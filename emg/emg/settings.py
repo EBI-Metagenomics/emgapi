@@ -202,7 +202,7 @@ DATABASES = {
         'NAME': 'emg',
         'USER': 'root',
         # 'PASSWORD': 'secret',
-        'HOST': 'mysql',
+        'HOST': 'localhost',
         'PORT': 3306,
         'TEST': {
             'ENGINE': 'django.db.backends.sqlite3',
