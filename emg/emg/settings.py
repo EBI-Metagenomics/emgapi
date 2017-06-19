@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 Django settings for emg project.
 
@@ -37,7 +39,7 @@ except NameError:
     os.close(dir_fd)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
@@ -51,6 +53,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # rest framework
+    'rest_framework',
+    'rest_framework_swagger',
+    'django_filters',
     # apps
     'emg_api',
 ]
@@ -135,6 +141,59 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+
+REST_FRAMEWORK = {
+
+    'PAGE_SIZE': 20,
+
+    # 'EXCEPTION_HANDLER':
+    #     'rest_framework_json_api.exceptions.exception_handler',
+
+    'DEFAULT_PAGINATION_CLASS':
+        'rest_framework.pagination.PageNumberPagination',
+    #     'rest_framework_json_api.pagination.PageNumberPagination',
+
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework.parsers.JSONParser',
+        # 'rest_framework_json_api.parsers.JSONParser',
+        # 'rest_framework_xml.parsers.XMLParser',
+        # 'rest_framework_yaml.parsers.YAMLParser',
+        # 'rest_framework.parsers.MultiPartParser'
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+        # 'rest_framework_json_api.renderers.JSONRenderer',
+        # 'rest_framework_xml.renderers.XMLRenderer',
+        # 'rest_framework_yaml.renderers.YAMLRenderer',
+        # 'rest_framework_csv.renderers.CSVRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+         #'rest_framework.permissions.AllowAny',
+         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ],
+
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
+
+    'DEFAULT_MODEL_SERIALIZER_CLASS':
+        'rest_framework.serializers.HyperlinkedModelSerializer',
+
+    # 'DEFAULT_METADATA_CLASS':
+    #     'rest_framework_json_api.metadata.JSONAPIMetadata',
+
+}
+
+## django cors
+INSTALLED_APPS += ('corsheaders',)
+MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')
+CORS_ORIGIN_ALLOW_ALL = True
+
+## statics
+INSTALLED_APPS += ('whitenoise',)
+MIDDLEWARE.append('whitenoise.middleware.WhiteNoiseMiddleware')
 
 
 DATABASES = {

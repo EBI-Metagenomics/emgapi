@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
+
 from django.apps import AppConfig
 
 
 class EmgApiConfig(AppConfig):
-    name = 'emg_api'
+    name = 'api'
