@@ -1,0 +1,20 @@
+sudo: required
+
+language: python
+
+services:
+  - docker
+
+before_install:
+  - pip install docker-compose
+  - docker --version
+  - docker-compose -v
+
+install:
+  - docker-compose build
+
+script:
+  - docker-compose up --abort-on-container-exit
+  - exitcode=$(docker inspect -f '{{.State.ExitCode}}' ebimetagenomicsapigit_emgapi_1)
+  - docker-compose rm -fv
+  - exit $exitcode
