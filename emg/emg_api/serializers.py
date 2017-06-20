@@ -10,12 +10,20 @@ from emg_api import models as emg_models
 logger = logging.getLogger(__name__)
 
 
-class BiomeHierarchyTreeSerializer(serializers.HyperlinkedModelSerializer):
+class SimpleBiomeHierarchyTreeSerializer(serializers.
+                                         HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
         view_name='biome-detail',
         lookup_field='biome_id',
     )
+
+    class Meta:
+        model = emg_models.BiomeHierarchyTree
+        fields = '__all__'
+
+
+class BiomeHierarchyTreeSerializer(SimpleBiomeHierarchyTreeSerializer):
 
     # studies = serializers.HyperlinkedIdentityField(
     #     view_name='biome-studies-list',
@@ -46,12 +54,19 @@ class BiomeHierarchyTreeSerializer(serializers.HyperlinkedModelSerializer):
 
 # Publication serializer
 
-class PublicationSerializer(serializers.HyperlinkedModelSerializer):
+class SimplePublicationSerializer(serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
         view_name='publications-detail',
         lookup_field='pub_id',
     )
+
+    class Meta:
+        model = emg_models.Publication
+        fields = '__all__'
+
+
+class PublicationSerializer(SimplePublicationSerializer):
 
     # studies = serializers.HyperlinkedIdentityField(
     #     view_name='publications-studies-list',
@@ -69,30 +84,40 @@ class PublicationSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
 
-# AnalysisJob serializer
+# PipelineRelease serializer
 
-class PipelineReleaseSerializer(serializers.HyperlinkedModelSerializer):
+class SimplePipelineReleaseSerializer(serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
         view_name='pipelines-detail',
         lookup_field='pipeline_id',
     )
 
-    # analysis_jobs = serializers.HyperlinkedIdentityField(
-    #     view_name='pipelines-jobs-list',
-    #     lookup_field='pipeline_id',
-    # )
-    analysis_jobs = relations.ResourceRelatedField(
-        queryset=emg_models.PipelineRelease.objects,
-        many=True,
-        related_link_view_name='pipelines-jobs-list',
-        related_link_url_kwarg='pipeline_id',
+    class Meta:
+        model = emg_models.PipelineRelease
+        fields = '__all__'
+
+
+class PipelineReleaseSerializer(SimplePipelineReleaseSerializer):
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='pipelines-detail',
+        lookup_field='pipeline_id',
     )
+
+    # analysis_jobs = relations.ResourceRelatedField(
+    #     read_only=True,
+    #     many=True,
+    #     related_link_view_name='pipelines-jobs-list',
+    #     related_link_url_kwarg='pipeline_id',
+    # )
 
     class Meta:
         model = emg_models.PipelineRelease
         fields = '__all__'
 
+
+# ExperimentType serializer
 
 class ExperimentTypeSerializer(serializers.ModelSerializer):
 
@@ -101,6 +126,8 @@ class ExperimentTypeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+# AnalysisStatus serializer
+
 class AnalysisStatusSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -108,7 +135,9 @@ class AnalysisStatusSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class AnalysisJobSerializer(serializers.HyperlinkedModelSerializer):
+# AnalysisJob serializer
+
+class SimpleAnalysisJobSerializer(serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
         view_name='jobs-detail',
@@ -121,23 +150,52 @@ class AnalysisJobSerializer(serializers.HyperlinkedModelSerializer):
 
     pipeline = serializers.HyperlinkedRelatedField(
         read_only=True,
+        many=True,
         view_name='pipelines-detail',
         lookup_field='pipeline_id',
     )
 
     class Meta:
         model = emg_models.AnalysisJob
-        exclude = ('sample',)
+        exclude = (
+            'sample',
+            'pipeline',
+        )
+
+
+class AnalysisJobSerializer(SimpleAnalysisJobSerializer):
+
+    pipeline = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='pipelines-detail',
+        lookup_field='pipeline_id',
+    )
+
+    class Meta:
+        model = emg_models.AnalysisJob
+        exclude = (
+            'sample',
+        )
 
 
 # Sample serializer
 
-class SampleSerializer(serializers.HyperlinkedModelSerializer):
+class SimpleSampleSerializer(serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
         view_name='samples-detail',
         lookup_field='sample_id',
     )
+
+    class Meta:
+        model = emg_models.Sample
+        exclude = (
+            'biome',
+            'study',
+        )
+
+
+class SampleSerializer(SimpleSampleSerializer):
 
     biome = serializers.HyperlinkedRelatedField(
         read_only=True,
@@ -169,7 +227,7 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
 
 # Study serializer
 
-class StudySerializer(serializers.HyperlinkedModelSerializer):
+class SimpleStudySerializer(serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
         view_name='studies-detail',
@@ -193,6 +251,13 @@ class StudySerializer(serializers.HyperlinkedModelSerializer):
         related_link_url_kwarg='study_id',
     )
 
+    class Meta:
+        model = emg_models.Study
+        fields = '__all__'
+
+
+class StudySerializer(SimpleStudySerializer):
+
     # samples = serializers.HyperlinkedIdentityField(
     #     view_name='studies-samples-list',
     #     lookup_field='study_id',
@@ -206,4 +271,4 @@ class StudySerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = emg_models.Study
-        fields = '__all__'
+        exclude = ('publications',)

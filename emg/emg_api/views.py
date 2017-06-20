@@ -20,7 +20,7 @@ class BiomeHierarchyTreeViewSet(mixins.RetrieveModelMixin,
                                 mixins.ListModelMixin,
                                 viewsets.GenericViewSet):
 
-    serializer_class = emg_serializers.BiomeHierarchyTreeSerializer
+    serializer_class = emg_serializers.SimpleBiomeHierarchyTreeSerializer
     queryset = emg_models.BiomeHierarchyTree.objects.all()
 
     filter_backends = (
@@ -79,7 +79,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
                    mixins.ListModelMixin,
                    viewsets.GenericViewSet):
 
-    serializer_class = emg_serializers.StudySerializer
+    serializer_class = emg_serializers.SimpleStudySerializer
     queryset = emg_models.Study.objects.all()
 
     filter_backends = (
@@ -114,7 +114,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='publications-list',
-        serializer_class=emg_serializers.PublicationSerializer
+        serializer_class=emg_serializers.SimplePublicationSerializer
     )
     def publications(self, request, study_id=None):
         queryset = self.get_object().publications.all()
@@ -129,7 +129,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='samples-list',
-        serializer_class=emg_serializers.SampleSerializer
+        serializer_class=emg_serializers.SimpleSampleSerializer
     )
     def samples(self, request, study_id=None):
         queryset = self.get_object().samples.all()
@@ -179,7 +179,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='jobs-list',
-        serializer_class=emg_serializers.AnalysisJobSerializer
+        serializer_class=emg_serializers.SimpleAnalysisJobSerializer
     )
     def jobs(self, request, sample_id=None):
         queryset = self.get_object().analysis_jobs.all()
@@ -229,7 +229,7 @@ class PipelineReleaseViewSet(mixins.RetrieveModelMixin,
                              mixins.ListModelMixin,
                              viewsets.GenericViewSet):
 
-    serializer_class = emg_serializers.PipelineReleaseSerializer
+    serializer_class = emg_serializers.SimplePipelineReleaseSerializer
     queryset = emg_models.PipelineRelease.objects.all()
 
     filter_backends = (
@@ -253,7 +253,7 @@ class PipelineReleaseViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='jobs-list',
-        serializer_class=emg_serializers.AnalysisJobSerializer
+        serializer_class=emg_serializers.SimpleAnalysisJobSerializer
     )
     def jobs(self, request, pipeline_id=None):
         queryset = self.get_object().analysis_jobs.all()
@@ -270,7 +270,7 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
                          mixins.ListModelMixin,
                          viewsets.GenericViewSet):
 
-    serializer_class = emg_serializers.PublicationSerializer
+    serializer_class = emg_serializers.SimplePublicationSerializer
     queryset = emg_models.Publication.objects.all()
 
     filter_backends = (
@@ -291,13 +291,13 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
-            return emg_serializers.PublicationSerializer
+            return emg_serializers.SimplePublicationSerializer
         return super(PublicationViewSet, self).get_serializer_class()
 
     @detail_route(
         methods=['get', ],
         url_name='studies-list',
-        serializer_class=emg_serializers.StudySerializer
+        serializer_class=emg_serializers.SimpleStudySerializer
     )
     def studies(self, request, pub_id=None):
         queryset = self.get_object().studies.all()
