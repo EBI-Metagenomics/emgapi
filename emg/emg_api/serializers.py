@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 # from rest_framework import serializers
 from rest_framework_json_api import serializers
 from rest_framework_json_api import relations
 from emg_api import models as emg_models
+
+logger = logging.getLogger(__name__)
 
 
 class BiomeHierarchyTreeSerializer(serializers.HyperlinkedModelSerializer):
