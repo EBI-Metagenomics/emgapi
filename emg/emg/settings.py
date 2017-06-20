@@ -13,11 +13,72 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
+import logging
 import binascii
+
+logger = logging.getLogger(__name__)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+LOGDIR = os.path.join(BASE_DIR, '..', 'log')
+if not os.path.exists(LOGDIR):
+    os.makedirs(LOGDIR)
+
+LOGGING_CLASS = 'cloghandler.ConcurrentRotatingFileHandler'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'handlers': {
+        'default': {
+            'level': 'DEBUG',
+            'class': LOGGING_CLASS,
+            'filename': os.path.join(LOGDIR, 'emg.log').replace('\\', '/'),
+            'maxBytes': 1024*1024*5,  # 5 MB
+            'backupCount': 10,
+        },
+        'null': {
+            'level': 'DEBUG',
+            'class': 'logging.NullHandler',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'filters': ['require_debug_true'],
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler'
+        }
+    },
+    'loggers': {
+        'django.request': {  # Stop SQL debug from logging to main logger
+            'handlers': ['default', 'mail_admins'],
+            'level': 'DEBUG',
+            'propagate': False
+        },
+        'django': {
+            'handlers': ['null'],
+            'level': 'DEBUG',
+            'propagate': True
+        },
+        '': {
+            'handlers': ['default'],
+            'level': 'DEBUG',
+            'propagate': True
+        }
+    }
+}
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
@@ -39,7 +100,7 @@ except NameError:
     os.close(dir_fd)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -95,11 +156,25 @@ WSGI_APPLICATION = 'emg.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'emg',
+        'USER': 'root',
+        # 'PASSWORD': 'secret',
+        'HOST': 'mysql',
+        'PORT': 3306,
+        'TEST': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(os.path.dirname(__file__), 'test.db'),
+        },
+    },
 }
 
 
@@ -147,27 +222,27 @@ REST_FRAMEWORK = {
 
     'PAGE_SIZE': 20,
 
-    # 'EXCEPTION_HANDLER':
-    #     'rest_framework_json_api.exceptions.exception_handler',
+    'EXCEPTION_HANDLER':
+        'rest_framework_json_api.exceptions.exception_handler',
 
     'DEFAULT_PAGINATION_CLASS':
-        'rest_framework.pagination.PageNumberPagination',
-    #     'rest_framework_json_api.pagination.PageNumberPagination',
+        # 'rest_framework.pagination.PageNumberPagination',
+        'rest_framework_json_api.pagination.PageNumberPagination',
 
     'DEFAULT_PARSER_CLASSES': (
-        'rest_framework.parsers.JSONParser',
-        # 'rest_framework_json_api.parsers.JSONParser',
+        # 'rest_framework.parsers.JSONParser',
+        'rest_framework_json_api.parsers.JSONParser',
         # 'rest_framework_xml.parsers.XMLParser',
         # 'rest_framework_yaml.parsers.YAMLParser',
         # 'rest_framework.parsers.MultiPartParser'
     ),
     'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer',
-        # 'rest_framework_json_api.renderers.JSONRenderer',
+        # 'rest_framework.renderers.JSONRenderer',
+        'rest_framework_json_api.renderers.JSONRenderer',
         # 'rest_framework_xml.renderers.XMLRenderer',
         # 'rest_framework_yaml.renderers.YAMLRenderer',
         # 'rest_framework_csv.renderers.CSVRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',
+        # 'rest_framework.renderers.BrowsableAPIRenderer',
     ),
     'DEFAULT_PERMISSION_CLASSES': [
          #'rest_framework.permissions.AllowAny',
@@ -181,8 +256,8 @@ REST_FRAMEWORK = {
     'DEFAULT_MODEL_SERIALIZER_CLASS':
         'rest_framework.serializers.HyperlinkedModelSerializer',
 
-    # 'DEFAULT_METADATA_CLASS':
-    #     'rest_framework_json_api.metadata.JSONAPIMetadata',
+    'DEFAULT_METADATA_CLASS':
+        'rest_framework_json_api.metadata.JSONAPIMetadata',
 
 }
 
@@ -194,19 +269,3 @@ CORS_ORIGIN_ALLOW_ALL = True
 ## statics
 INSTALLED_APPS += ('whitenoise',)
 MIDDLEWARE.append('whitenoise.middleware.WhiteNoiseMiddleware')
-
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'emg',
-        'USER': 'root',
-        # 'PASSWORD': 'secret',
-        'HOST': 'localhost',
-        'PORT': 3306,
-        'TEST': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(os.path.dirname(__file__), 'test.db'),
-        },
-    },
-}

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 from rest_framework import viewsets, mixins
 from rest_framework.response import Response
 
@@ -10,6 +12,8 @@ from rest_framework.decorators import detail_route
 
 from emg_api import models as emg_models
 from emg_api import serializers as emg_serializers
+
+logger = logging.getLogger(__name__)
 
 
 class BiomeHierarchyTreeViewSet(mixins.RetrieveModelMixin,
