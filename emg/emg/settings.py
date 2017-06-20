@@ -26,6 +26,9 @@ if not os.path.exists(LOGDIR):
     os.makedirs(LOGDIR)
 
 LOGGING_CLASS = 'cloghandler.ConcurrentRotatingFileHandler'
+LOGGING_FORMATER = (
+    '%(asctime)s %(levelname)5.5s [%(name)30.30s]'
+    ' (proc.%(process)5.5d) %(funcName)s:%(lineno)d %(message)s')
 
 LOGGING = {
     'version': 1,
@@ -38,6 +41,11 @@ LOGGING = {
             '()': 'django.utils.log.RequireDebugTrue',
         },
     },
+    'formatters': {
+        'default': {
+            'format': LOGGING_FORMATER
+        },
+    },
     'handlers': {
         'default': {
             'level': 'DEBUG',
@@ -45,6 +53,7 @@ LOGGING = {
             'filename': os.path.join(LOGDIR, 'emg.log').replace('\\', '/'),
             'maxBytes': 1024*1024*5,  # 5 MB
             'backupCount': 10,
+            'formatter': 'default',
         },
         'null': {
             'level': 'DEBUG',
@@ -54,6 +63,7 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'filters': ['require_debug_true'],
+            'formatter': 'default',
         },
         'mail_admins': {
             'level': 'ERROR',
