@@ -104,7 +104,7 @@ except NameError:
 
     if not os.path.exists(os.path.join(BASE_DIR, 'secret.key')):
         with open('secret.key', 'w', opener=opener) as f:
-            print(binascii.hexlify(os.urandom(24)).decode('ascii'), file=f)
+            print(binascii.hexlify(os.urandom(50)).decode('ascii'), file=f)
     with open('secret.key', 'r', opener=opener) as f:
         SECRET_KEY = f.read()
     os.close(dir_fd)
