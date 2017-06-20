@@ -229,7 +229,7 @@ class PipelineReleaseViewSet(mixins.RetrieveModelMixin,
                              mixins.ListModelMixin,
                              viewsets.GenericViewSet):
 
-    serializer_class = emg_serializers.SimplePipelineReleaseSerializer
+    serializer_class = emg_serializers.PipelineReleaseSerializer
     queryset = emg_models.PipelineRelease.objects.all()
 
     filter_backends = (
