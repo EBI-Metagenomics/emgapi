@@ -2,3 +2,5 @@
 
 
 # ebi-metagenomics-api
+
+Copyright (c) 2017 EMBL - European Bioinformatics Institute
