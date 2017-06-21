@@ -88,6 +88,11 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         filters.OrderingFilter,
     )
 
+    ordering_fields = (
+        'ext_study_id',
+        'last_update',
+    )
+
     filter_fields = (
         'biome_id',
         'centre_name',
