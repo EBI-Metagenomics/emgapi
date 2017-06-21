@@ -217,7 +217,7 @@ class SimpleSampleSerializer(serializers.HyperlinkedModelSerializer):
     study = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name='studies-detail',
-        lookup_field='study_id',
+        lookup_field='ext_study_id',
     )
 
     analysis_jobs = relations.SerializerMethodResourceRelatedField(
@@ -264,7 +264,7 @@ class SimpleStudySerializer(serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
         view_name='studies-detail',
-        lookup_field='study_id',
+        lookup_field='ext_study_id',
     )
 
     biome = serializers.HyperlinkedRelatedField(
@@ -273,13 +273,18 @@ class SimpleStudySerializer(serializers.HyperlinkedModelSerializer):
         lookup_field='biome_id',
     )
 
+    # publications = serializers.HyperlinkedIdentityField(
+    #     view_name='studies-publications-list',
+    #     lookup_field='ext_study_id',
+    # )
     publications = relations.SerializerMethodResourceRelatedField(
         source='get_publications',
         model=emg_models.Publication,
         many=True,
         read_only=True,
         related_link_view_name='studies-publications-list',
-        related_link_url_kwarg='study_id',
+        related_link_url_kwarg='ext_study_id',
+        related_link_lookup_field='ext_study_id',
     )
 
     def get_publications(self, obj):
@@ -288,13 +293,18 @@ class SimpleStudySerializer(serializers.HyperlinkedModelSerializer):
         # /django-rest-framework-json-api/issues/178
         return ()
 
+    # samples = serializers.HyperlinkedIdentityField(
+    #     view_name='studies-samples-list',
+    #     lookup_field='ext_study_id',
+    # )
     samples = relations.SerializerMethodResourceRelatedField(
         source='get_samples',
         model=emg_models.Sample,
         many=True,
         read_only=True,
         related_link_view_name='studies-samples-list',
-        related_link_url_kwarg='study_id',
+        related_link_url_kwarg='ext_study_id',
+        related_link_lookup_field='ext_study_id',
     )
 
     def get_samples(self, obj):
@@ -312,24 +322,26 @@ class StudySerializer(SimpleStudySerializer):
 
     # publications = serializers.HyperlinkedIdentityField(
     #     view_name='studies-publications-list',
-    #     lookup_field='study_id',
+    #     lookup_field='ext_study_id',
     # )
     publications = relations.ResourceRelatedField(
         read_only=True,
         many=True,
         related_link_view_name='studies-publications-list',
-        related_link_url_kwarg='study_id',
+        related_link_url_kwarg='ext_study_id',
+        related_link_lookup_field='ext_study_id',
     )
 
     # samples = serializers.HyperlinkedIdentityField(
     #     view_name='studies-samples-list',
-    #     lookup_field='study_id',
+    #     lookup_field='ext_study_id',
     # )
     samples = relations.ResourceRelatedField(
         read_only=True,
         many=True,
         related_link_view_name='studies-samples-list',
-        related_link_url_kwarg='study_id',
+        related_link_url_kwarg='ext_study_id',
+        related_link_lookup_field='ext_study_id',
     )
 
     class Meta:
