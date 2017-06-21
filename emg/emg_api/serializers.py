@@ -10,8 +10,7 @@ from emg_api import models as emg_models
 logger = logging.getLogger(__name__)
 
 
-class BiomeHierarchyTreeSerializer(serializers.
-                                   HyperlinkedModelSerializer):
+class BiomeSerializer(serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
         view_name='biome-detail',
@@ -23,14 +22,14 @@ class BiomeHierarchyTreeSerializer(serializers.
     #     lookup_field='biome_id',
     # )
     # projects = relations.ResourceRelatedField(
-    #     queryset=emg_models.BiomeHierarchyTree.objects,
+    #     queryset=emg_models.Biome.objects,
     #     many=True,
     #     related_link_view_name='biome-projects-list',
     #     related_link_url_kwarg='biome_id',
     # )
     projects = relations.SerializerMethodResourceRelatedField(
         source='get_projects',
-        model=emg_models.BiomeHierarchyTree,
+        model=emg_models.Biome,
         many=True,
         read_only=True,
         related_link_view_name='biome-projects-list',
@@ -48,14 +47,14 @@ class BiomeHierarchyTreeSerializer(serializers.
     #     lookup_field='biome_id',
     # )
     # samples = relations.ResourceRelatedField(
-    #     queryset=emg_models.BiomeHierarchyTree.objects,
+    #     queryset=emg_models.Biome.objects,
     #     many=True,
     #     related_link_view_name='biome-samples-list',
     #     related_link_url_kwarg='biome_id',
     # )
     samples = relations.SerializerMethodResourceRelatedField(
         source='get_samples',
-        model=emg_models.BiomeHierarchyTree,
+        model=emg_models.Biome,
         many=True,
         read_only=True,
         related_link_view_name='biome-samples-list',
@@ -69,7 +68,7 @@ class BiomeHierarchyTreeSerializer(serializers.
         return ()
 
     class Meta:
-        model = emg_models.BiomeHierarchyTree
+        model = emg_models.Biome
         fields = '__all__'
 
 

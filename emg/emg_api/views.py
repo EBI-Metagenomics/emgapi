@@ -16,12 +16,12 @@ from emg_api import serializers as emg_serializers
 logger = logging.getLogger(__name__)
 
 
-class BiomeHierarchyTreeViewSet(mixins.RetrieveModelMixin,
-                                mixins.ListModelMixin,
-                                viewsets.GenericViewSet):
+class BiomeViewSet(mixins.RetrieveModelMixin,
+                   mixins.ListModelMixin,
+                   viewsets.GenericViewSet):
 
-    serializer_class = emg_serializers.BiomeHierarchyTreeSerializer
-    queryset = emg_models.BiomeHierarchyTree.objects.all()
+    serializer_class = emg_serializers.BiomeSerializer
+    queryset = emg_models.Biome.objects.all()
 
     filter_backends = (
         DjangoFilterBackend,
@@ -41,8 +41,8 @@ class BiomeHierarchyTreeViewSet(mixins.RetrieveModelMixin,
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
-            return emg_serializers.BiomeHierarchyTreeSerializer
-        return super(BiomeHierarchyTreeViewSet, self).get_serializer_class()
+            return emg_serializers.BiomeSerializer
+        return super(BiomeViewSet, self).get_serializer_class()
 
     @detail_route(
         methods=['get', ],
