@@ -247,6 +247,9 @@ REST_FRAMEWORK = {
         # 'rest_framework.parsers.MultiPartParser'
     ),
     'DEFAULT_RENDERER_CLASSES': (
+        # TODO: workaround mime types for swagger doc
+        'emg_api.renderers.VersionRenderer',
+        'emg_api.renderers.DefaultRenderer',
         # 'rest_framework.renderers.JSONRenderer',
         'rest_framework_json_api.renderers.JSONRenderer',
         # 'rest_framework_xml.renderers.XMLRenderer',
@@ -268,6 +271,12 @@ REST_FRAMEWORK = {
 
     'DEFAULT_METADATA_CLASS':
         'rest_framework_json_api.metadata.JSONAPIMetadata',
+
+    'DEFAULT_VERSION': 'application/vnd.api+json',
+    'ALLOWED_VERSIONS': (
+        'application/vnd.api+json',
+        'application/json',
+    ),
 
 }
 
