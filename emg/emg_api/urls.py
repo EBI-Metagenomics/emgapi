@@ -11,7 +11,7 @@ router = DefaultRouter()
 
 router.register(
     r'biome',
-    views.BiomeHierarchyTreeViewSet,
+    views.BiomeViewSet,
     base_name='biome'
 )
 

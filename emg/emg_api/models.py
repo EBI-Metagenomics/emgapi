@@ -42,7 +42,7 @@ class AnalysisStatus(models.Model):
         db_table = 'ANALYSIS_STATUS'
 
 
-class BiomeHierarchyTree(models.Model):
+class Biome(models.Model):
     biome_id = models.SmallIntegerField(db_column='BIOME_ID', primary_key=True)  # Field name made lowercase.
     biome_name = models.CharField(db_column='BIOME_NAME', max_length=60)  # Field name made lowercase.
     lft = models.SmallIntegerField(db_column='LFT')  # Field name made lowercase.
@@ -173,7 +173,7 @@ class Sample(models.Model):
     longitude = models.DecimalField(db_column='LONGITUDE', max_digits=7, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
     last_update = models.DateTimeField(db_column='LAST_UPDATE')  # Field name made lowercase.
     submission_account_id = models.CharField(db_column='SUBMISSION_ACCOUNT_ID', max_length=15, blank=True, null=True)  # Field name made lowercase.
-    biome = models.ForeignKey(BiomeHierarchyTree, models.DO_NOTHING, db_column='BIOME_ID', blank=True, null=True, related_name='samples')  # Field name made lowercase.
+    biome = models.ForeignKey(Biome, models.DO_NOTHING, db_column='BIOME_ID', blank=True, null=True, related_name='samples')  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -219,7 +219,7 @@ class Project(models.Model):
     author_name = models.CharField(db_column='AUTHOR_NAME', max_length=100, blank=True, null=True)  # Field name made lowercase.
     last_update = models.DateTimeField(db_column='LAST_UPDATE')  # Field name made lowercase.
     submission_account_id = models.CharField(db_column='SUBMISSION_ACCOUNT_ID', max_length=15, blank=True, null=True)  # Field name made lowercase.
-    biome = models.ForeignKey(BiomeHierarchyTree, models.DO_NOTHING, db_column='BIOME_ID', blank=True, null=True, related_name='projects')  # Field name made lowercase.
+    biome = models.ForeignKey(Biome, models.DO_NOTHING, db_column='BIOME_ID', blank=True, null=True, related_name='projects')  # Field name made lowercase.
     result_directory = models.CharField(db_column='RESULT_DIRECTORY', max_length=100, blank=True, null=True)  # Field name made lowercase.
     first_created = models.DateTimeField(db_column='FIRST_CREATED')  # Field name made lowercase.
     project_id = models.CharField(db_column='PROJECT_ID', max_length=18, blank=True, null=True)  # Field name made lowercase.
@@ -228,6 +228,8 @@ class Project(models.Model):
     publications = models.ManyToManyField(Publication, through='StudyPublication', related_name='projects')
 
     class Meta:
+        # manualy added make sure both are unique
+        unique_together = (('study_id', 'ext_study_id'),)
         managed = False
         db_table = 'STUDY'
 
