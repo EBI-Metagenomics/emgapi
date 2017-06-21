@@ -106,6 +106,7 @@ class ProjectViewSet(mixins.RetrieveModelMixin,
         'author_name',
         'author_email',
         'biome__biome_name',
+        'biome__lineage',
     )
 
     lookup_field = 'ext_study_id'
