@@ -7,7 +7,7 @@ from rest_framework.routers import DefaultRouter
 
 urlpatterns = []
 
-router = DefaultRouter()
+router = DefaultRouter(trailing_slash=False)
 
 router.register(
     r'biome',
