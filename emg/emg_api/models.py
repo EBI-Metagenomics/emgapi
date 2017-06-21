@@ -163,7 +163,7 @@ class Sample(models.Model):
     environment_biome = models.CharField(db_column='ENVIRONMENT_BIOME', max_length=255, blank=True, null=True)  # Field name made lowercase.
     environment_feature = models.CharField(db_column='ENVIRONMENT_FEATURE', max_length=255, blank=True, null=True)  # Field name made lowercase.
     environment_material = models.CharField(db_column='ENVIRONMENT_MATERIAL', max_length=255, blank=True, null=True)  # Field name made lowercase.
-    study = models.ForeignKey('Study', models.DO_NOTHING, db_column='STUDY_ID', blank=True, null=True, related_name='samples')  # Field name made lowercase.
+    project = models.ForeignKey('Project', models.DO_NOTHING, db_column='STUDY_ID', blank=True, null=True, related_name='samples')  # Field name made lowercase.
     sample_name = models.CharField(db_column='SAMPLE_NAME', max_length=255, blank=True, null=True)  # Field name made lowercase.
     sample_alias = models.CharField(db_column='SAMPLE_ALIAS', max_length=255, blank=True, null=True)  # Field name made lowercase.
     host_tax_id = models.IntegerField(db_column='HOST_TAX_ID', blank=True, null=True)  # Field name made lowercase.
@@ -203,7 +203,7 @@ class SamplePublication(models.Model):
         unique_together = (('sample', 'pub'),)
 
 
-class Study(models.Model):
+class Project(models.Model):
     study_id = models.AutoField(db_column='STUDY_ID', primary_key=True)  # Field name made lowercase.
     centre_name = models.CharField(db_column='CENTRE_NAME', max_length=255, blank=True, null=True)  # Field name made lowercase.
     experimental_factor = models.CharField(db_column='EXPERIMENTAL_FACTOR', max_length=255, blank=True, null=True)  # Field name made lowercase.
@@ -219,13 +219,13 @@ class Study(models.Model):
     author_name = models.CharField(db_column='AUTHOR_NAME', max_length=100, blank=True, null=True)  # Field name made lowercase.
     last_update = models.DateTimeField(db_column='LAST_UPDATE')  # Field name made lowercase.
     submission_account_id = models.CharField(db_column='SUBMISSION_ACCOUNT_ID', max_length=15, blank=True, null=True)  # Field name made lowercase.
-    biome = models.ForeignKey(BiomeHierarchyTree, models.DO_NOTHING, db_column='BIOME_ID', blank=True, null=True, related_name='studies')  # Field name made lowercase.
+    biome = models.ForeignKey(BiomeHierarchyTree, models.DO_NOTHING, db_column='BIOME_ID', blank=True, null=True, related_name='projects')  # Field name made lowercase.
     result_directory = models.CharField(db_column='RESULT_DIRECTORY', max_length=100, blank=True, null=True)  # Field name made lowercase.
     first_created = models.DateTimeField(db_column='FIRST_CREATED')  # Field name made lowercase.
     project_id = models.CharField(db_column='PROJECT_ID', max_length=18, blank=True, null=True)  # Field name made lowercase.
 
     # manualy added StudyPublication
-    publications = models.ManyToManyField(Publication, through='StudyPublication', related_name='studies')
+    publications = models.ManyToManyField(Publication, through='StudyPublication', related_name='projects')
 
     class Meta:
         managed = False
@@ -243,7 +243,7 @@ class StudyErrorType(models.Model):
 
 
 class StudyPublication(models.Model):
-    study = models.ForeignKey(Study, models.DO_NOTHING, db_column='STUDY_ID', primary_key=True)  # Field name made lowercase.
+    study = models.ForeignKey(Project, models.DO_NOTHING, db_column='STUDY_ID', primary_key=True)  # Field name made lowercase.
     pub = models.ForeignKey(Publication, models.DO_NOTHING, db_column='PUB_ID')  # Field name made lowercase.
 
     class Meta:

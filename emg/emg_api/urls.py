@@ -16,9 +16,9 @@ router.register(
 )
 
 router.register(
-    r'studies',
-    views.StudyViewSet,
-    base_name='studies'
+    r'projects',
+    views.ProjectViewSet,
+    base_name='projects'
 )
 
 router.register(
@@ -45,22 +45,4 @@ router.register(
     base_name='publications'
 )
 
-# pub_router = NestedSimpleRouter(router, r'studies', lookup='studies')
-# pub_router.register(
-#     r'publications',
-#     views.StudyPublicationViewSet,
-#     base_name='studies-publications')
-#
-# sample_router = NestedSimpleRouter(router, r'studies', lookup='studies')
-# sample_router.register(
-#     r'samples',
-#     views.StudySampleViewSet,
-#     base_name='studies-samples')
-
-
 urlpatterns = router.urls
-# urlpatterns = [
-#     url(r'^', include(router.urls)),
-#     url(r'^', include(pub_router.urls)),
-#     url(r'^', include(sample_router.urls)),
-# ]
