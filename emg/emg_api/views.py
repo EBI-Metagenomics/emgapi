@@ -94,7 +94,8 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     )
 
     search_fields = (
-        'study_id',
+        # 'study_id',
+        'ext_study_id',
         '@study_name',
         '@study_abstract',
         'centre_name',
@@ -103,7 +104,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         'biome__biome_name',
     )
 
-    lookup_field = 'study_id'
+    lookup_field = 'ext_study_id'
     lookup_value_regex = '[a-zA-Z0-9]+'
 
     def get_serializer_class(self):
@@ -116,7 +117,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         url_name='publications-list',
         serializer_class=emg_serializers.SimplePublicationSerializer
     )
-    def publications(self, request, study_id=None):
+    def publications(self, request, ext_study_id=None):
         queryset = self.get_object().publications.all()
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -131,7 +132,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         url_name='samples-list',
         serializer_class=emg_serializers.SimpleSampleSerializer
     )
-    def samples(self, request, study_id=None):
+    def samples(self, request, ext_study_id=None):
         queryset = self.get_object().samples.all()
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -291,7 +292,7 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
-            return emg_serializers.SimplePublicationSerializer
+            return emg_serializers.PublicationSerializer
         return super(PublicationViewSet, self).get_serializer_class()
 
     @detail_route(
