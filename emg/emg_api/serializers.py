@@ -10,42 +10,63 @@ from emg_api import models as emg_models
 logger = logging.getLogger(__name__)
 
 
-class SimpleBiomeHierarchyTreeSerializer(serializers.
-                                         HyperlinkedModelSerializer):
+class BiomeHierarchyTreeSerializer(serializers.
+                                   HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
         view_name='biome-detail',
         lookup_field='biome_id',
     )
 
-    class Meta:
-        model = emg_models.BiomeHierarchyTree
-        fields = '__all__'
-
-
-class BiomeHierarchyTreeSerializer(SimpleBiomeHierarchyTreeSerializer):
-
     # studies = serializers.HyperlinkedIdentityField(
     #     view_name='biome-studies-list',
     #     lookup_field='biome_id',
     # )
-    studies = relations.ResourceRelatedField(
-        queryset=emg_models.BiomeHierarchyTree.objects,
+    # studies = relations.ResourceRelatedField(
+    #     queryset=emg_models.BiomeHierarchyTree.objects,
+    #     many=True,
+    #     related_link_view_name='biome-studies-list',
+    #     related_link_url_kwarg='biome_id',
+    # )
+    studies = relations.SerializerMethodResourceRelatedField(
+        source='get_studies',
+        model=emg_models.BiomeHierarchyTree,
         many=True,
+        read_only=True,
         related_link_view_name='biome-studies-list',
         related_link_url_kwarg='biome_id',
     )
+
+    def get_studies(self, obj):
+        # TODO: provide counter instead of paginating relationship
+        # workaround https://github.com/django-json-api
+        # /django-rest-framework-json-api/issues/178
+        return ()
 
     # samples = serializers.HyperlinkedIdentityField(
     #     view_name='biome-samples-list',
     #     lookup_field='biome_id',
     # )
-    samples = relations.ResourceRelatedField(
-        queryset=emg_models.BiomeHierarchyTree.objects,
+    # samples = relations.ResourceRelatedField(
+    #     queryset=emg_models.BiomeHierarchyTree.objects,
+    #     many=True,
+    #     related_link_view_name='biome-samples-list',
+    #     related_link_url_kwarg='biome_id',
+    # )
+    samples = relations.SerializerMethodResourceRelatedField(
+        source='get_samples',
+        model=emg_models.BiomeHierarchyTree,
         many=True,
+        read_only=True,
         related_link_view_name='biome-samples-list',
         related_link_url_kwarg='biome_id',
     )
+
+    def get_samples(self, obj):
+        # TODO: provide counter instead of paginating relationship
+        # workaround https://github.com/django-json-api
+        # /django-rest-framework-json-api/issues/178
+        return ()
 
     class Meta:
         model = emg_models.BiomeHierarchyTree
@@ -144,11 +165,17 @@ class AnalysisStatusSerializer(serializers.ModelSerializer):
 
 # AnalysisJob serializer
 
-class SimpleAnalysisJobSerializer(serializers.HyperlinkedModelSerializer):
+class AnalysisJobSerializer(serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
         view_name='jobs-detail',
         lookup_field='job_id',
+    )
+
+    pipeline = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='pipelines-detail',
+        lookup_field='pipeline_id',
     )
 
     analysis_status = AnalysisStatusSerializer()
@@ -161,27 +188,15 @@ class SimpleAnalysisJobSerializer(serializers.HyperlinkedModelSerializer):
         lookup_field='pipeline_id',
     )
 
-    class Meta:
-        model = emg_models.AnalysisJob
-        exclude = (
-            'sample',
-            'pipeline',
-        )
-
-
-class AnalysisJobSerializer(SimpleAnalysisJobSerializer):
-
-    pipeline = serializers.HyperlinkedRelatedField(
+    sample = serializers.HyperlinkedRelatedField(
         read_only=True,
-        view_name='pipelines-detail',
-        lookup_field='pipeline_id',
+        view_name='samples-detail',
+        lookup_field='sample_id',
     )
 
     class Meta:
         model = emg_models.AnalysisJob
-        exclude = (
-            'sample',
-        )
+        fields = '__all__'
 
 
 # Sample serializer
@@ -193,21 +208,39 @@ class SimpleSampleSerializer(serializers.HyperlinkedModelSerializer):
         lookup_field='sample_id',
     )
 
-    class Meta:
-        model = emg_models.Sample
-        exclude = (
-            'biome',
-            'study',
-        )
-
-
-class SampleSerializer(SimpleSampleSerializer):
-
     biome = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name='biome-detail',
         lookup_field='biome_id',
     )
+
+    study = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='studies-detail',
+        lookup_field='study_id',
+    )
+
+    analysis_jobs = relations.SerializerMethodResourceRelatedField(
+        source='get_analysis_jobs',
+        model=emg_models.AnalysisJob,
+        many=True,
+        read_only=True,
+        related_link_view_name='samples-jobs-list',
+        related_link_url_kwarg='sample_id',
+    )
+
+    def get_analysis_jobs(self, obj):
+        # TODO: provide counter instead of paginating relationship
+        # workaround https://github.com/django-json-api
+        # /django-rest-framework-json-api/issues/178
+        return ()
+
+    class Meta:
+        model = emg_models.Sample
+        fields = '__all__'
+
+
+class SampleSerializer(SimpleSampleSerializer):
 
     # analysis_jobs = serializers.HyperlinkedIdentityField(
     #     view_name='samples-jobs-list',
@@ -218,12 +251,6 @@ class SampleSerializer(SimpleSampleSerializer):
         many=True,
         related_link_view_name='samples-jobs-list',
         related_link_url_kwarg='sample_id',
-    )
-
-    study = serializers.HyperlinkedRelatedField(
-        read_only=True,
-        view_name='studies-detail',
-        lookup_field='study_id',
     )
 
     class Meta:
@@ -246,6 +273,43 @@ class SimpleStudySerializer(serializers.HyperlinkedModelSerializer):
         lookup_field='biome_id',
     )
 
+    publications = relations.SerializerMethodResourceRelatedField(
+        source='get_publications',
+        model=emg_models.Publication,
+        many=True,
+        read_only=True,
+        related_link_view_name='studies-publications-list',
+        related_link_url_kwarg='study_id',
+    )
+
+    def get_publications(self, obj):
+        # TODO: provide counter instead of paginating relationship
+        # workaround https://github.com/django-json-api
+        # /django-rest-framework-json-api/issues/178
+        return ()
+
+    samples = relations.SerializerMethodResourceRelatedField(
+        source='get_samples',
+        model=emg_models.Sample,
+        many=True,
+        read_only=True,
+        related_link_view_name='studies-samples-list',
+        related_link_url_kwarg='study_id',
+    )
+
+    def get_samples(self, obj):
+        # TODO: provide counter instead of paginating relationship
+        # workaround https://github.com/django-json-api
+        # /django-rest-framework-json-api/issues/178
+        return ()
+
+    class Meta:
+        model = emg_models.Study
+        fields = '__all__'
+
+
+class StudySerializer(SimpleStudySerializer):
+
     # publications = serializers.HyperlinkedIdentityField(
     #     view_name='studies-publications-list',
     #     lookup_field='study_id',
@@ -256,13 +320,6 @@ class SimpleStudySerializer(serializers.HyperlinkedModelSerializer):
         related_link_view_name='studies-publications-list',
         related_link_url_kwarg='study_id',
     )
-
-    class Meta:
-        model = emg_models.Study
-        fields = '__all__'
-
-
-class StudySerializer(SimpleStudySerializer):
 
     # samples = serializers.HyperlinkedIdentityField(
     #     view_name='studies-samples-list',
@@ -277,4 +334,4 @@ class StudySerializer(SimpleStudySerializer):
 
     class Meta:
         model = emg_models.Study
-        exclude = ('publications',)
+        fields = '__all__'

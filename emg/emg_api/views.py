@@ -20,7 +20,7 @@ class BiomeHierarchyTreeViewSet(mixins.RetrieveModelMixin,
                                 mixins.ListModelMixin,
                                 viewsets.GenericViewSet):
 
-    serializer_class = emg_serializers.SimpleBiomeHierarchyTreeSerializer
+    serializer_class = emg_serializers.BiomeHierarchyTreeSerializer
     queryset = emg_models.BiomeHierarchyTree.objects.all()
 
     filter_backends = (
@@ -62,7 +62,7 @@ class BiomeHierarchyTreeViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='studies-list',
-        serializer_class=emg_serializers.StudySerializer
+        serializer_class=emg_serializers.SimpleStudySerializer
     )
     def studies(self, request, biome_id=None):
         queryset = self.get_object().studies.all()
@@ -146,7 +146,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
                     mixins.ListModelMixin,
                     viewsets.GenericViewSet):
 
-    serializer_class = emg_serializers.SampleSerializer
+    serializer_class = emg_serializers.SimpleSampleSerializer
     queryset = emg_models.Sample.objects.all()
 
     filter_backends = (
@@ -179,7 +179,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='jobs-list',
-        serializer_class=emg_serializers.SimpleAnalysisJobSerializer
+        serializer_class=emg_serializers.AnalysisJobSerializer
     )
     def jobs(self, request, sample_id=None):
         queryset = self.get_object().analysis_jobs.all()
@@ -253,7 +253,7 @@ class PipelineReleaseViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='jobs-list',
-        serializer_class=emg_serializers.SimpleAnalysisJobSerializer
+        serializer_class=emg_serializers.AnalysisJobSerializer
     )
     def jobs(self, request, pipeline_id=None):
         queryset = self.get_object().analysis_jobs.all()
