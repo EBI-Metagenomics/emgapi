@@ -91,19 +91,12 @@ class BiomeSerializer(serializers.HyperlinkedModelSerializer):
 
 # Publication serializer
 
-class SimplePublicationSerializer(serializers.HyperlinkedModelSerializer):
+class PublicationSerializer(serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
         view_name='publications-detail',
         lookup_field='pub_id',
     )
-
-    class Meta:
-        model = emg_models.Publication
-        fields = '__all__'
-
-
-class PublicationSerializer(SimplePublicationSerializer):
 
     # studies = serializers.HyperlinkedIdentityField(
     #     view_name='publications-studies-list',
@@ -115,6 +108,13 @@ class PublicationSerializer(SimplePublicationSerializer):
         related_link_view_name='publications-studies-list',
         related_link_url_kwarg='pub_id',
     )
+
+    class Meta:
+        model = emg_models.Publication
+        fields = '__all__'
+
+
+class SimplePublicationSerializer(PublicationSerializer):
 
     class Meta:
         model = emg_models.Publication
@@ -217,7 +217,7 @@ class AnalysisJobSerializer(serializers.HyperlinkedModelSerializer):
 
 # Sample serializer
 
-class SimpleSampleSerializer(serializers.HyperlinkedModelSerializer):
+class SampleSerializer(serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
         view_name='samples-detail',
@@ -235,6 +235,24 @@ class SimpleSampleSerializer(serializers.HyperlinkedModelSerializer):
         view_name='studies-detail',
         lookup_field='accession',
     )
+
+    # analysis_jobs = serializers.HyperlinkedIdentityField(
+    #     view_name='samples-jobs-list',
+    #     lookup_field='sample_id',
+    # )
+    analysis_jobs = relations.ResourceRelatedField(
+        read_only=True,
+        many=True,
+        related_link_view_name='samples-jobs-list',
+        related_link_url_kwarg='sample_id',
+    )
+
+    class Meta:
+        model = emg_models.Sample
+        fields = '__all__'
+
+
+class SimpleSampleSerializer(SampleSerializer):
 
     analysis_jobs = relations.SerializerMethodResourceRelatedField(
         source='get_analysis_jobs',
@@ -256,27 +274,9 @@ class SimpleSampleSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
 
-class SampleSerializer(SimpleSampleSerializer):
-
-    # analysis_jobs = serializers.HyperlinkedIdentityField(
-    #     view_name='samples-jobs-list',
-    #     lookup_field='sample_id',
-    # )
-    analysis_jobs = relations.ResourceRelatedField(
-        read_only=True,
-        many=True,
-        related_link_view_name='samples-jobs-list',
-        related_link_url_kwarg='sample_id',
-    )
-
-    class Meta:
-        model = emg_models.Sample
-        fields = '__all__'
-
-
 # Study serializer
 
-class SimpleStudySerializer(serializers.HyperlinkedModelSerializer):
+class StudySerializer(serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
         view_name='studies-detail',
@@ -329,18 +329,18 @@ class SimpleStudySerializer(serializers.HyperlinkedModelSerializer):
         # /django-rest-framework-json-api/issues/178
         return ()
 
-    study_abstract = serializers.SerializerMethodField(
-        'get_short_study_abstract')
-
-    def get_short_study_abstract(self, obj):
-        return Truncator(obj.study_abstract).chars(75)
-
     class Meta:
         model = emg_models.Study
         fields = '__all__'
 
 
-class StudySerializer(SimpleStudySerializer):
+class SimpleStudySerializer(StudySerializer):
+
+    study_abstract = serializers.SerializerMethodField(
+        'get_short_study_abstract')
+
+    def get_short_study_abstract(self, obj):
+        return Truncator(obj.study_abstract).chars(75)
 
     class Meta:
         model = emg_models.Study
