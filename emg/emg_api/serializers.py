@@ -231,7 +231,7 @@ class SimpleSampleSerializer(serializers.HyperlinkedModelSerializer):
     study = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name='studies-detail',
-        lookup_field='ext_study_id',
+        lookup_field='accession',
     )
 
     analysis_jobs = relations.SerializerMethodResourceRelatedField(
@@ -278,7 +278,7 @@ class SimpleStudySerializer(serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
         view_name='studies-detail',
-        lookup_field='ext_study_id',
+        lookup_field='accession',
     )
 
     biome = serializers.HyperlinkedRelatedField(
@@ -289,7 +289,7 @@ class SimpleStudySerializer(serializers.HyperlinkedModelSerializer):
 
     # publications = serializers.HyperlinkedIdentityField(
     #     view_name='studies-publications-list',
-    #     lookup_field='ext_study_id',
+    #     lookup_field='accession',
     # )
     publications = relations.SerializerMethodResourceRelatedField(
         source='get_publications',
@@ -297,8 +297,8 @@ class SimpleStudySerializer(serializers.HyperlinkedModelSerializer):
         many=True,
         read_only=True,
         related_link_view_name='studies-publications-list',
-        related_link_url_kwarg='ext_study_id',
-        related_link_lookup_field='ext_study_id',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
     )
 
     def get_publications(self, obj):
@@ -309,7 +309,7 @@ class SimpleStudySerializer(serializers.HyperlinkedModelSerializer):
 
     # samples = serializers.HyperlinkedIdentityField(
     #     view_name='studies-samples-list',
-    #     lookup_field='ext_study_id',
+    #     lookup_field='accession',
     # )
     samples = relations.SerializerMethodResourceRelatedField(
         source='get_samples',
@@ -317,8 +317,8 @@ class SimpleStudySerializer(serializers.HyperlinkedModelSerializer):
         many=True,
         read_only=True,
         related_link_view_name='studies-samples-list',
-        related_link_url_kwarg='ext_study_id',
-        related_link_lookup_field='ext_study_id',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
     )
 
     def get_samples(self, obj):

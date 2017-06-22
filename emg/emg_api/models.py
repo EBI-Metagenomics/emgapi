@@ -73,7 +73,7 @@ class Biome(models.Model):
 
 
 class BlacklistedStudy(models.Model):
-    ext_study_id = models.CharField(db_column='EXT_STUDY_ID', primary_key=True, max_length=18)  # Field name made lowercase.
+    accession = models.CharField(db_column='EXT_STUDY_ID', primary_key=True, max_length=18)  # Field name made lowercase.
     error_type = models.ForeignKey('StudyErrorType', models.DO_NOTHING, db_column='ERROR_TYPE_ID')  # Field name made lowercase.
     analyzer = models.CharField(db_column='ANALYZER', max_length=15)  # Field name made lowercase.
     pipeline_id = models.IntegerField(db_column='PIPELINE_ID', blank=True, null=True)  # Field name made lowercase.
@@ -228,7 +228,7 @@ class Study(models.Model):
     ncbi_project_id = models.IntegerField(db_column='NCBI_PROJECT_ID', blank=True, null=True)  # Field name made lowercase.
     public_release_date = models.DateField(db_column='PUBLIC_RELEASE_DATE', blank=True, null=True)  # Field name made lowercase.
     study_abstract = models.TextField(db_column='STUDY_ABSTRACT', blank=True, null=True)  # Field name made lowercase.
-    ext_study_id = models.CharField(db_column='EXT_STUDY_ID', max_length=18)  # Field name made lowercase.
+    accession = models.CharField(db_column='EXT_STUDY_ID', max_length=18)  # Field name made lowercase.
     study_name = models.CharField(db_column='STUDY_NAME', max_length=255, blank=True, null=True)  # Field name made lowercase.
     study_status = models.CharField(db_column='STUDY_STATUS', max_length=30, blank=True, null=True)  # Field name made lowercase.
     data_origination = models.CharField(db_column='DATA_ORIGINATION', max_length=20, blank=True, null=True)  # Field name made lowercase.
@@ -246,7 +246,7 @@ class Study(models.Model):
 
     class Meta:
         # manualy added make sure both are unique
-        unique_together = (('study_id', 'ext_study_id'),)
+        unique_together = (('study_id', 'accession'),)
         managed = False
         db_table = 'STUDY'
 
