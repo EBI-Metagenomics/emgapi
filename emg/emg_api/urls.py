@@ -30,9 +30,9 @@ router.register(
 )
 
 router.register(
-    r'projects',
-    views.ProjectViewSet,
-    base_name='projects'
+    r'studies',
+    views.StudyViewSet,
+    base_name='studies'
 )
 
 router.register(

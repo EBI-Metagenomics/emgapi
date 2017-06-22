@@ -32,26 +32,26 @@ class BiomeSerializer(serializers.HyperlinkedModelSerializer):
         lookup_field='biome_id',
     )
 
-    # projects = serializers.HyperlinkedIdentityField(
-    #     view_name='biome-projects-list',
+    # studies = serializers.HyperlinkedIdentityField(
+    #     view_name='biome-studies-list',
     #     lookup_field='biome_id',
     # )
-    # projects = relations.ResourceRelatedField(
+    # studies = relations.ResourceRelatedField(
     #     queryset=emg_models.Biome.objects,
     #     many=True,
-    #     related_link_view_name='biome-projects-list',
+    #     related_link_view_name='biome-studies-list',
     #     related_link_url_kwarg='biome_id',
     # )
-    projects = relations.SerializerMethodResourceRelatedField(
-        source='get_projects',
+    studies = relations.SerializerMethodResourceRelatedField(
+        source='get_studies',
         model=emg_models.Biome,
         many=True,
         read_only=True,
-        related_link_view_name='biome-projects-list',
+        related_link_view_name='biome-studies-list',
         related_link_url_kwarg='biome_id',
     )
 
-    def get_projects(self, obj):
+    def get_studies(self, obj):
         # TODO: provide counter instead of paginating relationship
         # workaround https://github.com/django-json-api
         # /django-rest-framework-json-api/issues/178
@@ -103,14 +103,14 @@ class SimplePublicationSerializer(serializers.HyperlinkedModelSerializer):
 
 class PublicationSerializer(SimplePublicationSerializer):
 
-    # projects = serializers.HyperlinkedIdentityField(
-    #     view_name='publications-projects-list',
+    # studies = serializers.HyperlinkedIdentityField(
+    #     view_name='publications-studies-list',
     #     lookup_field='pub_id',
     # )
-    projects = relations.ResourceRelatedField(
+    studies = relations.ResourceRelatedField(
         queryset=emg_models.Publication.objects,
         many=True,
-        related_link_view_name='publications-projects-list',
+        related_link_view_name='publications-studies-list',
         related_link_url_kwarg='pub_id',
     )
 
@@ -228,9 +228,9 @@ class SimpleSampleSerializer(serializers.HyperlinkedModelSerializer):
         lookup_field='biome_id',
     )
 
-    project = serializers.HyperlinkedRelatedField(
+    study = serializers.HyperlinkedRelatedField(
         read_only=True,
-        view_name='projects-detail',
+        view_name='studies-detail',
         lookup_field='ext_study_id',
     )
 
@@ -272,12 +272,12 @@ class SampleSerializer(SimpleSampleSerializer):
         fields = '__all__'
 
 
-# Project serializer
+# Study serializer
 
-class SimpleProjectSerializer(serializers.HyperlinkedModelSerializer):
+class SimpleStudySerializer(serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='projects-detail',
+        view_name='studies-detail',
         lookup_field='ext_study_id',
     )
 
@@ -288,7 +288,7 @@ class SimpleProjectSerializer(serializers.HyperlinkedModelSerializer):
     )
 
     # publications = serializers.HyperlinkedIdentityField(
-    #     view_name='projects-publications-list',
+    #     view_name='studies-publications-list',
     #     lookup_field='ext_study_id',
     # )
     publications = relations.SerializerMethodResourceRelatedField(
@@ -296,7 +296,7 @@ class SimpleProjectSerializer(serializers.HyperlinkedModelSerializer):
         model=emg_models.Publication,
         many=True,
         read_only=True,
-        related_link_view_name='projects-publications-list',
+        related_link_view_name='studies-publications-list',
         related_link_url_kwarg='ext_study_id',
         related_link_lookup_field='ext_study_id',
     )
@@ -308,7 +308,7 @@ class SimpleProjectSerializer(serializers.HyperlinkedModelSerializer):
         return ()
 
     # samples = serializers.HyperlinkedIdentityField(
-    #     view_name='projects-samples-list',
+    #     view_name='studies-samples-list',
     #     lookup_field='ext_study_id',
     # )
     samples = relations.SerializerMethodResourceRelatedField(
@@ -316,7 +316,7 @@ class SimpleProjectSerializer(serializers.HyperlinkedModelSerializer):
         model=emg_models.Sample,
         many=True,
         read_only=True,
-        related_link_view_name='projects-samples-list',
+        related_link_view_name='studies-samples-list',
         related_link_url_kwarg='ext_study_id',
         related_link_lookup_field='ext_study_id',
     )
@@ -328,12 +328,12 @@ class SimpleProjectSerializer(serializers.HyperlinkedModelSerializer):
         return ()
 
     class Meta:
-        model = emg_models.Project
+        model = emg_models.Study
         fields = '__all__'
 
 
-class ProjectSerializer(SimpleProjectSerializer):
+class StudySerializer(SimpleStudySerializer):
 
     class Meta:
-        model = emg_models.Project
+        model = emg_models.Study
         fields = '__all__'
