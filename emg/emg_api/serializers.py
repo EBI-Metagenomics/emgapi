@@ -17,6 +17,8 @@
 
 import logging
 
+from django.utils.text import Truncator
+
 # from rest_framework import serializers
 from rest_framework_json_api import serializers
 from rest_framework_json_api import relations
@@ -326,6 +328,12 @@ class SimpleStudySerializer(serializers.HyperlinkedModelSerializer):
         # workaround https://github.com/django-json-api
         # /django-rest-framework-json-api/issues/178
         return ()
+
+    study_abstract = serializers.SerializerMethodField(
+        'get_short_study_abstract')
+
+    def get_short_study_abstract(self, obj):
+        return Truncator(obj.study_abstract).chars(75)
 
     class Meta:
         model = emg_models.Study
