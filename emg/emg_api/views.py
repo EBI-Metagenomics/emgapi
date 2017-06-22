@@ -129,7 +129,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
-            return emg_serializers.SimpleStudySerializer
+            return emg_serializers.StudySerializer
         return super(StudyViewSet, self).get_serializer_class()
 
     @detail_route(
