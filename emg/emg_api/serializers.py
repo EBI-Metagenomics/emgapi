@@ -207,7 +207,7 @@ class AnalysisJobSerializer(serializers.HyperlinkedModelSerializer):
     sample = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name='samples-detail',
-        lookup_field='sample_id',
+        lookup_field='accession',
     )
 
     class Meta:
@@ -221,7 +221,7 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
         view_name='samples-detail',
-        lookup_field='sample_id',
+        lookup_field='accession',
     )
 
     biome = serializers.HyperlinkedRelatedField(
@@ -238,14 +238,23 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
 
     # analysis_jobs = serializers.HyperlinkedIdentityField(
     #     view_name='samples-jobs-list',
-    #     lookup_field='sample_id',
+    #     lookup_field='accession',
     # )
-    analysis_jobs = relations.ResourceRelatedField(
-        read_only=True,
+    analysis_jobs = relations.SerializerMethodResourceRelatedField(
+        source='get_analysis_jobs',
+        model=emg_models.AnalysisJob,
         many=True,
+        read_only=True,
         related_link_view_name='samples-jobs-list',
-        related_link_url_kwarg='sample_id',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
     )
+
+    def get_analysis_jobs(self, obj):
+        # TODO: provide counter instead of paginating relationship
+        # workaround https://github.com/django-json-api
+        # /django-rest-framework-json-api/issues/178
+        return ()
 
     class Meta:
         model = emg_models.Sample
@@ -254,20 +263,11 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
 
 class SimpleSampleSerializer(SampleSerializer):
 
-    analysis_jobs = relations.SerializerMethodResourceRelatedField(
-        source='get_analysis_jobs',
-        model=emg_models.AnalysisJob,
-        many=True,
-        read_only=True,
-        related_link_view_name='samples-jobs-list',
-        related_link_url_kwarg='sample_id',
-    )
+    sample_desc = serializers.SerializerMethodField(
+        'get_short_sample_desc')
 
-    def get_analysis_jobs(self, obj):
-        # TODO: provide counter instead of paginating relationship
-        # workaround https://github.com/django-json-api
-        # /django-rest-framework-json-api/issues/178
-        return ()
+    def get_short_sample_desc(self, obj):
+        return Truncator(obj.sample_desc).chars(75)
 
     class Meta:
         model = emg_models.Sample

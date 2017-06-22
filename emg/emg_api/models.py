@@ -184,7 +184,7 @@ class Sample(models.Model):
     sample_name = models.CharField(db_column='SAMPLE_NAME', max_length=255, blank=True, null=True)  # Field name made lowercase.
     sample_alias = models.CharField(db_column='SAMPLE_ALIAS', max_length=255, blank=True, null=True)  # Field name made lowercase.
     host_tax_id = models.IntegerField(db_column='HOST_TAX_ID', blank=True, null=True)  # Field name made lowercase.
-    ext_sample_id = models.CharField(db_column='EXT_SAMPLE_ID', max_length=15, blank=True, null=True)  # Field name made lowercase.
+    accession = models.CharField(db_column='EXT_SAMPLE_ID', max_length=15, blank=True, null=True)  # Field name made lowercase.
     species = models.CharField(db_column='SPECIES', max_length=255, blank=True, null=True)  # Field name made lowercase.
     latitude = models.DecimalField(db_column='LATITUDE', max_digits=7, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
     longitude = models.DecimalField(db_column='LONGITUDE', max_digits=7, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
@@ -193,6 +193,7 @@ class Sample(models.Model):
     biome = models.ForeignKey(Biome, models.DO_NOTHING, db_column='BIOME_ID', blank=True, null=True, related_name='samples')  # Field name made lowercase.
 
     class Meta:
+        unique_together = (('sample_id', 'accession'),)
         managed = False
         db_table = 'SAMPLE'
 

@@ -27,6 +27,7 @@ from rest_framework.decorators import detail_route
 
 from emg_api import models as emg_models
 from emg_api import serializers as emg_serializers
+from emg_api import filters as emg_filters
 
 logger = logging.getLogger(__name__)
 
@@ -150,10 +151,15 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='samples-list',
+        url_path='samples(?:/(?P<sample_accession>[a-zA-Z0-9]+))?',
         serializer_class=emg_serializers.SimpleSampleSerializer
     )
-    def samples(self, request, accession=None):
-        queryset = self.get_object().samples.all()
+    def samples(self, request, accession=None, sample_accession=None):
+        if sample_accession is not None:
+            queryset = self.get_object().samples.filter(
+                accession=sample_accession)
+        else:
+            queryset = self.get_object().samples.all()
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -170,26 +176,22 @@ class SampleViewSet(mixins.RetrieveModelMixin,
     serializer_class = emg_serializers.SimpleSampleSerializer
     queryset = emg_models.Sample.objects.all()
 
+    filter_class = emg_filters.SampleFilter
+
     filter_backends = (
         DjangoFilterBackend,
         filters.SearchFilter,
         filters.OrderingFilter,
     )
 
-    filter_fields = (
-        'biome_id',
-        'analysis_jobs__analysis_status_id',
-        'analysis_jobs__experiment_type_id',
-        'geo_loc_name',
-    )
-
     search_fields = (
-        'sample_id',
+        # 'sample_id',
+        'accession',
         '@sample_name',
         'biome__biome_name',
     )
 
-    lookup_field = 'sample_id'
+    lookup_field = 'accession'
     lookup_value_regex = '[a-zA-Z0-9]+'
 
     def get_serializer_class(self):
@@ -200,10 +202,14 @@ class SampleViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='jobs-list',
+        url_path='jobs(?:/(?P<job_id>[a-zA-Z0-9]+))?',
         serializer_class=emg_serializers.AnalysisJobSerializer
     )
-    def jobs(self, request, sample_id=None):
-        queryset = self.get_object().analysis_jobs.all()
+    def jobs(self, request, accession=None, job_id=None):
+        if job_id is not None:
+            queryset = self.get_object().analysis_jobs.filter(job_id=job_id)
+        else:
+            queryset = self.get_object().analysis_jobs.all()
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
