@@ -76,11 +76,11 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
 
     @detail_route(
         methods=['get', ],
-        url_name='projects-list',
-        serializer_class=emg_serializers.SimpleProjectSerializer
+        url_name='studies-list',
+        serializer_class=emg_serializers.SimpleStudySerializer
     )
-    def projects(self, request, biome_id=None):
-        queryset = self.get_object().projects.all()
+    def studies(self, request, biome_id=None):
+        queryset = self.get_object().studies.all()
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -90,12 +90,12 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         return Response(serializer.data)
 
 
-class ProjectViewSet(mixins.RetrieveModelMixin,
-                     mixins.ListModelMixin,
-                     viewsets.GenericViewSet):
+class StudyViewSet(mixins.RetrieveModelMixin,
+                   mixins.ListModelMixin,
+                   viewsets.GenericViewSet):
 
-    serializer_class = emg_serializers.SimpleProjectSerializer
-    queryset = emg_models.Project.objects.all()
+    serializer_class = emg_serializers.SimpleStudySerializer
+    queryset = emg_models.Study.objects.all()
 
     filter_backends = (
         DjangoFilterBackend,
@@ -129,8 +129,8 @@ class ProjectViewSet(mixins.RetrieveModelMixin,
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
-            return emg_serializers.SimpleProjectSerializer
-        return super(ProjectViewSet, self).get_serializer_class()
+            return emg_serializers.SimpleStudySerializer
+        return super(StudyViewSet, self).get_serializer_class()
 
     @detail_route(
         methods=['get', ],
@@ -317,11 +317,11 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
 
     @detail_route(
         methods=['get', ],
-        url_name='projects-list',
-        serializer_class=emg_serializers.SimpleProjectSerializer
+        url_name='studies-list',
+        serializer_class=emg_serializers.SimpleStudySerializer
     )
-    def projects(self, request, pub_id=None):
-        queryset = self.get_object().projects.all()
+    def studies(self, request, pub_id=None):
+        queryset = self.get_object().studies.all()
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
