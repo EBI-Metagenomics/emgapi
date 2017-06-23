@@ -114,6 +114,7 @@ class PipelineRelease(models.Model):
     class Meta:
         managed = False
         db_table = 'PIPELINE_RELEASE'
+        unique_together = ('pipeline_id', 'release_version',)
 
 
 class PipelineReleaseTool(models.Model):

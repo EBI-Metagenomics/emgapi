@@ -127,14 +127,14 @@ class PipelineReleaseSerializer(serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
         view_name='pipelines-detail',
-        lookup_field='pipeline_id',
+        lookup_field='release_version',
     )
 
     # analysis_jobs = relations.ResourceRelatedField(
     #     read_only=True,
     #     many=True,
     #     related_link_view_name='pipelines-jobs-list',
-    #     related_link_url_kwarg='pipeline_id',
+    #     related_link_url_kwarg='release_version',
     # )
     analysis_jobs = relations.SerializerMethodResourceRelatedField(
         source='get_analysis_jobs',
@@ -142,7 +142,8 @@ class PipelineReleaseSerializer(serializers.HyperlinkedModelSerializer):
         many=True,
         read_only=True,
         related_link_view_name='pipelines-jobs-list',
-        related_link_url_kwarg='pipeline_id',
+        related_link_url_kwarg='release_version',
+        related_link_lookup_field='release_version',
     )
 
     def get_analysis_jobs(self, obj):
@@ -186,7 +187,7 @@ class AnalysisJobSerializer(serializers.HyperlinkedModelSerializer):
     pipeline = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name='pipelines-detail',
-        lookup_field='pipeline_id',
+        lookup_field='release_version',
     )
 
     analysis_status = AnalysisStatusSerializer()
@@ -196,7 +197,7 @@ class AnalysisJobSerializer(serializers.HyperlinkedModelSerializer):
     pipeline = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name='pipelines-detail',
-        lookup_field='pipeline_id',
+        lookup_field='release_version',
     )
 
     sample = serializers.HyperlinkedRelatedField(
