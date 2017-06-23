@@ -265,13 +265,13 @@ class PipelineReleaseViewSet(mixins.RetrieveModelMixin,
     serializer_class = emg_serializers.PipelineReleaseSerializer
     queryset = emg_models.PipelineRelease.objects.all()
 
+    filter_class = emg_filters.PipelineReleaseFilter
+
     filter_backends = (
         DjangoFilterBackend,
         # filters.SearchFilter,
         # filters.OrderingFilter,
     )
-
-    # filter_fields = ()
 
     # search_fields = ()
 
@@ -286,10 +286,15 @@ class PipelineReleaseViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='jobs-list',
+        url_path='jobs(?:/(?P<job_id>[a-zA-Z0-9]+))?',
         serializer_class=emg_serializers.AnalysisJobSerializer
     )
-    def jobs(self, request, pipeline_id=None):
-        queryset = self.get_object().analysis_jobs.all()
+    def jobs(self, request, pipeline_id=None, job_id=None):
+        if job_id is not None:
+            queryset = self.get_object().analysis_jobs.filter(
+                accession=job_id)
+        else:
+            queryset = self.get_object().analysis_jobs.all()
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
