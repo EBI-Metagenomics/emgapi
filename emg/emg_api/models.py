@@ -184,7 +184,7 @@ class Sample(models.Model):
     sample_name = models.CharField(db_column='SAMPLE_NAME', max_length=255, blank=True, null=True)  # Field name made lowercase.
     sample_alias = models.CharField(db_column='SAMPLE_ALIAS', max_length=255, blank=True, null=True)  # Field name made lowercase.
     host_tax_id = models.IntegerField(db_column='HOST_TAX_ID', blank=True, null=True)  # Field name made lowercase.
-    accession = models.CharField(db_column='EXT_SAMPLE_ID', max_length=15, blank=True, null=True)  # Field name made lowercase.
+    accession = models.CharField(db_column='EXT_SAMPLE_ID', max_length=15)  # Field name made lowercase.
     species = models.CharField(db_column='SPECIES', max_length=255, blank=True, null=True)  # Field name made lowercase.
     latitude = models.DecimalField(db_column='LATITUDE', max_digits=7, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
     longitude = models.DecimalField(db_column='LONGITUDE', max_digits=7, decimal_places=4, blank=True, null=True)  # Field name made lowercase.
