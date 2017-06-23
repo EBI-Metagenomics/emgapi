@@ -136,10 +136,16 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='publications-list',
+        url_path='publications(?:/(?P<publications_id>[a-zA-Z0-9]+))?',
         serializer_class=emg_serializers.SimplePublicationSerializer
     )
-    def publications(self, request, accession=None):
+    def publications(self, request, accession=None, publications_id=None):
         queryset = self.get_object().publications.all()
+        if publications_id is not None:
+            queryset = self.get_object().publications.filter(
+                publications_id=publications_id)
+        else:
+            queryset = self.get_object().publications.all()
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -306,11 +312,16 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         filters.OrderingFilter,
     )
 
-    # filter_fields = ()
+    filter_fields = (
+        'pub_type',
+        'published_year',
+    )
 
     search_fields = (
         '@pub_title',
         'authors',
+        'doi',
+        'isbn',
     )
 
     lookup_field = 'pub_id'
@@ -324,10 +335,15 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='studies-list',
+        url_path='studies(?:/(?P<study_accession>[a-zA-Z0-9]+))?',
         serializer_class=emg_serializers.SimpleStudySerializer
     )
-    def studies(self, request, pub_id=None):
-        queryset = self.get_object().studies.all()
+    def studies(self, request, pub_id=None, study_accession=None):
+        if study_accession is not None:
+            queryset = self.get_object().studies.filter(
+                accession=study_accession)
+        else:
+            queryset = self.get_object().studies.all()
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
