@@ -275,8 +275,8 @@ class PipelineReleaseViewSet(mixins.RetrieveModelMixin,
 
     # search_fields = ()
 
-    lookup_field = 'pipeline_id'
-    lookup_value_regex = '[a-zA-Z0-9]+'
+    lookup_field = 'release_version'
+    lookup_value_regex = '[a-zA-Z0-9.]+'
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -289,7 +289,7 @@ class PipelineReleaseViewSet(mixins.RetrieveModelMixin,
         url_path='jobs(?:/(?P<job_id>[a-zA-Z0-9]+))?',
         serializer_class=emg_serializers.AnalysisJobSerializer
     )
-    def jobs(self, request, pipeline_id=None, job_id=None):
+    def jobs(self, request, release_version=None, job_id=None):
         if job_id is not None:
             queryset = self.get_object().analysis_jobs.filter(
                 accession=job_id)
