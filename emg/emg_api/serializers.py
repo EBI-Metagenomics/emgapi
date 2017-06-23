@@ -130,11 +130,6 @@ class PipelineReleaseSerializer(serializers.HyperlinkedModelSerializer):
         lookup_field='pipeline_id',
     )
 
-    url = serializers.HyperlinkedIdentityField(
-        view_name='pipelines-detail',
-        lookup_field='pipeline_id',
-    )
-
     # analysis_jobs = relations.ResourceRelatedField(
     #     read_only=True,
     #     many=True,
