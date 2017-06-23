@@ -48,3 +48,15 @@ class SampleFilter(django_filters.FilterSet):
             'biome_id',
             'geo_loc_name',
         )
+
+
+class PipelineReleaseFilter(SampleFilter):
+
+    class Meta:
+        model = emg_models.PipelineRelease
+        fields = (
+            'analysis_status',
+            'experiment_type',
+            'analysis_status_id',
+            'experiment_type_id',
+        )
