@@ -29,12 +29,12 @@ from django.db import models
 
 class Run(models.Model):
     run_id = models.BigAutoField(db_column='JOB_ID', primary_key=True)  # Field name made lowercase.
-    run_operator = models.CharField(db_column='JOB_OPERATOR', max_length=15)  # Field name made lowercase.
+    job_operator = models.CharField(db_column='JOB_OPERATOR', max_length=15)  # Field name made lowercase.
     pipeline = models.ForeignKey('PipelineRelease', models.DO_NOTHING, db_column='PIPELINE_ID', related_name='runs')  # Field name made lowercase.
     submit_time = models.DateTimeField(db_column='SUBMIT_TIME')  # Field name made lowercase.
     complete_time = models.DateTimeField(db_column='COMPLETE_TIME', blank=True, null=True)  # Field name made lowercase.
     analysis_status = models.ForeignKey('AnalysisStatus', models.DO_NOTHING, db_column='ANALYSIS_STATUS_ID')  # Field name made lowercase.
-    re_run_count = models.IntegerField(db_column='RE_RUN_COUNT', blank=True, null=True)  # Field name made lowercase.
+    # re_run_count = models.IntegerField(db_column='RE_RUN_COUNT', blank=True, null=True)  # Field name made lowercase.
     input_file_name = models.CharField(db_column='INPUT_FILE_NAME', max_length=50)  # Field name made lowercase.
     result_directory = models.CharField(db_column='RESULT_DIRECTORY', max_length=100)  # Field name made lowercase.
     accession = models.CharField(db_column='EXTERNAL_RUN_IDS', max_length=100)  # Field name made lowercase.
@@ -227,7 +227,7 @@ class Study(models.Model):
     centre_name = models.CharField(db_column='CENTRE_NAME', max_length=255, blank=True, null=True)  # Field name made lowercase.
     experimental_factor = models.CharField(db_column='EXPERIMENTAL_FACTOR', max_length=255, blank=True, null=True)  # Field name made lowercase.
     is_public = models.IntegerField(db_column='IS_PUBLIC', blank=True, null=True)  # Field name made lowercase.
-    ncbi_project_id = models.IntegerField(db_column='NCBI_PROJECT_ID', blank=True, null=True)  # Field name made lowercase.
+    # ncbi_project_id = models.IntegerField(db_column='NCBI_PROJECT_ID', blank=True, null=True)  # Field name made lowercase.
     public_release_date = models.DateField(db_column='PUBLIC_RELEASE_DATE', blank=True, null=True)  # Field name made lowercase.
     study_abstract = models.TextField(db_column='STUDY_ABSTRACT', blank=True, null=True)  # Field name made lowercase.
     accession = models.CharField(db_column='EXT_STUDY_ID', max_length=18)  # Field name made lowercase.
