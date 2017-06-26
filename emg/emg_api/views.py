@@ -53,7 +53,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     )
 
     lookup_field = 'biome_id'
-    lookup_value_regex = '[a-zA-Z0-9]+'
+    lookup_value_regex = '[a-zA-Z0-9,]+'
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -126,7 +126,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     )
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9]+'
+    lookup_value_regex = '[a-zA-Z0-9,]+'
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -136,7 +136,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='publications-list',
-        url_path='publications(?:/(?P<publications_id>[a-zA-Z0-9]+))?',
+        url_path='publications(?:/(?P<publications_id>[a-zA-Z0-9,]+))?',
         serializer_class=emg_serializers.SimplePublicationSerializer
     )
     def publications(self, request, accession=None, publications_id=None):
@@ -156,7 +156,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='samples-list',
-        url_path='samples(?:/(?P<sample_accession>[a-zA-Z0-9]+))?',
+        url_path='samples(?:/(?P<sample_accession>[a-zA-Z0-9,]+))?',
         serializer_class=emg_serializers.SimpleSampleSerializer
     )
     def samples(self, request, accession=None, sample_accession=None):
@@ -197,7 +197,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
     )
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9]+'
+    lookup_value_regex = '[a-zA-Z0-9,]+'
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -207,7 +207,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='runs-list',
-        url_path='runs(?:/(?P<run_accession>[a-zA-Z0-9]+))?',
+        url_path='runs(?:/(?P<run_accession>[a-zA-Z0-9,]+))?',
         serializer_class=emg_serializers.RunSerializer
     )
     def runs(self, request, accession=None, run_accession=None):
@@ -245,7 +245,7 @@ class RunViewSet(mixins.RetrieveModelMixin,
     )
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9]+'
+    lookup_value_regex = '[a-zA-Z0-9,]+'
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -281,7 +281,7 @@ class PipelineReleaseViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='runs-list',
-        url_path='runs(?:/(?P<run_accession>[a-zA-Z0-9]+))?',
+        url_path='runs(?:/(?P<run_accession>[a-zA-Z0-9,]+))?',
         serializer_class=emg_serializers.RunSerializer
     )
     def runs(self, request, release_version=None, run_accession=None):
@@ -325,7 +325,7 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
     )
 
     lookup_field = 'pub_id'
-    lookup_value_regex = '[a-zA-Z0-9]+'
+    lookup_value_regex = '[a-zA-Z0-9,]+'
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -335,7 +335,7 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='studies-list',
-        url_path='studies(?:/(?P<study_accession>[a-zA-Z0-9]+))?',
+        url_path='studies(?:/(?P<study_accession>[a-zA-Z0-9,]+))?',
         serializer_class=emg_serializers.SimpleStudySerializer
     )
     def studies(self, request, pub_id=None, study_accession=None):
