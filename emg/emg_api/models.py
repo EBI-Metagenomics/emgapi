@@ -225,7 +225,7 @@ class SamplePublication(models.Model):
 class Study(models.Model):
     study_id = models.AutoField(db_column='STUDY_ID', primary_key=True)  # Field name made lowercase.
     centre_name = models.CharField(db_column='CENTRE_NAME', max_length=255, blank=True, null=True)  # Field name made lowercase.
-    experimental_factor = models.CharField(db_column='EXPERIMENTAL_FACTOR', max_length=255, blank=True, null=True)  # Field name made lowercase.
+    # experimental_factor = models.CharField(db_column='EXPERIMENTAL_FACTOR', max_length=255, blank=True, null=True)  # Field name made lowercase.
     is_public = models.IntegerField(db_column='IS_PUBLIC', blank=True, null=True)  # Field name made lowercase.
     # ncbi_project_id = models.IntegerField(db_column='NCBI_PROJECT_ID', blank=True, null=True)  # Field name made lowercase.
     public_release_date = models.DateField(db_column='PUBLIC_RELEASE_DATE', blank=True, null=True)  # Field name made lowercase.
