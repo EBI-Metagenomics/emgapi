@@ -60,3 +60,36 @@ class PipelineReleaseFilter(SampleFilter):
             'analysis_status_id',
             'experiment_type_id',
         )
+
+
+class RunFilter(django_filters.FilterSet):
+
+    analysis_status_id = django_filters.CharFilter(
+        name='analysis_status_id',
+        distinct=True)
+
+    experiment_type_id = django_filters.CharFilter(
+        name='experiment_type_id',
+        distinct=True)
+
+    analysis_status = django_filters.CharFilter(
+        name='analysis_status__analysis_status',
+        distinct=True)
+
+    experiment_type = django_filters.CharFilter(
+        name='experiment_type__experiment_type',
+        distinct=True)
+
+    pipeline_version = django_filters.CharFilter(
+        name='pipeline__release_version',
+        distinct=True)
+
+    class Meta:
+        model = emg_models.Run
+        fields = (
+            'analysis_status',
+            'experiment_type',
+            'analysis_status_id',
+            'experiment_type_id',
+            'pipeline_version',
+        )
