@@ -140,7 +140,6 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         serializer_class=emg_serializers.SimplePublicationSerializer
     )
     def publications(self, request, accession=None, publications_id=None):
-        queryset = self.get_object().publications.all()
         if publications_id is not None:
             queryset = self.get_object().publications.filter(
                 publications_id=publications_id)
