@@ -233,21 +233,16 @@ class RunViewSet(mixins.RetrieveModelMixin,
     serializer_class = emg_serializers.RunSerializer
     queryset = emg_models.Run.objects.all()
 
+    filter_class = emg_filters.RunFilter
+
     filter_backends = (
         DjangoFilterBackend,
         filters.SearchFilter,
         filters.OrderingFilter,
     )
 
-    filter_fields = (
-        'pipeline__release_version',
-        'analysis_status_id',
-        'experiment_type_id',
-    )
-
     search_fields = (
-        '@pipeline__description',
-        '@pipeline__changes',
+        'accession',
     )
 
     lookup_field = 'accession'
