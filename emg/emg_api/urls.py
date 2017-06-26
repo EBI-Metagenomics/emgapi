@@ -42,9 +42,9 @@ router.register(
 )
 
 router.register(
-    r'jobs',
-    views.AnalysisJobViewSet,
-    base_name='jobs'
+    r'runs',
+    views.RunViewSet,
+    base_name='runs'
 )
 
 router.register(

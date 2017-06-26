@@ -207,15 +207,16 @@ class SampleViewSet(mixins.RetrieveModelMixin,
 
     @detail_route(
         methods=['get', ],
-        url_name='jobs-list',
-        url_path='jobs(?:/(?P<job_id>[a-zA-Z0-9]+))?',
-        serializer_class=emg_serializers.AnalysisJobSerializer
+        url_name='runs-list',
+        url_path='runs(?:/(?P<run_accession>[a-zA-Z0-9]+))?',
+        serializer_class=emg_serializers.RunSerializer
     )
-    def jobs(self, request, accession=None, job_id=None):
-        if job_id is not None:
-            queryset = self.get_object().analysis_jobs.filter(job_id=job_id)
+    def runs(self, request, accession=None, run_accession=None):
+        if run_accession is not None:
+            queryset = self.get_object().runs.filter(
+                accession=run_accession)
         else:
-            queryset = self.get_object().analysis_jobs.all()
+            queryset = self.get_object().runs.all()
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -225,12 +226,12 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         return Response(serializer.data)
 
 
-class AnalysisJobViewSet(mixins.RetrieveModelMixin,
-                         mixins.ListModelMixin,
-                         viewsets.GenericViewSet):
+class RunViewSet(mixins.RetrieveModelMixin,
+                 mixins.ListModelMixin,
+                 viewsets.GenericViewSet):
 
-    serializer_class = emg_serializers.AnalysisJobSerializer
-    queryset = emg_models.AnalysisJob.objects.all()
+    serializer_class = emg_serializers.RunSerializer
+    queryset = emg_models.Run.objects.all()
 
     filter_backends = (
         DjangoFilterBackend,
@@ -249,13 +250,13 @@ class AnalysisJobViewSet(mixins.RetrieveModelMixin,
         '@pipeline__changes',
     )
 
-    lookup_field = 'job_id'
+    lookup_field = 'accession'
     lookup_value_regex = '[a-zA-Z0-9]+'
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
-            return emg_serializers.AnalysisJobSerializer
-        return super(AnalysisJobViewSet, self).get_serializer_class()
+            return emg_serializers.RunSerializer
+        return super(RunViewSet, self).get_serializer_class()
 
 
 class PipelineReleaseViewSet(mixins.RetrieveModelMixin,
@@ -285,16 +286,16 @@ class PipelineReleaseViewSet(mixins.RetrieveModelMixin,
 
     @detail_route(
         methods=['get', ],
-        url_name='jobs-list',
-        url_path='jobs(?:/(?P<job_id>[a-zA-Z0-9]+))?',
-        serializer_class=emg_serializers.AnalysisJobSerializer
+        url_name='runs-list',
+        url_path='runs(?:/(?P<run_accession>[a-zA-Z0-9]+))?',
+        serializer_class=emg_serializers.RunSerializer
     )
-    def jobs(self, request, release_version=None, job_id=None):
-        if job_id is not None:
-            queryset = self.get_object().analysis_jobs.filter(
-                accession=job_id)
+    def runs(self, request, release_version=None, run_accession=None):
+        if run_accession is not None:
+            queryset = self.get_object().runs.filter(
+                accession=run_accession)
         else:
-            queryset = self.get_object().analysis_jobs.all()
+            queryset = self.get_object().runs.all()
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
