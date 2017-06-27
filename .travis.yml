@@ -10,6 +10,6 @@ install:
   - flake8 -v .
 
 before_script:
-  - pip instll -r requirements.txt
+  - pip install -r requirements.txt
 script:
   - python setup.py test
