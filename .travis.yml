@@ -1,6 +1,9 @@
 language: python
 
-script:
+install:
   - pip install flake8 pycodestyle pep8-naming
   - flake8 --version
   - flake8 -v .
+
+script:
+  - python setup.py test
