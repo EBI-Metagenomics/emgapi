@@ -436,15 +436,6 @@ class Run(models.Model):
 #         managed = False
 #         db_table = 'VARIABLE_NAMES'
 #         unique_together = (('var_id', 'var_name'), ('var_id', 'var_name'),)
-#
-#
-# class DjangoMigrations(models.Model):
-#     app = models.CharField(max_length=255)
-#     name = models.CharField(max_length=255)
-#     applied = models.DateTimeField()
-#
-#     class Meta:
-#         db_table = 'django_migrations'
 
 
 # CREATE FULLTEXT INDEX STUDY_ABSTRACT_IDX
