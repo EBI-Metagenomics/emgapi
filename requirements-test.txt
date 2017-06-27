@@ -1,0 +1,6 @@
+# EMG tests dependencies
+# install and create a virtual environment
+# run pip install -r requirements-test
+
+pytest~=3.1.2
+pytest-django~=3.1.2
