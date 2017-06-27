@@ -97,7 +97,6 @@ class StudyViewSet(mixins.RetrieveModelMixin,
                    viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.SimpleStudySerializer
-    queryset = emg_models.Study.objects.all()
 
     filter_backends = (
         DjangoFilterBackend,
@@ -130,6 +129,10 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 
     lookup_field = 'accession'
     lookup_value_regex = '[a-zA-Z0-9,]+'
+
+    def get_queryset(self):
+        return emg_models.Study.objects.all() \
+            .select_related('biome')
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -182,7 +185,6 @@ class SampleViewSet(mixins.RetrieveModelMixin,
                     viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.SimpleSampleSerializer
-    queryset = emg_models.Sample.objects.all()
 
     filter_class = emg_filters.SampleFilter
 
@@ -208,6 +210,10 @@ class SampleViewSet(mixins.RetrieveModelMixin,
 
     lookup_field = 'accession'
     lookup_value_regex = '[a-zA-Z0-9,]+'
+
+    def get_queryset(self):
+        return emg_models.Sample.objects.all() \
+            .select_related('biome', 'study')
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -240,7 +246,6 @@ class RunViewSet(mixins.RetrieveModelMixin,
                  viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.RunSerializer
-    queryset = emg_models.Run.objects.all()
 
     filter_class = emg_filters.RunFilter
 
@@ -261,7 +266,12 @@ class RunViewSet(mixins.RetrieveModelMixin,
     )
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9,]+'
+    lookup_value_regex = '[a-zA-Z0-9,_]+'
+
+    def get_queryset(self):
+        return emg_models.Run.objects.all() \
+            .select_related('sample', 'pipeline', 'analysis_status',
+                            'experiment_type')
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -326,7 +336,6 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
                          viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.SimplePublicationSerializer
-    queryset = emg_models.Publication.objects.all()
 
     filter_backends = (
         DjangoFilterBackend,
@@ -354,6 +363,11 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
 
     lookup_field = 'pub_id'
     lookup_value_regex = '[a-zA-Z0-9,]+'
+
+    def get_queryset(self):
+        # TODO: select studies - many-to-many
+        return emg_models.Publication.objects.all() \
+            .select_related()
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
