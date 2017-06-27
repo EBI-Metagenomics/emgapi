@@ -40,12 +40,13 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     queryset = emg_models.Biome.objects.all()
 
     filter_backends = (
-        DjangoFilterBackend,
+        # DjangoFilterBackend,
         filters.SearchFilter,
-        # filters.OrderingFilter,
+        filters.OrderingFilter,
     )
 
-    # filter_fields = ()
+    ordering_fields = ('biome_id',)
+    ordering = ('biome_id',)
 
     search_fields = (
         'biome_name',
@@ -108,6 +109,8 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         'accession',
         'last_update',
     )
+
+    ordering = ('-last_update',)
 
     filter_fields = (
         'biome_id',
@@ -189,6 +192,13 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         filters.OrderingFilter,
     )
 
+    ordering_fields = (
+        'accession',
+        'last_update',
+    )
+
+    ordering = ('-last_update',)
+
     search_fields = (
         # 'sample_id',
         'accession',
@@ -240,6 +250,12 @@ class RunViewSet(mixins.RetrieveModelMixin,
         filters.OrderingFilter,
     )
 
+    ordering_fields = (
+        'accession',
+    )
+
+    ordering = ('accession',)
+
     search_fields = (
         'accession',
     )
@@ -265,8 +281,14 @@ class PipelineReleaseViewSet(mixins.RetrieveModelMixin,
     filter_backends = (
         DjangoFilterBackend,
         # filters.SearchFilter,
-        # filters.OrderingFilter,
+        filters.OrderingFilter,
     )
+
+    ordering_fields = (
+        'release_version',
+    )
+
+    ordering = ('release_version',)
 
     # search_fields = ()
 
@@ -316,6 +338,12 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         'pub_type',
         'published_year',
     )
+
+    ordering_fields = (
+        'pub_id',
+    )
+
+    ordering = ('pub_id',)
 
     search_fields = (
         '@pub_title',

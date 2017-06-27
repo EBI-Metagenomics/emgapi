@@ -46,6 +46,7 @@ class Run(models.Model):
     instrument_model = models.CharField(db_column='INSTRUMENT_MODEL', max_length=50, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
+        ordering = ('accession',)
         managed = False
         db_table = 'ANALYSIS_JOB'
 
@@ -55,6 +56,7 @@ class AnalysisStatus(models.Model):
     analysis_status = models.CharField(db_column='ANALYSIS_STATUS', max_length=25)  # Field name made lowercase.
 
     class Meta:
+        ordering = ('analysis_status_id',)
         managed = False
         db_table = 'ANALYSIS_STATUS'
 
@@ -68,6 +70,7 @@ class Biome(models.Model):
     lineage = models.CharField(db_column='LINEAGE', max_length=500)  # Field name made lowercase.
 
     class Meta:
+        ordering = ('biome_id',)
         managed = False
         db_table = 'BIOME_HIERARCHY_TREE'
 
@@ -112,6 +115,7 @@ class PipelineRelease(models.Model):
     release_date = models.DateField(db_column='RELEASE_DATE')  # Field name made lowercase.
 
     class Meta:
+        ordering = ('release_version',)
         managed = False
         db_table = 'PIPELINE_RELEASE'
         unique_together = ('pipeline_id', 'release_version',)
@@ -164,6 +168,7 @@ class Publication(models.Model):
     pub_type = models.CharField(db_column='PUB_TYPE', max_length=150, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
+        ordering = ('pub_id',)
         managed = False
         db_table = 'PUBLICATION'
 
@@ -194,6 +199,7 @@ class Sample(models.Model):
     biome = models.ForeignKey(Biome, models.DO_NOTHING, db_column='BIOME_ID', blank=True, null=True, related_name='samples')  # Field name made lowercase.
 
     class Meta:
+        ordering = ('accession',)
         unique_together = (('sample_id', 'accession'),)
         managed = False
         db_table = 'SAMPLE'
@@ -247,6 +253,7 @@ class Study(models.Model):
     publications = models.ManyToManyField(Publication, through='StudyPublication', related_name='studies')
 
     class Meta:
+        ordering = ('accession',)
         # manualy added make sure both are unique
         unique_together = (('study_id', 'accession'),)
         managed = False
