@@ -1,9 +1,15 @@
 language: python
+python:
+  - "3.5"
+  - "3.6"
+  - "nightly"
 
 install:
   - pip install flake8 pycodestyle pep8-naming
   - flake8 --version
   - flake8 -v .
 
+before_script:
+  - pip instll -r requirements.txt
 script:
   - python setup.py test
