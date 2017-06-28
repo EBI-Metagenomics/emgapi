@@ -366,6 +366,59 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         return Response(serializer.data)
 
 
+class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
+                            mixins.ListModelMixin,
+                            viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.ExperimentTypeSerializer
+    queryset = emg_models.ExperimentType.objects.all()
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'experiment_type',
+    )
+
+    ordering = ('experiment_type',)
+
+    search_fields = (
+        'experiment_type',
+    )
+
+    lookup_field = 'experiment_type'
+    lookup_value_regex = '[a-zA-Z]+'
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return emg_serializers.ExperimentTypeSerializer
+        return super(ExperimentTypeViewSet, self).get_serializer_class()
+
+    @detail_route(
+        methods=['get', ],
+        url_name='runs-list',
+        url_path='runs(?:/(?P<run_accession>[a-zA-Z0-9,]+))?',
+        serializer_class=emg_serializers.RunSerializer
+    )
+    def runs(self, request, experiment_type=None, run_accession=None):
+        obj = self.get_object()
+        if run_accession is not None:
+            queryset = obj.runs \
+                .filter(accession=run_accession)
+        else:
+            queryset = obj.runs.all()
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
 class PublicationViewSet(mixins.RetrieveModelMixin,
                          mixins.ListModelMixin,
                          viewsets.GenericViewSet):

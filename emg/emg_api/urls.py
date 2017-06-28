@@ -54,6 +54,12 @@ router.register(
 )
 
 router.register(
+    r'experiments',
+    views.ExperimentTypeViewSet,
+    base_name='experiments'
+)
+
+router.register(
     r'publications',
     views.PublicationViewSet,
     base_name='publications'
