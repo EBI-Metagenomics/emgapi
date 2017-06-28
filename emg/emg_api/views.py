@@ -407,9 +407,21 @@ class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
         obj = self.get_object()
         if run_accession is not None:
             queryset = obj.runs \
-                .filter(accession=run_accession)
+                .filter(accession=run_accession) \
+                .select_related(
+                    'sample',
+                    'pipeline',
+                    'analysis_status',
+                    'experiment_type'
+                )
         else:
-            queryset = obj.runs.all()
+            queryset = obj.runs.all() \
+                .select_related(
+                    'sample',
+                    'pipeline',
+                    'analysis_status',
+                    'experiment_type'
+                )
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
