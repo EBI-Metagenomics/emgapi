@@ -49,7 +49,7 @@ router.register(
 
 router.register(
     r'pipelines',
-    views.PipelineReleaseViewSet,
+    views.PipelineViewSet,
     base_name='pipelines'
 )
 

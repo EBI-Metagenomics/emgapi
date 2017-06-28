@@ -121,9 +121,9 @@ class SimplePublicationSerializer(PublicationSerializer):
         fields = '__all__'
 
 
-# PipelineRelease serializer
+# Pipeline serializer
 
-class PipelineReleaseSerializer(serializers.HyperlinkedModelSerializer):
+class PipelineSerializer(serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
         view_name='pipelines-detail',
@@ -153,7 +153,7 @@ class PipelineReleaseSerializer(serializers.HyperlinkedModelSerializer):
         return ()
 
     class Meta:
-        model = emg_models.PipelineRelease
+        model = emg_models.Pipeline
         fields = '__all__'
 
 
@@ -166,15 +166,6 @@ class ExperimentTypeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-# AnalysisStatus serializer
-
-class AnalysisStatusSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = emg_models.AnalysisStatus
-        fields = '__all__'
-
-
 # Run serializer
 
 class RunSerializer(serializers.HyperlinkedModelSerializer):
@@ -184,16 +175,13 @@ class RunSerializer(serializers.HyperlinkedModelSerializer):
         lookup_field='accession',
     )
 
-    pipeline = serializers.HyperlinkedRelatedField(
-        read_only=True,
-        view_name='pipelines-detail',
-        lookup_field='release_version',
-    )
+    # attributes
+    analysis_status = serializers.SerializerMethodField()
 
-    analysis_status = AnalysisStatusSerializer()
+    def get_analysis_status(self, obj):
+        return obj.analysis_status.analysis_status
 
-    experiment_type = ExperimentTypeSerializer()
-
+    # relationship
     pipeline = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name='pipelines-detail',

@@ -301,14 +301,14 @@ class RunViewSet(mixins.RetrieveModelMixin,
         return super(RunViewSet, self).get_serializer_class()
 
 
-class PipelineReleaseViewSet(mixins.RetrieveModelMixin,
-                             mixins.ListModelMixin,
-                             viewsets.GenericViewSet):
+class PipelineViewSet(mixins.RetrieveModelMixin,
+                      mixins.ListModelMixin,
+                      viewsets.GenericViewSet):
 
-    serializer_class = emg_serializers.PipelineReleaseSerializer
-    queryset = emg_models.PipelineRelease.objects.all()
+    serializer_class = emg_serializers.PipelineSerializer
+    queryset = emg_models.Pipeline.objects.all()
 
-    filter_class = emg_filters.PipelineReleaseFilter
+    filter_class = emg_filters.PipelineFilter
 
     filter_backends = (
         DjangoFilterBackend,
@@ -329,8 +329,8 @@ class PipelineReleaseViewSet(mixins.RetrieveModelMixin,
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
-            return emg_serializers.PipelineReleaseSerializer
-        return super(PipelineReleaseViewSet, self).get_serializer_class()
+            return emg_serializers.PipelineSerializer
+        return super(PipelineViewSet, self).get_serializer_class()
 
     @detail_route(
         methods=['get', ],

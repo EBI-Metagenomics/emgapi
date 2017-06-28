@@ -29,7 +29,7 @@ from __future__ import unicode_literals
 from django.db import models
 
 
-class PipelineRelease(models.Model):
+class Pipeline(models.Model):
     pipeline_id = models.AutoField(
         db_column='PIPELINE_ID', primary_key=True)
     description = models.TextField(
@@ -73,7 +73,7 @@ class PipelineTool(models.Model):
 
 class PipelineReleaseTool(models.Model):
     pipeline = models.ForeignKey(
-        PipelineRelease, db_column='PIPELINE_ID',
+        Pipeline, db_column='PIPELINE_ID',
         primary_key=True, on_delete=models.CASCADE)
     tool = models.ForeignKey(
         PipelineTool, db_column='TOOL_ID', on_delete=models.CASCADE)
@@ -308,7 +308,7 @@ class Run(models.Model):
     job_operator = models.CharField(
         db_column='JOB_OPERATOR', max_length=15)
     pipeline = models.ForeignKey(
-        PipelineRelease, db_column='PIPELINE_ID',
+        Pipeline, db_column='PIPELINE_ID',
         related_name='runs', on_delete=models.CASCADE)
     submit_time = models.DateTimeField(
         db_column='SUBMIT_TIME')
