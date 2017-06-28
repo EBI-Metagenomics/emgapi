@@ -5,11 +5,10 @@ python:
   - "nightly"
 
 install:
+  - pip install -r requirements.txt
   - pip install flake8 pycodestyle pep8-naming
+
+script:
   - flake8 --version
   - flake8 -v .
-
-before_script:
-  - pip install -r requirements.txt
-script:
   - python setup.py test
