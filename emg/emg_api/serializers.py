@@ -30,18 +30,18 @@ logger = logging.getLogger(__name__)
 class BiomeSerializer(serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='biome-detail',
+        view_name='biomes-detail',
         lookup_field='biome_id',
     )
 
     # studies = serializers.HyperlinkedIdentityField(
-    #     view_name='biome-studies-list',
+    #     view_name='biomes-studies-list',
     #     lookup_field='biome_id',
     # )
     # studies = relations.ResourceRelatedField(
     #     queryset=emg_models.Biome.objects,
     #     many=True,
-    #     related_link_view_name='biome-studies-list',
+    #     related_link_view_name='biomes-studies-list',
     #     related_link_url_kwarg='biome_id',
     # )
     studies = relations.SerializerMethodResourceRelatedField(
@@ -49,7 +49,7 @@ class BiomeSerializer(serializers.HyperlinkedModelSerializer):
         model=emg_models.Biome,
         many=True,
         read_only=True,
-        related_link_view_name='biome-studies-list',
+        related_link_view_name='biomes-studies-list',
         related_link_url_kwarg='biome_id',
     )
 
@@ -60,13 +60,13 @@ class BiomeSerializer(serializers.HyperlinkedModelSerializer):
         return ()
 
     # samples = serializers.HyperlinkedIdentityField(
-    #     view_name='biome-samples-list',
+    #     view_name='biomes-samples-list',
     #     lookup_field='biome_id',
     # )
     # samples = relations.ResourceRelatedField(
     #     queryset=emg_models.Biome.objects,
     #     many=True,
-    #     related_link_view_name='biome-samples-list',
+    #     related_link_view_name='biomes-samples-list',
     #     related_link_url_kwarg='biome_id',
     # )
     samples = relations.SerializerMethodResourceRelatedField(
@@ -74,7 +74,7 @@ class BiomeSerializer(serializers.HyperlinkedModelSerializer):
         model=emg_models.Biome,
         many=True,
         read_only=True,
-        related_link_view_name='biome-samples-list',
+        related_link_view_name='biomes-samples-list',
         related_link_url_kwarg='biome_id',
     )
 
@@ -222,7 +222,7 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
 
     biome = serializers.HyperlinkedRelatedField(
         read_only=True,
-        view_name='biome-detail',
+        view_name='biomes-detail',
         lookup_field='biome_id',
     )
 
@@ -281,7 +281,7 @@ class StudySerializer(serializers.HyperlinkedModelSerializer):
 
     biome = serializers.HyperlinkedRelatedField(
         read_only=True,
-        view_name='biome-detail',
+        view_name='biomes-detail',
         lookup_field='biome_id',
     )
 
