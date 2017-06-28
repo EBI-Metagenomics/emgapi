@@ -146,11 +146,12 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         serializer_class=emg_serializers.SimplePublicationSerializer
     )
     def publications(self, request, accession=None, publications_id=None):
+        obj = self.get_object()
         if publications_id is not None:
-            queryset = self.get_object().publications.filter(
-                publications_id=publications_id)
+            queryset = obj.publications \
+                .filter(publications_id=publications_id)
         else:
-            queryset = self.get_object().publications.all()
+            queryset = obj.publications.all()
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -166,11 +167,15 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         serializer_class=emg_serializers.SimpleSampleSerializer
     )
     def samples(self, request, accession=None, sample_accession=None):
+        obj = self.get_object()
         if sample_accession is not None:
-            queryset = self.get_object().samples.filter(
-                accession=sample_accession)
+            queryset = obj.samples \
+                .filter(accession=sample_accession) \
+                .select_related('biome')
         else:
-            queryset = self.get_object().samples.all()
+            queryset = obj.samples \
+                .all() \
+                .select_related('biome')
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -227,11 +232,24 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         serializer_class=emg_serializers.RunSerializer
     )
     def runs(self, request, accession=None, run_accession=None):
+        obj = self.get_object()
         if run_accession is not None:
-            queryset = self.get_object().runs.filter(
-                accession=run_accession)
+            queryset = obj.runs \
+                .filter(accession=run_accession) \
+                .select_related(
+                    'sample',
+                    'analysis_status',
+                    'experiment_type',
+                    'pipeline'
+                )
         else:
-            queryset = self.get_object().runs.all()
+            queryset = obj.runs.all() \
+                .select_related(
+                    'sample',
+                    'analysis_status',
+                    'experiment_type',
+                    'pipeline'
+                )
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -270,8 +288,12 @@ class RunViewSet(mixins.RetrieveModelMixin,
 
     def get_queryset(self):
         return emg_models.Run.objects.all() \
-            .select_related('sample', 'pipeline', 'analysis_status',
-                            'experiment_type')
+            .select_related(
+                'sample',
+                'pipeline',
+                'analysis_status',
+                'experiment_type'
+            )
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -317,11 +339,24 @@ class PipelineReleaseViewSet(mixins.RetrieveModelMixin,
         serializer_class=emg_serializers.RunSerializer
     )
     def runs(self, request, release_version=None, run_accession=None):
+        obj = self.get_object()
         if run_accession is not None:
-            queryset = self.get_object().runs.filter(
-                accession=run_accession)
+            queryset = obj.runs \
+                .filter(accession=run_accession) \
+                .select_related(
+                    'sample',
+                    'pipeline',
+                    'analysis_status',
+                    'experiment_type'
+                )
         else:
-            queryset = self.get_object().runs.all()
+            queryset = obj.runs.all() \
+                .select_related(
+                    'sample',
+                    'pipeline',
+                    'analysis_status',
+                    'experiment_type'
+                )
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -381,11 +416,14 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         serializer_class=emg_serializers.SimpleStudySerializer
     )
     def studies(self, request, pub_id=None, study_accession=None):
+        obj = self.get_object()
         if study_accession is not None:
-            queryset = self.get_object().studies.filter(
-                accession=study_accession)
+            queryset = obj.studies \
+                .filter(accession=study_accession) \
+                .select_related('biome')
         else:
-            queryset = self.get_object().studies.all()
+            queryset = obj.studies.all() \
+                .select_related('biome')
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
