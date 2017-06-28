@@ -37,9 +37,9 @@ class Pipeline(models.Model):
     changes = models.TextField(
         db_column='CHANGES', blank=True, null=True)
     release_version = models.CharField(
-        db_column='RELEASE_VERSION', max_length=20)
+        db_column='RELEASE_VERSION', max_length=20, blank=True, null=True)
     release_date = models.DateField(
-        db_column='RELEASE_DATE')
+        db_column='RELEASE_DATE', blank=True, null=True)
 
     class Meta:
         db_table = 'PIPELINE_RELEASE'
@@ -51,15 +51,15 @@ class PipelineTool(models.Model):
     tool_id = models.SmallIntegerField(
         db_column='TOOL_ID', primary_key=True)
     tool_name = models.CharField(
-        db_column='TOOL_NAME', max_length=30)
+        db_column='TOOL_NAME', max_length=30, blank=True, null=True)
     description = models.TextField(
-        db_column='DESCRIPTION')
+        db_column='DESCRIPTION', blank=True, null=True)
     web_link = models.CharField(
         db_column='WEB_LINK', max_length=500, blank=True, null=True)
     version = models.CharField(
-        db_column='VERSION', max_length=30)
+        db_column='VERSION', max_length=30, blank=True, null=True)
     exe_command = models.CharField(
-        db_column='EXE_COMMAND', max_length=500)
+        db_column='EXE_COMMAND', max_length=500, blank=True, null=True)
     installation_dir = models.CharField(
         db_column='INSTALLATION_DIR', max_length=200, blank=True, null=True)
     configuration_file = models.TextField(
@@ -76,11 +76,13 @@ class PipelineReleaseTool(models.Model):
         Pipeline, db_column='PIPELINE_ID',
         primary_key=True, on_delete=models.CASCADE)
     tool = models.ForeignKey(
-        PipelineTool, db_column='TOOL_ID', on_delete=models.CASCADE)
+        PipelineTool, db_column='TOOL_ID', on_delete=models.CASCADE,
+        blank=True, null=True)
     tool_group_id = models.DecimalField(
-        db_column='TOOL_GROUP_ID', max_digits=6, decimal_places=3)
+        db_column='TOOL_GROUP_ID', max_digits=6, decimal_places=3,
+        blank=True, null=True)
     how_tool_used_desc = models.TextField(
-        db_column='HOW_TOOL_USED_DESC')
+        db_column='HOW_TOOL_USED_DESC', blank=True, null=True)
 
     class Meta:
         db_table = 'PIPELINE_RELEASE_TOOL'
@@ -94,7 +96,7 @@ class AnalysisStatus(models.Model):
     analysis_status_id = models.AutoField(
         db_column='ANALYSIS_STATUS_ID', primary_key=True)
     analysis_status = models.CharField(
-        db_column='ANALYSIS_STATUS', max_length=25)
+        db_column='ANALYSIS_STATUS', max_length=25, blank=True, null=True)
 
     class Meta:
         db_table = 'ANALYSIS_STATUS'
@@ -105,13 +107,13 @@ class Biome(models.Model):
     biome_id = models.SmallIntegerField(
         db_column='BIOME_ID', primary_key=True)
     biome_name = models.CharField(
-        db_column='BIOME_NAME', max_length=60)
+        db_column='BIOME_NAME', max_length=60, blank=True, null=True)
     lft = models.SmallIntegerField(
-        db_column='LFT')
+        db_column='LFT', blank=True, null=True)
     rgt = models.SmallIntegerField(
-        db_column='RGT')
+        db_column='RGT', blank=True, null=True)
     depth = models.IntegerField(
-        db_column='DEPTH')
+        db_column='DEPTH', blank=True, null=True)
     lineage = models.CharField(
         db_column='LINEAGE', max_length=500)
 
@@ -142,7 +144,7 @@ class Publication(models.Model):
     pubmed_id = models.IntegerField(
         db_column='PUBMED_ID', blank=True, null=True)
     pub_title = models.CharField(
-        db_column='PUB_TITLE', max_length=740)
+        db_column='PUB_TITLE', max_length=740, blank=True, null=True)
     raw_pages = models.CharField(
         db_column='RAW_PAGES', max_length=30, blank=True, null=True)
     url = models.CharField(
@@ -163,7 +165,7 @@ class Study(models.Model):
     study_id = models.AutoField(
         db_column='STUDY_ID', primary_key=True)
     accession = models.CharField(
-        db_column='EXT_STUDY_ID', max_length=18)
+        db_column='EXT_STUDY_ID', max_length=18, blank=True, null=True)
     centre_name = models.CharField(
         db_column='CENTRE_NAME', max_length=255, blank=True, null=True)
     is_public = models.IntegerField(
@@ -183,7 +185,7 @@ class Study(models.Model):
     author_name = models.CharField(
         db_column='AUTHOR_NAME', max_length=100, blank=True, null=True)
     last_update = models.DateTimeField(
-        db_column='LAST_UPDATE')
+        db_column='LAST_UPDATE', blank=True, null=True)
     submission_account_id = models.CharField(
         db_column='SUBMISSION_ACCOUNT_ID',
         max_length=15, blank=True, null=True)
@@ -193,7 +195,7 @@ class Study(models.Model):
     result_directory = models.CharField(
         db_column='RESULT_DIRECTORY', max_length=100, blank=True, null=True)
     first_created = models.DateTimeField(
-        db_column='FIRST_CREATED')
+        db_column='FIRST_CREATED', blank=True, null=True)
     project_id = models.CharField(
         db_column='PROJECT_ID', max_length=18, blank=True, null=True)
 
@@ -210,7 +212,7 @@ class Sample(models.Model):
     sample_id = models.AutoField(
         db_column='SAMPLE_ID', primary_key=True)
     accession = models.CharField(
-        db_column='EXT_SAMPLE_ID', max_length=15)
+        db_column='EXT_SAMPLE_ID', max_length=15, blank=True, null=True)
     analysis_completed = models.DateField(
         db_column='ANALYSIS_COMPLETED', blank=True, null=True)
     collection_date = models.DateField(
@@ -252,7 +254,7 @@ class Sample(models.Model):
         db_column='LONGITUDE', max_digits=7, decimal_places=4,
         blank=True, null=True)
     last_update = models.DateTimeField(
-        db_column='LAST_UPDATE')
+        db_column='LAST_UPDATE', blank=True, null=True)
     submission_account_id = models.CharField(
         db_column='SUBMISSION_ACCOUNT_ID', max_length=15,
         blank=True, null=True)
@@ -271,7 +273,8 @@ class StudyPublication(models.Model):
         Study, db_column='STUDY_ID',
         primary_key=True, on_delete=models.CASCADE)
     pub = models.ForeignKey(
-        Publication, db_column='PUB_ID', on_delete=models.CASCADE)
+        Publication, db_column='PUB_ID', on_delete=models.CASCADE,
+        blank=True, null=True)
 
     class Meta:
         db_table = 'STUDY_PUBLICATION'
@@ -283,7 +286,8 @@ class SamplePublication(models.Model):
         Sample, db_column='SAMPLE_ID',
         on_delete=models.CASCADE, primary_key=True)
     pub = models.ForeignKey(
-        Publication, db_column='PUB_ID', on_delete=models.CASCADE)
+        Publication, db_column='PUB_ID', on_delete=models.CASCADE,
+        blank=True, null=True)
 
     class Meta:
         db_table = 'SAMPLE_PUBLICATION'
@@ -294,7 +298,7 @@ class ExperimentType(models.Model):
     experiment_type_id = models.AutoField(
         db_column='EXPERIMENT_TYPE_ID', primary_key=True)
     experiment_type = models.CharField(
-        db_column='EXPERIMENT_TYPE', max_length=30)
+        db_column='EXPERIMENT_TYPE', max_length=30, blank=True, null=True)
 
     class Meta:
         db_table = 'EXPERIMENT_TYPE'
@@ -304,23 +308,23 @@ class Run(models.Model):
     run_id = models.BigAutoField(
         db_column='JOB_ID', primary_key=True)
     accession = models.CharField(
-        db_column='EXTERNAL_RUN_IDS', max_length=100)
+        db_column='EXTERNAL_RUN_IDS', max_length=100, blank=True, null=True)
     job_operator = models.CharField(
-        db_column='JOB_OPERATOR', max_length=15)
+        db_column='JOB_OPERATOR', max_length=15, blank=True, null=True)
     pipeline = models.ForeignKey(
         Pipeline, db_column='PIPELINE_ID',
-        related_name='runs', on_delete=models.CASCADE)
+        related_name='runs', on_delete=models.CASCADE, blank=True, null=True)
     submit_time = models.DateTimeField(
-        db_column='SUBMIT_TIME')
+        db_column='SUBMIT_TIME', blank=True, null=True)
     complete_time = models.DateTimeField(
         db_column='COMPLETE_TIME', blank=True, null=True)
     analysis_status = models.ForeignKey(
         AnalysisStatus, db_column='ANALYSIS_STATUS_ID',
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE, blank=True, null=True)
     input_file_name = models.CharField(
-        db_column='INPUT_FILE_NAME', max_length=50)
+        db_column='INPUT_FILE_NAME', max_length=50, blank=True, null=True)
     result_directory = models.CharField(
-        db_column='RESULT_DIRECTORY', max_length=100)
+        db_column='RESULT_DIRECTORY', max_length=100, blank=True, null=True)
     sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID', related_name='runs',
         on_delete=models.CASCADE, blank=True, null=True)
@@ -344,99 +348,102 @@ class Run(models.Model):
         ordering = ('accession',)
 
 
-# class BlacklistedStudy(models.Model):
-#     accession = models.CharField(
-#         db_column='STUDY_ID', primary_key=True, max_length=18)
-#     error_type = models.ForeignKey(
-#         'StudyErrorType', models.DO_NOTHING, db_column='ERROR_TYPE_ID')
-#     analyzer = models.CharField(
-#         db_column='ANALYZER', max_length=15)
-#     pipeline_id = models.IntegerField(
-#         db_column='PIPELINE_ID', blank=True, null=True)
-#     date_blacklisted = models.DateField(
-#         db_column='DATE_BLACKLISTED')
-#     comment = models.TextField(
-#         db_column='COMMENT', blank=True, null=True)
-#
-#     class Meta:
-#         managed = False
-#         db_table = 'BLACKLISTED_STUDY'
+class BlacklistedStudy(models.Model):
+    accession = models.CharField(
+        db_column='STUDY_ID', primary_key=True, max_length=18)
+    error_type = models.ForeignKey(
+        'StudyErrorType', models.DO_NOTHING, db_column='ERROR_TYPE_ID')
+    analyzer = models.CharField(
+        db_column='ANALYZER', max_length=15)
+    pipeline_id = models.IntegerField(
+        db_column='PIPELINE_ID', blank=True, null=True)
+    date_blacklisted = models.DateField(
+        db_column='DATE_BLACKLISTED')
+    comment = models.TextField(
+        db_column='COMMENT', blank=True, null=True)
 
-# class GscCvCv(models.Model):
-#     var_name = models.ForeignKey(
-#         'VariableNames', models.DO_NOTHING, db_column='VAR_NAME',
-#         blank=True, null=True)
-#     var_val_cv = models.CharField(
-#         db_column='VAR_VAL_CV', primary_key=True, max_length=60)
-#
-#     class Meta:
-#         managed = False
-#         db_table = 'GSC_CV_CV'
-#         unique_together = (('var_name', 'var_val_cv'),)
-
-# class SampleAnn(models.Model):
-#     sample = models.ForeignKey(
-#         Sample, models.DO_NOTHING, db_column='SAMPLE_ID', primary_key=True)
-#     var_val_cv = models.ForeignKey(
-#         GscCvCv, models.DO_NOTHING, db_column='VAR_VAL_CV',
-#         blank=True, null=True)
-#     units = models.CharField(
-#         db_column='UNITS', max_length=25, blank=True, null=True)
-#     var = models.ForeignKey(
-#         'VariableNames', models.DO_NOTHING, db_column='VAR_ID')
-#     var_val_ucv = models.CharField(
-#         db_column='VAR_VAL_UCV', max_length=4000, blank=True, null=True)
-#
-#     class Meta:
-#         managed = False
-#         db_table = 'SAMPLE_ANN'
-#         unique_together = (('sample', 'var'), ('sample', 'var'),)
+    class Meta:
+        managed = False
+        db_table = 'BLACKLISTED_STUDY'
 
 
-# class StudyErrorType(models.Model):
-#     error_id = models.IntegerField(
-#         db_column='ERROR_ID', primary_key=True)
-#     error_type = models.CharField(
-#         db_column='ERROR_TYPE', max_length=50)
-#     description = models.TextField(
-#         db_column='DESCRIPTION')
-#
-#     class Meta:
-#         managed = False
-#         db_table = 'STUDY_ERROR_TYPE'
+class GscCvCv(models.Model):
+    var_name = models.ForeignKey(
+        'VariableNames', models.DO_NOTHING, db_column='VAR_NAME',
+        blank=True, null=True)
+    var_val_cv = models.CharField(
+        db_column='VAR_VAL_CV', primary_key=True, max_length=60)
 
-# class VariableNames(models.Model):
-#     var_id = models.SmallIntegerField(
-#         db_column='VAR_ID', primary_key=True)
-#     var_name = models.CharField(
-#         db_column='VAR_NAME', unique=True, max_length=50)
-#     definition = models.TextField(
-#         db_column='DEFINITION', blank=True, null=True)
-#     value_syntax = models.CharField(
-#         db_column='VALUE_SYNTAX', max_length=250, blank=True, null=True)
-#     alias = models.CharField(
-#         db_column='ALIAS', max_length=30, blank=True, null=True)
-#     authority = models.CharField(
-#         db_column='AUTHORITY', max_length=30, blank=True, null=True)
-#     sra_xml_attribute = models.CharField(
-#         db_column='SRA_XML_ATTRIBUTE', max_length=30, blank=True, null=True)
-#     required_for_mimarks_complianc = models.CharField(
-#         db_column='REQUIRED_FOR_MIMARKS_COMPLIANC', max_length=1,
-#         blank=True, null=True)
-#     required_for_mims_compliance = models.CharField(
-#         db_column='REQUIRED_FOR_MIMS_COMPLIANCE', max_length=1,
-#         blank=True, null=True)
-#     gsc_env_packages = models.CharField(
-#         db_column='GSC_ENV_PACKAGES', max_length=250,
-#         blank=True, null=True)
-#     comments = models.CharField(
-#         db_column='COMMENTS', max_length=250,
-#         blank=True, null=True)
-#
-#     class Meta:
-#         managed = False
-#         db_table = 'VARIABLE_NAMES'
-#         unique_together = (('var_id', 'var_name'), ('var_id', 'var_name'),)
+    class Meta:
+        managed = False
+        db_table = 'GSC_CV_CV'
+        unique_together = (('var_name', 'var_val_cv'),)
+
+
+class SampleAnn(models.Model):
+    sample = models.ForeignKey(
+        Sample, models.DO_NOTHING, db_column='SAMPLE_ID', primary_key=True)
+    var_val_cv = models.ForeignKey(
+        GscCvCv, models.DO_NOTHING, db_column='VAR_VAL_CV',
+        blank=True, null=True)
+    units = models.CharField(
+        db_column='UNITS', max_length=25, blank=True, null=True)
+    var = models.ForeignKey(
+        'VariableNames', models.DO_NOTHING, db_column='VAR_ID')
+    var_val_ucv = models.CharField(
+        db_column='VAR_VAL_UCV', max_length=4000, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'SAMPLE_ANN'
+        unique_together = (('sample', 'var'), ('sample', 'var'),)
+
+
+class StudyErrorType(models.Model):
+    error_id = models.IntegerField(
+        db_column='ERROR_ID', primary_key=True)
+    error_type = models.CharField(
+        db_column='ERROR_TYPE', max_length=50)
+    description = models.TextField(
+        db_column='DESCRIPTION')
+
+    class Meta:
+        managed = False
+        db_table = 'STUDY_ERROR_TYPE'
+
+
+class VariableNames(models.Model):
+    var_id = models.SmallIntegerField(
+        db_column='VAR_ID', primary_key=True)
+    var_name = models.CharField(
+        db_column='VAR_NAME', unique=True, max_length=50)
+    definition = models.TextField(
+        db_column='DEFINITION', blank=True, null=True)
+    value_syntax = models.CharField(
+        db_column='VALUE_SYNTAX', max_length=250, blank=True, null=True)
+    alias = models.CharField(
+        db_column='ALIAS', max_length=30, blank=True, null=True)
+    authority = models.CharField(
+        db_column='AUTHORITY', max_length=30, blank=True, null=True)
+    sra_xml_attribute = models.CharField(
+        db_column='SRA_XML_ATTRIBUTE', max_length=30, blank=True, null=True)
+    required_for_mimarks_complianc = models.CharField(
+        db_column='REQUIRED_FOR_MIMARKS_COMPLIANC', max_length=1,
+        blank=True, null=True)
+    required_for_mims_compliance = models.CharField(
+        db_column='REQUIRED_FOR_MIMS_COMPLIANCE', max_length=1,
+        blank=True, null=True)
+    gsc_env_packages = models.CharField(
+        db_column='GSC_ENV_PACKAGES', max_length=250,
+        blank=True, null=True)
+    comments = models.CharField(
+        db_column='COMMENTS', max_length=250,
+        blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'VARIABLE_NAMES'
+        unique_together = (('var_id', 'var_name'), ('var_id', 'var_name'),)
 
 
 # CREATE FULLTEXT INDEX STUDY_ABSTRACT_IDX
