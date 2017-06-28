@@ -50,10 +50,10 @@ class SampleFilter(django_filters.FilterSet):
         )
 
 
-class PipelineReleaseFilter(SampleFilter):
+class PipelineFilter(SampleFilter):
 
     class Meta:
-        model = emg_models.PipelineRelease
+        model = emg_models.Pipeline
         fields = (
             'analysis_status',
             'experiment_type',

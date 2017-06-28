@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='PipelineRelease',
+            name='Pipeline',
             fields=[
                 ('pipeline_id', models.AutoField(db_column='PIPELINE_ID', primary_key=True, serialize=False)),
                 ('description', models.TextField(blank=True, db_column='DESCRIPTION', null=True)),
@@ -186,7 +186,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='PipelineReleaseTool',
             fields=[
-                ('pipeline', models.ForeignKey(db_column='PIPELINE_ID', on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to='emg_api.PipelineRelease')),
+                ('pipeline', models.ForeignKey(db_column='PIPELINE_ID', on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to='emg_api.Pipeline')),
                 ('tool_group_id', models.DecimalField(db_column='TOOL_GROUP_ID', decimal_places=3, max_digits=6)),
                 ('how_tool_used_desc', models.TextField(db_column='HOW_TOOL_USED_DESC')),
                 ('tool', models.ForeignKey(db_column='TOOL_ID', on_delete=django.db.models.deletion.CASCADE, to='emg_api.PipelineTool')),
@@ -233,7 +233,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='run',
             name='pipeline',
-            field=models.ForeignKey(db_column='PIPELINE_ID', on_delete=django.db.models.deletion.CASCADE, related_name='runs', to='emg_api.PipelineRelease'),
+            field=models.ForeignKey(db_column='PIPELINE_ID', on_delete=django.db.models.deletion.CASCADE, related_name='runs', to='emg_api.Pipeline'),
         ),
         migrations.AddField(
             model_name='run',
