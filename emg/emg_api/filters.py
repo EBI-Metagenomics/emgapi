@@ -22,12 +22,12 @@ from emg_api import models as emg_models
 
 class SampleFilter(django_filters.FilterSet):
 
-    analysis_status_id = django_filters.CharFilter(
-        name='runs__analysis_status_id',
+    analysis_status_id = django_filters.ModelChoiceFilter(
+        queryset=emg_models.AnalysisStatus.objects.all(),
         distinct=True)
 
-    experiment_type_id = django_filters.CharFilter(
-        name='runs__experiment_type_id',
+    experiment_type_id = django_filters.ModelChoiceFilter(
+        queryset=emg_models.ExperimentType.objects.all(),
         distinct=True)
 
     analysis_status = django_filters.CharFilter(
@@ -64,12 +64,12 @@ class PipelineFilter(SampleFilter):
 
 class RunFilter(django_filters.FilterSet):
 
-    analysis_status_id = django_filters.CharFilter(
-        name='analysis_status_id',
+    analysis_status_id = django_filters.ModelChoiceFilter(
+        queryset=emg_models.AnalysisStatus.objects.all(),
         distinct=True)
 
-    experiment_type_id = django_filters.CharFilter(
-        name='experiment_type_id',
+    experiment_type_id = django_filters.ModelChoiceFilter(
+        queryset=emg_models.ExperimentType.objects.all(),
         distinct=True)
 
     analysis_status = django_filters.CharFilter(
