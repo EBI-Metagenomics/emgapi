@@ -24,9 +24,9 @@ urlpatterns = []
 router = DefaultRouter(trailing_slash=False)
 
 router.register(
-    r'biome',
+    r'biomes',
     views.BiomeViewSet,
-    base_name='biome'
+    base_name='biomes'
 )
 
 router.register(
