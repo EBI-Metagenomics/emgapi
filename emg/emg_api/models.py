@@ -328,6 +328,7 @@ class Run(models.Model):
         db_column='IS_PRODUCTION_RUN', blank=True, null=True)
     experiment_type = models.ForeignKey(
         ExperimentType, db_column='EXPERIMENT_TYPE_ID',
+        related_name='runs',
         on_delete=models.CASCADE, blank=True, null=True)
     run_status_id = models.IntegerField(
         db_column='RUN_STATUS_ID', blank=True, null=True)
