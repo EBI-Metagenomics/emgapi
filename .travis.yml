@@ -4,6 +4,8 @@ python:
   - "3.6"
 
 install:
+  # Bug fix: https://github.com/django-json-api/django-rest-framework-json-api/pull/359
+  - pip install "git+git://github.com/django-json-api/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
   - pip install -r requirements.txt
   - pip install flake8 pycodestyle pep8-naming
 
