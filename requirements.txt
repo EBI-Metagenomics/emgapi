@@ -28,6 +28,3 @@ coreapi~=2.3.0
 # docs
 django-rest-swagger~=2.1.2
 
-# testing
-# pytest
-# model_mommy
