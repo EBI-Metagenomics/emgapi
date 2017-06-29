@@ -21,9 +21,9 @@ from django.core.urlresolvers import reverse
 from rest_framework.test import APITestCase
 
 
-class TestRootAPI(APITestCase):
+class TestRunAPI(APITestCase):
 
     def test_default(self):
-        url = reverse('api-root')
+        url = reverse('runs-list')
         response = self.client.get(url)
         assert response.status_code == 200
