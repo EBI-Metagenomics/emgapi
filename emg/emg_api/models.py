@@ -35,16 +35,19 @@ class Pipeline(models.Model):
     description = models.TextField(
         db_column='DESCRIPTION', blank=True, null=True)
     changes = models.TextField(
-        db_column='CHANGES', blank=True, null=True)
+        db_column='CHANGES')
     release_version = models.CharField(
-        db_column='RELEASE_VERSION', max_length=20, blank=True, null=True)
+        db_column='RELEASE_VERSION', max_length=20)
     release_date = models.DateField(
-        db_column='RELEASE_DATE', blank=True, null=True)
+        db_column='RELEASE_DATE')
 
     class Meta:
         db_table = 'PIPELINE_RELEASE'
         unique_together = ('pipeline_id', 'release_version',)
         ordering = ('release_version',)
+
+    def __str__(self):
+        return self.release_version
 
 
 class PipelineTool(models.Model):
@@ -69,6 +72,9 @@ class PipelineTool(models.Model):
 
     class Meta:
         db_table = 'PIPELINE_TOOL'
+
+    def __str__(self):
+        return self.tool_name
 
 
 class PipelineReleaseTool(models.Model):
@@ -96,30 +102,36 @@ class AnalysisStatus(models.Model):
     analysis_status_id = models.AutoField(
         db_column='ANALYSIS_STATUS_ID', primary_key=True)
     analysis_status = models.CharField(
-        db_column='ANALYSIS_STATUS', max_length=25, blank=True, null=True)
+        db_column='ANALYSIS_STATUS', max_length=25)
 
     class Meta:
         db_table = 'ANALYSIS_STATUS'
         ordering = ('analysis_status_id',)
+
+    def __str__(self):
+        return self.analysis_status
 
 
 class Biome(models.Model):
     biome_id = models.SmallIntegerField(
         db_column='BIOME_ID', primary_key=True)
     biome_name = models.CharField(
-        db_column='BIOME_NAME', max_length=60, blank=True, null=True)
+        db_column='BIOME_NAME', max_length=60)
     lft = models.SmallIntegerField(
-        db_column='LFT', blank=True, null=True)
+        db_column='LFT')
     rgt = models.SmallIntegerField(
-        db_column='RGT', blank=True, null=True)
+        db_column='RGT')
     depth = models.IntegerField(
-        db_column='DEPTH', blank=True, null=True)
+        db_column='DEPTH')
     lineage = models.CharField(
         db_column='LINEAGE', max_length=500)
 
     class Meta:
         db_table = 'BIOME_HIERARCHY_TREE'
         ordering = ('biome_id',)
+
+    def __str__(self):
+        return self.biome_name
 
 
 class Publication(models.Model):
@@ -144,7 +156,7 @@ class Publication(models.Model):
     pubmed_id = models.IntegerField(
         db_column='PUBMED_ID', blank=True, null=True)
     pub_title = models.CharField(
-        db_column='PUB_TITLE', max_length=740, blank=True, null=True)
+        db_column='PUB_TITLE', max_length=740)
     raw_pages = models.CharField(
         db_column='RAW_PAGES', max_length=30, blank=True, null=True)
     url = models.CharField(
@@ -160,12 +172,15 @@ class Publication(models.Model):
         db_table = 'PUBLICATION'
         ordering = ('pub_id',)
 
+    def __str__(self):
+        return self.pub_title
+
 
 class Study(models.Model):
     study_id = models.AutoField(
         db_column='STUDY_ID', primary_key=True)
     accession = models.CharField(
-        db_column='EXT_STUDY_ID', max_length=18, blank=True, null=True)
+        db_column='EXT_STUDY_ID', max_length=18)
     centre_name = models.CharField(
         db_column='CENTRE_NAME', max_length=255, blank=True, null=True)
     is_public = models.IntegerField(
@@ -185,17 +200,17 @@ class Study(models.Model):
     author_name = models.CharField(
         db_column='AUTHOR_NAME', max_length=100, blank=True, null=True)
     last_update = models.DateTimeField(
-        db_column='LAST_UPDATE', blank=True, null=True)
+        db_column='LAST_UPDATE')
     submission_account_id = models.CharField(
         db_column='SUBMISSION_ACCOUNT_ID',
         max_length=15, blank=True, null=True)
     biome = models.ForeignKey(
         Biome, db_column='BIOME_ID', related_name='studies',
-        on_delete=models.CASCADE, blank=True, null=True)
+        on_delete=models.CASCADE)
     result_directory = models.CharField(
         db_column='RESULT_DIRECTORY', max_length=100, blank=True, null=True)
     first_created = models.DateTimeField(
-        db_column='FIRST_CREATED', blank=True, null=True)
+        db_column='FIRST_CREATED')
     project_id = models.CharField(
         db_column='PROJECT_ID', max_length=18, blank=True, null=True)
 
@@ -203,16 +218,32 @@ class Study(models.Model):
         Publication, through='StudyPublication', related_name='studies')
 
     class Meta:
-        unique_together = (('study_id', 'accession'),)
         db_table = 'STUDY'
+        unique_together = (('study_id', 'accession'),)
         ordering = ('accession',)
+
+    def __str__(self):
+        return self.accession
+
+
+class StudyPublication(models.Model):
+    study = models.ForeignKey(
+        Study, db_column='STUDY_ID',
+        primary_key=True, on_delete=models.CASCADE)
+    pub = models.ForeignKey(
+        Publication, db_column='PUB_ID', on_delete=models.CASCADE,
+        blank=True, null=True)
+
+    class Meta:
+        db_table = 'STUDY_PUBLICATION'
+        unique_together = (('study', 'pub'),)
 
 
 class Sample(models.Model):
     sample_id = models.AutoField(
         db_column='SAMPLE_ID', primary_key=True)
     accession = models.CharField(
-        db_column='EXT_SAMPLE_ID', max_length=15, blank=True, null=True)
+        db_column='EXT_SAMPLE_ID', max_length=15)
     analysis_completed = models.DateField(
         db_column='ANALYSIS_COMPLETED', blank=True, null=True)
     collection_date = models.DateField(
@@ -238,7 +269,7 @@ class Sample(models.Model):
         blank=True, null=True)
     study = models.ForeignKey(
         Study, db_column='STUDY_ID', related_name='samples',
-        on_delete=models.CASCADE, blank=True, null=True)
+        on_delete=models.CASCADE)
     sample_name = models.CharField(
         db_column='SAMPLE_NAME', max_length=255, blank=True, null=True)
     sample_alias = models.CharField(
@@ -254,31 +285,21 @@ class Sample(models.Model):
         db_column='LONGITUDE', max_digits=7, decimal_places=4,
         blank=True, null=True)
     last_update = models.DateTimeField(
-        db_column='LAST_UPDATE', blank=True, null=True)
+        db_column='LAST_UPDATE')
     submission_account_id = models.CharField(
         db_column='SUBMISSION_ACCOUNT_ID', max_length=15,
         blank=True, null=True)
     biome = models.ForeignKey(
         Biome, db_column='BIOME_ID', related_name='samples',
-        on_delete=models.CASCADE, blank=True, null=True)
+        on_delete=models.CASCADE)
 
     class Meta:
         unique_together = (('sample_id', 'accession'),)
         db_table = 'SAMPLE'
         ordering = ('accession',)
 
-
-class StudyPublication(models.Model):
-    study = models.ForeignKey(
-        Study, db_column='STUDY_ID',
-        primary_key=True, on_delete=models.CASCADE)
-    pub = models.ForeignKey(
-        Publication, db_column='PUB_ID', on_delete=models.CASCADE,
-        blank=True, null=True)
-
-    class Meta:
-        db_table = 'STUDY_PUBLICATION'
-        # unique_together = (('study', 'pub'),)
+    def __str__(self):
+        return self.accession
 
 
 class SamplePublication(models.Model):
@@ -291,49 +312,52 @@ class SamplePublication(models.Model):
 
     class Meta:
         db_table = 'SAMPLE_PUBLICATION'
-        # unique_together = (('sample', 'pub'),)
+        unique_together = (('sample', 'pub'),)
 
 
 class ExperimentType(models.Model):
     experiment_type_id = models.AutoField(
         db_column='EXPERIMENT_TYPE_ID', primary_key=True)
     experiment_type = models.CharField(
-        db_column='EXPERIMENT_TYPE', max_length=30, blank=True, null=True)
+        db_column='EXPERIMENT_TYPE', max_length=30)
 
     class Meta:
         db_table = 'EXPERIMENT_TYPE'
+
+    def __str__(self):
+        return self.experiment_type
 
 
 class Run(models.Model):
     run_id = models.BigAutoField(
         db_column='JOB_ID', primary_key=True)
     accession = models.CharField(
-        db_column='EXTERNAL_RUN_IDS', max_length=100, blank=True, null=True)
+        db_column='EXTERNAL_RUN_IDS', max_length=100)
     job_operator = models.CharField(
-        db_column='JOB_OPERATOR', max_length=15, blank=True, null=True)
+        db_column='JOB_OPERATOR', max_length=15)
     pipeline = models.ForeignKey(
         Pipeline, db_column='PIPELINE_ID',
-        related_name='runs', on_delete=models.CASCADE, blank=True, null=True)
+        related_name='runs', on_delete=models.CASCADE)
     submit_time = models.DateTimeField(
-        db_column='SUBMIT_TIME', blank=True, null=True)
+        db_column='SUBMIT_TIME')
     complete_time = models.DateTimeField(
         db_column='COMPLETE_TIME', blank=True, null=True)
     analysis_status = models.ForeignKey(
         AnalysisStatus, db_column='ANALYSIS_STATUS_ID',
-        on_delete=models.CASCADE, blank=True, null=True)
+        on_delete=models.CASCADE)
     input_file_name = models.CharField(
-        db_column='INPUT_FILE_NAME', max_length=50, blank=True, null=True)
+        db_column='INPUT_FILE_NAME', max_length=50)
     result_directory = models.CharField(
-        db_column='RESULT_DIRECTORY', max_length=100, blank=True, null=True)
+        db_column='RESULT_DIRECTORY', max_length=100)
     sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID', related_name='runs',
-        on_delete=models.CASCADE, blank=True, null=True)
+        on_delete=models.CASCADE)
     is_production_run = models.TextField(
         db_column='IS_PRODUCTION_RUN', blank=True, null=True)
     experiment_type = models.ForeignKey(
         ExperimentType, db_column='EXPERIMENT_TYPE_ID',
         related_name='runs',
-        on_delete=models.CASCADE, blank=True, null=True)
+        on_delete=models.CASCADE)
     run_status_id = models.IntegerField(
         db_column='RUN_STATUS_ID', blank=True, null=True)
     instrument_platform = models.CharField(
@@ -345,12 +369,32 @@ class Run(models.Model):
 
     class Meta:
         db_table = 'ANALYSIS_JOB'
+        unique_together = (('run_id', 'accession'),)
         ordering = ('accession',)
+
+    def __str__(self):
+        return self.accession
+
+
+class StudyErrorType(models.Model):
+    error_id = models.IntegerField(
+        db_column='ERROR_ID', primary_key=True)
+    error_type = models.CharField(
+        db_column='ERROR_TYPE', max_length=50)
+    description = models.TextField(
+        db_column='DESCRIPTION')
+
+    class Meta:
+        managed = False
+        db_table = 'STUDY_ERROR_TYPE'
+
+    def __str__(self):
+        return self.error_type
 
 
 class BlacklistedStudy(models.Model):
-    accession = models.CharField(
-        db_column='STUDY_ID', primary_key=True, max_length=18)
+    ext_study_id = models.CharField(
+        db_column='EXT_STUDY_ID', primary_key=True, max_length=18)
     error_type = models.ForeignKey(
         'StudyErrorType', models.DO_NOTHING, db_column='ERROR_TYPE_ID')
     analyzer = models.CharField(
@@ -366,50 +410,8 @@ class BlacklistedStudy(models.Model):
         managed = False
         db_table = 'BLACKLISTED_STUDY'
 
-
-class GscCvCv(models.Model):
-    var_name = models.ForeignKey(
-        'VariableNames', models.DO_NOTHING, db_column='VAR_NAME',
-        blank=True, null=True)
-    var_val_cv = models.CharField(
-        db_column='VAR_VAL_CV', primary_key=True, max_length=60)
-
-    class Meta:
-        managed = False
-        db_table = 'GSC_CV_CV'
-        unique_together = (('var_name', 'var_val_cv'),)
-
-
-class SampleAnn(models.Model):
-    sample = models.ForeignKey(
-        Sample, models.DO_NOTHING, db_column='SAMPLE_ID', primary_key=True)
-    var_val_cv = models.ForeignKey(
-        GscCvCv, models.DO_NOTHING, db_column='VAR_VAL_CV',
-        blank=True, null=True)
-    units = models.CharField(
-        db_column='UNITS', max_length=25, blank=True, null=True)
-    var = models.ForeignKey(
-        'VariableNames', models.DO_NOTHING, db_column='VAR_ID')
-    var_val_ucv = models.CharField(
-        db_column='VAR_VAL_UCV', max_length=4000, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'SAMPLE_ANN'
-        unique_together = (('sample', 'var'), ('sample', 'var'),)
-
-
-class StudyErrorType(models.Model):
-    error_id = models.IntegerField(
-        db_column='ERROR_ID', primary_key=True)
-    error_type = models.CharField(
-        db_column='ERROR_TYPE', max_length=50)
-    description = models.TextField(
-        db_column='DESCRIPTION')
-
-    class Meta:
-        managed = False
-        db_table = 'STUDY_ERROR_TYPE'
+    def __str__(self):
+        return self.ext_study_id
 
 
 class VariableNames(models.Model):
@@ -444,6 +446,41 @@ class VariableNames(models.Model):
         managed = False
         db_table = 'VARIABLE_NAMES'
         unique_together = (('var_id', 'var_name'), ('var_id', 'var_name'),)
+
+    def __str__(self):
+        return self.var_name
+
+
+class GscCvCv(models.Model):
+    var_name = models.ForeignKey(
+        'VariableNames', models.DO_NOTHING, db_column='VAR_NAME',
+        blank=True, null=True)
+    var_val_cv = models.CharField(
+        db_column='VAR_VAL_CV', primary_key=True, max_length=60)
+
+    class Meta:
+        managed = False
+        db_table = 'GSC_CV_CV'
+        unique_together = (('var_name', 'var_val_cv'),)
+
+
+class SampleAnn(models.Model):
+    sample = models.ForeignKey(
+        Sample, models.DO_NOTHING, db_column='SAMPLE_ID', primary_key=True)
+    var_val_cv = models.ForeignKey(
+        GscCvCv, models.DO_NOTHING, db_column='VAR_VAL_CV',
+        blank=True, null=True)
+    units = models.CharField(
+        db_column='UNITS', max_length=25, blank=True, null=True)
+    var = models.ForeignKey(
+        'VariableNames', models.DO_NOTHING, db_column='VAR_ID')
+    var_val_ucv = models.CharField(
+        db_column='VAR_VAL_UCV', max_length=4000, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'SAMPLE_ANN'
+        unique_together = (('sample', 'var'), ('sample', 'var'),)
 
 
 # CREATE FULLTEXT INDEX STUDY_ABSTRACT_IDX
