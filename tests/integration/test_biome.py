@@ -21,9 +21,9 @@ from django.core.urlresolvers import reverse
 from rest_framework.test import APITestCase
 
 
-class TestRootAPI(APITestCase):
+class TestBiomeAPI(APITestCase):
 
-    def test_root(self):
+    def test_default(self):
         url = reverse('biomes-list')
         response = self.client.get(url)
         assert response.status_code == 200
