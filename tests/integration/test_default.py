@@ -14,25 +14,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import importlib
 import pytest
 
 from model_mommy import mommy
 
 from django.core.urlresolvers import reverse
 
-from emg_api.models import Biome  # noqa
-from emg_api.models import ExperimentType  # noqa
-from emg_api.models import Pipeline  # noqa
-from emg_api.models import Publication  # noqa
-from emg_api.models import Run  # noqa
-from emg_api.models import Sample  # noqa
-from emg_api.models import Study  # noqa
-
 
 class TestDefaultAPI(object):
 
     @pytest.mark.parametrize(
-        'emg_view',
+        '_view',
         [
             'biomes',
             'experiments',
@@ -44,8 +37,8 @@ class TestDefaultAPI(object):
         ]
     )
     @pytest.mark.django_db
-    def test_empty_list(self, client, emg_view):
-        view_name = "%s-list" % emg_view
+    def test_empty_list(self, client, _view):
+        view_name = "%s-list" % _view
         url = reverse(view_name)
         response = client.get(url)
         assert response.status_code == 200
@@ -57,7 +50,7 @@ class TestDefaultAPI(object):
         assert rsp['meta']['pagination']['count'] == 0
 
     @pytest.mark.parametrize(
-        'emg_model, emg_view',
+        '_model, _view',
         [
             ('Biome', 'biomes'),
             ('ExperimentType', 'experiments'),
@@ -69,12 +62,14 @@ class TestDefaultAPI(object):
         ]
     )
     @pytest.mark.django_db
-    def test_list(self, client, emg_model, emg_view):
-        model_name = "emg_api.%s" % emg_model
-        view_name = "%s-list" % emg_view
+    def test_list(self, client, _model, _view):
+        getattr(importlib.import_module("emg_api.models"), _model)
+
+        model_name = "emg_api.%s" % _model
+        view_name = "%s-list" % _view
 
         for pk in range(0, 100):
-            if emg_model in ('Sample', 'Study'):
+            if _model in ('Sample', 'Study'):
                 _biome = mommy.make('emg_api.Biome', pk=pk)
                 mommy.make(model_name, pk=pk, biome=_biome)
             else:
@@ -91,9 +86,9 @@ class TestDefaultAPI(object):
         assert rsp['meta']['pagination']['count'] == 100
 
         # Links
-        first_link = 'http://testserver/api/%s?page=1' % emg_view
-        last_link = 'http://testserver/api/%s?page=5' % emg_view
-        next_link = 'http://testserver/api/%s?page=2' % emg_view
+        first_link = 'http://testserver/api/%s?page=1' % _view
+        last_link = 'http://testserver/api/%s?page=5' % _view
+        next_link = 'http://testserver/api/%s?page=2' % _view
         assert rsp['links']['first'] == first_link
         assert rsp['links']['last'] == last_link
         assert rsp['links']['next'] == next_link
