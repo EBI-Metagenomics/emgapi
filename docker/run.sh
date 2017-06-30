@@ -25,7 +25,8 @@ done
 >&2 echo "MySQL now accepts connections, creating database..."
 
 echo "Start up..."
-$HOME/venv/bin/python3.5 $HOME/src/emg/manage.py migrate
+$HOME/venv/bin/python3.5 $HOME/src/emg/manage.py migrate emg_api 0001 --fake
+$HOME/venv/bin/python3.5 $HOME/src/emg/manage.py migrate emg_api 0002
 $HOME/venv/bin/python3.5 $HOME/src/emg/manage.py collectstatic --noinput
 #$HOME/venv/bin/python3.5 $HOME/src/emg/manage.py runserver 0.0.0.0:8000
 
