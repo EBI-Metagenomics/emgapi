@@ -82,11 +82,9 @@ class PipelineReleaseTool(models.Model):
         Pipeline, db_column='PIPELINE_ID',
         primary_key=True, on_delete=models.CASCADE)
     tool = models.ForeignKey(
-        PipelineTool, db_column='TOOL_ID', on_delete=models.CASCADE,
-        blank=True, null=True)
+        PipelineTool, db_column='TOOL_ID', on_delete=models.CASCADE)
     tool_group_id = models.DecimalField(
-        db_column='TOOL_GROUP_ID', max_digits=6, decimal_places=3,
-        blank=True, null=True)
+        db_column='TOOL_GROUP_ID', max_digits=6, decimal_places=3)
     how_tool_used_desc = models.TextField(
         db_column='HOW_TOOL_USED_DESC', blank=True, null=True)
 
@@ -180,7 +178,7 @@ class Study(models.Model):
     study_id = models.AutoField(
         db_column='STUDY_ID', primary_key=True)
     accession = models.CharField(
-        db_column='EXT_STUDY_ID', max_length=18)
+        db_column='EXT_STUDY_ID', max_length=20, default='ERP000000')
     centre_name = models.CharField(
         db_column='CENTRE_NAME', max_length=255, blank=True, null=True)
     is_public = models.IntegerField(
@@ -231,8 +229,7 @@ class StudyPublication(models.Model):
         Study, db_column='STUDY_ID',
         primary_key=True, on_delete=models.CASCADE)
     pub = models.ForeignKey(
-        Publication, db_column='PUB_ID', on_delete=models.CASCADE,
-        blank=True, null=True)
+        Publication, db_column='PUB_ID', on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'STUDY_PUBLICATION'
@@ -243,7 +240,7 @@ class Sample(models.Model):
     sample_id = models.AutoField(
         db_column='SAMPLE_ID', primary_key=True)
     accession = models.CharField(
-        db_column='EXT_SAMPLE_ID', max_length=15)
+        db_column='EXT_SAMPLE_ID', max_length=20, default='ERS0000000')
     analysis_completed = models.DateField(
         db_column='ANALYSIS_COMPLETED', blank=True, null=True)
     collection_date = models.DateField(
@@ -307,8 +304,7 @@ class SamplePublication(models.Model):
         Sample, db_column='SAMPLE_ID',
         on_delete=models.CASCADE, primary_key=True)
     pub = models.ForeignKey(
-        Publication, db_column='PUB_ID', on_delete=models.CASCADE,
-        blank=True, null=True)
+        Publication, db_column='PUB_ID', on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'SAMPLE_PUBLICATION'
