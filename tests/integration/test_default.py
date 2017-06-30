@@ -68,7 +68,9 @@ class TestDefaultAPI(object):
         model_name = "emg_api.%s" % _model
         view_name = "%s-list" % _view
 
-        for pk in range(0, 100):
+        # start from 1
+        # https://code.djangoproject.com/ticket/17653
+        for pk in range(1, 101):
             if _model in ('Sample', 'Study'):
                 _biome = mommy.make('emg_api.Biome', pk=pk)
                 mommy.make(model_name, pk=pk, biome=_biome)

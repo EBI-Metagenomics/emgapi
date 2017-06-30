@@ -3,6 +3,9 @@ python:
   - "3.5"
   - "3.6"
 
+services:
+  - mysql
+
 install:
   # Bug fix: https://github.com/django-json-api/django-rest-framework-json-api/pull/359
   - pip install "git+git://github.com/django-json-api/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"

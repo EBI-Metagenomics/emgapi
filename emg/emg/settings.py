@@ -195,10 +195,6 @@ DATABASES = {
         # 'PASSWORD': 'secret',
         'HOST': 'mysql',
         'PORT': 3306,
-        'TEST': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(os.path.dirname(__file__), 'test.db'),
-        },
     },
 }
 

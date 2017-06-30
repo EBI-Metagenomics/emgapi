@@ -478,15 +478,3 @@ class SampleAnn(models.Model):
         managed = False
         db_table = 'SAMPLE_ANN'
         unique_together = (('sample', 'var'), ('sample', 'var'),)
-
-
-# CREATE FULLTEXT INDEX STUDY_ABSTRACT_IDX
-#     ON STUDY (study_abstract);
-# CREATE FULLTEXT INDEX STUDY_NAME_IDX
-#     ON STUDY (study_name);
-# CREATE FULLTEXT INDEX PUBLICATION_TITLE_IDX
-#     ON PUBLICATION (pub_title);
-# CREATE FULLTEXT INDEX PIPELINE_RELEASE_DESCRIPTION_IDX
-#    ON PIPELINE_RELEASE (description);
-# CREATE FULLTEXT INDEX PIPELINE_RELEASE_CHANGES_IDX
-#    ON PIPELINE_RELEASE (changes);

@@ -6,6 +6,7 @@
 gunicorn
 whitenoise
 mysqlclient
+sqlparse
 
 # log handler
 ConcurrentLogHandler
