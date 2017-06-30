@@ -228,4 +228,11 @@ class Migration(migrations.Migration):
             name='studypublication',
             unique_together=set([('study', 'pub')]),
         ),
+
+        # Ticket: IBU-6868
+        # combine external_run_id and pipeline version to restrict duplicates
+        migrations.AlterUniqueTogether(
+            name='run',
+            unique_together=set([('pipeline', 'accession')]),
+        ),
     ]

@@ -366,6 +366,7 @@ class Run(models.Model):
     class Meta:
         db_table = 'ANALYSIS_JOB'
         unique_together = (('run_id', 'accession'),)
+        unique_together = (('pipeline', 'accession'),)
         ordering = ('accession',)
 
     def __str__(self):
