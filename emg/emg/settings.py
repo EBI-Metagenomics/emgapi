@@ -117,10 +117,11 @@ except NameError:
     def opener(path, flags, mode=0o700):
         return os.open(path, flags, mode, dir_fd=dir_fd)
 
-    if not os.path.exists(os.path.join(BASE_DIR, 'secret.key')):
-        with open('secret.key', 'w', opener=opener) as f:
+    key_path = os.path.join(BASE_DIR, 'secret.key')
+    if not os.path.exists(key_path):
+        with open(key_path, 'w', opener=opener) as f:
             print(binascii.hexlify(os.urandom(50)).decode('ascii'), file=f)
-    with open('secret.key', 'r', opener=opener) as f:
+    with open(key_path, 'r', opener=opener) as f:
         SECRET_KEY = f.read()
     os.close(dir_fd)
 
