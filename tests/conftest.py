@@ -24,9 +24,5 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'emg.settings')
 
 def pytest_configure():
     settings.DEBUG = False
-    settings.DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(settings.BASE_DIR, 'db.sqlite3'),
-        }
-    }
+    settings.DATABASES['default']['NAME'] = 'emg_test'
+    settings.DATABASES['default']['HOST'] = 'localhost'

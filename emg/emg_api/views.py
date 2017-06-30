@@ -49,8 +49,8 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     ordering = ('biome_id',)
 
     search_fields = (
-        'biome_name',
-        'lineage',
+        '@biome_name',
+        '@lineage',
     )
 
     lookup_field = 'biome_id'
@@ -123,8 +123,8 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         'centre_name',
         'author_name',
         'author_email',
-        'biome__biome_name',
-        'biome__lineage',
+        '@biome__biome_name',
+        '@biome__lineage',
     )
 
     lookup_field = 'accession'
@@ -210,7 +210,8 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         # 'sample_id',
         'accession',
         '@sample_name',
-        'biome__biome_name',
+        '@biome__biome_name',
+        '@biome__lineage',
     )
 
     lookup_field = 'accession'
@@ -456,6 +457,7 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
 
     search_fields = (
         '@pub_title',
+        '@pub_abstract',
         'authors',
         'doi',
         'isbn',
