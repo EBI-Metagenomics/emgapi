@@ -292,10 +292,12 @@ REST_FRAMEWORK = {
 
 }
 
+
 ## django cors
 INSTALLED_APPS += ('corsheaders',)
 MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')
 CORS_ORIGIN_ALLOW_ALL = True
+
 
 ## statics
 INSTALLED_APPS += ('whitenoise',)
