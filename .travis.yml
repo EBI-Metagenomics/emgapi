@@ -5,6 +5,9 @@ python:
   - "3.5"
   - "3.6"
 
+env:
+  - MYSQL_HOST=127.0.0.1
+
 services:
   - docker
 
@@ -13,7 +16,7 @@ before_install:
   - docker --version
 
 install:
-  - docker run --name mysql -p 3306:3306 -e MYSQL_ALLOW_EMPTY_PASSWORD=yes -d mysql:5.6
+  - docker run --rm --name mysql -p 3306:3306 -e MYSQL_ALLOW_EMPTY_PASSWORD=yes -d mysql:5.6
     # Bug fix: https://github.com/django-json-api/django-rest-framework-json-api/pull/359
   - pip install "git+git://github.com/django-json-api/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
   - pip install -r requirements.txt
@@ -24,4 +27,5 @@ before_script:
   - flake8 -v .
 
 script:
-  - python setup.py test 
+  - python setup.py test
+  - docker stop mysql
