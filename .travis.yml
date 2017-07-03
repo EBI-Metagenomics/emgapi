@@ -29,5 +29,5 @@ before_script:
   - flake8 -v .
 
 script:
-  - python setup.py test
+  - ./travis.sh
   - docker stop mysql
