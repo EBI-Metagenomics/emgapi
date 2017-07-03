@@ -238,30 +238,30 @@ class Migration(migrations.Migration):
 
         # FullText index
         migrations.RunSQL(
-            "CREATE FULLTEXT INDEX biome_biome_name_ts_idx ON biome_hierarchy_tree (biome_name)"
+            "CREATE FULLTEXT INDEX biome_biome_name_ts_idx ON BIOME_HIERARCHY_TREE (biome_name)"
         ),
         migrations.RunSQL(
-            "CREATE FULLTEXT INDEX biome_lineage_ts_idx ON biome_hierarchy_tree (lineage)"
+            "CREATE FULLTEXT INDEX biome_lineage_ts_idx ON BIOME_HIERARCHY_TREE (lineage)"
         ),
         migrations.RunSQL(
-            "CREATE FULLTEXT INDEX study_study_name_ts_idx ON study(study_name)"
+            "CREATE FULLTEXT INDEX study_study_name_ts_idx ON STUDY(study_name)"
         ),
         migrations.RunSQL(
-            "CREATE FULLTEXT INDEX study_study_abstract_ts_idx ON study (study_abstract)"
+            "CREATE FULLTEXT INDEX study_study_abstract_ts_idx ON STUDY (study_abstract)"
         ),
         migrations.RunSQL(
-            "CREATE FULLTEXT INDEX publication_publication_title_ts_idx ON publication (pub_title)"
+            "CREATE FULLTEXT INDEX publication_publication_title_ts_idx ON PUBLICATION (pub_title)"
         ),
         migrations.RunSQL(
-            "CREATE FULLTEXT INDEX publication_pub_abstract_ts_idx ON publication (pub_abstract)"
+            "CREATE FULLTEXT INDEX publication_pub_abstract_ts_idx ON PUBLICATION (pub_abstract)"
         ),
         migrations.RunSQL(
-            "CREATE FULLTEXT INDEX pipeline_description_ts_idx ON pipeline_release (description)"
+            "CREATE FULLTEXT INDEX pipeline_description_ts_idx ON PIPELINE_RELEASE (description)"
         ),
         migrations.RunSQL(
-            "CREATE FULLTEXT INDEX pipeline_changes_ts_idx ON pipeline_release (changes)"
+            "CREATE FULLTEXT INDEX pipeline_changes_ts_idx ON PIPELINE_RELEASE (changes)"
         ),
         migrations.RunSQL(
-            "CREATE FULLTEXT INDEX sample_sample_name_ts_idx ON sample (sample_name)"
+            "CREATE FULLTEXT INDEX sample_sample_name_ts_idx ON SAMPLE (sample_name)"
         ),
     ]
