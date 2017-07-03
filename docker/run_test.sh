@@ -26,7 +26,7 @@ done
 >&2 echo "MySQL now accepts connections, creating database..."
 
 echo "EMG Run tests..."
+
 export PYTHONPATH=$HOME/src/emg
 export MYSQL_HOST='mysql'
-# pytest $HOME/src
-(cd $HOME/src && $HOME/venv/bin/python3.5 setup.py test)
+(cd $HOME/src && python3.5 setup.py test)

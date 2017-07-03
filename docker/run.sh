@@ -26,13 +26,15 @@ done
 >&2 echo "MySQL now accepts connections, creating database..."
 
 echo "EMG Start up..."
-$HOME/venv/bin/python3.5 $HOME/src/emg/manage.py migrate emg_api 0001 --fake
-$HOME/venv/bin/python3.5 $HOME/src/emg/manage.py migrate emg_api 0002
-$HOME/venv/bin/python3.5 $HOME/src/emg/manage.py collectstatic --noinput
-#$HOME/venv/bin/python3.5 $HOME/src/emg/manage.py runserver 0.0.0.0:8000
 
-(cd $HOME/src/emg && $HOME/venv/bin/python3.5 \
-  $HOME/venv/bin/gunicorn \
+cd $HOME/src
+
+python3.5 emg/manage.py migrate emg_api 0001 --fake
+python3.5 emg/manage.py migrate emg_api 0002
+python3.5 emg/manage.py collectstatic --noinput
+#python3.5 emg/manage.py runserver 0.0.0.0:8000
+
+(cd emg && python3.5 $HOME/venv/bin/gunicorn \
   -p $HOME/src/emg/django.pid \
   --bind 0.0.0.0:8000 \
   --workers 5 \
