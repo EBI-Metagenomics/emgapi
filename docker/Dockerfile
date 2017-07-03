@@ -14,7 +14,7 @@ RUN yum -y install https://centos7.iuscommunity.org/ius-release.rpm
 RUN yum -y install python35u
 
 RUN yum -y install epel-release gcc
-RUN yum -y install python35u-pip python35u-devel git sqlite; yum clean all
+RUN yum -y install python35u-pip python35u-devel git; yum clean all
 
 RUN pip3.5 install virtualenv
 
@@ -24,14 +24,16 @@ RUN yum -y install mysql mysql-devel
 RUN useradd centos
 RUN chpasswd centos
 
-ADD run.sh /tmp/run.sh
-RUN chmod a+x /tmp/run.sh
-RUN chown centos:centos /tmp/run.sh
+ADD run.sh /tmp/docker/run.sh
+RUN chmod a+x /tmp/docker/run.sh
+RUN chown centos:centos /tmp/docker/run.sh
+
+ADD run_test.sh /tmp/docker/run_test.sh
+RUN chmod a+x /tmp/docker/run_test.sh
+RUN chown centos:centos /tmp/docker/run_test.sh
+
 
 USER centos
 ENV HOME /home/centos
 
-
-ENTRYPOINT ["/tmp/run.sh"]
-
-
+ENTRYPOINT ["/tmp/docker/run.sh"]

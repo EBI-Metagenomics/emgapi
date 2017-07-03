@@ -1,16 +1,19 @@
+sudo: required
 language: python
-python:
-  - "3.5"
-  - "3.6"
+
+services:
+  - docker
 
 install:
-  # Bug fix: https://github.com/django-json-api/django-rest-framework-json-api/pull/359
-  - pip install "git+git://github.com/django-json-api/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
-  - pip install -r requirements.txt
   - pip install flake8 pycodestyle pep8-naming
+  - pip install docker-compose
 
-script:
-  - mysql -V
+before_script:
+  - docker --version
+  - docker-compose -v
   - flake8 --version
   - flake8 -v .
-  - python setup.py test
+
+script:
+  - docker-compose up --build --abort-on-container-exit
+  - exit $(docker inspect -f '{{.State.ExitCode}}' ebi-metagenomics-api_emgtest_1)
