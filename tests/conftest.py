@@ -25,4 +25,5 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'emg.settings')
 def pytest_configure():
     settings.DEBUG = False
     settings.DATABASES['default']['NAME'] = 'emg_test'
-    settings.DATABASES['default']['HOST'] = 'localhost'
+    settings.DATABASES['default']['HOST'] = \
+        os.getenv('MYSQL_HOST', 'localhost')
