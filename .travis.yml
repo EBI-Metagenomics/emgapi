@@ -12,17 +12,19 @@ services:
   - docker
 
 before_install:
-  - sudo service mysql stop
   - docker --version
 
 install:
-  - docker run --rm --name mysql -p 3306:3306 -e MYSQL_ALLOW_EMPTY_PASSWORD=yes -d mysql:5.6
     # Bug fix: https://github.com/django-json-api/django-rest-framework-json-api/pull/359
   - pip install "git+git://github.com/django-json-api/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
   - pip install -r requirements.txt
   - pip install flake8 pycodestyle pep8-naming
 
 before_script:
+  # TODO: travis by default comes with MySQL 5.5
+  - sudo service mysql stop
+  - docker run --rm --name mysql -p 3306:3306 -e MYSQL_ALLOW_EMPTY_PASSWORD=yes -d mysql:5.6
+
   - flake8 --version
   - flake8 -v .
 
