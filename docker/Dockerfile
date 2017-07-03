@@ -28,11 +28,6 @@ ADD run.sh /tmp/docker/run.sh
 RUN chmod a+x /tmp/docker/run.sh
 RUN chown centos:centos /tmp/docker/run.sh
 
-ADD run_test.sh /tmp/docker/run_test.sh
-RUN chmod a+x /tmp/docker/run_test.sh
-RUN chown centos:centos /tmp/docker/run_test.sh
-
-
 USER centos
 ENV HOME /home/centos
 

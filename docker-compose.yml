@@ -29,11 +29,3 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d
     ports:
       - "80:80"
-
-  deployment:
-    image: centos:7
-    volumes:
-      - ${PWD}/docker/test_deployment.sh:/tmp/test_deployment.sh
-    links:
-      - nginx
-    command: bash /tmp/test_deployment.sh
