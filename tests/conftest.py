@@ -27,3 +27,5 @@ def pytest_configure():
     settings.DATABASES['default']['NAME'] = 'emg_test'
     settings.DATABASES['default']['HOST'] = \
         os.getenv('MYSQL_HOST', 'localhost')
+    settings.DATABASES['default']['PORT'] = \
+        os.getenv('MYSQL_PORT', '3306')
