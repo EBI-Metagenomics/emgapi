@@ -10,19 +10,7 @@ services:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
       - MYSQL_DATABASE=emg
 
-  emgapi_test:
-    build:
-      context: docker
-      dockerfile: Dockerfile
-    volumes:
-      - .:/home/centos/src
-    links:
-      - mysql
-    environment:
-      - PYTHONUNBUFFERED=0
-    entrypoint: /tmp/docker/run_test.sh
-
-  emgapi:
+  app:
     build:
       context: docker
       dockerfile: Dockerfile
@@ -36,8 +24,16 @@ services:
   nginx:
     image: nginx:1.10
     links:
-      - emgapi
+      - app
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
     ports:
       - "80:80"
+
+  deployment:
+    image: centos:7
+    volumes:
+      - ${PWD}/docker/test_deployment.sh:/tmp/test_deployment.sh
+    links:
+      - nginx
+    command: bash /tmp/test_deployment.sh
