@@ -5,17 +5,17 @@ services:
     image: mysql:5.6
     volumes:
     #   - ./mysql:/var/lib/mysql:rw
-      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+      - ../database/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
       - MYSQL_DATABASE=emg
 
   app:
     build:
-      context: docker
+      context: .
       dockerfile: Dockerfile
     volumes:
-      - .:/home/centos/src
+      - ../:/home/centos/src
     links:
       - mysql
     environment:
@@ -26,6 +26,6 @@ services:
     links:
       - app
     volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ../nginx/conf.d:/etc/nginx/conf.d
     ports:
       - "80:80"
