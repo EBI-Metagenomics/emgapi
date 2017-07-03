@@ -15,5 +15,6 @@ before_script:
   - flake8 -v .
 
 script:
-  - docker-compose up --build --abort-on-container-exit
-  - exit $(docker inspect -f '{{.State.ExitCode}}' ebi-metagenomics-api_emgtest_1)
+  - docker-compose -f dc-test.yml up --build --abort-on-container-exit
+  - exit $(docker inspect -f '{{.State.ExitCode}}' ebimetagenomicsapi_test_1)
+  - docker-compose -f dc-deploy.yml up --build --abort-on-container-exit
