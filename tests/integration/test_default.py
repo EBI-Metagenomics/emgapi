@@ -50,19 +50,19 @@ class TestDefaultAPI(object):
         assert rsp['meta']['pagination']['count'] == 0
 
     @pytest.mark.parametrize(
-        '_model, _view',
+        '_model, _view, relations',
         [
-            ('Biome', 'biomes'),
-            ('ExperimentType', 'experiments'),
-            ('Pipeline', 'pipelines'),
-            ('Publication', 'publications'),
-            ('Run', 'runs'),
-            ('Sample', 'samples'),
-            ('Study', 'studies'),
+            ('Biome', 'biomes', ['studies', 'samples']),
+            ('ExperimentType', 'experiments', ['runs']),
+            ('Pipeline', 'pipelines', ['runs']),
+            ('Publication', 'publications', ['studies']),
+            ('Run', 'runs', ['pipeline', 'sample']),
+            ('Sample', 'samples', ['biome', 'study', 'runs']),
+            ('Study', 'studies', ['biome', 'publications', 'samples']),
         ]
     )
     @pytest.mark.django_db
-    def test_list(self, client, _model, _view):
+    def test_list(self, client, _model, _view, relations):
         klass = getattr(importlib.import_module("emg_api.models"), _model)
 
         model_name = "emg_api.%s" % _model
@@ -106,3 +106,4 @@ class TestDefaultAPI(object):
             _attrs = [f.name for f in klass._meta.get_fields()]
             for a in d['attributes']:
                 assert a in _attrs
+            assert relations == list(d['relationships'])
