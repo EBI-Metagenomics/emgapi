@@ -16,22 +16,75 @@
 
 
 # import pytest
+from datetime import datetime
 
 from django.core.urlresolvers import reverse
 from rest_framework.test import APITestCase
 
 from model_mommy import mommy
 
-from emg_api.models import Study  # noqa
-
 
 class TestStudyAPI(APITestCase):
 
-    def test_public(self):
-        _biome = mommy.make('emg_api.Biome', pk=10)
-        mommy.make("emg_api.Study", pk=123, biome=_biome, is_public=1)
-        mommy.make("emg_api.Study", pk=456, biome=_biome, is_public=0)
+    def setUp(self):
+        self.data = {}
+        self.data['date'] = datetime.now()
+        _biome = mommy.make('emg_api.Biome', pk=123)
+        self.data['studies'] = []
+        self.data['studies'].append(
+            mommy.make(
+                'emg_api.Study',
+                biome=_biome,
+                pk=123,
+                study_abstract="abcdefghijklmnoprstuvwyz",
+                accession="SRP01234",
+                centre_name="Centre Name",
+                is_public=1,
+                public_release_date=None,
+                study_name="Example study name",
+                study_status="FINISHED",
+                data_origination="HARVESTED",
+                author_email=None,
+                author_name=None,
+                last_update=self.data['date'],
+                submission_account_id="Webin-842",
+                result_directory="2017/05/SRP01234",
+                first_created=self.data['date'],
+                project_id="PRJDB1234"
+            )
+        )
+        self.data['studies'].append(
+            mommy.make("emg_api.Study", pk=456, biome=_biome, is_public=0)
+        )
 
+    def test_default(self):
+        url = reverse("studies-detail", args=["SRP01234"])
+        response = self.client.get(url)
+        assert response.status_code == 200
+        rsp = response.json()
+
+        # Data
+        assert len(rsp) == 1
+        assert rsp['data']['type'] == "Study"
+        assert rsp['data']['id'] == "123"
+        _attr = rsp['data']['attributes']
+        assert _attr['accession'] == "SRP01234"
+        assert _attr['centre_name'] == "Centre Name"
+        assert _attr['is_public'] == 1
+        assert not _attr['public_release_date']
+        assert _attr['study_abstract'] == "abcdefghijklmnoprstuvwyz"
+        assert _attr['study_name'] == "Example study name"
+        assert _attr['study_status'] == "FINISHED"
+        assert _attr['data_origination'] == "HARVESTED"
+        assert not _attr['author_email']
+        assert not _attr['author_name']
+        # assert _attr['last_update'] == str(self.data['date'],)
+        assert _attr['submission_account_id'] == "Webin-842"
+        assert _attr['result_directory'] == "2017/05/SRP01234"
+        # assert _attr['first_created'] == str(self.data['date'],)
+        assert _attr['project_id'] == "PRJDB1234"
+
+    def test_public(self):
         url = reverse("studies-list")
         response = self.client.get(url)
         assert response.status_code == 200
@@ -48,4 +101,5 @@ class TestStudyAPI(APITestCase):
         for d in rsp['data']:
             assert d['type'] == "Study"
             assert d['id'] == "123"
+            assert d['attributes']['accession'] == "SRP01234"
             assert d['attributes']['is_public'] == 1
