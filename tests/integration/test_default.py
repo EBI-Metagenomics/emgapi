@@ -73,7 +73,9 @@ class TestDefaultAPI(object):
         for pk in range(1, 101):
             if _model in ('Sample', 'Study'):
                 _biome = mommy.make('emg_api.Biome', pk=pk)
-                mommy.make(model_name, pk=pk, biome=_biome)
+                mommy.make(model_name, pk=pk, biome=_biome, is_public=1)
+            elif _model in ('Run'):
+                mommy.make(model_name, pk=pk, run_status_id=4)
             else:
                 mommy.make(model_name, pk=pk)
 

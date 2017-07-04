@@ -174,6 +174,12 @@ class Publication(models.Model):
         return self.pub_title
 
 
+class StudyManager(models.Manager):
+
+    def public(self):
+        return self.filter(is_public=1)
+
+
 class Study(models.Model):
     study_id = models.AutoField(
         db_column='STUDY_ID', primary_key=True)
@@ -215,6 +221,8 @@ class Study(models.Model):
     publications = models.ManyToManyField(
         Publication, through='StudyPublication', related_name='studies')
 
+    objects = StudyManager()
+
     class Meta:
         db_table = 'STUDY'
         unique_together = (('study_id', 'accession'),)
@@ -234,6 +242,12 @@ class StudyPublication(models.Model):
     class Meta:
         db_table = 'STUDY_PUBLICATION'
         unique_together = (('study', 'pub'),)
+
+
+class SampleManager(models.Manager):
+
+    def public(self):
+        return self.filter(is_public=1)
 
 
 class Sample(models.Model):
@@ -290,6 +304,8 @@ class Sample(models.Model):
         Biome, db_column='BIOME_ID', related_name='samples',
         on_delete=models.CASCADE)
 
+    objects = SampleManager()
+
     class Meta:
         unique_together = (('sample_id', 'accession'),)
         db_table = 'SAMPLE'
@@ -322,6 +338,12 @@ class ExperimentType(models.Model):
 
     def __str__(self):
         return self.experiment_type
+
+
+class RunManager(models.Manager):
+
+    def public(self):
+        return self.filter(run_status_id=4)
 
 
 class Run(models.Model):
@@ -362,6 +384,8 @@ class Run(models.Model):
     instrument_model = models.CharField(
         db_column='INSTRUMENT_MODEL', max_length=50,
         blank=True, null=True)
+
+    objects = RunManager()
 
     class Meta:
         db_table = 'ANALYSIS_JOB'
