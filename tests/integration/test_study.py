@@ -53,11 +53,10 @@ class TestStudyAPI(APITestCase):
                 project_id="PRJDB1234"
             )
         )
-        self.data['studies'].append(
-            mommy.make("emg_api.Study", pk=456, biome=_biome, is_public=0)
-        )
+        # private
+        mommy.make("emg_api.Study", pk=456, biome=_biome, is_public=0)
 
-    def test_default(self):
+    def test_details(self):
         url = reverse("studies-detail", args=["SRP01234"])
         response = self.client.get(url)
         assert response.status_code == 200
@@ -68,6 +67,7 @@ class TestStudyAPI(APITestCase):
         assert rsp['data']['type'] == "Study"
         assert rsp['data']['id'] == "123"
         _attr = rsp['data']['attributes']
+        assert(len(_attr) == 15)
         assert _attr['accession'] == "SRP01234"
         assert _attr['centre_name'] == "Centre Name"
         assert _attr['is_public'] == 1
@@ -78,10 +78,10 @@ class TestStudyAPI(APITestCase):
         assert _attr['data_origination'] == "HARVESTED"
         assert not _attr['author_email']
         assert not _attr['author_name']
-        # assert _attr['last_update'] == str(self.data['date'],)
+        # assert _attr['last_update'] == str(self.data['date'])
         assert _attr['submission_account_id'] == "Webin-842"
         assert _attr['result_directory'] == "2017/05/SRP01234"
-        # assert _attr['first_created'] == str(self.data['date'],)
+        # assert _attr['first_created'] == str(self.data['date'])
         assert _attr['project_id'] == "PRJDB1234"
 
     def test_public(self):
