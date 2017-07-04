@@ -20,10 +20,31 @@
 from django.core.urlresolvers import reverse
 from rest_framework.test import APITestCase
 
+from model_mommy import mommy
+
+from emg_api.models import Run  # noqa
+
 
 class TestRunAPI(APITestCase):
 
-    def test_default(self):
-        url = reverse('runs-list')
+    def test_public(self):
+        mommy.make("emg_api.Run", pk=123, run_status_id=4)
+        mommy.make("emg_api.Run", pk=456, run_status_id=0)
+
+        url = reverse("runs-list")
         response = self.client.get(url)
         assert response.status_code == 200
+        rsp = response.json()
+
+        # Meta
+        assert rsp['meta']['pagination']['page'] == 1
+        assert rsp['meta']['pagination']['pages'] == 1
+        assert rsp['meta']['pagination']['count'] == 1
+
+        # Data
+        assert len(rsp['data']) == 1
+
+        for d in rsp['data']:
+            assert d['type'] == "Run"
+            assert d['id'] == "123"
+            assert d['attributes']['run_status_id'] == 4

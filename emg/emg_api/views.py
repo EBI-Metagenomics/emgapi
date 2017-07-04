@@ -67,7 +67,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         serializer_class=emg_serializers.SampleSerializer
     )
     def samples(self, request, biome_id=None):
-        queryset = self.get_object().samples.all()
+        queryset = self.get_object().samples.public().select_related('biome')
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -82,7 +82,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         serializer_class=emg_serializers.SimpleStudySerializer
     )
     def studies(self, request, biome_id=None):
-        queryset = self.get_object().studies.all()
+        queryset = self.get_object().studies.public().select_related('biome')
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -131,7 +131,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     lookup_value_regex = '[a-zA-Z0-9,]+'
 
     def get_queryset(self):
-        return emg_models.Study.objects.all() \
+        return emg_models.Study.objects.public() \
             .select_related('biome')
 
     def get_serializer_class(self):
@@ -169,12 +169,12 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     def samples(self, request, accession=None, sample_accession=None):
         obj = self.get_object()
         if sample_accession is not None:
-            queryset = obj.samples \
+            queryset = obj.samples.public() \
                 .filter(accession=sample_accession) \
                 .select_related('biome')
         else:
             queryset = obj.samples \
-                .all() \
+                .public() \
                 .select_related('biome')
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -218,7 +218,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
     lookup_value_regex = '[a-zA-Z0-9,]+'
 
     def get_queryset(self):
-        return emg_models.Sample.objects.all() \
+        return emg_models.Sample.objects.public() \
             .select_related('biome', 'study')
 
     def get_serializer_class(self):
@@ -235,7 +235,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
     def runs(self, request, accession=None, run_accession=None):
         obj = self.get_object()
         if run_accession is not None:
-            queryset = obj.runs \
+            queryset = obj.runs.public() \
                 .filter(accession=run_accession) \
                 .select_related(
                     'sample',
@@ -244,7 +244,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
                     'pipeline'
                 )
         else:
-            queryset = obj.runs.all() \
+            queryset = obj.runs.public() \
                 .select_related(
                     'sample',
                     'analysis_status',
@@ -288,7 +288,7 @@ class RunViewSet(mixins.RetrieveModelMixin,
     lookup_value_regex = '[a-zA-Z0-9,_]+'
 
     def get_queryset(self):
-        return emg_models.Run.objects.all() \
+        return emg_models.Run.objects.public() \
             .select_related(
                 'sample',
                 'pipeline',

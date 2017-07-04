@@ -80,7 +80,8 @@ def create_studies(count):
                 pk=pk,
                 biome=_biome,
                 study_name="Study findme",
-                study_abstract="abcdefghijklmnoprstuvwxyz"
+                study_abstract="abcdefghijklmnoprstuvwxyz",
+                is_public=1
             )
         )
     for pk in range(count+1, 2*count+1):
@@ -91,7 +92,8 @@ def create_studies(count):
                 pk=pk,
                 biome=_biome,
                 study_name="Study hide",
-                study_abstract="abcdefghijklmnoprstuvwxyz"
+                study_abstract="abcdefghijklmnoprstuvwxyz",
+                is_public=1
             )
         )
     return entries
@@ -101,26 +103,28 @@ def create_samples(count):
     entries = []
     for pk in range(1, count+1):
         _biome = mommy.make('emg_api.Biome', pk=pk)
-        _study = mommy.make('emg_api.Study', pk=pk, biome=_biome)
+        _study = mommy.make('emg_api.Study', pk=pk, biome=_biome, is_public=1)
         entries.append(
             mommy.prepare(
                 "emg_api.Sample",
                 pk=pk,
                 biome=_biome,
                 study=_study,
-                sample_name="Sample findme"
+                sample_name="Sample findme",
+                is_public=1
             )
         )
     for pk in range(count+1, 2*count+1):
         _biome = mommy.make('emg_api.Biome', pk=pk)
-        _study = mommy.make('emg_api.Study', pk=pk, biome=_biome)
+        _study = mommy.make('emg_api.Study', pk=pk, biome=_biome, is_public=1)
         entries.append(
             mommy.prepare(
                 "emg_api.Sample",
                 pk=pk,
                 biome=_biome,
                 study=_study,
-                sample_name="Sample hideme"
+                sample_name="Sample hideme",
+                is_public=1
             )
         )
     return entries
