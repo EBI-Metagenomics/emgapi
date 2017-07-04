@@ -23,7 +23,6 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from rest_framework.decorators import detail_route
-# from rest_framework.decorators import list_route
 
 from emg_api import models as emg_models
 from emg_api import serializers as emg_serializers
@@ -50,7 +49,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
 
     search_fields = (
         '@biome_name',
-        '@lineage',
+        '^lineage',
     )
 
     lookup_field = 'biome_id'
@@ -61,17 +60,27 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
             return emg_serializers.BiomeSerializer
         return super(BiomeViewSet, self).get_serializer_class()
 
-    def retrieve(self, request, *args, **kwargs):
-        """
-        Retrieves biome for the given id
-        """
-        return super(BiomeViewSet, self).retrieve(request, *args, **kwargs)
-
     def list(self, request, *args, **kwargs):
         """
         Retrieves list of biomes
+        Example:
+        ---
+        /api/biomes
+
+        /api/biomes?search=root:Environmental:Terrestrial:Soil
         """
+
         return super(BiomeViewSet, self).list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves biome for the given id
+        Example:
+        ---
+        /api/biomes/220 - retrieve 'root:Environmental:Terrestrial:Soil'
+        """
+
+        return super(BiomeViewSet, self).retrieve(request, *args, **kwargs)
 
     @detail_route(
         methods=['get', ],
@@ -81,15 +90,20 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     def samples(self, request, biome_id=None):
         """
         Retrieves list of samples for the given biome
+        Example:
+        ---
+        /api/biomes/220/samples - retrieve linked samples
         """
 
         queryset = self.get_object().samples.public().select_related('biome')
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = self.get_serializer(page, many=True)
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request})
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(
+            queryset, many=True, context={'request': request})
         return Response(serializer.data)
 
     @detail_route(
@@ -100,15 +114,20 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     def studies(self, request, biome_id=None):
         """
         Retrieves list of studies for the given biome
+        Example:
+        ---
+        /api/biomes/220/studies - retrieve linked studies
         """
 
         queryset = self.get_object().studies.public().select_related('biome')
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = self.get_serializer(page, many=True)
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request})
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(
+            queryset, many=True, context={'request': request})
         return Response(serializer.data)
 
 
@@ -144,7 +163,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         'author_name',
         'author_email',
         '@biome__biome_name',
-        '@biome__lineage',
+        '^biome__lineage',
     )
 
     lookup_field = 'accession'
@@ -159,17 +178,28 @@ class StudyViewSet(mixins.RetrieveModelMixin,
             return emg_serializers.StudySerializer
         return super(StudyViewSet, self).get_serializer_class()
 
-    def retrieve(self, request, *args, **kwargs):
-        """
-        Retrieves study for the given accession
-        """
-        return super(StudyViewSet, self).retrieve(request, *args, **kwargs)
-
     def list(self, request, *args, **kwargs):
         """
         Retrieves list of studies
+        Example:
+        ---
+        /api/studies
+
+        /api/studies?search=microbial%20fuel%20cells
+
+        /api/studies?biome_id=4 - retrieve all studies for Bioreactor
         """
+
         return super(StudyViewSet, self).list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves study for the given accession
+        Example:
+        ---
+        /api/studies/ERP008945 - retrieve study ERP008945
+        """
+        return super(StudyViewSet, self).retrieve(request, *args, **kwargs)
 
     @detail_route(
         methods=['get', ],
@@ -180,6 +210,9 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     def publications(self, request, accession=None, publications_id=None):
         """
         Retrieves list of publications for the given study accession
+        Example:
+        ---
+        /api/studies/ERP008945/publications - retrieve linked publications
         """
 
         obj = self.get_object()
@@ -190,10 +223,12 @@ class StudyViewSet(mixins.RetrieveModelMixin,
             queryset = obj.publications.all()
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = self.get_serializer(page, many=True)
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request})
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(
+            queryset, many=True, context={'request': request})
         return Response(serializer.data)
 
     @detail_route(
@@ -205,6 +240,9 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     def samples(self, request, accession=None, sample_accession=None):
         """
         Retrieves list of samples for the given study accession
+        Example:
+        ---
+        /api/studies/ERP008945/samples - retrieve linked samples
         """
 
         obj = self.get_object()
@@ -218,10 +256,12 @@ class StudyViewSet(mixins.RetrieveModelMixin,
                 .select_related('biome')
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = self.get_serializer(page, many=True)
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request})
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(
+            queryset, many=True, context={'request': request})
         return Response(serializer.data)
 
 
@@ -251,7 +291,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         'accession',
         '@sample_name',
         '@biome__biome_name',
-        '@biome__lineage',
+        '^biome__lineage',
     )
 
     lookup_field = 'accession'
@@ -309,10 +349,12 @@ class SampleViewSet(mixins.RetrieveModelMixin,
                 )
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = self.get_serializer(page, many=True)
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request})
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(
+            queryset, many=True, context={'request': request})
         return Response(serializer.data)
 
 
@@ -444,10 +486,12 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
                 )
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = self.get_serializer(page, many=True)
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request})
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(
+            queryset, many=True, context={'request': request})
         return Response(serializer.data)
 
 
@@ -527,10 +571,12 @@ class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
                 )
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = self.get_serializer(page, many=True)
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request})
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(
+            queryset, many=True, context={'request': request})
         return Response(serializer.data)
 
 
@@ -612,8 +658,10 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
                 .select_related('biome')
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = self.get_serializer(page, many=True)
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request})
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(
+            queryset, many=True, context={'request': request})
         return Response(serializer.data)

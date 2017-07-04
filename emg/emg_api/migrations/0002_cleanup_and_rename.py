@@ -241,10 +241,10 @@ class Migration(migrations.Migration):
             sql="CREATE FULLTEXT INDEX biome_biome_name_ts_idx ON BIOME_HIERARCHY_TREE (biome_name)",
             reverse_sql='ALTER TABLE BIOME_HIERARCHY_TREE DROP INDEX biome_biome_name_ts_idx'
         ),
-        migrations.RunSQL(
-            sql="CREATE FULLTEXT INDEX biome_lineage_ts_idx ON BIOME_HIERARCHY_TREE (lineage)",
-            reverse_sql='ALTER TABLE BIOME_HIERARCHY_TREE DROP INDEX biome_lineage_ts_idx'
-        ),
+        # migrations.RunSQL(
+        #     sql="CREATE FULLTEXT INDEX biome_lineage_ts_idx ON BIOME_HIERARCHY_TREE (lineage)",
+        #     reverse_sql='ALTER TABLE BIOME_HIERARCHY_TREE DROP INDEX biome_lineage_ts_idx'
+        # ),
         migrations.RunSQL(
             sql="CREATE FULLTEXT INDEX study_study_name_ts_idx ON STUDY(study_name)",
             reverse_sql='ALTER TABLE STUDY DROP INDEX study_study_name_ts_idx'
