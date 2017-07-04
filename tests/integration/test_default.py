@@ -24,6 +24,23 @@ from django.core.urlresolvers import reverse
 
 class TestDefaultAPI(object):
 
+    def test_default(self, client):
+        url = reverse('api-root')
+        response = client.get(url)
+        assert response.status_code == 200
+        rsp = response.json()
+
+        expected = {
+            "biomes": "http://testserver/api/biomes",
+            "studies": "http://testserver/api/studies",
+            "samples": "http://testserver/api/samples",
+            "runs": "http://testserver/api/runs",
+            "pipelines": "http://testserver/api/pipelines",
+            "experiments": "http://testserver/api/experiments",
+            "publications": "http://testserver/api/publications"
+        }
+        assert rsp['data'] == expected
+
     @pytest.mark.parametrize(
         '_view',
         [
@@ -106,4 +123,4 @@ class TestDefaultAPI(object):
             _attrs = [f.name for f in klass._meta.get_fields()]
             for a in d['attributes']:
                 assert a in _attrs
-            assert relations == list(d['relationships'])
+            assert set(relations) == set(d['relationships'])
