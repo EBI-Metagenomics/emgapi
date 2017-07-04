@@ -61,12 +61,28 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
             return emg_serializers.BiomeSerializer
         return super(BiomeViewSet, self).get_serializer_class()
 
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves biome for the given id
+        """
+        return super(BiomeViewSet, self).retrieve(request, *args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of biomes
+        """
+        return super(BiomeViewSet, self).list(request, *args, **kwargs)
+
     @detail_route(
         methods=['get', ],
         url_name='samples-list',
         serializer_class=emg_serializers.SampleSerializer
     )
     def samples(self, request, biome_id=None):
+        """
+        Retrieves list of samples for the given biome
+        """
+
         queryset = self.get_object().samples.public().select_related('biome')
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -82,6 +98,10 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         serializer_class=emg_serializers.SimpleStudySerializer
     )
     def studies(self, request, biome_id=None):
+        """
+        Retrieves list of studies for the given biome
+        """
+
         queryset = self.get_object().studies.public().select_related('biome')
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -139,6 +159,18 @@ class StudyViewSet(mixins.RetrieveModelMixin,
             return emg_serializers.StudySerializer
         return super(StudyViewSet, self).get_serializer_class()
 
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves study for the given accession
+        """
+        return super(StudyViewSet, self).retrieve(request, *args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of studies
+        """
+        return super(StudyViewSet, self).list(request, *args, **kwargs)
+
     @detail_route(
         methods=['get', ],
         url_name='publications-list',
@@ -146,6 +178,10 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         serializer_class=emg_serializers.SimplePublicationSerializer
     )
     def publications(self, request, accession=None, publications_id=None):
+        """
+        Retrieves list of publications for the given study accession
+        """
+
         obj = self.get_object()
         if publications_id is not None:
             queryset = obj.publications \
@@ -167,6 +203,10 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         serializer_class=emg_serializers.SimpleSampleSerializer
     )
     def samples(self, request, accession=None, sample_accession=None):
+        """
+        Retrieves list of samples for the given study accession
+        """
+
         obj = self.get_object()
         if sample_accession is not None:
             queryset = obj.samples.public() \
@@ -226,6 +266,18 @@ class SampleViewSet(mixins.RetrieveModelMixin,
             return emg_serializers.SampleSerializer
         return super(SampleViewSet, self).get_serializer_class()
 
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves sample for the given accession
+        """
+        return super(SampleViewSet, self).retrieve(request, *args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of samples
+        """
+        return super(SampleViewSet, self).list(request, *args, **kwargs)
+
     @detail_route(
         methods=['get', ],
         url_name='runs-list',
@@ -233,6 +285,10 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         serializer_class=emg_serializers.RunSerializer
     )
     def runs(self, request, accession=None, run_accession=None):
+        """
+        Retrieves list of runs for the given sample accession
+        """
+
         obj = self.get_object()
         if run_accession is not None:
             queryset = obj.runs.public() \
@@ -301,6 +357,18 @@ class RunViewSet(mixins.RetrieveModelMixin,
             return emg_serializers.RunSerializer
         return super(RunViewSet, self).get_serializer_class()
 
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves run for the given accession
+        """
+        return super(RunViewSet, self).retrieve(request, *args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of runs
+        """
+        return super(RunViewSet, self).list(request, *args, **kwargs)
+
 
 class PipelineViewSet(mixins.RetrieveModelMixin,
                       mixins.ListModelMixin,
@@ -333,6 +401,18 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
             return emg_serializers.PipelineSerializer
         return super(PipelineViewSet, self).get_serializer_class()
 
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves pipeline for the given version
+        """
+        return super(PipelineViewSet, self).retrieve(request, *args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of pipeline versions
+        """
+        return super(PipelineViewSet, self).list(request, *args, **kwargs)
+
     @detail_route(
         methods=['get', ],
         url_name='runs-list',
@@ -340,6 +420,10 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         serializer_class=emg_serializers.RunSerializer
     )
     def runs(self, request, release_version=None, run_accession=None):
+        """
+        Retrieves list of runs for the given pipeline version
+        """
+
         obj = self.get_object()
         if run_accession is not None:
             queryset = obj.runs \
@@ -398,6 +482,20 @@ class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
             return emg_serializers.ExperimentTypeSerializer
         return super(ExperimentTypeViewSet, self).get_serializer_class()
 
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves experiment type for the given id
+        """
+        return super(ExperimentTypeViewSet, self) \
+            .retrieve(request, *args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of experiment types
+        """
+        return super(ExperimentTypeViewSet, self) \
+            .list(request, *args, **kwargs)
+
     @detail_route(
         methods=['get', ],
         url_name='runs-list',
@@ -405,6 +503,10 @@ class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
         serializer_class=emg_serializers.RunSerializer
     )
     def runs(self, request, experiment_type=None, run_accession=None):
+        """
+        Retrieves list of runs for the given experiment type
+        """
+
         obj = self.get_object()
         if run_accession is not None:
             queryset = obj.runs \
@@ -476,6 +578,19 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
             return emg_serializers.PublicationSerializer
         return super(PublicationViewSet, self).get_serializer_class()
 
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves publication for the given id
+        """
+        return super(PublicationViewSet, self) \
+            .retrieve(request, *args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of publications
+        """
+        return super(PublicationViewSet, self).list(request, *args, **kwargs)
+
     @detail_route(
         methods=['get', ],
         url_name='studies-list',
@@ -483,6 +598,10 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         serializer_class=emg_serializers.SimpleStudySerializer
     )
     def studies(self, request, pub_id=None, study_accession=None):
+        """
+        Retrieves list of studies for the given publication
+        """
+
         obj = self.get_object()
         if study_accession is not None:
             queryset = obj.studies \
