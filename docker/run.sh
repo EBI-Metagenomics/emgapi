@@ -29,8 +29,7 @@ echo "EMG Start up..."
 
 cd $HOME/src
 
-python3.5 emg/manage.py migrate emg_api 0001 --fake
-python3.5 emg/manage.py migrate emg_api 0002
+python3.5 emg/manage.py migrate --fake-initial
 python3.5 emg/manage.py collectstatic --noinput
 #python3.5 emg/manage.py runserver 0.0.0.0:8000
 
