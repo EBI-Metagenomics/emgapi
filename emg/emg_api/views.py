@@ -52,8 +52,8 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         '^lineage',
     )
 
-    lookup_field = 'biome_id'
-    lookup_value_regex = '[a-zA-Z0-9,]+'
+    lookup_field = 'lineage'
+    lookup_value_regex = '(.*)'
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -77,7 +77,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         Retrieves biome for the given id
         Example:
         ---
-        /api/biomes/220 - retrieve 'root:Environmental:Terrestrial:Soil'
+        /api/biomes/root:Environmental:Terrestrial:Soil
         """
 
         return super(BiomeViewSet, self).retrieve(request, *args, **kwargs)
@@ -87,12 +87,13 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         url_name='samples-list',
         serializer_class=emg_serializers.SampleSerializer
     )
-    def samples(self, request, biome_id=None):
+    def samples(self, request, lineage=None):
         """
         Retrieves list of samples for the given biome
         Example:
         ---
-        /api/biomes/220/samples - retrieve linked samples
+        /api/biomes/root:Environmental:Terrestrial:Soil/samples
+        - retrieve linked samples
         """
 
         queryset = self.get_object().samples.public().select_related('biome')
@@ -111,12 +112,13 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         url_name='studies-list',
         serializer_class=emg_serializers.SimpleStudySerializer
     )
-    def studies(self, request, biome_id=None):
+    def studies(self, request, lineage=None):
         """
         Retrieves list of studies for the given biome
         Example:
         ---
-        /api/biomes/220/studies - retrieve linked studies
+        /api/biomes/root:Environmental:Terrestrial:Soil/studies
+        - retrieve linked studies
         """
 
         queryset = self.get_object().studies.public().select_related('biome')

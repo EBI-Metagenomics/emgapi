@@ -30,7 +30,11 @@ class TestSampleAPI(APITestCase):
     def setUp(self):
         self.data = {}
         self.data['date'] = datetime.now()
-        _biome = mommy.make('emg_api.Biome', pk=123)
+        _biome = mommy.make(
+            'emg_api.Biome',
+            biome_name="foo",
+            lineage="root:foo",
+            pk=123)
         self.data['studies'] = []
         self.data['studies'].append(
             mommy.make(
@@ -73,9 +77,11 @@ class TestSampleAPI(APITestCase):
         assert rsp['data']['type'] == "Sample"
         assert rsp['data']['id'] == "123"
         _attr = rsp['data']['attributes']
-        assert(len(_attr) == 20)
+        assert(len(_attr) == 22)
         assert _attr['accession'] == "DRS012345"
         assert _attr['sample_desc'] == "abcdefghijklmnoprstuvwyz"
+        assert _attr['biome_name'] == "foo"
+        assert _attr['biome'] == "root:foo"
         assert _attr['analysis_completed'] == str(self.data['date'].date())
         assert _attr['collection_date'] == str(self.data['date'].date())
         assert _attr['geo_loc_name'] == "Geo Location"
