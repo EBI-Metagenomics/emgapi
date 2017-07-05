@@ -53,7 +53,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     )
 
     lookup_field = 'lineage'
-    lookup_value_regex = '(.*)'
+    lookup_value_regex = '[a-zA-Z0-9\:\-\s\(\)\<\>]+'
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
