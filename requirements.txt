@@ -8,6 +8,9 @@ whitenoise
 mysqlclient
 sqlparse
 
+# optional session store
+# django-redis>=4.4
+
 # log handler
 ConcurrentLogHandler
 
