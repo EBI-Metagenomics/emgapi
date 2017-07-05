@@ -29,7 +29,11 @@ class TestStudyAPI(APITestCase):
     def setUp(self):
         self.data = {}
         self.data['date'] = datetime.now()
-        _biome = mommy.make('emg_api.Biome', pk=123)
+        _biome = mommy.make(
+            'emg_api.Biome',
+            biome_name="foo",
+            lineage="root:foo",
+            pk=123)
         self.data['studies'] = []
         self.data['studies'].append(
             mommy.make(
@@ -67,8 +71,10 @@ class TestStudyAPI(APITestCase):
         assert rsp['data']['type'] == "Study"
         assert rsp['data']['id'] == "123"
         _attr = rsp['data']['attributes']
-        assert(len(_attr) == 15)
+        assert(len(_attr) == 17)
         assert _attr['accession'] == "SRP01234"
+        assert _attr['biome_name'] == "foo"
+        assert _attr['biome'] == "root:foo"
         assert _attr['centre_name'] == "Centre Name"
         assert _attr['is_public'] == 1
         assert not _attr['public_release_date']

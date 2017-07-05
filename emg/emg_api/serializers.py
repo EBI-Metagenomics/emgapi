@@ -31,18 +31,18 @@ class BiomeSerializer(serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
         view_name='biomes-detail',
-        lookup_field='biome_id',
+        lookup_field='lineage',
     )
 
     # studies = serializers.HyperlinkedIdentityField(
     #     view_name='biomes-studies-list',
-    #     lookup_field='biome_id',
+    #     lookup_field='lineage',
     # )
     # studies = relations.ResourceRelatedField(
     #     queryset=emg_models.Biome.objects,
     #     many=True,
     #     related_link_view_name='biomes-studies-list',
-    #     related_link_url_kwarg='biome_id',
+    #     related_link_url_kwarg='lineage',
     # )
     studies = relations.SerializerMethodResourceRelatedField(
         source='get_studies',
@@ -50,7 +50,8 @@ class BiomeSerializer(serializers.HyperlinkedModelSerializer):
         many=True,
         read_only=True,
         related_link_view_name='biomes-studies-list',
-        related_link_url_kwarg='biome_id',
+        related_link_url_kwarg='lineage',
+        related_link_lookup_field='lineage',
     )
 
     def get_studies(self, obj):
@@ -61,13 +62,13 @@ class BiomeSerializer(serializers.HyperlinkedModelSerializer):
 
     # samples = serializers.HyperlinkedIdentityField(
     #     view_name='biomes-samples-list',
-    #     lookup_field='biome_id',
+    #     lookup_field='lineage',
     # )
     # samples = relations.ResourceRelatedField(
     #     queryset=emg_models.Biome.objects,
     #     many=True,
     #     related_link_view_name='biomes-samples-list',
-    #     related_link_url_kwarg='biome_id',
+    #     related_link_url_kwarg='lineage',
     # )
     samples = relations.SerializerMethodResourceRelatedField(
         source='get_samples',
@@ -75,7 +76,8 @@ class BiomeSerializer(serializers.HyperlinkedModelSerializer):
         many=True,
         read_only=True,
         related_link_view_name='biomes-samples-list',
-        related_link_url_kwarg='biome_id',
+        related_link_url_kwarg='lineage',
+        related_link_lookup_field='lineage',
     )
 
     def get_samples(self, obj):
@@ -239,11 +241,20 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
         lookup_field='accession',
     )
 
-    biome = serializers.HyperlinkedRelatedField(
-        read_only=True,
-        view_name='biomes-detail',
-        lookup_field='biome_id',
-    )
+    # biome = serializers.HyperlinkedRelatedField(
+    #     read_only=True,
+    #     view_name='biomes-detail',
+    #     lookup_field='lineage',
+    # )
+    biome = serializers.SerializerMethodField()
+
+    def get_biome(self, obj):
+        return obj.biome.lineage
+
+    biome_name = serializers.SerializerMethodField()
+
+    def get_biome_name(self, obj):
+        return obj.biome.biome_name
 
     study = serializers.HyperlinkedRelatedField(
         read_only=True,
@@ -298,11 +309,20 @@ class StudySerializer(serializers.HyperlinkedModelSerializer):
         lookup_field='accession',
     )
 
-    biome = serializers.HyperlinkedRelatedField(
-        read_only=True,
-        view_name='biomes-detail',
-        lookup_field='biome_id',
-    )
+    # biome = serializers.HyperlinkedRelatedField(
+    #     read_only=True,
+    #     view_name='biomes-detail',
+    #     lookup_field='lineage',
+    # )
+    biome = serializers.SerializerMethodField()
+
+    def get_biome(self, obj):
+        return obj.biome.lineage
+
+    biome_name = serializers.SerializerMethodField()
+
+    def get_biome_name(self, obj):
+        return obj.biome.biome_name
 
     # publications = serializers.HyperlinkedIdentityField(
     #     view_name='studies-publications-list',
