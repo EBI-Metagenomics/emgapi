@@ -3,7 +3,7 @@
 set -eux
 
 echo "DB startup..."
-until mysql -u root -h $MYSQL_HOST -P 3306 -e 'show databases;'; do
+until mysql -u root -h $DB_HOST -P $DB_PORT -e 'show databases;'; do
   >&2 echo "MySQL is unavailable - sleeping"
   sleep 5
 done

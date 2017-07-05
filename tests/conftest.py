@@ -26,6 +26,8 @@ def pytest_configure():
     settings.DEBUG = False
     settings.DATABASES['default']['NAME'] = 'emg_test'
     settings.DATABASES['default']['HOST'] = \
-        os.getenv('MYSQL_HOST', 'localhost')
+        os.getenv('DB_HOST', 'localhost')
     settings.DATABASES['default']['PORT'] = \
-        os.getenv('MYSQL_PORT', '3306')
+        os.getenv('DB_PORT', '3306')
+    # settings.CACHES['default']['LOCATION'] = \
+    #     os.getenv('CACHE_LOCATION', 'redis://localhost:6379/0')

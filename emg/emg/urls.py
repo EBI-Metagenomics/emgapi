@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+from django.contrib import admin
 from django.conf.urls import include, url
 
 from rest_framework.schemas import get_schema_view
@@ -35,6 +35,8 @@ docs_schema_view = get_swagger_view(title='EBI metagenomics API')
 urlpatterns = [
 
     url(r'^$', schema_view),
+
+    url(r'^admin/', admin.site.urls),
 
     url(r'^api-auth/', include('rest_framework.urls',
                                namespace='rest_framework')),

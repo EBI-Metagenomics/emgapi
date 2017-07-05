@@ -194,11 +194,19 @@ DATABASES = {
         'NAME': 'emg',
         'USER': 'root',
         # 'PASSWORD': 'secret',
-        'HOST': 'mysql',
+        'HOST': 'localhost',
         'PORT': 3306,
     },
 }
 
+# SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION":  "redis://localhost:6379/0",
+#         "KEY_PREFIX": "emg"
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -239,7 +247,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-
 REST_FRAMEWORK = {
 
     'PAGE_SIZE': 20,
@@ -269,10 +276,6 @@ REST_FRAMEWORK = {
         # 'rest_framework_csv.renderers.CSVRenderer',
         # 'rest_framework.renderers.BrowsableAPIRenderer',
     ),
-    'DEFAULT_PERMISSION_CLASSES': [
-         #'rest_framework.permissions.AllowAny',
-         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ],
 
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
@@ -290,6 +293,13 @@ REST_FRAMEWORK = {
         'application/json',
     ),
 
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+         'rest_framework.permissions.AllowAny',
+         # 'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ],
 }
 
 ## django cors
