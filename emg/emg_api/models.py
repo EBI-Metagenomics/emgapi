@@ -174,10 +174,19 @@ class Publication(models.Model):
         return self.pub_title
 
 
+class StudyQuerySet(models.QuerySet):
+
+    def available(self, request):
+        return self.filter(is_public=1)
+
+
 class StudyManager(models.Manager):
 
-    def public(self):
-        return self.filter(is_public=1)
+    def get_queryset(self):
+        return StudyQuerySet(self.model, using=self._db)
+
+    def available(self, request):
+        return self.get_queryset().available(request)
 
 
 class Study(models.Model):
@@ -244,10 +253,19 @@ class StudyPublication(models.Model):
         unique_together = (('study', 'pub'),)
 
 
+class SampleQuerySet(models.QuerySet):
+
+    def available(self, request):
+        return self.filter(is_public=1)
+
+
 class SampleManager(models.Manager):
 
-    def public(self):
-        return self.filter(is_public=1)
+    def get_queryset(self):
+        return SampleQuerySet(self.model, using=self._db)
+
+    def available(self, request):
+        return self.get_queryset().available(request)
 
 
 class Sample(models.Model):
@@ -340,10 +358,19 @@ class ExperimentType(models.Model):
         return self.experiment_type
 
 
+class RunQuerySet(models.QuerySet):
+
+    def available(self, request):
+        return self.filter(run_status_id=4)
+
+
 class RunManager(models.Manager):
 
-    def public(self):
-        return self.filter(run_status_id=4)
+    def get_queryset(self):
+        return RunQuerySet(self.model, using=self._db)
+
+    def available(self, request):
+        return self.get_queryset().available(request)
 
 
 class Run(models.Model):
