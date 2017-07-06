@@ -105,12 +105,27 @@ class PublicationSerializer(serializers.HyperlinkedModelSerializer):
     #     view_name='publications-studies-list',
     #     lookup_field='pub_id',
     # )
-    studies = relations.ResourceRelatedField(
-        queryset=emg_models.Publication.objects,
+    # studies = relations.ResourceRelatedField(
+    #     queryset=emg_models.Publication.objects,
+    #     many=True,
+    #     related_link_view_name='publications-studies-list',
+    #     related_link_url_kwarg='pub_id',
+    # )
+    studies = relations.SerializerMethodResourceRelatedField(
+        source='get_studies',
+        model=emg_models.Publication,
         many=True,
+        read_only=True,
         related_link_view_name='publications-studies-list',
         related_link_url_kwarg='pub_id',
+        related_link_lookup_field='pub_id',
     )
+
+    def get_studies(self, obj):
+        # TODO: provide counter instead of paginating relationship
+        # workaround https://github.com/django-json-api
+        # /django-rest-framework-json-api/issues/178
+        return obj.studies.available(self.context.get("request"))
 
     class Meta:
         model = emg_models.Publication
