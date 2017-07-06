@@ -20,6 +20,24 @@ import django_filters
 from emg_api import models as emg_models
 
 
+class StudyFilter(django_filters.FilterSet):
+
+    biome = django_filters.CharFilter(
+        name='biome__lineage',
+        distinct=True)
+
+    biome_name = django_filters.CharFilter(
+        name='biome__biome_name',
+        distinct=True)
+
+    class Meta:
+        model = emg_models.Study
+        fields = (
+            'biome',
+            'biome_name',
+        )
+
+
 class SampleFilter(django_filters.FilterSet):
 
     analysis_status_id = django_filters.ModelChoiceFilter(
@@ -38,6 +56,14 @@ class SampleFilter(django_filters.FilterSet):
         name='runs__experiment_type__experiment_type',
         distinct=True)
 
+    biome = django_filters.CharFilter(
+        name='biome__lineage',
+        distinct=True)
+
+    biome_name = django_filters.CharFilter(
+        name='biome__biome_name',
+        distinct=True)
+
     class Meta:
         model = emg_models.Sample
         fields = (
@@ -45,7 +71,8 @@ class SampleFilter(django_filters.FilterSet):
             'experiment_type',
             'analysis_status_id',
             'experiment_type_id',
-            'biome_id',
+            'biome',
+            'biome_name',
             'geo_loc_name',
         )
 
