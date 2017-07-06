@@ -397,8 +397,6 @@ class Run(models.Model):
     sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID', related_name='runs',
         on_delete=models.CASCADE)
-    is_production_run = models.TextField(
-        db_column='IS_PRODUCTION_RUN', blank=True, null=True)
     experiment_type = models.ForeignKey(
         ExperimentType, db_column='EXPERIMENT_TYPE_ID',
         related_name='runs',

@@ -71,12 +71,11 @@ class TestStudyAPI(APITestCase):
         assert rsp['data']['type'] == "Study"
         assert rsp['data']['id'] == "123"
         _attr = rsp['data']['attributes']
-        assert(len(_attr) == 17)
+        assert(len(_attr) == 14)
         assert _attr['accession'] == "SRP01234"
         assert _attr['biome_name'] == "foo"
         assert _attr['biome'] == "root:foo"
         assert _attr['centre_name'] == "Centre Name"
-        assert _attr['is_public'] == 1
         assert not _attr['public_release_date']
         assert _attr['study_abstract'] == "abcdefghijklmnoprstuvwyz"
         assert _attr['study_name'] == "Example study name"
@@ -85,8 +84,6 @@ class TestStudyAPI(APITestCase):
         assert not _attr['author_email']
         assert not _attr['author_name']
         # assert _attr['last_update'] == str(self.data['date'])
-        assert _attr['submission_account_id'] == "Webin-842"
-        assert _attr['result_directory'] == "2017/05/SRP01234"
         # assert _attr['first_created'] == str(self.data['date'])
         assert _attr['project_id'] == "PRJDB1234"
 
@@ -108,4 +105,3 @@ class TestStudyAPI(APITestCase):
             assert d['type'] == "Study"
             assert d['id'] == "123"
             assert d['attributes']['accession'] == "SRP01234"
-            assert d['attributes']['is_public'] == 1
