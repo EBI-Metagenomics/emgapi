@@ -96,7 +96,9 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         - retrieve linked samples
         """
 
-        queryset = self.get_object().samples.public().select_related('biome')
+        queryset = self.get_object().samples \
+            .available(self.request) \
+            .select_related('biome')
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(
@@ -121,7 +123,9 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         - retrieve linked studies
         """
 
-        queryset = self.get_object().studies.public().select_related('biome')
+        queryset = self.get_object().studies \
+            .available(self.request) \
+            .select_related('biome')
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(
@@ -172,7 +176,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     lookup_value_regex = '[a-zA-Z0-9,]+'
 
     def get_queryset(self):
-        return emg_models.Study.objects.public() \
+        return emg_models.Study.objects.available(self.request) \
             .select_related('biome')
 
     def get_serializer_class(self):
@@ -249,12 +253,13 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 
         obj = self.get_object()
         if sample_accession is not None:
-            queryset = obj.samples.public() \
+            queryset = obj.samples \
+                .available(self.request) \
                 .filter(accession=sample_accession) \
                 .select_related('biome')
         else:
             queryset = obj.samples \
-                .public() \
+                .available(self.request)\
                 .select_related('biome')
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -300,7 +305,8 @@ class SampleViewSet(mixins.RetrieveModelMixin,
     lookup_value_regex = '[a-zA-Z0-9,]+'
 
     def get_queryset(self):
-        return emg_models.Sample.objects.public() \
+        return emg_models.Sample.objects \
+            .available(self.request) \
             .select_related('biome', 'study')
 
     def get_serializer_class(self):
@@ -333,7 +339,8 @@ class SampleViewSet(mixins.RetrieveModelMixin,
 
         obj = self.get_object()
         if run_accession is not None:
-            queryset = obj.runs.public() \
+            queryset = obj.runs \
+                .available(self.request) \
                 .filter(accession=run_accession) \
                 .select_related(
                     'sample',
@@ -342,7 +349,8 @@ class SampleViewSet(mixins.RetrieveModelMixin,
                     'pipeline'
                 )
         else:
-            queryset = obj.runs.public() \
+            queryset = obj.runs \
+                .available(self.request) \
                 .select_related(
                     'sample',
                     'analysis_status',
@@ -388,7 +396,8 @@ class RunViewSet(mixins.RetrieveModelMixin,
     lookup_value_regex = '[a-zA-Z0-9,_]+'
 
     def get_queryset(self):
-        return emg_models.Run.objects.public() \
+        return emg_models.Run.objects \
+            .available(self.request) \
             .select_related(
                 'sample',
                 'pipeline',
@@ -471,6 +480,7 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         obj = self.get_object()
         if run_accession is not None:
             queryset = obj.runs \
+                .available(self.request) \
                 .filter(accession=run_accession) \
                 .select_related(
                     'sample',
@@ -479,7 +489,8 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
                     'experiment_type'
                 )
         else:
-            queryset = obj.runs.all() \
+            queryset = obj.runs \
+                .available(self.request) \
                 .select_related(
                     'sample',
                     'pipeline',
@@ -653,10 +664,12 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         obj = self.get_object()
         if study_accession is not None:
             queryset = obj.studies \
+                .available(self.request) \
                 .filter(accession=study_accession) \
                 .select_related('biome')
         else:
-            queryset = obj.studies.all() \
+            queryset = obj.studies \
+                .available(self.request) \
                 .select_related('biome')
         page = self.paginate_queryset(queryset)
         if page is not None:
