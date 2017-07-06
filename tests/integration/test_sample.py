@@ -77,7 +77,7 @@ class TestSampleAPI(APITestCase):
         assert rsp['data']['type'] == "Sample"
         assert rsp['data']['id'] == "123"
         _attr = rsp['data']['attributes']
-        assert(len(_attr) == 22)
+        assert(len(_attr) == 21)
         assert _attr['accession'] == "DRS012345"
         assert _attr['sample_desc'] == "abcdefghijklmnoprstuvwyz"
         assert _attr['biome_name'] == "foo"
@@ -85,7 +85,6 @@ class TestSampleAPI(APITestCase):
         assert _attr['analysis_completed'] == str(self.data['date'].date())
         assert _attr['collection_date'] == str(self.data['date'].date())
         assert _attr['geo_loc_name'] == "Geo Location"
-        assert _attr['is_public'] == 1
         # assert _attr['metadata_received'] == str(self.data['date'])
         # assert _attr['sequencedata_archived'] == str(self.data['date'])
         # assert _attr['sequencedata_received'] == str(self.data['date'])
@@ -99,7 +98,6 @@ class TestSampleAPI(APITestCase):
         assert _attr['latitude'] == "12.3456"
         assert _attr['longitude'] == "123.4567"
         # assert _attr['last_update'] == str(self.data['date'])
-        assert _attr['submission_account_id'] == "Webin-842"
 
     def test_public(self):
         url = reverse("samples-list")
@@ -119,4 +117,3 @@ class TestSampleAPI(APITestCase):
             assert d['type'] == "Sample"
             assert d['id'] == "123"
             assert d['attributes']['accession'] == "DRS012345"
-            assert d['attributes']['is_public'] == 1

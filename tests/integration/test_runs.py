@@ -47,4 +47,3 @@ class TestRunAPI(APITestCase):
         for d in rsp['data']:
             assert d['type'] == "Run"
             assert d['id'] == "123"
-            assert d['attributes']['run_status_id'] == 4

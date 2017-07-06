@@ -37,6 +37,10 @@ class Migration(migrations.Migration):
             model_name='run',
             name='re_run_count',
         ),
+        migrations.RemoveField(
+            model_name='run',
+            name='is_production_run',
+        ),
 
         migrations.AlterField(
             model_name='sample',

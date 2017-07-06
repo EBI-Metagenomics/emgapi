@@ -17,7 +17,7 @@
 
 import logging
 
-from django.utils.text import Truncator
+# from django.utils.text import Truncator
 
 # from rest_framework import serializers
 from rest_framework_json_api import serializers
@@ -100,6 +100,7 @@ class PublicationSerializer(serializers.HyperlinkedModelSerializer):
         lookup_field='pub_id',
     )
 
+    # relationships
     # studies = serializers.HyperlinkedIdentityField(
     #     view_name='publications-studies-list',
     #     lookup_field='pub_id',
@@ -120,7 +121,13 @@ class SimplePublicationSerializer(PublicationSerializer):
 
     class Meta:
         model = emg_models.Publication
-        fields = '__all__'
+        fields = (
+            'url',
+            'pub_title',
+            'authors',
+            'doi',
+            'studies',
+        )
 
 
 # Pipeline serializer
@@ -206,13 +213,24 @@ class RunSerializer(serializers.HyperlinkedModelSerializer):
 
     # attributes
     analysis_status = serializers.SerializerMethodField()
-    experiment_type = serializers.SerializerMethodField()
 
     def get_analysis_status(self, obj):
         return obj.analysis_status.analysis_status
 
+    experiment_type = serializers.SerializerMethodField()
+
     def get_experiment_type(self, obj):
         return obj.experiment_type.experiment_type
+
+    pipeline_version = serializers.SerializerMethodField()
+
+    def get_pipeline_version(self, obj):
+        return obj.pipeline.release_version
+
+    sample_accession = serializers.SerializerMethodField()
+
+    def get_sample_accession(self, obj):
+        return obj.sample.accession
 
     # relationship
     pipeline = serializers.HyperlinkedRelatedField(
@@ -229,7 +247,10 @@ class RunSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = emg_models.Run
-        fields = '__all__'
+        exclude = (
+            'job_operator',
+            'run_status_id'
+        )
 
 
 # Sample serializer
@@ -256,6 +277,12 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
     def get_biome_name(self, obj):
         return obj.biome.biome_name
 
+    study_accession = serializers.SerializerMethodField()
+
+    def get_study_accession(self, obj):
+        return obj.study.accession
+
+    # relationships
     study = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name='studies-detail',
@@ -284,20 +311,30 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = emg_models.Sample
-        fields = '__all__'
+        exclude = (
+            'is_public',
+            'submission_account_id',
+        )
 
 
 class SimpleSampleSerializer(SampleSerializer):
 
-    sample_desc = serializers.SerializerMethodField(
-        'get_short_sample_desc')
-
-    def get_short_sample_desc(self, obj):
-        return Truncator(obj.sample_desc).chars(75)
+    # sample_desc = serializers.SerializerMethodField(
+    #     'get_short_sample_desc')
+    #
+    # def get_short_sample_desc(self, obj):
+    #     return Truncator(obj.sample_desc).chars(75)
 
     class Meta:
         model = emg_models.Sample
-        fields = '__all__'
+        fields = (
+            'url',
+            'accession',
+            'biome',
+            'sample_name',
+            'study_accession',
+            'runs',
+        )
 
 
 # Study serializer
@@ -366,17 +403,29 @@ class StudySerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = emg_models.Study
-        fields = '__all__'
+        exclude = (
+            'is_public',
+            'submission_account_id',
+            'result_directory',
+        )
 
 
 class SimpleStudySerializer(StudySerializer):
 
-    study_abstract = serializers.SerializerMethodField(
-        'get_short_study_abstract')
-
-    def get_short_study_abstract(self, obj):
-        return Truncator(obj.study_abstract).chars(75)
+    # study_abstract = serializers.SerializerMethodField(
+    #     'get_short_study_abstract')
+    #
+    # def get_short_study_abstract(self, obj):
+    #     return Truncator(obj.study_abstract).chars(75)
 
     class Meta:
         model = emg_models.Study
-        fields = '__all__'
+        fields = (
+            'url',
+            'accession',
+            'study_name',
+            'biome',
+            'last_update',
+            'samples',
+            'publications',
+        )
