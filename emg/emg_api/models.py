@@ -27,6 +27,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.db.models import Count
 
 
 class Pipeline(models.Model):
@@ -110,6 +111,22 @@ class AnalysisStatus(models.Model):
         return self.analysis_status
 
 
+class BiomeQuerySet(models.QuerySet):
+
+    def top10(self):
+        return self.annotate(num_children=Count('studies')) \
+            .order_by('-num_children')
+
+
+class BiomeManager(models.Manager):
+
+    def get_queryset(self):
+        return BiomeQuerySet(self.model, using=self._db)
+
+    def top10(self):
+        return self.get_queryset().top10()
+
+
 class Biome(models.Model):
     biome_id = models.SmallIntegerField(
         db_column='BIOME_ID', primary_key=True)
@@ -123,6 +140,8 @@ class Biome(models.Model):
         db_column='DEPTH')
     lineage = models.CharField(
         db_column='LINEAGE', max_length=500)
+
+    objects = BiomeManager()
 
     class Meta:
         db_table = 'BIOME_HIERARCHY_TREE'
