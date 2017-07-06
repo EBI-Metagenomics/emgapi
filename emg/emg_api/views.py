@@ -22,7 +22,7 @@ from rest_framework.response import Response
 
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import detail_route, list_route
 
 from emg_api import models as emg_models
 from emg_api import serializers as emg_serializers
@@ -81,6 +81,21 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         """
 
         return super(BiomeViewSet, self).retrieve(request, *args, **kwargs)
+
+    @list_route(
+        methods=['get', ],
+        # url_name='biome-list',
+        serializer_class=emg_serializers.BiomeSerializer
+    )
+    def top10(self, request):
+        queryset = emg_models.Biome.objects.top10()[:10]
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     @detail_route(
         methods=['get', ],
