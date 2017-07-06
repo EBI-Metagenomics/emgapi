@@ -114,8 +114,8 @@ class AnalysisStatus(models.Model):
 class BiomeQuerySet(models.QuerySet):
 
     def top10(self):
-        return self.annotate(num_children=Count('studies')) \
-            .order_by('-num_children')
+        return self.annotate(studies_count=Count('studies')) \
+            .order_by('-studies_count')
 
 
 class BiomeManager(models.Manager):
