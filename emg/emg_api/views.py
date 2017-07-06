@@ -96,7 +96,6 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
 
     @list_route(
         methods=['get', ],
-        # url_name='biome-list',
         serializer_class=emg_serializers.BiomeSerializer
     )
     def top10(self, request):
