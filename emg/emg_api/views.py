@@ -17,6 +17,8 @@
 
 import logging
 
+from django.db.models import Count
+
 from rest_framework import viewsets, mixins
 from rest_framework.response import Response
 
@@ -44,16 +46,26 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         filters.OrderingFilter,
     )
 
-    ordering_fields = ('biome_id',)
-    ordering = ('biome_id',)
+    ordering_fields = (
+        'studies_count',
+        'samples_count',
+        'runs_count',
+    )
+    ordering = ('-studies_count',)
 
     search_fields = (
         '@biome_name',
-        '^lineage',
+        '@lineage',
     )
 
     lookup_field = 'lineage'
     lookup_value_regex = '[a-zA-Z0-9\:\-\s\(\)\<\>]+'
+
+    def get_queryset(self):
+        return emg_models.Biome.objects.all() \
+            .annotate(studies_count=Count('studies')) \
+            .annotate(samples_count=Count('studies__samples')) \
+            .annotate(runs_count=Count('studies__samples__runs'))
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -65,19 +77,19 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         Retrieves list of biomes
         Example:
         ---
-        /api/biomes
+        `/api/biomes`
 
-        /api/biomes?search=root:Environmental:Terrestrial:Soil
+        `/api/biomes?search=soil` search for Soil
         """
 
         return super(BiomeViewSet, self).list(request, *args, **kwargs)
 
     def retrieve(self, request, *args, **kwargs):
         """
-        Retrieves biome for the given id
+        Retrieves biome for the given identifier
         Example:
         ---
-        /api/biomes/root:Environmental:Terrestrial:Soil
+        `/api/biomes/root:Environmental:Terrestrial:Soil`
         """
 
         return super(BiomeViewSet, self).retrieve(request, *args, **kwargs)
@@ -88,6 +100,12 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         serializer_class=emg_serializers.BiomeSerializer
     )
     def top10(self, request):
+        """
+        Retrieve top 10 biomes sorted by number of studies
+        Example:
+        ---
+        `/api/biomes/top10` retrieve top 10 biomes
+        """
         queryset = emg_models.Biome.objects.top10()[:10]
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -107,8 +125,8 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         Retrieves list of samples for the given biome
         Example:
         ---
-        /api/biomes/root:Environmental:Terrestrial:Soil/samples
-        - retrieve linked samples
+        `/api/biomes/root:Environmental:Terrestrial:Soil/samples
+        retrieve` linked samples
         """
 
         queryset = self.get_object().samples \
@@ -134,8 +152,8 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         Retrieves list of studies for the given biome
         Example:
         ---
-        /api/biomes/root:Environmental:Terrestrial:Soil/studies
-        - retrieve linked studies
+        `/api/biomes/root:Environmental:Terrestrial:Soil/studies`
+        retrieve linked studies
         """
 
         queryset = self.get_object().studies \
@@ -158,6 +176,8 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 
     serializer_class = emg_serializers.SimpleStudySerializer
 
+    filter_class = emg_filters.StudyFilter
+
     filter_backends = (
         DjangoFilterBackend,
         filters.SearchFilter,
@@ -171,10 +191,6 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 
     ordering = ('-last_update',)
 
-    filter_fields = (
-        'biome_id',
-    )
-
     search_fields = (
         # 'study_id',
         'accession',
@@ -184,7 +200,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         'author_name',
         'author_email',
         '@biome__biome_name',
-        '^biome__lineage',
+        '@biome__lineage',
     )
 
     lookup_field = 'accession'
@@ -204,11 +220,15 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         Retrieves list of studies
         Example:
         ---
-        /api/studies
+        `/api/studies`
 
-        /api/studies?search=microbial%20fuel%20cells
+        `/api/studies?search=microbial%20fuel%20cells`
 
-        /api/studies?biome_id=4 - retrieve all studies for Bioreactor
+        `/api/studies?biome=root:Environmental:Terrestrial:Soil`
+        retrieve all studies for given Biome
+
+        `/api/studies?biome_name=Soil`
+        retrieve all studies containing given Biome
         """
 
         return super(StudyViewSet, self).list(request, *args, **kwargs)
@@ -218,7 +238,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         Retrieves study for the given accession
         Example:
         ---
-        /api/studies/ERP008945 - retrieve study ERP008945
+        `/api/studies/ERP008945` retrieve study ERP008945
         """
         return super(StudyViewSet, self).retrieve(request, *args, **kwargs)
 
@@ -233,7 +253,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         Retrieves list of publications for the given study accession
         Example:
         ---
-        /api/studies/ERP008945/publications - retrieve linked publications
+        `/api/studies/ERP008945/publications` retrieve linked publications
         """
 
         obj = self.get_object()
@@ -263,7 +283,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         Retrieves list of samples for the given study accession
         Example:
         ---
-        /api/studies/ERP008945/samples - retrieve linked samples
+        `/api/studies/ERP008945/samples` retrieve linked samples
         """
 
         obj = self.get_object()
