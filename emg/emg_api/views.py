@@ -17,6 +17,7 @@
 
 import logging
 
+from django.conf import settings
 from django.db.models import Count
 
 from rest_framework import viewsets, mixins
@@ -105,7 +106,8 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         ---
         `/api/biomes/top10` retrieve top 10 biomes
         """
-        queryset = emg_models.Biome.objects.top10()[:10]
+        limit = settings.EMG_DEFAULT_LIMIT
+        queryset = emg_models.Biome.objects.top10()[:limit]
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(
@@ -240,6 +242,29 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         `/api/studies/ERP008945` retrieve study ERP008945
         """
         return super(StudyViewSet, self).retrieve(request, *args, **kwargs)
+
+    @list_route(
+        methods=['get', ],
+        serializer_class=emg_serializers.SimpleStudySerializer
+    )
+    def recent(self, request):
+        """
+        Retrieve latest studies
+        Example:
+        ---
+        `/api/studies/latest` retrieve latest studies
+        """
+        limit = settings.EMG_DEFAULT_LIMIT
+        queryset = emg_models.Study.objects \
+            .recent(self.request) \
+            .select_related('biome')[:limit]
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     @detail_route(
         methods=['get', ],
@@ -406,7 +431,7 @@ class RunViewSet(mixins.RetrieveModelMixin,
                  mixins.ListModelMixin,
                  viewsets.GenericViewSet):
 
-    serializer_class = emg_serializers.RunSerializer
+    serializer_class = emg_serializers.SimpleRunSerializer
 
     filter_class = emg_filters.RunFilter
 
@@ -504,7 +529,7 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         methods=['get', ],
         url_name='runs-list',
         # url_path='runs(?:/(?P<run_accession>[a-zA-Z0-9,]+))?',
-        serializer_class=emg_serializers.RunSerializer
+        serializer_class=emg_serializers.SimpleRunSerializer
     )
     def runs(self, request, release_version=None, run_accession=None):
         """
@@ -591,7 +616,7 @@ class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
         methods=['get', ],
         url_name='runs-list',
         # url_path='runs(?:/(?P<run_accession>[a-zA-Z0-9,]+))?',
-        serializer_class=emg_serializers.RunSerializer
+        serializer_class=emg_serializers.SimpleRunSerializer
     )
     def runs(self, request, experiment_type=None, run_accession=None):
         """
@@ -635,26 +660,22 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
 
     serializer_class = emg_serializers.SimplePublicationSerializer
 
+    filter_class = emg_filters.PublicationFilter
+
     filter_backends = (
         DjangoFilterBackend,
         filters.SearchFilter,
         filters.OrderingFilter,
     )
 
-    filter_fields = (
-        'pub_type',
-        'published_year',
-    )
-
-    ordering_fields = (
-        'pub_id',
-    )
+    ordering_fields = ('pub_id',)
 
     ordering = ('pub_id',)
 
     search_fields = (
         '@pub_title',
         '@pub_abstract',
+        'pub_type',
         'authors',
         'doi',
         'isbn',
@@ -664,9 +685,10 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
     lookup_value_regex = '[a-zA-Z0-9,]+'
 
     def get_queryset(self):
-        # TODO: select studies - many-to-many
-        return emg_models.Publication.objects.all() \
-            .select_related()
+        if 'studies' in self.request.GET.get('include', '').split(','):
+            return emg_models.Publication.objects.all() \
+                .prefetch_related('studies', 'studies__biome')
+        return emg_models.Publication.objects.all()
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -676,6 +698,10 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
     def retrieve(self, request, *args, **kwargs):
         """
         Retrieves publication for the given id
+        Example:
+        ---
+        `/api/publications/pub_id`
+        `/api/publications/pub_id?include=studies` with studies
         """
         return super(PublicationViewSet, self) \
             .retrieve(request, *args, **kwargs)
@@ -683,6 +709,15 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
     def list(self, request, *args, **kwargs):
         """
         Retrieves list of publications
+        Example:
+        ---
+        `/api/publications` retrieves list of publications
+        `/api/publications?include=studies` with studies
+        `/api/publications?ordering=pub_id` ordered by id
+
+        Search for title, abstract, authors, etc.:
+        ---
+        `/api/publications?search=text`
         """
         return super(PublicationViewSet, self).list(request, *args, **kwargs)
 
@@ -695,18 +730,21 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
     def studies(self, request, pub_id=None, study_accession=None):
         """
         Retrieves list of studies for the given publication
+        Example:
+        ---
+        `/api/publications/studies`
+
+        Filter by:
+        `/api/publications/studies?data_origination=harvested`
         """
 
         obj = self.get_object()
+        queryset = obj.studies \
+            .available(self.request) \
+            .select_related('biome')
         if study_accession is not None:
-            queryset = obj.studies \
-                .available(self.request) \
-                .filter(accession=study_accession) \
-                .select_related('biome')
-        else:
-            queryset = obj.studies \
-                .available(self.request) \
-                .select_related('biome')
+            queryset = queryset.filter(accession=study_accession)
+
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(

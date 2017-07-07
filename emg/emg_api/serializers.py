@@ -29,10 +29,7 @@ logger = logging.getLogger(__name__)
 
 class BiomeSerializer(serializers.HyperlinkedModelSerializer):
 
-    included_serializers = {
-        # 'studies': 'emg_api.serializers.StudySerializer',
-        # 'samples': 'emg_api.serializers.SampleSerializer',
-    }
+    included_serializers = {}
 
     url = serializers.HyperlinkedIdentityField(
         view_name='biomes-detail',
@@ -134,7 +131,7 @@ class PublicationSerializer(serializers.HyperlinkedModelSerializer):
         # TODO: provide counter instead of paginating relationship
         # workaround https://github.com/django-json-api
         # /django-rest-framework-json-api/issues/178
-        return obj.studies.available(self.context.get("request"))
+        return ()
 
     class Meta:
         model = emg_models.Publication
@@ -148,6 +145,7 @@ class SimplePublicationSerializer(PublicationSerializer):
         fields = (
             'url',
             'pub_title',
+            'pub_type',
             'authors',
             'doi',
             'studies',
@@ -290,6 +288,21 @@ class RunSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 
+class SimpleRunSerializer(RunSerializer):
+
+    included_serializers = {}
+
+    class Meta:
+        model = emg_models.Run
+        fields = (
+            'url',
+            'accession',
+            'pipeline_version',
+            'pipeline',
+            'sample',
+        )
+
+
 # Sample serializer
 
 class SampleSerializer(serializers.HyperlinkedModelSerializer):
@@ -375,6 +388,8 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
 
 class SimpleSampleSerializer(SampleSerializer):
 
+    included_serializers = {}
+
     # sample_desc = serializers.SerializerMethodField(
     #     'get_short_sample_desc')
     #
@@ -400,7 +415,7 @@ class StudySerializer(serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
         'publications': 'emg_api.serializers.PublicationSerializer',
-        # 'samples': 'emg_api.serializers.SampleSerializer',
+        'samples': 'emg_api.serializers.SampleSerializer',
     }
 
     url = serializers.HyperlinkedIdentityField(
@@ -473,6 +488,8 @@ class StudySerializer(serializers.HyperlinkedModelSerializer):
 
 
 class SimpleStudySerializer(StudySerializer):
+
+    included_serializers = {}
 
     # study_abstract = serializers.SerializerMethodField(
     #     'get_short_study_abstract')
