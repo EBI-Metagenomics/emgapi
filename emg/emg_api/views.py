@@ -529,7 +529,7 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         methods=['get', ],
         url_name='runs-list',
         # url_path='runs(?:/(?P<run_accession>[a-zA-Z0-9,]+))?',
-        serializer_class=emg_serializers.SimpleRunSerializer
+        serializer_class=emg_serializers.RunSerializer
     )
     def runs(self, request, release_version=None, run_accession=None):
         """
@@ -543,18 +543,18 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
                 .filter(accession=run_accession) \
                 .select_related(
                     'sample',
-                    'pipeline',
                     'analysis_status',
-                    'experiment_type'
+                    'experiment_type',
+                    'pipeline'
                 )
         else:
             queryset = obj.runs \
                 .available(self.request) \
                 .select_related(
                     'sample',
-                    'pipeline',
                     'analysis_status',
-                    'experiment_type'
+                    'experiment_type',
+                    'pipeline'
                 )
         page = self.paginate_queryset(queryset)
         if page is not None:
