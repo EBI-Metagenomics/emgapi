@@ -601,6 +601,7 @@ class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
         obj = self.get_object()
         if run_accession is not None:
             queryset = obj.runs \
+                .available(self.request) \
                 .filter(accession=run_accession) \
                 .select_related(
                     'sample',
@@ -609,7 +610,8 @@ class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
                     'experiment_type'
                 )
         else:
-            queryset = obj.runs.all() \
+            queryset = obj.runs \
+                .available(self.request) \
                 .select_related(
                     'sample',
                     'pipeline',
