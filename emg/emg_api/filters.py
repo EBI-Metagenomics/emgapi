@@ -20,6 +20,19 @@ import django_filters
 from emg_api import models as emg_models
 
 
+class PublicationFilter(django_filters.FilterSet):
+
+    data_origination = django_filters.CharFilter(
+        name='studies__data_origination',
+        distinct=True)
+
+    class Meta:
+        model = emg_models.Publication
+        fields = (
+            'data_origination',
+        )
+
+
 class StudyFilter(django_filters.FilterSet):
 
     biome = django_filters.CharFilter(

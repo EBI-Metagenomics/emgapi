@@ -307,7 +307,13 @@ INSTALLED_APPS += ('corsheaders',)
 MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')
 CORS_ORIGIN_ALLOW_ALL = True
 
-
 ## statics
 INSTALLED_APPS += ('whitenoise',)
 MIDDLEWARE.append('whitenoise.middleware.WhiteNoiseMiddleware')
+
+
+# Custom settings
+try:
+    EMG_DEFAULT_LIMIT = REST_FRAMEWORK['PAGE_SIZE']
+except:
+    EMG_DEFAULT_LIMIT = 20

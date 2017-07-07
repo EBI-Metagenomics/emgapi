@@ -198,6 +198,9 @@ class StudyQuerySet(models.QuerySet):
     def available(self, request):
         return self.filter(is_public=1)
 
+    def recent(self):
+        return self.order_by('-last_update')
+
 
 class StudyManager(models.Manager):
 
@@ -206,6 +209,9 @@ class StudyManager(models.Manager):
 
     def available(self, request):
         return self.get_queryset().available(request)
+
+    def recent(self, request):
+        return self.get_queryset().available(request).recent()
 
 
 class Study(models.Model):
