@@ -20,8 +20,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='run',
             name='external_run_ids',
-            field=models.CharField(
-                db_column='EXTERNAL_RUN_IDS', max_length=100),
+            field=models.CharField(db_column='EXTERNAL_RUN_IDS', max_length=100),
         ),
         migrations.RenameField(
             model_name='run',
@@ -42,28 +41,26 @@ class Migration(migrations.Migration):
             name='is_production_run',
         ),
 
-        migrations.AlterField(
-            model_name='sample',
-            name='ext_sample_id',
-            field=models.CharField(
-                db_column='EXT_SAMPLE_ID', max_length=20),
-        ),
         migrations.RenameField(
             model_name='sample',
             old_name='ext_sample_id',
             new_name='accession',
         ),
-
         migrations.AlterField(
-            model_name='study',
-            name='ext_study_id',
-            field=models.CharField(
-                db_column='EXT_STUDY_ID', max_length=20),
+            model_name='sample',
+            name='accession',
+            field=models.CharField(db_column='EXT_SAMPLE_ID', default='ERS0000000', max_length=20),
         ),
+
         migrations.RenameField(
             model_name='study',
             old_name='ext_study_id',
             new_name='accession',
+        ),
+        migrations.AlterField(
+            model_name='study',
+            name='accession',
+            field=models.CharField(db_column='EXT_STUDY_ID', default='ERP000000', max_length=20, unique=True),
         ),
         migrations.RemoveField(
             model_name='study',
