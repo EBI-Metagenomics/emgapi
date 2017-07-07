@@ -156,9 +156,7 @@ class SimplePublicationSerializer(PublicationSerializer):
 
 class PipelineSerializer(serializers.HyperlinkedModelSerializer):
 
-    included_serializers = {
-        # 'runs': 'emg_api.serializers.RunSerializer',
-    }
+    included_serializers = {}
 
     url = serializers.HyperlinkedIdentityField(
         view_name='pipelines-detail',
@@ -196,9 +194,7 @@ class PipelineSerializer(serializers.HyperlinkedModelSerializer):
 
 class ExperimentTypeSerializer(serializers.ModelSerializer):
 
-    included_serializers = {
-        # 'runs': 'emg_api.serializers.RunSerializer',
-    }
+    included_serializers = {}
 
     url = serializers.HyperlinkedIdentityField(
         view_name='experiments-detail',
@@ -273,18 +269,46 @@ class RunSerializer(serializers.HyperlinkedModelSerializer):
         view_name='pipelines-detail',
         lookup_field='release_version',
     )
+    # pipeline = relations.SerializerMethodResourceRelatedField(
+    #     source='get_pipeline',
+    #     model=emg_models.Pipeline,
+    #     read_only=True,
+    #     related_link_view_name='pipelines-detail',
+    #     related_link_url_kwarg='release_version',
+    #     related_link_lookup_field='release_version',
+    # )
+    #
+    # def get_pipeline(self, obj):
+    #     # TODO: provide counter instead of paginating relationship
+    #     # workaround https://github.com/django-json-api
+    #     # /django-rest-framework-json-api/issues/178
+    #     return ()
 
     sample = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name='samples-detail',
         lookup_field='accession',
     )
+    # sample = relations.SerializerMethodResourceRelatedField(
+    #     source='get_sample',
+    #     model=emg_models.Sample,
+    #     read_only=True,
+    #     related_link_view_name='samples-detail',
+    #     related_link_url_kwarg='accession',
+    #     related_link_lookup_field='accession',
+    # )
+    #
+    # def get_sample(self, obj):
+    #     # TODO: provide counter instead of paginating relationship
+    #     # workaround https://github.com/django-json-api
+    #     # /django-rest-framework-json-api/issues/178
+    #     return ()
 
     class Meta:
         model = emg_models.Run
         exclude = (
             'job_operator',
-            'run_status_id'
+            'run_status_id',
         )
 
 
@@ -300,6 +324,7 @@ class SimpleRunSerializer(RunSerializer):
             'pipeline_version',
             'pipeline',
             'sample',
+            'sample_accession',
         )
 
 
@@ -338,19 +363,19 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
         return obj.study.accession
 
     # relationships
-    # study = serializers.HyperlinkedRelatedField(
-    #     read_only=True,
-    #     view_name='studies-detail',
-    #     lookup_field='accession',
-    # )
-    study = relations.SerializerMethodResourceRelatedField(
-        source='get_study',
-        model=emg_models.Study,
+    study = serializers.HyperlinkedRelatedField(
         read_only=True,
-        related_link_view_name='studies-detail',
-        related_link_url_kwarg='accession',
-        related_link_lookup_field='accession',
+        view_name='studies-detail',
+        lookup_field='accession',
     )
+    # study = relations.SerializerMethodResourceRelatedField(
+    #     source='get_study',
+    #     model=emg_models.Study,
+    #     read_only=True,
+    #     related_link_view_name='studies-detail',
+    #     related_link_url_kwarg='accession',
+    #     related_link_lookup_field='accession',
+    # )
 
     def get_study(self, obj):
         # TODO: provide counter instead of paginating relationship
