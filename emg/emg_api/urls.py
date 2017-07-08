@@ -15,11 +15,14 @@
 
 
 from emg_api import views
-
+from django.conf.urls import url
 from rest_framework.routers import DefaultRouter
-# from rest_framework_nested.routers import NestedSimpleRouter
 
-urlpatterns = []
+
+urlpatterns = [
+    url(r'^runs/(?P<accession>[a-zA-Z0-9,_]+)/(?P<release_version>[0-9\.]+)$',
+        views.RunAPIView.as_view(), name='runs-detail'),
+]
 
 router = DefaultRouter(trailing_slash=False)
 
@@ -65,4 +68,4 @@ router.register(
     base_name='publications'
 )
 
-urlpatterns = router.urls
+urlpatterns += router.urls

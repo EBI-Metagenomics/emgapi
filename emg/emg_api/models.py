@@ -389,7 +389,7 @@ class ExperimentType(models.Model):
 class RunQuerySet(models.QuerySet):
 
     def available(self, request):
-        return self.filter(run_status_id=4)
+        return self.filter(analysis_status=3)
 
 
 class RunManager(models.Manager):

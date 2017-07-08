@@ -18,6 +18,7 @@
 import logging
 
 # from django.utils.text import Truncator
+from rest_framework.reverse import reverse
 
 # from rest_framework import serializers
 from rest_framework_json_api import serializers
@@ -230,6 +231,17 @@ class ExperimentTypeSerializer(serializers.ModelSerializer):
 
 # Run serializer
 
+class RunHyperlinkedField(serializers.HyperlinkedIdentityField):
+
+    def get_url(self, obj, view_name, request, format):
+        kwargs = {
+            'accession': obj.accession,
+            'release_version': obj.pipeline.release_version
+        }
+        return reverse(
+            view_name, kwargs=kwargs, request=request, format=format)
+
+
 class RunSerializer(serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
@@ -237,9 +249,8 @@ class RunSerializer(serializers.HyperlinkedModelSerializer):
         'sample': 'emg_api.serializers.SampleSerializer',
     }
 
-    url = serializers.HyperlinkedIdentityField(
-        view_name='runs-detail',
-        lookup_field='accession',
+    url = RunHyperlinkedField(
+        view_name='runs-detail'
     )
 
     # attributes

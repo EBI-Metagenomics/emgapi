@@ -28,8 +28,10 @@ from emg_api.models import Run  # noqa
 class TestRunAPI(APITestCase):
 
     def test_public(self):
-        mommy.make("emg_api.Run", pk=123, run_status_id=4)
-        mommy.make("emg_api.Run", pk=456, run_status_id=0)
+        _as = mommy.make('emg_api.AnalysisStatus', pk=3)
+        _p = mommy.make('emg_api.Pipeline', pk=1, release_version="1.0")
+        mommy.make("emg_api.Run", pk=123, pipeline=_p, analysis_status=_as)
+        mommy.make("emg_api.Run", pk=456, pipeline=_p)
 
         url = reverse("runs-list")
         response = self.client.get(url)
