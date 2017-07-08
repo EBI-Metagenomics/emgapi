@@ -146,6 +146,9 @@ class Biome(models.Model):
     class Meta:
         db_table = 'BIOME_HIERARCHY_TREE'
         ordering = ('biome_id',)
+        unique_together = (
+            ('biome_id', 'biome_name'),
+        )
 
     def __str__(self):
         return self.biome_name
@@ -218,8 +221,7 @@ class Study(models.Model):
     study_id = models.AutoField(
         db_column='STUDY_ID', primary_key=True)
     accession = models.CharField(
-        db_column='EXT_STUDY_ID', max_length=20, unique=True,
-        default='ERP000000')
+        db_column='EXT_STUDY_ID', max_length=20, unique=True)
     centre_name = models.CharField(
         db_column='CENTRE_NAME', max_length=255, blank=True, null=True)
     is_public = models.IntegerField(
@@ -298,8 +300,7 @@ class Sample(models.Model):
     sample_id = models.AutoField(
         db_column='SAMPLE_ID', primary_key=True)
     accession = models.CharField(
-        db_column='EXT_SAMPLE_ID', max_length=20,
-        default='ERS0000000')
+        db_column='EXT_SAMPLE_ID', max_length=20)
     analysis_completed = models.DateField(
         db_column='ANALYSIS_COMPLETED', blank=True, null=True)
     collection_date = models.DateField(

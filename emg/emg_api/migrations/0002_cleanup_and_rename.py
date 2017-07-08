@@ -12,25 +12,32 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RenameModel('BiomeHierarchyTree', 'Biome'),
-
-        migrations.RenameModel('PipelineRelease', 'Pipeline'),
-
-        migrations.RenameModel('AnalysisJob', 'Run'),
+        migrations.RenameModel(
+            old_name='BiomeHierarchyTree',
+            new_name='Biome',
+        ),
+        migrations.RenameModel(
+            old_name='PipelineRelease',
+            new_name='Pipeline',
+        ),
+        migrations.RenameModel(
+            old_name='AnalysisJob',
+            new_name='Run',
+        ),
+        migrations.RenameField(
+            model_name='run',
+            old_name='external_run_ids',
+            new_name='accession',
+        ),
         migrations.AlterField(
             model_name='run',
-            name='external_run_ids',
+            name='accession',
             field=models.CharField(db_column='EXTERNAL_RUN_IDS', max_length=100),
         ),
         migrations.RenameField(
             model_name='run',
             old_name='job_id',
             new_name='run_id',
-        ),
-        migrations.RenameField(
-            model_name='run',
-            old_name='external_run_ids',
-            new_name='accession',
         ),
         migrations.RemoveField(
             model_name='run',
@@ -40,7 +47,6 @@ class Migration(migrations.Migration):
             model_name='run',
             name='is_production_run',
         ),
-
         migrations.RenameField(
             model_name='sample',
             old_name='ext_sample_id',
@@ -49,9 +55,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='sample',
             name='accession',
-            field=models.CharField(db_column='EXT_SAMPLE_ID', default='ERS0000000', max_length=20),
+            field=models.CharField(db_column='EXT_SAMPLE_ID', max_length=20),
         ),
-
         migrations.RenameField(
             model_name='study',
             old_name='ext_study_id',
@@ -60,7 +65,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='study',
             name='accession',
-            field=models.CharField(db_column='EXT_STUDY_ID', default='ERP000000', max_length=20, unique=True),
+            field=models.CharField(db_column='EXT_STUDY_ID', max_length=20, unique=True),
         ),
         migrations.RemoveField(
             model_name='study',
@@ -70,7 +75,6 @@ class Migration(migrations.Migration):
             model_name='study',
             name='ncbi_project_id',
         ),
-
         migrations.AlterField(
             model_name='pipelinereleasetool',
             name='how_tool_used_desc',
@@ -86,7 +90,6 @@ class Migration(migrations.Migration):
             name='tool',
             field=models.ForeignKey(db_column='TOOL_ID', on_delete=django.db.models.deletion.CASCADE, to='emg_api.PipelineTool'),
         ),
-
         migrations.AlterField(
             model_name='pipelinetool',
             name='description',
@@ -130,7 +133,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='sample',
             name='accession',
-            field=models.CharField(db_column='EXT_SAMPLE_ID', default='ERS0000000', max_length=20),
+            field=models.CharField(db_column='EXT_SAMPLE_ID', max_length=20),
         ),
         migrations.AlterField(
             model_name='sample',
@@ -154,11 +157,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name='study',
-            name='accession',
-            field=models.CharField(db_column='EXT_STUDY_ID', default='ERP000000', max_length=20),
-        ),
-        migrations.AlterField(
-            model_name='study',
             name='biome',
             field=models.ForeignKey(db_column='BIOME_ID', on_delete=django.db.models.deletion.CASCADE, related_name='studies', to='emg_api.Biome'),
         ),
@@ -172,7 +170,6 @@ class Migration(migrations.Migration):
             name='study',
             field=models.ForeignKey(db_column='STUDY_ID', on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to='emg_api.Study'),
         ),
-
         migrations.AlterModelOptions(
             name='analysisstatus',
             options={'ordering': ('analysis_status_id',)},
@@ -207,11 +204,18 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='pipelinereleasetool',
-            unique_together=set([('pipeline', 'tool_group_id'), ('pipeline', 'tool')]),
+            unique_together=set([('pipeline', 'tool'), ('pipeline', 'tool_group_id')]),
         ),
         migrations.AlterUniqueTogether(
+            name='biome',
+            unique_together=set([('biome_id', 'biome_name')]),
+        ),
+        # Ticket: IBU-6868
+        # combine external_run_id/accession and pipeline version
+        # to restrict duplicates
+        migrations.AlterUniqueTogether(
             name='run',
-            unique_together=set([('run_id', 'accession')]),
+            unique_together=set([('pipeline', 'accession')]),
         ),
         migrations.AlterUniqueTogether(
             name='sample',
@@ -229,49 +233,40 @@ class Migration(migrations.Migration):
             name='studypublication',
             unique_together=set([('study', 'pub')]),
         ),
-
-        # Ticket: IBU-6868
-        # combine external_run_id and pipeline version to restrict duplicates
-        migrations.AlterUniqueTogether(
-            name='run',
-            unique_together=set([('pipeline', 'accession')]),
-        ),
-
-        # FullText index
         migrations.RunSQL(
-            sql="CREATE FULLTEXT INDEX biome_biome_name_ts_idx ON BIOME_HIERARCHY_TREE (biome_name)",
-            reverse_sql='ALTER TABLE BIOME_HIERARCHY_TREE DROP INDEX biome_biome_name_ts_idx'
+            sql='CREATE FULLTEXT INDEX biome_biome_name_ts_idx ON BIOME_HIERARCHY_TREE (biome_name)',
+            reverse_sql='ALTER TABLE BIOME_HIERARCHY_TREE DROP INDEX biome_biome_name_ts_idx',
         ),
         migrations.RunSQL(
-            sql="CREATE FULLTEXT INDEX biome_lineage_ts_idx ON BIOME_HIERARCHY_TREE (lineage)",
-            reverse_sql='ALTER TABLE BIOME_HIERARCHY_TREE DROP INDEX biome_lineage_ts_idx'
+            sql='CREATE FULLTEXT INDEX biome_lineage_ts_idx ON BIOME_HIERARCHY_TREE (lineage)',
+            reverse_sql='ALTER TABLE BIOME_HIERARCHY_TREE DROP INDEX biome_lineage_ts_idx',
         ),
         migrations.RunSQL(
-            sql="CREATE FULLTEXT INDEX study_study_name_ts_idx ON STUDY(study_name)",
-            reverse_sql='ALTER TABLE STUDY DROP INDEX study_study_name_ts_idx'
+            sql='CREATE FULLTEXT INDEX study_study_name_ts_idx ON STUDY(study_name)',
+            reverse_sql='ALTER TABLE STUDY DROP INDEX study_study_name_ts_idx',
         ),
         migrations.RunSQL(
-            sql="CREATE FULLTEXT INDEX study_study_abstract_ts_idx ON STUDY (study_abstract)",
-            reverse_sql='ALTER TABLE STUDY DROP INDEX study_study_abstract_ts_idx'
+            sql='CREATE FULLTEXT INDEX study_study_abstract_ts_idx ON STUDY (study_abstract)',
+            reverse_sql='ALTER TABLE STUDY DROP INDEX study_study_abstract_ts_idx',
         ),
         migrations.RunSQL(
-            sql="CREATE FULLTEXT INDEX publication_publication_title_ts_idx ON PUBLICATION (pub_title)",
-            reverse_sql='ALTER TABLE PUBLICATION DROP INDEX publication_publication_title_ts_idx'
+            sql='CREATE FULLTEXT INDEX publication_publication_title_ts_idx ON PUBLICATION (pub_title)',
+            reverse_sql='ALTER TABLE PUBLICATION DROP INDEX publication_publication_title_ts_idx',
         ),
         migrations.RunSQL(
-            sql="CREATE FULLTEXT INDEX publication_pub_abstract_ts_idx ON PUBLICATION (pub_abstract)",
-            reverse_sql='ALTER TABLE PUBLICATION DROP INDEX publication_pub_abstract_ts_idx'
+            sql='CREATE FULLTEXT INDEX publication_pub_abstract_ts_idx ON PUBLICATION (pub_abstract)',
+            reverse_sql='ALTER TABLE PUBLICATION DROP INDEX publication_pub_abstract_ts_idx',
         ),
         migrations.RunSQL(
-            sql="CREATE FULLTEXT INDEX pipeline_description_ts_idx ON PIPELINE_RELEASE (description)",
-            reverse_sql='ALTER TABLE PIPELINE_RELEASE DROP INDEX pipeline_description_ts_idx'
+            sql='CREATE FULLTEXT INDEX pipeline_description_ts_idx ON PIPELINE_RELEASE (description)',
+            reverse_sql='ALTER TABLE PIPELINE_RELEASE DROP INDEX pipeline_description_ts_idx',
         ),
         migrations.RunSQL(
-            sql="CREATE FULLTEXT INDEX pipeline_changes_ts_idx ON PIPELINE_RELEASE (changes)",
-            reverse_sql='ALTER TABLE PIPELINE_RELEASE DROP INDEX pipeline_changes_ts_idx'
+            sql='CREATE FULLTEXT INDEX pipeline_changes_ts_idx ON PIPELINE_RELEASE (changes)',
+            reverse_sql='ALTER TABLE PIPELINE_RELEASE DROP INDEX pipeline_changes_ts_idx',
         ),
         migrations.RunSQL(
-            sql="CREATE FULLTEXT INDEX sample_sample_name_ts_idx ON SAMPLE (sample_name)",
-            reverse_sql='ALTER TABLE SAMPLE DROP INDEX sample_sample_name_ts_idx'
+            sql='CREATE FULLTEXT INDEX sample_sample_name_ts_idx ON SAMPLE (sample_name)',
+            reverse_sql='ALTER TABLE SAMPLE DROP INDEX sample_sample_name_ts_idx',
         ),
     ]
