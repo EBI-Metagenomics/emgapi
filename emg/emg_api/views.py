@@ -357,7 +357,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         'accession',
         '@sample_name',
         '@biome__biome_name',
-        '^biome__lineage',
+        '@biome__lineage',
     )
 
     lookup_field = 'accession'
