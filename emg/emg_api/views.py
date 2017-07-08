@@ -19,8 +19,9 @@ import logging
 
 from django.conf import settings
 from django.db.models import Count
+from django.shortcuts import get_object_or_404
 
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets, mixins, generics
 from rest_framework.response import Response
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -427,8 +428,52 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         return Response(serializer.data)
 
 
-class RunViewSet(mixins.RetrieveModelMixin,
-                 mixins.ListModelMixin,
+class MultipleFieldLookupMixin(object):
+
+    """
+    Apply this mixin to any view or viewset to get multiple field filtering
+    based on a `lookup_fields` attribute, instead of the default single field
+    filtering.
+    Source: http://www.django-rest-framework.org/api-guide/generic-views/
+    """
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        queryset = self.filter_queryset(queryset)
+        filter = {}
+        for field in self.lookup_fields:
+            if self.kwargs[field]:
+                filter[field] = self.kwargs[field]
+        return get_object_or_404(queryset, **filter)
+
+
+class RunAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):
+
+    serializer_class = emg_serializers.RunSerializer
+
+    lookup_fields = ('accession', 'release_version')
+
+    def get_queryset(self):
+        return emg_models.Run.objects \
+            .available(self.request) \
+            .select_related(
+                'sample',
+                'pipeline',
+                'analysis_status',
+                'experiment_type'
+            )
+
+    def get(self, request, accession, release_version, *args, **kwargs):
+        """
+        Retrieves run for the given accession
+        """
+        run = emg_models.Run.objects.get(
+            accession=accession, pipeline__release_version=release_version)
+        serializer = self.get_serializer(run)
+        return Response(data=serializer.data)
+
+
+class RunViewSet(mixins.ListModelMixin,
                  viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.SimpleRunSerializer
@@ -451,9 +496,6 @@ class RunViewSet(mixins.RetrieveModelMixin,
         'accession',
     )
 
-    lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9,_]+'
-
     def get_queryset(self):
         return emg_models.Run.objects \
             .available(self.request) \
@@ -468,12 +510,6 @@ class RunViewSet(mixins.RetrieveModelMixin,
         if self.action == 'retrieve':
             return emg_serializers.RunSerializer
         return super(RunViewSet, self).get_serializer_class()
-
-    def retrieve(self, request, *args, **kwargs):
-        """
-        Retrieves run for the given accession
-        """
-        return super(RunViewSet, self).retrieve(request, *args, **kwargs)
 
     def list(self, request, *args, **kwargs):
         """

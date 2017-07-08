@@ -89,7 +89,10 @@ class TestDefaultAPI(object):
                 _biome = mommy.make('emg_api.Biome', pk=pk)
                 mommy.make(model_name, pk=pk, biome=_biome, is_public=1)
             elif _model in ('Run'):
-                mommy.make(model_name, pk=pk, run_status_id=4)
+                _as = mommy.make('emg_api.AnalysisStatus', pk=3)
+                _p = mommy.make('emg_api.Pipeline', pk=1,
+                                release_version="1.0")
+                mommy.make(model_name, pk=pk, pipeline=_p, analysis_status=_as)
             else:
                 mommy.make(model_name, pk=pk)
 
