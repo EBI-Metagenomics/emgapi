@@ -27,6 +27,7 @@ from emg_api.models import Sample  # noqa
 
 
 class TestSampleAPI(APITestCase):
+
     def setUp(self):
         self.data = {}
         self.data['date'] = datetime.now()

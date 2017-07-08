@@ -701,6 +701,7 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         Example:
         ---
         `/api/publications/pub_id`
+
         `/api/publications/pub_id?include=studies` with studies
         """
         return super(PublicationViewSet, self) \
@@ -712,7 +713,9 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         Example:
         ---
         `/api/publications` retrieves list of publications
+
         `/api/publications?include=studies` with studies
+
         `/api/publications?ordering=pub_id` ordered by id
 
         Search for title, abstract, authors, etc.:
@@ -735,6 +738,7 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         `/api/publications/studies`
 
         Filter by:
+        ---
         `/api/publications/studies?data_origination=harvested`
         """
 
