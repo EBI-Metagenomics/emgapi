@@ -18,7 +18,7 @@
 import logging
 
 from django.conf import settings
-from django.db.models import Count
+from django.db.models import Count, Prefetch
 from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets, mixins, generics
@@ -209,8 +209,19 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     lookup_value_regex = '[a-zA-Z0-9,]+'
 
     def get_queryset(self):
-        return emg_models.Study.objects.available(self.request) \
+        qs = emg_models.Study.objects.available(self.request) \
             .select_related('biome')
+        if 'samples' in self.request.GET.get('include', '').split(','):
+            _qs = emg_models.Sample.objects \
+                .available(self.request) \
+                .select_related('biome')
+            qs = qs.prefetch_related(Prefetch('samples', queryset=_qs))
+        if 'publications' in self.request.GET.get('include', '').split(','):
+            qs = qs.prefetch_related(
+                Prefetch(
+                    'publications',
+                    queryset=emg_models.Publication.objects.all()))
+        return qs
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -224,13 +235,19 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         ---
         `/api/studies`
 
-        `/api/studies?search=microbial%20fuel%20cells`
+        `/api/studies?include=samples` with samples
 
+        Filter by:
+        ---
         `/api/studies?biome=root:Environmental:Terrestrial:Soil`
         retrieve all studies for given Biome
 
         `/api/studies?biome_name=Soil`
         retrieve all studies containing given Biome
+
+        Search:
+        ---
+        `/api/studies?search=microbial%20fuel%20cells`
         """
 
         return super(StudyViewSet, self).list(request, *args, **kwargs)
@@ -241,6 +258,9 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         Example:
         ---
         `/api/studies/ERP008945` retrieve study ERP008945
+
+        `/api/studies/ERP008945?include=samples,publications`
+        with samples and publications
         """
         return super(StudyViewSet, self).retrieve(request, *args, **kwargs)
 
@@ -369,9 +389,12 @@ class SampleViewSet(mixins.RetrieveModelMixin,
             .available(self.request) \
             .select_related('biome', 'study')
         if 'runs' in self.request.GET.get('include', '').split(','):
-            qs = qs.prefetch_related(
-                'runs', 'runs__analysis_status',
-                'runs__pipeline', 'runs__experiment_type')
+            _qs = emg_models.Run.objects \
+                .available(self.request) \
+                .select_related(
+                    'analysis_status', 'pipeline', 'experiment_type'
+                )
+            qs = qs.prefetch_related(Prefetch('runs', queryset=_qs))
         if 'study' in self.request.GET.get('include', '').split(','):
             qs = qs.select_related('study__biome')
         return qs
@@ -388,10 +411,8 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         ---
         `/api/sammples/accession`
 
-        `/api/sammples/accession?include=run` with related runs
+        `/api/sammples/accession?include=runs` with related runs
 
-        `/api/sammples/accession?include=run,study`
-        with related runs and studies
         """
         return super(SampleViewSet, self).retrieve(request, *args, **kwargs)
 
@@ -402,7 +423,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         ---
         `/api/samples` retrieves list of samples
 
-        `/api/samples?include=run,study` with related runs and studies
+        `/api/samples?include=runs,study` with related runs and studies
 
         `/api/samples?ordering=accession` ordered by accession
 
@@ -769,10 +790,11 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
     lookup_value_regex = '[a-zA-Z0-9,]+'
 
     def get_queryset(self):
+        qs = emg_models.Publication.objects.all()
         if 'studies' in self.request.GET.get('include', '').split(','):
-            return emg_models.Publication.objects.all() \
-                .prefetch_related('studies', 'studies__biome')
-        return emg_models.Publication.objects.all()
+            _qs = emg_models.Run.objects.select_related('biome')
+            qs = qs.prefetch_related(Prefetch('studies', queryset=_qs))
+        return qs
 
     def get_serializer_class(self):
         if self.action == 'retrieve':

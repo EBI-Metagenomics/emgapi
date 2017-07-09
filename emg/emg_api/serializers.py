@@ -141,6 +141,10 @@ class PublicationSerializer(serializers.HyperlinkedModelSerializer):
 
 class SimplePublicationSerializer(PublicationSerializer):
 
+    included_serializers = {
+        'studies': 'emg_api.serializers.SimpleStudySerializer',
+    }
+
     class Meta:
         model = emg_models.Publication
         fields = (
@@ -245,7 +249,6 @@ class RunHyperlinkedField(serializers.HyperlinkedIdentityField):
 class RunSerializer(serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
-        'pipeline': 'emg_api.serializers.PipelineSerializer',
         'sample': 'emg_api.serializers.SampleSerializer',
     }
 
@@ -325,7 +328,9 @@ class RunSerializer(serializers.HyperlinkedModelSerializer):
 
 class SimpleRunSerializer(RunSerializer):
 
-    included_serializers = {}
+    included_serializers = {
+        'sample': 'emg_api.serializers.SimpleSampleSerializer',
+    }
 
     class Meta:
         model = emg_models.Run
@@ -344,7 +349,7 @@ class SimpleRunSerializer(RunSerializer):
 class SampleSerializer(serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
-        'study': 'emg_api.serializers.SimpleStudySerializer',
+        'study': 'emg_api.serializers.StudySerializer',
         'run': 'emg_api.serializers.RunSerializer',
     }
 
@@ -426,7 +431,7 @@ class SimpleSampleSerializer(SampleSerializer):
 
     included_serializers = {
         'study': 'emg_api.serializers.SimpleStudySerializer',
-        'run': 'emg_api.serializers.RunSerializer',
+        'run': 'emg_api.serializers.SimpleRunSerializer',
     }
 
     # sample_desc = serializers.SerializerMethodField(
@@ -528,7 +533,10 @@ class StudySerializer(serializers.HyperlinkedModelSerializer):
 
 class SimpleStudySerializer(StudySerializer):
 
-    included_serializers = {}
+    included_serializers = {
+        'publications': 'emg_api.serializers.SimplePublicationSerializer',
+        'samples': 'emg_api.serializers.SimpleSampleSerializer',
+    }
 
     # study_abstract = serializers.SerializerMethodField(
     #     'get_short_study_abstract')
