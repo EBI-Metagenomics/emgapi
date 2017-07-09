@@ -53,20 +53,16 @@ class StudyFilter(django_filters.FilterSet):
 
 class SampleFilter(django_filters.FilterSet):
 
-    analysis_status_id = django_filters.ModelChoiceFilter(
-        queryset=emg_models.AnalysisStatus.objects.all(),
-        distinct=True)
-
     experiment_type_id = django_filters.ModelChoiceFilter(
         queryset=emg_models.ExperimentType.objects.all(),
         distinct=True)
 
-    analysis_status = django_filters.CharFilter(
-        name='runs__analysis_status__analysis_status',
-        distinct=True)
-
     experiment_type = django_filters.CharFilter(
         name='runs__experiment_type__experiment_type',
+        distinct=True)
+
+    pipeline_version = django_filters.CharFilter(
+        name='runs__pipeline__release_version',
         distinct=True)
 
     biome = django_filters.CharFilter(
@@ -80,12 +76,11 @@ class SampleFilter(django_filters.FilterSet):
     class Meta:
         model = emg_models.Sample
         fields = (
-            'analysis_status',
             'experiment_type',
-            'analysis_status_id',
             'experiment_type_id',
             'biome',
             'biome_name',
+            'pipeline_version',
             'geo_loc_name',
         )
 
@@ -95,9 +90,7 @@ class PipelineFilter(SampleFilter):
     class Meta:
         model = emg_models.Pipeline
         fields = (
-            'analysis_status',
             'experiment_type',
-            'analysis_status_id',
             'experiment_type_id',
         )
 
@@ -128,8 +121,8 @@ class RunFilter(django_filters.FilterSet):
         model = emg_models.Run
         fields = (
             'analysis_status',
-            'experiment_type',
             'analysis_status_id',
+            'experiment_type',
             'experiment_type_id',
             'pipeline_version',
         )

@@ -345,7 +345,7 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
         'study': 'emg_api.serializers.SimpleStudySerializer',
-        'runs': 'emg_api.serializers.RunSerializer',
+        'run': 'emg_api.serializers.RunSerializer',
     }
 
     url = serializers.HyperlinkedIdentityField(
@@ -424,7 +424,10 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
 
 class SimpleSampleSerializer(SampleSerializer):
 
-    included_serializers = {}
+    included_serializers = {
+        'study': 'emg_api.serializers.SimpleStudySerializer',
+        'run': 'emg_api.serializers.RunSerializer',
+    }
 
     # sample_desc = serializers.SerializerMethodField(
     #     'get_short_sample_desc')

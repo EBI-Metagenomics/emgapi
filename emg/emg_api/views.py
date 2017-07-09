@@ -365,9 +365,16 @@ class SampleViewSet(mixins.RetrieveModelMixin,
     lookup_value_regex = '[a-zA-Z0-9,]+'
 
     def get_queryset(self):
-        return emg_models.Sample.objects \
+        qs = emg_models.Sample.objects \
             .available(self.request) \
             .select_related('biome', 'study')
+        if 'runs' in self.request.GET.get('include', '').split(','):
+            qs = qs.prefetch_related(
+                'runs', 'runs__analysis_status',
+                'runs__pipeline', 'runs__experiment_type')
+        if 'study' in self.request.GET.get('include', '').split(','):
+            qs = qs.select_related('study__biome')
+        return qs
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -377,12 +384,39 @@ class SampleViewSet(mixins.RetrieveModelMixin,
     def retrieve(self, request, *args, **kwargs):
         """
         Retrieves sample for the given accession
+        Example:
+        ---
+        `/api/sammples/accession`
+
+        `/api/sammples/accession?include=run` with related runs
+
+        `/api/sammples/accession?include=run,study`
+        with related runs and studies
         """
         return super(SampleViewSet, self).retrieve(request, *args, **kwargs)
 
     def list(self, request, *args, **kwargs):
         """
         Retrieves list of samples
+        Example:
+        ---
+        `/api/samples` retrieves list of samples
+
+        `/api/samples?include=run,study` with related runs and studies
+
+        `/api/samples?ordering=accession` ordered by accession
+
+        Filter by:
+        ---
+        `/api/samples?experiment_type=metagenomics`
+
+        `/api/samples?pipeline_version=3.0`
+
+        `/api/samples?biome=root:Environmental:Aquatic:Marine`
+
+        Search for accession, name, biome, etc.:
+        ---
+        `/api/samples?search=text`
         """
         return super(SampleViewSet, self).list(request, *args, **kwargs)
 
@@ -395,6 +429,20 @@ class SampleViewSet(mixins.RetrieveModelMixin,
     def runs(self, request, accession=None, run_accession=None):
         """
         Retrieves list of runs for the given sample accession
+        Example:
+        ---
+        `/api/samples/accession/runs`
+
+        `/api/sample/saccession/runs?include=run,study`
+        with related runs and studies
+
+        Filter by:
+        ---
+        `/api/samples/accession/runs?experiment_type=metagenomics`
+
+        `/api/samples/accession/runs?pipeline_version=3.0`
+
+        `/api/samples/accession/runs?biome=root:Environmental:Aquatic:Marine`
         """
 
         obj = self.get_object()
@@ -771,11 +819,11 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         Retrieves list of studies for the given publication
         Example:
         ---
-        `/api/publications/studies`
+        `/api/publications/id/studies`
 
         Filter by:
         ---
-        `/api/publications/studies?data_origination=harvested`
+        `/api/publications/id/studies?data_origination=harvested`
         """
 
         obj = self.get_object()
