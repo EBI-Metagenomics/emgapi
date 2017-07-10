@@ -22,7 +22,6 @@ RUN pip3.5 install virtualenv
 RUN yum -y install mysql mysql-devel
 
 RUN useradd centos
-RUN chpasswd centos
 
 ADD run.sh /tmp/docker/run.sh
 RUN chmod a+x /tmp/docker/run.sh
