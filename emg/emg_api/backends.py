@@ -27,7 +27,7 @@ class EMGBackend(object):
     supports_anonymous_user = False
     supports_object_permissions = False
 
-    def authenticate(self, request, username, password):
+    def authenticate(self, request, username=None, password=None):
         self._get_backend_settings()
         req = requests.post(
             self.ena_auth_url,
@@ -55,7 +55,4 @@ class EMGBackend(object):
             return None
 
     def _get_backend_settings(self):
-        try:
-            self.ena_auth_url = settings.EMG_BACKEND_AUTH_URL
-        except AttributeError:
-            self.ena_auth_url = 'http://localhost'
+        self.ena_auth_url = settings.EMG_BACKEND_AUTH_URL

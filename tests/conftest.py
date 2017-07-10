@@ -24,6 +24,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'emg.settings')
 
 def pytest_configure():
     settings.DEBUG = False
+    settings.REST_FRAMEWORK['TEST_REQUEST_DEFAULT_FORMAT'] = 'vnd.api+json'
     settings.DATABASES['default']['NAME'] = 'emg_test'
     settings.DATABASES['default']['HOST'] = \
         os.getenv('DB_HOST', 'localhost')
