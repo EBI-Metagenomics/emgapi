@@ -302,6 +302,20 @@ REST_FRAMEWORK = {
     ],
 }
 
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {},
+    'LOGIN_URL': 'rest_framework:login',
+    'LOGOUT_URL': 'rest_framework:logout',
+}
+
+# Swagger auth
+# Toggles the use of Django Auth as an authentication mechanism.
+# Note: The login/logout button relies on the LOGIN_URL and LOGOUT_URL
+# settings These can either be configured under SWAGGER_SETTINGS or Django settings.
+LOGIN_URL = 'rest_framework:login'
+LOGOUT_URL = 'rest_framework:logout'
+
+
 ## django cors
 INSTALLED_APPS += ('corsheaders',)
 MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')
@@ -317,3 +331,10 @@ try:
     EMG_DEFAULT_LIMIT = REST_FRAMEWORK['PAGE_SIZE']
 except:
     EMG_DEFAULT_LIMIT = 20
+
+# Authentication backends
+AUTHENTICATION_BACKENDS = (
+    'emg_api.backends.EMGBackend',
+)
+
+EMG_BACKEND_AUTH_URL = os.getenv('EMG_BACKEND_AUTH_URL', 'http://localhost')
