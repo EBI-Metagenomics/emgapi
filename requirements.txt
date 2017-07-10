@@ -19,6 +19,7 @@ Django~=1.11.1
 djangorestframework~=3.6.3
 django-filter~=1.0.3
 djangorestframework-jsonapi~=2.2.0
+# django-rest-auth~=0.9.1
 django-cors-headers~=1.3.1
 
 # optional serializers
@@ -31,4 +32,3 @@ coreapi~=2.3.0
 
 # docs
 django-rest-swagger~=2.1.2
-

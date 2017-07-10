@@ -142,8 +142,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # rest framework
     'rest_framework',
+    # 'rest_framework.authtoken',
     'rest_framework_swagger',
     'django_filters',
+    # 'rest_auth',
     # apps
     'emg_api',
 ]
@@ -294,18 +296,14 @@ REST_FRAMEWORK = {
     ),
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        # 'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': [
-         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
-         # 'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+        # 'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ],
-}
-
-SWAGGER_SETTINGS = {
-    'SECURITY_DEFINITIONS': {},
-    'LOGIN_URL': 'rest_framework:login',
-    'LOGOUT_URL': 'rest_framework:logout',
 }
 
 # Swagger auth
@@ -315,6 +313,15 @@ SWAGGER_SETTINGS = {
 LOGIN_URL = 'rest_framework:login'
 LOGOUT_URL = 'rest_framework:logout'
 
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'basic': {
+            'type': 'basic'
+        }
+    },
+    'LOGIN_URL': 'rest_framework:login',
+    'LOGOUT_URL': 'rest_framework:logout',
+}
 
 ## django cors
 INSTALLED_APPS += ('corsheaders',)
