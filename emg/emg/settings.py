@@ -194,8 +194,8 @@ DATABASES = {
         'NAME': 'emg',
         'USER': 'root',
         # 'PASSWORD': 'secret',
-        'HOST': 'localhost',
-        'PORT': 3306,
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '3306'),
     },
 }
 
