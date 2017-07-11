@@ -28,11 +28,21 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from rest_framework.decorators import detail_route, list_route
 
+from rest_auth import views as rest_auth_views
+
 from emg_api import models as emg_models
 from emg_api import serializers as emg_serializers
 from emg_api import filters as emg_filters
 
 logger = logging.getLogger(__name__)
+
+
+class LoginViewSet(rest_auth_views.LoginView):
+    serializer_class = emg_serializers.LoginSerializer
+
+
+class LogoutViewSet(rest_auth_views.LogoutView):
+    pass
 
 
 class BiomeViewSet(mixins.RetrieveModelMixin,

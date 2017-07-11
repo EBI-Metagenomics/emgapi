@@ -20,8 +20,25 @@ from rest_framework.routers import DefaultRouter
 
 
 urlpatterns = [
-    url(r'^runs/(?P<accession>[a-zA-Z0-9,_]+)/(?P<release_version>[0-9\.]+)$',
-        views.RunAPIView.as_view(), name='runs-detail'),
+
+    url(
+        r'^auth/login$',
+        views.LoginViewSet.as_view(),
+        name='api_login'
+    ),
+
+    url(
+        r'^auth/logout$',
+        views.LogoutViewSet.as_view(),
+        name='api_logout'
+    ),
+
+    url(
+        r'^runs/(?P<accession>[a-zA-Z0-9,_]+)/(?P<release_version>[0-9\.]+)$',
+        views.RunAPIView.as_view(),
+        name='runs-detail'
+    ),
+
 ]
 
 router = DefaultRouter(trailing_slash=False)

@@ -145,7 +145,8 @@ INSTALLED_APPS = [
     # 'rest_framework.authtoken',
     'rest_framework_swagger',
     'django_filters',
-    # 'rest_auth',
+    #'rest_auth',
+
     # apps
     'emg_api',
 ]
@@ -315,12 +316,11 @@ LOGOUT_URL = 'rest_framework:logout'
 
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
-        'basic': {
-            'type': 'basic'
-        }
+        # 'basic': {
+        #     'type': 'basic'
+        # }
     },
-    'LOGIN_URL': 'rest_framework:login',
-    'LOGOUT_URL': 'rest_framework:logout',
+    'USE_SESSION_AUTH': True,
 }
 
 ## django cors
