@@ -135,17 +135,18 @@ class TestFullTextIndexAPI(object):
     @pytest.mark.parametrize(
         '_model, _view, search_term, search_attr, counts',
         [
-            ('Biome', 'biomes', 'findme', 'biome_name', 5),
-            ('Study', 'studies', 'findme', 'study_name', 5),
-            ('Sample', 'samples', 'findme', 'sample_name', 5),
-            ('Publication', 'publications', 'findme', 'pub_title', 5),
+            ('Biome', 'emg_api:biomes', 'findme', 'biome_name', 5),
+            ('Study', 'emg_api:studies', 'findme', 'study_name', 5),
+            ('Sample', 'emg_api:samples', 'findme', 'sample_name', 5),
+            ('Publication', 'emg_api:publications', 'findme', 'pub_title', 5),
         ]
     )
     @pytest.mark.django_db
     def test_search(self, live_server, client,
                     _model, _view, search_term, search_attr, counts):
+        view_name = _view.split(":")[1]
         klass = getattr(importlib.import_module("emg_api.models"), _model)
-        entries = globals()["create_%s" % _view](counts)
+        entries = globals()["create_%s" % view_name](counts)
         klass.objects.bulk_create(entries)
         assert len(klass.objects.all()) == 2*counts
 

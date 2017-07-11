@@ -24,7 +24,7 @@ from django.core.urlresolvers import reverse
 class TestDefaultAPI(object):
 
     def test_default(self, client):
-        url = reverse('api-root')
+        url = reverse('emg_api:api-root')
         response = client.get(url)
         assert response.status_code == 200
         rsp = response.json()
@@ -43,12 +43,12 @@ class TestDefaultAPI(object):
     @pytest.mark.parametrize(
         '_view',
         [
-            'biomes',
-            'experiments',
-            'pipelines',
-            'publications',
-            'samples',
-            'studies',
+            'emg_api:biomes',
+            'emg_api:experiments',
+            'emg_api:pipelines',
+            'emg_api:publications',
+            'emg_api:samples',
+            'emg_api:studies',
             pytest.mark.xfail('viewdoesnotexist'),
         ]
     )
@@ -68,13 +68,13 @@ class TestDefaultAPI(object):
     @pytest.mark.parametrize(
         '_model, _view, relations',
         [
-            ('Biome', 'biomes', ['studies', 'samples']),
-            ('ExperimentType', 'experiments', ['runs']),
-            ('Pipeline', 'pipelines', ['runs']),
-            ('Publication', 'publications', ['studies']),
-            ('Run', 'runs', ['pipeline', 'sample']),
-            ('Sample', 'samples', ['biome', 'study', 'runs']),
-            ('Study', 'studies', ['biome', 'publications', 'samples']),
+            ('Biome', 'emg_api:biomes', ['studies', 'samples']),
+            ('ExperimentType', 'emg_api:experiments', ['runs']),
+            ('Pipeline', 'emg_api:pipelines', ['runs']),
+            ('Publication', 'emg_api:publications', ['studies']),
+            ('Run', 'emg_api:runs', ['pipeline', 'sample']),
+            ('Sample', 'emg_api:samples', ['biome', 'study', 'runs']),
+            ('Study', 'emg_api:studies', ['biome', 'publications', 'samples']),
         ]
     )
     @pytest.mark.django_db
@@ -107,9 +107,10 @@ class TestDefaultAPI(object):
         assert rsp['meta']['pagination']['count'] == 100
 
         # Links
-        first_link = 'http://testserver/api/%s?page=1' % _view
-        last_link = 'http://testserver/api/%s?page=5' % _view
-        next_link = 'http://testserver/api/%s?page=2' % _view
+        _view_url = _view.split(":")[1]
+        first_link = 'http://testserver/api/%s?page=1' % _view_url
+        last_link = 'http://testserver/api/%s?page=5' % _view_url
+        next_link = 'http://testserver/api/%s?page=2' % _view_url
         assert rsp['links']['first'] == first_link
         assert rsp['links']['last'] == last_link
         assert rsp['links']['next'] == next_link

@@ -24,6 +24,6 @@ from rest_framework.test import APITestCase
 class TestPublicationAPI(APITestCase):
 
     def test_default(self):
-        url = reverse('publications-list')
+        url = reverse('emg_api:publications-list')
         response = self.client.get(url)
         assert response.status_code == 200

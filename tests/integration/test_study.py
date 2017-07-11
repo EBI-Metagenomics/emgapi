@@ -61,7 +61,7 @@ class TestStudyAPI(APITestCase):
         mommy.make("emg_api.Study", pk=456, biome=_biome, is_public=0)
 
     def test_details(self):
-        url = reverse("studies-detail", args=["SRP01234"])
+        url = reverse("emg_api:studies-detail", args=["SRP01234"])
         response = self.client.get(url)
         assert response.status_code == 200
         rsp = response.json()
@@ -88,7 +88,7 @@ class TestStudyAPI(APITestCase):
         assert _attr['project_id'] == "PRJDB1234"
 
     def test_public(self):
-        url = reverse("studies-list")
+        url = reverse("emg_api:studies-list")
         response = self.client.get(url)
         assert response.status_code == 200
         rsp = response.json()

@@ -33,7 +33,7 @@ class TestRunAPI(APITestCase):
         mommy.make("emg_api.Run", pk=123, pipeline=_p, analysis_status=_as)
         mommy.make("emg_api.Run", pk=456, pipeline=_p)
 
-        url = reverse("runs-list")
+        url = reverse("emg_api:runs-list")
         response = self.client.get(url)
         assert response.status_code == 200
         rsp = response.json()
