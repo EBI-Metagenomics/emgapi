@@ -19,6 +19,8 @@
 import random
 
 from django.core.urlresolvers import reverse
+
+from rest_framework import status
 from rest_framework.test import APITestCase
 
 from model_mommy import mommy
@@ -58,7 +60,7 @@ class TestBiomeAPI(APITestCase):
     def test_default(self):
         url = reverse('emg_api:biomes-top10')
         response = self.client.get(url)
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
 
         # Data
