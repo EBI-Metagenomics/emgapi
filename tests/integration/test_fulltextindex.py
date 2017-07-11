@@ -23,6 +23,8 @@ from model_mommy import mommy
 
 from django.core.urlresolvers import reverse
 
+from rest_framework import status
+
 
 def create_biomes(count):
     entries = []
@@ -154,7 +156,7 @@ class TestFullTextIndexAPI(object):
         qs = urlencode({'search': search_term})
         url = "%s%s?%s" % (live_server.url, reverse(view_name), qs)
         response = client.get(url)
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
 
         # Meta

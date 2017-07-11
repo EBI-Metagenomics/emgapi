@@ -20,13 +20,15 @@ from model_mommy import mommy
 
 from django.core.urlresolvers import reverse
 
+from rest_framework import status
+
 
 class TestDefaultAPI(object):
 
     def test_default(self, client):
         url = reverse('emg_api:api-root')
         response = client.get(url)
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
 
         expected = {
@@ -57,9 +59,7 @@ class TestDefaultAPI(object):
         view_name = "%s-list" % _view
         url = reverse(view_name)
         response = client.get(url)
-        assert response.status_code == 200
-        # assert response.headers['Content-Type'] == \
-        # 'application/vnd.api+json'
+        assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
         assert rsp['meta']['pagination']['page'] == 1
         assert rsp['meta']['pagination']['pages'] == 1
@@ -98,7 +98,7 @@ class TestDefaultAPI(object):
 
         url = reverse(view_name)
         response = client.get(url)
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
 
         # Meta
