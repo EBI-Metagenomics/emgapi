@@ -145,7 +145,7 @@ INSTALLED_APPS = [
     # 'rest_framework.authtoken',
     'rest_framework_swagger',
     'django_filters',
-    #'rest_auth',
+    # 'rest_auth',
 
     # apps
     'emg_api',
@@ -270,10 +270,9 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_RENDERER_CLASSES': (
         # TODO: workaround mime types for swagger doc
-        'emg_api.renderers.VersionRenderer',
-        'emg_api.renderers.DefaultRenderer',
         # 'rest_framework.renderers.JSONRenderer',
         'rest_framework_json_api.renderers.JSONRenderer',
+        'emg_api.renderers.CustomJSONRenderer',
         # 'rest_framework_xml.renderers.XMLRenderer',
         # 'rest_framework_yaml.renderers.YAMLRenderer',
         # 'rest_framework_csv.renderers.CSVRenderer',
