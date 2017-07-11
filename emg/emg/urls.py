@@ -41,7 +41,8 @@ urlpatterns = [
     url(r'^api-auth/', include('rest_framework.urls',
                                namespace='rest_framework')),
 
-    url(r'^api/', include('emg_api.urls')),
+    url(r'^api/', include('emg_api.urls',
+                          namespace='emg_api')),
 
     url(r'^docs/$', docs_schema_view),
 
