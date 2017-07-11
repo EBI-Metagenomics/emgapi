@@ -21,28 +21,21 @@ from django.conf import settings
 from django.db.models import Count, Prefetch
 from django.shortcuts import get_object_or_404
 
+from django_filters.rest_framework import DjangoFilterBackend
+
 from rest_framework import viewsets, mixins, generics
 from rest_framework.response import Response
 
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from rest_framework.decorators import detail_route, list_route
-
-from rest_auth import views as rest_auth_views
+# from rest_framework.permissions import IsAuthenticated, AllowAny
+# from rest_framework_json_api.renderers import JSONRenderer
 
 from emg_api import models as emg_models
 from emg_api import serializers as emg_serializers
 from emg_api import filters as emg_filters
 
 logger = logging.getLogger(__name__)
-
-
-class LoginViewSet(rest_auth_views.LoginView):
-    serializer_class = emg_serializers.LoginSerializer
-
-
-class LogoutViewSet(rest_auth_views.LogoutView):
-    pass
 
 
 class BiomeViewSet(mixins.RetrieveModelMixin,

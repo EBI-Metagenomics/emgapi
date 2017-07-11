@@ -45,4 +45,6 @@ urlpatterns = [
 
     url(r'^docs/$', docs_schema_view),
 
+    # url(r'^rest-auth/', include('rest_auth.urls')),
+
 ]
