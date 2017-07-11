@@ -68,7 +68,7 @@ class TestSampleAPI(APITestCase):
         mommy.make("emg_api.Sample", pk=456, biome=_biome, is_public=0)
 
     def test_details(self):
-        url = reverse("samples-detail", args=["DRS012345"])
+        url = reverse("emg_api:samples-detail", args=["DRS012345"])
         response = self.client.get(url)
         assert response.status_code == 200
         rsp = response.json()
@@ -101,7 +101,7 @@ class TestSampleAPI(APITestCase):
         # assert _attr['last_update'] == str(self.data['date'])
 
     def test_public(self):
-        url = reverse("samples-list")
+        url = reverse("emg_api:samples-list")
         response = self.client.get(url)
         assert response.status_code == 200
         rsp = response.json()

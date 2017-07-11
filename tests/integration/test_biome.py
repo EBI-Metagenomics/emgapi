@@ -56,7 +56,7 @@ class TestBiomeAPI(APITestCase):
             )
 
     def test_default(self):
-        url = reverse('biomes-top10')
+        url = reverse('emg_api:biomes-top10')
         response = self.client.get(url)
         assert response.status_code == 200
         rsp = response.json()

@@ -24,6 +24,6 @@ from rest_framework.test import APITestCase
 class TestPipelineAPI(APITestCase):
 
     def test_default(self):
-        url = reverse('pipelines-list')
+        url = reverse('emg_api:pipelines-list')
         response = self.client.get(url)
         assert response.status_code == 200
