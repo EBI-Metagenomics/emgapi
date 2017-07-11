@@ -142,10 +142,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # rest framework
     'rest_framework',
-    # 'rest_framework.authtoken',
+    'rest_framework.authtoken',
     'rest_framework_swagger',
     'django_filters',
-    # 'rest_auth',
+    'rest_auth',
 
     # apps
     'emg_api',
@@ -262,17 +262,16 @@ REST_FRAMEWORK = {
         'rest_framework_json_api.pagination.PageNumberPagination',
 
     'DEFAULT_PARSER_CLASSES': (
-        # 'rest_framework.parsers.JSONParser',
         'rest_framework_json_api.parsers.JSONParser',
+        'rest_framework.parsers.JSONParser',
         # 'rest_framework_xml.parsers.XMLParser',
         # 'rest_framework_yaml.parsers.YAMLParser',
         # 'rest_framework.parsers.MultiPartParser'
     ),
+
     'DEFAULT_RENDERER_CLASSES': (
-        # TODO: workaround mime types for swagger doc
-        # 'rest_framework.renderers.JSONRenderer',
         'rest_framework_json_api.renderers.JSONRenderer',
-        'emg_api.renderers.CustomJSONRenderer',
+        'rest_framework.renderers.JSONRenderer',
         # 'rest_framework_xml.renderers.XMLRenderer',
         # 'rest_framework_yaml.renderers.YAMLRenderer',
         # 'rest_framework_csv.renderers.CSVRenderer',
@@ -289,12 +288,6 @@ REST_FRAMEWORK = {
     'DEFAULT_METADATA_CLASS':
         'rest_framework_json_api.metadata.JSONAPIMetadata',
 
-    'DEFAULT_VERSION': 'application/vnd.api+json',
-    'ALLOWED_VERSIONS': (
-        'application/vnd.api+json',
-        'application/json',
-    ),
-
     'DEFAULT_AUTHENTICATION_CLASSES': (
         # 'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
@@ -304,6 +297,9 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
         # 'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ],
+    'DEFAULT_CONTENT_NEGOTIATION_CLASS':
+        'emg_api.negotiation.CustomContentNegotiation',
+
 }
 
 # Swagger auth
