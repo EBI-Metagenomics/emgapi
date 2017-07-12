@@ -351,7 +351,7 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
         'study': 'emg_api.serializers.StudySerializer',
-        'run': 'emg_api.serializers.RunSerializer',
+        'runs': 'emg_api.serializers.RunSerializer',
     }
 
     url = serializers.HyperlinkedIdentityField(
@@ -393,12 +393,12 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
     #     related_link_url_kwarg='accession',
     #     related_link_lookup_field='accession',
     # )
-
-    def get_study(self, obj):
-        # TODO: provide counter instead of paginating relationship
-        # workaround https://github.com/django-json-api
-        # /django-rest-framework-json-api/issues/178
-        return ()
+    #
+    # def get_study(self, obj):
+    #     # TODO: provide counter instead of paginating relationship
+    #     # workaround https://github.com/django-json-api
+    #     # /django-rest-framework-json-api/issues/178
+    #     return ()
 
     # runs = serializers.HyperlinkedIdentityField(
     #     view_name='emg_api:samples-runs-list',
@@ -432,7 +432,7 @@ class SimpleSampleSerializer(SampleSerializer):
 
     included_serializers = {
         'study': 'emg_api.serializers.SimpleStudySerializer',
-        'run': 'emg_api.serializers.SimpleRunSerializer',
+        'runs': 'emg_api.serializers.SimpleRunSerializer',
     }
 
     # sample_desc = serializers.SerializerMethodField(
