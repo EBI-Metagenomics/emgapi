@@ -212,19 +212,21 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     lookup_value_regex = '[a-zA-Z0-9,]+'
 
     def get_queryset(self):
-        qs = emg_models.Study.objects.available(self.request) \
+        queryset = emg_models.Study.objects \
+            .available(self.request) \
             .select_related('biome')
         if 'samples' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Sample.objects \
                 .available(self.request) \
                 .select_related('biome')
-            qs = qs.prefetch_related(Prefetch('samples', queryset=_qs))
+            queryset = queryset.prefetch_related(
+                Prefetch('samples', queryset=_qs))
         if 'publications' in self.request.GET.get('include', '').split(','):
-            qs = qs.prefetch_related(
+            queryset = queryset.prefetch_related(
                 Prefetch(
                     'publications',
                     queryset=emg_models.Publication.objects.all()))
-        return qs
+        return queryset
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -332,18 +334,28 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         Example:
         ---
         `/api/studies/ERP008945/samples` retrieve linked samples
+
+        `/api/studies/ERP008945/samples?include=runs` with runs
         """
 
         obj = self.get_object()
+        queryset = obj.samples \
+            .available(self.request)
         if sample_accession is not None:
-            queryset = obj.samples \
-                .available(self.request) \
+            queryset = queryset \
                 .filter(accession=sample_accession) \
                 .select_related('biome')
         else:
-            queryset = obj.samples \
-                .available(self.request)\
+            queryset = queryset \
                 .select_related('biome')
+        if 'runs' in self.request.GET.get('include', '').split(','):
+            _qs = emg_models.Run.objects \
+                .available(self.request) \
+                .select_related(
+                    'analysis_status', 'pipeline', 'experiment_type'
+                )
+            queryset = queryset.prefetch_related(
+                Prefetch('runs', queryset=_qs))
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(
@@ -388,7 +400,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
     lookup_value_regex = '[a-zA-Z0-9,]+'
 
     def get_queryset(self):
-        qs = emg_models.Sample.objects \
+        queryset = emg_models.Sample.objects \
             .available(self.request) \
             .select_related('biome', 'study')
         if 'runs' in self.request.GET.get('include', '').split(','):
@@ -397,10 +409,11 @@ class SampleViewSet(mixins.RetrieveModelMixin,
                 .select_related(
                     'analysis_status', 'pipeline', 'experiment_type'
                 )
-            qs = qs.prefetch_related(Prefetch('runs', queryset=_qs))
+            queryset = queryset.prefetch_related(
+                Prefetch('runs', queryset=_qs))
         if 'study' in self.request.GET.get('include', '').split(','):
-            qs = qs.select_related('study__biome')
-        return qs
+            queryset = queryset.select_related('study__biome')
+        return queryset
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -538,6 +551,11 @@ class RunAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):
     def get(self, request, accession, release_version, *args, **kwargs):
         """
         Retrieves run for the given accession
+        Example:
+        ---
+        `/api/runs/ERR1385375/3.0`
+
+        `/api/runs/ERR1385375/3.0?include=sample` with related sample
         """
         run = emg_models.Run.objects.get(
             accession=accession, pipeline__release_version=release_version)
@@ -586,6 +604,19 @@ class RunViewSet(mixins.ListModelMixin,
     def list(self, request, *args, **kwargs):
         """
         Retrieves list of runs
+        Example:
+        ---
+        `/api/runs`
+
+        `/api/runs?include=run,study` with related runs and studies
+
+        Filter by:
+        ---
+        `/api/runs?experiment_type=metagenomics`
+
+        `/api/runs?pipeline_version=3.0`
+
+        `/api/runs?biome=root:Environmental:Aquatic:Marine`
         """
         return super(RunViewSet, self).list(request, *args, **kwargs)
 
@@ -793,11 +824,12 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
     lookup_value_regex = '[a-zA-Z0-9,]+'
 
     def get_queryset(self):
-        qs = emg_models.Publication.objects.all()
+        queryset = emg_models.Publication.objects.all()
         if 'studies' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Run.objects.select_related('biome')
-            qs = qs.prefetch_related(Prefetch('studies', queryset=_qs))
-        return qs
+            queryset = queryset.prefetch_related(
+                Prefetch('studies', queryset=_qs))
+        return queryset
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
