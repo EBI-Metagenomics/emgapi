@@ -28,6 +28,47 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.db.models import Count
+from django.db.models import Q
+
+
+class BaseQuerySet(models.QuerySet):
+
+    def available(self, request):
+        _username = request.user.username
+        _query_filters = {
+            'StudyQuerySet': {
+                'authenticated':
+                    Q(submission_account_id=_username) |
+                    Q(is_public=1),
+                'all': Q(is_public=1),
+            },
+            'SampleQuerySet': {
+                'authenticated':
+                    Q(study__submission_account_id=_username) |
+                    Q(is_public=1),
+                'all': Q(is_public=1),
+            },
+            'RunQuerySet': {
+                'authenticated':
+                    Q(sample__study__submission_account_id=_username) |
+                    Q(analysis_status=3),
+                'all': Q(analysis_status=3),
+            }
+        }
+
+        q = list()
+        try:
+            _instance = _query_filters[self.__class__.__name__]
+            if isinstance(self, self.__class__):
+                if request.user.is_authenticated():
+                    q.append(_instance['authenticated'])
+                else:
+                    q.append(_instance['all'])
+            return self.distinct().filter(*q)
+        except KeyError:
+            pass
+        # TODO: should return nothing
+        return self
 
 
 class Pipeline(models.Model):
@@ -196,10 +237,7 @@ class Publication(models.Model):
         return self.pub_title
 
 
-class StudyQuerySet(models.QuerySet):
-
-    def available(self, request):
-        return self.filter(is_public=1)
+class StudyQuerySet(BaseQuerySet):
 
     def recent(self):
         return self.order_by('-last_update')
@@ -281,10 +319,8 @@ class StudyPublication(models.Model):
         unique_together = (('study', 'pub'),)
 
 
-class SampleQuerySet(models.QuerySet):
-
-    def available(self, request):
-        return self.filter(is_public=1)
+class SampleQuerySet(BaseQuerySet):
+    pass
 
 
 class SampleManager(models.Manager):
@@ -386,10 +422,8 @@ class ExperimentType(models.Model):
         return self.experiment_type
 
 
-class RunQuerySet(models.QuerySet):
-
-    def available(self, request):
-        return self.filter(analysis_status=3)
+class RunQuerySet(BaseQuerySet):
+    pass
 
 
 class RunManager(models.Manager):

@@ -28,6 +28,7 @@ from rest_framework.response import Response
 
 from rest_framework import filters
 from rest_framework.decorators import detail_route, list_route
+# from rest_framework import authentication
 # from rest_framework.permissions import IsAuthenticated, AllowAny
 # from rest_framework_json_api.renderers import JSONRenderer
 
@@ -268,6 +269,29 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         with samples and publications
         """
         return super(StudyViewSet, self).retrieve(request, *args, **kwargs)
+
+    @list_route(
+        methods=['get', ],
+        serializer_class=emg_serializers.SimpleStudySerializer
+    )
+    def mydata(self, request):
+        """
+        Retrieve latest studies
+        Example:
+        ---
+        `/api/studies/latest` retrieve latest studies
+        """
+        limit = settings.EMG_DEFAULT_LIMIT
+        queryset = emg_models.Study.objects \
+            .recent(self.request) \
+            .select_related('biome')[:limit]
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     @list_route(
         methods=['get', ],
