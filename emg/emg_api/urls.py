@@ -33,6 +33,12 @@ urlpatterns = [
 router = DefaultRouter(trailing_slash=False)
 
 router.register(
+    r'mydata',
+    views.MyDataViewSet,
+    base_name='mydata'
+)
+
+router.register(
     r'biomes',
     views.BiomeViewSet,
     base_name='biomes'
