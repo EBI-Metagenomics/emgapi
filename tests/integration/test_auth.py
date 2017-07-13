@@ -29,6 +29,10 @@ class TestAuthAPI(APITestCase):
         self.login_url = reverse('rest_auth_login')
         self.logout_url = reverse('rest_auth_logout')
 
+    def tearDown(self):
+        rsp = self.client.post(self.logout_url, format='json')
+        assert rsp.status_code == status.HTTP_200_OK
+
     def test_default(self):
         data = {
             'username': 'username',

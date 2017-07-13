@@ -15,19 +15,20 @@
 # limitations under the License.
 
 
-# import pytest
+import pytest
 
 from django.core.urlresolvers import reverse
 
 from rest_framework import status
-from rest_framework.test import APITestCase
 
 from model_mommy import mommy
 
 
-class TestPermissionsAPI(APITestCase):
+@pytest.mark.django_db
+class TestPermissionsAPI(object):
 
-    def setUp(self):
+    @pytest.fixture(autouse=True)
+    def setup_method(self, db):
         _biome = mommy.make('emg_api.Biome', biome_name="foo",
                             lineage="root:foo", pk=123)
 
@@ -54,44 +55,57 @@ class TestPermissionsAPI(APITestCase):
         mommy.make("emg_api.Study", pk=121, accession="SRP0121", is_public=0,
                    submission_account_id=None, biome=_biome)
 
-    def test_public(self):
-        url = reverse("emg_api:studies-list")
-        response = self.client.get(url)
+    @pytest.mark.parametrize(
+        'view, username, count, ids, bad_ids',
+        [
+            # private
+            ('emg_api:studies-list', 'Webin-111', 5,
+             ['111', '112', '114', '115', '120'],
+             ['113', '121']),
+            # mydata
+            ('emg_api:mydata-list', 'Webin-111', 2,
+             ['114', '115'],
+             []),
+            # public
+            ('emg_api:studies-list', None, 4,
+             ['111', '112', '114', '120'],
+             ['113', '115', '121']),
+        ]
+    )
+    def test_list(self, client, view, username, count, ids, bad_ids):
+        if username is not None:
+            client.login(username=username, password='secret')
+
+        url = reverse(view)
+        response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
 
         # Meta
         assert rsp['meta']['pagination']['page'] == 1
         assert rsp['meta']['pagination']['pages'] == 1
-        assert rsp['meta']['pagination']['count'] == 4
+        assert rsp['meta']['pagination']['count'] == count
 
         # Data
-        assert len(rsp['data']) == 4
-        ids = set(['111', '112', '114', '120'])
-        assert ids - set([d['id'] for d in rsp['data']]) == set()
+        assert len(rsp['data']) == count
+        assert set(ids) - set([d['id'] for d in rsp['data']]) == set()
 
-        bad_ids = ['113', '115', '121']
-        ids.update(bad_ids)
-        assert ids - set([d['id'] for d in rsp['data']]) == set(bad_ids)
+        ids.extend(bad_ids)
+        assert set(ids) - set([d['id'] for d in rsp['data']]) == set(bad_ids)
 
-    def test_private(self):
-        self.client.login(username='Webin-000', password='secret')
+        client.logout()
 
-        url = reverse("emg_api:studies-list")
-        response = self.client.get(url)
-        assert response.status_code == status.HTTP_200_OK
-        rsp = response.json()
-
-        # Meta
-        assert rsp['meta']['pagination']['page'] == 1
-        assert rsp['meta']['pagination']['pages'] == 1
-        assert rsp['meta']['pagination']['count'] == 5
-
-        # Data
-        assert len(rsp['data']) == 5
-        ids = set(['111', '112', '113', '114', '120'])
-        assert ids - set([d['id'] for d in rsp['data']]) == set()
-
-        bad_ids = ['115', '121']
-        ids.update(bad_ids)
-        assert ids - set([d['id'] for d in rsp['data']]) == set(bad_ids)
+    def test_unauthorized(self, client):
+        expected_rsp = [
+            {
+                'detail': 'Authentication credentials were not provided.',
+                'source': {
+                    'pointer': '/data'
+                },
+                'status': '401'
+            }
+        ]
+        url = reverse('emg_api:mydata-list')
+        response = client.get(url)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.json()['errors'] == expected_rsp
