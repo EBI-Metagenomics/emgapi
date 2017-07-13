@@ -39,6 +39,25 @@ from emg_api import permissions as emg_perms
 logger = logging.getLogger(__name__)
 
 
+class MultipleFieldLookupMixin(object):
+
+    """
+    Apply this mixin to any view or viewset to get multiple field filtering
+    based on a `lookup_fields` attribute, instead of the default single field
+    filtering.
+    Source: http://www.django-rest-framework.org/api-guide/generic-views/
+    """
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        queryset = self.filter_queryset(queryset)
+        filter = {}
+        for field in self.lookup_fields:
+            if self.kwargs[field]:
+                filter[field] = self.kwargs[field]
+        return get_object_or_404(queryset, **filter)
+
+
 class MyDataViewSet(mixins.ListModelMixin,
                     viewsets.GenericViewSet):
 
@@ -544,24 +563,93 @@ class SampleViewSet(mixins.RetrieveModelMixin,
             queryset, many=True, context={'request': request})
         return Response(serializer.data)
 
+    @detail_route(
+        methods=['get', ],
+        url_name='annotations-list',
+        serializer_class=emg_serializers.SimpleSampleAnnSerializer
+    )
+    def annotations(self, request, accession=None):
+        """
+        Retrieves list of samples for the given study accession
+        Example:
+        ---
+        `/api/samples/accession/annotations` retrieve annotations
+        """
 
-class MultipleFieldLookupMixin(object):
+        obj = self.get_object()
+        queryset = obj.annotations.all()
 
-    """
-    Apply this mixin to any view or viewset to get multiple field filtering
-    based on a `lookup_fields` attribute, instead of the default single field
-    filtering.
-    Source: http://www.django-rest-framework.org/api-guide/generic-views/
-    """
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
 
-    def get_object(self):
-        queryset = self.get_queryset()
-        queryset = self.filter_queryset(queryset)
-        filter = {}
-        for field in self.lookup_fields:
-            if self.kwargs[field]:
-                filter[field] = self.kwargs[field]
-        return get_object_or_404(queryset, **filter)
+        serializer = self.get_serializer(
+            queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+class SampleAnnAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):
+
+    serializer_class = emg_serializers.SampleAnnSerializer
+
+    lookup_fields = ('sample', 'name')
+
+    def get_queryset(self):
+        return emg_models.SampleAnn.objects.all()
+
+    def get(self, request, sample_accession, name, *args, **kwargs):
+        """
+        Retrieves sample annotation for the given sample accession and value
+        Example:
+        ---
+        `/api/annotations/sample_accession/value`
+        """
+        sa = emg_models.SampleAnn.objects.get(
+            sample__accession=sample_accession,
+            var__var_name=name)
+        serializer = self.get_serializer(sa)
+        return Response(data=serializer.data)
+
+
+class SampleAnnsViewSet(MultipleFieldLookupMixin,
+                        mixins.ListModelMixin,
+                        viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.SimpleSampleAnnSerializer
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+    )
+
+    ordering = ()
+
+    search_fields = (
+    )
+
+    def get_queryset(self):
+        queryset = emg_models.SampleAnn.objects.all()
+        return queryset
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return emg_serializers.SampleAnnSerializer
+        return super(SampleAnnsViewSet, self).get_serializer_class()
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of annotaitons
+        Example:
+        ---
+        `/api/annotations` retrieves list of samples
+        """
+        return super(SampleAnnsViewSet, self).list(request, *args, **kwargs)
 
 
 class RunAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):

@@ -276,7 +276,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'VARIABLE_NAMES',
-                'managed': False,
             },
         ),
 
@@ -284,25 +283,24 @@ class Migration(migrations.Migration):
             name='GscCvCv',
             fields=[
                 ('var_val_cv', models.CharField(db_column='VAR_VAL_CV', max_length=60, primary_key=True, serialize=False)),
+                ('var_name', models.ForeignKey(blank=True, db_column='VAR_NAME', null=True, on_delete=django.db.models.deletion.CASCADE, to='emg_api.VariableNames')),
             ],
             options={
                 'db_table': 'GSC_CV_CV',
-                'managed': False,
             },
         ),
 
         migrations.CreateModel(
             name='SampleAnn',
             fields=[
-                ('sample', models.ForeignKey(db_column='SAMPLE_ID', on_delete=django.db.models.deletion.DO_NOTHING, primary_key=True, serialize=False, to='emg_api.Sample')),
-                ('var_val_cv', models.ForeignKey(db_column='VAR_VAL_CV', on_delete=django.db.models.deletion.DO_NOTHING, to='emg_api.GscCvCv')),
+                ('sample', models.ForeignKey(db_column='SAMPLE_ID', on_delete=django.db.models.deletion.CASCADE, primary_key=True, related_name='annotations', serialize=False, to='emg_api.Sample')),
+                ('var_val_cv', models.ForeignKey(blank=True, db_column='VAR_VAL_CV', null=True, on_delete=django.db.models.deletion.CASCADE, to='emg_api.GscCvCv')),
                 ('units', models.CharField(blank=True, db_column='UNITS', max_length=25, null=True)),
-                ('var', models.ForeignKey(db_column='VAR_ID', on_delete=django.db.models.deletion.DO_NOTHING, to='emg_api.VariableNames')),
+                ('var', models.ForeignKey(db_column='VAR_ID', on_delete=django.db.models.deletion.CASCADE, to='emg_api.VariableNames')),
                 ('var_val_ucv', models.CharField(blank=True, db_column='VAR_VAL_UCV', max_length=4000, null=True)),
             ],
             options={
                 'db_table': 'SAMPLE_ANN',
-                'managed': False,
             },
         ),
 

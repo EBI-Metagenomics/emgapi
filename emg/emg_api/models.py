@@ -561,7 +561,6 @@ class VariableNames(models.Model):
         blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'VARIABLE_NAMES'
         unique_together = (('var_id', 'var_name'), ('var_id', 'var_name'),)
 
@@ -571,31 +570,36 @@ class VariableNames(models.Model):
 
 class GscCvCv(models.Model):
     var_name = models.ForeignKey(
-        'VariableNames', models.DO_NOTHING, db_column='VAR_NAME',
+        'VariableNames', db_column='VAR_NAME',
         blank=True, null=True)
     var_val_cv = models.CharField(
         db_column='VAR_VAL_CV', primary_key=True, max_length=60)
 
     class Meta:
-        managed = False
         db_table = 'GSC_CV_CV'
         unique_together = (('var_name', 'var_val_cv'),)
+
+    def __str__(self):
+        return "%s %s" % (self.var_name, self.var_val_cv)
 
 
 class SampleAnn(models.Model):
     sample = models.ForeignKey(
-        Sample, models.DO_NOTHING, db_column='SAMPLE_ID', primary_key=True)
+        Sample, db_column='SAMPLE_ID', primary_key=True,
+        related_name="annotations")
     var_val_cv = models.ForeignKey(
-        GscCvCv, models.DO_NOTHING, db_column='VAR_VAL_CV',
+        GscCvCv, db_column='VAR_VAL_CV',
         blank=True, null=True)
     units = models.CharField(
         db_column='UNITS', max_length=25, blank=True, null=True)
     var = models.ForeignKey(
-        'VariableNames', models.DO_NOTHING, db_column='VAR_ID')
+        'VariableNames', db_column='VAR_ID')
     var_val_ucv = models.CharField(
         db_column='VAR_VAL_UCV', max_length=4000, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'SAMPLE_ANN'
         unique_together = (('sample', 'var'), ('sample', 'var'),)
+
+    def __str__(self):
+        return "%s %s" % (self.sample, self.var)
