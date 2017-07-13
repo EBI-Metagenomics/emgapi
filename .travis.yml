@@ -2,9 +2,8 @@ sudo: required
 language: python
 
 python:
-  - "3.5"
-  - "3.6"
-
+  - '3.5'
+  - '3.6'
 env:
   - DB_HOST=127.0.0.1 DB_PORT=3306
 
@@ -12,7 +11,7 @@ services:
   - docker
 
 install:
-    # Bug fix: https://github.com/django-json-api/django-rest-framework-json-api/pull/359
+  # Bug fix: https://github.com/django-json-api/django-rest-framework-json-api/pull/359
   - pip install "git+git://github.com/django-json-api/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
   - pip install -r requirements.txt
   - pip install flake8 pycodestyle pep8-naming
@@ -24,12 +23,14 @@ before_script:
   - docker run --rm --name mysql -p 3306:3306 -e MYSQL_ALLOW_EMPTY_PASSWORD=yes -d mysql:5.6
   # optional redis
   # - docker run --rm --name redis -p 6379:6379 -d redis
-
   - flake8 --version
   - flake8 -v .
 
 script:
   - ./travis.sh
-
 after_script:
   - docker stop mysql
+
+notifications:
+  slack:
+    secure: L3+DPUKQ0mZOuvvWDV9CYm07W10SJT0vQrOZbE7k+Y88woFGp/GMR6xvKDfQsNo3C1VfVzUYRGLp+cyRMxaKYHuhNG3IkWzz8pM4Kh1sy2V+glg2BL3Ax/Uq+43PjSYAJOwTAnJwRpA5vryU63c/g3Bu/pH6+wRGZOjn6uWNGeNmiTPIaJ8qv6iV5DkoeozPAugKCFC5IzFMH5BpTY2Y4psT5NtH6jOjG0yXltq/3L6H/pxFnACwbYURe1C9+SHl1bfA1e/haQ6CduAegm9eCXP2fjuE9z/1Taz2TgkC52ylY1YoiVgyL9m9PeEyP9apEazedNBfveeU1FrSu53uQp6zLI1L97DGR0fYXX7gxfL8P+oUlRQsh7ADPLWoYTPdI9bHl5rR/qfiNibgQaOUs91LqTzmmXbTGvA8O0QMxxaIEzJWw20aAA6+uIso+scZhiUyFQs/TvSSB4kPAAUpih/QLwwiGPks+MIGuUBUnBNFQZQpmAtULqLVy3g1x4ROGAkcsUs/79vu1Z5KYIgnWUINvryuZ8icFfA3KOvgq67rAlExSFoan+wquujmW/Wds39WTAOS2z3B3Lq43aYUCdgnlfgSR6MzzjnDPmpmYKSTEvgr4acP7Bcb3VHGottNF3JsX/B0TfuSugRymfrso9FnKG5kHMqAgJFpxXB4ty8=
