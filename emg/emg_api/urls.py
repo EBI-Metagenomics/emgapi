@@ -28,6 +28,13 @@ urlpatterns = [
         name='runs-detail'
     ),
 
+    url(
+        (r'^annotations/(?P<sample_accession>[a-zA-Z0-9,_]+)/'
+         '(?P<name>(.*))$'),
+        views.SampleAnnAPIView.as_view(),
+        name='annotations-detail'
+    ),
+
 ]
 
 router = DefaultRouter(trailing_slash=False)
@@ -54,6 +61,12 @@ router.register(
     r'samples',
     views.SampleViewSet,
     base_name='samples'
+)
+
+router.register(
+    r'annotations',
+    views.SampleAnnsViewSet,
+    base_name='annotations'
 )
 
 router.register(

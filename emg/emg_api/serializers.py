@@ -345,6 +345,43 @@ class SimpleRunSerializer(RunSerializer):
         )
 
 
+# SampleAnn serializer
+
+class SampelAnnHyperlinkedField(serializers.HyperlinkedIdentityField):
+
+    def get_url(self, obj, view_name, request, format):
+        kwargs = {
+            'sample_accession': obj.sample.accession,
+            'name': obj.var.var_name,
+        }
+        return reverse(
+            view_name, kwargs=kwargs, request=request, format=format)
+
+
+class SampleAnnSerializer(serializers.HyperlinkedModelSerializer):
+
+    url = SampelAnnHyperlinkedField(
+        view_name='emg_api:annotations-detail'
+    )
+
+    sample = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emg_api:samples-detail',
+        lookup_field='accession',
+    )
+
+    class Meta:
+        model = emg_models.SampleAnn
+        fields = (
+            'url',
+            'sample',
+        )
+
+
+class SimpleSampleAnnSerializer(SampleAnnSerializer):
+    pass
+
+
 # Sample serializer
 
 class SampleSerializer(serializers.HyperlinkedModelSerializer):
@@ -415,6 +452,26 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
     )
 
     def get_runs(self, obj):
+        # TODO: provide counter instead of paginating relationship
+        # workaround https://github.com/django-json-api
+        # /django-rest-framework-json-api/issues/178
+        return ()
+
+    # annotations = serializers.HyperlinkedIdentityField(
+    #     view_name='emg_api:samples-annotations-list',
+    #     lookup_field='accession',
+    # )
+    annotations = relations.SerializerMethodResourceRelatedField(
+        source='get_annotations',
+        model=emg_models.SampleAnn,
+        many=True,
+        read_only=True,
+        related_link_view_name='emg_api:samples-annotations-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+    )
+
+    def get_annotations(self, obj):
         # TODO: provide counter instead of paginating relationship
         # workaround https://github.com/django-json-api
         # /django-rest-framework-json-api/issues/178
