@@ -102,10 +102,11 @@ class TestPermissionsAPI(object):
                 'source': {
                     'pointer': '/data'
                 },
-                'status': '401'
+                'status': '403'
             }
         ]
         url = reverse('emg_api:mydata-list')
         response = client.get(url)
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        print(response)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
         assert response.json()['errors'] == expected_rsp
