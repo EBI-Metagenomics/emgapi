@@ -29,7 +29,6 @@ class TestAuthAPI(APITestCase):
         self.login_url = reverse('rest_auth_login')
         self.logout_url = reverse('rest_auth_logout')
 
-    @pytest.mark.skip(reason="no backend mock")
     def test_default(self):
         data = {
             'username': 'username',
@@ -39,7 +38,7 @@ class TestAuthAPI(APITestCase):
         token = rsp.json()['data']['attributes']['key']
         assert rsp.status_code == status.HTTP_200_OK
         assert User.objects.count() == 1
-        assert User.objects.get().username == 'test'
+        assert User.objects.get().username == 'username'
         assert Token.objects.get(user_id=User.objects.get().id).key == token
 
         rsp = self.client.post(
@@ -48,7 +47,7 @@ class TestAuthAPI(APITestCase):
         )
         assert rsp.status_code == status.HTTP_200_OK
         assert User.objects.count() == 1
-        assert User.objects.get().username == 'test'
+        assert User.objects.get().username == 'username'
         with pytest.raises(Token.DoesNotExist):
             Token.objects.get(user_id=User.objects.get().id).key
 
