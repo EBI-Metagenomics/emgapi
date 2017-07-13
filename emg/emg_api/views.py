@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import logging
 
 from django.conf import settings
@@ -29,14 +28,46 @@ from rest_framework.response import Response
 from rest_framework import filters
 from rest_framework.decorators import detail_route, list_route
 # from rest_framework import authentication
-# from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework import permissions
 # from rest_framework_json_api.renderers import JSONRenderer
 
 from emg_api import models as emg_models
 from emg_api import serializers as emg_serializers
 from emg_api import filters as emg_filters
+from emg_api import permissions as emg_perms
 
 logger = logging.getLogger(__name__)
+
+
+class MyDataViewSet(mixins.ListModelMixin,
+                    viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.StudySerializer
+    permission_classes = (
+        permissions.IsAuthenticated,
+        emg_perms.IsSelf,
+    )
+
+    def get_serializer_class(self):
+        return super(MyDataViewSet, self).get_serializer_class()
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieve studies owned by the logged in user
+        Example:
+        ---
+        `/api/mydata` retrieve own studies
+        """
+        queryset = emg_models.Study.objects \
+            .mydata(self.request) \
+            .select_related('biome')
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class BiomeViewSet(mixins.RetrieveModelMixin,
@@ -269,29 +300,6 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         with samples and publications
         """
         return super(StudyViewSet, self).retrieve(request, *args, **kwargs)
-
-    @list_route(
-        methods=['get', ],
-        serializer_class=emg_serializers.SimpleStudySerializer
-    )
-    def mydata(self, request):
-        """
-        Retrieve latest studies
-        Example:
-        ---
-        `/api/studies/latest` retrieve latest studies
-        """
-        limit = settings.EMG_DEFAULT_LIMIT
-        queryset = emg_models.Study.objects \
-            .recent(self.request) \
-            .select_related('biome')[:limit]
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(
-                page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
 
     @list_route(
         methods=['get', ],

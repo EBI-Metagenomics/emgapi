@@ -239,6 +239,13 @@ class Publication(models.Model):
 
 class StudyQuerySet(BaseQuerySet):
 
+    def mydata(self, request):
+        if request.user.is_authenticated():
+            _username = request.user.username
+            return self.distinct() \
+                .filter(Q(submission_account_id=_username))
+        return self.available(request)
+
     def recent(self):
         return self.order_by('-last_update')
 
@@ -253,6 +260,9 @@ class StudyManager(models.Manager):
 
     def recent(self, request):
         return self.get_queryset().available(request).recent()
+
+    def mydata(self, request):
+        return self.get_queryset().mydata(request).recent()
 
 
 class Study(models.Model):
