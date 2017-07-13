@@ -7,6 +7,7 @@ gunicorn
 whitenoise
 mysqlclient
 sqlparse
+requests
 
 # optional session store
 # django-redis>=4.4
