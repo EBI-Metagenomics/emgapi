@@ -275,8 +275,9 @@ REST_FRAMEWORK = {
     ),
 
     'DEFAULT_RENDERER_CLASSES': (
+        'emg_api.renderers.DefaultJSONRenderer',
         'rest_framework_json_api.renderers.JSONRenderer',
-        'rest_framework.renderers.JSONRenderer',
+        # 'rest_framework.renderers.JSONRenderer',
         # 'rest_framework_xml.renderers.XMLRenderer',
         # 'rest_framework_yaml.renderers.YAMLRenderer',
         # 'rest_framework_csv.renderers.CSVRenderer',
@@ -302,8 +303,8 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
         # 'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ],
-    'DEFAULT_CONTENT_NEGOTIATION_CLASS':
-        'emg_api.negotiation.CustomContentNegotiation',
+    # 'DEFAULT_CONTENT_NEGOTIATION_CLASS':
+    #     'emg_api.negotiation.CustomContentNegotiation',
 
 }
 
