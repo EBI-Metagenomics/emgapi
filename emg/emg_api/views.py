@@ -174,7 +174,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='samples-list',
-        serializer_class=emg_serializers.SampleSerializer
+        serializer_class=emg_serializers.SimpleSampleSerializer
     )
     def samples(self, request, lineage=None):
         """
@@ -512,7 +512,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         methods=['get', ],
         url_name='runs-list',
         # url_path='runs(?:/(?P<run_accession>[a-zA-Z0-9,]+))?',
-        serializer_class=emg_serializers.RunSerializer
+        serializer_class=emg_serializers.SimpleRunSerializer
     )
     def runs(self, request, accession=None, run_accession=None):
         """
@@ -802,27 +802,18 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         """
         Retrieves list of runs for the given pipeline version
         """
-
         obj = self.get_object()
+        queryset = obj.runs \
+            .available(self.request) \
+            .select_related(
+                'sample',
+                'analysis_status',
+                'experiment_type',
+                'pipeline'
+            )
         if run_accession is not None:
-            queryset = obj.runs \
-                .available(self.request) \
-                .filter(accession=run_accession) \
-                .select_related(
-                    'sample',
-                    'analysis_status',
-                    'experiment_type',
-                    'pipeline'
-                )
-        else:
-            queryset = obj.runs \
-                .available(self.request) \
-                .select_related(
-                    'sample',
-                    'analysis_status',
-                    'experiment_type',
-                    'pipeline'
-                )
+            queryset = queryset.filter(accession=run_accession)
+
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(
@@ -891,25 +882,17 @@ class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
         """
 
         obj = self.get_object()
+        queryset = obj.runs \
+            .available(self.request) \
+            .select_related(
+                'sample',
+                'pipeline',
+                'analysis_status',
+                'experiment_type'
+            )
         if run_accession is not None:
-            queryset = obj.runs \
-                .available(self.request) \
-                .filter(accession=run_accession) \
-                .select_related(
-                    'sample',
-                    'pipeline',
-                    'analysis_status',
-                    'experiment_type'
-                )
-        else:
-            queryset = obj.runs \
-                .available(self.request) \
-                .select_related(
-                    'sample',
-                    'pipeline',
-                    'analysis_status',
-                    'experiment_type'
-                )
+            queryset = queryset.filter(accession=run_accession) \
+
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(
