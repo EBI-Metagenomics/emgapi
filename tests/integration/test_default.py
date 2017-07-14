@@ -33,7 +33,6 @@ class TestDefaultAPI(object):
 
         expected = {
             "mydata": "http://testserver/api/mydata",
-            "annotations": "http://testserver/api/annotations",
             "biomes": "http://testserver/api/biomes",
             "studies": "http://testserver/api/studies",
             "samples": "http://testserver/api/samples",
