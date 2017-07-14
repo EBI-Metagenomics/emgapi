@@ -565,19 +565,19 @@ class SampleViewSet(mixins.RetrieveModelMixin,
 
     @detail_route(
         methods=['get', ],
-        url_name='annotations-list',
+        url_name='metadata-list',
         serializer_class=emg_serializers.SimpleSampleAnnSerializer
     )
-    def annotations(self, request, accession=None):
+    def metadata(self, request, accession=None):
         """
         Retrieves list of samples for the given study accession
         Example:
         ---
-        `/api/samples/accession/annotations` retrieve annotations
+        `/api/samples/accession/metadata` retrieve metadata
         """
 
         obj = self.get_object()
-        queryset = obj.annotations.all() \
+        queryset = obj.metadata.all() \
             .select_related('sample', 'var') \
             .order_by('var')
 
@@ -606,7 +606,7 @@ class SampleAnnAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):
         Retrieves sample annotation for the given sample accession and value
         Example:
         ---
-        `/api/annotations/sample_accession/value`
+        `/api/metadata/sample_accession/value`
         """
         sa = emg_models.SampleAnn.objects.get(
             sample__accession=sample_accession,
@@ -655,7 +655,7 @@ class SampleAnnsViewSet(MultipleFieldLookupMixin,
         Retrieves list of annotaitons
         Example:
         ---
-        `/api/annotations` retrieves list of samples
+        `/api/metadata` retrieves list of samples
         """
         return super(SampleAnnsViewSet, self).list(request, *args, **kwargs)
 

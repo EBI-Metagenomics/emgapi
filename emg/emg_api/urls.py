@@ -29,10 +29,10 @@ urlpatterns = [
     ),
 
     # url(
-    #     (r'^annotations/(?P<sample_accession>[a-zA-Z0-9,_]+)/'
+    #     (r'^metadata/(?P<sample_accession>[a-zA-Z0-9,_]+)/'
     #      '(?P<var_id>[0-9]+)$'),
     #     views.SampleAnnAPIView.as_view(),
-    #     name='annotations-detail'
+    #     name='metadata-detail'
     # ),
 
 ]
@@ -64,9 +64,9 @@ router.register(
 )
 
 # router.register(
-#     r'annotations',
+#     r'metadata',
 #     views.SampleAnnsViewSet,
-#     base_name='annotations'
+#     base_name='metadata'
 # )
 
 router.register(
