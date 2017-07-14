@@ -184,7 +184,7 @@ WSGI_APPLICATION = 'emg.wsgi.application'
 # Security
 X_FRAME_OPTIONS = 'DENY'
 CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
+# SESSION_COOKIE_SECURE = True
 SECURE_BROWSER_XSS_FILTER = True
 
 # Database
@@ -207,14 +207,14 @@ DATABASES = {
     },
 }
 
-# SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-# CACHES = {
-#     "default": {
-#         "BACKEND": "django_redis.cache.RedisCache",
-#         "LOCATION":  "redis://localhost:6379/0",
-#         "KEY_PREFIX": "emg"
-#     }
-# }
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION":  "redis://localhost:6379/0",
+        "KEY_PREFIX": "emg"
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators

@@ -22,7 +22,7 @@ services:
       - PYTHONUNBUFFERED=0
       - DB_HOST=mysql
       - DB_PORT=3306
-      # - CACHE_LOCATION=redis://redis:6379/0
+      - CACHE_LOCATION=redis://redis:6379/0
 
   nginx:
     image: nginx:1.10
@@ -33,5 +33,5 @@ services:
     ports:
       - "80:80"
 
-  # redis:
-  #   image: redis
+  redis:
+    image: redis
