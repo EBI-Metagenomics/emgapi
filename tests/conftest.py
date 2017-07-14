@@ -30,8 +30,6 @@ def pytest_configure():
         os.getenv('DB_HOST', 'localhost')
     settings.DATABASES['default']['PORT'] = \
         os.getenv('DB_PORT', '3306')
-    # settings.CACHES['default']['LOCATION'] = \
-    #     os.getenv('CACHE_LOCATION', 'redis://localhost:6379/0')
 
     # TODO: backend mock to replace FakeEMGBackend
     # settings.EMG_BACKEND_AUTH_URL = 'http://fake_backend/auth'
