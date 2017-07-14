@@ -29,6 +29,8 @@ echo "EMG Start up..."
 
 cd $HOME/src
 
+# python3.5 emg/manage.py check --deploy
+
 python3.5 emg/manage.py migrate --fake-initial
 python3.5 emg/manage.py collectstatic --noinput
 #python3.5 emg/manage.py runserver 0.0.0.0:8000

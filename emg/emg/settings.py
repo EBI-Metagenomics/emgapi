@@ -181,6 +181,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'emg.wsgi.application'
 
+# Security
+X_FRAME_OPTIONS = 'DENY'
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+SECURE_BROWSER_XSS_FILTER = True
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
