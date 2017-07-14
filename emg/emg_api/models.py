@@ -586,7 +586,7 @@ class GscCvCv(models.Model):
 class SampleAnn(models.Model):
     sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID', primary_key=True,
-        related_name="annotations")
+        related_name="metadata")
     var_val_cv = models.ForeignKey(
         GscCvCv, db_column='VAR_VAL_CV',
         blank=True, null=True)

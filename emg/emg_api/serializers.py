@@ -361,7 +361,7 @@ class SimpleRunSerializer(RunSerializer):
 class SampleAnnSerializer(serializers.HyperlinkedModelSerializer):
 
     # url = SampelAnnHyperlinkedField(
-    #     view_name='emg_api:annotations-detail'
+    #     view_name='emg_api:metadata-detail'
     # )
 
     # sample = serializers.HyperlinkedRelatedField(
@@ -475,21 +475,21 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
         # /django-rest-framework-json-api/issues/178
         return ()
 
-    # annotations = serializers.HyperlinkedIdentityField(
-    #     view_name='emg_api:samples-annotations-list',
+    # metadata = serializers.HyperlinkedIdentityField(
+    #     view_name='emg_api:samples-metadata-list',
     #     lookup_field='accession',
     # )
-    annotations = relations.SerializerMethodResourceRelatedField(
-        source='get_annotations',
+    metadata = relations.SerializerMethodResourceRelatedField(
+        source='get_metadata',
         model=emg_models.SampleAnn,
         many=True,
         read_only=True,
-        related_link_view_name='emg_api:samples-annotations-list',
+        related_link_view_name='emg_api:samples-metadata-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession',
     )
 
-    def get_annotations(self, obj):
+    def get_metadata(self, obj):
         # TODO: provide counter instead of paginating relationship
         # workaround https://github.com/django-json-api
         # /django-rest-framework-json-api/issues/178

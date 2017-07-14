@@ -293,7 +293,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='SampleAnn',
             fields=[
-                ('sample', models.ForeignKey(db_column='SAMPLE_ID', on_delete=django.db.models.deletion.CASCADE, primary_key=True, related_name='annotations', serialize=False, to='emg_api.Sample')),
+                ('sample', models.ForeignKey(db_column='SAMPLE_ID', on_delete=django.db.models.deletion.CASCADE, primary_key=True, related_name='metadata', serialize=False, to='emg_api.Sample')),
                 ('var_val_cv', models.ForeignKey(blank=True, db_column='VAR_VAL_CV', null=True, on_delete=django.db.models.deletion.CASCADE, to='emg_api.GscCvCv')),
                 ('units', models.CharField(blank=True, db_column='UNITS', max_length=25, null=True)),
                 ('var', models.ForeignKey(db_column='VAR_ID', on_delete=django.db.models.deletion.CASCADE, to='emg_api.VariableNames')),
