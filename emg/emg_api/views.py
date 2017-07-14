@@ -577,7 +577,9 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         """
 
         obj = self.get_object()
-        queryset = obj.annotations.all()
+        queryset = obj.annotations.all() \
+            .select_related('sample', 'var') \
+            .order_by('var')
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -626,11 +628,17 @@ class SampleAnnsViewSet(MultipleFieldLookupMixin,
     )
 
     ordering_fields = (
+        'sample',
+        'var',
     )
 
-    ordering = ()
+    ordering = (
+        'sample',
+        'var',
+    )
 
     search_fields = (
+        'var__var_name',
     )
 
     def get_queryset(self):

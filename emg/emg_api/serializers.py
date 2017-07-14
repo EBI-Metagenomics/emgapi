@@ -347,34 +347,52 @@ class SimpleRunSerializer(RunSerializer):
 
 # SampleAnn serializer
 
-class SampelAnnHyperlinkedField(serializers.HyperlinkedIdentityField):
-
-    def get_url(self, obj, view_name, request, format):
-        kwargs = {
-            'sample_accession': obj.sample.accession,
-            'name': obj.var.var_name,
-        }
-        return reverse(
-            view_name, kwargs=kwargs, request=request, format=format)
+# class SampelAnnHyperlinkedField(serializers.HyperlinkedIdentityField):
+#
+#     def get_url(self, obj, view_name, request, format):
+#         kwargs = {
+#             'sample_accession': obj.sample.accession,
+#             'var_id': obj.var.var_id,
+#         }
+#         return reverse(
+#             view_name, kwargs=kwargs, request=request, format=format)
 
 
 class SampleAnnSerializer(serializers.HyperlinkedModelSerializer):
 
-    url = SampelAnnHyperlinkedField(
-        view_name='emg_api:annotations-detail'
-    )
+    # url = SampelAnnHyperlinkedField(
+    #     view_name='emg_api:annotations-detail'
+    # )
 
-    sample = serializers.HyperlinkedRelatedField(
-        read_only=True,
-        view_name='emg_api:samples-detail',
-        lookup_field='accession',
-    )
+    # sample = serializers.HyperlinkedRelatedField(
+    #     read_only=True,
+    #     view_name='emg_api:samples-detail',
+    #     lookup_field='accession',
+    # )
+
+    var_name = serializers.SerializerMethodField()
+
+    def get_var_name(self, obj):
+        return obj.var.var_name
+
+    var_value = serializers.SerializerMethodField()
+
+    def get_var_value(self, obj):
+        return obj.var_val_ucv
+
+    unit = serializers.SerializerMethodField()
+
+    def get_unit(self, obj):
+        return obj.units
 
     class Meta:
         model = emg_models.SampleAnn
         fields = (
-            'url',
-            'sample',
+            # 'url',
+            # 'sample',
+            'var_name',
+            'var_value',
+            'unit',
         )
 
 
