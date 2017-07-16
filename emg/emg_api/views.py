@@ -79,7 +79,7 @@ class MyDataViewSet(mixins.ListModelMixin,
         """
         queryset = emg_models.Study.objects \
             .mydata(self.request) \
-            .prefetch_related('biome')
+            .select_related('biome')
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(
@@ -453,7 +453,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
     def get_queryset(self):
         queryset = emg_models.Sample.objects \
             .available(self.request) \
-            .prefetch_related('biome', 'study')
+            .select_related('biome', 'study')
         if 'runs' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Run.objects \
                 .available(self.request) \
