@@ -257,6 +257,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         'author_email',
         '@biome__biome_name',
         '@biome__lineage',
+        'samples__metadata__var_val_ucv'
     )
 
     lookup_field = 'accession'
@@ -445,6 +446,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         '@sample_name',
         '@biome__biome_name',
         '@biome__lineage',
+        'metadata__var_val_ucv'
     )
 
     lookup_field = 'accession'
