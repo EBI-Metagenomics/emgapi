@@ -52,6 +52,7 @@ class TestDefaultAPI(object):
             'emg_api:publications',
             'emg_api:samples',
             'emg_api:studies',
+            'emg_api:runs',
             pytest.mark.xfail('viewdoesnotexist'),
         ]
     )
@@ -89,7 +90,7 @@ class TestDefaultAPI(object):
             if _model in ('Sample', 'Study'):
                 _biome = mommy.make('emg_api.Biome', pk=pk)
                 mommy.make(model_name, pk=pk, biome=_biome, is_public=1)
-            elif _model in ('Run'):
+            elif _model in ('Run',):
                 _as = mommy.make('emg_api.AnalysisStatus', pk=3)
                 _p = mommy.make('emg_api.Pipeline', pk=1,
                                 release_version="1.0")
