@@ -330,7 +330,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         Retrieve latest studies
         Example:
         ---
-        `/api/studies/latest` retrieve latest studies
+        `/api/studies/recent` retrieve recent studies
         """
         limit = settings.EMG_DEFAULT_LIMIT
         queryset = emg_models.Study.objects \
