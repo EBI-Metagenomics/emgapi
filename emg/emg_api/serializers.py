@@ -526,6 +526,7 @@ class SimpleSampleSerializer(SampleSerializer):
             'study_accession',
             'runs',
             'study',
+            'metadata',
         )
 
 
