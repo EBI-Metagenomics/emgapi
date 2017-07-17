@@ -27,11 +27,19 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
+import sys
 import os
+import warnings
 import logging
 import binascii
 
+try:
+    from YamJam import yamjam, YAMLError
+except ImportError:
+    raise ImportError("Install yamjam. Run `pip install -r requirements.txt`")
+
 logger = logging.getLogger(__name__)
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -196,25 +204,22 @@ SECURE_BROWSER_XSS_FILTER = True
 #         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
 #     }
 # }
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'emg',
-        'USER': 'root',
-        # 'PASSWORD': 'secret',
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', '3306'),
-    },
-}
+try:
+    DATABASES = yamjam()['emg']['databases']
+except KeyError:
+    raise KeyError("Config must container default database.")
 
-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION":  "redis://localhost:6379/0",
-        "KEY_PREFIX": "emg"
-    }
-}
+try:
+    SESSION_ENGINE = yamjam()['emg']['session_engine']
+except KeyError:
+    warnings.warn("SESSION_ENGINE not configured, using default",
+                  RuntimeWarning)
+
+try:
+    CACHES = yamjam()['emg']['caches']
+except KeyError:
+    warnings.warn("CACHES not configured, using default",
+                  RuntimeWarning)
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -345,4 +350,4 @@ AUTHENTICATION_BACKENDS = (
     'emg_api.backends.EMGBackend',
 )
 
-EMG_BACKEND_AUTH_URL = os.getenv('EMG_BACKEND_AUTH_URL', 'http://localhost')
+EMG_BACKEND_AUTH_URL = yamjam()['emg']['emg_backend_auth']
