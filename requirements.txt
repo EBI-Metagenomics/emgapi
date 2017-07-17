@@ -8,6 +8,7 @@ whitenoise
 mysqlclient
 sqlparse
 requests
+yamjam
 
 # optional session store
 django-redis>=4.4

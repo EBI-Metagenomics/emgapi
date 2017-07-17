@@ -25,12 +25,6 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'emg.settings')
 def pytest_configure():
     settings.DEBUG = False
     settings.REST_FRAMEWORK['TEST_REQUEST_DEFAULT_FORMAT'] = 'vnd.api+json'
-    settings.DATABASES['default']['NAME'] = 'emg_test'
-    settings.DATABASES['default']['HOST'] = \
-        os.getenv('DB_HOST', 'localhost')
-    settings.DATABASES['default']['PORT'] = \
-        os.getenv('DB_PORT', '3306')
-
     # TODO: backend mock to replace FakeEMGBackend
     # settings.EMG_BACKEND_AUTH_URL = 'http://fake_backend/auth'
     settings.AUTHENTICATION_BACKENDS = ('test_utils.FakeEMGBackend',)
