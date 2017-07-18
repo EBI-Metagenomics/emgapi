@@ -136,9 +136,6 @@ except NameError:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["*"]
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -154,7 +151,6 @@ INSTALLED_APPS = [
     'rest_framework_swagger',
     'django_filters',
     'rest_auth',
-
     # apps
     'emg_api',
 ]
@@ -190,10 +186,17 @@ TEMPLATES = [
 WSGI_APPLICATION = 'emg.wsgi.application'
 
 # Security
+ALLOWED_HOSTS = ["*"]
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 X_FRAME_OPTIONS = 'DENY'
 CSRF_COOKIE_SECURE = True
 # SESSION_COOKIE_SECURE = True
 SECURE_BROWSER_XSS_FILTER = True
+
+## django cors
+INSTALLED_APPS += ('corsheaders',)
+MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')
+CORS_ORIGIN_ALLOW_ALL = True
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
@@ -253,12 +256,17 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+## statics
+INSTALLED_APPS += ('whitenoise',)
+MIDDLEWARE.append('whitenoise.middleware.WhiteNoiseMiddleware')
+
+# Django Rest Framewrk
 
 REST_FRAMEWORK = {
 
@@ -328,16 +336,6 @@ SWAGGER_SETTINGS = {
     },
     'USE_SESSION_AUTH': True,
 }
-
-## django cors
-INSTALLED_APPS += ('corsheaders',)
-MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')
-CORS_ORIGIN_ALLOW_ALL = True
-
-## statics
-INSTALLED_APPS += ('whitenoise',)
-MIDDLEWARE.append('whitenoise.middleware.WhiteNoiseMiddleware')
-
 
 # Custom settings
 try:
