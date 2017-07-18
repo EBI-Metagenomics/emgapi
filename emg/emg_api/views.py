@@ -392,11 +392,11 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 
         obj = self.get_object()
         queryset = obj.samples \
-            .available(self.request)
+            .available(self.request) \
+            .prefetch_related('biome')
         if sample_accession is not None:
             queryset = queryset \
-                .filter(accession=sample_accession) \
-                .select_related('biome')
+                .filter(accession=sample_accession)
         else:
             queryset = queryset \
                 .select_related('biome')
@@ -455,7 +455,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
     def get_queryset(self):
         queryset = emg_models.Sample.objects \
             .available(self.request) \
-            .select_related('biome', 'study')
+            .prefetch_related('biome', 'study')
         if 'runs' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Run.objects \
                 .available(self.request) \
