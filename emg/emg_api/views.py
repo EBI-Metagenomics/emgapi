@@ -67,6 +67,12 @@ class MyDataViewSet(mixins.ListModelMixin,
         emg_perms.IsSelf,
     )
 
+    def get_queryset(self):
+        queryset = emg_models.Study.objects \
+            .mydata(self.request) \
+            .select_related('biome')
+        return queryset
+
     def get_serializer_class(self):
         return super(MyDataViewSet, self).get_serializer_class()
 
