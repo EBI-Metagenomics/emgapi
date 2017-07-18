@@ -302,7 +302,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         `/api/studies?biome_name=Soil`
         retrieve all studies containing given Biome
 
-        Search:
+        Search for metadata, name, abstract, biome, etc.:
         ---
         `/api/studies?search=microbial%20fuel%20cells`
         """
@@ -504,9 +504,9 @@ class SampleViewSet(mixins.RetrieveModelMixin,
 
         `/api/samples?biome=root:Environmental:Aquatic:Marine`
 
-        Search for accession, name, biome, etc.:
+        Search for metadata, name, biome, etc.:
         ---
-        `/api/samples?search=text`
+        `/api/studies?search=microbial%20fuel%20cells`
         """
         return super(SampleViewSet, self).list(request, *args, **kwargs)
 
