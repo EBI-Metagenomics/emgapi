@@ -71,7 +71,7 @@ class TestStudyAPI(APITestCase):
         # Data
         assert len(rsp) == 1
         assert rsp['data']['type'] == "Study"
-        assert rsp['data']['id'] == "123"
+        assert rsp['data']['id'] == "SRP01234"
         _attr = rsp['data']['attributes']
         assert(len(_attr) == 14)
         assert _attr['accession'] == "SRP01234"
@@ -105,5 +105,5 @@ class TestStudyAPI(APITestCase):
 
         for d in rsp['data']:
             assert d['type'] == "Study"
-            assert d['id'] == "123"
+            assert d['id'] == "SRP01234"
             assert d['attributes']['accession'] == "SRP01234"
