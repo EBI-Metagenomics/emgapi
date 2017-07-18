@@ -60,16 +60,16 @@ class TestPermissionsAPI(object):
         [
             # private
             ('emg_api:studies-list', 'Webin-111', 5,
-             ['111', '112', '114', '115', '120'],
-             ['113', '121']),
+             ['SRP0111', 'SRP0112', 'SRP0114', 'SRP0115', 'SRP0120'],
+             ['SRP0113', 'SRP0121']),
             # mydata
             ('emg_api:mydata-list', 'Webin-111', 2,
-             ['114', '115'],
+             ['SRP0114', 'SRP0115'],
              []),
             # public
             ('emg_api:studies-list', None, 4,
-             ['111', '112', '114', '120'],
-             ['113', '115', '121']),
+             ['SRP0111', 'SRP0112', 'SRP0114', 'SRP0120'],
+             ['SRP0113', 'SRP0115', 'SRP0121']),
         ]
     )
     def test_list(self, client, view, username, count, ids, bad_ids):
