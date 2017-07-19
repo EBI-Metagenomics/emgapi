@@ -14,7 +14,7 @@ before_install:
 install:
   # customized branch
   - pip install "git+git://github.com/ola-t/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
-  - docker/run.sh install
+  - SRCDIR=$(pwd) docker/run.sh install
 
 before_script:
   - docker --version
@@ -28,7 +28,6 @@ before_script:
   - mkdir -p ~/.yamjam && cp travis/config.yaml ~/.yamjam/
 
 script:
-  - docker/run.sh is_db_running '-h 127.0.0.1 -P 3306'
   - python setup.py test
 after_script:
   - docker stop mysql redis

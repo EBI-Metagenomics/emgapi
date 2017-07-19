@@ -20,10 +20,8 @@ ConcurrentLogHandler
 Django~=1.11.1
 djangorestframework~=3.6.3
 django-filter~=1.0.3
-
 # Customized branch
 # djangorestframework-jsonapi~=2.2.0
--e "git+git://github.com/ola-t/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
 django-rest-auth~=0.9.1
 django-cors-headers~=1.3.1
 
