@@ -21,8 +21,9 @@ if "test" in sys.argv:
 sys.path.insert(0, 'emg')
 
 setup(
-    name="emg",
-    packages=find_packages(exclude=['ez_setup']),
+    name="emgapi",
+    packages=find_packages(
+        exclude=['ez_setup', 'tests', 'docker', 'database', 'nginx']),
     version=version,
     install_requires=install_requirements,
     setup_requires=['pytest-runner'],

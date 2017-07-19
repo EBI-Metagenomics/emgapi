@@ -3,7 +3,7 @@
 
 from django.contrib import admin
 
-from emg_api import models as emg_models
+from . import models as emg_models
 
 admin.site.register(emg_models.Biome)
 admin.site.register(emg_models.Study)

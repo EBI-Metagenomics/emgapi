@@ -31,10 +31,10 @@ from rest_framework.decorators import detail_route, list_route
 from rest_framework import permissions
 # from rest_framework_json_api.renderers import JSONRenderer
 
-from emg_api import models as emg_models
-from emg_api import serializers as emg_serializers
-from emg_api import filters as emg_filters
-from emg_api import permissions as emg_perms
+from . import models as emg_models
+from . import serializers as emg_serializers
+from . import filters as emg_filters
+from . import permissions as emg_perms
 
 logger = logging.getLogger(__name__)
 
