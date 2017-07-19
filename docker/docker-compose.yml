@@ -16,7 +16,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ../:/home/centos/src
-      - ${PWD}/docker/config.yaml:/home/centos/.yamjam/config.yaml
+      - ../docker/config.yaml:/home/centos/.yamjam/config.yaml:ro
     links:
       - mysql
     environment:
