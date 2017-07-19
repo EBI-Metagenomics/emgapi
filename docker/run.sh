@@ -2,44 +2,78 @@
 
 set -eux
 
-rm -f $HOME/src/emg/django.pid
+entryPoint=${1:-}
+pythonEnv=${PYTHONENV:-python3.5}
+homeDir=${HOMEDIR:-$HOME}
 
-echo "Installing EMG dependencies..."
+create_venv() {
+  $pythonEnv -m virtualenv $homeDir/venv
+}
 
-python3.5 -m virtualenv $HOME/venv
-set +o nounset
-source $HOME/venv/bin/activate
-set -o nounset
+activate_venv() {
+  set +o nounset
+  source $homeDir/venv/bin/activate
+  set -o nounset
+  python -V
+}
 
-python -V
+is_db_running() {
+  local conn=${1:-};
 
-pip install -U pip setuptools
-pip install "git+git://github.com/django-json-api/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
-pip install -U -r $HOME/src/requirements.txt
+  echo "DB startup..."
+  until mysql $conn -e 'show databases;'; do
+    >&2 echo "MySQL is unavailable - sleeping"
+    sleep 5
+  done
+  >&2 echo "MySQL now accepts connections, creating database..."
+}
 
-echo "DB startup..."
-until mysql -u root -h mysql -P 3306 -e 'show databases;'; do
-  >&2 echo "MySQL is unavailable - sleeping"
-  sleep 5
-done
+install() {
+  echo "Installing EMG dependencies..."
+  pip install -U pip
+  pip install -U -r $homeDir/src/requirements.txt
+}
 
->&2 echo "MySQL now accepts connections, creating database..."
+start() {
+  echo "EMG API Start up..."
+  cd $homeDir/src
 
-echo "EMG Start up..."
+  # python emg/manage.py check --deploy
+  python emg/manage.py migrate --fake-initial
+  python emg/manage.py collectstatic --noinput
+  # python emg/manage.py runserver 0.0.0.0:8000
 
-cd $HOME/src
+  (cd emg && python $homeDir/venv/bin/gunicorn \
+    -p $homeDir/src/django.pid \
+    --bind 0.0.0.0:8000 \
+    --workers 5 \
+    --timeout 30 \
+    --max-requests 0 \
+    emg.wsgi:application)
+}
 
-# python3.5 emg/manage.py check --deploy
+docker() {
 
-python3.5 emg/manage.py migrate --fake-initial
-python3.5 emg/manage.py collectstatic --noinput
-#python3.5 emg/manage.py runserver 0.0.0.0:8000
+  create_venv
+  is_db_running "-u root -h mysql -P 3306"
+  activate_venv
+  install
+  start
 
-(cd emg && python3.5 $HOME/venv/bin/gunicorn \
-  -p $HOME/src/emg/django.pid \
-  --bind 0.0.0.0:8000 \
-  --workers 5 \
-  --timeout 30 \
-  --max-requests 0 \
-  --reload \
-  emg.wsgi:application)
+}
+
+jenkins() {
+
+  create_venv
+  activate_venv
+  install
+  BUILD_ID=dontKillMe start
+
+}
+
+
+rm -f $homeDir/src/django.pid
+
+if [ ! -z ${entryPoint} ] ; then
+  eval $entryPoint
+fi 

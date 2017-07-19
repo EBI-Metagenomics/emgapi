@@ -8,11 +8,13 @@ python:
 services:
   - docker
 
-install:
-  # Bug fix: https://github.com/django-json-api/django-rest-framework-json-api/pull/359
-  - pip install "git+git://github.com/ola-t/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
-  - pip install -r requirements.txt
+before_install:
   - pip install flake8 pycodestyle pep8-naming
+
+install:
+  # customized branch
+  - pip install "git+git://github.com/ola-t/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
+  - docker/run.sh install
 
 before_script:
   - docker --version
@@ -26,7 +28,8 @@ before_script:
   - mkdir -p ~/.yamjam && cp travis/config.yaml ~/.yamjam/
 
 script:
-  - ./travis/run.sh
+  - docker/run.sh is_db_running '-h 127.0.0.1 -P 3306'
+  - python setup.py test
 after_script:
   - docker stop mysql redis
 
