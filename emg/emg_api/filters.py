@@ -17,7 +17,7 @@
 
 import django_filters
 
-from emg_api import models as emg_models
+from . import models as emg_models
 
 
 class PublicationFilter(django_filters.FilterSet):
