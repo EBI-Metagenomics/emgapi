@@ -3,16 +3,17 @@
 set -eux
 
 entryPoint=${1:-}
-pythonEnv=${PYTHONENV:-python3.5}
-homeDir=${HOMEDIR:-$HOME}
+pythonEnv=${PYTHONENV:-"python3.5"}
+srcDir=${SRCDIR:-"${HOME}/src"}
+venvDir=${VENVDIR:-"${HOME}/venv"}
 
 create_venv() {
-  $pythonEnv -m virtualenv $homeDir/venv
+  $pythonEnv -m virtualenv $VENVDIR
 }
 
 activate_venv() {
   set +o nounset
-  source $homeDir/venv/bin/activate
+  source $VENVDIR/bin/activate
   set -o nounset
   python -V
 }
@@ -31,20 +32,20 @@ is_db_running() {
 install() {
   echo "Installing EMG dependencies..."
   pip install -U pip
-  pip install -U -r $homeDir/src/requirements.txt
+  pip install -U -r $SRCDIR/requirements.txt
 }
 
 start() {
   echo "EMG API Start up..."
-  cd $homeDir/src
+  cd $SRCDIR
 
   # python emg/manage.py check --deploy
   python emg/manage.py migrate --fake-initial
   python emg/manage.py collectstatic --noinput
   # python emg/manage.py runserver 0.0.0.0:8000
 
-  (cd emg && python $homeDir/venv/bin/gunicorn \
-    -p $homeDir/src/django.pid \
+  (cd emg && python $SRCDIR/venv/bin/gunicorn \
+    -p $SRCDIR/django.pid \
     --bind 0.0.0.0:8000 \
     --workers 5 \
     --timeout 30 \
@@ -72,7 +73,7 @@ jenkins() {
 }
 
 
-rm -f $homeDir/src/django.pid
+rm -f $SRCDIR/django.pid
 
 if [ ! -z ${entryPoint} ] ; then
   eval $entryPoint
