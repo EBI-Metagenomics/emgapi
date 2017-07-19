@@ -253,7 +253,9 @@ class StudyQuerySet(BaseQuerySet):
 class StudyManager(models.Manager):
 
     def get_queryset(self):
-        return StudyQuerySet(self.model, using=self._db)
+        return StudyQuerySet(self.model, using=self._db) \
+            .annotate(samples_count=Count('samples', distinct=True)) \
+            .annotate(runs_count=Count('samples__runs', distinct=True))
 
     def available(self, request):
         return self.get_queryset().available(request)
@@ -336,7 +338,8 @@ class SampleQuerySet(BaseQuerySet):
 class SampleManager(models.Manager):
 
     def get_queryset(self):
-        return SampleQuerySet(self.model, using=self._db)
+        return SampleQuerySet(self.model, using=self._db) \
+            .annotate(runs_count=Count('runs'))
 
     def available(self, request):
         return self.get_queryset().available(request)

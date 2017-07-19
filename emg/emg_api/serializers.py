@@ -475,6 +475,8 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
         # /django-rest-framework-json-api/issues/178
         return ()
 
+    runs_count = serializers.IntegerField()
+
     # metadata = serializers.HyperlinkedIdentityField(
     #     view_name='emg_api:samples-metadata-list',
     #     lookup_field='accession',
@@ -527,6 +529,7 @@ class SimpleSampleSerializer(SampleSerializer):
             'runs',
             'study',
             'metadata',
+            'runs_count',
         )
 
 
@@ -593,6 +596,10 @@ class StudySerializer(serializers.HyperlinkedModelSerializer):
         related_link_lookup_field='accession',
     )
 
+    samples_count = serializers.IntegerField()
+
+    runs_count = serializers.IntegerField()
+
     def get_samples(self, obj):
         # TODO: provide counter instead of paginating relationship
         # workaround https://github.com/django-json-api
@@ -631,4 +638,6 @@ class SimpleStudySerializer(StudySerializer):
             'last_update',
             'samples',
             'publications',
+            'samples_count',
+            'runs_count',
         )
