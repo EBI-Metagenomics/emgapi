@@ -30,4 +30,4 @@ RUN chown centos:centos /tmp/docker/run.sh
 USER centos
 ENV HOME /home/centos
 
-ENTRYPOINT ["/tmp/docker/run.sh"]
+ENTRYPOINT ["/tmp/docker/run.sh", "docker"]
