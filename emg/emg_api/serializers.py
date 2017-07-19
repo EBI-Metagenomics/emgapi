@@ -24,7 +24,7 @@ from rest_framework.reverse import reverse
 from rest_framework_json_api import serializers
 from rest_framework_json_api import relations
 
-from emg_api import models as emg_models
+from . import models as emg_models
 
 logger = logging.getLogger(__name__)
 
