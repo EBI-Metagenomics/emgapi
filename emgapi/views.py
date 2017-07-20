@@ -600,29 +600,6 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         return Response(serializer.data)
 
 
-class SampleAnnAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):
-
-    serializer_class = emg_serializers.SampleAnnSerializer
-
-    lookup_fields = ('sample', 'name')
-
-    def get_queryset(self):
-        return emg_models.SampleAnn.objects.all()
-
-    def get(self, request, sample_accession, name, *args, **kwargs):
-        """
-        Retrieves sample annotation for the given sample accession and value
-        Example:
-        ---
-        `/api/metadata/sample_accession/value`
-        """
-        sa = emg_models.SampleAnn.objects.get(
-            sample__accession=sample_accession,
-            var__var_name=name)
-        serializer = self.get_serializer(sa)
-        return Response(data=serializer.data)
-
-
 class SampleAnnsViewSet(mixins.ListModelMixin,
                         viewsets.GenericViewSet):
 
@@ -724,7 +701,7 @@ class RunViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         return emg_models.Run.objects \
             .available(self.request) \
-            .select_related(
+            .prefetch_related(
                 'sample',
                 'pipeline',
                 'analysis_status',
