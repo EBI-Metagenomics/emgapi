@@ -57,7 +57,7 @@ urlpatterns = [
 
     url(r'^api/docs/$', docs_schema_view),
 
-    url(r'^api/', include('emg_api.urls',
-                          namespace='emg_api')),
+    url(r'^api/', include('emgapi.urls',
+                          namespace='emgapi')),
 
 ]

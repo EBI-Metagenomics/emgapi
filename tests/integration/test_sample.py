@@ -25,7 +25,7 @@ from rest_framework.test import APITestCase
 
 from model_mommy import mommy
 
-from emg_api.models import Sample  # noqa
+from emgapi.models import Sample  # noqa
 
 
 class TestSampleAPI(APITestCase):
@@ -34,14 +34,14 @@ class TestSampleAPI(APITestCase):
         self.data = {}
         self.data['date'] = datetime.now()
         _biome = mommy.make(
-            'emg_api.Biome',
+            'emgapi.Biome',
             biome_name="foo",
             lineage="root:foo",
             pk=123)
         self.data['studies'] = []
         self.data['studies'].append(
             mommy.make(
-                'emg_api.Sample',
+                'emgapi.Sample',
                 biome=_biome,
                 pk=123,
                 sample_desc="abcdefghijklmnoprstuvwyz",
@@ -67,10 +67,10 @@ class TestSampleAPI(APITestCase):
             )
         )
         # private
-        mommy.make("emg_api.Sample", pk=456, biome=_biome, is_public=0)
+        mommy.make("emgapi.Sample", pk=456, biome=_biome, is_public=0)
 
     def test_details(self):
-        url = reverse("emg_api:samples-detail", args=["DRS012345"])
+        url = reverse("emgapi:samples-detail", args=["DRS012345"])
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -103,7 +103,7 @@ class TestSampleAPI(APITestCase):
         # assert _attr['last_update'] == str(self.data['date'])
 
     def test_public(self):
-        url = reverse("emg_api:samples-list")
+        url = reverse("emgapi:samples-list")
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()

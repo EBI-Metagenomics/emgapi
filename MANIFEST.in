@@ -1,0 +1,7 @@
+include README.rst
+include LICENSE
+include requirements.txt
+recursive-include emgcli *
+recursive-include emgapi *
+recursive-exclude * __pycache__
+recursive-exclude * *.pyc

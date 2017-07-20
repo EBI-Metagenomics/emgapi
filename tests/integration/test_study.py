@@ -32,14 +32,14 @@ class TestStudyAPI(APITestCase):
         self.data = {}
         self.data['date'] = datetime.now()
         _biome = mommy.make(
-            'emg_api.Biome',
+            'emgapi.Biome',
             biome_name="foo",
             lineage="root:foo",
             pk=123)
         self.data['studies'] = []
         self.data['studies'].append(
             mommy.make(
-                'emg_api.Study',
+                'emgapi.Study',
                 biome=_biome,
                 pk=123,
                 study_abstract="abcdefghijklmnoprstuvwyz",
@@ -60,10 +60,10 @@ class TestStudyAPI(APITestCase):
             )
         )
         # private
-        mommy.make("emg_api.Study", pk=456, biome=_biome, is_public=0)
+        mommy.make("emgapi.Study", pk=456, biome=_biome, is_public=0)
 
     def test_details(self):
-        url = reverse("emg_api:studies-detail", args=["SRP01234"])
+        url = reverse("emgapi:studies-detail", args=["SRP01234"])
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -90,7 +90,7 @@ class TestStudyAPI(APITestCase):
         assert _attr['project_id'] == "PRJDB1234"
 
     def test_public(self):
-        url = reverse("emg_api:studies-list")
+        url = reverse("emgapi:studies-list")
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()

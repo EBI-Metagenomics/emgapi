@@ -8,7 +8,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('emg_api', '0001_initial'),
+        ('emgapi', '0001_initial'),
     ]
 
     operations = [
@@ -83,12 +83,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='pipelinereleasetool',
             name='pipeline',
-            field=models.ForeignKey(db_column='PIPELINE_ID', on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to='emg_api.Pipeline'),
+            field=models.ForeignKey(db_column='PIPELINE_ID', on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to='emgapi.Pipeline'),
         ),
         migrations.AlterField(
             model_name='pipelinereleasetool',
             name='tool',
-            field=models.ForeignKey(db_column='TOOL_ID', on_delete=django.db.models.deletion.CASCADE, to='emg_api.PipelineTool'),
+            field=models.ForeignKey(db_column='TOOL_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.PipelineTool'),
         ),
         migrations.AlterField(
             model_name='pipelinetool',
@@ -113,22 +113,22 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='run',
             name='analysis_status',
-            field=models.ForeignKey(db_column='ANALYSIS_STATUS_ID', on_delete=django.db.models.deletion.CASCADE, to='emg_api.AnalysisStatus'),
+            field=models.ForeignKey(db_column='ANALYSIS_STATUS_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.AnalysisStatus'),
         ),
         migrations.AlterField(
             model_name='run',
             name='experiment_type',
-            field=models.ForeignKey(db_column='EXPERIMENT_TYPE_ID', on_delete=django.db.models.deletion.CASCADE, related_name='runs', to='emg_api.ExperimentType'),
+            field=models.ForeignKey(db_column='EXPERIMENT_TYPE_ID', on_delete=django.db.models.deletion.CASCADE, related_name='runs', to='emgapi.ExperimentType'),
         ),
         migrations.AlterField(
             model_name='run',
             name='pipeline',
-            field=models.ForeignKey(db_column='PIPELINE_ID', on_delete=django.db.models.deletion.CASCADE, related_name='runs', to='emg_api.Pipeline'),
+            field=models.ForeignKey(db_column='PIPELINE_ID', on_delete=django.db.models.deletion.CASCADE, related_name='runs', to='emgapi.Pipeline'),
         ),
         migrations.AlterField(
             model_name='run',
             name='sample',
-            field=models.ForeignKey(db_column='SAMPLE_ID', on_delete=django.db.models.deletion.CASCADE, related_name='runs', to='emg_api.Sample'),
+            field=models.ForeignKey(db_column='SAMPLE_ID', on_delete=django.db.models.deletion.CASCADE, related_name='runs', to='emgapi.Sample'),
         ),
         migrations.AlterField(
             model_name='sample',
@@ -138,37 +138,37 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='sample',
             name='biome',
-            field=models.ForeignKey(db_column='BIOME_ID', on_delete=django.db.models.deletion.CASCADE, related_name='samples', to='emg_api.Biome'),
+            field=models.ForeignKey(db_column='BIOME_ID', on_delete=django.db.models.deletion.CASCADE, related_name='samples', to='emgapi.Biome'),
         ),
         migrations.AlterField(
             model_name='sample',
             name='study',
-            field=models.ForeignKey(db_column='STUDY_ID', on_delete=django.db.models.deletion.CASCADE, related_name='samples', to='emg_api.Study'),
+            field=models.ForeignKey(db_column='STUDY_ID', on_delete=django.db.models.deletion.CASCADE, related_name='samples', to='emgapi.Study'),
         ),
         migrations.AlterField(
             model_name='samplepublication',
             name='pub',
-            field=models.ForeignKey(db_column='PUB_ID', on_delete=django.db.models.deletion.CASCADE, to='emg_api.Publication'),
+            field=models.ForeignKey(db_column='PUB_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.Publication'),
         ),
         migrations.AlterField(
             model_name='samplepublication',
             name='sample',
-            field=models.ForeignKey(db_column='SAMPLE_ID', on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to='emg_api.Sample'),
+            field=models.ForeignKey(db_column='SAMPLE_ID', on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to='emgapi.Sample'),
         ),
         migrations.AlterField(
             model_name='study',
             name='biome',
-            field=models.ForeignKey(db_column='BIOME_ID', on_delete=django.db.models.deletion.CASCADE, related_name='studies', to='emg_api.Biome'),
+            field=models.ForeignKey(db_column='BIOME_ID', on_delete=django.db.models.deletion.CASCADE, related_name='studies', to='emgapi.Biome'),
         ),
         migrations.AlterField(
             model_name='studypublication',
             name='pub',
-            field=models.ForeignKey(db_column='PUB_ID', on_delete=django.db.models.deletion.CASCADE, to='emg_api.Publication'),
+            field=models.ForeignKey(db_column='PUB_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.Publication'),
         ),
         migrations.AlterField(
             model_name='studypublication',
             name='study',
-            field=models.ForeignKey(db_column='STUDY_ID', on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to='emg_api.Study'),
+            field=models.ForeignKey(db_column='STUDY_ID', on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to='emgapi.Study'),
         ),
         migrations.AlterModelOptions(
             name='analysisstatus',

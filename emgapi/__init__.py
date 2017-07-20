@@ -15,8 +15,4 @@
 # limitations under the License.
 
 
-from django.apps import AppConfig
-
-
-class EmgApiConfig(AppConfig):
-    name = 'api'
+default_app_config = 'emgapi.apps.EmgApiConfig'

@@ -19,7 +19,7 @@ import os
 
 from django.conf import settings
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'emg.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'emgcli.settings')
 
 
 def pytest_configure():

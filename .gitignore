@@ -1,8 +1,7 @@
+.DS_Store
 db.sqlite3
 __pycache__
 *.pyc
-.DS_Store
-*.db
-db.sqlite3
-emg/django.pid
-emg/secret.key
+var
+dist
+.eggs

@@ -15,17 +15,9 @@
 # limitations under the License.
 
 
-# import pytest
-
-from django.core.urlresolvers import reverse
-
-from rest_framework import status
-from rest_framework.test import APITestCase
+from django.apps import AppConfig
 
 
-class TestPublicationAPI(APITestCase):
-
-    def test_default(self):
-        url = reverse('emgapi:publications-list')
-        response = self.client.get(url)
-        assert response.status_code == status.HTTP_200_OK
+class EmgApiConfig(AppConfig):
+    name = 'emgapi'
+    # label = 'api'
