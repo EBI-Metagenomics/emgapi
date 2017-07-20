@@ -70,6 +70,12 @@ router.register(
 # )
 
 router.register(
+    r'tools',
+    views.PipelineToolViewSet,
+    base_name='tools'
+)
+
+router.register(
     r'runs',
     views.RunViewSet,
     base_name='runs'
