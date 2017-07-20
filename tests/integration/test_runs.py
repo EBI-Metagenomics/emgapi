@@ -24,18 +24,18 @@ from rest_framework.test import APITestCase
 
 from model_mommy import mommy
 
-from emg_api.models import Run  # noqa
+from emgapi.models import Run  # noqa
 
 
 class TestRunAPI(APITestCase):
 
     def test_public(self):
-        _as = mommy.make('emg_api.AnalysisStatus', pk=3)
-        _p = mommy.make('emg_api.Pipeline', pk=1, release_version="1.0")
-        mommy.make("emg_api.Run", pk=123, pipeline=_p, analysis_status=_as)
-        mommy.make("emg_api.Run", pk=456, pipeline=_p)
+        _as = mommy.make('emgapi.AnalysisStatus', pk=3)
+        _p = mommy.make('emgapi.Pipeline', pk=1, release_version="1.0")
+        mommy.make("emgapi.Run", pk=123, pipeline=_p, analysis_status=_as)
+        mommy.make("emgapi.Run", pk=456, pipeline=_p)
 
-        url = reverse("emg_api:runs-list")
+        url = reverse("emgapi:runs-list")
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()

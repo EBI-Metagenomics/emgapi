@@ -31,7 +31,7 @@ def create_biomes(count):
     for pk in range(1, count+1):
         entries.append(
             mommy.prepare(
-                "emg_api.Biome",
+                "emgapi.Biome",
                 pk=pk,
                 biome_name="Biome findme",
                 lineage="root:biome:findme"
@@ -40,7 +40,7 @@ def create_biomes(count):
     for pk in range(count+1, 2*count+1):
         entries.append(
             mommy.prepare(
-                "emg_api.Biome",
+                "emgapi.Biome",
                 pk=pk,
                 biome_name="Biome hideme",
                 lineage="root:biome:hideme"
@@ -54,7 +54,7 @@ def create_publications(count):
     for pk in range(1, count+1):
         entries.append(
             mommy.prepare(
-                "emg_api.Publication",
+                "emgapi.Publication",
                 pk=pk,
                 pub_title="Publication findme",
                 pub_abstract="abcdefghijklmnoprstuvwxyz"
@@ -63,7 +63,7 @@ def create_publications(count):
     for pk in range(count+1, 2*count+1):
         entries.append(
             mommy.prepare(
-                "emg_api.Publication",
+                "emgapi.Publication",
                 pk=pk,
                 pub_title="Publication hide",
                 pub_abstract="abcdefghijklmnoprstuvwxyz"
@@ -75,10 +75,10 @@ def create_publications(count):
 def create_studies(count):
     entries = []
     for pk in range(1, count+1):
-        _biome = mommy.make('emg_api.Biome', pk=pk)
+        _biome = mommy.make('emgapi.Biome', pk=pk)
         entries.append(
             mommy.prepare(
-                "emg_api.Study",
+                "emgapi.Study",
                 pk=pk,
                 biome=_biome,
                 study_name="Study findme",
@@ -87,10 +87,10 @@ def create_studies(count):
             )
         )
     for pk in range(count+1, 2*count+1):
-        _biome = mommy.make('emg_api.Biome', pk=pk)
+        _biome = mommy.make('emgapi.Biome', pk=pk)
         entries.append(
             mommy.prepare(
-                "emg_api.Study",
+                "emgapi.Study",
                 pk=pk,
                 biome=_biome,
                 study_name="Study hide",
@@ -104,11 +104,11 @@ def create_studies(count):
 def create_samples(count):
     entries = []
     for pk in range(1, count+1):
-        _biome = mommy.make('emg_api.Biome', pk=pk)
-        _study = mommy.make('emg_api.Study', pk=pk, biome=_biome, is_public=1)
+        _biome = mommy.make('emgapi.Biome', pk=pk)
+        _study = mommy.make('emgapi.Study', pk=pk, biome=_biome, is_public=1)
         entries.append(
             mommy.prepare(
-                "emg_api.Sample",
+                "emgapi.Sample",
                 pk=pk,
                 biome=_biome,
                 study=_study,
@@ -117,11 +117,11 @@ def create_samples(count):
             )
         )
     for pk in range(count+1, 2*count+1):
-        _biome = mommy.make('emg_api.Biome', pk=pk)
-        _study = mommy.make('emg_api.Study', pk=pk, biome=_biome, is_public=1)
+        _biome = mommy.make('emgapi.Biome', pk=pk)
+        _study = mommy.make('emgapi.Study', pk=pk, biome=_biome, is_public=1)
         entries.append(
             mommy.prepare(
-                "emg_api.Sample",
+                "emgapi.Sample",
                 pk=pk,
                 biome=_biome,
                 study=_study,
@@ -137,17 +137,17 @@ class TestFullTextIndexAPI(object):
     @pytest.mark.parametrize(
         '_model, _view, search_term, search_attr, counts',
         [
-            ('Biome', 'emg_api:biomes', 'findme', 'biome_name', 5),
-            ('Study', 'emg_api:studies', 'findme', 'study_name', 5),
-            ('Sample', 'emg_api:samples', 'findme', 'sample_name', 5),
-            ('Publication', 'emg_api:publications', 'findme', 'pub_title', 5),
+            ('Biome', 'emgapi:biomes', 'findme', 'biome_name', 5),
+            ('Study', 'emgapi:studies', 'findme', 'study_name', 5),
+            ('Sample', 'emgapi:samples', 'findme', 'sample_name', 5),
+            ('Publication', 'emgapi:publications', 'findme', 'pub_title', 5),
         ]
     )
     @pytest.mark.django_db
     def test_search(self, live_server, client,
                     _model, _view, search_term, search_attr, counts):
         view_name = _view.split(":")[1]
-        klass = getattr(importlib.import_module("emg_api.models"), _model)
+        klass = getattr(importlib.import_module("emgapi.models"), _model)
         entries = globals()["create_%s" % view_name](counts)
         klass.objects.bulk_create(entries)
         assert len(klass.objects.all()) == 2*counts

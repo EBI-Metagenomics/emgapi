@@ -29,45 +29,45 @@ class TestPermissionsAPI(object):
 
     @pytest.fixture(autouse=True)
     def setup_method(self, db):
-        _biome = mommy.make('emg_api.Biome', biome_name="foo",
+        _biome = mommy.make('emgapi.Biome', biome_name="foo",
                             lineage="root:foo", pk=123)
 
         # Webin-000 public
-        mommy.make("emg_api.Study", pk=111, accession="SRP0111", is_public=1,
+        mommy.make("emgapi.Study", pk=111, accession="SRP0111", is_public=1,
                    submission_account_id='Webin-000', biome=_biome)
-        mommy.make("emg_api.Study", pk=112, accession="SRP0112", is_public=1,
+        mommy.make("emgapi.Study", pk=112, accession="SRP0112", is_public=1,
                    submission_account_id='Webin-000', biome=_biome)
         # Webin-000 private
-        mommy.make("emg_api.Study", pk=113, accession="SRP0113", is_public=0,
+        mommy.make("emgapi.Study", pk=113, accession="SRP0113", is_public=0,
                    submission_account_id='Webin-000', biome=_biome)
 
         # Webin-111 public
-        mommy.make("emg_api.Study", pk=114, accession="SRP0114", is_public=1,
+        mommy.make("emgapi.Study", pk=114, accession="SRP0114", is_public=1,
                    submission_account_id='Webin-111', biome=_biome)
         # Webin-111 private
-        mommy.make("emg_api.Study", pk=115, accession="SRP0115", is_public=0,
+        mommy.make("emgapi.Study", pk=115, accession="SRP0115", is_public=0,
                    submission_account_id='Webin-111', biome=_biome)
 
         # unknown public
-        mommy.make("emg_api.Study", pk=120, accession="SRP0120", is_public=1,
+        mommy.make("emgapi.Study", pk=120, accession="SRP0120", is_public=1,
                    submission_account_id=None, biome=_biome)
         # unknown private
-        mommy.make("emg_api.Study", pk=121, accession="SRP0121", is_public=0,
+        mommy.make("emgapi.Study", pk=121, accession="SRP0121", is_public=0,
                    submission_account_id=None, biome=_biome)
 
     @pytest.mark.parametrize(
         'view, username, count, ids, bad_ids',
         [
             # private
-            ('emg_api:studies-list', 'Webin-111', 5,
+            ('emgapi:studies-list', 'Webin-111', 5,
              ['SRP0111', 'SRP0112', 'SRP0114', 'SRP0115', 'SRP0120'],
              ['SRP0113', 'SRP0121']),
             # mydata
-            ('emg_api:mydata-list', 'Webin-111', 2,
+            ('emgapi:mydata-list', 'Webin-111', 2,
              ['SRP0114', 'SRP0115'],
              []),
             # public
-            ('emg_api:studies-list', None, 4,
+            ('emgapi:studies-list', None, 4,
              ['SRP0111', 'SRP0112', 'SRP0114', 'SRP0120'],
              ['SRP0113', 'SRP0115', 'SRP0121']),
         ]
@@ -105,7 +105,7 @@ class TestPermissionsAPI(object):
                 'status': '403'
             }
         ]
-        url = reverse('emg_api:mydata-list')
+        url = reverse('emgapi:mydata-list')
         response = client.get(url)
         print(response)
         assert response.status_code == status.HTTP_403_FORBIDDEN

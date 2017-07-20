@@ -50,8 +50,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='PipelineReleaseTool',
             fields=[
-                ('pipeline', models.ForeignKey(db_column='PIPELINE_ID', on_delete=django.db.models.deletion.DO_NOTHING, primary_key=True, serialize=False, to='emg_api.PipelineRelease')),
-                ('tool', models.ForeignKey(db_column='TOOL_ID', on_delete=django.db.models.deletion.DO_NOTHING, to='emg_api.PipelineTool')),
+                ('pipeline', models.ForeignKey(db_column='PIPELINE_ID', on_delete=django.db.models.deletion.DO_NOTHING, primary_key=True, serialize=False, to='emgapi.PipelineRelease')),
+                ('tool', models.ForeignKey(db_column='TOOL_ID', on_delete=django.db.models.deletion.DO_NOTHING, to='emgapi.PipelineTool')),
                 ('tool_group_id', models.DecimalField(db_column='TOOL_GROUP_ID', decimal_places=3, max_digits=6)),
                 ('how_tool_used_desc', models.TextField(db_column='HOW_TOOL_USED_DESC')),
             ],
@@ -132,8 +132,8 @@ class Migration(migrations.Migration):
                 ('result_directory', models.CharField(blank=True, db_column='RESULT_DIRECTORY', max_length=100, null=True)),
                 ('first_created', models.DateTimeField(db_column='FIRST_CREATED')),
                 ('project_id', models.CharField(blank=True, db_column='PROJECT_ID', max_length=18, null=True)),
-                ('biome', models.ForeignKey(db_column='BIOME_ID', on_delete=django.db.models.deletion.DO_NOTHING, to='emg_api.BiomeHierarchyTree')),
-                # ('publications', models.ManyToManyField(through='emg_api.StudyPublication', to='emg_api.Publication')),
+                ('biome', models.ForeignKey(db_column='BIOME_ID', on_delete=django.db.models.deletion.DO_NOTHING, to='emgapi.BiomeHierarchyTree')),
+                # ('publications', models.ManyToManyField(through='emgapi.StudyPublication', to='emgapi.Publication')),
             ],
             options={
                 'db_table': 'STUDY',
@@ -143,8 +143,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='StudyPublication',
             fields=[
-                ('study', models.ForeignKey(db_column='STUDY_ID', on_delete=django.db.models.deletion.DO_NOTHING, primary_key=True, serialize=False, to='emg_api.Study')),
-                ('pub', models.ForeignKey(db_column='PUB_ID', on_delete=django.db.models.deletion.DO_NOTHING, to='emg_api.Publication')),
+                ('study', models.ForeignKey(db_column='STUDY_ID', on_delete=django.db.models.deletion.DO_NOTHING, primary_key=True, serialize=False, to='emgapi.Study')),
+                ('pub', models.ForeignKey(db_column='PUB_ID', on_delete=django.db.models.deletion.DO_NOTHING, to='emgapi.Publication')),
             ],
             options={
                 'db_table': 'STUDY_PUBLICATION',
@@ -166,7 +166,7 @@ class Migration(migrations.Migration):
                 ('environment_biome', models.CharField(blank=True, db_column='ENVIRONMENT_BIOME', max_length=255, null=True)),
                 ('environment_feature', models.CharField(blank=True, db_column='ENVIRONMENT_FEATURE', max_length=255, null=True)),
                 ('environment_material', models.CharField(blank=True, db_column='ENVIRONMENT_MATERIAL', max_length=255, null=True)),
-                ('study', models.ForeignKey(db_column='STUDY_ID', on_delete=django.db.models.deletion.DO_NOTHING, to='emg_api.Study')),
+                ('study', models.ForeignKey(db_column='STUDY_ID', on_delete=django.db.models.deletion.DO_NOTHING, to='emgapi.Study')),
                 ('sample_name', models.CharField(blank=True, db_column='SAMPLE_NAME', max_length=255, null=True)),
                 ('sample_alias', models.CharField(blank=True, db_column='SAMPLE_ALIAS', max_length=255, null=True)),
                 ('host_tax_id', models.IntegerField(blank=True, db_column='HOST_TAX_ID', null=True)),
@@ -176,7 +176,7 @@ class Migration(migrations.Migration):
                 ('longitude', models.DecimalField(blank=True, db_column='LONGITUDE', decimal_places=4, max_digits=7, null=True)),
                 ('last_update', models.DateTimeField(db_column='LAST_UPDATE')),
                 ('submission_account_id', models.CharField(blank=True, db_column='SUBMISSION_ACCOUNT_ID', max_length=15, null=True)),
-                ('biome', models.ForeignKey(db_column='BIOME_ID', on_delete=django.db.models.deletion.DO_NOTHING, to='emg_api.BiomeHierarchyTree')),
+                ('biome', models.ForeignKey(db_column='BIOME_ID', on_delete=django.db.models.deletion.DO_NOTHING, to='emgapi.BiomeHierarchyTree')),
             ],
             options={
                 'db_table': 'SAMPLE',
@@ -186,8 +186,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='SamplePublication',
             fields=[
-                ('sample', models.ForeignKey(db_column='SAMPLE_ID', on_delete=django.db.models.deletion.DO_NOTHING, primary_key=True, serialize=False, to='emg_api.Sample')),
-                ('pub', models.ForeignKey(db_column='PUB_ID', on_delete=django.db.models.deletion.DO_NOTHING, to='emg_api.Publication')),
+                ('sample', models.ForeignKey(db_column='SAMPLE_ID', on_delete=django.db.models.deletion.DO_NOTHING, primary_key=True, serialize=False, to='emgapi.Sample')),
+                ('pub', models.ForeignKey(db_column='PUB_ID', on_delete=django.db.models.deletion.DO_NOTHING, to='emgapi.Publication')),
             ],
             options={
                 'db_table': 'SAMPLE_PUBLICATION',
@@ -210,17 +210,17 @@ class Migration(migrations.Migration):
             fields=[
                 ('job_id', models.BigAutoField(db_column='JOB_ID', primary_key=True, serialize=False)),
                 ('job_operator', models.CharField(db_column='JOB_OPERATOR', max_length=15)),
-                ('pipeline', models.ForeignKey(db_column='PIPELINE_ID', on_delete=django.db.models.deletion.DO_NOTHING, to='emg_api.PipelineRelease')),
+                ('pipeline', models.ForeignKey(db_column='PIPELINE_ID', on_delete=django.db.models.deletion.DO_NOTHING, to='emgapi.PipelineRelease')),
                 ('submit_time', models.DateTimeField(db_column='SUBMIT_TIME')),
                 ('complete_time', models.DateTimeField(blank=True, db_column='COMPLETE_TIME', null=True)),
-                ('analysis_status', models.ForeignKey(db_column='ANALYSIS_STATUS_ID', on_delete=django.db.models.deletion.DO_NOTHING, to='emg_api.AnalysisStatus')),
+                ('analysis_status', models.ForeignKey(db_column='ANALYSIS_STATUS_ID', on_delete=django.db.models.deletion.DO_NOTHING, to='emgapi.AnalysisStatus')),
                 ('re_run_count', models.IntegerField(blank=True, db_column='RE_RUN_COUNT', null=True)),
                 ('input_file_name', models.CharField(db_column='INPUT_FILE_NAME', max_length=50)),
                 ('result_directory', models.CharField(db_column='RESULT_DIRECTORY', max_length=100)),
-                ('sample', models.ForeignKey(db_column='SAMPLE_ID', on_delete=django.db.models.deletion.DO_NOTHING, to='emg_api.Sample')),
+                ('sample', models.ForeignKey(db_column='SAMPLE_ID', on_delete=django.db.models.deletion.DO_NOTHING, to='emgapi.Sample')),
                 ('external_run_ids', models.CharField(blank=True, db_column='EXTERNAL_RUN_IDS', max_length=100, null=True)),
                 ('is_production_run', models.TextField(blank=True, db_column='IS_PRODUCTION_RUN', null=True)),
-                ('experiment_type', models.ForeignKey(db_column='EXPERIMENT_TYPE_ID', on_delete=django.db.models.deletion.DO_NOTHING, to='emg_api.ExperimentType')),
+                ('experiment_type', models.ForeignKey(db_column='EXPERIMENT_TYPE_ID', on_delete=django.db.models.deletion.DO_NOTHING, to='emgapi.ExperimentType')),
                 ('run_status_id', models.IntegerField(blank=True, db_column='RUN_STATUS_ID', null=True)),
                 ('instrument_platform', models.CharField(blank=True, db_column='INSTRUMENT_PLATFORM', max_length=50, null=True)),
                 ('instrument_model', models.CharField(blank=True, db_column='INSTRUMENT_MODEL', max_length=50, null=True)),
@@ -247,7 +247,7 @@ class Migration(migrations.Migration):
             name='BlacklistedStudy',
             fields=[
                 ('ext_study_id', models.CharField(db_column='EXT_STUDY_ID', max_length=18, primary_key=True, serialize=False)),
-                ('error_type', models.ForeignKey(db_column='ERROR_TYPE_ID', on_delete=django.db.models.deletion.DO_NOTHING, to='emg_api.StudyErrorType')),
+                ('error_type', models.ForeignKey(db_column='ERROR_TYPE_ID', on_delete=django.db.models.deletion.DO_NOTHING, to='emgapi.StudyErrorType')),
                 ('analyzer', models.CharField(db_column='ANALYZER', max_length=15)),
                 ('pipeline_id', models.IntegerField(blank=True, db_column='PIPELINE_ID', null=True)),
                 ('date_blacklisted', models.DateField(db_column='DATE_BLACKLISTED')),
@@ -283,7 +283,7 @@ class Migration(migrations.Migration):
             name='GscCvCv',
             fields=[
                 ('var_val_cv', models.CharField(db_column='VAR_VAL_CV', max_length=60, primary_key=True, serialize=False)),
-                ('var_name', models.ForeignKey(blank=True, db_column='VAR_NAME', null=True, on_delete=django.db.models.deletion.CASCADE, to='emg_api.VariableNames')),
+                ('var_name', models.ForeignKey(blank=True, db_column='VAR_NAME', null=True, on_delete=django.db.models.deletion.CASCADE, to='emgapi.VariableNames')),
             ],
             options={
                 'db_table': 'GSC_CV_CV',
@@ -293,10 +293,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='SampleAnn',
             fields=[
-                ('sample', models.ForeignKey(db_column='SAMPLE_ID', on_delete=django.db.models.deletion.CASCADE, primary_key=True, related_name='metadata', serialize=False, to='emg_api.Sample')),
-                ('var_val_cv', models.ForeignKey(blank=True, db_column='VAR_VAL_CV', null=True, on_delete=django.db.models.deletion.CASCADE, to='emg_api.GscCvCv')),
+                ('sample', models.ForeignKey(db_column='SAMPLE_ID', on_delete=django.db.models.deletion.CASCADE, primary_key=True, related_name='metadata', serialize=False, to='emgapi.Sample')),
+                ('var_val_cv', models.ForeignKey(blank=True, db_column='VAR_VAL_CV', null=True, on_delete=django.db.models.deletion.CASCADE, to='emgapi.GscCvCv')),
                 ('units', models.CharField(blank=True, db_column='UNITS', max_length=25, null=True)),
-                ('var', models.ForeignKey(db_column='VAR_ID', on_delete=django.db.models.deletion.CASCADE, to='emg_api.VariableNames')),
+                ('var', models.ForeignKey(db_column='VAR_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.VariableNames')),
                 ('var_val_ucv', models.CharField(blank=True, db_column='VAR_VAL_UCV', max_length=4000, null=True)),
             ],
             options={

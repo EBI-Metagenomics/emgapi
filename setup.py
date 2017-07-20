@@ -18,12 +18,9 @@ if "test" in sys.argv:
     with open(_requirements_test) as f:
         test_requirements = f.read().splitlines()
 
-sys.path.insert(0, 'emg')
-
 setup(
-    name="emgapi",
-    packages=find_packages(
-        exclude=['ez_setup', 'tests', 'docker', 'database', 'nginx']),
+    name="emgcli",
+    packages=find_packages(exclude=['ez_setup']),
     version=version,
     install_requires=install_requirements,
     setup_requires=['pytest-runner'],
@@ -31,4 +28,10 @@ setup(
     include_package_data=True,
     zip_safe=False,
     test_suite="tests",
+    entry_points={
+        'console_scripts': [
+            'emgcli=emgcli.manage:main',
+            'emgunicorn=emgcli.gunicorn:main',
+        ],
+    },
 )

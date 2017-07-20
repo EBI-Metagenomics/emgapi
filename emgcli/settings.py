@@ -33,6 +33,8 @@ import warnings
 import logging
 import binascii
 
+from os.path import expanduser
+
 try:
     from YamJam import yamjam, YAMLError
 except ImportError:
@@ -43,8 +45,10 @@ logger = logging.getLogger(__name__)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+VAR_DIR = os.path.join(expanduser("~"), 'emgvar') 
 
-LOGDIR = os.path.join(BASE_DIR, '..', 'log')
+
+LOGDIR = os.path.join(VAR_DIR, 'log')
 if not os.path.exists(LOGDIR):
     os.makedirs(LOGDIR)
 
@@ -120,12 +124,12 @@ LOGGING = {
 try:
     SECRET_KEY
 except NameError:
-    dir_fd = os.open(BASE_DIR, os.O_RDONLY)
+    dir_fd = os.open(VAR_DIR, os.O_RDONLY)
 
     def opener(path, flags, mode=0o700):
         return os.open(path, flags, mode, dir_fd=dir_fd)
 
-    key_path = os.path.join(BASE_DIR, 'secret.key')
+    key_path = os.path.join(VAR_DIR, 'secret.key')
     if not os.path.exists(key_path):
         with open(key_path, 'w', opener=opener) as f:
             print(binascii.hexlify(os.urandom(50)).decode('ascii'), file=f)
@@ -152,7 +156,7 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_auth',
     # apps
-    'emg_api',
+    'emgapi',
 ]
 
 MIDDLEWARE = [
@@ -165,7 +169,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'emg.urls'
+ROOT_URLCONF = 'emgcli.urls'
 
 TEMPLATES = [
     {
@@ -183,7 +187,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'emg.wsgi.application'
+WSGI_APPLICATION = 'emgcli.wsgi.application'
 
 # Security
 ALLOWED_HOSTS = ["*"]
@@ -204,7 +208,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#         'NAME': os.path.join(VAR_DIR, 'db.sqlite3'),
 #     }
 # }
 try:
@@ -288,7 +292,7 @@ REST_FRAMEWORK = {
     ),
 
     'DEFAULT_RENDERER_CLASSES': (
-        'emg_api.renderers.DefaultJSONRenderer',
+        'emgapi.renderers.DefaultJSONRenderer',
         'rest_framework_json_api.renderers.JSONRenderer',
         # 'rest_framework.renderers.JSONRenderer',
         # 'rest_framework_xml.renderers.XMLRenderer',
@@ -317,7 +321,7 @@ REST_FRAMEWORK = {
         # 'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ],
     # 'DEFAULT_CONTENT_NEGOTIATION_CLASS':
-    #     'emg_api.negotiation.CustomContentNegotiation',
+    #     'emgapi.negotiation.CustomContentNegotiation',
 
 }
 
@@ -345,7 +349,7 @@ except:
 
 # Authentication backends
 AUTHENTICATION_BACKENDS = (
-    'emg_api.backends.EMGBackend',
+    'emgapi.backends.EMGBackend',
 )
 
 EMG_BACKEND_AUTH_URL = yamjam()['emg']['emg_backend_auth']

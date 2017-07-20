@@ -9,7 +9,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('emg_api', '0002_cleanup_and_rename'),
+        ('emgapi', '0002_cleanup_and_rename'),
     ]
 
     operations = [
