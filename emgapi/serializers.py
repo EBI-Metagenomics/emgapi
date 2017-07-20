@@ -160,6 +160,22 @@ class SimplePublicationSerializer(PublicationSerializer):
 
 # Pipeline serializer
 
+class PipelineToolSerializer(serializers.ModelSerializer):
+
+    pipelines = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        many=True,
+        view_name='emgapi:pipelines-detail',
+        lookup_field='release_version',
+    )
+
+    class Meta:
+        model = emg_models.PipelineTool
+        exclude = (
+            'tool_id',
+        )
+
+
 class PipelineSerializer(serializers.HyperlinkedModelSerializer):
 
     included_serializers = {}
@@ -186,6 +202,22 @@ class PipelineSerializer(serializers.HyperlinkedModelSerializer):
     )
 
     def get_runs(self, obj):
+        # TODO: provide counter instead of paginating relationship
+        # workaround https://github.com/django-json-api
+        # /django-rest-framework-json-api/issues/178
+        return ()
+
+    tools = relations.SerializerMethodResourceRelatedField(
+        source='get_tools',
+        model=emg_models.PipelineTool,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi:pipelines-tools-list',
+        related_link_url_kwarg='release_version',
+        related_link_lookup_field='release_version',
+    )
+
+    def get_tools(self, obj):
         # TODO: provide counter instead of paginating relationship
         # workaround https://github.com/django-json-api
         # /django-rest-framework-json-api/issues/178
@@ -347,28 +379,7 @@ class SimpleRunSerializer(RunSerializer):
 
 # SampleAnn serializer
 
-# class SampelAnnHyperlinkedField(serializers.HyperlinkedIdentityField):
-#
-#     def get_url(self, obj, view_name, request, format):
-#         kwargs = {
-#             'sample_accession': obj.sample.accession,
-#             'var_id': obj.var.var_id,
-#         }
-#         return reverse(
-#             view_name, kwargs=kwargs, request=request, format=format)
-
-
 class SampleAnnSerializer(serializers.HyperlinkedModelSerializer):
-
-    # url = SampelAnnHyperlinkedField(
-    #     view_name='emgapi:metadata-detail'
-    # )
-
-    # sample = serializers.HyperlinkedRelatedField(
-    #     read_only=True,
-    #     view_name='emgapi:samples-detail',
-    #     lookup_field='accession',
-    # )
 
     var_name = serializers.SerializerMethodField()
 
@@ -411,7 +422,7 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
         view_name='emgapi:samples-detail',
-        lookup_field='accession',
+        lookup_field='accession'
     )
 
     # biome = serializers.HyperlinkedRelatedField(
@@ -488,7 +499,7 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
         read_only=True,
         related_link_view_name='emgapi:samples-metadata-list',
         related_link_url_kwarg='accession',
-        related_link_lookup_field='accession',
+        related_link_lookup_field='accession'
     )
 
     def get_metadata(self, obj):

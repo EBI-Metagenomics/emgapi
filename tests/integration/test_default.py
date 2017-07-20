@@ -39,7 +39,8 @@ class TestDefaultAPI(object):
             "runs": "http://testserver/api/runs",
             "pipelines": "http://testserver/api/pipelines",
             "experiments": "http://testserver/api/experiments",
-            "publications": "http://testserver/api/publications"
+            "publications": "http://testserver/api/publications",
+            'tools': 'http://testserver/api/tools',
         }
         assert rsp['data'] == expected
 
@@ -53,6 +54,7 @@ class TestDefaultAPI(object):
             'emgapi:samples',
             'emgapi:studies',
             'emgapi:runs',
+            'emgapi:tools',
             pytest.mark.xfail('viewdoesnotexist'),
         ]
     )
@@ -77,6 +79,7 @@ class TestDefaultAPI(object):
             ('Run', 'emgapi:runs', ['pipeline', 'sample']),
             ('Sample', 'emgapi:samples', ['biome', 'study', 'runs']),
             ('Study', 'emgapi:studies', ['biome', 'publications', 'samples']),
+            ('PipelineTool', 'emgapi:tools', ['pipelines']),
         ]
     )
     @pytest.mark.django_db
@@ -95,6 +98,13 @@ class TestDefaultAPI(object):
                 _p = mommy.make('emgapi.Pipeline', pk=1,
                                 release_version="1.0")
                 mommy.make(model_name, pk=pk, pipeline=_p, analysis_status=_as)
+            elif _model in ('PipelineTool',):
+                _p = mommy.make('emgapi.Pipeline', pk=pk,
+                                release_version="1.0")
+                _t = mommy.make('emgapi.PipelineTool', pk=pk,
+                                tool_name='a tool')
+                mommy.make('emgapi.PipelineReleaseTool', pk=pk,
+                           pipeline=_p, tool=_t)
             else:
                 mommy.make(model_name, pk=pk)
 
