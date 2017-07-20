@@ -623,8 +623,7 @@ class SampleAnnAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):
         return Response(data=serializer.data)
 
 
-class SampleAnnsViewSet(MultipleFieldLookupMixin,
-                        mixins.ListModelMixin,
+class SampleAnnsViewSet(mixins.ListModelMixin,
                         viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.SimpleSampleAnnSerializer
@@ -803,10 +802,9 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='runs-list',
-        # url_path='runs(?:/(?P<run_accession>[a-zA-Z0-9,]+))?',
         serializer_class=emg_serializers.RunSerializer
     )
-    def runs(self, request, release_version=None, run_accession=None):
+    def runs(self, request, release_version=None):
         """
         Retrieves list of runs for the given pipeline version
         """
@@ -819,8 +817,6 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
                 'experiment_type',
                 'pipeline'
             )
-        if run_accession is not None:
-            queryset = queryset.filter(accession=run_accession)
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -831,6 +827,47 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         serializer = self.get_serializer(
             queryset, many=True, context={'request': request})
         return Response(serializer.data)
+
+    @detail_route(
+        methods=['get', ],
+        url_name='tools-list',
+        serializer_class=emg_serializers.PipelineToolSerializer
+    )
+    def tools(self, request, release_version=None):
+        """
+        Retrieves list of runs for the given pipeline version
+        """
+        obj = self.get_object()
+        queryset = obj.tools.all()
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(
+            queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+class PipelineToolViewSet(mixins.ListModelMixin,
+                          viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.PipelineToolSerializer
+    queryset = emg_models.PipelineTool.objects.all()
+
+    lookup_field = 'tool_name'
+    lookup_value_regex = '[0-9a-zA-Z]+'
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of annotaitons
+        Example:
+        ---
+        `/api/metadata` retrieves list of samples
+        """
+        return super(PipelineToolViewSet, self).list(request, *args, **kwargs)
 
 
 class ExperimentTypeViewSet(mixins.RetrieveModelMixin,

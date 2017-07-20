@@ -71,27 +71,6 @@ class BaseQuerySet(models.QuerySet):
         return self
 
 
-class Pipeline(models.Model):
-    pipeline_id = models.AutoField(
-        db_column='PIPELINE_ID', primary_key=True)
-    description = models.TextField(
-        db_column='DESCRIPTION', blank=True, null=True)
-    changes = models.TextField(
-        db_column='CHANGES')
-    release_version = models.CharField(
-        db_column='RELEASE_VERSION', max_length=20)
-    release_date = models.DateField(
-        db_column='RELEASE_DATE')
-
-    class Meta:
-        db_table = 'PIPELINE_RELEASE'
-        unique_together = ('pipeline_id', 'release_version',)
-        ordering = ('release_version',)
-
-    def __str__(self):
-        return self.release_version
-
-
 class PipelineTool(models.Model):
     tool_id = models.SmallIntegerField(
         db_column='TOOL_ID', primary_key=True)
@@ -117,6 +96,30 @@ class PipelineTool(models.Model):
 
     def __str__(self):
         return self.tool_name
+
+
+class Pipeline(models.Model):
+    pipeline_id = models.AutoField(
+        db_column='PIPELINE_ID', primary_key=True)
+    description = models.TextField(
+        db_column='DESCRIPTION', blank=True, null=True)
+    changes = models.TextField(
+        db_column='CHANGES')
+    release_version = models.CharField(
+        db_column='RELEASE_VERSION', max_length=20)
+    release_date = models.DateField(
+        db_column='RELEASE_DATE')
+
+    tools = models.ManyToManyField(
+        PipelineTool, through='PipelineReleaseTool', related_name='pipelines')
+
+    class Meta:
+        db_table = 'PIPELINE_RELEASE'
+        unique_together = ('pipeline_id', 'release_version',)
+        ordering = ('release_version',)
+
+    def __str__(self):
+        return self.release_version
 
 
 class PipelineReleaseTool(models.Model):
