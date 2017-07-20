@@ -40,7 +40,7 @@ class TestBiomeAPI(APITestCase):
         for b in _biome:
             self.data['biomes'].append(
                 mommy.make(
-                    'emg_api.Biome',
+                    'emgapi.Biome',
                     biome_name=b,
                     lineage=b,
                     pk=(_biome.index(b)+1))
@@ -49,7 +49,7 @@ class TestBiomeAPI(APITestCase):
         for pk in range(1, 51):
             self.data['studies'].append(
                 mommy.make(
-                    'emg_api.Study',
+                    'emgapi.Study',
                     biome=random.sample(self.data['biomes'], 1)[0],
                     pk=pk,
                     accession="SRP{:0>3}".format(pk),
@@ -58,7 +58,7 @@ class TestBiomeAPI(APITestCase):
             )
 
     def test_default(self):
-        url = reverse('emg_api:biomes-top10')
+        url = reverse('emgapi:biomes-top10')
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()

@@ -26,7 +26,7 @@ from rest_framework import status
 class TestDefaultAPI(object):
 
     def test_default(self, client):
-        url = reverse('emg_api:api-root')
+        url = reverse('emgapi:api-root')
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -46,13 +46,13 @@ class TestDefaultAPI(object):
     @pytest.mark.parametrize(
         '_view',
         [
-            'emg_api:biomes',
-            'emg_api:experiments',
-            'emg_api:pipelines',
-            'emg_api:publications',
-            'emg_api:samples',
-            'emg_api:studies',
-            'emg_api:runs',
+            'emgapi:biomes',
+            'emgapi:experiments',
+            'emgapi:pipelines',
+            'emgapi:publications',
+            'emgapi:samples',
+            'emgapi:studies',
+            'emgapi:runs',
             pytest.mark.xfail('viewdoesnotexist'),
         ]
     )
@@ -70,29 +70,29 @@ class TestDefaultAPI(object):
     @pytest.mark.parametrize(
         '_model, _view, relations',
         [
-            ('Biome', 'emg_api:biomes', ['studies', 'samples']),
-            ('ExperimentType', 'emg_api:experiments', ['runs']),
-            ('Pipeline', 'emg_api:pipelines', ['runs']),
-            ('Publication', 'emg_api:publications', ['studies']),
-            ('Run', 'emg_api:runs', ['pipeline', 'sample']),
-            ('Sample', 'emg_api:samples', ['biome', 'study', 'runs']),
-            ('Study', 'emg_api:studies', ['biome', 'publications', 'samples']),
+            ('Biome', 'emgapi:biomes', ['studies', 'samples']),
+            ('ExperimentType', 'emgapi:experiments', ['runs']),
+            ('Pipeline', 'emgapi:pipelines', ['runs']),
+            ('Publication', 'emgapi:publications', ['studies']),
+            ('Run', 'emgapi:runs', ['pipeline', 'sample']),
+            ('Sample', 'emgapi:samples', ['biome', 'study', 'runs']),
+            ('Study', 'emgapi:studies', ['biome', 'publications', 'samples']),
         ]
     )
     @pytest.mark.django_db
     def test_list(self, client, _model, _view, relations):
-        model_name = "emg_api.%s" % _model
+        model_name = "emgapi.%s" % _model
         view_name = "%s-list" % _view
 
         # start from 1
         # https://code.djangoproject.com/ticket/17653
         for pk in range(1, 101):
             if _model in ('Sample', 'Study'):
-                _biome = mommy.make('emg_api.Biome', pk=pk)
+                _biome = mommy.make('emgapi.Biome', pk=pk)
                 mommy.make(model_name, pk=pk, biome=_biome, is_public=1)
             elif _model in ('Run',):
-                _as = mommy.make('emg_api.AnalysisStatus', pk=3)
-                _p = mommy.make('emg_api.Pipeline', pk=1,
+                _as = mommy.make('emgapi.AnalysisStatus', pk=3)
+                _p = mommy.make('emgapi.Pipeline', pk=1,
                                 release_version="1.0")
                 mommy.make(model_name, pk=pk, pipeline=_p, analysis_status=_as)
             else:

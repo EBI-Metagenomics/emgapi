@@ -8,12 +8,12 @@ srcDir=${SRCDIR:-"${HOME}/src"}
 venvDir=${VENVDIR:-"${HOME}/venv"}
 
 create_venv() {
-  $pythonEnv -m virtualenv $VENVDIR
+  $pythonEnv -m virtualenv $venvDir
 }
 
 activate_venv() {
   set +o nounset
-  source $VENVDIR/bin/activate
+  source $venvDir/bin/activate
   set -o nounset
   python -V
 }
@@ -30,27 +30,20 @@ is_db_running() {
 }
 
 install() {
-  echo "Installing EMG dependencies..."
-  pip install -U pip
-  pip install -U -r $SRCDIR/requirements.txt
+  echo "Installing EMG..."
+  pip install -U $srcDir
 }
 
 start() {
   echo "EMG API Start up..."
-  cd $SRCDIR
 
-  # python emg/manage.py check --deploy
-  python emg/manage.py migrate --fake-initial
-  python emg/manage.py collectstatic --noinput
-  # python emg/manage.py runserver 0.0.0.0:8000
+  # emgcli check --deploy
+  emgcli migrate --fake-initial
+  emgcli collectstatic --noinput
 
-  (cd emg && python $SRCDIR/venv/bin/gunicorn \
-    -p $SRCDIR/django.pid \
-    --bind 0.0.0.0:8000 \
-    --workers 5 \
-    --timeout 30 \
-    --max-requests 0 \
-    emg.wsgi:application)
+  # emgcli runserver 0.0.0.0:8000
+  emgunicorn 
+
 }
 
 docker() {
@@ -58,6 +51,7 @@ docker() {
   create_venv
   is_db_running "-u root -h mysql -P 3306"
   activate_venv
+  pip install "git+git://github.com/ola-t/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
   install
   start
 
@@ -73,7 +67,7 @@ jenkins() {
 }
 
 
-rm -f $SRCDIR/django.pid
+rm -f $srcDir/var/django.pid
 
 if [ ! -z ${entryPoint} ] ; then
   eval $entryPoint

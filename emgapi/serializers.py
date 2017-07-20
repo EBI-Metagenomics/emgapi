@@ -34,18 +34,18 @@ class BiomeSerializer(serializers.HyperlinkedModelSerializer):
     included_serializers = {}
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emg_api:biomes-detail',
+        view_name='emgapi:biomes-detail',
         lookup_field='lineage',
     )
 
     # studies = serializers.HyperlinkedIdentityField(
-    #     view_name='emg_api:biomes-studies-list',
+    #     view_name='emgapi:biomes-studies-list',
     #     lookup_field='lineage',
     # )
     # studies = relations.ResourceRelatedField(
     #     queryset=emg_models.Biome.objects,
     #     many=True,
-    #     related_link_view_name='emg_api:biomes-studies-list',
+    #     related_link_view_name='emgapi:biomes-studies-list',
     #     related_link_url_kwarg='lineage',
     # )
     studies = relations.SerializerMethodResourceRelatedField(
@@ -53,7 +53,7 @@ class BiomeSerializer(serializers.HyperlinkedModelSerializer):
         model=emg_models.Biome,
         many=True,
         read_only=True,
-        related_link_view_name='emg_api:biomes-studies-list',
+        related_link_view_name='emgapi:biomes-studies-list',
         related_link_url_kwarg='lineage',
         related_link_lookup_field='lineage',
     )
@@ -65,13 +65,13 @@ class BiomeSerializer(serializers.HyperlinkedModelSerializer):
         return ()
 
     # samples = serializers.HyperlinkedIdentityField(
-    #     view_name='emg_api:biomes-samples-list',
+    #     view_name='emgapi:biomes-samples-list',
     #     lookup_field='lineage',
     # )
     # samples = relations.ResourceRelatedField(
     #     queryset=emg_models.Biome.objects,
     #     many=True,
-    #     related_link_view_name='emg_api:biomes-samples-list',
+    #     related_link_view_name='emgapi:biomes-samples-list',
     #     related_link_url_kwarg='lineage',
     # )
     samples = relations.SerializerMethodResourceRelatedField(
@@ -79,7 +79,7 @@ class BiomeSerializer(serializers.HyperlinkedModelSerializer):
         model=emg_models.Biome,
         many=True,
         read_only=True,
-        related_link_view_name='emg_api:biomes-samples-list',
+        related_link_view_name='emgapi:biomes-samples-list',
         related_link_url_kwarg='lineage',
         related_link_lookup_field='lineage',
     )
@@ -100,23 +100,23 @@ class BiomeSerializer(serializers.HyperlinkedModelSerializer):
 class PublicationSerializer(serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
-        'studies': 'emg_api.serializers.StudySerializer',
+        'studies': 'emgapi.serializers.StudySerializer',
     }
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emg_api:publications-detail',
+        view_name='emgapi:publications-detail',
         lookup_field='pub_id',
     )
 
     # relationships
     # studies = serializers.HyperlinkedIdentityField(
-    #     view_name='emg_api:publications-studies-list',
+    #     view_name='emgapi:publications-studies-list',
     #     lookup_field='pub_id',
     # )
     # studies = relations.ResourceRelatedField(
     #     queryset=emg_models.Publication.objects,
     #     many=True,
-    #     related_link_view_name='emg_api:publications-studies-list',
+    #     related_link_view_name='emgapi:publications-studies-list',
     #     related_link_url_kwarg='pub_id',
     # )
     studies = relations.SerializerMethodResourceRelatedField(
@@ -124,7 +124,7 @@ class PublicationSerializer(serializers.HyperlinkedModelSerializer):
         model=emg_models.Publication,
         many=True,
         read_only=True,
-        related_link_view_name='emg_api:publications-studies-list',
+        related_link_view_name='emgapi:publications-studies-list',
         related_link_url_kwarg='pub_id',
         related_link_lookup_field='pub_id',
     )
@@ -143,7 +143,7 @@ class PublicationSerializer(serializers.HyperlinkedModelSerializer):
 class SimplePublicationSerializer(PublicationSerializer):
 
     included_serializers = {
-        'studies': 'emg_api.serializers.SimpleStudySerializer',
+        'studies': 'emgapi.serializers.SimpleStudySerializer',
     }
 
     class Meta:
@@ -165,7 +165,7 @@ class PipelineSerializer(serializers.HyperlinkedModelSerializer):
     included_serializers = {}
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emg_api:pipelines-detail',
+        view_name='emgapi:pipelines-detail',
         lookup_field='release_version',
     )
 
@@ -180,7 +180,7 @@ class PipelineSerializer(serializers.HyperlinkedModelSerializer):
         model=emg_models.Run,
         many=True,
         read_only=True,
-        related_link_view_name='emg_api:pipelines-runs-list',
+        related_link_view_name='emgapi:pipelines-runs-list',
         related_link_url_kwarg='release_version',
         related_link_lookup_field='release_version',
     )
@@ -203,14 +203,14 @@ class ExperimentTypeSerializer(serializers.ModelSerializer):
     included_serializers = {}
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emg_api:experiments-detail',
+        view_name='emgapi:experiments-detail',
         lookup_field='experiment_type',
     )
 
     # runs = relations.ResourceRelatedField(
     #     read_only=True,
     #     many=True,
-    #     related_link_view_name='emg_api:experiments-runs-list',
+    #     related_link_view_name='emgapi:experiments-runs-list',
     #     related_link_url_kwarg='release_version',
     # )
     runs = relations.SerializerMethodResourceRelatedField(
@@ -218,7 +218,7 @@ class ExperimentTypeSerializer(serializers.ModelSerializer):
         model=emg_models.Run,
         many=True,
         read_only=True,
-        related_link_view_name='emg_api:experiments-runs-list',
+        related_link_view_name='emgapi:experiments-runs-list',
         related_link_url_kwarg='experiment_type',
         related_link_lookup_field='experiment_type',
     )
@@ -250,11 +250,11 @@ class RunHyperlinkedField(serializers.HyperlinkedIdentityField):
 class RunSerializer(serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
-        'sample': 'emg_api.serializers.SampleSerializer',
+        'sample': 'emgapi.serializers.SampleSerializer',
     }
 
     url = RunHyperlinkedField(
-        view_name='emg_api:runs-detail'
+        view_name='emgapi:runs-detail'
     )
 
     # attributes
@@ -281,14 +281,14 @@ class RunSerializer(serializers.HyperlinkedModelSerializer):
     # relationship
     pipeline = serializers.HyperlinkedRelatedField(
         read_only=True,
-        view_name='emg_api:pipelines-detail',
+        view_name='emgapi:pipelines-detail',
         lookup_field='release_version',
     )
     # pipeline = relations.SerializerMethodResourceRelatedField(
     #     source='get_pipeline',
     #     model=emg_models.Pipeline,
     #     read_only=True,
-    #     related_link_view_name='emg_api:pipelines-detail',
+    #     related_link_view_name='emgapi:pipelines-detail',
     #     related_link_url_kwarg='release_version',
     #     related_link_lookup_field='release_version',
     # )
@@ -301,14 +301,14 @@ class RunSerializer(serializers.HyperlinkedModelSerializer):
 
     sample = serializers.HyperlinkedRelatedField(
         read_only=True,
-        view_name='emg_api:samples-detail',
+        view_name='emgapi:samples-detail',
         lookup_field='accession',
     )
     # sample = relations.SerializerMethodResourceRelatedField(
     #     source='get_sample',
     #     model=emg_models.Sample,
     #     read_only=True,
-    #     related_link_view_name='emg_api:samples-detail',
+    #     related_link_view_name='emgapi:samples-detail',
     #     related_link_url_kwarg='accession',
     #     related_link_lookup_field='accession',
     # )
@@ -330,7 +330,7 @@ class RunSerializer(serializers.HyperlinkedModelSerializer):
 class SimpleRunSerializer(RunSerializer):
 
     included_serializers = {
-        'sample': 'emg_api.serializers.SimpleSampleSerializer',
+        'sample': 'emgapi.serializers.SimpleSampleSerializer',
     }
 
     class Meta:
@@ -361,12 +361,12 @@ class SimpleRunSerializer(RunSerializer):
 class SampleAnnSerializer(serializers.HyperlinkedModelSerializer):
 
     # url = SampelAnnHyperlinkedField(
-    #     view_name='emg_api:metadata-detail'
+    #     view_name='emgapi:metadata-detail'
     # )
 
     # sample = serializers.HyperlinkedRelatedField(
     #     read_only=True,
-    #     view_name='emg_api:samples-detail',
+    #     view_name='emgapi:samples-detail',
     #     lookup_field='accession',
     # )
 
@@ -405,18 +405,18 @@ class SimpleSampleAnnSerializer(SampleAnnSerializer):
 class SampleSerializer(serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
-        'study': 'emg_api.serializers.StudySerializer',
-        'runs': 'emg_api.serializers.RunSerializer',
+        'study': 'emgapi.serializers.StudySerializer',
+        'runs': 'emgapi.serializers.RunSerializer',
     }
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emg_api:samples-detail',
+        view_name='emgapi:samples-detail',
         lookup_field='accession',
     )
 
     # biome = serializers.HyperlinkedRelatedField(
     #     read_only=True,
-    #     view_name='emg_api:biomes-detail',
+    #     view_name='emgapi:biomes-detail',
     #     lookup_field='lineage',
     # )
     biome = serializers.SerializerMethodField()
@@ -437,14 +437,14 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
     # relationships
     study = serializers.HyperlinkedRelatedField(
         read_only=True,
-        view_name='emg_api:studies-detail',
+        view_name='emgapi:studies-detail',
         lookup_field='accession',
     )
     # study = relations.SerializerMethodResourceRelatedField(
     #     source='get_study',
     #     model=emg_models.Study,
     #     read_only=True,
-    #     related_link_view_name='emg_api:studies-detail',
+    #     related_link_view_name='emgapi:studies-detail',
     #     related_link_url_kwarg='accession',
     #     related_link_lookup_field='accession',
     # )
@@ -456,7 +456,7 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
     #     return ()
 
     # runs = serializers.HyperlinkedIdentityField(
-    #     view_name='emg_api:samples-runs-list',
+    #     view_name='emgapi:samples-runs-list',
     #     lookup_field='accession',
     # )
     runs = relations.SerializerMethodResourceRelatedField(
@@ -464,7 +464,7 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
         model=emg_models.Run,
         many=True,
         read_only=True,
-        related_link_view_name='emg_api:samples-runs-list',
+        related_link_view_name='emgapi:samples-runs-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession',
     )
@@ -478,7 +478,7 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
     runs_count = serializers.IntegerField()
 
     # metadata = serializers.HyperlinkedIdentityField(
-    #     view_name='emg_api:samples-metadata-list',
+    #     view_name='emgapi:samples-metadata-list',
     #     lookup_field='accession',
     # )
     metadata = relations.SerializerMethodResourceRelatedField(
@@ -486,7 +486,7 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
         model=emg_models.SampleAnn,
         many=True,
         read_only=True,
-        related_link_view_name='emg_api:samples-metadata-list',
+        related_link_view_name='emgapi:samples-metadata-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession',
     )
@@ -508,8 +508,8 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
 class SimpleSampleSerializer(SampleSerializer):
 
     included_serializers = {
-        'study': 'emg_api.serializers.SimpleStudySerializer',
-        'runs': 'emg_api.serializers.SimpleRunSerializer',
+        'study': 'emgapi.serializers.SimpleStudySerializer',
+        'runs': 'emgapi.serializers.SimpleRunSerializer',
     }
 
     # sample_desc = serializers.SerializerMethodField(
@@ -538,18 +538,18 @@ class SimpleSampleSerializer(SampleSerializer):
 class StudySerializer(serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
-        'publications': 'emg_api.serializers.PublicationSerializer',
-        'samples': 'emg_api.serializers.SampleSerializer',
+        'publications': 'emgapi.serializers.PublicationSerializer',
+        'samples': 'emgapi.serializers.SampleSerializer',
     }
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emg_api:studies-detail',
+        view_name='emgapi:studies-detail',
         lookup_field='accession',
     )
 
     # biome = serializers.HyperlinkedRelatedField(
     #     read_only=True,
-    #     view_name='emg_api:biomes-detail',
+    #     view_name='emgapi:biomes-detail',
     #     lookup_field='lineage',
     # )
     biome = serializers.SerializerMethodField()
@@ -563,7 +563,7 @@ class StudySerializer(serializers.HyperlinkedModelSerializer):
         return obj.biome.biome_name
 
     # publications = serializers.HyperlinkedIdentityField(
-    #     view_name='emg_api:studies-publications-list',
+    #     view_name='emgapi:studies-publications-list',
     #     lookup_field='accession',
     # )
     publications = relations.SerializerMethodResourceRelatedField(
@@ -571,7 +571,7 @@ class StudySerializer(serializers.HyperlinkedModelSerializer):
         model=emg_models.Publication,
         many=True,
         read_only=True,
-        related_link_view_name='emg_api:studies-publications-list',
+        related_link_view_name='emgapi:studies-publications-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession',
     )
@@ -583,7 +583,7 @@ class StudySerializer(serializers.HyperlinkedModelSerializer):
         return ()
 
     # samples = serializers.HyperlinkedIdentityField(
-    #     view_name='emg_api:studies-samples-list',
+    #     view_name='emgapi:studies-samples-list',
     #     lookup_field='accession',
     # )
     samples = relations.SerializerMethodResourceRelatedField(
@@ -591,7 +591,7 @@ class StudySerializer(serializers.HyperlinkedModelSerializer):
         model=emg_models.Sample,
         many=True,
         read_only=True,
-        related_link_view_name='emg_api:studies-samples-list',
+        related_link_view_name='emgapi:studies-samples-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession',
     )
@@ -618,8 +618,8 @@ class StudySerializer(serializers.HyperlinkedModelSerializer):
 class SimpleStudySerializer(StudySerializer):
 
     included_serializers = {
-        'publications': 'emg_api.serializers.SimplePublicationSerializer',
-        'samples': 'emg_api.serializers.SimpleSampleSerializer',
+        'publications': 'emgapi.serializers.SimplePublicationSerializer',
+        'samples': 'emgapi.serializers.SimpleSampleSerializer',
     }
 
     # study_abstract = serializers.SerializerMethodField(
