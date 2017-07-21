@@ -29,8 +29,7 @@ urlpatterns = [
     ),
 
     # url(
-    #     (r'^metadata/(?P<sample_accession>[a-zA-Z0-9,_]+)/'
-    #      '(?P<var_id>[0-9]+)$'),
+    #     (r'^metadata/(?P<name>(.*)+)/(?P<value>(.*)+)$'),
     #     views.SampleAnnAPIView.as_view(),
     #     name='metadata-detail'
     # ),

@@ -178,7 +178,9 @@ class PipelineToolSerializer(serializers.ModelSerializer):
 
 class PipelineSerializer(serializers.HyperlinkedModelSerializer):
 
-    included_serializers = {}
+    included_serializers = {
+        'tools': 'emgapi.serializers.PipelineToolSerializer',
+    }
 
     url = serializers.HyperlinkedIdentityField(
         view_name='emgapi:pipelines-detail',
@@ -282,11 +284,12 @@ class RunHyperlinkedField(serializers.HyperlinkedIdentityField):
 class RunSerializer(serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
-        'sample': 'emgapi.serializers.SampleSerializer',
+        'sample': 'emgapi.serializers.IncludeSampleSerializer',
     }
 
     url = RunHyperlinkedField(
-        view_name='emgapi:runs-detail'
+        view_name='emgapi:runs-detail',
+        lookup_field='accession'
     )
 
     # attributes
@@ -362,7 +365,7 @@ class RunSerializer(serializers.HyperlinkedModelSerializer):
 class SimpleRunSerializer(RunSerializer):
 
     included_serializers = {
-        'sample': 'emgapi.serializers.SimpleSampleSerializer',
+        'sample': 'emgapi.serializers.IncludeSampleSerializer',
     }
 
     class Meta:
@@ -379,7 +382,20 @@ class SimpleRunSerializer(RunSerializer):
 
 # SampleAnn serializer
 
+class SampleAnnHyperlinkedField(serializers.HyperlinkedIdentityField):
+
+    def get_url(self, obj, view_name, request, format):
+        kwargs = {
+            'name': obj.var.var_name,
+            'value': obj.var_val_ucv
+        }
+        return reverse(
+            view_name, kwargs=kwargs, request=request, format=format)
+
+
 class SampleAnnSerializer(serializers.HyperlinkedModelSerializer):
+
+    id = serializers.ReadOnlyField(source="multiple_pk")
 
     var_name = serializers.SerializerMethodField()
 
@@ -396,19 +412,20 @@ class SampleAnnSerializer(serializers.HyperlinkedModelSerializer):
     def get_unit(self, obj):
         return obj.units
 
+    sample_accession = serializers.SerializerMethodField()
+
+    def get_sample_accession(self, obj):
+        return obj.sample.accession
+
     class Meta:
         model = emg_models.SampleAnn
         fields = (
-            # 'url',
-            # 'sample',
+            'id',
+            'sample_accession',
             'var_name',
             'var_value',
-            'unit',
+            'unit'
         )
-
-
-class SimpleSampleAnnSerializer(SampleAnnSerializer):
-    pass
 
 
 # Sample serializer
@@ -418,6 +435,7 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
     included_serializers = {
         'study': 'emgapi.serializers.StudySerializer',
         'runs': 'emgapi.serializers.RunSerializer',
+        'metadata': 'emgapi.serializers.SampleAnnSerializer',
     }
 
     url = serializers.HyperlinkedIdentityField(
@@ -521,6 +539,7 @@ class SimpleSampleSerializer(SampleSerializer):
     included_serializers = {
         'study': 'emgapi.serializers.SimpleStudySerializer',
         'runs': 'emgapi.serializers.SimpleRunSerializer',
+        'metadata': 'emgapi.serializers.SampleAnnSerializer',
     }
 
     # sample_desc = serializers.SerializerMethodField(
@@ -541,6 +560,34 @@ class SimpleSampleSerializer(SampleSerializer):
             'study',
             'metadata',
             'runs_count',
+        )
+
+
+class IncludeSampleSerializer(SampleSerializer):
+
+    included_serializers = {
+        'study': 'emgapi.serializers.SimpleStudySerializer',
+        'runs': 'emgapi.serializers.SimpleRunSerializer',
+        'metadata': 'emgapi.serializers.SampleAnnSerializer',
+    }
+
+    # sample_desc = serializers.SerializerMethodField(
+    #     'get_short_sample_desc')
+    #
+    # def get_short_sample_desc(self, obj):
+    #     return Truncator(obj.sample_desc).chars(75)
+
+    class Meta:
+        model = emg_models.Sample
+        fields = (
+            'url',
+            'accession',
+            'biome',
+            'sample_name',
+            'study_accession',
+            'runs',
+            'study',
+            'metadata',
         )
 
 
