@@ -107,6 +107,5 @@ class TestPermissionsAPI(object):
         ]
         url = reverse('emgapi:mydata-list')
         response = client.get(url)
-        print(response)
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert response.json()['errors'] == expected_rsp

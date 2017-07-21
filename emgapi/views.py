@@ -486,6 +486,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         ---
         `/api/sammples/accession`
 
+        `/api/sammples/accession?include=metadata` with metadata
         `/api/sammples/accession?include=runs` with related runs
 
         """
@@ -498,7 +499,8 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         ---
         `/api/samples` retrieves list of samples
 
-        `/api/samples?include=runs,study` with related runs and studies
+        `/api/samples?include=metadata,runs,study`
+        with related metadata, runs and studies
 
         `/api/samples?ordering=accession` ordered by accession
 
@@ -528,9 +530,6 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         Example:
         ---
         `/api/samples/accession/runs`
-
-        `/api/sample/saccession/runs?include=run,study`
-        with related runs and studies
 
         Filter by:
         ---
@@ -574,7 +573,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='metadata-list',
-        serializer_class=emg_serializers.SimpleSampleAnnSerializer
+        serializer_class=emg_serializers.SampleAnnSerializer
     )
     def metadata(self, request, accession=None):
         """
@@ -600,10 +599,34 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         return Response(serializer.data)
 
 
+# class SampleAnnAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):
+#
+#     serializer_class = emg_serializers.SampleAnnSerializer
+#
+#     lookup_fields = ('var__var_name', 'var_val_ucv')
+#
+#     def get_queryset(self):
+#         return emg_models.SampleAnn.objects.all()
+#
+#     def get(self, request, name, value, *args, **kwargs):
+#         """
+#         Retrieves sample annotation for the given sample accession and value
+#         Example:
+#         ---
+#         `/api/metadata/name/value`
+#         """
+#         sa = emg_models.SampleAnn.objects.get(
+#             var__var_name=name,
+#             var_val_ucv=value
+#         )
+#         serializer = self.get_serializer(sa)
+#         return Response(data=serializer.data)
+
+
 class SampleAnnsViewSet(mixins.ListModelMixin,
                         viewsets.GenericViewSet):
 
-    serializer_class = emg_serializers.SimpleSampleAnnSerializer
+    serializer_class = emg_serializers.SampleAnnSerializer
 
     filter_backends = (
         DjangoFilterBackend,
@@ -623,6 +646,7 @@ class SampleAnnsViewSet(mixins.ListModelMixin,
 
     search_fields = (
         'var__var_name',
+        'var_val_ucv',
     )
 
     def get_queryset(self):
@@ -630,8 +654,6 @@ class SampleAnnsViewSet(mixins.ListModelMixin,
         return queryset
 
     def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return emg_serializers.SampleAnnSerializer
         return super(SampleAnnsViewSet, self).get_serializer_class()
 
     def list(self, request, *args, **kwargs):
@@ -698,8 +720,10 @@ class RunViewSet(mixins.ListModelMixin,
         'accession',
     )
 
+    lookup_field = 'accession'
+
     def get_queryset(self):
-        return emg_models.Run.objects \
+        queryset = emg_models.Run.objects \
             .available(self.request) \
             .prefetch_related(
                 'sample',
@@ -707,6 +731,13 @@ class RunViewSet(mixins.ListModelMixin,
                 'analysis_status',
                 'experiment_type'
             )
+        if 'sample' in self.request.GET.get('include', '').split(','):
+            queryset = queryset.prefetch_related(
+                'sample__biome',
+                'sample__study',
+                'sample__study__biome'
+            )
+        return queryset
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -767,12 +798,22 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
     def retrieve(self, request, *args, **kwargs):
         """
         Retrieves pipeline for the given version
+        Example:
+        ---
+        `/api/pipeline/3.0`
+
+        `/api/pipeline/3.0?include=tools` with tools
         """
         return super(PipelineViewSet, self).retrieve(request, *args, **kwargs)
 
     def list(self, request, *args, **kwargs):
         """
         Retrieves list of pipeline versions
+        Example:
+        ---
+        `/api/pipeline
+
+        `/api/pipeline?include=tools` with tools
         """
         return super(PipelineViewSet, self).list(request, *args, **kwargs)
 
@@ -784,6 +825,11 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
     def runs(self, request, release_version=None):
         """
         Retrieves list of runs for the given pipeline version
+        Example:
+        ---
+        `/api/pipeline/3.0/runs
+
+        `/api/pipeline/3.0/runs?include=sample` with samples
         """
         obj = self.get_object()
         queryset = obj.runs \
@@ -791,8 +837,13 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
             .select_related(
                 'sample',
                 'analysis_status',
-                'experiment_type',
-                'pipeline'
+                'experiment_type'
+            )
+        if 'sample' in self.request.GET.get('include', '').split(','):
+            queryset = queryset.select_related(
+                'sample__biome',
+                'sample__study',
+                'sample__study__biome'
             )
 
         page = self.paginate_queryset(queryset)
@@ -812,7 +863,10 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
     )
     def tools(self, request, release_version=None):
         """
-        Retrieves list of runs for the given pipeline version
+        Retrieves list of tools for the given pipeline version
+        Example:
+        ---
+        `/api/pipeline/tools
         """
         obj = self.get_object()
         queryset = obj.tools.all()
@@ -839,10 +893,10 @@ class PipelineToolViewSet(mixins.ListModelMixin,
 
     def list(self, request, *args, **kwargs):
         """
-        Retrieves list of annotaitons
+        Retrieves list of pipeline tools
         Example:
         ---
-        `/api/metadata` retrieves list of samples
+        `/api/tools` retrieves list of pipeline tools
         """
         return super(PipelineToolViewSet, self).list(request, *args, **kwargs)
 
@@ -913,7 +967,7 @@ class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
                 'experiment_type'
             )
         if run_accession is not None:
-            queryset = queryset.filter(accession=run_accession) \
+            queryset = queryset.filter(accession=run_accession)
 
         page = self.paginate_queryset(queryset)
         if page is not None:
