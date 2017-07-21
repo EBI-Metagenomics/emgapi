@@ -13,6 +13,7 @@ import gunicorn.app.base
 from gunicorn.six import iteritems
 
 import os
+from os.path import expanduser
 
 from django.core.wsgi import get_wsgi_application
 
@@ -44,7 +45,7 @@ class StandaloneApplication(gunicorn.app.base.BaseApplication):
 
 def main():
     options = {
-        'pid': '~/emgvar/django.pid',
+        'pid': os.path.join(expanduser("~"), 'emgvar', 'django.pid'),
         'bind': '%s:%s' % ('0.0.0.0', '8000'),
         'workers': number_of_workers(),
         'timeout': '30',
