@@ -32,8 +32,10 @@ class TestRunAPI(APITestCase):
     def test_public(self):
         _as = mommy.make('emgapi.AnalysisStatus', pk=3)
         _p = mommy.make('emgapi.Pipeline', pk=1, release_version="1.0")
-        mommy.make("emgapi.Run", pk=123, pipeline=_p, analysis_status=_as)
-        mommy.make("emgapi.Run", pk=456, pipeline=_p)
+        mommy.make("emgapi.Run", pk=123, accession="123",
+                   pipeline=_p, analysis_status=_as)
+        mommy.make("emgapi.Run", pk=456, accession="456",
+                   pipeline=_p)
 
         url = reverse("emgapi:runs-list")
         response = self.client.get(url)

@@ -609,3 +609,6 @@ class SampleAnn(models.Model):
 
     def __str__(self):
         return "%s %s" % (self.sample, self.var)
+
+    def multiple_pk(self):
+        return "%s/%s" % (self.var.var_name, self.var_val_ucv)
