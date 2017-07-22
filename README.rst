@@ -32,6 +32,9 @@ pip install "git+git://github.com/ola-t/ebi-metagenomics-api@master#egg=emgcli"
 pip install "git+git://github.com/ola-t/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
 emgunicorn
 
+Uninstallation::
+----------------
+
 # deactivate
 source deactivate
 
