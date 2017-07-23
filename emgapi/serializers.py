@@ -29,7 +29,27 @@ from . import models as emg_models
 logger = logging.getLogger(__name__)
 
 
-class BiomeSerializer(serializers.HyperlinkedModelSerializer):
+class ExplicitFieldsModelSerializer(serializers.ModelSerializer):
+    """
+    Retrieve object with explicit fields. This is compatible with `include`
+    although relationship has to be present in `fields`.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(ExplicitFieldsModelSerializer, self).__init__(*args, **kwargs)
+
+        fields = self.context['request'].query_params.get('fields')
+        if fields:
+            fields = fields.split(',')
+            # Drop any fields that are not specified in the `fields` argument.
+            allowed = set(fields)
+            existing = set(self.fields.keys())
+            for field_name in existing - allowed:
+                self.fields.pop(field_name)
+
+
+class BiomeSerializer(ExplicitFieldsModelSerializer,
+                      serializers.HyperlinkedModelSerializer):
 
     included_serializers = {}
 
@@ -97,7 +117,8 @@ class BiomeSerializer(serializers.HyperlinkedModelSerializer):
 
 # Publication serializer
 
-class PublicationSerializer(serializers.HyperlinkedModelSerializer):
+class PublicationSerializer(ExplicitFieldsModelSerializer,
+                            serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
         'studies': 'emgapi.serializers.StudySerializer',
@@ -140,27 +161,15 @@ class PublicationSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
 
-class SimplePublicationSerializer(PublicationSerializer):
-
-    included_serializers = {
-        'studies': 'emgapi.serializers.SimpleStudySerializer',
-    }
-
-    class Meta:
-        model = emg_models.Publication
-        fields = (
-            'url',
-            'pub_title',
-            'pub_type',
-            'authors',
-            'doi',
-            'studies',
-        )
-
-
 # Pipeline serializer
 
-class PipelineToolSerializer(serializers.ModelSerializer):
+class PipelineToolSerializer(ExplicitFieldsModelSerializer,
+                             serializers.HyperlinkedModelSerializer):
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi:tools-detail',
+        lookup_field='tool_name',
+    )
 
     pipelines = serializers.HyperlinkedRelatedField(
         read_only=True,
@@ -171,12 +180,11 @@ class PipelineToolSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = emg_models.PipelineTool
-        exclude = (
-            'tool_id',
-        )
+        fields = '__all__'
 
 
-class PipelineSerializer(serializers.HyperlinkedModelSerializer):
+class PipelineSerializer(ExplicitFieldsModelSerializer,
+                         serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
         'tools': 'emgapi.serializers.PipelineToolSerializer',
@@ -232,7 +240,8 @@ class PipelineSerializer(serializers.HyperlinkedModelSerializer):
 
 # ExperimentType serializer
 
-class ExperimentTypeSerializer(serializers.ModelSerializer):
+class ExperimentTypeSerializer(ExplicitFieldsModelSerializer,
+                               serializers.ModelSerializer):
 
     included_serializers = {}
 
@@ -281,10 +290,11 @@ class RunHyperlinkedField(serializers.HyperlinkedIdentityField):
             view_name, kwargs=kwargs, request=request, format=format)
 
 
-class RunSerializer(serializers.HyperlinkedModelSerializer):
+class RunSerializer(ExplicitFieldsModelSerializer,
+                    serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
-        'sample': 'emgapi.serializers.IncludeSampleSerializer',
+        'sample': 'emgapi.serializers.SampleSerializer',
     }
 
     url = RunHyperlinkedField(
@@ -362,38 +372,28 @@ class RunSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 
-class SimpleRunSerializer(RunSerializer):
+class RetrieveRunSerializer(RunSerializer):
 
     included_serializers = {
-        'sample': 'emgapi.serializers.IncludeSampleSerializer',
+        'sample': 'emgapi.serializers.SampleSerializer',
     }
-
-    class Meta:
-        model = emg_models.Run
-        fields = (
-            'url',
-            'accession',
-            'pipeline_version',
-            'pipeline',
-            'sample',
-            'sample_accession',
-        )
 
 
 # SampleAnn serializer
 
-class SampleAnnHyperlinkedField(serializers.HyperlinkedIdentityField):
+# class SampleAnnHyperlinkedField(serializers.HyperlinkedIdentityField):
+#
+#     def get_url(self, obj, view_name, request, format):
+#         kwargs = {
+#             'name': obj.var.var_name,
+#             'value': obj.var_val_ucv
+#         }
+#         return reverse(
+#             view_name, kwargs=kwargs, request=request, format=format)
 
-    def get_url(self, obj, view_name, request, format):
-        kwargs = {
-            'name': obj.var.var_name,
-            'value': obj.var_val_ucv
-        }
-        return reverse(
-            view_name, kwargs=kwargs, request=request, format=format)
 
-
-class SampleAnnSerializer(serializers.HyperlinkedModelSerializer):
+class SampleAnnSerializer(ExplicitFieldsModelSerializer,
+                          serializers.HyperlinkedModelSerializer):
 
     id = serializers.ReadOnlyField(source="multiple_pk")
 
@@ -430,12 +430,11 @@ class SampleAnnSerializer(serializers.HyperlinkedModelSerializer):
 
 # Sample serializer
 
-class SampleSerializer(serializers.HyperlinkedModelSerializer):
+class SampleSerializer(ExplicitFieldsModelSerializer,
+                       serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
         'study': 'emgapi.serializers.StudySerializer',
-        'runs': 'emgapi.serializers.RunSerializer',
-        'metadata': 'emgapi.serializers.SampleAnnSerializer',
     }
 
     url = serializers.HyperlinkedIdentityField(
@@ -534,70 +533,23 @@ class SampleSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 
-class SimpleSampleSerializer(SampleSerializer):
+class RetrieveSampleSerializer(SampleSerializer):
 
     included_serializers = {
-        'study': 'emgapi.serializers.SimpleStudySerializer',
-        'runs': 'emgapi.serializers.SimpleRunSerializer',
+        'study': 'emgapi.serializers.StudySerializer',
+        'runs': 'emgapi.serializers.RunSerializer',
         'metadata': 'emgapi.serializers.SampleAnnSerializer',
     }
-
-    # sample_desc = serializers.SerializerMethodField(
-    #     'get_short_sample_desc')
-    #
-    # def get_short_sample_desc(self, obj):
-    #     return Truncator(obj.sample_desc).chars(75)
-
-    class Meta:
-        model = emg_models.Sample
-        fields = (
-            'url',
-            'accession',
-            'biome',
-            'sample_name',
-            'study_accession',
-            'runs',
-            'study',
-            'metadata',
-            'runs_count',
-        )
-
-
-class IncludeSampleSerializer(SampleSerializer):
-
-    included_serializers = {
-        'study': 'emgapi.serializers.SimpleStudySerializer',
-        'runs': 'emgapi.serializers.SimpleRunSerializer',
-        'metadata': 'emgapi.serializers.SampleAnnSerializer',
-    }
-
-    # sample_desc = serializers.SerializerMethodField(
-    #     'get_short_sample_desc')
-    #
-    # def get_short_sample_desc(self, obj):
-    #     return Truncator(obj.sample_desc).chars(75)
-
-    class Meta:
-        model = emg_models.Sample
-        fields = (
-            'url',
-            'accession',
-            'biome',
-            'sample_name',
-            'study_accession',
-            'runs',
-            'study',
-            'metadata',
-        )
 
 
 # Study serializer
 
-class StudySerializer(serializers.HyperlinkedModelSerializer):
+class StudySerializer(ExplicitFieldsModelSerializer,
+                      serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
         'publications': 'emgapi.serializers.PublicationSerializer',
-        'samples': 'emgapi.serializers.SampleSerializer',
+        # 'samples': 'emgapi.serializers.SampleSerializer',
     }
 
     url = serializers.HyperlinkedIdentityField(
@@ -619,6 +571,8 @@ class StudySerializer(serializers.HyperlinkedModelSerializer):
 
     def get_biome_name(self, obj):
         return obj.biome.biome_name
+
+    # relationships
 
     # publications = serializers.HyperlinkedIdentityField(
     #     view_name='emgapi:studies-publications-list',
@@ -654,15 +608,17 @@ class StudySerializer(serializers.HyperlinkedModelSerializer):
         related_link_lookup_field='accession',
     )
 
-    samples_count = serializers.IntegerField()
-
-    runs_count = serializers.IntegerField()
-
     def get_samples(self, obj):
         # TODO: provide counter instead of paginating relationship
         # workaround https://github.com/django-json-api
         # /django-rest-framework-json-api/issues/178
         return ()
+
+    # count
+
+    samples_count = serializers.IntegerField()
+
+    runs_count = serializers.IntegerField()
 
     class Meta:
         model = emg_models.Study
@@ -673,29 +629,9 @@ class StudySerializer(serializers.HyperlinkedModelSerializer):
         )
 
 
-class SimpleStudySerializer(StudySerializer):
+class RetrieveStudySerializer(StudySerializer):
 
     included_serializers = {
-        'publications': 'emgapi.serializers.SimplePublicationSerializer',
-        'samples': 'emgapi.serializers.SimpleSampleSerializer',
+        'publications': 'emgapi.serializers.PublicationSerializer',
+        # 'samples': 'emgapi.serializers.SampleSerializer',
     }
-
-    # study_abstract = serializers.SerializerMethodField(
-    #     'get_short_study_abstract')
-    #
-    # def get_short_study_abstract(self, obj):
-    #     return Truncator(obj.study_abstract).chars(75)
-
-    class Meta:
-        model = emg_models.Study
-        fields = (
-            'url',
-            'accession',
-            'study_name',
-            'biome',
-            'last_update',
-            'samples',
-            'publications',
-            'samples_count',
-            'runs_count',
-        )

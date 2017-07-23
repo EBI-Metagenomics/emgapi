@@ -102,7 +102,7 @@ class TestDefaultAPI(object):
                 _p = mommy.make('emgapi.Pipeline', pk=pk,
                                 release_version="1.0")
                 _t = mommy.make('emgapi.PipelineTool', pk=pk,
-                                tool_name='a tool')
+                                tool_name='ToolName')
                 mommy.make('emgapi.PipelineReleaseTool', pk=pk,
                            pipeline=_p, tool=_t)
             else:
