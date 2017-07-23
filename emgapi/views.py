@@ -131,7 +131,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
-            return emg_serializers.BiomeSerializer
+            return emg_serializers.RetrieveBiomeSerializer
         return super(BiomeViewSet, self).get_serializer_class()
 
     def list(self, request, *args, **kwargs):
@@ -180,7 +180,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='samples-list',
-        serializer_class=emg_serializers.SimpleSampleSerializer
+        serializer_class=emg_serializers.SampleSerializer
     )
     def samples(self, request, lineage=None):
         """
@@ -207,7 +207,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='studies-list',
-        serializer_class=emg_serializers.SimpleStudySerializer
+        serializer_class=emg_serializers.StudySerializer
     )
     def studies(self, request, lineage=None):
         """
@@ -236,7 +236,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
                    mixins.ListModelMixin,
                    viewsets.GenericViewSet):
 
-    serializer_class = emg_serializers.SimpleStudySerializer
+    serializer_class = emg_serializers.StudySerializer
 
     filter_class = emg_filters.StudyFilter
 
@@ -249,6 +249,8 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     ordering_fields = (
         'accession',
         'last_update',
+        'samples_count',
+        'runs_count',
     )
 
     ordering = ('-last_update',)
@@ -288,7 +290,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
-            return emg_serializers.StudySerializer
+            return emg_serializers.RetrieveStudySerializer
         return super(StudyViewSet, self).get_serializer_class()
 
     def list(self, request, *args, **kwargs):
@@ -298,7 +300,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         ---
         `/api/studies`
 
-        `/api/studies?include=samples` with samples
+        `/api/studies?include=publications` with publications
 
         Filter by:
         ---
@@ -322,14 +324,13 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         ---
         `/api/studies/ERP008945` retrieve study ERP008945
 
-        `/api/studies/ERP008945?include=samples,publications`
-        with samples and publications
+        `/api/studies/ERP008945?include=publications` with publications
         """
         return super(StudyViewSet, self).retrieve(request, *args, **kwargs)
 
     @list_route(
         methods=['get', ],
-        serializer_class=emg_serializers.SimpleStudySerializer
+        serializer_class=emg_serializers.StudySerializer
     )
     def recent(self, request):
         """
@@ -354,7 +355,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         methods=['get', ],
         url_name='publications-list',
         # url_path='publications(?:/(?P<publications_id>[a-zA-Z0-9,]+))?',
-        serializer_class=emg_serializers.SimplePublicationSerializer
+        serializer_class=emg_serializers.PublicationSerializer
     )
     def publications(self, request, accession=None, publications_id=None):
         """
@@ -384,7 +385,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         methods=['get', ],
         url_name='samples-list',
         # url_path='samples(?:/(?P<sample_accession>[a-zA-Z0-9,]+))?',
-        serializer_class=emg_serializers.SimpleSampleSerializer
+        serializer_class=emg_serializers.SampleSerializer
     )
     def samples(self, request, accession=None, sample_accession=None):
         """
@@ -429,7 +430,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
                     mixins.ListModelMixin,
                     viewsets.GenericViewSet):
 
-    serializer_class = emg_serializers.SimpleSampleSerializer
+    serializer_class = emg_serializers.SampleSerializer
 
     filter_class = emg_filters.SampleFilter
 
@@ -442,6 +443,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
     ordering_fields = (
         'accession',
         'last_update',
+        'runs_count',
     )
 
     ordering = ('-last_update',)
@@ -476,7 +478,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
-            return emg_serializers.SampleSerializer
+            return emg_serializers.RetrieveSampleSerializer
         return super(SampleViewSet, self).get_serializer_class()
 
     def retrieve(self, request, *args, **kwargs):
@@ -487,7 +489,6 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         `/api/sammples/accession`
 
         `/api/sammples/accession?include=metadata` with metadata
-        `/api/sammples/accession?include=runs` with related runs
 
         """
         return super(SampleViewSet, self).retrieve(request, *args, **kwargs)
@@ -522,7 +523,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         methods=['get', ],
         url_name='runs-list',
         # url_path='runs(?:/(?P<run_accession>[a-zA-Z0-9,]+))?',
-        serializer_class=emg_serializers.SimpleRunSerializer
+        serializer_class=emg_serializers.RunSerializer
     )
     def runs(self, request, accession=None, run_accession=None):
         """
@@ -668,7 +669,7 @@ class SampleAnnsViewSet(mixins.ListModelMixin,
 
 class RunAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):
 
-    serializer_class = emg_serializers.RunSerializer
+    serializer_class = emg_serializers.RetrieveRunSerializer
 
     lookup_fields = ('accession', 'release_version')
 
@@ -700,7 +701,7 @@ class RunAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):
 class RunViewSet(mixins.ListModelMixin,
                  viewsets.GenericViewSet):
 
-    serializer_class = emg_serializers.SimpleRunSerializer
+    serializer_class = emg_serializers.RunSerializer
 
     filter_class = emg_filters.RunFilter
 
@@ -740,8 +741,6 @@ class RunViewSet(mixins.ListModelMixin,
         return queryset
 
     def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return emg_serializers.RunSerializer
         return super(RunViewSet, self).get_serializer_class()
 
     def list(self, request, *args, **kwargs):
@@ -882,7 +881,8 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         return Response(serializer.data)
 
 
-class PipelineToolViewSet(mixins.ListModelMixin,
+class PipelineToolViewSet(mixins.RetrieveModelMixin,
+                          mixins.ListModelMixin,
                           viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.PipelineToolSerializer
@@ -890,6 +890,18 @@ class PipelineToolViewSet(mixins.ListModelMixin,
 
     lookup_field = 'tool_name'
     lookup_value_regex = '[0-9a-zA-Z]+'
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return emg_serializers.PipelineToolSerializer
+        return super(PipelineToolViewSet, self).get_serializer_class()
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves experiment type for the given id
+        """
+        return super(PipelineToolViewSet, self) \
+            .retrieve(request, *args, **kwargs)
 
     def list(self, request, *args, **kwargs):
         """
@@ -950,7 +962,7 @@ class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
         methods=['get', ],
         url_name='runs-list',
         # url_path='runs(?:/(?P<run_accession>[a-zA-Z0-9,]+))?',
-        serializer_class=emg_serializers.SimpleRunSerializer
+        serializer_class=emg_serializers.RunSerializer
     )
     def runs(self, request, experiment_type=None, run_accession=None):
         """
@@ -984,7 +996,7 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
                          mixins.ListModelMixin,
                          viewsets.GenericViewSet):
 
-    serializer_class = emg_serializers.SimplePublicationSerializer
+    serializer_class = emg_serializers.PublicationSerializer
 
     filter_class = emg_filters.PublicationFilter
 
@@ -1020,7 +1032,7 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
-            return emg_serializers.PublicationSerializer
+            return emg_serializers.RetrievePublicationSerializer
         return super(PublicationViewSet, self).get_serializer_class()
 
     def retrieve(self, request, *args, **kwargs):
@@ -1056,7 +1068,7 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         methods=['get', ],
         url_name='studies-list',
         # url_path='studies(?:/(?P<study_accession>[a-zA-Z0-9,]+))?',
-        serializer_class=emg_serializers.SimpleStudySerializer
+        serializer_class=emg_serializers.StudySerializer
     )
     def studies(self, request, pub_id=None, study_accession=None):
         """
