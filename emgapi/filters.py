@@ -43,11 +43,17 @@ class StudyFilter(django_filters.FilterSet):
         name='biome__biome_name',
         distinct=True)
 
+    species = django_filters.CharFilter(
+        name='samples__species',
+        distinct=True)
+
     class Meta:
         model = emg_models.Study
         fields = (
             'biome',
             'biome_name',
+            'project_id',
+            'species',
         )
 
 
@@ -69,6 +75,14 @@ class SampleFilter(django_filters.FilterSet):
         name='biome__biome_name',
         distinct=True)
 
+    instrument_model = django_filters.CharFilter(
+        name='runs__instrument_platform',
+        distinct=True)
+
+    instrument_platform = django_filters.CharFilter(
+        name='runs__instrument_model',
+        distinct=True)
+
     class Meta:
         model = emg_models.Sample
         fields = (
@@ -77,10 +91,17 @@ class SampleFilter(django_filters.FilterSet):
             'biome_name',
             'pipeline_version',
             'geo_loc_name',
+            'species',
+            'instrument_model',
+            'instrument_platform',
         )
 
 
-class PipelineFilter(SampleFilter):
+class PipelineFilter(django_filters.FilterSet):
+
+    experiment_type = django_filters.CharFilter(
+        name='runs__experiment_type__experiment_type',
+        distinct=True)
 
     class Meta:
         model = emg_models.Pipeline
@@ -109,4 +130,6 @@ class RunFilter(django_filters.FilterSet):
             'analysis_status',
             'experiment_type',
             'pipeline_version',
+            'instrument_platform',
+            'instrument_model',
         )

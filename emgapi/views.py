@@ -117,7 +117,6 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
 
     search_fields = (
         '@biome_name',
-        '@lineage',
     )
 
     lookup_field = 'lineage'
@@ -253,20 +252,18 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     ordering = ('-last_update',)
 
     search_fields = (
-        # 'study_id',
-        'accession',
         '@study_name',
         '@study_abstract',
         'centre_name',
         'author_name',
         'author_email',
-        '@biome__biome_name',
-        '@biome__lineage',
+        'samples__species',
+        'biome__biome_name',
         'samples__metadata__var_val_ucv'
     )
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9,]+'
+    lookup_value_regex = '[a-zA-Z0-9]+'
 
     def get_queryset(self):
         queryset = emg_models.Study.objects \
@@ -297,15 +294,12 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         ---
         `/api/studies`
 
-        `/api/studies?include=publications` with publications
+        `/api/studies?include=publications,biome` with publications and biome
 
         Filter by:
         ---
         `/api/studies?biome=root:Environmental:Terrestrial:Soil`
-        retrieve all studies for given Biome
-
-        `/api/studies?biome_name=Soil`
-        retrieve all studies containing given Biome
+        `/api/studies?biome_name=soil`
 
         Search for metadata, name, abstract, biome, etc.:
         ---
@@ -321,7 +315,8 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         ---
         `/api/studies/ERP008945` retrieve study ERP008945
 
-        `/api/studies/ERP008945?include=publications` with publications
+        `/api/studies/ERP008945?include=publications,biome`
+        with publications and biome
         """
         return super(StudyViewSet, self).retrieve(request, *args, **kwargs)
 
@@ -391,7 +386,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         ---
         `/api/studies/ERP008945/samples` retrieve linked samples
 
-        `/api/studies/ERP008945/samples?include=runs` with runs
+        `/api/studies/ERP002061/samples?include=runs` with runs
         """
 
         obj = self.get_object()
@@ -446,12 +441,12 @@ class SampleViewSet(mixins.RetrieveModelMixin,
     ordering = ('-last_update',)
 
     search_fields = (
-        # 'sample_id',
-        'accession',
         '@sample_name',
-        '@biome__biome_name',
-        '@biome__lineage',
-        'metadata__var_val_ucv'
+        'species',
+        'biome__biome_name',
+        'runs__instrument_platform',
+        'runs__instrument_model',
+        'metadata__var_val_ucv',
     )
 
     lookup_field = 'accession'
@@ -506,9 +501,12 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         ---
         `/api/samples?experiment_type=metagenomics`
 
+        `/api/samples?species=Homo%20sapiens`
+
         `/api/samples?pipeline_version=3.0`
 
         `/api/samples?biome=root:Environmental:Aquatic:Marine`
+        `/api/samples?biome_name=soil`
 
         Search for metadata, name, biome, etc.:
         ---
@@ -715,7 +713,9 @@ class RunViewSet(mixins.ListModelMixin,
     ordering = ('accession',)
 
     search_fields = (
-        'accession',
+        'instrument_platform',
+        'instrument_model',
+        'sample__metadata__var_val_ucv',
     )
 
     lookup_field = 'accession'
