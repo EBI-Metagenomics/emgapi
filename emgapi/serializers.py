@@ -199,23 +199,28 @@ class PipelineSerializer(ExplicitFieldsModelSerializer,
         lookup_field='release_version',
     )
 
+    samples_count = serializers.IntegerField()
+
+    runs_count = serializers.IntegerField()
+
+    # relationships
     # runs = relations.ResourceRelatedField(
     #     read_only=True,
     #     many=True,
-    #     related_link_view_name='pipelines-runs-list',
+    #     related_link_view_name='pipelines-samples-list',
     #     related_link_url_kwarg='release_version',
     # )
-    runs = relations.SerializerMethodResourceRelatedField(
-        source='get_runs',
-        model=emg_models.Run,
+    samples = relations.SerializerMethodResourceRelatedField(
+        source='get_samples',
+        model=emg_models.Sample,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:pipelines-runs-list',
+        related_link_view_name='emgapi:pipelines-samples-list',
         related_link_url_kwarg='release_version',
         related_link_lookup_field='release_version',
     )
 
-    def get_runs(self, obj):
+    def get_samples(self, obj):
         # TODO: provide counter instead of paginating relationship
         # workaround https://github.com/django-json-api
         # /django-rest-framework-json-api/issues/178
@@ -254,23 +259,28 @@ class ExperimentTypeSerializer(ExplicitFieldsModelSerializer,
         lookup_field='experiment_type',
     )
 
-    # runs = relations.ResourceRelatedField(
+    samples_count = serializers.IntegerField()
+
+    runs_count = serializers.IntegerField()
+
+    # relationships
+    # samples = relations.ResourceRelatedField(
     #     read_only=True,
     #     many=True,
-    #     related_link_view_name='emgapi:experiments-runs-list',
-    #     related_link_url_kwarg='release_version',
+    #     related_link_view_name='emgapi:experiments-samples-list',
+    #     related_link_url_kwarg='experiment_type',
     # )
-    runs = relations.SerializerMethodResourceRelatedField(
-        source='get_runs',
-        model=emg_models.Run,
+    samples = relations.SerializerMethodResourceRelatedField(
+        source='get_samples',
+        model=emg_models.Sample,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:experiments-runs-list',
+        related_link_view_name='emgapi:experiments-samples-list',
         related_link_url_kwarg='experiment_type',
         related_link_lookup_field='experiment_type',
     )
 
-    def get_runs(self, obj):
+    def get_samples(self, obj):
         # TODO: provide counter instead of paginating relationship
         # workaround https://github.com/django-json-api
         # /django-rest-framework-json-api/issues/178

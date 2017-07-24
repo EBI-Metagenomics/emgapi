@@ -815,33 +815,31 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
 
     @detail_route(
         methods=['get', ],
-        url_name='runs-list',
-        serializer_class=emg_serializers.RunSerializer
+        url_name='samples-list',
+        serializer_class=emg_serializers.SampleSerializer
     )
-    def runs(self, request, release_version=None):
+    def samples(self, request, release_version=None):
         """
-        Retrieves list of runs for the given pipeline version
+        Retrieves list of samples for the given pipeline version
         Example:
         ---
-        `/api/pipeline/3.0/runs
-
-        `/api/pipeline/3.0/runs?include=sample` with samples
+        `/api/pipeline/3.0/samples
         """
         obj = self.get_object()
-        queryset = obj.runs \
+        queryset = emg_models.Sample.objects.filter(runs__pipeline=obj) \
             .available(self.request) \
-            .select_related(
-                'sample',
-                'analysis_status',
-                'experiment_type'
+            .prefetch_related(
+                'biome',
+                'study',
             )
-        if 'sample' in self.request.GET.get('include', '').split(','):
-            queryset = queryset.select_related(
-                'sample__biome',
-                'sample__study',
-                'sample__study__biome'
-            )
-
+        if 'runs' in self.request.GET.get('include', '').split(','):
+            _qs = emg_models.Run.objects \
+                .available(self.request) \
+                .select_related(
+                    'analysis_status', 'pipeline', 'experiment_type'
+                )
+            queryset = queryset.prefetch_related(
+                Prefetch('runs', queryset=_qs))
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(
@@ -957,27 +955,32 @@ class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
 
     @detail_route(
         methods=['get', ],
-        url_name='runs-list',
-        # url_path='runs(?:/(?P<run_accession>[a-zA-Z0-9,]+))?',
-        serializer_class=emg_serializers.RunSerializer
+        url_name='samples-list',
+        serializer_class=emg_serializers.SampleSerializer
     )
-    def runs(self, request, experiment_type=None, run_accession=None):
+    def samples(self, request, experiment_type=None):
         """
-        Retrieves list of runs for the given experiment type
+        Retrieves list of samples for the given experiment type
+        Example:
+        ---
+        `/api/experiments/metagenomic/samples
         """
-
         obj = self.get_object()
-        queryset = obj.runs \
+        queryset = emg_models.Sample.objects \
+            .filter(runs__experiment_type=obj) \
             .available(self.request) \
-            .select_related(
-                'sample',
-                'pipeline',
-                'analysis_status',
-                'experiment_type'
+            .prefetch_related(
+                'biome',
+                'study',
             )
-        if run_accession is not None:
-            queryset = queryset.filter(accession=run_accession)
-
+        if 'runs' in self.request.GET.get('include', '').split(','):
+            _qs = emg_models.Run.objects \
+                .available(self.request) \
+                .select_related(
+                    'analysis_status', 'pipeline', 'experiment_type'
+                )
+            queryset = queryset.prefetch_related(
+                Prefetch('runs', queryset=_qs))
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(

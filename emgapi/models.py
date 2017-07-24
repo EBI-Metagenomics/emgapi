@@ -98,6 +98,18 @@ class PipelineTool(models.Model):
         return self.tool_name
 
 
+class PipelineQuerySet(BaseQuerySet):
+    pass
+
+
+class PipelineManager(models.Manager):
+
+    def get_queryset(self):
+        return PipelineQuerySet(self.model, using=self._db) \
+            .annotate(runs_count=Count('runs', distinct=True)) \
+            .annotate(samples_count=Count('runs__sample', distinct=True))
+
+
 class Pipeline(models.Model):
     pipeline_id = models.AutoField(
         db_column='PIPELINE_ID', primary_key=True)
@@ -112,6 +124,8 @@ class Pipeline(models.Model):
 
     tools = models.ManyToManyField(
         PipelineTool, through='PipelineReleaseTool', related_name='pipelines')
+
+    objects = PipelineManager()
 
     class Meta:
         db_table = 'PIPELINE_RELEASE'
@@ -435,11 +449,25 @@ class SamplePublication(models.Model):
         unique_together = (('sample', 'pub'),)
 
 
+class ExperimentTypeQuerySet(BaseQuerySet):
+    pass
+
+
+class ExperimentTypeManager(models.Manager):
+
+    def get_queryset(self):
+        return ExperimentTypeQuerySet(self.model, using=self._db) \
+            .annotate(runs_count=Count('runs', distinct=True)) \
+            .annotate(samples_count=Count('runs__sample', distinct=True))
+
+
 class ExperimentType(models.Model):
     experiment_type_id = models.AutoField(
         db_column='EXPERIMENT_TYPE_ID', primary_key=True)
     experiment_type = models.CharField(
         db_column='EXPERIMENT_TYPE', max_length=30)
+
+    objects = ExperimentTypeManager()
 
     class Meta:
         db_table = 'EXPERIMENT_TYPE'
