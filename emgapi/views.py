@@ -17,7 +17,7 @@
 import logging
 
 from django.conf import settings
-from django.db.models import Count, Prefetch
+from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -124,14 +124,11 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     lookup_value_regex = '[a-zA-Z0-9\:\-\s\(\)\<\>]+'
 
     def get_queryset(self):
-        return emg_models.Biome.objects.all() \
-            .annotate(studies_count=Count('studies')) \
-            .annotate(samples_count=Count('studies__samples')) \
-            .annotate(runs_count=Count('studies__samples__runs'))
+        return emg_models.Biome.objects.all()
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
-            return emg_serializers.RetrieveBiomeSerializer
+            return emg_serializers.BiomeSerializer
         return super(BiomeViewSet, self).get_serializer_class()
 
     def list(self, request, *args, **kwargs):
