@@ -170,9 +170,7 @@ class AnalysisStatus(models.Model):
 
 
 class BiomeQuerySet(models.QuerySet):
-
-    def top10(self):
-        return self.order_by('-studies_count')
+    pass
 
 
 class BiomeManager(models.Manager):
@@ -187,12 +185,8 @@ class BiomeManager(models.Manager):
                 AND lower(parent.biome_name) = 'soil'
         ORDER BY node.lft;"""
         return BiomeQuerySet(self.model, using=self._db) \
-            .annotate(studies_count=Count('studies')) \
-            .annotate(samples_count=Count('studies__samples')) \
-            .annotate(runs_count=Count('studies__samples__runs'))
-
-    def top10(self):
-        return self.get_queryset().top10()
+            .annotate(studies_count=Count('studies', distinct=True)) \
+            .annotate(samples_count=Count('samples', distinct=True))
 
 
 class Biome(models.Model):
