@@ -110,6 +110,10 @@ class BiomeSerializer(ExplicitFieldsModelSerializer,
         # /django-rest-framework-json-api/issues/178
         return ()
 
+    samples_count = serializers.IntegerField()
+
+    studies_count = serializers.IntegerField()
+
     class Meta:
         model = emg_models.Biome
         fields = '__all__'
@@ -434,6 +438,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
                        serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
+        'biome': 'emgapi.serializers.BiomeSerializer',
         'study': 'emgapi.serializers.StudySerializer',
     }
 
@@ -441,16 +446,6 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
         view_name='emgapi:samples-detail',
         lookup_field='accession'
     )
-
-    # biome = serializers.HyperlinkedRelatedField(
-    #     read_only=True,
-    #     view_name='emgapi:biomes-detail',
-    #     lookup_field='lineage',
-    # )
-    biome = serializers.SerializerMethodField()
-
-    def get_biome(self, obj):
-        return obj.biome.lineage
 
     biome_name = serializers.SerializerMethodField()
 
@@ -463,6 +458,12 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
         return obj.study.accession
 
     # relationships
+    biome = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emgapi:biomes-detail',
+        lookup_field='lineage',
+    )
+
     study = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name='emgapi:studies-detail',
@@ -548,6 +549,7 @@ class StudySerializer(ExplicitFieldsModelSerializer,
                       serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
+        'biome': 'emgapi.serializers.BiomeSerializer',
         'publications': 'emgapi.serializers.PublicationSerializer',
         # 'samples': 'emgapi.serializers.SampleSerializer',
     }
@@ -557,22 +559,18 @@ class StudySerializer(ExplicitFieldsModelSerializer,
         lookup_field='accession',
     )
 
-    # biome = serializers.HyperlinkedRelatedField(
-    #     read_only=True,
-    #     view_name='emgapi:biomes-detail',
-    #     lookup_field='lineage',
-    # )
-    biome = serializers.SerializerMethodField()
-
-    def get_biome(self, obj):
-        return obj.biome.lineage
-
     biome_name = serializers.SerializerMethodField()
 
     def get_biome_name(self, obj):
         return obj.biome.biome_name
 
     # relationships
+
+    biome = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emgapi:biomes-detail',
+        lookup_field='lineage',
+    )
 
     # publications = serializers.HyperlinkedIdentityField(
     #     view_name='emgapi:studies-publications-list',
