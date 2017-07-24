@@ -807,7 +807,7 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         Retrieves list of pipeline versions
         Example:
         ---
-        `/api/pipeline
+        `/api/pipeline`
 
         `/api/pipeline?include=tools` with tools
         """
@@ -823,7 +823,7 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         Retrieves list of samples for the given pipeline version
         Example:
         ---
-        `/api/pipeline/3.0/samples
+        `/api/pipeline/3.0/samples`
         """
         obj = self.get_object()
         queryset = emg_models.Sample.objects.filter(runs__pipeline=obj) \
@@ -860,7 +860,7 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         Retrieves list of tools for the given pipeline version
         Example:
         ---
-        `/api/pipeline/tools
+        `/api/pipeline/tools`
         """
         obj = self.get_object()
         queryset = obj.tools.all()
@@ -917,7 +917,6 @@ class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
 
     filter_backends = (
         DjangoFilterBackend,
-        filters.SearchFilter,
         filters.OrderingFilter,
     )
 
@@ -926,10 +925,6 @@ class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
     )
 
     ordering = ('experiment_type',)
-
-    search_fields = (
-        'experiment_type',
-    )
 
     lookup_field = 'experiment_type'
     lookup_value_regex = '[a-zA-Z]+'
@@ -963,7 +958,7 @@ class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
         Retrieves list of samples for the given experiment type
         Example:
         ---
-        `/api/experiments/metagenomic/samples
+        `/api/experiments/metagenomic/samples`
         """
         obj = self.get_object()
         queryset = emg_models.Sample.objects \
