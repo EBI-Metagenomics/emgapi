@@ -237,10 +237,10 @@ class Migration(migrations.Migration):
             sql='CREATE FULLTEXT INDEX biome_biome_name_ts_idx ON BIOME_HIERARCHY_TREE (biome_name)',
             reverse_sql='ALTER TABLE BIOME_HIERARCHY_TREE DROP INDEX biome_biome_name_ts_idx',
         ),
-        migrations.RunSQL(
-            sql='CREATE FULLTEXT INDEX biome_lineage_ts_idx ON BIOME_HIERARCHY_TREE (lineage)',
-            reverse_sql='ALTER TABLE BIOME_HIERARCHY_TREE DROP INDEX biome_lineage_ts_idx',
-        ),
+        # migrations.RunSQL(
+        #     sql='CREATE FULLTEXT INDEX biome_lineage_ts_idx ON BIOME_HIERARCHY_TREE (lineage)',
+        #     reverse_sql='ALTER TABLE BIOME_HIERARCHY_TREE DROP INDEX biome_lineage_ts_idx',
+        # ),
         migrations.RunSQL(
             sql='CREATE FULLTEXT INDEX study_study_name_ts_idx ON STUDY(study_name)',
             reverse_sql='ALTER TABLE STUDY DROP INDEX study_study_name_ts_idx',
@@ -268,5 +268,17 @@ class Migration(migrations.Migration):
         migrations.RunSQL(
             sql='CREATE FULLTEXT INDEX sample_sample_name_ts_idx ON SAMPLE (sample_name)',
             reverse_sql='ALTER TABLE SAMPLE DROP INDEX sample_sample_name_ts_idx',
+        ),
+        migrations.RunSQL(
+            sql='CREATE FULLTEXT INDEX sample_ann_var_val_ucv_ts_idx ON SAMPLE_ANN (var_val_ucv)',
+            reverse_sql='ALTER TABLE SAMPLE_ANN DROP INDEX sample_ann_var_val_ucv_ts_idx',
+        ),
+        migrations.RunSQL(
+            sql='CREATE FULLTEXT INDEX run_instrument_platform_ts_idx ON ANALYSIS_JOB (instrument_platform)',
+            reverse_sql='ALTER TABLE ANALYSIS_JOB DROP INDEX run_instrument_platform_ts_idx',
+        ),
+        migrations.RunSQL(
+            sql='CREATE FULLTEXT INDEX run_instrument_model_ts_idx ON ANALYSIS_JOB (instrument_model)',
+            reverse_sql='ALTER TABLE ANALYSIS_JOB DROP INDEX run_instrument_model_ts_idx',
         ),
     ]

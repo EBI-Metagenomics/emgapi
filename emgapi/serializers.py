@@ -440,6 +440,8 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
     included_serializers = {
         'biome': 'emgapi.serializers.BiomeSerializer',
         'study': 'emgapi.serializers.StudySerializer',
+        'runs': 'emgapi.serializers.RunSerializer',
+        'metadata': 'emgapi.serializers.SampleAnnSerializer',
     }
 
     url = serializers.HyperlinkedIdentityField(
@@ -537,6 +539,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
 class RetrieveSampleSerializer(SampleSerializer):
 
     included_serializers = {
+        'biome': 'emgapi.serializers.BiomeSerializer',
         'study': 'emgapi.serializers.StudySerializer',
         'runs': 'emgapi.serializers.RunSerializer',
         'metadata': 'emgapi.serializers.SampleAnnSerializer',
