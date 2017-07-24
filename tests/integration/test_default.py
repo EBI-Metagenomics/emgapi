@@ -36,7 +36,6 @@ class TestDefaultAPI(object):
             "biomes": "http://testserver/api/biomes",
             "studies": "http://testserver/api/studies",
             "samples": "http://testserver/api/samples",
-            "runs": "http://testserver/api/runs",
             "pipelines": "http://testserver/api/pipelines",
             "experiments": "http://testserver/api/experiments",
             "publications": "http://testserver/api/publications",
@@ -53,7 +52,6 @@ class TestDefaultAPI(object):
             'emgapi:publications',
             'emgapi:samples',
             'emgapi:studies',
-            'emgapi:runs',
             'emgapi:tools',
             pytest.mark.xfail('viewdoesnotexist'),
         ]
@@ -73,11 +71,11 @@ class TestDefaultAPI(object):
         '_model, _view, relations',
         [
             ('Biome', 'emgapi:biomes', ['studies', 'samples']),
-            ('ExperimentType', 'emgapi:experiments', ['runs']),
-            ('Pipeline', 'emgapi:pipelines', ['runs']),
+            ('ExperimentType', 'emgapi:experiments', ['samples']),
+            ('Pipeline', 'emgapi:pipelines', ['samples', 'tools']),
             ('Publication', 'emgapi:publications', ['studies']),
-            ('Run', 'emgapi:runs', ['pipeline', 'sample']),
-            ('Sample', 'emgapi:samples', ['biome', 'study', 'runs']),
+            ('Sample', 'emgapi:samples',
+             ['biome', 'study', 'runs', 'metadata']),
             ('Study', 'emgapi:studies', ['biome', 'publications', 'samples']),
             ('PipelineTool', 'emgapi:tools', ['pipelines']),
         ]
@@ -135,3 +133,4 @@ class TestDefaultAPI(object):
             assert d['type'] == _model
             assert 'attributes' in d
             assert 'relationships' in d
+            assert set(d['relationships']) - set(relations) == set()
