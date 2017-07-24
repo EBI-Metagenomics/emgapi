@@ -32,12 +32,16 @@ class TestRunAPI(APITestCase):
     def test_public(self):
         _as = mommy.make('emgapi.AnalysisStatus', pk=3)
         _p = mommy.make('emgapi.Pipeline', pk=1, release_version="1.0")
-        mommy.make("emgapi.Run", pk=123, accession="123",
-                   pipeline=_p, analysis_status=_as)
-        mommy.make("emgapi.Run", pk=456, accession="456",
-                   pipeline=_p)
+        _r1 = mommy.make("emgapi.Run", pk=123, accession="123",
+                         pipeline=_p, analysis_status=_as)
+        _r2 = mommy.make("emgapi.Run", pk=456, accession="456",
+                         pipeline=_p)
+        mommy.make("emgapi.Sample", pk=123, accession="123",
+                   runs=[_r1], is_public=1)
+        mommy.make("emgapi.Sample", pk=456, accession="456",
+                   runs=[_r2], is_public=0)
 
-        url = reverse("emgapi:runs-list")
+        url = reverse("emgapi:samples-list")
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -51,5 +55,5 @@ class TestRunAPI(APITestCase):
         assert len(rsp['data']) == 1
 
         for d in rsp['data']:
-            assert d['type'] == "Run"
+            assert d['type'] == "Sample"
             assert d['id'] == "123"
