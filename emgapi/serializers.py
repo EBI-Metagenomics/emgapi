@@ -110,13 +110,17 @@ class BiomeSerializer(ExplicitFieldsModelSerializer,
         # /django-rest-framework-json-api/issues/178
         return ()
 
-    samples_count = serializers.IntegerField()
-
-    studies_count = serializers.IntegerField()
+    # studies_count = serializers.IntegerField()
+    #
+    # samples_count = serializers.IntegerField()
 
     class Meta:
         model = emg_models.Biome
-        fields = '__all__'
+        exclude = (
+            'lft',
+            'rgt',
+            'depth',
+        )
 
 
 # Publication serializer

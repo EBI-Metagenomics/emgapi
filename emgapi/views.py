@@ -18,6 +18,7 @@ import logging
 
 from django.conf import settings
 from django.db.models import Prefetch
+# from django.db.models import Count
 from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -103,8 +104,6 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     queryset = emg_models.Biome.objects.all()
 
     filter_backends = (
-        # DjangoFilterBackend,
-        filters.SearchFilter,
         filters.OrderingFilter,
     )
 
@@ -115,15 +114,19 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     )
     ordering = ('-studies_count',)
 
-    search_fields = (
-        '@biome_name',
-    )
-
     lookup_field = 'lineage'
     lookup_value_regex = '[a-zA-Z0-9\:\-\s\(\)\<\>]+'
 
     def get_queryset(self):
-        return emg_models.Biome.objects.all()
+        try:
+            l = emg_models.Biome.objects \
+                .get(lineage=self.kwargs['lineage'])
+            queryset = self.queryset \
+                .filter(lft__gte=l.lft-1, rgt__lte=l.rgt+1)
+        except KeyError:
+            queryset = emg_models.Biome.objects \
+                .filter(depth=2)
+        return queryset
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -164,7 +167,8 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         `/api/biomes/top10` retrieve top 10 biomes
         """
         limit = settings.EMG_DEFAULT_LIMIT
-        queryset = emg_models.Biome.objects.top10()[:limit]
+        queryset = emg_models.Biome.objects \
+            .all().order_by('-studies_count')[:limit]
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(
@@ -187,8 +191,10 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         retrieve` linked samples
         """
 
-        queryset = self.get_object().samples \
+        obj = self.get_object()
+        queryset = emg_models.Sample.objects \
             .available(self.request) \
+            .filter(biome__lft__gte=obj.lft-1, biome__rgt__lte=obj.rgt+1) \
             .select_related('biome')
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -213,9 +219,10 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         `/api/biomes/root:Environmental:Terrestrial:Soil/studies`
         retrieve linked studies
         """
-
-        queryset = self.get_object().studies \
+        obj = self.get_object()
+        queryset = emg_models.Study.objects \
             .available(self.request) \
+            .filter(biome__lft__gte=obj.lft-1, biome__rgt__lte=obj.rgt+1) \
             .select_related('biome')
         page = self.paginate_queryset(queryset)
         if page is not None:
