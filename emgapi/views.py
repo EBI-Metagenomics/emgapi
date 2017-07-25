@@ -102,16 +102,16 @@ class BiomeViewSet(mixins.ListModelMixin,
     serializer_class = emg_serializers.BiomeSerializer
     queryset = emg_models.Biome.objects.all()
 
-    filter_backends = (
-        filters.OrderingFilter,
-    )
+    # filter_backends = (
+    #     filters.OrderingFilter,
+    # )
 
-    ordering_fields = (
-        'studies_count',
-        'samples_count',
-        'runs_count',
-    )
-    ordering = ('-studies_count',)
+    # ordering_fields = (
+    #     'studies_count',
+    #     'samples_count',
+    #     'runs_count',
+    # )
+    # ordering = ('-studies_count',)
 
     lookup_field = 'lineage'
     lookup_value_regex = '[a-zA-Z0-9\:\-\s\(\)\<\>]+'
@@ -145,6 +145,8 @@ class BiomeViewSet(mixins.ListModelMixin,
         ---
         `/api/biomes/root:Environmental:Aquatic`
         list all children
+
+        `/api/biomes/root:Host-associated?page=2`
         """
 
         return super(BiomeViewSet, self) \
@@ -184,7 +186,7 @@ class BiomeViewSet(mixins.ListModelMixin,
         with all children and descendants.
         Example:
         ---
-        `/api/biomes/root:Environmental:Aquatic/samples
+        `/api/biomes/root:Environmental:Aquatic/samples`
         """
 
         obj = self.get_object()
@@ -261,9 +263,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         'centre_name',
         'author_name',
         'author_email',
-        'samples__species',
-        'biome__biome_name',
-        'samples__metadata__var_val_ucv'
+        'project_id',
     )
 
     lookup_field = 'accession'
@@ -302,13 +302,13 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 
         Filter by:
         ---
-        `/api/studies?biome=root:Environmental:Terrestrial:Soil`
+        `/api/studies?biome=root:Host-associated:Human`
 
-        `/api/studies?biome_name=soil`
+        `/api/studies?biome_name=human`
 
         `/api/studies?centre_name=BioProject`
 
-        Search for metadata, name, abstract, biome, etc.:
+        Search for name, abstract, author and centre name etc.:
         ---
         `/api/studies?search=microbial%20fuel%20cells`
         """
@@ -320,9 +320,9 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         Retrieves study for the given accession
         Example:
         ---
-        `/api/studies/ERP008945` retrieve study ERP008945
+        `/api/studies/SRP001634` retrieve study SRP001634
 
-        `/api/studies/ERP008945?include=publications,biome`
+        `/api/studies/SRP001634?include=publications,biome`
         with publications and biome
         """
         return super(StudyViewSet, self).retrieve(request, *args, **kwargs)
@@ -333,7 +333,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     )
     def recent(self, request):
         """
-        Retrieve latest studies
+        Retrieve 20 latest studies
         Example:
         ---
         `/api/studies/recent` retrieve recent studies
@@ -353,23 +353,18 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='publications-list',
-        # url_path='publications(?:/(?P<publications_id>[a-zA-Z0-9,]+))?',
         serializer_class=emg_serializers.PublicationSerializer
     )
-    def publications(self, request, accession=None, publications_id=None):
+    def publications(self, request, accession=None):
         """
         Retrieves list of publications for the given study accession
         Example:
         ---
-        `/api/studies/ERP008945/publications` retrieve linked publications
+        `/api/studies/SRP000183/publications` retrieve linked publications
         """
 
         obj = self.get_object()
-        if publications_id is not None:
-            queryset = obj.publications \
-                .filter(publications_id=publications_id)
-        else:
-            queryset = obj.publications.all()
+        queryset = obj.publications.all()
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(
@@ -383,29 +378,22 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='samples-list',
-        # url_path='samples(?:/(?P<sample_accession>[a-zA-Z0-9,]+))?',
         serializer_class=emg_serializers.SampleSerializer
     )
-    def samples(self, request, accession=None, sample_accession=None):
+    def samples(self, request, accession=None):
         """
         Retrieves list of samples for the given study accession
         Example:
         ---
-        `/api/studies/ERP008945/samples` retrieve linked samples
+        `/api/studies/SRP001634/samples` retrieve linked samples
 
-        `/api/studies/ERP002061/samples?include=runs` with runs
+        `/api/studies/SRP001634/samples?include=runs` with runs
         """
 
         obj = self.get_object()
         queryset = obj.samples \
             .available(self.request) \
             .prefetch_related('biome')
-        if sample_accession is not None:
-            queryset = queryset \
-                .filter(accession=sample_accession)
-        else:
-            queryset = queryset \
-                .select_related('biome')
         if 'runs' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Run.objects \
                 .available(self.request) \
@@ -449,15 +437,18 @@ class SampleViewSet(mixins.RetrieveModelMixin,
 
     search_fields = (
         '@sample_name',
+        '@sample_desc',
+        'sample_alias',
         'species',
-        'biome__biome_name',
-        'runs__instrument_platform',
-        'runs__instrument_model',
-        'metadata__var_val_ucv',
+        'environment_feature',
+        'environment_biome',
+        'environment_feature',
+        'environment_material',
+        '@metadata__var_val_ucv',
     )
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9,]+'
+    lookup_value_regex = '[a-zA-Z0-9_]+'
 
     def get_queryset(self):
         queryset = emg_models.Sample.objects \
@@ -485,9 +476,9 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         Retrieves sample for the given accession
         Example:
         ---
-        `/api/sammples/accession`
+        `/api/sammples/ERS1015417`
 
-        `/api/sammples/accession?include=metadata` with metadata
+        `/api/sammples/ERS1015417?include=metadata` with metadata
 
         """
         return super(SampleViewSet, self).retrieve(request, *args, **kwargs)
@@ -513,56 +504,46 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         `/api/samples?pipeline_version=3.0`
 
         `/api/samples?biome=root:Environmental:Aquatic:Marine`
+
         `/api/samples?biome_name=soil`
 
-        Search for metadata, name, biome, etc.:
+        Search for name, descriptions, metadata, species,
+        environment feature and material:
         ---
-        `/api/studies?search=microbial%20fuel%20cells`
+        `/api/samples?search=continuous%20culture`
         """
         return super(SampleViewSet, self).list(request, *args, **kwargs)
 
     @detail_route(
         methods=['get', ],
         url_name='runs-list',
-        # url_path='runs(?:/(?P<run_accession>[a-zA-Z0-9,]+))?',
         serializer_class=emg_serializers.RunSerializer
     )
-    def runs(self, request, accession=None, run_accession=None):
+    def runs(self, request, accession=None):
         """
         Retrieves list of runs for the given sample accession
         Example:
         ---
-        `/api/samples/accession/runs`
+        `/api/samples/ERS1015417/runs`
 
         Filter by:
         ---
-        `/api/samples/accession/runs?experiment_type=metagenomics`
+        `/api/samples/ERS1015417/runs?experiment_type=metagenomics`
 
-        `/api/samples/accession/runs?pipeline_version=3.0`
+        `/api/samples/ERS1015417/runs?pipeline_version=3.0`
 
-        `/api/samples/accession/runs?biome=root:Environmental:Aquatic:Marine`
+        `/api/samples/ERS1015417/runs?biome=root:Host-associated:Plants`
         """
 
         obj = self.get_object()
-        if run_accession is not None:
-            queryset = obj.runs \
-                .available(self.request) \
-                .filter(accession=run_accession) \
-                .select_related(
-                    'sample',
-                    'analysis_status',
-                    'experiment_type',
-                    'pipeline'
-                )
-        else:
-            queryset = obj.runs \
-                .available(self.request) \
-                .select_related(
-                    'sample',
-                    'analysis_status',
-                    'experiment_type',
-                    'pipeline'
-                )
+        queryset = obj.runs \
+            .available(self.request) \
+            .select_related(
+                'sample',
+                'analysis_status',
+                'experiment_type',
+                'pipeline'
+            )
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(
@@ -583,7 +564,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         Retrieves list of samples for the given study accession
         Example:
         ---
-        `/api/samples/accession/metadata` retrieve metadata
+        `/api/samples/ERS1015417/metadata` retrieve metadata
         """
 
         obj = self.get_object()
@@ -695,7 +676,8 @@ class RunAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):
         `/api/runs/ERR1385375/3.0?include=sample` with related sample
         """
         run = emg_models.Run.objects.get(
-            accession=accession, pipeline__release_version=release_version)
+            accession=accession,
+            pipeline__release_version=release_version)
         serializer = self.get_serializer(run)
         return Response(data=serializer.data)
 
@@ -717,12 +699,12 @@ class RunViewSet(mixins.ListModelMixin,
         'accession',
     )
 
-    ordering = ('accession',)
+    ordering = ('-accession',)
 
     search_fields = (
         'instrument_platform',
         'instrument_model',
-        'sample__metadata__var_val_ucv',
+        '@sample__metadata__var_val_ucv',
     )
 
     lookup_field = 'accession'
@@ -736,12 +718,6 @@ class RunViewSet(mixins.ListModelMixin,
                 'analysis_status',
                 'experiment_type'
             )
-        if 'sample' in self.request.GET.get('include', '').split(','):
-            queryset = queryset.prefetch_related(
-                'sample__biome',
-                'sample__study',
-                'sample__study__biome'
-            )
         return queryset
 
     def get_serializer_class(self):
@@ -753,8 +729,6 @@ class RunViewSet(mixins.ListModelMixin,
         Example:
         ---
         `/api/runs`
-
-        `/api/runs?include=run,study` with related runs and studies
 
         Filter by:
         ---
@@ -1008,7 +982,10 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         filters.OrderingFilter,
     )
 
-    ordering_fields = ('pub_id',)
+    ordering_fields = (
+        'pub_id',
+        'studies_count',
+    )
 
     ordering = ('pub_id',)
 
@@ -1042,9 +1019,9 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         Retrieves publication for the given id
         Example:
         ---
-        `/api/publications/pub_id`
+        `/api/publications/338`
 
-        `/api/publications/pub_id?include=studies` with studies
+        `/api/publications/338?include=studies` with studies
         """
         return super(PublicationViewSet, self) \
             .retrieve(request, *args, **kwargs)
@@ -1069,10 +1046,10 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='studies-list',
-        # url_path='studies(?:/(?P<study_accession>[a-zA-Z0-9,]+))?',
+        # url_path='studies(?:/(?P<accession>[a-zA-Z0-9,]+))?',
         serializer_class=emg_serializers.StudySerializer
     )
-    def studies(self, request, pub_id=None, study_accession=None):
+    def studies(self, request, pub_id=None, accession=None):
         """
         Retrieves list of studies for the given publication
         Example:
@@ -1088,8 +1065,8 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         queryset = obj.studies \
             .available(self.request) \
             .select_related('biome')
-        if study_accession is not None:
-            queryset = queryset.filter(accession=study_accession)
+        if accession is not None:
+            queryset = queryset.filter(accession=accession)
 
         page = self.paginate_queryset(queryset)
         if page is not None:
