@@ -216,6 +216,17 @@ class Biome(models.Model):
         return self.biome_name
 
 
+class PublicationQuerySet(BaseQuerySet):
+    pass
+
+
+class PublicationManager(models.Manager):
+
+    def get_queryset(self):
+        return PublicationQuerySet(self.model, using=self._db) \
+            .annotate(studies_count=Count('studies', distinct=True))
+
+
 class Publication(models.Model):
     pub_id = models.AutoField(
         db_column='PUB_ID', primary_key=True)
@@ -249,6 +260,8 @@ class Publication(models.Model):
         db_column='PUBLISHED_YEAR', blank=True, null=True)
     pub_type = models.CharField(
         db_column='PUB_TYPE', max_length=150, blank=True, null=True)
+
+    objects = PublicationManager()
 
     class Meta:
         db_table = 'PUBLICATION'
