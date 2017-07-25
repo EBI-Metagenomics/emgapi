@@ -75,6 +75,12 @@ router.register(
 )
 
 router.register(
+    r'runs',
+    views.RunViewSet,
+    base_name='runs'
+)
+
+router.register(
     r'pipelines',
     views.PipelineViewSet,
     base_name='pipelines'
