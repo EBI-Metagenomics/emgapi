@@ -164,6 +164,8 @@ class PublicationSerializer(ExplicitFieldsModelSerializer,
         # /django-rest-framework-json-api/issues/178
         return ()
 
+    studies_count = serializers.IntegerField()
+
     class Meta:
         model = emg_models.Publication
         fields = '__all__'
@@ -311,9 +313,7 @@ class RunHyperlinkedField(serializers.HyperlinkedIdentityField):
 class RunSerializer(ExplicitFieldsModelSerializer,
                     serializers.HyperlinkedModelSerializer):
 
-    included_serializers = {
-        'sample': 'emgapi.serializers.SampleSerializer',
-    }
+    included_serializers = {}
 
     url = RunHyperlinkedField(
         view_name='emgapi:runs-detail',
@@ -391,10 +391,7 @@ class RunSerializer(ExplicitFieldsModelSerializer,
 
 
 class RetrieveRunSerializer(RunSerializer):
-
-    included_serializers = {
-        'sample': 'emgapi.serializers.SampleSerializer',
-    }
+    pass
 
 
 # SampleAnn serializer

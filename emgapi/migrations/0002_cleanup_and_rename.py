@@ -266,6 +266,10 @@ class Migration(migrations.Migration):
             reverse_sql='ALTER TABLE SAMPLE DROP INDEX sample_sample_name_ts_idx',
         ),
         migrations.RunSQL(
+            sql='CREATE FULLTEXT INDEX sample_sample_desc_ts_idx ON SAMPLE (sample_desc)',
+            reverse_sql='ALTER TABLE SAMPLE DROP INDEX sample_sample_desc_ts_idx',
+        ),
+        migrations.RunSQL(
             sql='CREATE FULLTEXT INDEX sample_ann_var_val_ucv_ts_idx ON SAMPLE_ANN (var_val_ucv)',
             reverse_sql='ALTER TABLE SAMPLE_ANN DROP INDEX sample_ann_var_val_ucv_ts_idx',
         ),
