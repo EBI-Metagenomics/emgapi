@@ -23,6 +23,8 @@ from rest_framework.test import APITestCase
 
 from model_mommy import mommy
 
+from emgapi import models as emg_models
+
 
 class TestBiomeAPI(APITestCase):
 
@@ -52,7 +54,7 @@ class TestBiomeAPI(APITestCase):
             self.data['studies'].append(
                 mommy.make(
                     'emgapi.Study',
-                    biome=self.data['biomes'][pk-1],
+                    biome=emg_models.Biome.objects.get(pk=pk),
                     pk=pk,
                     accession="SRP{:0>3}".format(pk),
                     is_public=1
