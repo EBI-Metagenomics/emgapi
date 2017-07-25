@@ -16,8 +16,6 @@
 
 
 # import pytest
-import random
-
 from django.core.urlresolvers import reverse
 
 from rest_framework import status
@@ -32,25 +30,29 @@ class TestBiomeAPI(APITestCase):
         self.data = {}
         self.data['biomes'] = []
         _biome = [
-            'root',
-            'root:foo', 'root:foo2', 'root:foo3', 'root:foo4', 'root:foo5',
-            'root:foo:bar', 'root:foo:bar2', 'root:foo:bar3',
-            'root:foo:bar4', 'root:foo:bar4'
+            {'lineage': 'root', 'depth': 1, 'lft': 1, 'rgt': 984},
+            {'lineage': 'root:foo', 'depth': 2, 'lft': 2, 'rgt': 161},
+            {'lineage': 'root:foo2', 'depth': 2, 'lft': 162, 'rgt': 513},
+            {'lineage': 'root:foo:bar', 'depth': 3, 'lft': 3, 'rgt': 160},
+            {'lineage': 'root:foo2:bar', 'depth': 3, 'lft': 163, 'rgt': 513},
         ]
         for b in _biome:
             self.data['biomes'].append(
                 mommy.make(
                     'emgapi.Biome',
-                    biome_name=b,
-                    lineage=b,
+                    depth=b['depth'],
+                    biome_name=b['lineage'].split(':')[-1],
+                    lineage=b['lineage'],
+                    lft=b['lft'],
+                    rgt=b['rgt'],
                     pk=(_biome.index(b)+1))
             )
         self.data['studies'] = []
-        for pk in range(1, 51):
+        for pk in range(1, len(_biome)+1):
             self.data['studies'].append(
                 mommy.make(
                     'emgapi.Study',
-                    biome=random.sample(self.data['biomes'], 1)[0],
+                    biome=self.data['biomes'][pk-1],
                     pk=pk,
                     accession="SRP{:0>3}".format(pk),
                     is_public=1
@@ -58,10 +60,24 @@ class TestBiomeAPI(APITestCase):
             )
 
     def test_default(self):
-        url = reverse('emgapi:biomes-top10')
+        url = reverse('emgapi:biomes-list', args=['root'])
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
 
         # Data
-        assert len(rsp['data']) == 10
+        assert len(rsp['data']) == 2
+
+        biomes = rsp['data']
+        for b in biomes:
+            assert b['type'] == 'Biome'
+            assert b['id'] in ('root:foo', 'root:foo2')
+
+        response = self.client.get(
+            biomes[0]['relationships']['studies']['links']['related'])
+        assert response.status_code == status.HTTP_200_OK
+        rsp = response.json()
+        assert len(rsp['data']) == 2
+        for s in rsp['data']:
+            assert s['type'] == 'Study'
+            assert s['id'] in ('SRP002', 'SRP004')

@@ -26,29 +26,6 @@ from django.core.urlresolvers import reverse
 from rest_framework import status
 
 
-def create_biomes(count):
-    entries = []
-    for pk in range(1, count+1):
-        entries.append(
-            mommy.prepare(
-                "emgapi.Biome",
-                pk=pk,
-                biome_name="Biome findme",
-                lineage="root:biome:findme"
-            )
-        )
-    for pk in range(count+1, 2*count+1):
-        entries.append(
-            mommy.prepare(
-                "emgapi.Biome",
-                pk=pk,
-                biome_name="Biome hideme",
-                lineage="root:biome:hideme"
-            )
-        )
-    return entries
-
-
 def create_publications(count):
     entries = []
     for pk in range(1, count+1):
@@ -137,7 +114,6 @@ class TestFullTextIndexAPI(object):
     @pytest.mark.parametrize(
         '_model, _view, search_term, search_attr, counts',
         [
-            ('Biome', 'emgapi:biomes', 'findme', 'biome_name', 5),
             ('Study', 'emgapi:studies', 'findme', 'study_name', 5),
             ('Sample', 'emgapi:samples', 'findme', 'sample_name', 5),
             ('Publication', 'emgapi:publications', 'findme', 'pub_title', 5),
