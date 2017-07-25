@@ -45,7 +45,7 @@ router.register(
 )
 
 router.register(
-    r'biomes',
+    r'biomes/(?P<lineage>[a-zA-Z0-9\:\-\s\(\)\<\>]+)',
     views.BiomeViewSet,
     base_name='biomes'
 )

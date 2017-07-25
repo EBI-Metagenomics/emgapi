@@ -96,8 +96,7 @@ class MyDataViewSet(mixins.ListModelMixin,
         return Response(serializer.data)
 
 
-class BiomeViewSet(mixins.RetrieveModelMixin,
-                   mixins.ListModelMixin,
+class BiomeViewSet(mixins.ListModelMixin,
                    viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.BiomeSerializer
@@ -118,77 +117,74 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     lookup_value_regex = '[a-zA-Z0-9\:\-\s\(\)\<\>]+'
 
     def get_queryset(self):
-        try:
-            l = emg_models.Biome.objects \
-                .get(lineage=self.kwargs['lineage'])
-            queryset = self.queryset \
-                .filter(lft__gte=l.lft-1, rgt__lte=l.rgt+1)
-        except KeyError:
-            queryset = emg_models.Biome.objects \
-                .filter(depth=2)
+        if self.action == 'list':
+            lineage = self.kwargs.get('lineage', None)
+            if lineage is not None and len(lineage) > 0:
+                l = get_object_or_404(emg_models.Biome, lineage=lineage)
+                queryset = emg_models.Biome.objects \
+                    .filter(lft__gte=l.lft-1, rgt__lte=l.rgt+1,
+                            depth=l.depth+1)
+            else:
+                queryset = emg_models.Biome.objects.filter(depth=1)
+        else:
+            queryset = super(BiomeViewSet, self).get_queryset()
         return queryset
 
     def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return emg_serializers.BiomeSerializer
         return super(BiomeViewSet, self).get_serializer_class()
 
-    def list(self, request, *args, **kwargs):
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['lineage'] = self.kwargs.get('lineage')
+        return context
+
+    def list(self, request, lineage, *args, **kwargs):
         """
-        Retrieves list of biomes
+        Retrieves children for the given Biome node.
         Example:
         ---
-        `/api/biomes`
-
-        `/api/biomes?search=soil` search for Soil
+        `/api/biomes/root:Environmental:Aquatic`
+        list all children
         """
 
-        return super(BiomeViewSet, self).list(request, *args, **kwargs)
+        return super(BiomeViewSet, self) \
+            .list(request, lineage, *args, **kwargs)
 
-    def retrieve(self, request, *args, **kwargs):
-        """
-        Retrieves biome for the given identifier
-        Example:
-        ---
-        `/api/biomes/root:Environmental:Terrestrial:Soil`
-        """
-
-        return super(BiomeViewSet, self).retrieve(request, *args, **kwargs)
+    # @list_route(
+    #     methods=['get', ],
+    #     serializer_class=emg_serializers.BiomeSerializer
+    # )
+    # def top10(self, request):
+    #     """
+    #     Retrieve top 10 biomes sorted by number of studies
+    #     Example:
+    #     ---
+    #     `/api/biomes/top10` retrieve top 10 biomes
+    #     """
+    #     limit = settings.EMG_DEFAULT_LIMIT
+    #     queryset = emg_models.Biome.objects \
+    #         .all().order_by('-studies_count')[:limit]
+    #     page = self.paginate_queryset(queryset)
+    #     if page is not None:
+    #         serializer = self.get_serializer(
+    #             page, many=True, context={'request': request})
+    #         return self.get_paginated_response(serializer.data)
+    #     serializer = self.get_serializer(queryset, many=True)
+    #     return Response(serializer.data)
 
     @list_route(
         methods=['get', ],
-        serializer_class=emg_serializers.BiomeSerializer
-    )
-    def top10(self, request):
-        """
-        Retrieve top 10 biomes sorted by number of studies
-        Example:
-        ---
-        `/api/biomes/top10` retrieve top 10 biomes
-        """
-        limit = settings.EMG_DEFAULT_LIMIT
-        queryset = emg_models.Biome.objects \
-            .all().order_by('-studies_count')[:limit]
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(
-                page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
-    @detail_route(
-        methods=['get', ],
         url_name='samples-list',
-        serializer_class=emg_serializers.SampleSerializer
+        serializer_class=emg_serializers.SampleSerializer,
+        lookup_field='lineage'
     )
-    def samples(self, request, lineage=None):
+    def samples(self, request, lineage):
         """
-        Retrieves list of samples for the given biome
+        Retrieves list of samples for the given Biome
+        with all children and descendants.
         Example:
         ---
-        `/api/biomes/root:Environmental:Terrestrial:Soil/samples
-        retrieve` linked samples
+        `/api/biomes/root:Environmental:Aquatic/samples
         """
 
         obj = self.get_object()
@@ -206,18 +202,19 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
             queryset, many=True, context={'request': request})
         return Response(serializer.data)
 
-    @detail_route(
+    @list_route(
         methods=['get', ],
         url_name='studies-list',
-        serializer_class=emg_serializers.StudySerializer
+        serializer_class=emg_serializers.StudySerializer,
+        lookup_field='lineage'
     )
-    def studies(self, request, lineage=None):
+    def studies(self, request, lineage):
         """
-        Retrieves list of studies for the given biome
+        Retrieves list of studies for the given Biome
+        with all children and descendants.
         Example:
         ---
-        `/api/biomes/root:Environmental:Terrestrial:Soil/studies`
-        retrieve linked studies
+        `/api/biomes/root:Environmental:Aquatic/studies`
         """
         obj = self.get_object()
         queryset = emg_models.Study.objects \
