@@ -43,9 +43,9 @@ class StudyFilter(django_filters.FilterSet):
         name='biome__biome_name',
         distinct=True)
 
-    species = django_filters.CharFilter(
-        name='samples__species',
-        distinct=True)
+    # species = django_filters.CharFilter(
+    #     name='samples__species',
+    #     distinct=True)
 
     class Meta:
         model = emg_models.Study
@@ -53,7 +53,8 @@ class StudyFilter(django_filters.FilterSet):
             'biome',
             'biome_name',
             'project_id',
-            'species',
+            # 'species',
+            'centre_name',
         )
 
 

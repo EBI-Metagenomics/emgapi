@@ -303,7 +303,10 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         Filter by:
         ---
         `/api/studies?biome=root:Environmental:Terrestrial:Soil`
+
         `/api/studies?biome_name=soil`
+
+        `/api/studies?centre_name=BioProject`
 
         Search for metadata, name, abstract, biome, etc.:
         ---
