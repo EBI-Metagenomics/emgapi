@@ -54,7 +54,7 @@ class BiomeSerializer(ExplicitFieldsModelSerializer,
     included_serializers = {}
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi:biomes-detail',
+        view_name='emgapi:biomes-list',
         lookup_field='lineage',
     )
 
@@ -476,7 +476,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
     # relationships
     biome = serializers.HyperlinkedRelatedField(
         read_only=True,
-        view_name='emgapi:biomes-detail',
+        view_name='emgapi:biomes-list',
         lookup_field='lineage',
     )
 
@@ -585,7 +585,7 @@ class StudySerializer(ExplicitFieldsModelSerializer,
 
     biome = serializers.HyperlinkedRelatedField(
         read_only=True,
-        view_name='emgapi:biomes-detail',
+        view_name='emgapi:biomes-list',
         lookup_field='lineage',
     )
 

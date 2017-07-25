@@ -33,7 +33,8 @@ class TestDefaultAPI(object):
 
         expected = {
             "mydata": "http://testserver/api/mydata",
-            "biomes": "http://testserver/api/biomes",
+            # TODO: create alias
+            # "biomes": "http://testserver/api/biomes",
             "studies": "http://testserver/api/studies",
             "samples": "http://testserver/api/samples",
             "pipelines": "http://testserver/api/pipelines",
@@ -46,7 +47,8 @@ class TestDefaultAPI(object):
     @pytest.mark.parametrize(
         '_view',
         [
-            'emgapi:biomes',
+            # TODO: create alias
+            # 'emgapi:biomes',
             'emgapi:experiments',
             'emgapi:pipelines',
             'emgapi:publications',
@@ -70,7 +72,6 @@ class TestDefaultAPI(object):
     @pytest.mark.parametrize(
         '_model, _view, relations',
         [
-            ('Biome', 'emgapi:biomes', ['studies', 'samples']),
             ('ExperimentType', 'emgapi:experiments', ['samples']),
             ('Pipeline', 'emgapi:pipelines', ['samples', 'tools']),
             ('Publication', 'emgapi:publications', ['studies']),
