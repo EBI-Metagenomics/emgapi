@@ -32,7 +32,6 @@ class TestDefaultAPI(object):
         rsp = response.json()
 
         expected = {
-            "mydata": "http://testserver/api/mydata",
             # TODO: create alias
             # "biomes": "http://testserver/api/biomes",
             "studies": "http://testserver/api/studies",
@@ -42,6 +41,7 @@ class TestDefaultAPI(object):
             "experiments": "http://testserver/api/experiments",
             "publications": "http://testserver/api/publications",
             'tools': 'http://testserver/api/tools',
+            "mydata": "http://testserver/api/mydata",
         }
         assert rsp['data'] == expected
 

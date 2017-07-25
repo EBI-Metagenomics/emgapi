@@ -39,18 +39,6 @@ urlpatterns = [
 router = DefaultRouter(trailing_slash=False)
 
 router.register(
-    r'mydata',
-    views.MyDataViewSet,
-    base_name='mydata'
-)
-
-router.register(
-    r'biomes/(?P<lineage>[a-zA-Z0-9\:\-\s\(\)\<\>]+)',
-    views.BiomeViewSet,
-    base_name='biomes'
-)
-
-router.register(
     r'studies',
     views.StudyViewSet,
     base_name='studies'
@@ -60,18 +48,6 @@ router.register(
     r'samples',
     views.SampleViewSet,
     base_name='samples'
-)
-
-# router.register(
-#     r'metadata',
-#     views.SampleAnnsViewSet,
-#     base_name='metadata'
-# )
-
-router.register(
-    r'tools',
-    views.PipelineToolViewSet,
-    base_name='tools'
 )
 
 router.register(
@@ -93,9 +69,34 @@ router.register(
 )
 
 router.register(
+    r'biomes/(?P<lineage>[a-zA-Z0-9\:\-\s\(\)\<\>]+)',
+    views.BiomeViewSet,
+    base_name='biomes'
+)
+
+router.register(
     r'publications',
     views.PublicationViewSet,
     base_name='publications'
+)
+
+router.register(
+    r'tools',
+    views.PipelineToolViewSet,
+    base_name='tools'
+)
+
+# router.register(
+#     r'metadata',
+#     views.SampleAnnsViewSet,
+#     base_name='metadata'
+# )
+
+
+router.register(
+    r'mydata',
+    views.MyDataViewSet,
+    base_name='mydata'
 )
 
 urlpatterns += router.urls
