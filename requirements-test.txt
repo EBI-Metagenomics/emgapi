@@ -7,3 +7,5 @@ pytest-django~=3.1.2
 
 model_mommy
 mock_services
+
+jsonapi-client
