@@ -300,6 +300,8 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 
         `/api/studies?include=publications,biome` with publications and biome
 
+        `/api/studies?fields=accession,biome_name retrieve only selected fileds
+
         Filter by:
         ---
         `/api/studies?biome=root:Host-associated:Human`
@@ -388,6 +390,8 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         `/api/studies/SRP001634/samples` retrieve linked samples
 
         `/api/studies/SRP001634/samples?include=runs` with runs
+
+        `/api/studies/ERP013558/samples?include=metadata` with metadata
         """
 
         obj = self.get_object()
@@ -476,9 +480,9 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         Retrieves sample for the given accession
         Example:
         ---
-        `/api/sammples/ERS1015417`
+        `/api/samples/ERS1015417`
 
-        `/api/sammples/ERS1015417?include=metadata` with metadata
+        `/api/samples/ERS1015417?include=metadata` with metadata
 
         """
         return super(SampleViewSet, self).retrieve(request, *args, **kwargs)
@@ -494,6 +498,8 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         with related metadata, runs and studies
 
         `/api/samples?ordering=accession` ordered by accession
+
+        `/api/samples?fields=accession,biome_name retrieve only selected fileds
 
         Filter by:
         ---
@@ -672,11 +678,9 @@ class RunAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):
         Example:
         ---
         `/api/runs/ERR1385375/3.0`
-
-        `/api/runs/ERR1385375/3.0?include=sample` with related sample
         """
-        run = emg_models.Run.objects.get(
-            accession=accession,
+        run = get_object_or_404(
+            emg_models.Run, accession=accession,
             pipeline__release_version=release_version)
         serializer = self.get_serializer(run)
         return Response(data=serializer.data)
@@ -737,6 +741,9 @@ class RunViewSet(mixins.ListModelMixin,
         `/api/runs?pipeline_version=3.0`
 
         `/api/runs?biome=root:Environmental:Aquatic:Marine`
+
+        `/api/runs?fields=accession,biome_name retrieve only selected fileds
+
         """
         return super(RunViewSet, self).list(request, *args, **kwargs)
 
@@ -777,9 +784,9 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         Retrieves pipeline for the given version
         Example:
         ---
-        `/api/pipeline/3.0`
+        `/api/pipelines/3.0`
 
-        `/api/pipeline/3.0?include=tools` with tools
+        `/api/pipelines/3.0?include=tools` with tools
         """
         return super(PipelineViewSet, self).retrieve(request, *args, **kwargs)
 
