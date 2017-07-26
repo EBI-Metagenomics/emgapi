@@ -313,8 +313,6 @@ class RunHyperlinkedField(serializers.HyperlinkedIdentityField):
 class RunSerializer(ExplicitFieldsModelSerializer,
                     serializers.HyperlinkedModelSerializer):
 
-    included_serializers = {}
-
     url = RunHyperlinkedField(
         view_name='emgapi:runs-detail',
         lookup_field='accession'
@@ -450,7 +448,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
 
     included_serializers = {
         'biome': 'emgapi.serializers.BiomeSerializer',
-        'study': 'emgapi.serializers.StudySerializer',
+        # 'study': 'emgapi.serializers.StudySerializer',
         'runs': 'emgapi.serializers.RunSerializer',
         'metadata': 'emgapi.serializers.SampleAnnSerializer',
     }
