@@ -84,6 +84,14 @@ class SampleFilter(django_filters.FilterSet):
         name='runs__instrument_model',
         distinct=True)
 
+    metadata_key = django_filters.CharFilter(
+        name='metadata__var__var_name',
+        distinct=True)
+
+    metadata_value = django_filters.CharFilter(
+        name='metadata__var_val_ucv',
+        distinct=True)
+
     class Meta:
         model = emg_models.Sample
         fields = (
@@ -95,6 +103,8 @@ class SampleFilter(django_filters.FilterSet):
             'species',
             'instrument_model',
             'instrument_platform',
+            'metadata_key',
+            'metadata_value',
         )
 
 
@@ -125,9 +135,19 @@ class RunFilter(django_filters.FilterSet):
         name='pipeline__release_version',
         distinct=True)
 
+    biome = django_filters.CharFilter(
+        name='sample__biome__lineage',
+        distinct=True)
+
+    biome_name = django_filters.CharFilter(
+        name='sample__biome__biome_name',
+        distinct=True)
+
     class Meta:
         model = emg_models.Run
         fields = (
+            'biome',
+            'biome_name',
             'analysis_status',
             'experiment_type',
             'pipeline_version',
