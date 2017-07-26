@@ -52,8 +52,9 @@ Create virtual environmnet::
     # activate
     source activate venv
 
-    pip install "git+git://github.com/ola-t/ebi-metagenomics-api@master#egg=emgcli"
     pip install "git+git://github.com/ola-t/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
+    pip install "git+git://github.com/ola-t/ebi-metagenomics-api@master#egg=emgcli"
+
 
 Start up application server::
 
