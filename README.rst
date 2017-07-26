@@ -12,8 +12,8 @@ Requirements:
  - Django 1.11
  - MySQL 5.6 or 5.7
 
-Installation::
---------------
+Install:
+-------------
 
 Create configuration file in `~/.yamjam/config.yaml`::
 
@@ -40,16 +40,21 @@ Install anaconda::
     wget https://repo.continuum.io/archive/Anaconda3-4.4.0-Linux-x86_64.sh 
     bash Anaconda3-4.4.0-Linux-x86_64.sh 
 
+
 Create conda environmnet::
 
     conda -V
     conda update conda
     conda search "^python$"
 
+
 Create virtual environmnet::
 
     conda create -n venv python=3.6 anaconda
-    # activate
+
+
+Activate::
+
     source activate venv
 
     pip install "git+git://github.com/ola-t/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
@@ -63,7 +68,7 @@ Start up application server::
 NOTE: `~/emgvar` is used as default directory to store logs, secret key, etc.
 
 
-Uninstallation::
+Uninstal:
 ----------------
 
 Deactivate conda environment and remove::
