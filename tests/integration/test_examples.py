@@ -16,10 +16,14 @@
 
 import pytest
 
+import sys
+
 # import fixtures
 from test_utils.emg_fixtures import *  # noqa
 
 
+@pytest.mark.skipif(sys.version_info < (3, 6),
+                    reason="requires Python 3.6")
 @pytest.mark.django_db
 def test_list_samples(live_server, runs):
     """
