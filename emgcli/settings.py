@@ -126,7 +126,7 @@ try:
 except NameError:
     dir_fd = os.open(VAR_DIR, os.O_RDONLY)
 
-    def opener(path, flags, mode=0o700):
+    def opener(path, flags, mode=0o600):
         return os.open(path, flags, mode, dir_fd=dir_fd)
 
     key_path = os.path.join(VAR_DIR, 'secret.key')
