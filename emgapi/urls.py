@@ -15,10 +15,14 @@
 
 from django.conf.urls import url
 from rest_framework.routers import DefaultRouter
+from rest_framework_mongoengine.routers import DefaultRouter \
+    as MongoDefaultRouter
 from rest_auth import views as rest_auth_views
 
 from . import views
 from . import views_relations
+
+from .mongo import views as m_views
 
 
 app_name = "emgapi"
@@ -99,7 +103,6 @@ router.register(
 #     views.SampleAnnsViewSet,
 #     base_name='metadata'
 # )
-
 
 router.register(
     r'mydata',
@@ -186,3 +189,15 @@ relation_router.register(
 )
 
 urlpatterns += relation_router.urls
+
+
+# MongoDB views
+mongorouter = MongoDefaultRouter(trailing_slash=False)
+
+mongorouter.register(
+    r'annotations',
+    m_views.AnnotationViewSet,
+    base_name='annotations'
+)
+
+urlpatterns += mongorouter.urls

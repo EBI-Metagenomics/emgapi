@@ -163,6 +163,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_swagger',
+    'rest_framework_mongoengine',
     'django_filters',
     'rest_auth',
     # apps
@@ -410,3 +411,9 @@ EMG_DESC = (
     'For more details and full documentation go to '
     'http://www.ebi.ac.uk/metagenomics/'
 )
+
+# MongoDB
+import mongoengine
+
+mongodb = yamjam()['emg']['mongodb']
+MONGO_CONN = mongoengine.connect(**mongodb)
