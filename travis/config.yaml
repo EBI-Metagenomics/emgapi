@@ -14,3 +14,6 @@ emg:
   #     LOCATION: "redis://127.0.0.1:6379/0"
   #     KEY_PREFIX: "emg"
   emg_backend_auth: "https://backend"
+  mongodb:
+      db: 'emg'
+      host: '127.0.0.1'
