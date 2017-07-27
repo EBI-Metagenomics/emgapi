@@ -8,6 +8,7 @@ python:
 
 services:
   - docker
+  - mongodb
 
 before_install:
   - pip install flake8 pycodestyle pep8-naming
