@@ -134,7 +134,7 @@ class BiomeViewSet(mixins.ListModelMixin,
         return super(BiomeViewSet, self).get_serializer_class()
 
     def get_serializer_context(self):
-        context = super().get_serializer_context()
+        context = super(BiomeViewSet, self).get_serializer_context()
         context['lineage'] = self.kwargs.get('lineage')
         return context
 
