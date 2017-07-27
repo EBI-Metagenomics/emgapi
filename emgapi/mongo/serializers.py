@@ -14,23 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from rest_framework_json_api import serializers
 
-import os
+from rest_framework_mongoengine import serializers as m_serializers
 
-from django.conf import settings
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'emgcli.settings')
+from . import models as m_models
 
 
-def pytest_configure():
-    settings.DEBUG = False
-    settings.REST_FRAMEWORK['TEST_REQUEST_DEFAULT_FORMAT'] = 'vnd.api+json'
-    # TODO: backend mock to replace FakeEMGBackend
-    # settings.EMG_BACKEND_AUTH_URL = 'http://fake_backend/auth'
-    settings.AUTHENTICATION_BACKENDS = ('test_utils.FakeEMGBackend',)
+class AnnotationSerializer(m_serializers.DocumentSerializer):
 
-    import mongoengine
-    settings.MONGO_CONN = mongoengine.connect(
-        db='test_db',
-        host='127.0.0.1'
-    )
+    id = serializers.ReadOnlyField(source="accession")
+
+    class Meta:
+        model = m_models.Annotation
+        fields = '__all__'

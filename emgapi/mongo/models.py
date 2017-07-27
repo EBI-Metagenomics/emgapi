@@ -14,23 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-import os
-
-from django.conf import settings
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'emgcli.settings')
+import mongoengine
 
 
-def pytest_configure():
-    settings.DEBUG = False
-    settings.REST_FRAMEWORK['TEST_REQUEST_DEFAULT_FORMAT'] = 'vnd.api+json'
-    # TODO: backend mock to replace FakeEMGBackend
-    # settings.EMG_BACKEND_AUTH_URL = 'http://fake_backend/auth'
-    settings.AUTHENTICATION_BACKENDS = ('test_utils.FakeEMGBackend',)
-
-    import mongoengine
-    settings.MONGO_CONN = mongoengine.connect(
-        db='test_db',
-        host='127.0.0.1'
-    )
+class Annotation(mongoengine.Document):
+    accession = mongoengine.StringField(primary_key=True, required=True)
