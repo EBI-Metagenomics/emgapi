@@ -120,22 +120,27 @@ LOGGING = {
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
+def create_secret_key(var_dir):
+    secret_key = None
+    dir_fd = os.open(var_dir, os.O_RDONLY)
+
+    key_path = os.path.join(var_dir, 'secret.key')
+    if not os.path.exists(key_path):
+        with os.fdopen(os.open(key_path,
+                               os.O_WRONLY | os.O_CREAT,
+                               0o600), 'w') as f:  # noqa
+            f.write(binascii.hexlify(os.urandom(50)).decode('ascii'))
+    with open(key_path, 'r') as f:
+        secret_key = f.read().rstrip()
+    os.close(dir_fd)
+    return secret_key
+
 # SECURITY WARNING: keep the secret key used in production secret!
 try:
     SECRET_KEY
 except NameError:
-    dir_fd = os.open(VAR_DIR, os.O_RDONLY)
+    SECRET_KEY = create_secret_key(VAR_DIR)
 
-    def opener(path, flags, mode=0o600):
-        return os.open(path, flags, mode, dir_fd=dir_fd)
-
-    key_path = os.path.join(VAR_DIR, 'secret.key')
-    if not os.path.exists(key_path):
-        with open(key_path, 'w', opener=opener) as f:
-            print(binascii.hexlify(os.urandom(50)).decode('ascii'), file=f)
-    with open(key_path, 'r', opener=opener) as f:
-        SECRET_KEY = f.read()
-    os.close(dir_fd)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
