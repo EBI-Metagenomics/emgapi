@@ -25,15 +25,19 @@ from emgapimetadata import models as m_models
 class TestAnnotations(object):
 
     @pytest.mark.parametrize(
-        'accession, run_accession, pipeline_version',
+        'accession, run_id, run_accession, pipeline_version',
         [
-            ('GO0001', 'DRR066347', '3.0'),
-            ('IPR0001', 'DRR066347', '3.0'),
+            ('GO0001', 131955, 'DRR066347', '3.0'),
+            ('GO0001', 131955, 'DRR066355', '3.0'),
+            ('IPR0001', 131955, 'DRR066347', '3.0'),
+            ('IPR0001', 131955, 'DRR066355', '3.0'),
         ]
     )
-    def test_serializer(self, accession, run_accession, pipeline_version):
+    def test_serializer(self, accession, run_id, run_accession,
+                        pipeline_version):
         instance = m_models.Annotation.objects.create(
             accession=accession,
+            run_id=run_id,
             run_accession=run_accession,
             pipeline_version=pipeline_version,
         )
@@ -42,5 +46,6 @@ class TestAnnotations(object):
         expected = {
             'id': accession,
             'accession': accession,
+            'runs': []
         }
         assert serializer.data == expected
