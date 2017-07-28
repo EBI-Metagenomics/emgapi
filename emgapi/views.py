@@ -663,30 +663,30 @@ class RunAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):
     lookup_fields = ('accession', 'release_version')
 
     def get_queryset(self):
-        return emg_models.Run.objects \
+        return emg_models.AnalysisJob.objects \
             .available(self.request) \
             .select_related(
                 'sample',
                 'pipeline',
                 'analysis_status',
-                'experiment_type'
             )
 
     def get(self, request, accession, release_version, *args, **kwargs):
         """
-        Retrieves run for the given accession
+        Retrieves run for the given accession and pipeline version
         Example:
         ---
         `/api/runs/ERR1385375/3.0`
         """
         run = get_object_or_404(
-            emg_models.Run, accession=accession,
+            emg_models.AnalysisJob, accession=accession,
             pipeline__release_version=release_version)
         serializer = self.get_serializer(run)
         return Response(data=serializer.data)
 
 
-class RunViewSet(mixins.ListModelMixin,
+class RunViewSet(mixins.RetrieveModelMixin,
+                 mixins.ListModelMixin,
                  viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.RunSerializer
@@ -714,14 +714,18 @@ class RunViewSet(mixins.ListModelMixin,
     lookup_field = 'accession'
 
     def get_queryset(self):
-        queryset = emg_models.Run.objects \
-            .available(self.request) \
-            .prefetch_related(
-                'sample',
-                'pipeline',
-                'analysis_status',
-                'experiment_type'
-            )
+        queryset = emg_models.Run.objects
+        if self.action == 'retrieve':
+            queryset = queryset \
+                .filter(accession=self.kwargs['accession']) \
+                .distinct()
+        else:
+            queryset = queryset.available(self.request) \
+                .prefetch_related(
+                    'sample',
+                    'analysis_status',
+                    'experiment_type'
+                )
         return queryset
 
     def get_serializer_class(self):
@@ -746,6 +750,15 @@ class RunViewSet(mixins.ListModelMixin,
 
         """
         return super(RunViewSet, self).list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves run for the given accession
+        Example:
+        ---
+        `/api/runs/ERR1385375`
+        """
+        return super(RunViewSet, self).retrieve(request, *args, **kwargs)
 
 
 class PipelineViewSet(mixins.RetrieveModelMixin,
