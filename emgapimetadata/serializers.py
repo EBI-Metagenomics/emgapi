@@ -14,8 +14,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import mongoengine
+from rest_framework_json_api import serializers
+
+from rest_framework_mongoengine import serializers as m_serializers
+
+from . import models as m_models
 
 
-class Annotation(mongoengine.Document):
-    accession = mongoengine.StringField(primary_key=True, required=True)
+class AnnotationSerializer(m_serializers.DocumentSerializer):
+
+    id = serializers.ReadOnlyField(source="accession")
+
+    class Meta:
+        model = m_models.Annotation
+        exclude = (
+            'run_accession',
+            'pipeline_version',
+        )

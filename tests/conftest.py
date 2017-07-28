@@ -16,6 +16,9 @@
 
 
 import os
+import pytest
+
+import mongoengine
 
 from django.conf import settings
 
@@ -29,8 +32,20 @@ def pytest_configure():
     # settings.EMG_BACKEND_AUTH_URL = 'http://fake_backend/auth'
     settings.AUTHENTICATION_BACKENDS = ('test_utils.FakeEMGBackend',)
 
-    import mongoengine
-    settings.MONGO_CONN = mongoengine.connect(
-        db='test_db',
-        host='127.0.0.1'
-    )
+    # disconnect main database
+    mongoengine.connection.disconnect()
+
+
+# Mock MongoDB connection
+@pytest.fixture(scope='function')
+def mongodb(request):
+    mongoengine.connect('testdb', host='mongomock://testdb')
+    mongoengine.connection.get_connection()
+    db = mongoengine.connection.get_db()
+
+    def finalizer():
+        mongoengine.connection.disconnect()
+        db.collection.drop()
+    request.addfinalizer(finalizer)
+
+    return db
