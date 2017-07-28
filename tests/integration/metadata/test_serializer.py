@@ -16,6 +16,8 @@
 
 import pytest
 
+from mongoengine.errors import NotUniqueError
+
 from emgapimetadata import serializers as m_serializers
 
 from emgapimetadata import models as m_models
@@ -28,9 +30,12 @@ class TestAnnotations(object):
         'accession, run_id, run_accession, pipeline_version',
         [
             ('GO0001', 131955, 'DRR066347', '3.0'),
-            ('GO0001', 131955, 'DRR066355', '3.0'),
+            ('GO0001', 131944, 'DRR066355', '3.0'),
             ('IPR0001', 131955, 'DRR066347', '3.0'),
-            ('IPR0001', 131955, 'DRR066355', '3.0'),
+            ('IPR0001', 131944, 'DRR066355', '3.0'),
+            pytest.mark.xfail(
+                ('IPR0001', 131944, 'DRR066355', '3.0'),
+                raises=NotUniqueError),
         ]
     )
     def test_serializer(self, accession, run_id, run_accession,
@@ -41,7 +46,6 @@ class TestAnnotations(object):
             run_accession=run_accession,
             pipeline_version=pipeline_version,
         )
-
         serializer = m_serializers.AnnotationSerializer(instance)
         expected = {
             'id': accession,
