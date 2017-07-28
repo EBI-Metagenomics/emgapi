@@ -19,6 +19,7 @@ import pytest
 from model_mommy import mommy
 
 from django.core.urlresolvers import reverse
+from django.urls.exceptions import NoReverseMatch
 
 from rest_framework import status
 
@@ -57,7 +58,7 @@ class TestDefaultAPI(object):
             'emgapi:runs',
             'emgapi:studies',
             'emgapi:tools',
-            pytest.mark.xfail('viewdoesnotexist'),
+            pytest.mark.xfail('viewdoesnotexist', raises=NoReverseMatch),
         ]
     )
     @pytest.mark.django_db
