@@ -207,7 +207,7 @@ class PipelineSerializer(ExplicitFieldsModelSerializer,
 
     samples_count = serializers.IntegerField()
 
-    runs_count = serializers.IntegerField()
+    analysis_count = serializers.IntegerField()
 
     # relationships
     # runs = relations.ResourceRelatedField(
@@ -299,6 +299,62 @@ class ExperimentTypeSerializer(ExplicitFieldsModelSerializer,
 
 # Run serializer
 
+class RunSerializer(ExplicitFieldsModelSerializer,
+                    serializers.HyperlinkedModelSerializer):
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi:runs-detail',
+        lookup_field='accession'
+    )
+
+    # attributes
+    accession = serializers.SerializerMethodField()
+
+    def get_accession(self, obj):
+        return obj.accession
+
+    experiment = serializers.SerializerMethodField()
+
+    def get_experiment(self, obj):
+        return obj.experiment_type.experiment_type
+
+    sample_accession = serializers.SerializerMethodField()
+
+    def get_sample_accession(self, obj):
+        return obj.sample.accession
+
+    # relationship
+    experiment_type = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emgapi:experiments-detail',
+        lookup_field='experiment_type'
+    )
+
+    sample = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emgapi:samples-detail',
+        lookup_field='accession'
+    )
+
+    pipelines = relations.SerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_pipelines',
+        model=emg_models.Pipeline,
+    )
+
+    def get_pipelines(self, obj):
+        return emg_models.Pipeline.objects \
+            .filter(analysis__accession=obj.accession)
+
+    class Meta:
+        model = emg_models.Run
+        exclude = (
+            'analysis_status',
+            'run_status_id',
+        )
+
+
 class RunHyperlinkedField(serializers.HyperlinkedIdentityField):
 
     def get_url(self, obj, view_name, request, format):
@@ -310,8 +366,8 @@ class RunHyperlinkedField(serializers.HyperlinkedIdentityField):
             view_name, kwargs=kwargs, request=request, format=format)
 
 
-class RunSerializer(ExplicitFieldsModelSerializer,
-                    serializers.HyperlinkedModelSerializer):
+class RetrieveRunSerializer(ExplicitFieldsModelSerializer,
+                            serializers.HyperlinkedModelSerializer):
 
     url = RunHyperlinkedField(
         view_name='emgapi:runs-detail',
@@ -319,20 +375,10 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     )
 
     # attributes
-    analysis_status = serializers.SerializerMethodField()
+    experiment = serializers.SerializerMethodField()
 
-    def get_analysis_status(self, obj):
-        return obj.analysis_status.analysis_status
-
-    experiment_type = serializers.SerializerMethodField()
-
-    def get_experiment_type(self, obj):
+    def get_experiment(self, obj):
         return obj.experiment_type.experiment_type
-
-    pipeline_version = serializers.SerializerMethodField()
-
-    def get_pipeline_version(self, obj):
-        return obj.pipeline.release_version
 
     sample_accession = serializers.SerializerMethodField()
 
@@ -340,57 +386,35 @@ class RunSerializer(ExplicitFieldsModelSerializer,
         return obj.sample.accession
 
     # relationship
+    experiment_type = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emgapi:experiments-detail',
+        lookup_field='experiment_type'
+    )
+
+    sample = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emgapi:samples-detail',
+        lookup_field='accession'
+    )
+
     pipeline = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name='emgapi:pipelines-detail',
         lookup_field='release_version',
     )
-    # pipeline = relations.SerializerMethodResourceRelatedField(
-    #     source='get_pipeline',
-    #     model=emg_models.Pipeline,
-    #     read_only=True,
-    #     related_link_view_name='emgapi:pipelines-detail',
-    #     related_link_url_kwarg='release_version',
-    #     related_link_lookup_field='release_version',
-    # )
-    #
-    # def get_pipeline(self, obj):
-    #     # TODO: provide counter instead of paginating relationship
-    #     # workaround https://github.com/django-json-api
-    #     # /django-rest-framework-json-api/issues/178
-    #     return ()
-
-    sample = serializers.HyperlinkedRelatedField(
-        read_only=True,
-        view_name='emgapi:samples-detail',
-        lookup_field='accession',
-    )
-    # sample = relations.SerializerMethodResourceRelatedField(
-    #     source='get_sample',
-    #     model=emg_models.Sample,
-    #     read_only=True,
-    #     related_link_view_name='emgapi:samples-detail',
-    #     related_link_url_kwarg='accession',
-    #     related_link_lookup_field='accession',
-    # )
-    #
-    # def get_sample(self, obj):
-    #     # TODO: provide counter instead of paginating relationship
-    #     # workaround https://github.com/django-json-api
-    #     # /django-rest-framework-json-api/issues/178
-    #     return ()
 
     class Meta:
-        model = emg_models.Run
+        model = emg_models.AnalysisJob
         exclude = (
-            'job_operator',
+            'analysis_status',
             'run_status_id',
+            'job_operator',
+            'submit_time',
+            'complete_time',
+            'input_file_name',
+            'result_directory',
         )
-
-
-class RetrieveRunSerializer(RunSerializer):
-    pass
-
 
 # SampleAnn serializer
 
@@ -437,7 +461,7 @@ class SampleAnnSerializer(ExplicitFieldsModelSerializer,
             'sample_accession',
             'var_name',
             'var_value',
-            'unit'
+            'unit',
         )
 
 

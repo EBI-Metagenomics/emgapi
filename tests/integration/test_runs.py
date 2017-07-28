@@ -32,9 +32,9 @@ class TestRunAPI(APITestCase):
     def test_public(self):
         _as = mommy.make('emgapi.AnalysisStatus', pk=3)
         _p = mommy.make('emgapi.Pipeline', pk=1, release_version="1.0")
-        _r1 = mommy.make("emgapi.Run", pk=123, accession="123",
+        _r1 = mommy.make("emgapi.AnalysisJob", pk=123, accession="123",
                          pipeline=_p, analysis_status=_as)
-        _r2 = mommy.make("emgapi.Run", pk=456, accession="456",
+        _r2 = mommy.make("emgapi.AnalysisJob", pk=456, accession="456",
                          pipeline=_p)
         mommy.make("emgapi.Sample", pk=123, accession="123",
                    runs=[_r1], is_public=1)

@@ -53,7 +53,7 @@ class BaseQuerySet(models.QuerySet):
                     Q(sample__study__submission_account_id=_username) |
                     Q(analysis_status=3),
                 'all': Q(analysis_status=3),
-            }
+            },
         }
 
         q = list()
@@ -106,8 +106,8 @@ class PipelineManager(models.Manager):
 
     def get_queryset(self):
         return PipelineQuerySet(self.model, using=self._db) \
-            .annotate(runs_count=Count('runs', distinct=True)) \
-            .annotate(samples_count=Count('runs__sample', distinct=True))
+            .annotate(analysis_count=Count('analysis', distinct=True)) \
+            .annotate(samples_count=Count('analysis__sample', distinct=True))
 
 
 class Pipeline(models.Model):
@@ -497,7 +497,41 @@ class RunManager(models.Manager):
 
 
 class Run(models.Model):
-    run_id = models.BigAutoField(
+    accession = models.CharField(
+        db_column='EXTERNAL_RUN_IDS', max_length=100, primary_key=True)
+    run_status_id = models.IntegerField(
+        db_column='RUN_STATUS_ID', blank=True, null=True)
+    sample = models.ForeignKey(
+        Sample, db_column='SAMPLE_ID', related_name='runs',
+        on_delete=models.CASCADE)
+    analysis_status = models.ForeignKey(
+        AnalysisStatus, db_column='ANALYSIS_STATUS_ID',
+        on_delete=models.CASCADE)
+    # TODO: not consistant, schema changes may be needed
+    experiment_type = models.ForeignKey(
+        ExperimentType, db_column='EXPERIMENT_TYPE_ID',
+        related_name='runs',
+        on_delete=models.CASCADE)
+    instrument_platform = models.CharField(
+        db_column='INSTRUMENT_PLATFORM', max_length=50,
+        blank=True, null=True)
+    instrument_model = models.CharField(
+        db_column='INSTRUMENT_MODEL', max_length=50,
+        blank=True, null=True)
+
+    objects = RunManager()
+
+    class Meta:
+        managed = False
+        db_table = 'ANALYSIS_JOB'
+        ordering = ('accession',)
+
+    def __str__(self):
+        return self.accession
+
+
+class AnalysisJob(models.Model):
+    job_id = models.BigAutoField(
         db_column='JOB_ID', primary_key=True)
     accession = models.CharField(
         db_column='EXTERNAL_RUN_IDS', max_length=100)
@@ -505,7 +539,7 @@ class Run(models.Model):
         db_column='JOB_OPERATOR', max_length=15)
     pipeline = models.ForeignKey(
         Pipeline, db_column='PIPELINE_ID',
-        related_name='runs', on_delete=models.CASCADE)
+        related_name='analysis', on_delete=models.CASCADE)
     submit_time = models.DateTimeField(
         db_column='SUBMIT_TIME')
     complete_time = models.DateTimeField(
@@ -518,11 +552,11 @@ class Run(models.Model):
     result_directory = models.CharField(
         db_column='RESULT_DIRECTORY', max_length=100)
     sample = models.ForeignKey(
-        Sample, db_column='SAMPLE_ID', related_name='runs',
+        Sample, db_column='SAMPLE_ID', related_name='analysis',
         on_delete=models.CASCADE)
     experiment_type = models.ForeignKey(
         ExperimentType, db_column='EXPERIMENT_TYPE_ID',
-        related_name='runs',
+        related_name='analysis',
         on_delete=models.CASCADE)
     run_status_id = models.IntegerField(
         db_column='RUN_STATUS_ID', blank=True, null=True)
@@ -537,8 +571,7 @@ class Run(models.Model):
 
     class Meta:
         db_table = 'ANALYSIS_JOB'
-        unique_together = (('run_id', 'accession'),)
-        unique_together = (('pipeline', 'accession'),)
+        unique_together = (('job_id', 'accession'), ('pipeline', 'accession'),)
         ordering = ('accession',)
 
     def __str__(self):
