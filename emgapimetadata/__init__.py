@@ -14,17 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from rest_framework_json_api import serializers
-
-from rest_framework_mongoengine import serializers as m_serializers
-
-from . import models as m_models
-
-
-class AnnotationSerializer(m_serializers.DocumentSerializer):
-
-    id = serializers.ReadOnlyField(source="accession")
-
-    class Meta:
-        model = m_models.Annotation
-        fields = '__all__'
+default_app_config = 'emgapimetadata.apps.EmgapimetadataConfig'
