@@ -51,10 +51,8 @@ class AnnotationViewSet(viewsets.ReadOnlyModelViewSet):
         ---
         `/api/annotations/GO0001/runs`
         """
-
         run_ids = m_models.Annotation.objects \
             .filter(accession=accession).values_list('run_id')
-
         queryset = emg_models.Run.objects.filter(run_id__in=run_ids) \
             .available(self.request) \
             .select_related(
