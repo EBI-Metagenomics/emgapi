@@ -16,3 +16,6 @@ emg:
   emg_backend_auth: "https://backend"
   # prefix: "/metagenomics"
   # static_root: /home/emg/staticfiles
+  mongodb:
+      db: 'emg'
+      host: 'mongodb://mongodb'

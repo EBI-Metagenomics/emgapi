@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # Copyright 2017 EMBL - European Bioinformatics Institute
@@ -14,26 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
+# from django.conf.urls import url
+from rest_framework_mongoengine.routers import DefaultRouter \
+    as MongoDefaultRouter
 
-from emgapi.mongo import models as m_models
-from emgapi.mongo import serializers as m_serializers
+from . import views as m_views
 
 
-class TestAnnotations(object):
+app_name = "emgapimetadata"
+urlpatterns = [
+]
 
-    @pytest.mark.parametrize(
-        'accession',
-        [
-            'GO0001',
-            'IPR0001'
-        ]
-    )
-    def test_serializer(self, accession):
-        instance = m_models.Annotation.objects.create(accession=accession)
-        serializer = m_serializers.AnnotationSerializer(instance)
-        expected = {
-            'id': accession,
-            'accession': accession
-        }
-        assert serializer.data == expected
+# MongoDB views
+mongorouter = MongoDefaultRouter(trailing_slash=False)
+
+mongorouter.register(
+    r'annotations',
+    m_views.AnnotationViewSet,
+    base_name='annotations'
+)
+
+urlpatterns += mongorouter.urls
