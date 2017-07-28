@@ -7,5 +7,6 @@ pytest-django~=3.1.2
 
 model_mommy
 mock_services
+mongomock
 
 jsonapi-client; python_version == '3.6'
