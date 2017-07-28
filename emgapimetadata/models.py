@@ -18,13 +18,15 @@ import mongoengine
 
 
 class Annotation(mongoengine.Document):
+
     accession = mongoengine.StringField(
-        primary_key=True, required=True, max_length=20)
+        required=True, max_length=20)
+    run_id = mongoengine.IntField(required=True)
     run_accession = mongoengine.StringField(required=True, max_length=20)
     pipeline_version = mongoengine.StringField(required=True, max_length=10)
 
     meta = {
         'shard_key': (
-            'accession', 'run_accession', 'pipeline_version'
+            'accession', 'run_id', 'run_accession', 'pipeline_version'
         )
     }
