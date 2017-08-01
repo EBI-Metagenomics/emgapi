@@ -20,31 +20,26 @@ class Migration(migrations.Migration):
             old_name='PipelineRelease',
             new_name='Pipeline',
         ),
-        migrations.RenameModel(
-            old_name='AnalysisJob',
-            new_name='Run',
-        ),
+        # migrations.RenameModel(
+        #     old_name='AnalysisJob',
+        #     new_name='Run',
+        # ),
         migrations.RenameField(
-            model_name='run',
+            model_name='analysisjob',
             old_name='external_run_ids',
             new_name='accession',
         ),
         migrations.AlterField(
-            model_name='run',
+            model_name='analysisjob',
             name='accession',
             field=models.CharField(db_column='EXTERNAL_RUN_IDS', max_length=100),
         ),
-        migrations.RenameField(
-            model_name='run',
-            old_name='job_id',
-            new_name='run_id',
-        ),
         migrations.RemoveField(
-            model_name='run',
+            model_name='analysisjob',
             name='re_run_count',
         ),
         migrations.RemoveField(
-            model_name='run',
+            model_name='analysisjob',
             name='is_production_run',
         ),
         migrations.RenameField(
@@ -111,24 +106,24 @@ class Migration(migrations.Migration):
             field=models.CharField(blank=True, db_column='VERSION', max_length=30, null=True),
         ),
         migrations.AlterField(
-            model_name='run',
+            model_name='analysisjob',
             name='analysis_status',
             field=models.ForeignKey(db_column='ANALYSIS_STATUS_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.AnalysisStatus'),
         ),
         migrations.AlterField(
-            model_name='run',
+            model_name='analysisjob',
             name='experiment_type',
-            field=models.ForeignKey(db_column='EXPERIMENT_TYPE_ID', on_delete=django.db.models.deletion.CASCADE, related_name='runs', to='emgapi.ExperimentType'),
+            field=models.ForeignKey(db_column='EXPERIMENT_TYPE_ID', on_delete=django.db.models.deletion.CASCADE, related_name='analysis', to='emgapi.ExperimentType'),
         ),
         migrations.AlterField(
-            model_name='run',
+            model_name='analysisjob',
             name='pipeline',
-            field=models.ForeignKey(db_column='PIPELINE_ID', on_delete=django.db.models.deletion.CASCADE, related_name='runs', to='emgapi.Pipeline'),
+            field=models.ForeignKey(db_column='PIPELINE_ID', on_delete=django.db.models.deletion.CASCADE, related_name='analysis', to='emgapi.Pipeline'),
         ),
         migrations.AlterField(
-            model_name='run',
+            model_name='analysisjob',
             name='sample',
-            field=models.ForeignKey(db_column='SAMPLE_ID', on_delete=django.db.models.deletion.CASCADE, related_name='runs', to='emgapi.Sample'),
+            field=models.ForeignKey(db_column='SAMPLE_ID', on_delete=django.db.models.deletion.CASCADE, related_name='analysis', to='emgapi.Sample'),
         ),
         migrations.AlterField(
             model_name='sample',
@@ -187,7 +182,7 @@ class Migration(migrations.Migration):
             options={'ordering': ('pub_id',)},
         ),
         migrations.AlterModelOptions(
-            name='run',
+            name='analysisjob',
             options={'ordering': ('accession',)},
         ),
         migrations.AlterModelOptions(
@@ -214,8 +209,8 @@ class Migration(migrations.Migration):
         # combine external_run_id/accession and pipeline version
         # to restrict duplicates
         migrations.AlterUniqueTogether(
-            name='run',
-            unique_together=set([('pipeline', 'accession')]),
+            name='analysisjob',
+            unique_together=set([('job_id', 'accession'), ('pipeline', 'accession')]),
         ),
         migrations.AlterUniqueTogether(
             name='sample',
