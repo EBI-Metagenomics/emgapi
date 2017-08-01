@@ -206,6 +206,21 @@ class Migration(migrations.Migration):
         ),
 
         migrations.CreateModel(
+            name='Run',
+            fields=[
+                ('accession', models.CharField(db_column='EXTERNAL_RUN_IDS', max_length=100, primary_key=True, serialize=False)),
+                ('run_status_id', models.IntegerField(blank=True, db_column='RUN_STATUS_ID', null=True)),
+                ('instrument_platform', models.CharField(blank=True, db_column='INSTRUMENT_PLATFORM', max_length=50, null=True)),
+                ('instrument_model', models.CharField(blank=True, db_column='INSTRUMENT_MODEL', max_length=50, null=True)),
+            ],
+            options={
+                'db_table': 'ANALYSIS_JOB',
+                'ordering': ('accession',),
+                'managed': False,
+            },
+        ),
+
+        migrations.CreateModel(
             name='AnalysisJob',
             fields=[
                 ('job_id', models.BigAutoField(db_column='JOB_ID', primary_key=True, serialize=False)),
