@@ -17,6 +17,8 @@
 
 import django_filters
 
+from django.shortcuts import get_object_or_404
+
 from . import models as emg_models
 
 
@@ -35,9 +37,11 @@ class PublicationFilter(django_filters.FilterSet):
 
 class StudyFilter(django_filters.FilterSet):
 
-    biome = django_filters.CharFilter(
-        name='biome__lineage',
-        distinct=True)
+    biome = django_filters.CharFilter(method='filter_biome', distinct=True)
+
+    def filter_biome(self, qs, name, value):
+        b = get_object_or_404(emg_models.Biome, lineage=value)
+        return qs.filter(biome__lft__gte=b.lft-1, biome__rgt__lte=b.rgt+1)
 
     biome_name = django_filters.CharFilter(
         name='biome__biome_name',
@@ -68,9 +72,11 @@ class SampleFilter(django_filters.FilterSet):
         name='runs__pipeline__release_version',
         distinct=True)
 
-    biome = django_filters.CharFilter(
-        name='biome__lineage',
-        distinct=True)
+    biome = django_filters.CharFilter(method='filter_biome', distinct=True)
+
+    def filter_biome(self, qs, name, value):
+        b = get_object_or_404(emg_models.Biome, lineage=value)
+        return qs.filter(biome__lft__gte=b.lft-1, biome__rgt__lte=b.rgt+1)
 
     biome_name = django_filters.CharFilter(
         name='biome__biome_name',
@@ -98,7 +104,7 @@ class SampleFilter(django_filters.FilterSet):
             'experiment_type',
             'biome',
             'biome_name',
-            'pipeline_version',
+            # 'pipeline_version',
             'geo_loc_name',
             'species',
             'instrument_model',
@@ -135,9 +141,13 @@ class RunFilter(django_filters.FilterSet):
         name='pipeline__release_version',
         distinct=True)
 
-    biome = django_filters.CharFilter(
-        name='sample__biome__lineage',
-        distinct=True)
+    biome = django_filters.CharFilter(method='filter_biome', distinct=True)
+
+    def filter_biome(self, qs, name, value):
+        b = get_object_or_404(emg_models.Biome, lineage=value)
+        return qs.filter(
+            sample__biome__lft__gte=b.lft-1,
+            sample__biome__rgt__lte=b.rgt+1)
 
     biome_name = django_filters.CharFilter(
         name='sample__biome__biome_name',
@@ -150,7 +160,7 @@ class RunFilter(django_filters.FilterSet):
             'biome_name',
             'analysis_status',
             'experiment_type',
-            'pipeline_version',
+            # 'pipeline_version',
             'instrument_platform',
             'instrument_model',
         )
