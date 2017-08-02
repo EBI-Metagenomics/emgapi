@@ -15,18 +15,19 @@
 
 
 from . import views
-from django.conf.urls import url
+# from django.conf.urls import url
 from rest_framework.routers import DefaultRouter
 
 
 app_name = "emgapi"
 urlpatterns = [
 
-    url(
-        r'^runs/(?P<accession>[a-zA-Z0-9,_]+)/(?P<release_version>[0-9\.]+)$',
-        views.RunAPIView.as_view(),
-        name='runs-detail'
-    ),
+    # TODO: swagger override runs-details
+    # url(
+    #     r'^runs/(?P<accession>[a-zA-Z0-9,_]+)/(?P<release_version>[0-9\.]+)$',
+    #     views.RunAPIView.as_view(),
+    #     name='runs-pipelines-detail'
+    # ),
 
     # url(
     #     (r'^metadata/(?P<name>(.*)+)/(?P<value>(.*)+)$'),
