@@ -173,10 +173,21 @@ class PublicationSerializer(ExplicitFieldsModelSerializer,
 
 # Pipeline serializer
 
+class PipelineToolHyperlinkedField(serializers.HyperlinkedIdentityField):
+
+    def get_url(self, obj, view_name, request, format):
+        kwargs = {
+            'tool_name': obj.tool_name,
+            'version': obj.version
+        }
+        return reverse(
+            view_name, kwargs=kwargs, request=request, format=format)
+
+
 class PipelineToolSerializer(ExplicitFieldsModelSerializer,
                              serializers.HyperlinkedModelSerializer):
 
-    url = serializers.HyperlinkedIdentityField(
+    url = PipelineToolHyperlinkedField(
         view_name='emgapi:tools-detail',
         lookup_field='tool_name',
     )

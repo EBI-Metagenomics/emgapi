@@ -15,7 +15,7 @@
 
 
 from . import views
-# from django.conf.urls import url
+from django.conf.urls import url
 from rest_framework.routers import DefaultRouter
 
 
@@ -28,6 +28,12 @@ urlpatterns = [
     #     views.RunAPIView.as_view(),
     #     name='runs-pipelines-detail'
     # ),
+
+    url(
+        r'^tools/(?P<tool_name>[\w+]+)/(?P<version>[a-zA-Z0-9\-\.]+)$',
+        views.PipelineToolAPIView.as_view(),
+        name='tools-detail'
+    ),
 
     # url(
     #     (r'^metadata/(?P<name>(.*)+)/(?P<value>(.*)+)$'),

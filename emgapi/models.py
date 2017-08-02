@@ -93,9 +93,11 @@ class PipelineTool(models.Model):
 
     class Meta:
         db_table = 'PIPELINE_TOOL'
+        unique_together = ('tool_name', 'version',)
+        ordering = ('tool_name',)
 
     def __str__(self):
-        return self.tool_name
+        return "%s:%s" % (self.tool_name, self.version)
 
 
 class PipelineQuerySet(BaseQuerySet):
