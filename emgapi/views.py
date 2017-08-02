@@ -767,11 +767,7 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
     serializer_class = emg_serializers.PipelineSerializer
     queryset = emg_models.Pipeline.objects.all()
 
-    filter_class = emg_filters.PipelineFilter
-
     filter_backends = (
-        DjangoFilterBackend,
-        # filters.SearchFilter,
         filters.OrderingFilter,
     )
 
