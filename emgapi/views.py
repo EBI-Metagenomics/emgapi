@@ -300,7 +300,8 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 
         `/api/studies?include=publications,biome` with publications and biome
 
-        `/api/studies?fields=accession,biome_name retrieve only selected fileds
+        `/api/studies?fields=accession,biome_name` retrieve only selected
+        fileds
 
         Filter by:
         ---
@@ -310,8 +311,10 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 
         `/api/studies?centre_name=BioProject`
 
-        Search for name, abstract, author and centre name etc.:
+        Search for:
         ---
+        name, abstract, author and centre name etc.
+
         `/api/studies?search=microbial%20fuel%20cells`
         """
 
@@ -402,7 +405,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
             _qs = emg_models.Run.objects \
                 .available(self.request) \
                 .select_related(
-                    'analysis_status', 'pipeline', 'experiment_type'
+                    'analysis_status', 'experiment_type'
                 )
             queryset = queryset.prefetch_related(
                 Prefetch('runs', queryset=_qs))
@@ -499,7 +502,8 @@ class SampleViewSet(mixins.RetrieveModelMixin,
 
         `/api/samples?ordering=accession` ordered by accession
 
-        `/api/samples?fields=accession,biome_name retrieve only selected fileds
+        `/api/samples?fields=accession,biome_name`
+        retrieve only selected fileds
 
         Filter by:
         ---
@@ -507,16 +511,16 @@ class SampleViewSet(mixins.RetrieveModelMixin,
 
         `/api/samples?species=Homo%20sapiens`
 
-        `/api/samples?pipeline_version=3.0`
-
         `/api/samples?biome=root:Environmental:Aquatic:Marine`
 
         `/api/samples?biome_name=soil`
 
-        Search for name, descriptions, metadata, species,
-        environment feature and material:
+        Search for:
         ---
+        name, descriptions, metadata, species, environment feature and material
+
         `/api/samples?search=continuous%20culture`
+
         """
         return super(SampleViewSet, self).list(request, *args, **kwargs)
 
@@ -535,8 +539,6 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         Filter by:
         ---
         `/api/samples/ERS1015417/runs?experiment_type=metagenomics`
-
-        `/api/samples/ERS1015417/runs?pipeline_version=3.0`
 
         `/api/samples/ERS1015417/runs?biome=root:Host-associated:Plants`
         """
@@ -743,7 +745,7 @@ class RunViewSet(mixins.RetrieveModelMixin,
 
         `/api/runs?biome=root:Environmental:Aquatic:Marine`
 
-        `/api/runs?fields=accession,biome_name retrieve only selected fileds
+        `/api/runs?fields=accession,biome_name` retrieve only selected fileds
 
         """
         return super(RunViewSet, self).list(request, *args, **kwargs)
@@ -891,7 +893,7 @@ class PipelineToolViewSet(mixins.RetrieveModelMixin,
 
     def retrieve(self, request, *args, **kwargs):
         """
-        Retrieves experiment type for the given id
+        Retrieves pipeline tool for the given id
         """
         return super(PipelineToolViewSet, self) \
             .retrieve(request, *args, **kwargs)
@@ -970,7 +972,7 @@ class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
             _qs = emg_models.Run.objects \
                 .available(self.request) \
                 .select_related(
-                    'analysis_status', 'pipeline', 'experiment_type'
+                    'analysis_status', 'experiment_type'
                 )
             queryset = queryset.prefetch_related(
                 Prefetch('runs', queryset=_qs))
@@ -1054,8 +1056,10 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
 
         `/api/publications?ordering=pub_id` ordered by id
 
-        Search for title, abstract, authors, etc.:
+        Search for:
         ---
+        title, abstract, authors, etc.
+
         `/api/publications?search=text`
         """
         return super(PublicationViewSet, self).list(request, *args, **kwargs)
