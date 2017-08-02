@@ -462,7 +462,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
             _qs = emg_models.Run.objects \
                 .available(self.request) \
                 .select_related(
-                    'analysis_status', 'pipeline', 'experiment_type'
+                    'analysis_status', 'experiment_type'
                 )
             queryset = queryset.prefetch_related(
                 Prefetch('runs', queryset=_qs))
@@ -547,9 +547,8 @@ class SampleViewSet(mixins.RetrieveModelMixin,
             .select_related(
                 'sample',
                 'analysis_status',
-                'experiment_type',
-                'pipeline'
-            )
+                'experiment_type'
+            ).distinct()
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(
@@ -742,8 +741,6 @@ class RunViewSet(mixins.RetrieveModelMixin,
         ---
         `/api/runs?experiment_type=metagenomics`
 
-        `/api/runs?pipeline_version=3.0`
-
         `/api/runs?biome=root:Environmental:Aquatic:Marine`
 
         `/api/runs?fields=accession,biome_name retrieve only selected fileds
@@ -827,7 +824,7 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         `/api/pipeline/3.0/samples`
         """
         obj = self.get_object()
-        queryset = emg_models.Sample.objects.filter(runs__pipeline=obj) \
+        queryset = emg_models.Sample.objects.filter(analysis__pipeline=obj) \
             .available(self.request) \
             .prefetch_related(
                 'biome',
@@ -837,7 +834,7 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
             _qs = emg_models.Run.objects \
                 .available(self.request) \
                 .select_related(
-                    'analysis_status', 'pipeline', 'experiment_type'
+                    'analysis_status', 'experiment_type'
                 )
             queryset = queryset.prefetch_related(
                 Prefetch('runs', queryset=_qs))

@@ -78,7 +78,7 @@ class TestDefaultAPI(object):
             ('ExperimentType', 'emgapi:experiments', ['samples']),
             ('Pipeline', 'emgapi:pipelines', ['samples', 'tools']),
             ('Publication', 'emgapi:publications', ['studies']),
-            ('Run', 'emgapi:runs', ['pipeline', 'sample']),
+            ('Run', 'emgapi:runs', ['pipelines', 'experiment_type', 'sample']),
             ('Sample', 'emgapi:samples',
              ['biome', 'study', 'runs', 'metadata']),
             ('Study', 'emgapi:studies', ['biome', 'publications', 'samples']),
@@ -100,7 +100,8 @@ class TestDefaultAPI(object):
                 _as = mommy.make('emgapi.AnalysisStatus', pk=3)
                 _p = mommy.make('emgapi.Pipeline', pk=1,
                                 release_version="1.0")
-                mommy.make(model_name, pk=pk, pipeline=_p, analysis_status=_as)
+                mommy.make('emgapi.AnalysisJob',
+                           pk=pk, pipeline=_p, analysis_status=_as)
             elif _model in ('PipelineTool',):
                 _p = mommy.make('emgapi.Pipeline', pk=pk,
                                 release_version="1.0")
