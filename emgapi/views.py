@@ -872,27 +872,38 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         return Response(serializer.data)
 
 
-class PipelineToolViewSet(mixins.RetrieveModelMixin,
-                          mixins.ListModelMixin,
+class PipelineToolAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):
+
+    serializer_class = emg_serializers.PipelineToolSerializer
+    queryset = emg_models.PipelineTool.objects.all()
+
+    lookup_fields = ('tool_name', 'version')
+
+    def get(self, request, tool_name, version, *args, **kwargs):
+        """
+        Retrieves run for the given accession and pipeline version
+        Example:
+        ---
+        `/api/tools/interproscan/5.19-58.0`
+        """
+        run = get_object_or_404(
+            emg_models.PipelineTool,
+            tool_name__iexact=tool_name, version=version)
+        serializer = self.get_serializer(run)
+        return Response(data=serializer.data)
+
+
+class PipelineToolViewSet(mixins.ListModelMixin,
                           viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.PipelineToolSerializer
     queryset = emg_models.PipelineTool.objects.all()
 
-    lookup_field = 'tool_name'
-    lookup_value_regex = '[0-9a-zA-Z]+'
+    # lookup_field = 'tool_name'
+    # lookup_value_regex = '[0-9a-zA-Z\-\.]+'
 
     def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return emg_serializers.PipelineToolSerializer
         return super(PipelineToolViewSet, self).get_serializer_class()
-
-    def retrieve(self, request, *args, **kwargs):
-        """
-        Retrieves pipeline tool for the given id
-        """
-        return super(PipelineToolViewSet, self) \
-            .retrieve(request, *args, **kwargs)
 
     def list(self, request, *args, **kwargs):
         """

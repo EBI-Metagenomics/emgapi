@@ -202,6 +202,10 @@ class Migration(migrations.Migration):
             unique_together=set([('pipeline', 'tool'), ('pipeline', 'tool_group_id')]),
         ),
         migrations.AlterUniqueTogether(
+            name='pipelinetool',
+            unique_together=set([('tool_name', 'version')]),
+        ),
+        migrations.AlterUniqueTogether(
             name='biome',
             unique_together=set([('biome_id', 'biome_name')]),
         ),
