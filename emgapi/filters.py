@@ -122,19 +122,6 @@ class SampleFilter(django_filters.FilterSet):
         )
 
 
-class PipelineFilter(django_filters.FilterSet):
-
-    experiment_type = django_filters.CharFilter(
-        name='runs__experiment_type__experiment_type',
-        distinct=True)
-
-    class Meta:
-        model = emg_models.Pipeline
-        fields = (
-            'experiment_type',
-        )
-
-
 class RunFilter(django_filters.FilterSet):
 
     analysis_status = django_filters.CharFilter(
