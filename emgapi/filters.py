@@ -40,8 +40,12 @@ class StudyFilter(django_filters.FilterSet):
     biome = django_filters.CharFilter(method='filter_biome', distinct=True)
 
     def filter_biome(self, qs, name, value):
-        b = get_object_or_404(emg_models.Biome, lineage=value)
-        return qs.filter(biome__lft__gte=b.lft-1, biome__rgt__lte=b.rgt+1)
+        try:
+            b = emg_models.Biome.objects.get(lineage=value)
+            qs = qs.filter(biome__lft__gte=b.lft-1, biome__rgt__lte=b.rgt+1)
+        except emg_models.Biome.DoesNotExist:
+            pass
+        return qs
 
     biome_name = django_filters.CharFilter(
         name='biome__biome_name',
@@ -68,15 +72,19 @@ class SampleFilter(django_filters.FilterSet):
         name='runs__experiment_type__experiment_type',
         distinct=True)
 
-    pipeline_version = django_filters.CharFilter(
-        name='runs__pipeline__release_version',
-        distinct=True)
+    # pipeline_version = django_filters.CharFilter(
+    #     name='runs__pipeline__release_version',
+    #     distinct=True)
 
     biome = django_filters.CharFilter(method='filter_biome', distinct=True)
 
     def filter_biome(self, qs, name, value):
-        b = get_object_or_404(emg_models.Biome, lineage=value)
-        return qs.filter(biome__lft__gte=b.lft-1, biome__rgt__lte=b.rgt+1)
+        try:
+            b = emg_models.Biome.objects.get(lineage=value)
+            qs = qs.filter(biome__lft__gte=b.lft-1, biome__rgt__lte=b.rgt+1)
+        except emg_models.Biome.DoesNotExist:
+            pass
+        return qs
 
     biome_name = django_filters.CharFilter(
         name='biome__biome_name',
@@ -137,17 +145,21 @@ class RunFilter(django_filters.FilterSet):
         name='experiment_type__experiment_type',
         distinct=True)
 
-    pipeline_version = django_filters.CharFilter(
-        name='pipeline__release_version',
-        distinct=True)
+    # pipeline_version = django_filters.CharFilter(
+    #     name='pipeline__release_version',
+    #     distinct=True)
 
     biome = django_filters.CharFilter(method='filter_biome', distinct=True)
 
     def filter_biome(self, qs, name, value):
-        b = get_object_or_404(emg_models.Biome, lineage=value)
-        return qs.filter(
-            sample__biome__lft__gte=b.lft-1,
-            sample__biome__rgt__lte=b.rgt+1)
+        try:
+            b = get_object_or_404(emg_models.Biome, lineage=value)
+            qs = qs.filter(
+                sample__biome__lft__gte=b.lft-1,
+                sample__biome__rgt__lte=b.rgt+1)
+        except emg_models.Biome.DoesNotExist:
+            pass
+        return qs
 
     biome_name = django_filters.CharFilter(
         name='sample__biome__biome_name',
