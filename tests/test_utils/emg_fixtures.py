@@ -107,12 +107,12 @@ def experiment_type():
 
 @pytest.fixture
 def runs(samples, analysis_status, pipeline, experiment_type):
-    runs = []
+    jobs = []
     for s in samples:
         pk = s.pk
-        runs.append(
+        jobs.append(
             mommy.prepare(
-                'emgapi.Run',
+                'emgapi.AnalysisJob',
                 pk=pk,
                 sample_id=pk,
                 accession="ABC_{:0>3}".format(pk),
@@ -124,4 +124,4 @@ def runs(samples, analysis_status, pipeline, experiment_type):
                 result_directory="path/version_1.0/ABC_FASTQ",
             )
         )
-    return emg_models.Run.objects.bulk_create(runs)
+    return emg_models.AnalysisJob.objects.bulk_create(jobs)

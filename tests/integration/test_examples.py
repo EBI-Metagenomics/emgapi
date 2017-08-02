@@ -46,6 +46,6 @@ def test_list_samples(live_server, runs):
                 print(
                     study.accession,
                     sample.accession,
-                    run.accession, run['pipeline_version'],
-                    run['result_directory'], run['input_file_name']
+                    run.accession,
+                    run.relationships.pipelines
                 )

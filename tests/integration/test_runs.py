@@ -37,9 +37,9 @@ class TestRunAPI(APITestCase):
         _r2 = mommy.make("emgapi.AnalysisJob", pk=456, accession="456",
                          pipeline=_p)
         mommy.make("emgapi.Sample", pk=123, accession="123",
-                   runs=[_r1], is_public=1)
+                   analysis=[_r1], is_public=1)
         mommy.make("emgapi.Sample", pk=456, accession="456",
-                   runs=[_r2], is_public=0)
+                   analysis=[_r2], is_public=0)
 
         url = reverse("emgapi:samples-list")
         response = self.client.get(url)
