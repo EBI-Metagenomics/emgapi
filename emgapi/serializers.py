@@ -566,6 +566,9 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
         exclude = (
             'is_public',
             'submission_account_id',
+            'metadata_received',
+            'sequencedata_archived',
+            'sequencedata_received',
         )
 
 
@@ -660,6 +663,8 @@ class StudySerializer(ExplicitFieldsModelSerializer,
             'is_public',
             'submission_account_id',
             'result_directory',
+            'first_created',
+            'study_status',
         )
 
 
