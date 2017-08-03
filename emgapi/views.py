@@ -509,7 +509,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         ---
         `/api/samples?experiment_type=metagenomics`
 
-        `/api/samples?species=Homo%20sapiens`
+        `/api/samples?species=sapiens`
 
         `/api/samples?biome=root:Environmental:Aquatic:Marine`
 
