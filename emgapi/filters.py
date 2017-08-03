@@ -122,12 +122,18 @@ class SampleFilter(django_filters.FilterSet):
         return qs.filter(pk__in=samples).select_related('study', 'biome')
 
     metadata_key = django_filters.CharFilter(
-        name='metadata__var__var_name',
-        distinct=True)
+        method='filter_metadata_key', distinct=True)
+
+    def filter_metadata_key(self, qs, name, value):
+        return qs.filter(
+            metadata__var__var_name__iregex=WORD_MATCH_REGEX.format(value))
 
     metadata_value = django_filters.CharFilter(
-        name='metadata__var_val_ucv',
-        distinct=True)
+        method='filter_metadata_value', distinct=True)
+
+    def filter_metadata_value(self, qs, name, value):
+        return qs.filter(
+            metadata__var_val_ucv__iregex=WORD_MATCH_REGEX.format(value))
 
     other_accession = django_filters.CharFilter(
         name='study__project_id',
