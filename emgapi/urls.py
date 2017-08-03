@@ -22,12 +22,12 @@ from rest_framework.routers import DefaultRouter
 app_name = "emgapi"
 urlpatterns = [
 
-    # TODO: swagger override runs-details
-    # url(
-    #     r'^runs/(?P<accession>[a-zA-Z0-9,_]+)/(?P<release_version>[0-9\.]+)$',
-    #     views.RunAPIView.as_view(),
-    #     name='runs-pipelines-detail'
-    # ),
+    url(
+        (r'^runs/(?P<accession>[a-zA-Z0-9,_]+)/'
+         r'pipelines/(?P<release_version>[0-9\.]+)$'),
+        views.RunAPIView.as_view(),
+        name='runs-pipelines-detail'
+    ),
 
     url(
         r'^tools/(?P<tool_name>[\w+]+)/(?P<version>[a-zA-Z0-9\-\.]+)$',
