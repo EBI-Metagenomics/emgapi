@@ -150,6 +150,13 @@ class SampleFilter(django_filters.FilterSet):
     def filter_geo_loc_name(self, qs, name, value):
         return qs.filter(geo_loc_name__iregex=WORD_MATCH_REGEX.format(value))
 
+    study_accession = django_filters.CharFilter(
+        method='filter_study_accession', distinct=True)
+
+    def filter_study_accession(self, qs, name, value):
+        return qs.filter(
+            study__accession__iregex=WORD_MATCH_REGEX.format(value))
+
     class Meta:
         model = emg_models.Sample
         fields = (
@@ -164,6 +171,7 @@ class SampleFilter(django_filters.FilterSet):
             'metadata_key',
             'metadata_value',
             'other_accession',
+            'study_accession'
         )
 
 
@@ -217,6 +225,13 @@ class RunFilter(django_filters.FilterSet):
         return qs.filter(
             instrument_model__iregex=WORD_MATCH_REGEX.format(value))
 
+    sample_accession = django_filters.CharFilter(
+        method='filter_sample_accession', distinct=True)
+
+    def filter_sample_accession(self, qs, name, value):
+        return qs.filter(
+            sample__accession__iregex=WORD_MATCH_REGEX.format(value))
+
     class Meta:
         model = emg_models.Run
         fields = (
@@ -228,4 +243,5 @@ class RunFilter(django_filters.FilterSet):
             'instrument_platform',
             'instrument_model',
             'species',
+            'sample_accession',
         )
