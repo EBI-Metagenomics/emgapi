@@ -102,16 +102,14 @@ class BiomeViewSet(mixins.ListModelMixin,
     serializer_class = emg_serializers.BiomeSerializer
     queryset = emg_models.Biome.objects.all()
 
-    # filter_backends = (
-    #     filters.OrderingFilter,
-    # )
+    filter_backends = (
+        filters.OrderingFilter,
+    )
 
-    # ordering_fields = (
-    #     'studies_count',
-    #     'samples_count',
-    #     'runs_count',
-    # )
-    # ordering = ('-studies_count',)
+    ordering_fields = (
+        'lineage',
+    )
+    ordering = ('lineage',)
 
     lookup_field = 'lineage'
     lookup_value_regex = '[a-zA-Z0-9\:\-\s\(\)\<\>]+'
@@ -151,28 +149,6 @@ class BiomeViewSet(mixins.ListModelMixin,
 
         return super(BiomeViewSet, self) \
             .list(request, lineage, *args, **kwargs)
-
-    # @list_route(
-    #     methods=['get', ],
-    #     serializer_class=emg_serializers.BiomeSerializer
-    # )
-    # def top10(self, request):
-    #     """
-    #     Retrieve top 10 biomes sorted by number of studies
-    #     Example:
-    #     ---
-    #     `/api/biomes/top10` retrieve top 10 biomes
-    #     """
-    #     limit = settings.EMG_DEFAULT_LIMIT
-    #     queryset = emg_models.Biome.objects \
-    #         .all().order_by('-studies_count')[:limit]
-    #     page = self.paginate_queryset(queryset)
-    #     if page is not None:
-    #         serializer = self.get_serializer(
-    #             page, many=True, context={'request': request})
-    #         return self.get_paginated_response(serializer.data)
-    #     serializer = self.get_serializer(queryset, many=True)
-    #     return Response(serializer.data)
 
     @list_route(
         methods=['get', ],
@@ -219,9 +195,13 @@ class BiomeViewSet(mixins.ListModelMixin,
         `/api/biomes/root:Environmental:Aquatic/studies`
         """
         obj = self.get_object()
-        queryset = emg_models.Study.objects \
+        studies = emg_models.Sample.objects \
             .available(self.request) \
             .filter(biome__lft__gte=obj.lft-1, biome__rgt__lte=obj.rgt+1) \
+            .values('study_id')
+        queryset = emg_models.Study.objects \
+            .available(self.request) \
+            .filter(pk__in=studies) \
             .select_related('biome')
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -271,8 +251,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 
     def get_queryset(self):
         queryset = emg_models.Study.objects \
-            .available(self.request) \
-            .select_related('biome')
+            .available(self.request)
         if 'samples' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Sample.objects \
                 .available(self.request) \
@@ -345,8 +324,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         """
         limit = settings.EMG_DEFAULT_LIMIT
         queryset = emg_models.Study.objects \
-            .recent(self.request) \
-            .select_related('biome')[:limit]
+            .recent(self.request)[:limit]
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(
@@ -393,8 +371,6 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         `/api/studies/SRP001634/samples` retrieve linked samples
 
         `/api/studies/SRP001634/samples?include=runs` with runs
-
-        `/api/studies/ERP013558/samples?include=metadata` with metadata
         """
 
         obj = self.get_object()
@@ -409,6 +385,33 @@ class StudyViewSet(mixins.RetrieveModelMixin,
                 )
             queryset = queryset.prefetch_related(
                 Prefetch('runs', queryset=_qs))
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(
+            queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    @detail_route(
+        methods=['get', ],
+        url_name='biomes-list',
+        serializer_class=emg_serializers.BiomeSerializer
+    )
+    def biomes(self, request, accession=None):
+        """
+        Retrieves list of biomes for the given study accession
+        Example:
+        ---
+        `/api/studies/SRP001634/biomes` retrieve linked samples
+        """
+
+        obj = self.get_object()
+        biomes = obj.samples.values('biome_id').distinct()
+        queryset = emg_models.Biome.objects \
+            .filter(pk__in=biomes)
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(

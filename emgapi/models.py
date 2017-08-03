@@ -178,16 +178,7 @@ class BiomeQuerySet(models.QuerySet):
 class BiomeManager(models.Manager):
 
     def get_queryset(self):
-        """
-        TODO:
-        SELECT *
-        FROM BIOME_HIERARCHY_TREE AS node,
-                BIOME_HIERARCHY_TREE AS parent
-        WHERE node.lft BETWEEN parent.lft AND parent.rgt
-                AND lower(parent.biome_name) = 'soil'
-        ORDER BY node.lft;"""
         return BiomeQuerySet(self.model, using=self._db) \
-            .annotate(studies_count=Count('studies', distinct=True)) \
             .annotate(samples_count=Count('samples', distinct=True))
 
 
