@@ -881,7 +881,7 @@ class PipelineToolAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):
 
     def get(self, request, tool_name, version, *args, **kwargs):
         """
-        Retrieves run for the given accession and pipeline version
+        Retrieves pipeline tool details for the given pipeline version
         Example:
         ---
         `/api/tools/interproscan/5.19-58.0`
