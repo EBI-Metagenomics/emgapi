@@ -381,7 +381,7 @@ class RetrieveRunSerializer(ExplicitFieldsModelSerializer,
                             serializers.HyperlinkedModelSerializer):
 
     url = RunHyperlinkedField(
-        view_name='emgapi:runs-detail',
+        view_name='emgapi:runs-pipelines-detail',
         lookup_field='accession'
     )
 
