@@ -42,17 +42,12 @@ class StudyFilter(django_filters.FilterSet):
     def filter_biome(self, qs, name, value):
         try:
             b = emg_models.Biome.objects.get(lineage=value)
-            qs = qs.filter(biome__lft__gte=b.lft-1, biome__rgt__lte=b.rgt+1)
+            qs = qs.filter(
+                samples__biome__lft__gte=b.lft-1,
+                samples__biome__rgt__lte=b.rgt+1)
         except emg_models.Biome.DoesNotExist:
             pass
         return qs
-
-    biome_name = django_filters.CharFilter(
-        method='filter_biome_name', distinct=True)
-
-    def filter_biome_name(self, qs, name, value):
-        return qs.filter(
-            biome__biome_name__iregex=WORD_MATCH_REGEX.format(value))
 
     other_accession = django_filters.CharFilter(
         name='project_id',
@@ -69,7 +64,6 @@ class StudyFilter(django_filters.FilterSet):
         model = emg_models.Study
         fields = (
             'biome',
-            'biome_name',
             'project_id',
             'centre_name',
             'other_accession',
@@ -95,13 +89,6 @@ class SampleFilter(django_filters.FilterSet):
         except emg_models.Biome.DoesNotExist:
             pass
         return qs
-
-    biome_name = django_filters.CharFilter(
-        method='filter_biome_name', distinct=True)
-
-    def filter_biome_name(self, qs, name, value):
-        return qs.filter(
-            biome__biome_name__iregex=WORD_MATCH_REGEX.format(value))
 
     instrument_platform = django_filters.CharFilter(
         method='filter_instrument_platform', distinct=True)
@@ -162,7 +149,6 @@ class SampleFilter(django_filters.FilterSet):
         fields = (
             'experiment_type',
             'biome',
-            'biome_name',
             # 'pipeline_version',
             'geo_loc_name',
             'species',
