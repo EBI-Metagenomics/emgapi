@@ -25,6 +25,7 @@ from rest_framework_json_api import serializers
 from rest_framework_json_api import relations
 
 from . import models as emg_models
+from . import relations as emg_relations
 
 logger = logging.getLogger(__name__)
 
@@ -110,9 +111,7 @@ class BiomeSerializer(ExplicitFieldsModelSerializer,
         # /django-rest-framework-json-api/issues/178
         return ()
 
-    # studies_count = serializers.IntegerField()
-    #
-    # samples_count = serializers.IntegerField()
+    samples_count = serializers.IntegerField()
 
     class Meta:
         model = emg_models.Biome
@@ -493,11 +492,6 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
         lookup_field='accession'
     )
 
-    biome_name = serializers.SerializerMethodField()
-
-    def get_biome_name(self, obj):
-        return obj.biome.biome_name
-
     study_accession = serializers.SerializerMethodField()
 
     def get_study_accession(self, obj):
@@ -599,7 +593,6 @@ class StudySerializer(ExplicitFieldsModelSerializer,
                       serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
-        'biome': 'emgapi.serializers.BiomeSerializer',
         'publications': 'emgapi.serializers.PublicationSerializer',
         # 'samples': 'emgapi.serializers.SampleSerializer',
     }
@@ -609,18 +602,23 @@ class StudySerializer(ExplicitFieldsModelSerializer,
         lookup_field='accession',
     )
 
-    biome_name = serializers.SerializerMethodField()
-
-    def get_biome_name(self, obj):
-        return obj.biome.biome_name
-
     # relationships
-
-    biome = serializers.HyperlinkedRelatedField(
+    biomes = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
         read_only=True,
-        view_name='emgapi:biomes-list',
-        lookup_field='lineage',
+        source='get_biomes',
+        model=emg_models.Biome,
+        related_link_view_name='emgapi:studies-biomes-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+        related_link_self_view_name='emgapi:biomes-list',
+        related_link_self_lookup_field='lineage'
     )
+
+    def get_biomes(self, obj):
+        biomes = obj.samples.values('biome_id').distinct()
+        return emg_models.Biome.objects \
+            .filter(pk__in=biomes)
 
     # publications = serializers.HyperlinkedIdentityField(
     #     view_name='emgapi:studies-publications-list',
@@ -671,6 +669,8 @@ class StudySerializer(ExplicitFieldsModelSerializer,
     class Meta:
         model = emg_models.Study
         exclude = (
+            # TODO: remove biome when schema updated
+            'biome',
             'is_public',
             'submission_account_id',
             'result_directory',
