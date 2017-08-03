@@ -17,9 +17,9 @@
 
 import django_filters
 
-from django.shortcuts import get_object_or_404
-
 from . import models as emg_models
+
+WORD_MATCH_REGEX = r"{0}"
 
 
 class PublicationFilter(django_filters.FilterSet):
@@ -48,12 +48,22 @@ class StudyFilter(django_filters.FilterSet):
         return qs
 
     biome_name = django_filters.CharFilter(
-        name='biome__biome_name',
+        method='filter_biome_name', distinct=True)
+
+    def filter_biome_name(self, qs, name, value):
+        return qs.filter(
+            biome__biome_name__iregex=WORD_MATCH_REGEX.format(value))
+
+    other_accession = django_filters.CharFilter(
+        name='project_id',
         distinct=True)
 
-    # species = django_filters.CharFilter(
-    #     name='samples__species',
-    #     distinct=True)
+    centre_name = django_filters.CharFilter(
+        method='filter_centre_name', distinct=True)
+
+    def filter_centre_name(self, qs, name, value):
+        return qs.filter(
+            centre_name__iregex=WORD_MATCH_REGEX.format(value))
 
     class Meta:
         model = emg_models.Study
@@ -61,8 +71,8 @@ class StudyFilter(django_filters.FilterSet):
             'biome',
             'biome_name',
             'project_id',
-            # 'species',
             'centre_name',
+            'other_accession',
         )
 
 
@@ -87,16 +97,29 @@ class SampleFilter(django_filters.FilterSet):
         return qs
 
     biome_name = django_filters.CharFilter(
-        name='biome__biome_name',
-        distinct=True)
+        method='filter_biome_name', distinct=True)
 
-    instrument_model = django_filters.CharFilter(
-        name='runs__instrument_platform',
-        distinct=True)
+    def filter_biome_name(self, qs, name, value):
+        return qs.filter(
+            biome__biome_name__iregex=WORD_MATCH_REGEX.format(value))
 
     instrument_platform = django_filters.CharFilter(
-        name='runs__instrument_model',
-        distinct=True)
+        method='filter_instrument_platform', distinct=True)
+
+    def filter_instrument_platform(self, qs, name, value):
+        samples = emg_models.Run.objects.values('sample_id') \
+            .available(self.request) \
+            .filter(instrument_platform__iregex=WORD_MATCH_REGEX.format(value))
+        return qs.filter(pk__in=samples).select_related('study', 'biome')
+
+    instrument_model = django_filters.CharFilter(
+        method='filter_instrument_model', distinct=True)
+
+    def filter_instrument_model(self, qs, name, value):
+        samples = emg_models.Run.objects.values('sample_id') \
+            .available(self.request) \
+            .filter(instrument_model__iregex=WORD_MATCH_REGEX.format(value))
+        return qs.filter(pk__in=samples).select_related('study', 'biome')
 
     metadata_key = django_filters.CharFilter(
         name='metadata__var__var_name',
@@ -105,6 +128,21 @@ class SampleFilter(django_filters.FilterSet):
     metadata_value = django_filters.CharFilter(
         name='metadata__var_val_ucv',
         distinct=True)
+
+    other_accession = django_filters.CharFilter(
+        name='study__project_id',
+        distinct=True)
+
+    species = django_filters.CharFilter(method='filter_species', distinct=True)
+
+    def filter_species(self, qs, name, value):
+        return qs.filter(species__iregex=WORD_MATCH_REGEX.format(value))
+
+    geo_loc_name = django_filters.CharFilter(
+        method='filter_geo_loc_name', distinct=True)
+
+    def filter_geo_loc_name(self, qs, name, value):
+        return qs.filter(geo_loc_name__iregex=WORD_MATCH_REGEX.format(value))
 
     class Meta:
         model = emg_models.Sample
@@ -119,6 +157,7 @@ class SampleFilter(django_filters.FilterSet):
             'instrument_platform',
             'metadata_key',
             'metadata_value',
+            'other_accession',
         )
 
 
@@ -140,7 +179,7 @@ class RunFilter(django_filters.FilterSet):
 
     def filter_biome(self, qs, name, value):
         try:
-            b = get_object_or_404(emg_models.Biome, lineage=value)
+            b = emg_models.Biome.objects.get(lineage=value)
             qs = qs.filter(
                 sample__biome__lft__gte=b.lft-1,
                 sample__biome__rgt__lte=b.rgt+1)
@@ -152,6 +191,26 @@ class RunFilter(django_filters.FilterSet):
         name='sample__biome__biome_name',
         distinct=True)
 
+    species = django_filters.CharFilter(method='filter_species', distinct=True)
+
+    def filter_species(self, qs, name, value):
+        return qs.filter(
+            sample__species__iregex=WORD_MATCH_REGEX.format(value))
+
+    instrument_platform = django_filters.CharFilter(
+        method='filter_instrument_platform', distinct=True)
+
+    def filter_instrument_platform(self, qs, name, value):
+        return qs.filter(
+            instrument_platform__iregex=WORD_MATCH_REGEX.format(value))
+
+    instrument_model = django_filters.CharFilter(
+        method='filter_instrument_model', distinct=True)
+
+    def filter_instrument_model(self, qs, name, value):
+        return qs.filter(
+            instrument_model__iregex=WORD_MATCH_REGEX.format(value))
+
     class Meta:
         model = emg_models.Run
         fields = (
@@ -162,4 +221,5 @@ class RunFilter(django_filters.FilterSet):
             # 'pipeline_version',
             'instrument_platform',
             'instrument_model',
+            'species',
         )
