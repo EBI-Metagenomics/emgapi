@@ -99,6 +99,9 @@ class PipelineTool(models.Model):
     def __str__(self):
         return "%s:%s" % (self.tool_name, self.version)
 
+    def multiple_pk(self):
+        return "%s/%s" % (self.tool_name, self.version)
+
 
 class PipelineQuerySet(BaseQuerySet):
     pass
