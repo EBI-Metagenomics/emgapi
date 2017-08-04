@@ -394,6 +394,7 @@ class StudySampleRelationshipViewSet(mixins.ListModelMixin,
 
     filter_backends = (
         DjangoFilterBackend,
+        filters.SearchFilter,
         filters.OrderingFilter,
     )
 
@@ -404,6 +405,18 @@ class StudySampleRelationshipViewSet(mixins.ListModelMixin,
     )
 
     ordering = ('-last_update',)
+
+    search_fields = (
+        '@sample_name',
+        '@sample_desc',
+        'sample_alias',
+        'species',
+        'environment_feature',
+        'environment_biome',
+        'environment_feature',
+        'environment_material',
+        '@metadata__var_val_ucv',
+    )
 
     lookup_field = 'accession'
     lookup_value_regex = '[a-zA-Z0-9]+'
