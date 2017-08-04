@@ -157,7 +157,9 @@ class SampleFilter(django_filters.FilterSet):
             'metadata_key',
             'metadata_value',
             'other_accession',
-            'study_accession'
+            'study_accession',
+            'environment_material',
+            'environment_feature',
         )
 
 
