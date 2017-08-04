@@ -30,7 +30,6 @@ from rest_framework import filters
 from rest_framework.decorators import detail_route, list_route
 # from rest_framework import authentication
 from rest_framework import permissions
-# from rest_framework_json_api.renderers import JSONRenderer
 
 from . import models as emg_models
 from . import serializers as emg_serializers
@@ -360,43 +359,6 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 
     @detail_route(
         methods=['get', ],
-        url_name='samples-list',
-        serializer_class=emg_serializers.SampleSerializer
-    )
-    def samples(self, request, accession=None):
-        """
-        Retrieves list of samples for the given study accession
-        Example:
-        ---
-        `/api/studies/SRP001634/samples` retrieve linked samples
-
-        `/api/studies/SRP001634/samples?include=runs` with runs
-        """
-
-        obj = self.get_object()
-        queryset = obj.samples \
-            .available(self.request) \
-            .prefetch_related('biome')
-        if 'runs' in self.request.GET.get('include', '').split(','):
-            _qs = emg_models.Run.objects \
-                .available(self.request) \
-                .select_related(
-                    'analysis_status', 'experiment_type'
-                )
-            queryset = queryset.prefetch_related(
-                Prefetch('runs', queryset=_qs))
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(
-                page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(
-            queryset, many=True, context={'request': request})
-        return Response(serializer.data)
-
-    @detail_route(
-        methods=['get', ],
         url_name='biomes-list',
         serializer_class=emg_serializers.BiomeSerializer
     )
@@ -421,6 +383,70 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         serializer = self.get_serializer(
             queryset, many=True, context={'request': request})
         return Response(serializer.data)
+
+
+class StudySampleRelationshipViewSet(mixins.ListModelMixin,
+                                     viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.SampleSerializer
+
+    filter_class = emg_filters.SampleFilter
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'accession',
+        'last_update',
+        'runs_count',
+    )
+
+    ordering = ('-last_update',)
+
+    lookup_field = 'accession'
+    lookup_value_regex = '[a-zA-Z0-9]+'
+
+    def get_queryset(self):
+        study = get_object_or_404(
+            emg_models.Study, accession=self.kwargs[self.lookup_field])
+        queryset = emg_models.Sample.objects \
+            .available(self.request) \
+            .filter(study_id=study.pk) \
+            .prefetch_related('biome')
+        if 'runs' in self.request.GET.get('include', '').split(','):
+            _qs = emg_models.Run.objects \
+                .available(self.request) \
+                .select_related(
+                    'analysis_status', 'experiment_type'
+                )
+            queryset = queryset.prefetch_related(
+                Prefetch('runs', queryset=_qs))
+        return queryset
+
+    def get_serializer_class(self):
+        return emg_serializers.SampleSerializer
+
+    def list(self, request, accession, *args, **kwargs):
+        """
+        Retrieves list of samples for the given study accession
+        Example:
+        ---
+        `/api/studies/SRP001634/samples` retrieve linked samples
+
+        `/api/studies/SRP001634/samples?include=runs` with runs
+
+        Filter by:
+        ---
+        `/api/studies/ERP009004/samples?biome=root%3AEnvironmental%3AAquatic`
+        filtered by biome
+
+        `/api/studies/ERP009004/samples?geo_loc_name=Alberta` filtered by
+        localtion
+        """
+        return super(StudySampleRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
 
 
 class SampleViewSet(mixins.RetrieveModelMixin,
