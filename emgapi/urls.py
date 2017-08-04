@@ -23,7 +23,7 @@ app_name = "emgapi"
 urlpatterns = [
 
     url(
-        (r'^runs/(?P<accession>[a-zA-Z0-9,_]+)/'
+        (r'^runs/(?P<accession>[a-zA-Z0-9]+)/'
          r'pipelines/(?P<release_version>[0-9\.]+)$'),
         views.RunAPIView.as_view(),
         name='runs-pipelines-detail'
@@ -42,6 +42,7 @@ urlpatterns = [
     # ),
 
 ]
+
 
 router = DefaultRouter(trailing_slash=False)
 
@@ -107,3 +108,15 @@ router.register(
 )
 
 urlpatterns += router.urls
+
+
+# relationship views
+relation_router = DefaultRouter(trailing_slash=False)
+
+relation_router.register(
+    r'studies/(?P<accession>[a-zA-Z0-9]+)/samples',
+    views.StudySampleRelationshipViewSet,
+    base_name='studies-samples'
+)
+
+urlpatterns += relation_router.urls
