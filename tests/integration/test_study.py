@@ -73,9 +73,8 @@ class TestStudyAPI(APITestCase):
         assert rsp['data']['type'] == "Study"
         assert rsp['data']['id'] == "SRP01234"
         _attr = rsp['data']['attributes']
-        assert(len(_attr) == 13)
+        assert(len(_attr) == 12)
         assert _attr['accession'] == "SRP01234"
-        assert _attr['biome_name'] == "foo"
         assert _attr['centre_name'] == "Centre Name"
         assert not _attr['public_release_date']
         assert _attr['study_abstract'] == "abcdefghijklmnoprstuvwyz"
