@@ -30,38 +30,45 @@ class TestBiomeAPI(APITestCase):
 
     def setUp(self):
         self.data = {}
-        self.data['biomes'] = []
-        _biome = [
+        self.data['study'] = mommy.make(
+            'emgapi.Study',
+            pk=1,
+            accession="SPR0001",
+            is_public=1,
+        )
+
+        self.data['_biomes'] = [
             {'lineage': 'root', 'depth': 1, 'lft': 1, 'rgt': 984},
             {'lineage': 'root:foo', 'depth': 2, 'lft': 2, 'rgt': 161},
             {'lineage': 'root:foo2', 'depth': 2, 'lft': 162, 'rgt': 513},
             {'lineage': 'root:foo:bar', 'depth': 3, 'lft': 3, 'rgt': 160},
-            {'lineage': 'root:foo2:bar', 'depth': 3, 'lft': 163, 'rgt': 513},
+            {'lineage': 'root:foo2:bar2', 'depth': 3, 'lft': 163, 'rgt': 513},
         ]
-        for b in _biome:
-            self.data['biomes'].append(
-                mommy.make(
-                    'emgapi.Biome',
-                    depth=b['depth'],
-                    biome_name=b['lineage'].split(':')[-1],
-                    lineage=b['lineage'],
-                    lft=b['lft'],
-                    rgt=b['rgt'],
-                    pk=(_biome.index(b)+1))
+        for b in self.data['_biomes']:
+            mommy.make(
+                'emgapi.Biome',
+                depth=b['depth'],
+                biome_name=b['lineage'].split(':')[-1],
+                lineage=b['lineage'],
+                lft=b['lft'],
+                rgt=b['rgt'],
+                pk=(self.data['_biomes'].index(b)+1)
             )
-        self.data['studies'] = []
-        for pk in range(1, len(_biome)+1):
-            self.data['studies'].append(
+
+        self.data['samples'] = []
+        for pk in range(2, len(self.data['_biomes'])+1):
+            self.data['samples'].append(
                 mommy.make(
-                    'emgapi.Study',
-                    biome=emg_models.Biome.objects.get(pk=pk),
+                    'emgapi.Sample',
                     pk=pk,
-                    accession="SRP{:0>3}".format(pk),
-                    is_public=1
+                    biome=emg_models.Biome.objects.get(pk=pk),
+                    accession="ERS{:0>3}".format(pk),
+                    is_public=1,
+                    study=self.data['study']
                 )
             )
 
-    def test_default(self):
+    def test_samples(self):
         url = reverse('emgapi:biomes-list', args=['root'])
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -76,10 +83,25 @@ class TestBiomeAPI(APITestCase):
             assert b['id'] in ('root:foo', 'root:foo2')
 
         response = self.client.get(
-            biomes[0]['relationships']['studies']['links']['related'])
+            biomes[0]['relationships']['samples']['links']['related'])
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
         assert len(rsp['data']) == 2
         for s in rsp['data']:
-            assert s['type'] == 'Study'
-            assert s['id'] in ('SRP002', 'SRP004')
+            assert s['type'] == 'Sample'
+            assert s['id'] in ('ERS002', 'ERS004')
+
+    def test_study(self):
+        url = reverse('emgapi:studies-detail', args=['SPR0001'])
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        rsp = response.json()
+
+        # Data
+        biomes = rsp['data']['relationships']['biomes']['data']
+        assert len(biomes) == 4
+        _expected_biomes = (
+            'root:foo', 'root:foo2', 'root:foo:bar', 'root:foo2:bar2')
+        for b in biomes:
+            assert b['type'] == 'Biome'
+            assert b['id'] in _expected_biomes
