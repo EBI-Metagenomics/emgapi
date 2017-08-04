@@ -57,14 +57,15 @@ class HyperlinkedSerializerMethodResourceRelatedField(
         relation_data['type'] = resource_type
         relation_data['id'] = str(pk)
 
-        request = self.context.get('request', None)
-        self_kwargs = {
-            self.related_link_self_lookup_field:
-                getattr(value, self.related_link_self_lookup_field)
-        }
-        self_link = self.get_url(
-            'self', self.related_link_self_view_name, self_kwargs, request)
-        relation_data['links'] = {'self': self_link}
+        if self.related_link_self_view_name:
+            request = self.context.get('request', None)
+            self_kwargs = {
+                self.related_link_self_lookup_field:
+                    getattr(value, self.related_link_self_lookup_field)
+            }
+            self_link = self.get_url(
+                'self', self.related_link_self_view_name, self_kwargs, request)
+            relation_data['links'] = {'self': self_link}
         return relation_data
 
     def to_representation(self, value):
