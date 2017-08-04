@@ -80,10 +80,9 @@ class TestSampleAPI(APITestCase):
         assert rsp['data']['type'] == "Sample"
         assert rsp['data']['id'] == "DRS012345"
         _attr = rsp['data']['attributes']
-        assert(len(_attr) == 18)
+        assert(len(_attr) == 17)
         assert _attr['accession'] == "DRS012345"
         assert _attr['sample_desc'] == "abcdefghijklmnoprstuvwyz"
-        assert _attr['biome_name'] == "foo"
         assert _attr['analysis_completed'] == str(self.data['date'].date())
         assert _attr['collection_date'] == str(self.data['date'].date())
         assert _attr['geo_loc_name'] == "Geo Location"
