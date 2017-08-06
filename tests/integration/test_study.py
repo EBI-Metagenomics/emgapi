@@ -70,22 +70,22 @@ class TestStudyAPI(APITestCase):
 
         # Data
         assert len(rsp) == 1
-        assert rsp['data']['type'] == "Study"
+        assert rsp['data']['type'] == "studies"
         assert rsp['data']['id'] == "SRP01234"
         _attr = rsp['data']['attributes']
         assert(len(_attr) == 12)
         assert _attr['accession'] == "SRP01234"
-        assert _attr['centre_name'] == "Centre Name"
-        assert not _attr['public_release_date']
-        assert _attr['study_abstract'] == "abcdefghijklmnoprstuvwyz"
-        assert _attr['study_name'] == "Example study name"
+        assert _attr['centre-name'] == "Centre Name"
+        assert not _attr['public-release-date']
+        assert _attr['study-abstract'] == "abcdefghijklmnoprstuvwyz"
+        assert _attr['study-name'] == "Example study name"
         # assert _attr['study_status'] == "FINISHED"
-        assert _attr['data_origination'] == "HARVESTED"
-        assert not _attr['author_email']
-        assert not _attr['author_name']
+        assert _attr['data-origination'] == "HARVESTED"
+        assert not _attr['author-email']
+        assert not _attr['author-name']
         # assert _attr['last_update'] == str(self.data['date'])
         # assert _attr['first_created'] == str(self.data['date'])
-        assert _attr['project_id'] == "PRJDB1234"
+        assert _attr['project-id'] == "PRJDB1234"
 
     def test_public(self):
         url = reverse("emgapi:studies-list")
@@ -102,6 +102,6 @@ class TestStudyAPI(APITestCase):
         assert len(rsp['data']) == 1
 
         for d in rsp['data']:
-            assert d['type'] == "Study"
+            assert d['type'] == "studies"
             assert d['id'] == "SRP01234"
             assert d['attributes']['accession'] == "SRP01234"
