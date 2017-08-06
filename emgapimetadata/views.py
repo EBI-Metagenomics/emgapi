@@ -52,14 +52,13 @@ class AnnotationViewSet(viewsets.ReadOnlyModelViewSet):
         `/api/annotations/GO0001/runs`
         """
         run_ids = m_models.Annotation.objects \
-            .filter(accession=accession).values_list('run_id')
-        queryset = emg_models.Run.objects.filter(run_id__in=run_ids) \
+            .filter(accession=accession).values_list('run_accession')
+        queryset = emg_models.Run.objects.filter(accession__in=run_ids) \
             .available(self.request) \
             .select_related(
                 'sample',
                 'analysis_status',
-                'experiment_type',
-                'pipeline'
+                'experiment_type'
             )
         page = self.paginate_queryset(queryset)
         if page is not None:
