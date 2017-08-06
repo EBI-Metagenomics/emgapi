@@ -42,9 +42,12 @@ class StudyFilter(django_filters.FilterSet):
     def filter_biome(self, qs, name, value):
         try:
             b = emg_models.Biome.objects.get(lineage=value)
-            qs = qs.filter(
-                samples__biome__lft__gte=b.lft-1,
-                samples__biome__rgt__lte=b.rgt+1)
+            studies = emg_models.Sample.objects.values('study') \
+                .available(self.request) \
+                .filter(
+                    biome__lft__gte=b.lft-1,
+                    biome__rgt__lte=b.rgt+1)
+            qs = qs.filter(pk__in=studies)
         except emg_models.Biome.DoesNotExist:
             pass
         return qs
@@ -64,7 +67,6 @@ class StudyFilter(django_filters.FilterSet):
         model = emg_models.Study
         fields = (
             'biome',
-            'project_id',
             'centre_name',
             'other_accession',
         )
