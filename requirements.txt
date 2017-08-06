@@ -4,7 +4,7 @@
 
 # deployment
 gunicorn
-whitenoise
+whitenoise~=3.3.0
 mysqlclient
 sqlparse
 requests
