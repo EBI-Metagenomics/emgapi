@@ -20,14 +20,8 @@ import mongoengine
 class Annotation(mongoengine.Document):
 
     accession = mongoengine.StringField(
-        required=True, max_length=20,
-        unique_with=('run_id', 'run_accession', 'pipeline_version'))
-    run_id = mongoengine.IntField(
-        required=True,
-        unique_with=('accession', 'run_accession', 'pipeline_version'))
+        required=True, max_length=20, unique_with=('run_accession',))
     run_accession = mongoengine.StringField(
-        required=True, max_length=20,
-        unique_with=('accession', 'run_id', 'pipeline_version'))
-    pipeline_version = mongoengine.StringField(
-        required=True, max_length=10,
-        unique_with=('accession', 'run_id', 'run_accession'))
+        required=True, max_length=20, unique_with=('accession',))
+    description = mongoengine.StringField(required=True, max_length=255)
+    count = mongoengine.IntField(required=True)
