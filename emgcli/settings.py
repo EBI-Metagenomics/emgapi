@@ -325,6 +325,10 @@ REST_FRAMEWORK = {
 
 }
 
+JSON_API_FORMAT_KEYS = 'dasherize'
+JSON_API_FORMAT_TYPES = 'camelize'
+# JSON_API_PLURALIZE_TYPES = True
+
 # Swagger auth
 # Toggles the use of Django Auth as an authentication mechanism.
 # Note: The login/logout button relies on the LOGIN_URL and LOGOUT_URL

@@ -73,20 +73,25 @@ class TestDefaultAPI(object):
         assert rsp['meta']['pagination']['count'] == 0
 
     @pytest.mark.parametrize(
-        '_model, _view, relations',
+        '_model, _camelcase, _view, relations',
         [
-            ('ExperimentType', 'emgapi:experiments', ['samples']),
-            ('Pipeline', 'emgapi:pipelines', ['samples', 'tools']),
-            ('Publication', 'emgapi:publications', ['studies']),
-            ('Run', 'emgapi:runs', ['pipelines', 'experiment_type', 'sample']),
-            ('Sample', 'emgapi:samples',
+            ('ExperimentType', 'experimentTypes', 'emgapi:experiments',
+             ['samples']),
+            ('Pipeline', 'pipelines', 'emgapi:pipelines',
+             ['samples', 'tools']),
+            ('Publication', 'publications', 'emgapi:publications',
+             ['studies']),
+            ('Run', 'runs', 'emgapi:runs',
+             ['pipelines', 'experiment-type', 'sample']),
+            ('Sample', 'samples', 'emgapi:samples',
              ['biome', 'study', 'runs', 'metadata']),
-            ('Study', 'emgapi:studies', ['biomes', 'publications', 'samples']),
-            ('PipelineTool', 'emgapi:tools', ['pipelines']),
+            ('Study', 'studies', 'emgapi:studies',
+             ['biomes', 'publications', 'samples']),
+            ('PipelineTool', 'pipelineTools', 'emgapi:tools', ['pipelines']),
         ]
     )
     @pytest.mark.django_db
-    def test_list(self, client, _model, _view, relations):
+    def test_list(self, client, _model, _camelcase, _view, relations):
         model_name = "emgapi.%s" % _model
         view_name = "%s-list" % _view
 
@@ -136,7 +141,7 @@ class TestDefaultAPI(object):
         assert len(rsp['data']) == 20
 
         for d in rsp['data']:
-            assert d['type'] == _model
+            assert d['type'] == _camelcase
             assert 'attributes' in d
             assert 'relationships' in d
             assert set(d['relationships']) - set(relations) == set()
