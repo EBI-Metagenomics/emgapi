@@ -77,24 +77,24 @@ class TestSampleAPI(APITestCase):
 
         # Data
         assert len(rsp) == 1
-        assert rsp['data']['type'] == "Sample"
+        assert rsp['data']['type'] == "samples"
         assert rsp['data']['id'] == "DRS012345"
         _attr = rsp['data']['attributes']
         assert(len(_attr) == 17)
         assert _attr['accession'] == "DRS012345"
-        assert _attr['sample_desc'] == "abcdefghijklmnoprstuvwyz"
-        assert _attr['analysis_completed'] == str(self.data['date'].date())
-        assert _attr['collection_date'] == str(self.data['date'].date())
-        assert _attr['geo_loc_name'] == "Geo Location"
+        assert _attr['sample-desc'] == "abcdefghijklmnoprstuvwyz"
+        assert _attr['analysis-completed'] == str(self.data['date'].date())
+        assert _attr['collection-date'] == str(self.data['date'].date())
+        assert _attr['geo-loc-name'] == "Geo Location"
         # assert _attr['metadata_received'] == str(self.data['date'])
         # assert _attr['sequencedata_archived'] == str(self.data['date'])
         # assert _attr['sequencedata_received'] == str(self.data['date'])
-        assert not _attr['environment_biome']
-        assert _attr['environment_feature'] == "abcdef"
-        assert _attr['environment_material'] == "abcdef"
-        assert _attr['sample_name'] == "DRS012345"
-        assert _attr['sample_alias'] == "DRS012345"
-        assert not _attr['host_tax_id']
+        assert not _attr['environment-biome']
+        assert _attr['environment-feature'] == "abcdef"
+        assert _attr['environment-material'] == "abcdef"
+        assert _attr['sample-name'] == "DRS012345"
+        assert _attr['sample-alias'] == "DRS012345"
+        assert not _attr['host-tax-id']
         assert not _attr['species']
         assert _attr['latitude'] == "12.3456"
         assert _attr['longitude'] == "123.4567"
@@ -115,6 +115,6 @@ class TestSampleAPI(APITestCase):
         assert len(rsp['data']) == 1
 
         for d in rsp['data']:
-            assert d['type'] == "Sample"
+            assert d['type'] == "samples"
             assert d['id'] == "DRS012345"
             assert d['attributes']['accession'] == "DRS012345"

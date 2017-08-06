@@ -38,14 +38,17 @@ def test_list_samples(live_server, runs):
         # list samples
         sample_list = study.samples
         assert len(sample_list) == 1
-        for sample in study.samples:
+        for sample in sample_list:
             # list runs
-            run_list = sample.relationships.runs.fetch()
+            run_list = sample.runs
             assert len(run_list) == 1
             for run in run_list:
                 print(
                     study.accession,
+                    study.project_id,
+                    study.relationships.biomes,
                     sample.accession,
+                    sample.runs_count,
                     run.accession,
                     run.relationships.pipelines
                 )
