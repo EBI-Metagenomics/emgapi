@@ -112,16 +112,20 @@ def create_samples(count):
 class TestFullTextIndexAPI(object):
 
     @pytest.mark.parametrize(
-        '_model, _view, search_term, search_attr, counts',
+        '_model, _camelcase, _view, search_term, search_attr, counts',
         [
-            ('Study', 'emgapi:studies', 'findme', 'study_name', 5),
-            ('Sample', 'emgapi:samples', 'findme', 'sample_name', 5),
-            ('Publication', 'emgapi:publications', 'findme', 'pub_title', 5),
+            ('Study', 'studies', 'emgapi:studies',
+             'findme', 'study-name', 5),
+            ('Sample', 'samples', 'emgapi:samples',
+             'findme', 'sample-name', 5),
+            ('Publication', 'publications', 'emgapi:publications',
+             'findme', 'pub-title', 5),
         ]
     )
     @pytest.mark.django_db
     def test_search(self, live_server, client,
-                    _model, _view, search_term, search_attr, counts):
+                    _model, _camelcase, _view,
+                    search_term, search_attr, counts):
         view_name = _view.split(":")[1]
         klass = getattr(importlib.import_module("emgapi.models"), _model)
         entries = globals()["create_%s" % view_name](counts)
@@ -144,6 +148,6 @@ class TestFullTextIndexAPI(object):
         assert len(rsp['data']) == counts
 
         for d in rsp['data']:
-            assert d['type'] == _model
+            assert d['type'] == _camelcase
             assert d['attributes'][search_attr] == "%s findme" % _model
             assert not d['attributes'][search_attr] == "%s hideme" % _model
