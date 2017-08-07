@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from . import views
+from . import views_relations
 from django.conf.urls import url
 from rest_framework.routers import DefaultRouter
 
@@ -114,9 +114,51 @@ urlpatterns += router.urls
 relation_router = DefaultRouter(trailing_slash=False)
 
 relation_router.register(
+    r'biomes/(?P<lineage>[a-zA-Z0-9\:\-\s\(\)\<\>]+)/studies',
+    views_relations.BiomeStudyRelationshipViewSet,
+    base_name='biomes-studies'
+)
+
+relation_router.register(
+    r'publications/(?P<pub_id>[a-zA-Z0-9,]+)/studies',
+    views_relations.PublicationStudyRelationshipViewSet,
+    base_name='publications-studies'
+)
+
+relation_router.register(
     r'studies/(?P<accession>[a-zA-Z0-9]+)/samples',
-    views.StudySampleRelationshipViewSet,
+    views_relations.StudySampleRelationshipViewSet,
     base_name='studies-samples'
+)
+
+relation_router.register(
+    r'pipelines/(?P<release_version>[0-9\.]+)/samples',
+    views_relations.PipelineSampleRelationshipViewSet,
+    base_name='pipelines-samples'
+)
+
+relation_router.register(
+    r'experiments/(?P<experiment_type>[a-zA-Z0-9]+)/samples',
+    views_relations.ExperimentSampleRelationshipViewSet,
+    base_name='experiments-samples'
+)
+
+relation_router.register(
+    r'biomes/(?P<lineage>[a-zA-Z0-9\:\-\s\(\)\<\>]+)/samples',
+    views_relations.BiomeSampleRelationshipViewSet,
+    base_name='biomes-samples'
+)
+
+relation_router.register(
+    r'publications/(?P<pub_id>[a-zA-Z0-9,]+)/samples',
+    views_relations.PublicationSampleRelationshipViewSet,
+    base_name='publications-samples'
+)
+
+relation_router.register(
+    r'samples/(?P<accession>[a-zA-Z0-9]+)/runs',
+    views_relations.SampleRunRelationshipViewSet,
+    base_name='samples-runs'
 )
 
 urlpatterns += relation_router.urls

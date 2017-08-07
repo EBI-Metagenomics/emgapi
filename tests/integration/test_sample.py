@@ -77,7 +77,7 @@ class TestSampleAPI(APITestCase):
 
         # Data
         assert len(rsp) == 1
-        assert rsp['data']['type'] == "samples"
+        assert rsp['data']['type'] == "sample"
         assert rsp['data']['id'] == "DRS012345"
         _attr = rsp['data']['attributes']
         assert(len(_attr) == 17)
@@ -115,6 +115,6 @@ class TestSampleAPI(APITestCase):
         assert len(rsp['data']) == 1
 
         for d in rsp['data']:
-            assert d['type'] == "samples"
+            assert d['type'] == "sample"
             assert d['id'] == "DRS012345"
             assert d['attributes']['accession'] == "DRS012345"

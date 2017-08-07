@@ -328,11 +328,6 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     def get_accession(self, obj):
         return obj.accession
 
-    experiment = serializers.SerializerMethodField()
-
-    def get_experiment(self, obj):
-        return obj.experiment_type.experiment_type
-
     sample_accession = serializers.SerializerMethodField()
 
     def get_sample_accession(self, obj):
@@ -390,11 +385,6 @@ class RetrieveRunSerializer(ExplicitFieldsModelSerializer,
     )
 
     # attributes
-    experiment = serializers.SerializerMethodField()
-
-    def get_experiment(self, obj):
-        return obj.experiment_type.experiment_type
-
     sample_accession = serializers.SerializerMethodField()
 
     def get_sample_accession(self, obj):

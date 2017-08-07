@@ -114,11 +114,11 @@ class TestFullTextIndexAPI(object):
     @pytest.mark.parametrize(
         '_model, _camelcase, _view, search_term, search_attr, counts',
         [
-            ('Study', 'studies', 'emgapi:studies',
+            ('Study', 'study', 'emgapi:studies',
              'findme', 'study-name', 5),
-            ('Sample', 'samples', 'emgapi:samples',
+            ('Sample', 'sample', 'emgapi:samples',
              'findme', 'sample-name', 5),
-            ('Publication', 'publications', 'emgapi:publications',
+            ('Publication', 'publication', 'emgapi:publications',
              'findme', 'pub-title', 5),
         ]
     )
