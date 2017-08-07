@@ -167,10 +167,6 @@ class SampleFilter(django_filters.FilterSet):
 
 class RunFilter(django_filters.FilterSet):
 
-    analysis_status = django_filters.CharFilter(
-        name='analysis_status__analysis_status',
-        distinct=True)
-
     experiment_type = django_filters.CharFilter(
         name='experiment_type__experiment_type',
         distinct=True)
@@ -190,10 +186,6 @@ class RunFilter(django_filters.FilterSet):
         except emg_models.Biome.DoesNotExist:
             pass
         return qs
-
-    biome_name = django_filters.CharFilter(
-        name='sample__biome__biome_name',
-        distinct=True)
 
     species = django_filters.CharFilter(method='filter_species', distinct=True)
 
@@ -226,8 +218,6 @@ class RunFilter(django_filters.FilterSet):
         model = emg_models.Run
         fields = (
             'biome',
-            'biome_name',
-            'analysis_status',
             'experiment_type',
             # 'pipeline_version',
             'instrument_platform',
