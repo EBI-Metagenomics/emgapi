@@ -55,5 +55,5 @@ class TestRunAPI(APITestCase):
         assert len(rsp['data']) == 1
 
         for d in rsp['data']:
-            assert d['type'] == "samples"
+            assert d['type'] == "sample"
             assert d['id'] == "123"
