@@ -584,6 +584,7 @@ class StudySerializer(ExplicitFieldsModelSerializer,
 
     included_serializers = {
         'publications': 'emgapi.serializers.PublicationSerializer',
+        'biomes': 'emgapi.serializers.BiomeSerializer',
         # 'samples': 'emgapi.serializers.SampleSerializer',
     }
 
@@ -673,5 +674,6 @@ class RetrieveStudySerializer(StudySerializer):
 
     included_serializers = {
         'publications': 'emgapi.serializers.PublicationSerializer',
-        # 'samples': 'emgapi.serializers.SampleSerializer',
+        'samples': 'emgapi.serializers.SampleSerializer',
+        'biomes': 'emgapi.serializers.BiomeSerializer',
     }

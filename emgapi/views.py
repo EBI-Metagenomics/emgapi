@@ -142,8 +142,6 @@ class BiomeViewSet(mixins.ListModelMixin,
         ---
         `/api/biomes/root:Environmental:Aquatic`
         list all children
-
-        `/api/biomes/root:Host-associated?page=2`
         """
 
         return super(BiomeViewSet, self) \
@@ -276,16 +274,14 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         ---
         `/api/studies`
 
-        `/api/studies?include=publications,biome` with publications and biome
+        `/api/studies?fields[studies]=accession,samples_count,biomes`
+        retrieve only selected fileds
 
-        `/api/studies?fields=accession,biome_name` retrieve only selected
-        fileds
+        `/api/studies?include=publications` with publications
 
         Filter by:
         ---
-        `/api/studies?biome=root:Host-associated:Human`
-
-        `/api/studies?biome_name=human`
+        `/api/studies?biome=root:Environmental:Terrestrial:Soil`
 
         `/api/studies?centre_name=BioProject`
 
@@ -303,10 +299,10 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         Retrieves study for the given accession
         Example:
         ---
-        `/api/studies/SRP001634` retrieve study SRP001634
+        `/api/studies/ERP009004` retrieve study SRP001634
 
-        `/api/studies/SRP001634?include=publications,biome`
-        with publications and biome
+        `/api/studies/ERP009004?include=samples`
+        with samples
         """
         return super(StudyViewSet, self).retrieve(request, *args, **kwargs)
 
@@ -367,7 +363,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         Retrieves list of biomes for the given study accession
         Example:
         ---
-        `/api/studies/SRP001634/biomes` retrieve linked samples
+        `/api/studies/ERP009004/biomes` retrieve linked samples
         """
 
         obj = self.get_object()
@@ -539,13 +535,13 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         ---
         `/api/samples` retrieves list of samples
 
+        `/api/samples?fields[samples]=accession,runs_count,biome`
+        retrieve only selected fileds
+
         `/api/samples?include=metadata,runs,study`
         with related metadata, runs and studies
 
         `/api/samples?ordering=accession` ordered by accession
-
-        `/api/samples?fields=accession,biome_name`
-        retrieve only selected fileds
 
         Filter by:
         ---
@@ -554,8 +550,6 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         `/api/samples?species=sapiens`
 
         `/api/samples?biome=root:Environmental:Aquatic:Marine`
-
-        `/api/samples?biome_name=soil`
 
         Search for:
         ---
@@ -781,14 +775,14 @@ class RunViewSet(mixins.RetrieveModelMixin,
         ---
         `/api/runs`
 
+        `/api/runs?fields[runs]=accession,experiment_type` retrieve only
+        selected fileds
+
         Filter by:
         ---
         `/api/runs?experiment_type=metagenomics`
 
         `/api/runs?biome=root:Environmental:Aquatic:Marine`
-
-        `/api/runs?fields=accession,biome_name` retrieve only selected fileds
-
         """
         return super(RunViewSet, self).list(request, *args, **kwargs)
 
