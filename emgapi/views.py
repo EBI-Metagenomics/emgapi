@@ -427,7 +427,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
     )
     def metadata(self, request, accession=None):
         """
-        Retrieves list of samples for the given study accession
+        Retrieves metadatafor the given sample accession
         Example:
         ---
         `/api/samples/ERS1015417/metadata` retrieve metadata
@@ -659,7 +659,7 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
 
     def list(self, request, *args, **kwargs):
         """
-        Retrieves list of pipeline versions
+        Retrieves list of available pipeline versions
         Example:
         ---
         `/api/pipeline`
@@ -675,7 +675,7 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
     )
     def tools(self, request, release_version=None):
         """
-        Retrieves list of tools for the given pipeline version
+        Retrieves list of pipeline tools for the given pipeline version
         Example:
         ---
         `/api/pipeline/tools`
