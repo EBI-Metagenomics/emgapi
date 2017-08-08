@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from django.conf.urls import url
+
 # from django.conf.urls import url
 from rest_framework_mongoengine.routers import DefaultRouter \
     as MongoDefaultRouter
@@ -22,6 +24,14 @@ from . import views as m_views
 
 app_name = "emgapimetadata"
 urlpatterns = [
+
+    url(
+        (r'^runs/(?P<accession>[a-zA-Z0-9]+)/'
+         r'pipelines/(?P<release_version>[0-9\.]+)/annotations$'),
+        m_views.AnnotationRunAPIView.as_view(),
+        name='runs-pipelines-annotations-list'
+    ),
+
 ]
 
 # MongoDB views
