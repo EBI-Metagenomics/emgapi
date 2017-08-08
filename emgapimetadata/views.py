@@ -16,17 +16,19 @@
 
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
+from rest_framework import generics
 
-from rest_framework_mongoengine import viewsets
+from rest_framework_mongoengine import viewsets as m_viewset
 
 from emgapi import serializers as emg_serializers
 from emgapi import models as emg_models
+from emgapi import views as emg_views
 
 from . import serializers as m_serializers
 from . import models as m_models
 
 
-class AnnotationViewSet(viewsets.ReadOnlyModelViewSet):
+class AnnotationViewSet(m_viewset.ReadOnlyModelViewSet):
 
     serializer_class = m_serializers.AnnotationSerializer
 
@@ -60,6 +62,43 @@ class AnnotationViewSet(viewsets.ReadOnlyModelViewSet):
                 'analysis_status',
                 'experiment_type'
             )
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(
+            queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+class AnnotationRunAPIView(emg_views.MultipleFieldLookupMixin,
+                           generics.ListAPIView):
+
+    serializer_class = m_serializers.AnnotationSerializer
+
+    lookup_fields = ('accession', 'release_version')
+
+    def get_queryset(self):
+        return emg_models.AnalysisJob.objects \
+            .available(self.request) \
+            .select_related(
+                'sample',
+                'pipeline',
+                'analysis_status',
+            )
+
+    def list(self, request, accession, release_version, *args, **kwargs):
+        """
+        Retrieves run for the given accession and pipeline version
+        Example:
+        ---
+        `/api/runs/ERR1385375/pipelines/3.0`
+        """
+
+        queryset = m_models.Annotation.objects \
+            .filter(run_accession=accession)
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(
