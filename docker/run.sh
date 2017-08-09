@@ -32,6 +32,7 @@ is_db_running() {
 install() {
   echo "Installing EMG..."
   pip install -U $srcDir
+  pip install -U "django-redis>=4.4"
 }
 
 start() {
@@ -42,7 +43,8 @@ start() {
   emgcli collectstatic --noinput
 
   # emgcli runserver 0.0.0.0:8000
-  emgunicorn 
+  # emgunicorn
+  gunicorn -p ~/emgvar/django.pid --bind 0.0.0.0:8000 --workers 5 --reload emgcli.wsgi:application
 
 }
 
@@ -56,16 +58,6 @@ docker() {
   start
 
 }
-
-jenkins() {
-
-  create_venv
-  activate_venv
-  install
-  BUILD_ID=dontKillMe start
-
-}
-
 
 rm -f $srcDir/var/django.pid
 
