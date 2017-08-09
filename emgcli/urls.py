@@ -24,7 +24,7 @@ from rest_auth import views as rest_auth_views
 
 
 EMG_TITLE = 'EBI Metagenomics JSON API'
-EMG_URL = 'http://www.ebi.ac.uk/metagenomics/api/'
+# EMG_URL = 'http://www.ebi.ac.uk/metagenomics/api/'
 EMG_DESC = (
     'Is a free resource to visualise and discover metagenomic datasets. '
     'For more details and full documentation go to '
@@ -33,9 +33,9 @@ EMG_DESC = (
 
 
 schema_view = get_schema_view(
-    title=EMG_TITLE, url=EMG_URL, description=EMG_DESC)
+    title=EMG_TITLE, description=EMG_DESC)
 
-docs_schema_view = get_swagger_view(title=EMG_TITLE, url=EMG_URL)
+docs_schema_view = get_swagger_view(title=EMG_TITLE)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
