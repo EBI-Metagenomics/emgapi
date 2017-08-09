@@ -233,8 +233,7 @@ except KeyError:
 try:
     CACHES = yamjam()['emg']['caches']
 except KeyError:
-    warnings.warn("CACHES not configured, using default",
-                  RuntimeWarning)
+    pass
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
