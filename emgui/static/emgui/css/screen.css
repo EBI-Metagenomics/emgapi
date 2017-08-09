@@ -1,0 +1,33 @@
+.swagger-section {
+  font-weight: normal;
+}
+/* Header */
+.swagger-section #header {
+  background-color: #739eac;
+  color: #fff;
+}
+
+.swagger-section .swagger-ui-wrap {
+  font-weight: normal;
+  max-width: 90%;
+}
+
+.swagger-section .swagger-ui-wrap a {
+  font-weight: normal;
+}
+
+.swagger-section .swagger-ui-wrap .info_title {
+  color: #666;
+  font-weight: normal;
+}
+
+/* Login/Logout button */
+.swagger-section a.header__btn,
+.swagger-section #auth_container .authorize__btn {
+  background-color: #207a7a;
+  background-image: linear-gradient(#54bdbd, #207a7a);
+}
+.swagger-section .header__btn:hover,
+.swagger-section #auth_container .authorize__btn:hover {
+  background-color: #547f00;
+}
