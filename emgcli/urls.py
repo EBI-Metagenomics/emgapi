@@ -61,7 +61,7 @@ urlpatterns = [
         name='rest_auth_logout'
     ),
 
-    url(r'^api/doc$', docs_schema_view),
+    url(r'^api/docs/$', docs_schema_view),
 
     url(r'^api/', include('emgapi.urls',
                           namespace='emgapi')),
