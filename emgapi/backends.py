@@ -28,12 +28,12 @@ class EMGBackend(object):
     supports_object_permissions = False
 
     def authenticate(self, request, username=None, password=None):
-        self._get_backend_settings()
+        ena_auth_url = self._get_backend_settings()
         req = requests.post(
-            self.ena_auth_url,
+            ena_auth_url,
             json={
                 'authRealms': ['SRA'],
-                'rememberMe': True,
+                'rememberMe': False,
                 'username': username,
                 'password': password,
             }
@@ -55,4 +55,4 @@ class EMGBackend(object):
             return None
 
     def _get_backend_settings(self):
-        self.ena_auth_url = settings.EMG_BACKEND_AUTH_URL
+        return settings.EMG_BACKEND_AUTH_URL
