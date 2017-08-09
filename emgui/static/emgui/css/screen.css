@@ -1,15 +1,23 @@
+
 .swagger-section {
   font-weight: normal;
+  font-family: 'Lato',Arial,Helvetica,sans-serif;
 }
 /* Header */
 .swagger-section #header {
-  background-color: #739eac;
+  background-color: #389198;
   color: #fff;
+  width: 100%;
+  height: 50px;
+}
+.swagger-section #header .swagger-ui-wrap img {
+  height: 35px;
 }
 
 .swagger-section .swagger-ui-wrap {
   font-weight: normal;
-  max-width: 90%;
+  max-width: 100%;
+  padding: 0 2rem;
 }
 
 .swagger-section .swagger-ui-wrap a {
@@ -17,8 +25,10 @@
 }
 
 .swagger-section .swagger-ui-wrap .info_title {
-  color: #666;
+  color: #333;
   font-weight: normal;
+  padding-left: 0.5rem;
+  padding-bottom: 0;
 }
 
 /* Login/Logout button */
@@ -30,4 +40,21 @@
 .swagger-section .header__btn:hover,
 .swagger-section #auth_container .authorize__btn:hover {
   background-color: #547f00;
+}
+
+.swagger-section .swagger-ui-wrap h1 a:hover,
+.swagger-section .swagger-ui-wrap h2 a:hover,
+.swagger-section .swagger-ui-wrap h3 a:hover,
+.swagger-section .swagger-ui-wrap h4 a:hover,
+.swagger-section .swagger-ui-wrap h5 a:hover,
+.swagger-section .swagger-ui-wrap h6 a:hover {
+  text-decoration: none;
+}
+
+.swagger-section .swagger-ui-wrap ul#resources li.resource div.heading ul.options li a:hover, .swagger-section .swagger-ui-wrap ul#resources li.resource div.heading ul.options li a:active, .swagger-section .swagger-ui-wrap ul#resources li.resource div.heading ul.options li a.active {
+    text-decoration: none;
+}
+
+.swagger-section .swagger-ui-wrap ul#resources li.resource div.heading h2 a {
+  color: #666;
 }
