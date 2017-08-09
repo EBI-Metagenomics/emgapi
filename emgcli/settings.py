@@ -143,12 +143,15 @@ DEBUG = False
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
+    # 'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    # 'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
+    # UI
+    'emgui',
     # rest framework
     'rest_framework',
     'rest_framework.authtoken',
@@ -157,10 +160,14 @@ INSTALLED_APPS = [
     'rest_auth',
     # apps
     'emgapi',
+
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # Simplified static file serving.
+    # https://warehouse.python.org/project/whitenoise/
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -177,6 +184,7 @@ TEMPLATES = [
         'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
+            'debug': DEBUG,
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
@@ -191,11 +199,11 @@ WSGI_APPLICATION = 'emgcli.wsgi.application'
 
 # Security
 ALLOWED_HOSTS = ["*"]
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 X_FRAME_OPTIONS = 'DENY'
-CSRF_COOKIE_SECURE = True
-# SESSION_COOKIE_SECURE = True
 SECURE_BROWSER_XSS_FILTER = True
+# CSRF_COOKIE_SECURE = True
+# SESSION_COOKIE_SECURE = True
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 ## django cors
 INSTALLED_APPS += ('corsheaders',)
@@ -225,8 +233,7 @@ except KeyError:
 try:
     CACHES = yamjam()['emg']['caches']
 except KeyError:
-    warnings.warn("CACHES not configured, using default",
-                  RuntimeWarning)
+    pass
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -259,16 +266,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.11/howto/static-files/
-
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
-## statics
-INSTALLED_APPS += ('whitenoise',)
-MIDDLEWARE.append('whitenoise.middleware.WhiteNoiseMiddleware')
 
 # Django Rest Framewrk
 
@@ -337,6 +334,10 @@ LOGIN_URL = 'rest_framework:login'
 LOGOUT_URL = 'rest_framework:logout'
 
 SWAGGER_SETTINGS = {
+    'ENABLED_METHODS': [
+        'get',
+        'post',
+    ],
     'SECURITY_DEFINITIONS': {
         # 'basic': {
         #     'type': 'basic'
@@ -356,4 +357,18 @@ AUTHENTICATION_BACKENDS = (
     'emgapi.backends.EMGBackend',
 )
 
-EMG_BACKEND_AUTH_URL = yamjam()['emg']['emg_backend_auth']
+try:
+    EMG_BACKEND_AUTH_URL = yamjam()['emg']['emg_backend_auth']
+except KeyError:
+    EMG_BACKEND_AUTH_URL = None
+
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/1.11/howto/static-files/
+try:
+    FORCE_SCRIPT_NAME = yamjam()['emg']['prefix']
+except KeyError:
+    FORCE_SCRIPT_NAME = ''
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_URL = '%s/static/' % FORCE_SCRIPT_NAME.rstrip('/')

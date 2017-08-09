@@ -1,5 +1,5 @@
-.. image:: https://travis-ci.org/ola-t/ebi-metagenomics-api.svg?branch=master
-    :target: https://travis-ci.org/ola-t/ebi-metagenomics-api
+.. image:: https://travis-ci.org/ProteinsWebTeam/ebi-metagenomics-api.svg?branch=master
+    :target: https://travis-ci.org/ProteinsWebTeam/ebi-metagenomics-api
 
 
 EMG API

@@ -4,14 +4,14 @@
 
 # deployment
 gunicorn
-whitenoise~=3.3.0
+whitenoise
 mysqlclient
 sqlparse
 requests
 yamjam
 
 # optional session store
-django-redis>=4.4
+# django-redis>=4.4
 
 # log handler
 ConcurrentLogHandler
