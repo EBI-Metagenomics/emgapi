@@ -18,17 +18,24 @@
 from django.conf.urls import include, url
 
 from rest_framework.schemas import get_schema_view
-# from rest_framework.renderers import CoreJSONRenderer
 from rest_framework_swagger.views import get_swagger_view
 
 from rest_auth import views as rest_auth_views
 
-schema_view = get_schema_view(
-    title='EBI metagenomics API',
-    # renderer_classes=[CoreJSONRenderer]
+
+EMG_TITLE = 'EBI Metagenomics JSON API'
+EMG_URL = 'http://www.ebi.ac.uk/metagenomics/api/'
+EMG_DESC = (
+    'Is a free resource to visualise and discover metagenomic datasets. '
+    'For more details and full documentation go to '
+    'http://www.ebi.ac.uk/metagenomics'
 )
 
-docs_schema_view = get_swagger_view(title='EBI metagenomics API')
+
+schema_view = get_schema_view(
+    title=EMG_TITLE, url=EMG_URL, description=EMG_DESC)
+
+docs_schema_view = get_swagger_view(title=EMG_TITLE, url=EMG_URL)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
@@ -54,7 +61,7 @@ urlpatterns = [
         name='rest_auth_logout'
     ),
 
-    url(r'^api/docs/$', docs_schema_view),
+    url(r'^api/doc$', docs_schema_view),
 
     url(r'^api/', include('emgapi.urls',
                           namespace='emgapi')),

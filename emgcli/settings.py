@@ -150,6 +150,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     # 'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
+    # UI
+    'emgui',
     # rest framework
     'rest_framework',
     'rest_framework.authtoken',
@@ -158,6 +160,7 @@ INSTALLED_APPS = [
     'rest_auth',
     # apps
     'emgapi',
+
 ]
 
 MIDDLEWARE = [
@@ -332,11 +335,10 @@ LOGIN_URL = 'rest_framework:login'
 LOGOUT_URL = 'rest_framework:logout'
 
 SWAGGER_SETTINGS = {
-    'enabled_methods': [
+    'ENABLED_METHODS': [
         'get',
         'post',
     ],
-
     'SECURITY_DEFINITIONS': {
         # 'basic': {
         #     'type': 'basic'
