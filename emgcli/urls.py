@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from django.contrib import admin
+# from django.contrib import admin
 from django.conf.urls import include, url
 
 from rest_framework.schemas import get_schema_view
@@ -36,7 +36,7 @@ urlpatterns = [
 
     url(r'^$', schema_view),
 
-    url(r'^admin/', admin.site.urls),
+    # url(r'^admin/', admin.site.urls),
 
     url(r'^http-auth/', include('rest_framework.urls',
                                 namespace='rest_framework')),
@@ -53,7 +53,6 @@ urlpatterns = [
         rest_auth_views.LogoutView.as_view(),
         name='rest_auth_logout'
     ),
-
 
     url(r'^api/docs/$', docs_schema_view),
 
