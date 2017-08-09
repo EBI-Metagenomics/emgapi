@@ -32,6 +32,7 @@ is_db_running() {
 install() {
   echo "Installing EMG..."
   pip install -U $srcDir
+  pip install -U "django-redis>=4.4"
 }
 
 start() {
