@@ -16,9 +16,11 @@
 }
 
 .swagger-section .swagger-ui-wrap .info_title {
-  color: #333;
-  font-weight: normal;
-  padding-left: 0.5rem;
+  font-weight: 300;
+  color: rgb(0, 124, 130);
+  font-size: 2.5rem;
+  font-style: normal;
+  padding-left: 0;
   padding-bottom: 0;
 }
 
