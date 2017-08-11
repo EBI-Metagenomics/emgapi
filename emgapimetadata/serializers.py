@@ -49,7 +49,6 @@ class AnnotationSerializer(m_serializers.DocumentSerializer,
         # workaround https://github.com/django-json-api
         # /django-rest-framework-json-api/issues/178
         return ()
-        # return m_models.Annotation.objects.filter(accession=obj.accession)
 
     class Meta:
         model = m_models.Annotation
