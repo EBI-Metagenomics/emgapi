@@ -33,10 +33,14 @@ class AnnotationViewSet(m_viewset.ReadOnlyModelViewSet):
     serializer_class = m_serializers.AnnotationSerializer
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9]+'
+    lookup_value_regex = '[a-zA-Z0-9\:]+'
 
     def get_queryset(self):
         return m_models.Annotation.objects.all()
+
+    def get_object(self):
+        accession = self.kwargs.get('accession', None)
+        return m_models.Annotation.objects(accession=accession).first()
 
     def get_serializer_class(self):
         return super(AnnotationViewSet, self).get_serializer_class()
@@ -53,8 +57,11 @@ class AnnotationViewSet(m_viewset.ReadOnlyModelViewSet):
         ---
         `/api/annotations/GO0001/runs`
         """
-        run_ids = m_models.Annotation.objects \
-            .filter(accession=accession).values_list('run_accession')
+        obj = self.get_object()
+        run_ids = m_models.Run.objects \
+            .filter(annotations__annotation=obj.pk) \
+            .only('accession')
+        run_ids = [str(r.accession) for r in run_ids]
         queryset = emg_models.Run.objects.filter(accession__in=run_ids) \
             .available(self.request) \
             .select_related(
@@ -97,8 +104,11 @@ class AnnotationRunAPIView(emg_views.MultipleFieldLookupMixin,
         `/api/runs/ERR1385375/pipelines/3.0`
         """
 
-        queryset = m_models.Annotation.objects \
-            .filter(run_accession=accession)
+        run = m_models.Run.objects.filter(
+            accession=accession, pipeline_version=release_version).first()
+        ann_ids = [rann.annotation.pk for rann in run.annotations]
+        queryset = m_models.Annotation.objects.filter(pk__in=ann_ids)
+
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(
