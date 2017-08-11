@@ -112,19 +112,19 @@ def create_samples(count):
 class TestFullTextIndexAPI(object):
 
     @pytest.mark.parametrize(
-        '_model, _camelcase, _view, search_term, search_attr, counts',
+        '_model, _dashed, _view, search_term, search_attr, counts',
         [
-            ('Study', 'study', 'emgapi:studies',
+            ('Study', 'studies', 'emgapi:studies',
              'findme', 'study-name', 5),
-            ('Sample', 'sample', 'emgapi:samples',
+            ('Sample', 'samples', 'emgapi:samples',
              'findme', 'sample-name', 5),
-            ('Publication', 'publication', 'emgapi:publications',
+            ('Publication', 'publications', 'emgapi:publications',
              'findme', 'pub-title', 5),
         ]
     )
     @pytest.mark.django_db
     def test_search(self, live_server, client,
-                    _model, _camelcase, _view,
+                    _model, _dashed, _view,
                     search_term, search_attr, counts):
         view_name = _view.split(":")[1]
         klass = getattr(importlib.import_module("emgapi.models"), _model)
@@ -148,6 +148,6 @@ class TestFullTextIndexAPI(object):
         assert len(rsp['data']) == counts
 
         for d in rsp['data']:
-            assert d['type'] == _camelcase
+            assert d['type'] == _dashed
             assert d['attributes'][search_attr] == "%s findme" % _model
             assert not d['attributes'][search_attr] == "%s hideme" % _model

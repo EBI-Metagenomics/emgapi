@@ -39,9 +39,9 @@ class TestDefaultAPI(object):
             "samples": "http://testserver/api/samples",
             "runs": "http://testserver/api/runs",
             "pipelines": "http://testserver/api/pipelines",
-            "experiments": "http://testserver/api/experiments",
+            "experiment-types": "http://testserver/api/experiment-types",
             "publications": "http://testserver/api/publications",
-            'tools': 'http://testserver/api/tools',
+            'pipeline-tools': 'http://testserver/api/pipeline-tools',
             "mydata": "http://testserver/api/mydata",
         }
         assert rsp['data'] == expected
@@ -51,13 +51,13 @@ class TestDefaultAPI(object):
         [
             # TODO: create alias
             # 'emgapi:biomes',
-            'emgapi:experiments',
+            'emgapi:experiment-types',
             'emgapi:pipelines',
             'emgapi:publications',
             'emgapi:samples',
             'emgapi:runs',
             'emgapi:studies',
-            'emgapi:tools',
+            'emgapi:pipeline-tools',
             pytest.mark.xfail('viewdoesnotexist', raises=NoReverseMatch),
         ]
     )
@@ -75,19 +75,20 @@ class TestDefaultAPI(object):
     @pytest.mark.parametrize(
         '_model, _camelcase, _view, relations',
         [
-            ('ExperimentType', 'experimentType', 'emgapi:experiments',
+            ('ExperimentType', 'experiment-types', 'emgapi:experiment-types',
              ['samples']),
-            ('Pipeline', 'pipeline', 'emgapi:pipelines',
+            ('Pipeline', 'pipelines', 'emgapi:pipelines',
              ['samples', 'tools']),
-            ('Publication', 'publication', 'emgapi:publications',
+            ('Publication', 'publications', 'emgapi:publications',
              ['studies']),
-            ('Run', 'run', 'emgapi:runs',
+            ('Run', 'runs', 'emgapi:runs',
              ['pipelines', 'experiment-type', 'sample']),
-            ('Sample', 'sample', 'emgapi:samples',
+            ('Sample', 'samples', 'emgapi:samples',
              ['biome', 'study', 'runs', 'metadata']),
-            ('Study', 'study', 'emgapi:studies',
+            ('Study', 'studies', 'emgapi:studies',
              ['biomes', 'publications', 'samples']),
-            ('PipelineTool', 'pipelineTool', 'emgapi:tools', ['pipelines']),
+            ('PipelineTool', 'pipeline-tools', 'emgapi:pipeline-tools',
+             ['pipelines']),
         ]
     )
     @pytest.mark.django_db
