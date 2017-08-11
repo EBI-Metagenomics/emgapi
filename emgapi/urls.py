@@ -30,7 +30,8 @@ urlpatterns = [
     ),
 
     url(
-        r'^tools/(?P<tool_name>[\w+]+)/(?P<version>[a-zA-Z0-9\-\.]+)$',
+        (r'^pipeline-tools/(?P<tool_name>[\w+]+)/'
+         '(?P<version>[a-zA-Z0-9\-\.]+)$'),
         views.PipelineToolAPIView.as_view(),
         name='pipeline-tools-detail'
     ),
