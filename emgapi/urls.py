@@ -32,7 +32,7 @@ urlpatterns = [
     url(
         r'^tools/(?P<tool_name>[\w+]+)/(?P<version>[a-zA-Z0-9\-\.]+)$',
         views.PipelineToolAPIView.as_view(),
-        name='tools-detail'
+        name='pipeline-tools-detail'
     ),
 
     # url(
@@ -71,9 +71,9 @@ router.register(
 )
 
 router.register(
-    r'experiments',
+    r'experiment-types',
     views.ExperimentTypeViewSet,
-    base_name='experiments'
+    base_name='experiment-types'
 )
 
 router.register(
@@ -89,9 +89,9 @@ router.register(
 )
 
 router.register(
-    r'tools',
+    r'pipeline-tools',
     views.PipelineToolViewSet,
-    base_name='tools'
+    base_name='pipeline-tools'
 )
 
 # router.register(
@@ -138,9 +138,9 @@ relation_router.register(
 )
 
 relation_router.register(
-    r'experiments/(?P<experiment_type>[a-zA-Z0-9]+)/samples',
+    r'experiment-types/(?P<experiment_type>[a-zA-Z0-9]+)/samples',
     views_relations.ExperimentSampleRelationshipViewSet,
-    base_name='experiments-samples'
+    base_name='experiment-types-samples'
 )
 
 relation_router.register(
