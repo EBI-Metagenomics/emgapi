@@ -79,7 +79,7 @@ class TestBiomeAPI(APITestCase):
 
         biomes = rsp['data']
         for b in biomes:
-            assert b['type'] == 'biome'
+            assert b['type'] == 'biomes'
             assert b['id'] in ('root:foo', 'root:foo2')
 
         response = self.client.get(
@@ -88,7 +88,7 @@ class TestBiomeAPI(APITestCase):
         rsp = response.json()
         assert len(rsp['data']) == 2
         for s in rsp['data']:
-            assert s['type'] == 'sample'
+            assert s['type'] == 'samples'
             assert s['id'] in ('ERS002', 'ERS004')
 
     def test_study(self):
@@ -103,5 +103,5 @@ class TestBiomeAPI(APITestCase):
         _expected_biomes = (
             'root:foo', 'root:foo2', 'root:foo:bar', 'root:foo2:bar2')
         for b in biomes:
-            assert b['type'] == 'biome'
+            assert b['type'] == 'biomes'
             assert b['id'] in _expected_biomes

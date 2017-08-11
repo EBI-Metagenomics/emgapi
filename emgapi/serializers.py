@@ -189,7 +189,7 @@ class PipelineToolSerializer(ExplicitFieldsModelSerializer,
     id = serializers.ReadOnlyField(source="multiple_pk")
 
     url = PipelineToolHyperlinkedField(
-        view_name='emgapi:tools-detail',
+        view_name='emgapi:pipeline-tools-detail',
         lookup_field='tool_name',
     )
 
@@ -276,7 +276,7 @@ class ExperimentTypeSerializer(ExplicitFieldsModelSerializer,
     included_serializers = {}
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi:experiments-detail',
+        view_name='emgapi:experiment-types-detail',
         lookup_field='experiment_type',
     )
 
@@ -288,7 +288,7 @@ class ExperimentTypeSerializer(ExplicitFieldsModelSerializer,
     # samples = relations.ResourceRelatedField(
     #     read_only=True,
     #     many=True,
-    #     related_link_view_name='emgapi:experiments-samples-list',
+    #     related_link_view_name='emgapi:experiment-types-samples-list',
     #     related_link_url_kwarg='experiment_type',
     # )
     samples = relations.SerializerMethodResourceRelatedField(
@@ -296,7 +296,7 @@ class ExperimentTypeSerializer(ExplicitFieldsModelSerializer,
         model=emg_models.Sample,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:experiments-samples-list',
+        related_link_view_name='emgapi:experiment-types-samples-list',
         related_link_url_kwarg='experiment_type',
         related_link_lookup_field='experiment_type',
     )
@@ -336,7 +336,7 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     # relationship
     experiment_type = serializers.HyperlinkedRelatedField(
         read_only=True,
-        view_name='emgapi:experiments-detail',
+        view_name='emgapi:experiment-types-detail',
         lookup_field='experiment_type'
     )
 
@@ -393,7 +393,7 @@ class RetrieveRunSerializer(ExplicitFieldsModelSerializer,
     # relationship
     experiment_type = serializers.HyperlinkedRelatedField(
         read_only=True,
-        view_name='emgapi:experiments-detail',
+        view_name='emgapi:experiment-types-detail',
         lookup_field='experiment_type'
     )
 

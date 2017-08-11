@@ -46,9 +46,9 @@ def test_list_samples(live_server, runs):
                 print(
                     study.accession,
                     study.project_id,
-                    study.relationships.biomes,
                     sample.accession,
+                    # sample.biome.biome_name,
                     sample.runs_count,
                     run.accession,
-                    run.relationships.pipelines
+                    run.experiment_type,
                 )
