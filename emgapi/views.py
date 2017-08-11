@@ -706,7 +706,7 @@ class PipelineToolAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):
         Retrieves pipeline tool details for the given pipeline version
         Example:
         ---
-        `/api/tools/interproscan/5.19-58.0`
+        `/api/pipeline-tools/interproscan/5.19-58.0`
         """
         run = get_object_or_404(
             emg_models.PipelineTool,
@@ -732,7 +732,7 @@ class PipelineToolViewSet(mixins.ListModelMixin,
         Retrieves list of pipeline tools
         Example:
         ---
-        `/api/tools` retrieves list of pipeline tools
+        `/api/pipeline-tools` retrieves list of pipeline tools
         """
         return super(PipelineToolViewSet, self).list(request, *args, **kwargs)
 
