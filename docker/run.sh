@@ -21,7 +21,7 @@ create_venv() {
   export PATH=$condaDir/bin:$PATH
   rm -rf miniconda.sh
   hash -r
-  conda update -q conda
+  # conda update -q conda
   conda info -a
 
   # TODO: wait until 4.4 https://github.com/conda/conda/issues/3200
@@ -44,7 +44,6 @@ is_db_running() {
 install_src() {
   echo "Installing EMG API..."
   pip install -U $srcDir
-  pip install -U "django-redis>=4.4"
 }
 
 start() {
@@ -70,6 +69,7 @@ install() {
 
 install_docker() {
   install
+  pip install -U "django-redis>=4.4"
   is_db_running "-u root -h mysql -P 3306"
 }
 
@@ -80,6 +80,7 @@ docker() {
 }
 
 travis() {
+  export PATH=$condaDir/bin:$PATH
   # Install source, otherwise OSError: [Errno 2] No such file or directory:
   #     '/home/travis/build/ola-t/ebi-metagenomics-api/staticfiles/'
   install_src
