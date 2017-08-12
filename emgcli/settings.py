@@ -404,10 +404,10 @@ try:
 except KeyError:
     EMG_BACKEND_AUTH_URL = None
 
-EMG_TITLE = 'EBI Metagenomics JSON API'
+EMG_TITLE = 'EBI Metagenomics WEB API'
 EMG_URL = FORCE_SCRIPT_NAME
 EMG_DESC = (
     'Is a free resource to visualise and discover metagenomic datasets. '
     'For more details and full documentation go to '
-    'http://www.ebi.ac.uk/metagenomics/api/docs'
+    'http://www.ebi.ac.uk/metagenomics/'
 )
