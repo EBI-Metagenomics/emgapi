@@ -24,15 +24,3 @@
   padding-bottom: 0;
 }
 
-.swagger-section .swagger-ui-wrap h1 a:hover,
-.swagger-section .swagger-ui-wrap h2 a:hover,
-.swagger-section .swagger-ui-wrap h3 a:hover,
-.swagger-section .swagger-ui-wrap h4 a:hover,
-.swagger-section .swagger-ui-wrap h5 a:hover,
-.swagger-section .swagger-ui-wrap h6 a:hover {
-  text-decoration: none;
-}
-
-.swagger-section .swagger-ui-wrap ul#resources li.resource div.heading ul.options li a:hover, .swagger-section .swagger-ui-wrap ul#resources li.resource div.heading ul.options li a:active, .swagger-section .swagger-ui-wrap ul#resources li.resource div.heading ul.options li a.active {
-    text-decoration: none;
-}
