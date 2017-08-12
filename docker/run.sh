@@ -74,6 +74,9 @@ docker() {
 }
 
 travis() {
+  # Install source, otherwise OSError: [Errno 2] No such file or directory:
+  #     '/home/travis/build/ola-t/ebi-metagenomics-api/staticfiles/'
+  install_src
   cd $srcDir
   python setup.py test
 }
