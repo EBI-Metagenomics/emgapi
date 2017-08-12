@@ -373,18 +373,41 @@ AUTHENTICATION_BACKENDS = (
     'emgapi.backends.EMGBackend',
 )
 
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/1.11/howto/static-files/
+try:
+    FORCE_SCRIPT_NAME = yamjam()['emg']['prefix'].rstrip('/')
+    if not FORCE_SCRIPT_NAME.startswith("/"):
+        FORCE_SCRIPT_NAME = "/%s" % FORCE_SCRIPT_NAME
+except KeyError:
+    FORCE_SCRIPT_NAME = ''
+
+
+try:
+    STATIC_ROOT = yamjam()['emg']['static_root']
+except KeyError:
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+WHITENOISE_STATIC_PREFIX = '/static/'
+
+STATIC_URL = '%s%s' % (FORCE_SCRIPT_NAME, WHITENOISE_STATIC_PREFIX)
+
+STATICFILES_FINDERS = (
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+)
+
+# EMG
 try:
     EMG_BACKEND_AUTH_URL = yamjam()['emg']['emg_backend_auth']
 except KeyError:
     EMG_BACKEND_AUTH_URL = None
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.11/howto/static-files/
-try:
-    FORCE_SCRIPT_NAME = yamjam()['emg']['prefix']
-except KeyError:
-    FORCE_SCRIPT_NAME = ''
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-STATIC_URL = '%s/static/' % FORCE_SCRIPT_NAME.rstrip('/')
+EMG_TITLE = 'EBI Metagenomics JSON API'
+EMG_URL = FORCE_SCRIPT_NAME
+EMG_DESC = (
+    'Is a free resource to visualise and discover metagenomic datasets. '
+    'For more details and full documentation go to '
+    'http://www.ebi.ac.uk/metagenomics/api/docs'
+)
