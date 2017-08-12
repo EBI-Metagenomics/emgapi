@@ -63,14 +63,16 @@ Install application::
     pip install "git+git://github.com/ola-t/ebi-metagenomics-api@master#egg=emgcli"
 
 
-Start up application server::
+Start application::
 
     emgcli check --deploy
     emgcli migrate --fake-initial
     emgcli collectstatic --noinput
 
     # start application server
-    gunicorn --daemon -p ~/emgvar/django.pid --bind 0.0.0.0:8000 --workers 5 --reload emgcli.wsgi:application
+    # for a TCP configuration use: --bind 127.0.0.1:8000
+    # for UNIX domain socket use: --bind=unix:$SOCKFILE
+    gunicorn --daemon -p ~/emgvar/django.pid --workers 5 --reload emgcli.wsgi:application
 
 NOTE: `~/emgvar` is used as default directory to store logs, secret key, etc.
 
