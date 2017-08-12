@@ -120,22 +120,27 @@ LOGGING = {
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
+def create_secret_key(var_dir):
+    secret_key = None
+    dir_fd = os.open(var_dir, os.O_RDONLY)
+
+    key_path = os.path.join(var_dir, 'secret.key')
+    if not os.path.exists(key_path):
+        with os.fdopen(os.open(key_path,
+                               os.O_WRONLY | os.O_CREAT,
+                               0o600), 'w') as f:  # noqa
+            f.write(binascii.hexlify(os.urandom(50)).decode('ascii'))
+    with open(key_path, 'r') as f:
+        secret_key = f.read().rstrip()
+    os.close(dir_fd)
+    return secret_key
+
 # SECURITY WARNING: keep the secret key used in production secret!
 try:
     SECRET_KEY
 except NameError:
-    dir_fd = os.open(VAR_DIR, os.O_RDONLY)
+    SECRET_KEY = create_secret_key(VAR_DIR)
 
-    def opener(path, flags, mode=0o600):
-        return os.open(path, flags, mode, dir_fd=dir_fd)
-
-    key_path = os.path.join(VAR_DIR, 'secret.key')
-    if not os.path.exists(key_path):
-        with open(key_path, 'w', opener=opener) as f:
-            print(binascii.hexlify(os.urandom(50)).decode('ascii'), file=f)
-    with open(key_path, 'r', opener=opener) as f:
-        SECRET_KEY = f.read()
-    os.close(dir_fd)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -152,6 +157,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # UI
     'emgui',
+    # CORS
+    'corsheaders',
     # rest framework
     'rest_framework',
     'rest_framework.authtoken',
@@ -169,6 +176,10 @@ MIDDLEWARE = [
     # https://warehouse.python.org/project/whitenoise/
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # Django CORS middleware
+    'corsheaders.middleware.CorsMiddleware',
+    # ETAGS support
+    'django.middleware.http.ConditionalGetMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -205,10 +216,15 @@ SECURE_BROWSER_XSS_FILTER = True
 # SESSION_COOKIE_SECURE = True
 # SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-## django cors
-INSTALLED_APPS += ('corsheaders',)
-MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')
+
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_URLS_REGEX = r'^/api/.*$'
+# CORS_URLS_ALLOW_ALL_REGEX = ()
+CORS_ALLOW_METHODS = (
+    'GET',
+    'OPTIONS'
+)
+
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
@@ -357,18 +373,41 @@ AUTHENTICATION_BACKENDS = (
     'emgapi.backends.EMGBackend',
 )
 
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/1.11/howto/static-files/
+try:
+    FORCE_SCRIPT_NAME = yamjam()['emg']['prefix'].rstrip('/')
+    if not FORCE_SCRIPT_NAME.startswith("/"):
+        FORCE_SCRIPT_NAME = "/%s" % FORCE_SCRIPT_NAME
+except KeyError:
+    FORCE_SCRIPT_NAME = ''
+
+
+try:
+    STATIC_ROOT = yamjam()['emg']['static_root']
+except KeyError:
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+WHITENOISE_STATIC_PREFIX = '/static/'
+
+STATIC_URL = '%s%s' % (FORCE_SCRIPT_NAME, WHITENOISE_STATIC_PREFIX)
+
+STATICFILES_FINDERS = (
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+)
+
+# EMG
 try:
     EMG_BACKEND_AUTH_URL = yamjam()['emg']['emg_backend_auth']
 except KeyError:
     EMG_BACKEND_AUTH_URL = None
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.11/howto/static-files/
-try:
-    FORCE_SCRIPT_NAME = yamjam()['emg']['prefix']
-except KeyError:
-    FORCE_SCRIPT_NAME = ''
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-STATIC_URL = '%s/static/' % FORCE_SCRIPT_NAME.rstrip('/')
+EMG_TITLE = 'EBI Metagenomics WEB API'
+EMG_URL = FORCE_SCRIPT_NAME
+EMG_DESC = (
+    'Is a free resource to visualise and discover metagenomic datasets. '
+    'For more details and full documentation go to '
+    'http://www.ebi.ac.uk/metagenomics/'
+)
