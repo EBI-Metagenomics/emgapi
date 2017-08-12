@@ -8,12 +8,13 @@ EMG API
 Requirements:
 -------------
 
- - Python 3.6
- - Django 1.11
- - MySQL 5.6 or 5.7
+- Python 2.7, 3.5 or 3.6
+- Django 1.11
+- MySQL 5.6 or 5.7
+
 
 Install:
--------------
+--------
 
 Create configuration file in `~/.yamjam/config.yaml`::
 
@@ -26,6 +27,15 @@ Create configuration file in `~/.yamjam/config.yaml`::
           PASSWORD: 'secret'
           HOST: 'mysql.host'
           PORT: 3306
+
+      # Deploy under the custom prefix::
+      prefix: "/metagenomics"
+
+
+optional:
+
+- Store HTTP session in redis (requires: `pip install django-redis>=4.4`)::
+
       session_engine: 'django.contrib.sessions.backends.cache'
       caches:
         default:
@@ -34,28 +44,20 @@ Create configuration file in `~/.yamjam/config.yaml`::
           KEY_PREFIX: "some_key"
       emg_backend_auth: "https://backend"
 
+- Customize statics location::
 
-Install anaconda::
-
-    wget https://repo.continuum.io/archive/Anaconda3-4.4.0-Linux-x86_64.sh 
-    bash Anaconda3-4.4.0-Linux-x86_64.sh 
+      static_root: /path/to/static/storage
 
 
-Create conda environmnet::
+Install Miniconda::
 
-    conda -V
-    conda update conda
-    conda search "^python$"
+    wget https://repo.continuum.io/miniconda/Miniconda3-4.3.21-Linux-x86_64.sh
+    bash Miniconda3-4.3.21-Linux-x86_64.sh
 
-
-Create virtual environmnet::
-
-    conda create -n venv python=3.6 anaconda
+    export PATH=~/conda/bin:$PATH
 
 
-Activate::
-
-    source activate venv
+Install application::
 
     pip install "git+git://github.com/ola-t/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
     pip install "git+git://github.com/ola-t/ebi-metagenomics-api@master#egg=emgcli"
@@ -63,18 +65,19 @@ Activate::
 
 Start up application server::
 
+    emgcli check --deploy
+    emgcli migrate --fake-initial
+    emgcli collectstatic --noinput
+
+    # start application server
     gunicorn --daemon -p ~/emgvar/django.pid --bind 0.0.0.0:8000 --workers 5 --reload emgcli.wsgi:application
 
 NOTE: `~/emgvar` is used as default directory to store logs, secret key, etc.
 
 
-Uninstal:
-----------------
+Tests::
 
-Deactivate conda environment and remove::
-
-    source deactivate
-    conda remove -n venv --all
+    python setup.py tests
 
 
 Copyright (c) 2017 EMBL - European Bioinformatics Institute

@@ -16,6 +16,7 @@
 
 # from django.contrib import admin
 from django.conf.urls import include, url
+from django.conf import settings
 
 from rest_framework.schemas import get_schema_view
 from rest_framework_swagger.views import get_swagger_view
@@ -23,19 +24,14 @@ from rest_framework_swagger.views import get_swagger_view
 from rest_auth import views as rest_auth_views
 
 
-EMG_TITLE = 'EBI Metagenomics JSON API'
-# EMG_URL = 'http://www.ebi.ac.uk/metagenomics/api/'
-EMG_DESC = (
-    'Is a free resource to visualise and discover metagenomic datasets. '
-    'For more details and full documentation go to '
-    'http://www.ebi.ac.uk/metagenomics'
-)
-
-
+# schema_prefix
 schema_view = get_schema_view(
-    title=EMG_TITLE, description=EMG_DESC)
+    title=settings.EMG_TITLE, url=settings.EMG_URL,
+    description=settings.EMG_DESC)
 
-docs_schema_view = get_swagger_view(title=EMG_TITLE)
+docs_schema_view = get_swagger_view(
+    title=settings.EMG_TITLE, url=settings.EMG_URL)
+
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
@@ -50,18 +46,18 @@ urlpatterns = [
 
     # url(r'^api/auth/', include('rest_auth.urls')),
     url(
-        r'^api/auth/login$',
+        r'^api/auth/login',
         rest_auth_views.LoginView.as_view(),
         name='rest_auth_login'
     ),
 
     url(
-        r'^api/auth/logout$',
+        r'^api/auth/logout',
         rest_auth_views.LogoutView.as_view(),
         name='rest_auth_logout'
     ),
 
-    url(r'^api/docs/$', docs_schema_view),
+    url(r'^api/docs/', docs_schema_view),
 
     url(r'^api/', include('emgapi.urls',
                           namespace='emgapi')),
