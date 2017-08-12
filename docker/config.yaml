@@ -14,3 +14,5 @@ emg:
       LOCATION: "redis://redis:6379/0"
       KEY_PREFIX: "emg"
   emg_backend_auth: "https://backend"
+  prefix: "/metagenomics"
+  # static_root: /home/emg/staticfiles

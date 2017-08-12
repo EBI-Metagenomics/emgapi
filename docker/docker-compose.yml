@@ -15,10 +15,11 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - ../:/home/centos/src
-      - ../docker/config.yaml:/home/centos/.yamjam/config.yaml:ro
+      - ../:/home/emg/src
+      - ../docker/config.yaml:/home/emg/.yamjam/config.yaml:ro
     links:
       - mysql
+      - redis
     environment:
       - PYTHONUNBUFFERED=0
 
