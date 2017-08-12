@@ -30,9 +30,9 @@ before_script:
   - mkdir -p ~/.yamjam && cp travis/config.yaml ~/.yamjam/
 
 script:
-  - python setup.py test
+  - SRCDIR=$(pwd) docker/run.sh travis
 after_script:
-  - docker stop mysql redis
+  - docker stop mysql #redis
 
 notifications:
   slack:
