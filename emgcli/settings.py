@@ -152,6 +152,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # UI
     'emgui',
+    # CORS
+    'corsheaders',
     # rest framework
     'rest_framework',
     'rest_framework.authtoken',
@@ -169,6 +171,8 @@ MIDDLEWARE = [
     # https://warehouse.python.org/project/whitenoise/
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # Django CORS middleware
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -205,10 +209,15 @@ SECURE_BROWSER_XSS_FILTER = True
 # SESSION_COOKIE_SECURE = True
 # SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-## django cors
-INSTALLED_APPS += ('corsheaders',)
-MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')
+
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_URLS_REGEX = r'^/api/.*$'
+# CORS_URLS_ALLOW_ALL_REGEX = ()
+CORS_ALLOW_METHODS = (
+    'GET',
+    'OPTIONS'
+)
+
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
