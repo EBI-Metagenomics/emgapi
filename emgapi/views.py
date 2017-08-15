@@ -675,7 +675,7 @@ class RunViewSet(mixins.RetrieveModelMixin,
         Retrieves list of pipelines for the given run
         Example:
         ---
-        `/api/runs/SRR062157/pipelines`
+        `/api/runs/ERR1385375/pipelines`
         """
         queryset = emg_models.AnalysisJob.objects \
             .available(self.request) \
