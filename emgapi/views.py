@@ -614,9 +614,40 @@ class RunViewSet(mixins.RetrieveModelMixin,
         Retrieves run for the given accession
         Example:
         ---
-        `/api/runs/ERR1385375`
+        `/api/runs/SRR062157`
         """
         return super(RunViewSet, self).retrieve(request, *args, **kwargs)
+
+    @detail_route(
+        methods=['get', ],
+        url_name='pipelines-list',
+        serializer_class=emg_serializers.RetrieveRunSerializer
+    )
+    def analysis(self, request, accession=None):
+        """
+        Retrieves list of pipelines for the given run
+        Example:
+        ---
+        `/api/runs/SRR062157/pipelines`
+        """
+        queryset = emg_models.AnalysisJob.objects \
+            .available(self.request) \
+            .filter(accession=accession) \
+            .select_related(
+                'sample',
+                'pipeline',
+                'analysis_status',
+            )
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(
+            queryset, many=True, context={'request': request})
+        return Response(serializer.data)
 
 
 class PipelineViewSet(mixins.RetrieveModelMixin,
