@@ -243,8 +243,9 @@ except KeyError:
 try:
     SESSION_ENGINE = yamjam()['emg']['session_engine']
 except KeyError:
-    warnings.warn("SESSION_ENGINE not configured, using default",
-                  RuntimeWarning)
+    pass
+    # warnings.warn("SESSION_ENGINE not configured, using default",
+    #               RuntimeWarning)
 
 try:
     CACHES = yamjam()['emg']['caches']
