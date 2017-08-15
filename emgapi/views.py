@@ -574,18 +574,13 @@ class RunViewSet(mixins.RetrieveModelMixin,
     lookup_field = 'accession'
 
     def get_queryset(self):
-        queryset = emg_models.Run.objects
-        if self.action == 'retrieve':
-            queryset = queryset \
-                .filter(accession=self.kwargs['accession']) \
-                .distinct()
-        else:
-            queryset = queryset.available(self.request) \
-                .prefetch_related(
-                    'sample',
-                    'analysis_status',
-                    'experiment_type'
-                )
+        queryset = emg_models.Run.objects \
+            .available(self.request) \
+            .prefetch_related(
+                'sample',
+                'analysis_status',
+                'experiment_type'
+            )
         return queryset
 
     def get_serializer_class(self):
@@ -616,7 +611,11 @@ class RunViewSet(mixins.RetrieveModelMixin,
         ---
         `/api/runs/SRR062157`
         """
-        return super(RunViewSet, self).retrieve(request, *args, **kwargs)
+        run = emg_models.Run.objects \
+            .filter(accession=self.kwargs['accession']) \
+            .distinct().last()
+        serializer = self.get_serializer(run, context={'request': request})
+        return Response(serializer.data)
 
     @detail_route(
         methods=['get', ],
