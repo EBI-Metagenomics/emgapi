@@ -333,6 +333,11 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     def get_sample_accession(self, obj):
         return obj.sample.accession
 
+    study_accession = serializers.SerializerMethodField()
+
+    def get_study_accession(self, obj):
+        return obj.sample.study.accession
+
     # relationship
     experiment_type = serializers.HyperlinkedRelatedField(
         read_only=True,
@@ -389,6 +394,11 @@ class RetrieveRunSerializer(ExplicitFieldsModelSerializer,
 
     def get_sample_accession(self, obj):
         return obj.sample.accession
+
+    study_accession = serializers.SerializerMethodField()
+
+    def get_study_accession(self, obj):
+        return obj.sample.study.accession
 
     # relationship
     experiment_type = serializers.HyperlinkedRelatedField(
