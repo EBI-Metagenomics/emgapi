@@ -167,8 +167,9 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_auth',
     # apps
-    'emgapi',
     'emgapimetadata',
+    'emgapi',
+
 ]
 
 MIDDLEWARE = [

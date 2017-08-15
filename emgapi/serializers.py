@@ -404,6 +404,7 @@ class RetrieveRunSerializer(RunSerializer):
         lookup_field='accession'
     )
 
+    # relationship
     pipeline = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name='emgapi:pipelines-detail',
