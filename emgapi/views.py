@@ -574,18 +574,13 @@ class RunViewSet(mixins.RetrieveModelMixin,
     lookup_field = 'accession'
 
     def get_queryset(self):
-        queryset = emg_models.Run.objects
-        if self.action == 'retrieve':
-            queryset = queryset \
-                .filter(accession=self.kwargs['accession']) \
-                .distinct()
-        else:
-            queryset = queryset.available(self.request) \
-                .prefetch_related(
-                    'sample',
-                    'analysis_status',
-                    'experiment_type'
-                )
+        queryset = emg_models.Run.objects \
+            .available(self.request) \
+            .prefetch_related(
+                'sample',
+                'analysis_status',
+                'experiment_type'
+            )
         return queryset
 
     def get_serializer_class(self):
@@ -614,9 +609,44 @@ class RunViewSet(mixins.RetrieveModelMixin,
         Retrieves run for the given accession
         Example:
         ---
-        `/api/runs/ERR1385375`
+        `/api/runs/SRR062157`
         """
-        return super(RunViewSet, self).retrieve(request, *args, **kwargs)
+        run = emg_models.Run.objects \
+            .filter(accession=self.kwargs['accession']) \
+            .distinct().last()
+        serializer = self.get_serializer(run, context={'request': request})
+        return Response(serializer.data)
+
+    @detail_route(
+        methods=['get', ],
+        url_name='pipelines-list',
+        serializer_class=emg_serializers.RetrieveRunSerializer
+    )
+    def analysis(self, request, accession=None):
+        """
+        Retrieves list of pipelines for the given run
+        Example:
+        ---
+        `/api/runs/SRR062157/pipelines`
+        """
+        queryset = emg_models.AnalysisJob.objects \
+            .available(self.request) \
+            .filter(accession=accession) \
+            .select_related(
+                'sample',
+                'pipeline',
+                'analysis_status',
+            )
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(
+            queryset, many=True, context={'request': request})
+        return Response(serializer.data)
 
 
 class PipelineViewSet(mixins.RetrieveModelMixin,
