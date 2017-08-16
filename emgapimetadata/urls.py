@@ -28,7 +28,7 @@ urlpatterns = [
     url(
         (r'^runs/(?P<accession>[a-zA-Z0-9]+)/'
          r'pipelines/(?P<release_version>[0-9\.]+)/annotations$'),
-        m_views.AnnotationRunAPIView.as_view(),
+        m_views.AnnotationAnalysisAPIView.as_view(),
         name='runs-pipelines-annotations-list'
     ),
 
