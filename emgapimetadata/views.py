@@ -102,7 +102,7 @@ class AnnotationAnalysisAPIView(emg_views.MultipleFieldLookupMixin,
         Retrieves run for the given accession and pipeline version
         Example:
         ---
-        `/api/runs/ERR1385375/pipelines/3.0/annotations`
+        `/api/runs/ERR1385375/3.0/annotations`
         """
 
         analysis = m_models.AnalysisJob.objects.filter(
