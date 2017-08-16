@@ -15,60 +15,32 @@
 # limitations under the License.
 
 import pytest
+import os
 
 from django.core.urlresolvers import reverse
+from django.core.management import call_command
 
 from rest_framework import status
 
-from mongoengine.errors import NotUniqueError
-
-from emgapimetadata import models as m_models
+# import fixtures
+from test_utils.emg_fixtures import *  # noqa
 
 
 @pytest.mark.usefixtures('mongodb')
+@pytest.mark.django_db
 class TestAnnotations(object):
 
-    def test_default(self, client):
-        self.annotations = [
-            {'accession': 'GO0001', 'run_accession': 'DRR066347',
-             'description': 'abc', 'count': 123},
-            {'accession': 'GO0001', 'run_accession': 'DRR066355',
-             'description': 'abc', 'count': 345},
-            {'accession': 'IPR0001', 'run_accession': 'DRR066347',
-             'description': 'cde', 'count': 567},
-            {'accession': 'IPR0001', 'run_accession': 'DRR066355',
-             'description': 'efg', 'count': 789},
-        ]
-        anns = list()
-        for a in self.annotations:
-            anns.append(m_models.Annotation(
-                accession=a['accession'],
-                run_accession=a['run_accession'],
-                description=a['description'],
-                count=a['count']
-            ))
-        m_models.Annotation.objects.insert(anns)
-        assert len(m_models.Annotation.objects.all()) == 4
+    def test_default(self, client, run):
+        call_command('import_annotations', 'ABC01234',
+                     os.path.dirname(os.path.abspath(__file__)))
 
         url = reverse("emgapimetadata:annotations-list")
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
-        assert len(rsp['data']) == 4
+        assert len(rsp['data']) == 6
 
-    @pytest.mark.parametrize(
-        'accession, run_accession, description, count',
-        [
-            pytest.mark.xfail(
-                ('IPR0001', 'DRR066355', 'abc', 1),
-                raises=NotUniqueError),
-        ]
-    )
-    def test_unique(self, accession, run_accession,
-                    description, count):
-        m_models.Annotation.objects.create(
-            accession=accession,
-            run_accession=run_accession,
-            description=description,
-            count=count
-        )
+        expected = ['GO:0055114', 'GO:0008152', 'GO:0006810',
+                    'GO:0006412', 'GO:0009058', 'GO:0005975']
+        ids = [a['id'] for a in rsp['data']]
+        assert ids == expected
