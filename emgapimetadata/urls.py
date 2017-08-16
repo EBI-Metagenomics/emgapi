@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from django.conf.urls import url
+from rest_framework.routers import DefaultRouter
 
 # from django.conf.urls import url
 from rest_framework_mongoengine.routers import DefaultRouter \
@@ -44,3 +45,14 @@ mongorouter.register(
 )
 
 urlpatterns += mongorouter.urls
+
+
+mongorelation_router = DefaultRouter(trailing_slash=False)
+
+mongorelation_router.register(
+    r'annotations/(?P<accession>[a-zA-Z0-9\:]+)/runs',
+    m_views.AnnotationRunRelationshipViewSet,
+    base_name='annotations-runs'
+)
+
+urlpatterns += mongorelation_router.urls
