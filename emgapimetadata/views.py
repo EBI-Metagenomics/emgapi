@@ -14,15 +14,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from django.shortcuts import get_object_or_404
+
 from rest_framework.response import Response
-from rest_framework.decorators import detail_route
 from rest_framework import generics
+
+from django_filters.rest_framework import DjangoFilterBackend
+
+from rest_framework import viewsets, mixins
+from rest_framework import filters
 
 from rest_framework_mongoengine import viewsets as m_viewset
 
 from emgapi import serializers as emg_serializers
 from emgapi import models as emg_models
 from emgapi import views as emg_views
+from emgapi import filters as emg_filters
 
 from . import serializers as m_serializers
 from . import models as m_models
@@ -45,24 +52,43 @@ class AnnotationViewSet(m_viewset.ReadOnlyModelViewSet):
     def get_serializer_class(self):
         return super(AnnotationViewSet, self).get_serializer_class()
 
-    @detail_route(
-        methods=['get', ],
-        url_name='runs-list',
-        serializer_class=emg_serializers.RunSerializer
+
+class AnnotationRunRelationshipViewSet(mixins.ListModelMixin,
+                                       viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.RunSerializer
+
+    filter_class = emg_filters.RunFilter
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
     )
-    def runs(self, request, accession=None):
-        """
-        Retrieves list of runs for the given sample accession
-        Example:
-        ---
-        `/api/annotations/GO0001/runs`
-        """
-        obj = self.get_object()
+
+    ordering_fields = (
+        'accession',
+    )
+
+    ordering = ('-accession',)
+
+    search_fields = (
+        'instrument_platform',
+        'instrument_model',
+        '@sample__metadata__var_val_ucv',
+    )
+
+    lookup_field = 'accession'
+
+    def get_queryset(self):
+        annotation = get_object_or_404(
+            m_models.Annotation.objects,
+            accession=self.kwargs[self.lookup_field])
         run_ids = m_models.AnalysisJob.objects \
-            .filter(annotations__annotation=obj.pk) \
+            .filter(annotations__annotation=annotation.pk) \
             .only('accession')
         run_ids = [str(r.accession) for r in run_ids]
-        queryset = emg_models.AnalysisJob.objects \
+        queryset = emg_models.Run.objects \
             .filter(accession__in=run_ids) \
             .available(self.request) \
             .select_related(
@@ -70,15 +96,20 @@ class AnnotationViewSet(m_viewset.ReadOnlyModelViewSet):
                 'analysis_status',
                 'experiment_type'
             )
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(
-                page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
+        return queryset
 
-        serializer = self.get_serializer(
-            queryset, many=True, context={'request': request})
-        return Response(serializer.data)
+    def get_serializer_class(self):
+        return emg_serializers.RunSerializer
+
+    def list(self, request, accession, *args, **kwargs):
+        """
+        Retrieves list of runs for the given sample accession
+        Example:
+        ---
+        `/api/annotations/GO0001/runs`
+        """
+        return super(AnnotationRunRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
 
 
 class AnnotationAnalysisAPIView(emg_views.MultipleFieldLookupMixin,
