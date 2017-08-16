@@ -28,16 +28,14 @@ from . import models as m_models
 class AnnotationSerializer(m_serializers.DocumentSerializer,
                            serializers.HyperlinkedModelSerializer):
 
-    id = serializers.ReadOnlyField(source="accession")
-
     url = serializers.HyperlinkedIdentityField(
         view_name='emgapimetadata:annotations-detail',
         lookup_field='accession',
     )
 
-    runs = relations.SerializerMethodResourceRelatedField(
-        source='get_runs',
-        model=emg_models.Run,
+    analysis = relations.SerializerMethodResourceRelatedField(
+        source='get_analysis',
+        model=emg_models.AnalysisJob,
         many=True,
         read_only=True,
         related_link_view_name='emgapimetadata:annotations-runs-list',
@@ -45,7 +43,7 @@ class AnnotationSerializer(m_serializers.DocumentSerializer,
         related_link_lookup_field='accession'
     )
 
-    def get_runs(self, obj):
+    def get_analysis(self, obj):
         # TODO: provide counter instead of paginating relationship
         # workaround https://github.com/django-json-api
         # /django-rest-framework-json-api/issues/178
@@ -54,19 +52,6 @@ class AnnotationSerializer(m_serializers.DocumentSerializer,
     class Meta:
         model = m_models.Annotation
         fields = '__all__'
-
-
-class RunSerializer(emg_serializers.RunSerializer):
-
-    annotations = relations.SerializerMethodResourceRelatedField(
-        source='get_annotations',
-        model=m_models.Annotation,
-        many=True,
-        read_only=True,
-        related_link_view_name='emgapimetadata:runs-pipelines-annotations-list',  # noqa
-        related_link_url_kwarg='accession',
-        related_link_lookup_field='accession'
-    )
 
 
 class RetrieveRunSerializer(emg_serializers.RetrieveRunSerializer):
@@ -81,6 +66,11 @@ class RetrieveRunSerializer(emg_serializers.RetrieveRunSerializer):
         related_link_lookup_field='accession'
     )
 
+    def get_annotations(self, obj):
+        # TODO: provide counter instead of paginating relationship
+        # workaround https://github.com/django-json-api
+        # /django-rest-framework-json-api/issues/178
+        return ()
 
-emg_serializers.RunSerializer = RunSerializer
+
 emg_serializers.RetrieveRunSerializer = RetrieveRunSerializer
