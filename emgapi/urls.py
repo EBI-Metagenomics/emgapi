@@ -111,8 +111,7 @@ urlpatterns += router.urls
 urlpatterns += [
 
     url(
-        (r'^runs/(?P<accession>[a-zA-Z0-9_]+)/'
-         r'pipelines/(?P<release_version>[0-9\.]+)$'),
+        (r'^runs/(?P<accession>[a-zA-Z0-9_]+)/(?P<release_version>[0-9\.]+)$'),
         views.RunAPIView.as_view(),
         name='runs-pipelines-detail'
     ),
