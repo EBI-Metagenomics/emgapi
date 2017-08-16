@@ -584,7 +584,7 @@ class RunAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):
         Retrieves run for the given accession and pipeline version
         Example:
         ---
-        `/api/runs/ERR1385375/pipelines/3.0`
+        `/api/runs/ERR1385375/3.0`
         """
         run = get_object_or_404(
             emg_models.AnalysisJob, accession=accession,
