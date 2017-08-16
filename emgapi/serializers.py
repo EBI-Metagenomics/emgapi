@@ -367,9 +367,6 @@ class RunSerializer(ExplicitFieldsModelSerializer,
         read_only=True,
         source='get_pipelines',
         model=emg_models.Pipeline,
-        related_link_view_name='emgapi:runs-pipelines-list',
-        related_link_url_kwarg='accession',
-        related_link_lookup_field='accession',
         related_link_self_view_name='emgapi:pipelines-detail',
         related_link_self_lookup_field='release_version'
     )
@@ -377,6 +374,19 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     def get_pipelines(self, obj):
         return emg_models.Pipeline.objects \
             .filter(analysis__accession=obj.accession)
+
+    analysis = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_analysis',
+        model=emg_models.AnalysisJob,
+        related_link_view_name='emgapi:runs-pipelines-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+    )
+
+    def get_analysis(self, obj):
+        return ()
 
     class Meta:
         model = emg_models.Run
@@ -399,17 +409,17 @@ class RunHyperlinkedField(serializers.HyperlinkedIdentityField):
 
 class RetrieveRunSerializer(RunSerializer):
 
+    id = serializers.ReadOnlyField(source="multiple_pk")
+
     url = RunHyperlinkedField(
         view_name='emgapi:runs-pipelines-detail',
         lookup_field='accession'
     )
 
-    # relationship
-    pipeline = serializers.HyperlinkedRelatedField(
-        read_only=True,
-        view_name='emgapi:pipelines-detail',
-        lookup_field='release_version'
-    )
+    pipeline_version = serializers.SerializerMethodField()
+
+    def get_pipeline_version(self, obj):
+        return obj.pipeline.release_version
 
     class Meta:
         model = emg_models.AnalysisJob
@@ -422,6 +432,8 @@ class RetrieveRunSerializer(RunSerializer):
             'input_file_name',
             'result_directory',
             'pipelines',
+            'pipeline',
+            'analysis',
         )
 
 # SampleAnn serializer
