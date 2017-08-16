@@ -58,11 +58,12 @@ class AnnotationViewSet(m_viewset.ReadOnlyModelViewSet):
         `/api/annotations/GO0001/runs`
         """
         obj = self.get_object()
-        run_ids = m_models.Run.objects \
+        run_ids = m_models.AnalysisJob.objects \
             .filter(annotations__annotation=obj.pk) \
             .only('accession')
         run_ids = [str(r.accession) for r in run_ids]
-        queryset = emg_models.Run.objects.filter(accession__in=run_ids) \
+        queryset = emg_models.AnalysisJob.objects \
+            .filter(accession__in=run_ids) \
             .available(self.request) \
             .select_related(
                 'sample',
@@ -80,8 +81,8 @@ class AnnotationViewSet(m_viewset.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
 
-class AnnotationRunAPIView(emg_views.MultipleFieldLookupMixin,
-                           generics.ListAPIView):
+class AnnotationAnalysisAPIView(emg_views.MultipleFieldLookupMixin,
+                                generics.ListAPIView):
 
     serializer_class = m_serializers.AnnotationSerializer
 
@@ -101,12 +102,12 @@ class AnnotationRunAPIView(emg_views.MultipleFieldLookupMixin,
         Retrieves run for the given accession and pipeline version
         Example:
         ---
-        `/api/runs/ERR1385375/pipelines/3.0`
+        `/api/runs/ERR1385375/pipelines/3.0/annotations`
         """
 
-        run = m_models.Run.objects.filter(
+        analysis = m_models.AnalysisJob.objects.filter(
             accession=accession, pipeline_version=release_version).first()
-        ann_ids = [rann.annotation.pk for rann in run.annotations]
+        ann_ids = [a.annotation.pk for a in analysis.annotations]
         queryset = m_models.Annotation.objects.filter(pk__in=ann_ids)
 
         page = self.paginate_queryset(queryset)
