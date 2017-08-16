@@ -125,3 +125,18 @@ def runs(samples, analysis_status, pipeline, experiment_type):
             )
         )
     return emg_models.AnalysisJob.objects.bulk_create(jobs)
+
+
+@pytest.fixture
+def run(analysis_status, pipeline, experiment_type):
+    return mommy.make(
+        'emgapi.AnalysisJob',
+        pk=1234,
+        accession="ABC01234",
+        run_status_id=4,
+        experiment_type_id=experiment_type.pk,
+        pipeline_id=pipeline.pk,
+        analysis_status_id=analysis_status.pk,
+        input_file_name="ABC_FASTQ",
+        result_directory="path/version_1.0/ABC_FASTQ",
+    )
