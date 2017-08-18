@@ -37,27 +37,9 @@ from . import models as emg_models
 from . import serializers as emg_serializers
 from . import filters as emg_filters
 from . import permissions as emg_perms
+from . import mixins as emg_mixins
 
 logger = logging.getLogger(__name__)
-
-
-class MultipleFieldLookupMixin(object):
-
-    """
-    Apply this mixin to any view or viewset to get multiple field filtering
-    based on a `lookup_fields` attribute, instead of the default single field
-    filtering.
-    Source: http://www.django-rest-framework.org/api-guide/generic-views/
-    """
-
-    def get_object(self):
-        queryset = self.get_queryset()
-        queryset = self.filter_queryset(queryset)
-        filter = {}
-        for field in self.lookup_fields:
-            if self.kwargs[field]:
-                filter[field] = self.kwargs[field]
-        return get_object_or_404(queryset, **filter)
 
 
 class MyDataViewSet(mixins.ListModelMixin,
@@ -497,7 +479,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         return Response(serializer.data)
 
 
-# class SampleAnnAPIView(MultipleFieldLookupMixin,
+# class SampleAnnAPIView(emg_mixins.MultipleFieldLookupMixin,
 #                        generics.RetrieveAPIView):
 #
 #     serializer_class = emg_serializers.SampleAnnSerializer
@@ -565,7 +547,7 @@ class SampleAnnsViewSet(mixins.ListModelMixin,
         return super(SampleAnnsViewSet, self).list(request, *args, **kwargs)
 
 
-class RunAPIView(MultipleFieldLookupMixin,
+class RunAPIView(emg_mixins.MultipleFieldLookupMixin,
                  generics.RetrieveAPIView):
 
     serializer_class = emg_serializers.RetrieveRunSerializer
@@ -774,7 +756,7 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         return Response(serializer.data)
 
 
-class PipelineToolAPIView(MultipleFieldLookupMixin,
+class PipelineToolAPIView(emg_mixins.MultipleFieldLookupMixin,
                           generics.RetrieveAPIView):
 
     serializer_class = emg_serializers.PipelineToolSerializer
