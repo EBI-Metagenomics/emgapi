@@ -20,7 +20,6 @@ from rest_framework_json_api import relations
 from rest_framework_mongoengine import serializers as m_serializers
 
 from emgapi import models as emg_models
-from emgapi import serializers as emg_serializers
 
 from . import models as m_models
 
@@ -52,25 +51,3 @@ class AnnotationSerializer(m_serializers.DocumentSerializer,
     class Meta:
         model = m_models.Annotation
         fields = '__all__'
-
-
-class RetrieveRunSerializer(emg_serializers.RetrieveRunSerializer):
-
-    annotations = relations.SerializerMethodResourceRelatedField(
-        source='get_annotations',
-        model=m_models.Annotation,
-        many=True,
-        read_only=True,
-        related_link_view_name='emgapimetadata:runs-pipelines-annotations-list',  # noqa
-        related_link_url_kwarg='accession',
-        related_link_lookup_field='accession'
-    )
-
-    def get_annotations(self, obj):
-        # TODO: provide counter instead of paginating relationship
-        # workaround https://github.com/django-json-api
-        # /django-rest-framework-json-api/issues/178
-        return ()
-
-
-emg_serializers.RetrieveRunSerializer = RetrieveRunSerializer

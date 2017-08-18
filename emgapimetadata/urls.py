@@ -27,8 +27,8 @@ app_name = "emgapimetadata"
 urlpatterns = [
 
     url(
-        (r'^runs/(?P<accession>[a-zA-Z0-9]+)/(?P<release_version>[0-9\.]+)'
-         '/annotations$'),
+        (r'^runs/(?P<accession>[a-zA-Z0-9_]+)/(?P<release_version>[0-9\.]+)/'
+         'annotations$'),
         m_views.AnnotationAnalysisAPIView.as_view(),
         name='runs-pipelines-annotations-list'
     ),
