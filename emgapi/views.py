@@ -497,7 +497,8 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         return Response(serializer.data)
 
 
-# class SampleAnnAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):
+# class SampleAnnAPIView(MultipleFieldLookupMixin,
+#                        generics.RetrieveAPIView):
 #
 #     serializer_class = emg_serializers.SampleAnnSerializer
 #
@@ -564,7 +565,8 @@ class SampleAnnsViewSet(mixins.ListModelMixin,
         return super(SampleAnnsViewSet, self).list(request, *args, **kwargs)
 
 
-class RunAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):
+class RunAPIView(MultipleFieldLookupMixin,
+                 generics.RetrieveAPIView):
 
     serializer_class = emg_serializers.RetrieveRunSerializer
 
@@ -772,7 +774,8 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         return Response(serializer.data)
 
 
-class PipelineToolAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):
+class PipelineToolAPIView(MultipleFieldLookupMixin,
+                          generics.RetrieveAPIView):
 
     serializer_class = emg_serializers.PipelineToolSerializer
     queryset = emg_models.PipelineTool.objects.all()

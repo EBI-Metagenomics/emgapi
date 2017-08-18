@@ -54,6 +54,12 @@ class BaseQuerySet(models.QuerySet):
                     Q(analysis_status=3),
                 'all': Q(analysis_status=3),
             },
+            'AnalysisJobQuerySet': {
+                'authenticated':
+                    Q(sample__study__submission_account_id=_username) |
+                    Q(analysis_status=3),
+                'all': Q(analysis_status=3),
+            },
         }
 
         q = list()

@@ -138,7 +138,9 @@ class AnnotationAnalysisAPIView(emg_views.MultipleFieldLookupMixin,
 
         analysis = m_models.AnalysisJob.objects.filter(
             accession=accession, pipeline_version=release_version).first()
-        ann_ids = [a.annotation.pk for a in analysis.annotations]
+        ann_ids = []
+        if analysis is not None:
+            ann_ids = [a.annotation.pk for a in analysis.annotations]
         queryset = m_models.Annotation.objects.filter(pk__in=ann_ids)
 
         page = self.paginate_queryset(queryset)
