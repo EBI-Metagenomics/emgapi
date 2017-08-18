@@ -396,7 +396,7 @@ class RunSerializer(ExplicitFieldsModelSerializer,
         )
 
 
-class RunHyperlinkedField(serializers.HyperlinkedIdentityField):
+class AnalysisJobHyperlinkedField(serializers.HyperlinkedIdentityField):
 
     def get_url(self, obj, view_name, request, format):
         kwargs = {
@@ -411,7 +411,7 @@ class RetrieveRunSerializer(RunSerializer):
 
     id = serializers.ReadOnlyField(source="multiple_pk")
 
-    url = RunHyperlinkedField(
+    url = AnalysisJobHyperlinkedField(
         view_name='emgapi:runs-pipelines-detail',
         lookup_field='accession'
     )
