@@ -28,8 +28,8 @@ from rest_framework_mongoengine import viewsets as m_viewset
 
 from emgapi import serializers as emg_serializers
 from emgapi import models as emg_models
-from emgapi import views as emg_views
 from emgapi import filters as emg_filters
+from emgapi import mixins as emg_mixins
 
 from . import serializers as m_serializers
 from . import models as m_models
@@ -112,7 +112,7 @@ class AnnotationRunRelationshipViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class AnnotationAnalysisAPIView(emg_views.MultipleFieldLookupMixin,
+class AnnotationAnalysisAPIView(emg_mixins.MultipleFieldLookupMixin,
                                 generics.ListAPIView):
 
     serializer_class = m_serializers.AnnotationSerializer
