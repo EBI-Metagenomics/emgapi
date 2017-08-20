@@ -17,11 +17,10 @@
 # from django.contrib import admin
 from django.conf.urls import include, url
 from django.conf import settings
+from django.views.generic import RedirectView
 
 from rest_framework.schemas import get_schema_view
 from rest_framework_swagger.views import get_swagger_view
-
-from rest_auth import views as rest_auth_views
 
 
 # schema_prefix
@@ -37,29 +36,19 @@ docs_schema_view = get_swagger_view(
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
 
-    url(r'^$', schema_view),
-
     # url(r'^admin/', admin.site.urls),
+
+    url(r'^$', RedirectView.as_view(
+        pattern_name='emgapi:api-root', permanent=False)),
 
     url(r'^http-auth/', include('rest_framework.urls',
                                 namespace='rest_framework')),
 
-    # url(r'^api/auth/', include('rest_auth.urls')),
-    url(
-        r'^api/auth/login',
-        rest_auth_views.LoginView.as_view(),
-        name='rest_auth_login'
-    ),
+    url(r'^schema/', schema_view),
 
-    url(
-        r'^api/auth/logout',
-        rest_auth_views.LogoutView.as_view(),
-        name='rest_auth_logout'
-    ),
+    url(r'^docs/', docs_schema_view),
 
-    url(r'^api/docs/', docs_schema_view),
-
-    url(r'^api/', include('emgapi.urls',
-                          namespace='emgapi')),
+    url(r'^v0.2/', include('emgapi.urls',
+                           namespace='emgapi')),
 
 ]
