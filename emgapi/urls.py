@@ -13,14 +13,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from . import views
-from . import views_relations
 from django.conf.urls import url
 from rest_framework.routers import DefaultRouter
+from rest_auth import views as rest_auth_views
+
+from . import views
+from . import views_relations
 
 
 app_name = "emgapi"
 urlpatterns = [
+
+    url(
+        r'^auth/login',
+        rest_auth_views.LoginView.as_view(),
+        name='rest_auth_login'
+    ),
+
+    url(
+        r'^auth/logout',
+        rest_auth_views.LogoutView.as_view(),
+        name='rest_auth_logout'
+    ),
+
+]
+
+urlpatterns += [
 
     url(
         (r'^runs/(?P<accession>[a-zA-Z0-9_]+)/'
