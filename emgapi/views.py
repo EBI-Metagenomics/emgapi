@@ -15,6 +15,8 @@
 # limitations under the License.
 
 import logging
+import operator
+from collections import OrderedDict
 
 from django.conf import settings
 from django.db.models import Prefetch
@@ -167,15 +169,15 @@ class BiomeRootViewSet(mixins.ListModelMixin,
         SELECT parent.BIOME_ID, COUNT(distinct sample.STUDY_ID) as study_count
         FROM BIOME_HIERARCHY_TREE AS node,
             BIOME_HIERARCHY_TREE AS parent,
-            SAMPLE AS sample
+            SAMPLE as sample
         WHERE node.lft BETWEEN parent.lft AND parent.rgt
             AND node.BIOME_ID = sample.BIOME_ID
             AND parent.DEPTH > 1
+            AND sample.IS_PUBLIC = 1
         GROUP BY parent.BIOME_ID
         ORDER BY 2 DESC
         LIMIT 10;"""
-        import operator
-        from collections import OrderedDict
+
         res = emg_models.Biome.objects.raw(sql)
         biomes = {b.biome_id: b.study_count for b in res}
         biomes = OrderedDict(
