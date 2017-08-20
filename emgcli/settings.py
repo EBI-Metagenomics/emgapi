@@ -208,24 +208,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'emgcli.wsgi.application'
 
-# Security
-ALLOWED_HOSTS = ["*"]
-X_FRAME_OPTIONS = 'DENY'
-SECURE_BROWSER_XSS_FILTER = True
-# CSRF_COOKIE_SECURE = True
-# SESSION_COOKIE_SECURE = True
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_URLS_REGEX = r'^/api/.*$'
-# CORS_URLS_ALLOW_ALL_REGEX = ()
-CORS_ALLOW_METHODS = (
-    'GET',
-    'OPTIONS'
-)
-
-
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
@@ -397,6 +379,22 @@ STATIC_URL = '%s%s' % (FORCE_SCRIPT_NAME, WHITENOISE_STATIC_PREFIX)
 STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+)
+
+# Security
+ALLOWED_HOSTS = ["*"]
+X_FRAME_OPTIONS = 'DENY'
+SECURE_BROWSER_XSS_FILTER = True
+# CSRF_COOKIE_SECURE = True
+# SESSION_COOKIE_SECURE = True
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_URLS_REGEX = r'^%s/.*$' % FORCE_SCRIPT_NAME
+# CORS_URLS_ALLOW_ALL_REGEX = ()
+CORS_ALLOW_METHODS = (
+    'GET',
+    'OPTIONS'
 )
 
 # EMG
