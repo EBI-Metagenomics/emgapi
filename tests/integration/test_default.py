@@ -33,8 +33,7 @@ class TestDefaultAPI(object):
         rsp = response.json()
 
         expected = {
-            # TODO: create alias
-            # "biomes": "http://testserver/v0.2/biomes",
+            "biomes": "http://testserver/v0.2/biomes",
             "studies": "http://testserver/v0.2/studies",
             "samples": "http://testserver/v0.2/samples",
             "runs": "http://testserver/v0.2/runs",
@@ -49,8 +48,7 @@ class TestDefaultAPI(object):
     @pytest.mark.parametrize(
         '_view',
         [
-            # TODO: create alias
-            # 'emgapi:biomes',
+            'emgapi:biomes-root',
             'emgapi:experiment-types',
             'emgapi:pipelines',
             'emgapi:publications',
@@ -73,26 +71,29 @@ class TestDefaultAPI(object):
         assert rsp['meta']['pagination']['count'] == 0
 
     @pytest.mark.parametrize(
-        '_model, _camelcase, _view, relations',
+        '_model, _camelcase, _view, _view_args, relations',
         [
             ('ExperimentType', 'experiment-types', 'emgapi:experiment-types',
-             ['samples']),
-            ('Pipeline', 'pipelines', 'emgapi:pipelines',
+             [], ['samples']),
+            # ('Biome', 'biomes', 'emgapi:biomes', ['root'],
+            #  ['samples', 'studies']),
+            ('Pipeline', 'pipelines', 'emgapi:pipelines', [],
              ['samples', 'tools']),
-            ('Publication', 'publications', 'emgapi:publications',
+            ('Publication', 'publications', 'emgapi:publications', [],
              ['studies']),
-            ('Run', 'runs', 'emgapi:runs',
+            ('Run', 'runs', 'emgapi:runs', [],
              ['pipelines', 'experiment-type', 'sample']),
-            ('Sample', 'samples', 'emgapi:samples',
+            ('Sample', 'samples', 'emgapi:samples', [],
              ['biome', 'study', 'runs', 'metadata']),
-            ('Study', 'studies', 'emgapi:studies',
+            ('Study', 'studies', 'emgapi:studies', [],
              ['biomes', 'publications', 'samples']),
-            ('PipelineTool', 'pipeline-tools', 'emgapi:pipeline-tools',
+            ('PipelineTool', 'pipeline-tools', 'emgapi:pipeline-tools', [],
              ['pipelines']),
         ]
     )
     @pytest.mark.django_db
-    def test_list(self, client, _model, _camelcase, _view, relations):
+    def test_list(self, client, _model, _camelcase, _view, _view_args,
+                  relations):
         model_name = "emgapi.%s" % _model
         view_name = "%s-list" % _view
 
@@ -128,10 +129,14 @@ class TestDefaultAPI(object):
             elif _model in ('Pipeline',):
                 mommy.make('emgapi.Pipeline', pk=pk,
                            release_version="1.0")
+            # elif _model in ('Biome',):
+            #     mommy.make('emgapi.Biome', pk=pk,
+            #                biome_name="foo%d" % pk,
+            #                lineage="root:foo%d" % pk)
             else:
                 mommy.make(model_name, pk=pk)
 
-        url = reverse(view_name)
+        url = reverse(view_name, args=_view_args)
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
