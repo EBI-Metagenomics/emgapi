@@ -18,7 +18,6 @@ import logging
 
 from django.conf import settings
 from django.db.models import Prefetch
-# from django.db.models import Count
 from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -30,6 +29,7 @@ from rest_framework import filters
 from rest_framework.decorators import detail_route, list_route
 # from rest_framework import authentication
 from rest_framework import permissions
+
 
 from . import models as emg_models
 from . import serializers as emg_serializers
@@ -99,7 +99,6 @@ class BiomeViewSet(mixins.ListModelMixin,
                    viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.BiomeSerializer
-    queryset = emg_models.Biome.objects.all()
 
     filter_backends = (
         filters.OrderingFilter,
@@ -107,6 +106,8 @@ class BiomeViewSet(mixins.ListModelMixin,
 
     ordering_fields = (
         'lineage',
+        'samples_count',
+        'study_count',
     )
     ordering = ('lineage',)
 
@@ -115,12 +116,13 @@ class BiomeViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         if self.action == 'list':
-            lineage = self.kwargs.get('lineage', None)
-            if lineage is not None and len(lineage) > 0:
+            lineage = self.kwargs.get('lineage', None).strip()
+            if lineage:
                 l = get_object_or_404(emg_models.Biome, lineage=lineage)
                 queryset = emg_models.Biome.objects \
-                    .filter(lft__gte=l.lft-1, rgt__lte=l.rgt+1,
-                            depth=l.depth+1)
+                    .filter(lft__gte=l.lft, rgt__lte=l.rgt,
+                            depth__gte=l.depth) \
+                    .order_by("-samples_count")
             else:
                 queryset = emg_models.Biome.objects.filter(depth=1)
         else:
@@ -146,6 +148,50 @@ class BiomeViewSet(mixins.ListModelMixin,
 
         return super(BiomeViewSet, self) \
             .list(request, lineage, *args, **kwargs)
+
+
+class BiomeRootViewSet(mixins.ListModelMixin,
+                       viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.Top10BiomeSerializer
+    queryset = emg_models.Biome.objects.filter(depth=1)
+
+    def list(self, request):
+        """
+        Retrieve 10 most popular biome:
+        ---
+        `/api/biomes`
+        """
+
+        sql = """
+        SELECT parent.BIOME_ID, COUNT(distinct sample.STUDY_ID) as study_count
+        FROM BIOME_HIERARCHY_TREE AS node,
+            BIOME_HIERARCHY_TREE AS parent,
+            SAMPLE AS sample
+        WHERE node.lft BETWEEN parent.lft AND parent.rgt
+            AND node.BIOME_ID = sample.BIOME_ID
+            AND parent.DEPTH > 1
+        GROUP BY parent.BIOME_ID
+        ORDER BY 2 DESC
+        LIMIT 10;"""
+        import operator
+        from collections import OrderedDict
+        res = emg_models.Biome.objects.raw(sql)
+        biomes = {b.biome_id: b.study_count for b in res}
+        biomes = OrderedDict(
+            sorted(biomes.items(), key=operator.itemgetter(1), reverse=True))
+        queryset = emg_models.Biome.objects.filter(
+            biome_id__in=list(biomes))
+        for q in queryset:
+            q.study_count = biomes[q.biome_id]
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class StudyViewSet(mixins.RetrieveModelMixin,
