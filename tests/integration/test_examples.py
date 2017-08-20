@@ -32,7 +32,7 @@ def test_list_samples(live_server, runs):
 
     from jsonapi_client import Session
 
-    with Session('%s/api/' % live_server.url) as s:
+    with Session('%s/v0.2/' % live_server.url) as s:
         study = s.get('studies', 'SRP0025').resource
         assert study.accession == 'SRP0025'
         # list samples

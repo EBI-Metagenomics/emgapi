@@ -34,15 +34,15 @@ class TestDefaultAPI(object):
 
         expected = {
             # TODO: create alias
-            # "biomes": "http://testserver/api/biomes",
-            "studies": "http://testserver/api/studies",
-            "samples": "http://testserver/api/samples",
-            "runs": "http://testserver/api/runs",
-            "pipelines": "http://testserver/api/pipelines",
-            "experiment-types": "http://testserver/api/experiment-types",
-            "publications": "http://testserver/api/publications",
-            'pipeline-tools': 'http://testserver/api/pipeline-tools',
-            "mydata": "http://testserver/api/mydata",
+            # "biomes": "http://testserver/v0.2/biomes",
+            "studies": "http://testserver/v0.2/studies",
+            "samples": "http://testserver/v0.2/samples",
+            "runs": "http://testserver/v0.2/runs",
+            "pipelines": "http://testserver/v0.2/pipelines",
+            "experiment-types": "http://testserver/v0.2/experiment-types",
+            "publications": "http://testserver/v0.2/publications",
+            'pipeline-tools': 'http://testserver/v0.2/pipeline-tools',
+            "mydata": "http://testserver/v0.2/mydata",
         }
         assert rsp['data'] == expected
 
@@ -143,9 +143,9 @@ class TestDefaultAPI(object):
 
         # Links
         _view_url = _view.split(":")[1]
-        first_link = 'http://testserver/api/%s?page=1' % _view_url
-        last_link = 'http://testserver/api/%s?page=5' % _view_url
-        next_link = 'http://testserver/api/%s?page=2' % _view_url
+        first_link = 'http://testserver/v0.2/%s?page=1' % _view_url
+        last_link = 'http://testserver/v0.2/%s?page=5' % _view_url
+        next_link = 'http://testserver/v0.2/%s?page=2' % _view_url
         assert rsp['links']['first'] == first_link
         assert rsp['links']['last'] == last_link
         assert rsp['links']['next'] == next_link
