@@ -68,7 +68,9 @@ class BiomeStudyRelationshipViewSet(mixins.ListModelMixin,
         obj = get_object_or_404(emg_models.Biome, lineage=lineage)
         studies = emg_models.Sample.objects \
             .available(self.request) \
-            .filter(biome__lft__gte=obj.lft-1, biome__rgt__lte=obj.rgt+1) \
+            .filter(
+                biome__lft__gte=obj.lft, biome__rgt__lte=obj.rgt,
+                biome__depth__gte=obj.depth) \
             .values('study_id')
         queryset = emg_models.Study.objects \
             .available(self.request) \
