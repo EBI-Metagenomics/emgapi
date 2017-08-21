@@ -38,11 +38,11 @@ class TestBiomeAPI(APITestCase):
         )
 
         self.data['_biomes'] = [
-            {'lineage': 'root', 'depth': 1, 'lft': 1, 'rgt': 984},
-            {'lineage': 'root:foo', 'depth': 2, 'lft': 2, 'rgt': 161},
-            {'lineage': 'root:foo2', 'depth': 2, 'lft': 162, 'rgt': 513},
-            {'lineage': 'root:foo:bar', 'depth': 3, 'lft': 3, 'rgt': 160},
-            {'lineage': 'root:foo2:bar2', 'depth': 3, 'lft': 163, 'rgt': 513},
+            {'lineage': 'root', 'depth': 1, 'lft': 1, 'rgt': 50},
+            {'lineage': 'root:foo', 'depth': 2, 'lft': 2, 'rgt': 25},
+            {'lineage': 'root:foo2', 'depth': 2, 'lft': 26, 'rgt': 49},
+            {'lineage': 'root:foo:bar', 'depth': 3, 'lft': 3, 'rgt': 24},
+            {'lineage': 'root:foo2:bar2', 'depth': 3, 'lft': 26, 'rgt': 48},
         ]
         for b in self.data['_biomes']:
             mommy.make(
@@ -69,7 +69,7 @@ class TestBiomeAPI(APITestCase):
             )
 
     def test_samples(self):
-        url = reverse('emgapi:biomes-list', args=['root'])
+        url = reverse('emgapi:biomes-list', args=['root:foo'])
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -80,7 +80,7 @@ class TestBiomeAPI(APITestCase):
         biomes = rsp['data']
         for b in biomes:
             assert b['type'] == 'biomes'
-            assert b['id'] in ('root:foo', 'root:foo2')
+            assert b['id'] in ('root:foo', 'root:foo:bar')
 
         response = self.client.get(
             biomes[0]['relationships']['samples']['links']['related'])
