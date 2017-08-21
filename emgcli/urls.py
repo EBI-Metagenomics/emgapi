@@ -51,7 +51,7 @@ urlpatterns = [
     url(r'^v0.2/', include('emgapi.urls',
                            namespace='emgapi')),
 
-    url(r'^api/', include('emgapimetadata.urls',
-                          namespace='emgapimetadata')),
+    url(r'^v0.2/', include('emgapimetadata.urls',
+                           namespace='emgapimetadata')),
 
 ]
