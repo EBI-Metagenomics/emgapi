@@ -115,7 +115,7 @@ class AnnotationRunRelationshipViewSet(mixins.ListModelMixin,
 class AnnotationAnalysisAPIView(emg_mixins.MultipleFieldLookupMixin,
                                 generics.ListAPIView):
 
-    serializer_class = m_serializers.AnnotationSerializer
+    serializer_class = m_serializers.RetriveAnnotationSerializer
 
     lookup_fields = ('accession', 'release_version')
 
@@ -138,17 +138,29 @@ class AnnotationAnalysisAPIView(emg_mixins.MultipleFieldLookupMixin,
 
         analysis = m_models.AnalysisJob.objects.filter(
             accession=accession, pipeline_version=release_version).first()
+
         ann_ids = []
         if analysis is not None:
             ann_ids = [a.annotation.pk for a in analysis.annotations]
+            ann_counts = {
+                a.annotation.pk: a.count for a in analysis.annotations
+            }
+
         queryset = m_models.Annotation.objects.filter(pk__in=ann_ids)
 
         page = self.paginate_queryset(queryset)
+        for p in page:
+            p.count = ann_counts[p.pk]
         if page is not None:
             serializer = self.get_serializer(
-                page, many=True, context={'request': request})
+                page,
+                many=True,
+                context={'request': request}
+            )
             return self.get_paginated_response(serializer.data)
-
         serializer = self.get_serializer(
-            queryset, many=True, context={'request': request})
+            queryset,
+            many=True,
+            context={'request': request}
+        )
         return Response(serializer.data)

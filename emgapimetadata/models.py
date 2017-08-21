@@ -17,7 +17,7 @@
 import mongoengine
 
 
-class Annotation(mongoengine.Document):
+class Annotation(mongoengine.DynamicDocument):
 
     accession = mongoengine.StringField(
         primary_key=True, required=True,
