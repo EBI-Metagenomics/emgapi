@@ -38,31 +38,6 @@ urlpatterns = [
 
 ]
 
-urlpatterns += [
-
-    url(
-        (r'^runs/(?P<accession>[a-zA-Z0-9_]+)/'
-         r'pipelines/(?P<release_version>[0-9\.]+)$'),
-        views.RunAPIView.as_view(),
-        name='runs-pipelines-detail'
-    ),
-
-    url(
-        (r'^pipeline-tools/(?P<tool_name>[\w+]+)/'
-         '(?P<version>[a-zA-Z0-9\-\.]+)$'),
-        views.PipelineToolAPIView.as_view(),
-        name='pipeline-tools-detail'
-    ),
-
-    # url(
-    #     (r'^metadata/(?P<name>(.*)+)/(?P<value>(.*)+)$'),
-    #     views.SampleAnnAPIView.as_view(),
-    #     name='metadata-detail'
-    # ),
-
-]
-
-
 router = DefaultRouter(trailing_slash=False)
 
 router.register(
@@ -93,6 +68,12 @@ router.register(
     r'experiment-types',
     views.ExperimentTypeViewSet,
     base_name='experiment-types'
+)
+
+router.register(
+    r'biomes',
+    views.BiomeRootViewSet,
+    base_name='biomes-root'
 )
 
 router.register(
@@ -127,6 +108,30 @@ router.register(
 )
 
 urlpatterns += router.urls
+
+urlpatterns += [
+
+    url(
+        (r'^runs/(?P<accession>[a-zA-Z0-9_]+)/'
+         r'pipelines/(?P<release_version>[0-9\.]+)$'),
+        views.RunAPIView.as_view(),
+        name='runs-pipelines-detail'
+    ),
+
+    url(
+        (r'^pipeline-tools/(?P<tool_name>[\w+]+)/'
+         '(?P<version>[a-zA-Z0-9\-\.]+)$'),
+        views.PipelineToolAPIView.as_view(),
+        name='pipeline-tools-detail'
+    ),
+
+    # url(
+    #     (r'^metadata/(?P<name>(.*)+)/(?P<value>(.*)+)$'),
+    #     views.SampleAnnAPIView.as_view(),
+    #     name='metadata-detail'
+    # ),
+
+]
 
 
 # relationship views
