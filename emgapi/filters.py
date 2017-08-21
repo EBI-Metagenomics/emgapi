@@ -214,6 +214,13 @@ class RunFilter(django_filters.FilterSet):
         return qs.filter(
             sample__accession__iregex=WORD_MATCH_REGEX.format(value))
 
+    study_accession = django_filters.CharFilter(
+        method='filter_study_accession', distinct=True)
+
+    def filter_study_accession(self, qs, name, value):
+        return qs.filter(
+            sample__study__accession__iregex=WORD_MATCH_REGEX.format(value))
+
     class Meta:
         model = emg_models.Run
         fields = (
