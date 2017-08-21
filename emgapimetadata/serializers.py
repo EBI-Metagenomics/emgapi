@@ -51,3 +51,34 @@ class AnnotationSerializer(m_serializers.DocumentSerializer,
     class Meta:
         model = m_models.Annotation
         fields = '__all__'
+
+
+class RetriveAnnotationSerializer(m_serializers.DynamicDocumentSerializer,
+                                  serializers.HyperlinkedModelSerializer):
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapimetadata:annotations-detail',
+        lookup_field='accession',
+    )
+
+    analysis = relations.SerializerMethodResourceRelatedField(
+        source='get_analysis',
+        model=emg_models.AnalysisJob,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapimetadata:annotations-runs-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
+    )
+
+    def get_analysis(self, obj):
+        # TODO: provide counter instead of paginating relationship
+        # workaround https://github.com/django-json-api
+        # /django-rest-framework-json-api/issues/178
+        return ()
+
+    count = serializers.IntegerField(required=False)
+
+    class Meta:
+        model = m_models.Annotation
+        fields = '__all__'
