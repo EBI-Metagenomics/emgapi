@@ -117,6 +117,13 @@ urlpatterns += [
     ),
 
     url(
+        (r'^runs/(?P<accession>[a-zA-Z0-9_]+)/(?P<release_version>[0-9\.]+)/'
+         r'metadata$'),
+        views.RunAnnsAPIView.as_view(),
+        name='runs-pipelines-metadata-list'
+    ),
+
+    url(
         (r'^pipeline-tools/(?P<tool_name>[\w+]+)/'
          '(?P<version>[a-zA-Z0-9\-\.]+)$'),
         views.PipelineToolAPIView.as_view(),
