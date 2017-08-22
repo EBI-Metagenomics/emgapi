@@ -33,40 +33,41 @@ from django.db.models import Q
 
 class BaseQuerySet(models.QuerySet):
 
-    def available(self, request):
-        _username = request.user.username
+    def available(self, request=None):
         _query_filters = {
             'StudyQuerySet': {
-                'authenticated':
-                    Q(submission_account_id=_username) |
-                    Q(is_public=1),
                 'all': Q(is_public=1),
             },
             'SampleQuerySet': {
-                'authenticated':
-                    Q(study__submission_account_id=_username) |
-                    Q(is_public=1),
                 'all': Q(is_public=1),
             },
             'RunQuerySet': {
-                'authenticated':
-                    Q(sample__study__submission_account_id=_username) |
-                    Q(analysis_status=3),
                 'all': Q(analysis_status=3),
             },
             'AnalysisJobQuerySet': {
-                'authenticated':
-                    Q(sample__study__submission_account_id=_username) |
-                    Q(analysis_status=3),
                 'all': Q(analysis_status=3),
             },
         }
+        if request is not None:
+            _username = request.user.username
+            _query_filters['StudyQuerySet']['authenticated'] = \
+                (Q(submission_account_id=_username) |
+                 Q(is_public=1))
+            _query_filters['SampleQuerySet']['authenticated'] = \
+                (Q(study__submission_account_id=_username) |
+                 Q(is_public=1))
+            _query_filters['RunQuerySet']['authenticated'] = \
+                (Q(sample__study__submission_account_id=_username) |
+                 Q(analysis_status=3))
+            _query_filters['AnalysisJobQuerySet']['authenticated'] = \
+                (Q(sample__study__submission_account_id=_username) |
+                 Q(analysis_status=3))
 
         q = list()
         try:
             _instance = _query_filters[self.__class__.__name__]
             if isinstance(self, self.__class__):
-                if request.user.is_authenticated():
+                if request is not None and request.user.is_authenticated():
                     q.append(_instance['authenticated'])
                 else:
                     q.append(_instance['all'])
