@@ -479,6 +479,26 @@ class RetrieveRunSerializer(RunSerializer):
         # /django-rest-framework-json-api/issues/178
         return ()
 
+    # metadata = serializers.HyperlinkedIdentityField(
+    #     view_name='emgapi:samples-metadata-list',
+    #     lookup_field='accession',
+    # )
+    metadata = AnalysisJobSerializerMethodResourceRelatedField(
+        source='get_metadata',
+        model=emg_models.AnalysisJobAnn,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi:runs-pipelines-metadata-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
+    )
+
+    def get_metadata(self, obj):
+        # TODO: provide counter instead of paginating relationship
+        # workaround https://github.com/django-json-api
+        # /django-rest-framework-json-api/issues/178
+        return ()
+
     class Meta:
         model = emg_models.AnalysisJob
         exclude = (
