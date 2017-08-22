@@ -468,12 +468,6 @@ class SampleViewSet(mixins.RetrieveModelMixin,
             .select_related('sample', 'var') \
             .order_by('var')
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(
-                page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
-
         serializer = self.get_serializer(
             queryset, many=True, context={'request': request})
         return Response(serializer.data)
