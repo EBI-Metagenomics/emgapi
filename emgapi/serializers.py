@@ -543,6 +543,36 @@ class SampleAnnSerializer(ExplicitFieldsModelSerializer,
         )
 
 
+class AnalysisJobAnnSerializer(ExplicitFieldsModelSerializer,
+                               serializers.HyperlinkedModelSerializer):
+
+    id = serializers.ReadOnlyField(source="multiple_pk")
+
+    var_name = serializers.SerializerMethodField()
+
+    def get_var_name(self, obj):
+        return obj.var.var_name
+
+    var_value = serializers.SerializerMethodField()
+
+    def get_var_value(self, obj):
+        return obj.var_val_ucv
+
+    unit = serializers.SerializerMethodField()
+
+    def get_unit(self, obj):
+        return obj.units
+
+    class Meta:
+        model = emg_models.AnalysisJobAnn
+        fields = (
+            'id',
+            'var_name',
+            'var_value',
+            'unit',
+        )
+
+
 # Sample serializer
 
 class SampleSerializer(ExplicitFieldsModelSerializer,
