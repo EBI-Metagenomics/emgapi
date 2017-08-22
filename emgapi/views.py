@@ -577,6 +577,36 @@ class RunAPIView(emg_mixins.MultipleFieldLookupMixin,
         return Response(data=serializer.data)
 
 
+class RunAnnsAPIView(emg_mixins.MultipleFieldLookupMixin,
+                     generics.ListAPIView):
+
+    serializer_class = emg_serializers.AnalysisJobAnnSerializer
+
+    lookup_fields = ('accession', 'release_version')
+
+    def get_queryset(self):
+        return emg_models.AnalysisJobAnn.objects.all() \
+            .select_related('job', 'var') \
+            .order_by('var')
+
+    def list(self, request, accession, release_version, *args, **kwargs):
+        """
+        Retrieves metadatafor the given analysis job
+        Example:
+        ---
+        `/api/runs/ERR1385375/3.0/metadata` retrieve metadata
+        """
+
+        queryset = emg_models.AnalysisJobAnn.objects.filter(
+            job__accession=accession,
+            job__pipeline__release_version=release_version) \
+            .select_related('job', 'var') \
+            .order_by('var')
+        serializer = self.get_serializer(
+            queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
 class RunViewSet(mixins.RetrieveModelMixin,
                  mixins.ListModelMixin,
                  viewsets.GenericViewSet):
