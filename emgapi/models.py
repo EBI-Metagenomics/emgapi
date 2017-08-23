@@ -42,26 +42,24 @@ class BaseQuerySet(models.QuerySet):
                 'all': Q(is_public=1),
             },
             'RunQuerySet': {
-                'all': Q(analysis_status=3),
+                'all': Q(run_status_id=3) | Q(run_status_id=4),
             },
             'AnalysisJobQuerySet': {
-                'all': Q(analysis_status=3),
+                'all': Q(run_status_id=3) | Q(run_status_id=4),
             },
         }
         if request is not None:
             _username = request.user.username
             _query_filters['StudyQuerySet']['authenticated'] = \
-                (Q(submission_account_id=_username) |
-                 Q(is_public=1))
+                (Q(submission_account_id=_username) | Q(is_public=1))
             _query_filters['SampleQuerySet']['authenticated'] = \
-                (Q(study__submission_account_id=_username) |
-                 Q(is_public=1))
+                (Q(study__submission_account_id=_username) | Q(is_public=1))
             _query_filters['RunQuerySet']['authenticated'] = \
                 (Q(sample__study__submission_account_id=_username) |
-                 Q(analysis_status=3))
+                 Q(run_status_id=4) | Q(run_status_id=2))
             _query_filters['AnalysisJobQuerySet']['authenticated'] = \
                 (Q(sample__study__submission_account_id=_username) |
-                 Q(analysis_status=3))
+                 Q(run_status_id=4) | Q(run_status_id=2))
 
         q = list()
         try:
