@@ -37,20 +37,26 @@ class Migration(migrations.Migration):
         ),
 
         migrations.RunSQL(
+            # Production FOREIGN KEY may be different
+            # """
+            # ALTER TABLE GSC_CV_CV
+            #     DROP FOREIGN KEY GSC_CV_CV_ibfk_1,
+            #     MODIFY VAR_NAME VARCHAR(255);
+            # """
             """
-            LOCK TABLES 
+            LOCK TABLES
                 GSC_CV_CV WRITE,
                 VARIABLE_NAMES WRITE;
 
             ALTER TABLE GSC_CV_CV
-                DROP FOREIGN KEY GSC_CV_CV_ibfk_1,
+                DROP FOREIGN KEY GSC_CV_CV_VAR_NAME_7b3b67e1_fk_VARIABLE_NAMES_VAR_ID,
                 MODIFY VAR_NAME VARCHAR(255);
 
             ALTER TABLE VARIABLE_NAMES
                 MODIFY VAR_NAME VARCHAR(255);
 
             ALTER TABLE GSC_CV_CV
-                ADD CONSTRAINT GSC_CV_CV_ibfk_1 FOREIGN KEY (VAR_NAME)
+                ADD CONSTRAINT GSC_CV_CV_VAR_NAME_7b3b67e1_fk_VARIABLE_NAMES_VAR_ID FOREIGN KEY (VAR_NAME)
                       REFERENCES VARIABLE_NAMES (VAR_NAME);
 
             UNLOCK TABLES;
