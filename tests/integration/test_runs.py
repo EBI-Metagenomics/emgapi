@@ -33,9 +33,9 @@ class TestRunAPI(APITestCase):
         _as = mommy.make('emgapi.AnalysisStatus', pk=3)
         _p = mommy.make('emgapi.Pipeline', pk=1, release_version="1.0")
         _r1 = mommy.make("emgapi.AnalysisJob", pk=123, accession="123",
-                         pipeline=_p, analysis_status=_as)
+                         pipeline=_p, analysis_status=_as, run_status_id=4)
         _r2 = mommy.make("emgapi.AnalysisJob", pk=456, accession="456",
-                         pipeline=_p)
+                         pipeline=_p, run_status_id=2)
         mommy.make("emgapi.Sample", pk=123, accession="123",
                    analysis=[_r1], is_public=1)
         mommy.make("emgapi.Sample", pk=456, accession="456",
