@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
+
 from django.shortcuts import get_object_or_404
 
 from rest_framework.response import Response
@@ -33,6 +35,8 @@ from emgapi import mixins as emg_mixins
 
 from . import serializers as m_serializers
 from . import models as m_models
+
+logger = logging.getLogger(__name__)
 
 
 class AnnotationViewSet(m_viewset.ReadOnlyModelViewSet):
