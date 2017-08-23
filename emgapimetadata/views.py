@@ -17,21 +17,16 @@
 import logging
 
 from django.shortcuts import get_object_or_404
-
-from rest_framework.response import Response
-from rest_framework import generics
-
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework import viewsets, mixins
-from rest_framework import filters
+from rest_framework import filters, mixins
+from rest_framework.response import Response
 
 from rest_framework_mongoengine import viewsets as m_viewset
 
 from emgapi import serializers as emg_serializers
 from emgapi import models as emg_models
 from emgapi import filters as emg_filters
-from emgapi import mixins as emg_mixins
 
 from . import serializers as m_serializers
 from . import models as m_models
@@ -58,7 +53,7 @@ class AnnotationViewSet(m_viewset.ReadOnlyModelViewSet):
 
 
 class AnnotationRunRelationshipViewSet(mixins.ListModelMixin,
-                                       viewsets.GenericViewSet):
+                                       m_viewset.GenericViewSet):
 
     serializer_class = emg_serializers.RunSerializer
 
@@ -116,12 +111,12 @@ class AnnotationRunRelationshipViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class AnnotationAnalysisAPIView(emg_mixins.MultipleFieldLookupMixin,
-                                generics.ListAPIView):
+class AnnotationAnalysisAPIView(mixins.ListModelMixin,
+                                m_viewset.GenericAPIView):
 
     serializer_class = m_serializers.RetriveAnnotationSerializer
 
-    lookup_fields = ('accession', 'release_version')
+    lookup_field = 'accession'
 
     def get_queryset(self):
         return emg_models.AnalysisJob.objects \
