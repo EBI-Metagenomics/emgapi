@@ -38,5 +38,5 @@ django-rest-swagger~=2.1.2
 
 # mongo
 mongoengine~=0.13.0
-pymongo~=3.4.0
+pymongo~=3.5.0
 django-rest-framework-mongoengine
