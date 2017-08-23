@@ -31,7 +31,7 @@ from test_utils.emg_fixtures import *  # noqa
 class TestAnnotations(object):
 
     def test_default(self, client, run):
-        call_command('import_annotations', 'ABC01234',
+        call_command('import_go', 'ABC01234',
                      os.path.dirname(os.path.abspath(__file__)))
 
         url = reverse("emgapimetadata:annotations-list")
