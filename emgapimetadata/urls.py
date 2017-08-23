@@ -21,7 +21,7 @@ from rest_framework_mongoengine.routers import DefaultRouter \
     as MongoDefaultRouter
 
 from . import views as m_views
-
+from . import other_views as o_views
 
 app_name = "emgapimetadata"
 urlpatterns = [
@@ -31,6 +31,16 @@ urlpatterns = [
          'annotations$'),
         m_views.AnnotationAnalysisAPIView.as_view(),
         name='runs-pipelines-annotations-list'
+    ),
+
+]
+
+urlpatterns += [
+
+    url(
+        (r'^annotations/metadata$'),
+        o_views.AnnotationMetadataAPIView.as_view(),
+        name='annotations-metadata-list'
     ),
 
 ]
