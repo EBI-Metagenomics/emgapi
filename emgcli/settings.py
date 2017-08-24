@@ -437,13 +437,19 @@ try:
 except KeyError:
     EMG_BACKEND_AUTH_URL = None
 
-EMG_TITLE = 'EBI Metagenomics WEB API'
-EMG_URL = FORCE_SCRIPT_NAME
-EMG_DESC = (
-    'Is a free resource to visualise and discover metagenomic datasets. '
-    'For more details and full documentation go to '
-    'http://www.ebi.ac.uk/metagenomics/'
-)
+# Documentation
+try:
+    EMG_TITLE = yamjam()['emg']['documentation']['title']
+except KeyError:
+    EMG_TITLE = 'EBI Metagenomics API'
+try:
+    EMG_URL = yamjam()['emg']['documentation']['url']
+except KeyError:
+    EMG_URL = FORCE_SCRIPT_NAME
+try:
+    EMG_DESC = yamjam()['emg']['documentation']['description']
+except KeyError:
+    EMG_DESC = 'EBI Metagenomics API'
 
 # MongoDB
 import mongoengine
