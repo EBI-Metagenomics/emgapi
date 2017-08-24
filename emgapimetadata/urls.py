@@ -60,7 +60,7 @@ mongorelation_router.register(
     (r'runs/(?P<accession>[a-zA-Z0-9_]+)/(?P<release_version>[0-9\.]+)/'
      r'annotations'),
     m_views.AnalysisAnnotationRelViewSet,
-    base_name='annotations-runs'
+    base_name='runs-pipelines-annotations'
 )
 
 urlpatterns += mongorelation_router.urls
