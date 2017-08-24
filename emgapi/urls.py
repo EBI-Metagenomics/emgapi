@@ -149,7 +149,7 @@ relation_router.register(
 )
 
 relation_router.register(
-    r'publications/(?P<pub_id>[a-zA-Z0-9,]+)/studies',
+    r'publications/(?P<pubmed_id>[0-9\.]+)/studies',
     views_relations.PublicationStudyRelationshipViewSet,
     base_name='publications-studies'
 )
@@ -179,7 +179,7 @@ relation_router.register(
 )
 
 relation_router.register(
-    r'publications/(?P<pub_id>[a-zA-Z0-9,]+)/samples',
+    r'publications/(?P<pubmed_id>[0-9\.]+)/samples',
     views_relations.PublicationSampleRelationshipViewSet,
     base_name='publications-samples'
 )
