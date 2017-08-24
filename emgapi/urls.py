@@ -100,7 +100,6 @@ router.register(
 #     base_name='metadata'
 # )
 
-
 router.register(
     r'mydata',
     views.MyDataViewSet,
@@ -112,15 +111,21 @@ urlpatterns += router.urls
 urlpatterns += [
 
     url(
-        (r'^runs/(?P<accession>[a-zA-Z0-9_]+)/'
-         r'pipelines/(?P<release_version>[0-9\.]+)$'),
+        (r'^runs/(?P<accession>[a-zA-Z0-9_]+)/(?P<release_version>[0-9\.]+)$'),
         views.RunAPIView.as_view(),
         name='runs-pipelines-detail'
     ),
 
     url(
+        (r'^runs/(?P<accession>[a-zA-Z0-9_]+)/(?P<release_version>[0-9\.]+)/'
+         r'metadata$'),
+        views.RunAnnsAPIView.as_view(),
+        name='runs-pipelines-metadata-list'
+    ),
+
+    url(
         (r'^pipeline-tools/(?P<tool_name>[\w+]+)/'
-         '(?P<version>[a-zA-Z0-9\-\.]+)$'),
+         r'(?P<version>[a-zA-Z0-9\-\.]+)$'),
         views.PipelineToolAPIView.as_view(),
         name='pipeline-tools-detail'
     ),
@@ -144,7 +149,7 @@ relation_router.register(
 )
 
 relation_router.register(
-    r'publications/(?P<pub_id>[a-zA-Z0-9,]+)/studies',
+    r'publications/(?P<pubmed_id>[0-9\.]+)/studies',
     views_relations.PublicationStudyRelationshipViewSet,
     base_name='publications-studies'
 )
@@ -174,7 +179,7 @@ relation_router.register(
 )
 
 relation_router.register(
-    r'publications/(?P<pub_id>[a-zA-Z0-9,]+)/samples',
+    r'publications/(?P<pubmed_id>[0-9\.]+)/samples',
     views_relations.PublicationSampleRelationshipViewSet,
     base_name='publications-samples'
 )

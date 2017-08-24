@@ -265,7 +265,7 @@ class Publication(models.Model):
 
     class Meta:
         db_table = 'PUBLICATION'
-        ordering = ('pub_id',)
+        ordering = ('pubmed_id',)
 
     def __str__(self):
         return self.pub_title
@@ -569,6 +569,9 @@ class AnalysisJob(models.Model):
 
     objects = RunManager()
 
+    def multiple_pk(self):
+        return "%s/%s" % (self.accession, self.pipeline.release_version)
+
     class Meta:
         db_table = 'ANALYSIS_JOB'
         unique_together = (('job_id', 'accession'), ('pipeline', 'accession'),)
@@ -620,7 +623,7 @@ class VariableNames(models.Model):
     var_id = models.SmallIntegerField(
         db_column='VAR_ID', primary_key=True)
     var_name = models.CharField(
-        db_column='VAR_NAME', unique=True, max_length=50)
+        db_column='VAR_NAME', unique=True, max_length=100)
     definition = models.TextField(
         db_column='DEFINITION', blank=True, null=True)
     value_syntax = models.CharField(
@@ -687,6 +690,28 @@ class SampleAnn(models.Model):
 
     def __str__(self):
         return "%s %s" % (self.sample, self.var)
+
+    def multiple_pk(self):
+        return "%s/%s" % (self.var.var_name, self.var_val_ucv)
+
+
+class AnalysisJobAnn(models.Model):
+    job = models.ForeignKey(
+        AnalysisJob, db_column='JOB_ID',
+        related_name="analysis_metadata")
+    units = models.CharField(
+        db_column='UNITS', max_length=25, blank=True, null=True)
+    var = models.ForeignKey(
+        'VariableNames', db_column='VAR_ID')
+    var_val_ucv = models.CharField(
+        db_column='VAR_VAL_UCV', max_length=4000, blank=True, null=True)
+
+    class Meta:
+        db_table = 'ANALYSIS_JOB_ANN'
+        unique_together = (('job', 'var'), ('job', 'var'),)
+
+    def __str__(self):
+        return "%s %s" % (self.job, self.var)
 
     def multiple_pk(self):
         return "%s/%s" % (self.var.var_name, self.var_val_ucv)

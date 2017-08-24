@@ -37,27 +37,9 @@ from . import models as emg_models
 from . import serializers as emg_serializers
 from . import filters as emg_filters
 from . import permissions as emg_perms
+from . import mixins as emg_mixins
 
 logger = logging.getLogger(__name__)
-
-
-class MultipleFieldLookupMixin(object):
-
-    """
-    Apply this mixin to any view or viewset to get multiple field filtering
-    based on a `lookup_fields` attribute, instead of the default single field
-    filtering.
-    Source: http://www.django-rest-framework.org/api-guide/generic-views/
-    """
-
-    def get_object(self):
-        queryset = self.get_queryset()
-        queryset = self.filter_queryset(queryset)
-        filter = {}
-        for field in self.lookup_fields:
-            if self.kwargs[field]:
-                filter[field] = self.kwargs[field]
-        return get_object_or_404(queryset, **filter)
 
 
 class MyDataViewSet(mixins.ListModelMixin,
@@ -83,7 +65,7 @@ class MyDataViewSet(mixins.ListModelMixin,
         Retrieve studies owned by the logged in user
         Example:
         ---
-        `/api/mydata` retrieve own studies
+        `/mydata` retrieve own studies
         """
         queryset = emg_models.Study.objects \
             .mydata(self.request) \
@@ -144,7 +126,7 @@ class BiomeViewSet(mixins.ListModelMixin,
         Retrieves children for the given Biome node.
         Example:
         ---
-        `/api/biomes/root:Environmental:Aquatic`
+        `/biomes/root:Environmental:Aquatic`
         list all children
         """
 
@@ -162,7 +144,7 @@ class BiomeRootViewSet(mixins.ListModelMixin,
         """
         Retrieve 10 most popular biome:
         ---
-        `/api/biomes`
+        `/biomes`
         """
 
         sql = """
@@ -257,24 +239,24 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         Retrieves list of studies
         Example:
         ---
-        `/api/studies`
+        `/studies`
 
-        `/api/studies?fields[studies]=accession,samples_count,biomes`
+        `/studies?fields[studies]=accession,samples_count,biomes`
         retrieve only selected fileds
 
-        `/api/studies?include=publications` with publications
+        `/studies?include=publications` with publications
 
         Filter by:
         ---
-        `/api/studies?biome=root:Environmental:Terrestrial:Soil`
+        `/studies?biome=root:Environmental:Terrestrial:Soil`
 
-        `/api/studies?centre_name=BioProject`
+        `/studies?centre_name=BioProject`
 
         Search for:
         ---
         name, abstract, author and centre name etc.
 
-        `/api/studies?search=microbial%20fuel%20cells`
+        `/studies?search=microbial%20fuel%20cells`
         """
 
         return super(StudyViewSet, self).list(request, *args, **kwargs)
@@ -284,9 +266,9 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         Retrieves study for the given accession
         Example:
         ---
-        `/api/studies/ERP009004` retrieve study SRP001634
+        `/studies/ERP009004` retrieve study SRP001634
 
-        `/api/studies/ERP009004?include=samples`
+        `/studies/ERP009004?include=samples`
         with samples
         """
         return super(StudyViewSet, self).retrieve(request, *args, **kwargs)
@@ -300,7 +282,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         Retrieve 20 latest studies
         Example:
         ---
-        `/api/studies/recent` retrieve recent studies
+        `/studies/recent` retrieve recent studies
         """
         limit = settings.EMG_DEFAULT_LIMIT
         queryset = emg_models.Study.objects \
@@ -323,7 +305,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         Retrieves list of publications for the given study accession
         Example:
         ---
-        `/api/studies/SRP000183/publications` retrieve linked publications
+        `/studies/SRP000183/publications` retrieve linked publications
         """
 
         obj = self.get_object()
@@ -348,7 +330,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         Retrieves list of biomes for the given study accession
         Example:
         ---
-        `/api/studies/ERP009004/biomes` retrieve linked samples
+        `/studies/ERP009004/biomes` retrieve linked samples
         """
 
         obj = self.get_object()
@@ -429,9 +411,9 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         Retrieves sample for the given accession
         Example:
         ---
-        `/api/samples/ERS1015417`
+        `/samples/ERS1015417`
 
-        `/api/samples/ERS1015417?include=metadata` with metadata
+        `/samples/ERS1015417?include=metadata` with metadata
 
         """
         return super(SampleViewSet, self).retrieve(request, *args, **kwargs)
@@ -441,29 +423,29 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         Retrieves list of samples
         Example:
         ---
-        `/api/samples` retrieves list of samples
+        `/samples` retrieves list of samples
 
-        `/api/samples?fields[samples]=accession,runs_count,biome`
+        `/samples?fields[samples]=accession,runs_count,biome`
         retrieve only selected fileds
 
-        `/api/samples?include=metadata,runs,study`
+        `/samples?include=metadata,runs,study`
         with related metadata, runs and studies
 
-        `/api/samples?ordering=accession` ordered by accession
+        `/samples?ordering=accession` ordered by accession
 
         Filter by:
         ---
-        `/api/samples?experiment_type=metagenomics`
+        `/samples?experiment_type=metagenomics`
 
-        `/api/samples?species=sapiens`
+        `/samples?species=sapiens`
 
-        `/api/samples?biome=root:Environmental:Aquatic:Marine`
+        `/samples?biome=root:Environmental:Aquatic:Marine`
 
         Search for:
         ---
         name, descriptions, metadata, species, environment feature and material
 
-        `/api/samples?search=continuous%20culture`
+        `/samples?search=continuous%20culture`
 
         """
         return super(SampleViewSet, self).list(request, *args, **kwargs)
@@ -478,7 +460,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         Retrieves metadatafor the given sample accession
         Example:
         ---
-        `/api/samples/ERS1015417/metadata` retrieve metadata
+        `/samples/ERS1015417/metadata` retrieve metadata
         """
 
         obj = self.get_object()
@@ -491,7 +473,8 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         return Response(serializer.data)
 
 
-# class SampleAnnAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):
+# class SampleAnnAPIView(emg_mixins.MultipleFieldLookupMixin,
+#                        generics.RetrieveAPIView):
 #
 #     serializer_class = emg_serializers.SampleAnnSerializer
 #
@@ -505,7 +488,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
 #         Retrieves sample annotation for the given sample accession and value
 #         Example:
 #         ---
-#         `/api/metadata/name/value`
+#         `/metadata/name/value`
 #         """
 #         sa = emg_models.SampleAnn.objects.get(
 #             var__var_name=name,
@@ -553,12 +536,13 @@ class SampleAnnsViewSet(mixins.ListModelMixin,
         Retrieves list of annotaitons
         Example:
         ---
-        `/api/metadata` retrieves list of samples
+        `/metadata` retrieves list of samples
         """
         return super(SampleAnnsViewSet, self).list(request, *args, **kwargs)
 
 
-class RunAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):
+class RunAPIView(emg_mixins.MultipleFieldLookupMixin,
+                 generics.RetrieveAPIView):
 
     serializer_class = emg_serializers.RetrieveRunSerializer
 
@@ -578,13 +562,43 @@ class RunAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):
         Retrieves run for the given accession and pipeline version
         Example:
         ---
-        `/api/runs/ERR1385375/pipelines/3.0`
+        `/runs/ERR1385375/3.0`
         """
         run = get_object_or_404(
             emg_models.AnalysisJob, accession=accession,
             pipeline__release_version=release_version)
         serializer = self.get_serializer(run)
         return Response(data=serializer.data)
+
+
+class RunAnnsAPIView(emg_mixins.MultipleFieldLookupMixin,
+                     generics.ListAPIView):
+
+    serializer_class = emg_serializers.AnalysisJobAnnSerializer
+
+    lookup_fields = ('accession', 'release_version')
+
+    def get_queryset(self):
+        return emg_models.AnalysisJobAnn.objects.all() \
+            .select_related('job', 'var') \
+            .order_by('var')
+
+    def list(self, request, accession, release_version, *args, **kwargs):
+        """
+        Retrieves metadatafor the given analysis job
+        Example:
+        ---
+        `/runs/ERR1385375/3.0/metadata` retrieve metadata
+        """
+
+        queryset = emg_models.AnalysisJobAnn.objects.filter(
+            job__accession=accession,
+            job__pipeline__release_version=release_version) \
+            .select_related('job', 'var') \
+            .order_by('var')
+        serializer = self.get_serializer(
+            queryset, many=True, context={'request': request})
+        return Response(serializer.data)
 
 
 class RunViewSet(mixins.RetrieveModelMixin,
@@ -633,16 +647,16 @@ class RunViewSet(mixins.RetrieveModelMixin,
         Retrieves list of runs
         Example:
         ---
-        `/api/runs`
+        `/runs`
 
-        `/api/runs?fields[runs]=accession,experiment_type` retrieve only
+        `/runs?fields[runs]=accession,experiment_type` retrieve only
         selected fileds
 
         Filter by:
         ---
-        `/api/runs?experiment_type=metagenomics`
+        `/runs?experiment_type=metagenomics`
 
-        `/api/runs?biome=root:Environmental:Aquatic:Marine`
+        `/runs?biome=root:Environmental:Aquatic:Marine`
         """
         return super(RunViewSet, self).list(request, *args, **kwargs)
 
@@ -651,7 +665,7 @@ class RunViewSet(mixins.RetrieveModelMixin,
         Retrieves run for the given accession
         Example:
         ---
-        `/api/runs/SRR062157`
+        `/runs/SRR062157`
         """
         run = emg_models.Run.objects \
             .filter(accession=self.kwargs['accession']) \
@@ -666,10 +680,10 @@ class RunViewSet(mixins.RetrieveModelMixin,
     )
     def analysis(self, request, accession=None):
         """
-        Retrieves list of pipelines for the given run
+        Retrieves list of analysis for the given run
         Example:
         ---
-        `/api/runs/SRR062157/pipelines`
+        `/runs/ERR1385375/analysis`
         """
         queryset = emg_models.AnalysisJob.objects \
             .available(self.request) \
@@ -723,9 +737,9 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         Retrieves pipeline for the given version
         Example:
         ---
-        `/api/pipelines/3.0`
+        `/pipelines/3.0`
 
-        `/api/pipelines/3.0?include=tools` with tools
+        `/pipelines/3.0?include=tools` with tools
         """
         return super(PipelineViewSet, self).retrieve(request, *args, **kwargs)
 
@@ -734,9 +748,9 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         Retrieves list of available pipeline versions
         Example:
         ---
-        `/api/pipeline`
+        `/pipeline`
 
-        `/api/pipeline?include=tools` with tools
+        `/pipeline?include=tools` with tools
         """
         return super(PipelineViewSet, self).list(request, *args, **kwargs)
 
@@ -750,7 +764,7 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         Retrieves list of pipeline tools for the given pipeline version
         Example:
         ---
-        `/api/pipeline/tools`
+        `/pipeline/tools`
         """
         obj = self.get_object()
         queryset = obj.tools.all()
@@ -766,7 +780,8 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         return Response(serializer.data)
 
 
-class PipelineToolAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):
+class PipelineToolAPIView(emg_mixins.MultipleFieldLookupMixin,
+                          generics.RetrieveAPIView):
 
     serializer_class = emg_serializers.PipelineToolSerializer
     queryset = emg_models.PipelineTool.objects.all()
@@ -778,7 +793,7 @@ class PipelineToolAPIView(MultipleFieldLookupMixin, generics.RetrieveAPIView):
         Retrieves pipeline tool details for the given pipeline version
         Example:
         ---
-        `/api/pipeline-tools/interproscan/5.19-58.0`
+        `/pipeline-tools/interproscan/5.19-58.0`
         """
         run = get_object_or_404(
             emg_models.PipelineTool,
@@ -804,7 +819,7 @@ class PipelineToolViewSet(mixins.ListModelMixin,
         Retrieves list of pipeline tools
         Example:
         ---
-        `/api/pipeline-tools` retrieves list of pipeline tools
+        `/pipeline-tools` retrieves list of pipeline tools
         """
         return super(PipelineToolViewSet, self).list(request, *args, **kwargs)
 
@@ -865,11 +880,11 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
     )
 
     ordering_fields = (
-        'pub_id',
+        'pubmed_id',
         'studies_count',
     )
 
-    ordering = ('pub_id',)
+    ordering = ('pubmed_id',)
 
     search_fields = (
         '@pub_title',
@@ -880,8 +895,8 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         'isbn',
     )
 
-    lookup_field = 'pub_id'
-    lookup_value_regex = '[a-zA-Z0-9,]+'
+    lookup_field = 'pubmed_id'
+    lookup_value_regex = '[0-9\.]+'
 
     def get_queryset(self):
         queryset = emg_models.Publication.objects.all()
@@ -892,8 +907,6 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         return queryset
 
     def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return emg_serializers.RetrievePublicationSerializer
         return super(PublicationViewSet, self).get_serializer_class()
 
     def retrieve(self, request, *args, **kwargs):
@@ -901,9 +914,9 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         Retrieves publication for the given id
         Example:
         ---
-        `/api/publications/338`
+        `/publications/{pubmed}`
 
-        `/api/publications/338?include=studies` with studies
+        `/publications/{pubmed}?include=studies` with studies
         """
         return super(PublicationViewSet, self) \
             .retrieve(request, *args, **kwargs)
@@ -913,16 +926,16 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         Retrieves list of publications
         Example:
         ---
-        `/api/publications` retrieves list of publications
+        `/publications` retrieves list of publications
 
-        `/api/publications?include=studies` with studies
+        `/publications?include=studies` with studies
 
-        `/api/publications?ordering=pub_id` ordered by id
+        `/publications?ordering=pubmed_id` ordered by id
 
         Search for:
         ---
         title, abstract, authors, etc.
 
-        `/api/publications?search=text`
+        `/publications?search=text`
         """
         return super(PublicationViewSet, self).list(request, *args, **kwargs)
