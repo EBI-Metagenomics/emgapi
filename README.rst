@@ -83,7 +83,8 @@ Start application::
 NOTE: `~/emgvar` is used as default directory to store logs, secret key, etc.
 
 
-Tests::
+Tests
+-----
 
     python setup.py tests
 
