@@ -88,10 +88,10 @@ class BiomeStudyRelationshipViewSet(mixins.ListModelMixin,
         Retrieves list of studies for the given pipeline version
         Example:
         ---
-        `/api/biomes/root:Environmental:Aquatic/studies` retrieve linked
+        `/biomes/root:Environmental:Aquatic/studies` retrieve linked
         studies
 
-        `/api/biomes/root:Environmental:Aquatic/studies?include=samples` with
+        `/biomes/root:Environmental:Aquatic/studies?include=samples` with
         studies
         """
         return super(BiomeStudyRelationshipViewSet, self) \
@@ -101,11 +101,12 @@ class BiomeStudyRelationshipViewSet(mixins.ListModelMixin,
 class PublicationStudyRelationshipViewSet(mixins.ListModelMixin,
                                           BaseStudyRelationshipViewSet):
 
-    lookup_field = 'pub_id'
+    lookup_field = 'pubmed_id'
+    lookup_value_regex = '[0-9\.]+'
 
     def get_queryset(self):
-        pub_id = self.kwargs[self.lookup_field]
-        obj = get_object_or_404(emg_models.Publication, pub_id=pub_id)
+        pubmed_id = self.kwargs[self.lookup_field]
+        obj = get_object_or_404(emg_models.Publication, pubmed_id=pubmed_id)
         queryset = emg_models.Study.objects \
             .available(self.request) \
             .filter(publications=obj)
@@ -117,15 +118,15 @@ class PublicationStudyRelationshipViewSet(mixins.ListModelMixin,
                 Prefetch('samples', queryset=_qs))
         return queryset
 
-    def list(self, request, pub_id, *args, **kwargs):
+    def list(self, request, pubmed_id, *args, **kwargs):
         """
         Retrieves list of studies for the given pipeline version
         Example:
         ---
-        `/api/publications/338/studies` retrieve linked
+        `/publications/{pubmed}/studies` retrieve linked
         studies
 
-        `/api/publications/338/studies?include=samples` with
+        `/publications/{pubmed}/studies?include=samples` with
         samples
         """
         return super(PublicationStudyRelationshipViewSet, self) \
@@ -192,16 +193,16 @@ class StudySampleRelationshipViewSet(mixins.ListModelMixin,
         Retrieves list of samples for the given study accession
         Example:
         ---
-        `/api/studies/SRP001634/samples` retrieve linked samples
+        `/studies/SRP001634/samples` retrieve linked samples
 
-        `/api/studies/SRP001634/samples?include=runs` with runs
+        `/studies/SRP001634/samples?include=runs` with runs
 
         Filter by:
         ---
-        `/api/studies/ERP009004/samples?biome=root%3AEnvironmental%3AAquatic`
+        `/studies/ERP009004/samples?biome=root%3AEnvironmental%3AAquatic`
         filtered by biome
 
-        `/api/studies/ERP009004/samples?geo_loc_name=Alberta` filtered by
+        `/studies/ERP009004/samples?geo_loc_name=Alberta` filtered by
         localtion
         """
         return super(StudySampleRelationshipViewSet, self) \
@@ -236,16 +237,16 @@ class PipelineSampleRelationshipViewSet(mixins.ListModelMixin,
         Retrieves list of samples for the given pipeline version
         Example:
         ---
-        `/api/pipeline/3.0/samples` retrieve linked samples
+        `/pipeline/3.0/samples` retrieve linked samples
 
-        `/api/pipeline/3.0/samples?include=runs` with runs
+        `/pipeline/3.0/samples?include=runs` with runs
 
         Filter by:
         ---
-        `/api/pipeline/3.0/samples?biome=root%3AEnvironmental%3AAquatic`
+        `/pipeline/3.0/samples?biome=root%3AEnvironmental%3AAquatic`
         filtered by biome
 
-        `/api/pipeline/3.0/samples?geo_loc_name=Alberta` filtered by
+        `/pipeline/3.0/samples?geo_loc_name=Alberta` filtered by
         localtion
         """
         return super(PipelineSampleRelationshipViewSet, self) \
@@ -280,16 +281,16 @@ class ExperimentSampleRelationshipViewSet(mixins.ListModelMixin,
         Retrieves list of samples for the given experiment type
         Example:
         ---
-        `/api/experiments/metagenomic/samples` retrieve linked samples
+        `/experiments/metagenomic/samples` retrieve linked samples
 
-        `/api/experiments/metagenomic/samples?include=runs` with runs
+        `/experiments/metagenomic/samples?include=runs` with runs
 
         Filter by:
         ---
-        `/api/experiments/metagenomic/samples?biome=root%3AEnvironmental
+        `/experiments/metagenomic/samples?biome=root%3AEnvironmental
         %3AAquatic` filtered by biome
 
-        `/api/experiments/metagenomic/samples?geo_loc_name=Alberta`
+        `/experiments/metagenomic/samples?geo_loc_name=Alberta`
         filtered by localtion
         """
         return super(ExperimentSampleRelationshipViewSet, self) \
@@ -326,15 +327,15 @@ class BiomeSampleRelationshipViewSet(mixins.ListModelMixin,
         Retrieves list of samples for the given biome
         Example:
         ---
-        `/api/biomes/root:Environmental:Aquatic/samples` retrieve linked
+        `/biomes/root:Environmental:Aquatic/samples` retrieve linked
         samples
 
-        `/api/biomes/root:Environmental:Aquatic/samples?include=runs` with
+        `/biomes/root:Environmental:Aquatic/samples?include=runs` with
         runs
 
         Filter by:
         ---
-        `/api/biomes/root:Environmental:Aquatic/samples?geo_loc_name=Alberta`
+        `/biomes/root:Environmental:Aquatic/samples?geo_loc_name=Alberta`
         filtered by localtion
 
         """
@@ -345,11 +346,12 @@ class BiomeSampleRelationshipViewSet(mixins.ListModelMixin,
 class PublicationSampleRelationshipViewSet(mixins.ListModelMixin,
                                            BaseSampleRelationshipViewSet):
 
-    lookup_field = 'pub_id'
+    lookup_field = 'pubmed_id'
+    lookup_value_regex = '[0-9\.]+'
 
     def get_queryset(self):
-        pub_id = self.kwargs[self.lookup_field]
-        obj = get_object_or_404(emg_models.Publication, pub_id=pub_id)
+        pubmed_id = self.kwargs[self.lookup_field]
+        obj = get_object_or_404(emg_models.Publication, pubmed_id=pubmed_id)
         queryset = emg_models.Sample.objects \
             .available(self.request) \
             .filter(study__publications=obj)
@@ -363,19 +365,19 @@ class PublicationSampleRelationshipViewSet(mixins.ListModelMixin,
                 Prefetch('runs', queryset=_qs))
         return queryset
 
-    def list(self, request, pub_id, *args, **kwargs):
+    def list(self, request, pubmed_id, *args, **kwargs):
         """
         Retrieves list of studies for the given pipeline version
         Example:
         ---
-        `/api/publications/338/samples` retrieve linked
+        `/publications/{pubmed}/samples` retrieve linked
         studies
 
-        `/api/publications/338/samples?include=runs` with
+        `/publications/{pubmed}/samples?include=runs` with
         samples
         """
         return super(PublicationSampleRelationshipViewSet, self) \
-            .list(request, *args, **kwargs)
+            .list(request, pubmed_id, *args, **kwargs)
 
 
 class SampleRunRelationshipViewSet(mixins.ListModelMixin,
@@ -426,11 +428,11 @@ class SampleRunRelationshipViewSet(mixins.ListModelMixin,
         Retrieves list of runs for the given sample accession
         Example:
         ---
-        `/api/samples/ERS1015417/runs`
+        `/samples/ERS1015417/runs`
 
         Filter by:
         ---
-        `/api/samples/ERS1015417/runs?experiment_type=metagenomics`
+        `/samples/ERS1015417/runs?experiment_type=metagenomics`
         """
         return super(SampleRunRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
