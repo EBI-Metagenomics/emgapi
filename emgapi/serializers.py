@@ -16,6 +16,7 @@
 
 
 import logging
+from collections import OrderedDict
 
 # from django.utils.text import Truncator
 from rest_framework.reverse import reverse
@@ -26,6 +27,9 @@ from rest_framework_json_api import relations
 
 from . import models as emg_models
 from . import relations as emg_relations
+
+# TODO: add related_link_lookup_fields, a list
+from emgapimetadata import models as m_models
 
 logger = logging.getLogger(__name__)
 
@@ -144,19 +148,19 @@ class PublicationSerializer(ExplicitFieldsModelSerializer,
 
     url = serializers.HyperlinkedIdentityField(
         view_name='emgapi:publications-detail',
-        lookup_field='pub_id',
+        lookup_field='pubmed_id',
     )
 
     # relationships
     # studies = serializers.HyperlinkedIdentityField(
     #     view_name='emgapi:publications-studies-list',
-    #     lookup_field='pub_id',
+    #     lookup_field='pubmed_id',
     # )
     # studies = relations.ResourceRelatedField(
     #     queryset=emg_models.Publication.objects,
     #     many=True,
     #     related_link_view_name='emgapi:publications-studies-list',
-    #     related_link_url_kwarg='pub_id',
+    #     related_link_url_kwarg='pubmed_id',
     # )
     studies = relations.SerializerMethodResourceRelatedField(
         source='get_studies',
@@ -164,8 +168,8 @@ class PublicationSerializer(ExplicitFieldsModelSerializer,
         many=True,
         read_only=True,
         related_link_view_name='emgapi:publications-studies-list',
-        related_link_url_kwarg='pub_id',
-        related_link_lookup_field='pub_id',
+        related_link_url_kwarg='pubmed_id',
+        related_link_lookup_field='pubmed_id',
     )
 
     def get_studies(self, obj):
@@ -367,9 +371,6 @@ class RunSerializer(ExplicitFieldsModelSerializer,
         read_only=True,
         source='get_pipelines',
         model=emg_models.Pipeline,
-        related_link_view_name='emgapi:runs-pipelines-list',
-        related_link_url_kwarg='accession',
-        related_link_lookup_field='accession',
         related_link_self_view_name='emgapi:pipelines-detail',
         related_link_self_lookup_field='release_version'
     )
@@ -377,6 +378,19 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     def get_pipelines(self, obj):
         return emg_models.Pipeline.objects \
             .filter(analysis__accession=obj.accession)
+
+    analysis = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_analysis',
+        model=emg_models.AnalysisJob,
+        related_link_view_name='emgapi:runs-pipelines-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+    )
+
+    def get_analysis(self, obj):
+        return ()
 
     class Meta:
         model = emg_models.Run
@@ -386,7 +400,7 @@ class RunSerializer(ExplicitFieldsModelSerializer,
         )
 
 
-class RunHyperlinkedField(serializers.HyperlinkedIdentityField):
+class AnalysisJobHyperlinkedField(serializers.HyperlinkedIdentityField):
 
     def get_url(self, obj, view_name, request, format):
         kwargs = {
@@ -397,18 +411,93 @@ class RunHyperlinkedField(serializers.HyperlinkedIdentityField):
             view_name, kwargs=kwargs, request=request, format=format)
 
 
+class AnalysisJobSerializerMethodResourceRelatedField(
+    relations.SerializerMethodResourceRelatedField):  # NOQA
+
+    def get_links(self, obj=None, lookup_field='pk'):
+
+        request = self.context.get('request', None)
+        view = self.context.get('view', None)
+        return_data = OrderedDict()
+
+        kwargs = {
+            lookup_field: getattr(
+                obj, lookup_field) if obj else view.kwargs[lookup_field]
+        }
+
+        self_kwargs = kwargs.copy()
+        self_kwargs.update({
+            'related_field':
+                self.field_name if self.field_name else self.parent.field_name
+        })
+        self_link = self.get_url(
+            'self', self.self_link_view_name, self_kwargs, request)
+
+        related_kwargs = {
+            self.related_link_url_kwarg: kwargs[self.related_link_lookup_field]
+        }
+        # TODO: add related_link_lookup_fields, a list
+        related_kwargs['release_version'] = obj.pipeline.release_version
+
+        related_link = self.get_url(
+            'related', self.related_link_view_name, related_kwargs, request)
+
+        if self_link:
+            return_data.update({'self': self_link})
+        if related_link:
+            return_data.update({'related': related_link})
+        return return_data
+
+
 class RetrieveRunSerializer(RunSerializer):
 
-    url = RunHyperlinkedField(
+    id = serializers.ReadOnlyField(source="multiple_pk")
+
+    url = AnalysisJobHyperlinkedField(
         view_name='emgapi:runs-pipelines-detail',
         lookup_field='accession'
     )
 
-    pipeline = serializers.HyperlinkedRelatedField(
+    pipeline_version = serializers.SerializerMethodField()
+
+    def get_pipeline_version(self, obj):
+        return obj.pipeline.release_version
+
+    annotations = AnalysisJobSerializerMethodResourceRelatedField(
+        source='get_annotations',
+        model=m_models.Annotation,
+        many=True,
         read_only=True,
-        view_name='emgapi:pipelines-detail',
-        lookup_field='release_version'
+        related_link_view_name='emgapimetadata:runs-pipelines-annotations-list',  # noqa
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
     )
+
+    def get_annotations(self, obj):
+        # TODO: provide counter instead of paginating relationship
+        # workaround https://github.com/django-json-api
+        # /django-rest-framework-json-api/issues/178
+        return ()
+
+    # metadata = serializers.HyperlinkedIdentityField(
+    #     view_name='emgapi:samples-metadata-list',
+    #     lookup_field='accession',
+    # )
+    metadata = AnalysisJobSerializerMethodResourceRelatedField(
+        source='get_metadata',
+        model=emg_models.AnalysisJobAnn,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi:runs-pipelines-metadata-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
+    )
+
+    def get_metadata(self, obj):
+        # TODO: provide counter instead of paginating relationship
+        # workaround https://github.com/django-json-api
+        # /django-rest-framework-json-api/issues/178
+        return ()
 
     class Meta:
         model = emg_models.AnalysisJob
@@ -421,6 +510,8 @@ class RetrieveRunSerializer(RunSerializer):
             'input_file_name',
             'result_directory',
             'pipelines',
+            'pipeline',
+            'analysis',
         )
 
 # SampleAnn serializer
@@ -466,6 +557,36 @@ class SampleAnnSerializer(ExplicitFieldsModelSerializer,
         fields = (
             'id',
             'sample_accession',
+            'var_name',
+            'var_value',
+            'unit',
+        )
+
+
+class AnalysisJobAnnSerializer(ExplicitFieldsModelSerializer,
+                               serializers.HyperlinkedModelSerializer):
+
+    id = serializers.ReadOnlyField(source="multiple_pk")
+
+    var_name = serializers.SerializerMethodField()
+
+    def get_var_name(self, obj):
+        return obj.var.var_name
+
+    var_value = serializers.SerializerMethodField()
+
+    def get_var_value(self, obj):
+        return obj.var_val_ucv
+
+    unit = serializers.SerializerMethodField()
+
+    def get_unit(self, obj):
+        return obj.units
+
+    class Meta:
+        model = emg_models.AnalysisJobAnn
+        fields = (
+            'id',
             'var_name',
             'var_value',
             'unit',

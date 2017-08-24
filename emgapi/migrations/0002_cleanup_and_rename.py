@@ -179,7 +179,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterModelOptions(
             name='publication',
-            options={'ordering': ('pub_id',)},
+            options={'ordering': ('pubmed_id',)},
         ),
         migrations.AlterModelOptions(
             name='analysisjob',
