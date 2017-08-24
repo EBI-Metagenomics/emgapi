@@ -31,6 +31,12 @@ Create configuration file in `~/.yamjam/config.yaml`::
       # Deploy under the custom prefix::
       prefix: "/metagenomics"
 
+      admins:
+        - ['admin', 'admin@example.com']
+      email:
+        host: localhost
+        port: 25
+        subject: "EMGAPI"
 
 optional:
 
@@ -47,6 +53,13 @@ optional:
 - Customize statics location::
 
       static_root: /path/to/static/storage
+
+- Documentation settings:
+
+      documentation:
+        title: 'EBI Metagenomics API'
+        # url: http://host
+        description: 'Is a free resource to visualise and discover metagenomic datasets. For more details go to http://www.ebi.ac.uk/metagenomics/'
 
 
 Install Miniconda::
@@ -77,7 +90,8 @@ Start application::
 NOTE: `~/emgvar` is used as default directory to store logs, secret key, etc.
 
 
-Tests::
+Tests
+-----
 
     python setup.py tests
 

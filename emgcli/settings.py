@@ -163,9 +163,11 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_swagger',
+    'rest_framework_mongoengine',
     'django_filters',
     'rest_auth',
     # apps
+    'emgapimetadata',
     'emgapi',
 
 ]
@@ -382,7 +384,13 @@ STATICFILES_FINDERS = (
 )
 
 # Security
-ALLOWED_HOSTS = ["*"]
+try:
+    ALLOWED_HOSTS = yamjam()['emg']['allowed_host']
+except KeyError:
+    ALLOWED_HOSTS = ["*"]
+    warnings.warn("ALLOWED_HOSTS not configured using wildecard",
+                  RuntimeWarning)
+
 X_FRAME_OPTIONS = 'DENY'
 SECURE_BROWSER_XSS_FILTER = True
 # CSRF_COOKIE_SECURE = True
@@ -397,16 +405,54 @@ CORS_ALLOW_METHODS = (
     'OPTIONS'
 )
 
+try:
+    ADMINS = yamjam()['emg']['admins']
+    MANAGERS = ADMINS
+    # IGNORABLE_404_URLS
+except KeyError:
+    ADMINS = []
+    warnings.warn("ADMINS not configured, no error notification",
+                  RuntimeWarning)
+
+try:
+    EMAIL_HOST = yamjam()['emg']['email']['host']
+    MIDDLEWARE += ('django.middleware.common.BrokenLinkEmailsMiddleware',)
+except KeyError:
+    warnings.warn(
+        "EMAIL not configured, no error notification for %r." % ADMINS,
+        RuntimeWarning
+    )
+try:
+    EMAIL_PORT = yamjam()['emg']['email']['post']
+except KeyError:
+    pass
+try:
+    EMAIL_SUBJECT_PREFIX = yamjam()['emg']['email']['subject']
+except KeyError:
+    pass
+
 # EMG
 try:
     EMG_BACKEND_AUTH_URL = yamjam()['emg']['emg_backend_auth']
 except KeyError:
     EMG_BACKEND_AUTH_URL = None
 
-EMG_TITLE = 'EBI Metagenomics WEB API'
-EMG_URL = FORCE_SCRIPT_NAME
-EMG_DESC = (
-    'Is a free resource to visualise and discover metagenomic datasets. '
-    'For more details and full documentation go to '
-    'http://www.ebi.ac.uk/metagenomics/'
-)
+# Documentation
+try:
+    EMG_TITLE = yamjam()['emg']['documentation']['title']
+except KeyError:
+    EMG_TITLE = 'EBI Metagenomics API'
+try:
+    EMG_URL = yamjam()['emg']['documentation']['url']
+except KeyError:
+    EMG_URL = FORCE_SCRIPT_NAME
+try:
+    EMG_DESC = yamjam()['emg']['documentation']['description']
+except KeyError:
+    EMG_DESC = 'EBI Metagenomics API'
+
+# MongoDB
+import mongoengine
+
+mongodb = yamjam()['emg']['mongodb']
+MONGO_CONN = mongoengine.connect(**mongodb)

@@ -82,7 +82,7 @@ class TestDefaultAPI(object):
             ('Publication', 'publications', 'emgapi:publications', [],
              ['studies']),
             ('Run', 'runs', 'emgapi:runs', [],
-             ['pipelines', 'experiment-type', 'sample']),
+             ['pipelines', 'analysis', 'experiment-type', 'sample']),
             ('Sample', 'samples', 'emgapi:samples', [],
              ['biome', 'study', 'runs', 'metadata']),
             ('Study', 'studies', 'emgapi:studies', [],
@@ -133,6 +133,9 @@ class TestDefaultAPI(object):
             #     mommy.make('emgapi.Biome', pk=pk,
             #                biome_name="foo%d" % pk,
             #                lineage="root:foo%d" % pk)
+            elif _model in ('Publication',):
+                mommy.make('emgapi.Publication', pk=pk,
+                           pubmed_id=pk)
             else:
                 mommy.make(model_name, pk=pk)
 

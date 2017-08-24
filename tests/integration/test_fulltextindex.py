@@ -36,6 +36,7 @@ def create_publications(count):
             mommy.prepare(
                 "emgapi.Publication",
                 pk=pk,
+                pubmed_id=pk,
                 pub_title="Publication findme",
                 pub_abstract="abcdefghijklmnoprstuvwxyz"
             )
@@ -45,6 +46,7 @@ def create_publications(count):
             mommy.prepare(
                 "emgapi.Publication",
                 pk=pk,
+                pubmed_id=pk,
                 pub_title="Publication hide",
                 pub_abstract="abcdefghijklmnoprstuvwxyz"
             )
