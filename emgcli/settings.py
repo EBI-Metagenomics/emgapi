@@ -408,6 +408,13 @@ except KeyError:
     warnings.warn("ADMINS not configured, no error notification",
                   RuntimeWarning)
 
+try:
+    EMAIL_HOST = yamjam()['emg']['email']['host']
+    EMAIL_PORT = yamjam()['emg']['email']['post']
+    EMAIL_SUBJECT_PREFIX = yamjam()['emg']['email']['subject']
+except KeyError:
+    pass
+
 # EMG
 try:
     EMG_BACKEND_AUTH_URL = yamjam()['emg']['emg_backend_auth']
