@@ -29,17 +29,6 @@ urlpatterns = []
 urlpatterns += [
 
     url(
-        (r'^runs/(?P<accession>[a-zA-Z0-9_]+)/(?P<release_version>[0-9\.]+)/'
-         r'annotations$'),
-        m_views.AnnotationAnalysisAPIView.as_view(),
-        name='runs-pipelines-annotations-list'
-    ),
-
-]
-
-urlpatterns += [
-
-    url(
         (r'^annotations/metadata$'),
         o_views.AnnotationMetadataAPIView.as_view(),
         name='annotations-metadata-list'
@@ -64,6 +53,13 @@ mongorelation_router = DefaultRouter(trailing_slash=False)
 mongorelation_router.register(
     r'annotations/(?P<accession>[a-zA-Z0-9\:]+)/runs',
     m_views.AnnotationRunRelationshipViewSet,
+    base_name='annotations-runs'
+)
+
+mongorelation_router.register(
+    (r'runs/(?P<accession>[a-zA-Z0-9_]+)/(?P<release_version>[0-9\.]+)/'
+     r'annotations'),
+    m_views.AnalysisAnnotationRelViewSet,
     base_name='annotations-runs'
 )
 
