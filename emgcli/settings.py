@@ -384,7 +384,13 @@ STATICFILES_FINDERS = (
 )
 
 # Security
-ALLOWED_HOSTS = ["*"]
+try:
+    ALLOWED_HOSTS = yamjam()['emg']['allowed_host']
+except KeyError:
+    ALLOWED_HOSTS = []
+    warnings.warn("ALLOWED_HOSTS not configured",
+                  RuntimeWarning)
+
 X_FRAME_OPTIONS = 'DENY'
 SECURE_BROWSER_XSS_FILTER = True
 # CSRF_COOKIE_SECURE = True
