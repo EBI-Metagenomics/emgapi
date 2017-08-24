@@ -106,7 +106,7 @@ class AnnotationRunRelationshipViewSet(mixins.ListModelMixin,
         Retrieves list of runs for the given sample accession
         Example:
         ---
-        `/api/annotations/GO0001/runs`
+        `/annotations/GO0001/runs`
         """
         return super(AnnotationRunRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
@@ -134,7 +134,7 @@ class AnalysisAnnotationRelViewSet(emg_mixins.MultipleFieldLookupMixin,
         Retrieves run for the given accession and pipeline version
         Example:
         ---
-        `/api/runs/ERR1385375/3.0/annotations`
+        `/runs/ERR1385375/3.0/annotations`
         """
 
         analysis = m_models.AnalysisJob.objects.filter(

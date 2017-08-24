@@ -44,7 +44,7 @@ class AnnotationMetadataAPIView(generics.ListAPIView,
         """
         Example:
         ---
-        `/api/annotations/metadata?accession=ERP001736&metadata=temperature`
+        `/annotations/metadata?accession=ERP001736&metadata=temperature`
         """
 
         # query string parameters
