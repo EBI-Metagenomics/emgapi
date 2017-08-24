@@ -387,8 +387,8 @@ STATICFILES_FINDERS = (
 try:
     ALLOWED_HOSTS = yamjam()['emg']['allowed_host']
 except KeyError:
-    ALLOWED_HOSTS = []
-    warnings.warn("ALLOWED_HOSTS not configured",
+    ALLOWED_HOSTS = ["*"]
+    warnings.warn("ALLOWED_HOSTS not configured using wildecard",
                   RuntimeWarning)
 
 X_FRAME_OPTIONS = 'DENY'
@@ -416,14 +416,20 @@ except KeyError:
 
 try:
     EMAIL_HOST = yamjam()['emg']['email']['host']
-    EMAIL_PORT = yamjam()['emg']['email']['post']
-    EMAIL_SUBJECT_PREFIX = yamjam()['emg']['email']['subject']
     MIDDLEWARE += ('django.middleware.common.BrokenLinkEmailsMiddleware',)
 except KeyError:
     warnings.warn(
         "EMAIL not configured, no error notification for %r." % ADMINS,
         RuntimeWarning
     )
+try:
+    EMAIL_PORT = yamjam()['emg']['email']['post']
+except KeyError:
+    pass
+try:
+    EMAIL_SUBJECT_PREFIX = yamjam()['emg']['email']['subject']
+except KeyError:
+    pass
 
 # EMG
 try:
