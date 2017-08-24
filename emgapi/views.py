@@ -680,10 +680,10 @@ class RunViewSet(mixins.RetrieveModelMixin,
     )
     def analysis(self, request, accession=None):
         """
-        Retrieves list of pipelines for the given run
+        Retrieves list of analysis for the given run
         Example:
         ---
-        `/runs/ERR1385375/pipelines`
+        `/runs/ERR1385375/analysis`
         """
         queryset = emg_models.AnalysisJob.objects \
             .available(self.request) \
