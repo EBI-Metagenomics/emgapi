@@ -31,6 +31,8 @@ Create configuration file in `~/.yamjam/config.yaml`::
       # Deploy under the custom prefix::
       prefix: "/metagenomics"
 
+      admins:
+        - ['admin', 'admin@example.com']
 
 optional:
 
