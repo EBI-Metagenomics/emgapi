@@ -265,7 +265,7 @@ class Publication(models.Model):
 
     class Meta:
         db_table = 'PUBLICATION'
-        ordering = ('pub_id',)
+        ordering = ('pubmed_id',)
 
     def __str__(self):
         return self.pub_title

@@ -133,6 +133,9 @@ class TestDefaultAPI(object):
             #     mommy.make('emgapi.Biome', pk=pk,
             #                biome_name="foo%d" % pk,
             #                lineage="root:foo%d" % pk)
+            elif _model in ('Publication',):
+                mommy.make('emgapi.Publication', pk=pk,
+                           pubmed_id=pk)
             else:
                 mommy.make(model_name, pk=pk)
 

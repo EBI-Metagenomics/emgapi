@@ -880,11 +880,11 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
     )
 
     ordering_fields = (
-        'pub_id',
+        'pubmed_id',
         'studies_count',
     )
 
-    ordering = ('pub_id',)
+    ordering = ('pubmed_id',)
 
     search_fields = (
         '@pub_title',
@@ -895,8 +895,8 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         'isbn',
     )
 
-    lookup_field = 'pub_id'
-    lookup_value_regex = '[a-zA-Z0-9,]+'
+    lookup_field = 'pubmed_id'
+    lookup_value_regex = '[0-9\.]+'
 
     def get_queryset(self):
         queryset = emg_models.Publication.objects.all()
@@ -914,9 +914,9 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         Retrieves publication for the given id
         Example:
         ---
-        `/api/publications/338`
+        `/publications/{pubmed}`
 
-        `/api/publications/338?include=studies` with studies
+        `/publications/{pubmed}?include=studies` with studies
         """
         return super(PublicationViewSet, self) \
             .retrieve(request, *args, **kwargs)
@@ -926,11 +926,11 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         Retrieves list of publications
         Example:
         ---
-        `/api/publications` retrieves list of publications
+        `/publications` retrieves list of publications
 
-        `/api/publications?include=studies` with studies
+        `/publications?include=studies` with studies
 
-        `/api/publications?ordering=pub_id` ordered by id
+        `/publications?ordering=pubmed_id` ordered by id
 
         Search for:
         ---
