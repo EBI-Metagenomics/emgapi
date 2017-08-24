@@ -14,6 +14,9 @@ emg:
       LOCATION: "redis://redis:6379/0"
       KEY_PREFIX: "emg"
   emg_backend_auth: "https://backend"
+  # NEVER allow wildcard on production
+  # allowed_host:
+  #   - '*'
   # admins:
   #   - ['admin', 'admin@localhost']
   # email:
@@ -23,5 +26,9 @@ emg:
   # prefix: "/metagenomics"
   # static_root: /home/emg/staticfiles
   mongodb:
-      db: 'emg'
-      host: 'mongodb://mongodb'
+    db: 'emg'
+    host: 'mongodb://mongodb'
+  documentation:
+    title: 'EBI Metagenomics API'
+    # url: http://host
+    description: 'Is a free resource to visualise and discover metagenomic datasets. For more details go to http://www.ebi.ac.uk/metagenomics/'
