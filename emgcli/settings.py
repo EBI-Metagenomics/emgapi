@@ -403,8 +403,8 @@ try:
     ADMINS = yamjam()['emg']['admins']
     MANAGERS = ADMINS
     # IGNORABLE_404_URLS
-    # MIDDLEWARE += ('django.middleware.common.BrokenLinkEmailsMiddleware',)
 except KeyError:
+    ADMINS = []
     warnings.warn("ADMINS not configured, no error notification",
                   RuntimeWarning)
 
@@ -412,8 +412,12 @@ try:
     EMAIL_HOST = yamjam()['emg']['email']['host']
     EMAIL_PORT = yamjam()['emg']['email']['post']
     EMAIL_SUBJECT_PREFIX = yamjam()['emg']['email']['subject']
+    MIDDLEWARE += ('django.middleware.common.BrokenLinkEmailsMiddleware',)
 except KeyError:
-    pass
+    warnings.warn(
+        "EMAIL not configured, no error notification for %r." % ADMINS,
+        RuntimeWarning
+    )
 
 # EMG
 try:
