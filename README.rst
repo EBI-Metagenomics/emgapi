@@ -33,6 +33,10 @@ Create configuration file in `~/.yamjam/config.yaml`::
 
       admins:
         - ['admin', 'admin@example.com']
+      email:
+        host: localhost
+        port: 25
+        subject: "EMGAPI"
 
 optional:
 
