@@ -148,19 +148,19 @@ class PublicationSerializer(ExplicitFieldsModelSerializer,
 
     url = serializers.HyperlinkedIdentityField(
         view_name='emgapi:publications-detail',
-        lookup_field='pub_id',
+        lookup_field='pubmed_id',
     )
 
     # relationships
     # studies = serializers.HyperlinkedIdentityField(
     #     view_name='emgapi:publications-studies-list',
-    #     lookup_field='pub_id',
+    #     lookup_field='pubmed_id',
     # )
     # studies = relations.ResourceRelatedField(
     #     queryset=emg_models.Publication.objects,
     #     many=True,
     #     related_link_view_name='emgapi:publications-studies-list',
-    #     related_link_url_kwarg='pub_id',
+    #     related_link_url_kwarg='pubmed_id',
     # )
     studies = relations.SerializerMethodResourceRelatedField(
         source='get_studies',
@@ -168,8 +168,8 @@ class PublicationSerializer(ExplicitFieldsModelSerializer,
         many=True,
         read_only=True,
         related_link_view_name='emgapi:publications-studies-list',
-        related_link_url_kwarg='pub_id',
-        related_link_lookup_field='pub_id',
+        related_link_url_kwarg='pubmed_id',
+        related_link_lookup_field='pubmed_id',
     )
 
     def get_studies(self, obj):
