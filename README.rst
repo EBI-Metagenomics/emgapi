@@ -54,6 +54,13 @@ optional:
 
       static_root: /path/to/static/storage
 
+- Documentation settings:
+
+    ***REMOVED***
+    ***REMOVED***
+        # url: http://host
+    ***REMOVED*** 'Is a free resource to visualise and discover metagenomic datasets. For more details go to http://www.ebi.ac.uk/metagenomics/'
+
 
 Install Miniconda::
 
