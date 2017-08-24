@@ -399,6 +399,15 @@ CORS_ALLOW_METHODS = (
     'OPTIONS'
 )
 
+try:
+    ADMINS = yamjam()['emg']['admins']
+    MANAGERS = ADMINS
+    # IGNORABLE_404_URLS
+    # MIDDLEWARE += ('django.middleware.common.BrokenLinkEmailsMiddleware',)
+except KeyError:
+    warnings.warn("ADMINS not configured, no error notification",
+                  RuntimeWarning)
+
 # EMG
 try:
     EMG_BACKEND_AUTH_URL = yamjam()['emg']['emg_backend_auth']
