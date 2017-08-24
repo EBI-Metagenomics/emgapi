@@ -101,11 +101,12 @@ class BiomeStudyRelationshipViewSet(mixins.ListModelMixin,
 class PublicationStudyRelationshipViewSet(mixins.ListModelMixin,
                                           BaseStudyRelationshipViewSet):
 
-    lookup_field = 'pub_id'
+    lookup_field = 'pubmed_id'
+    lookup_value_regex = '[0-9\.]+'
 
     def get_queryset(self):
-        pub_id = self.kwargs[self.lookup_field]
-        obj = get_object_or_404(emg_models.Publication, pub_id=pub_id)
+        pubmed_id = self.kwargs[self.lookup_field]
+        obj = get_object_or_404(emg_models.Publication, pubmed_id=pubmed_id)
         queryset = emg_models.Study.objects \
             .available(self.request) \
             .filter(publications=obj)
@@ -117,15 +118,15 @@ class PublicationStudyRelationshipViewSet(mixins.ListModelMixin,
                 Prefetch('samples', queryset=_qs))
         return queryset
 
-    def list(self, request, pub_id, *args, **kwargs):
+    def list(self, request, pubmed_id, *args, **kwargs):
         """
         Retrieves list of studies for the given pipeline version
         Example:
         ---
-        `/api/publications/338/studies` retrieve linked
+        `/publications/{pubmed}/studies` retrieve linked
         studies
 
-        `/api/publications/338/studies?include=samples` with
+        `/publications/{pubmed}/studies?include=samples` with
         samples
         """
         return super(PublicationStudyRelationshipViewSet, self) \
@@ -345,11 +346,12 @@ class BiomeSampleRelationshipViewSet(mixins.ListModelMixin,
 class PublicationSampleRelationshipViewSet(mixins.ListModelMixin,
                                            BaseSampleRelationshipViewSet):
 
-    lookup_field = 'pub_id'
+    lookup_field = 'pubmed_id'
+    lookup_value_regex = '[0-9\.]+'
 
     def get_queryset(self):
-        pub_id = self.kwargs[self.lookup_field]
-        obj = get_object_or_404(emg_models.Publication, pub_id=pub_id)
+        pubmed_id = self.kwargs[self.lookup_field]
+        obj = get_object_or_404(emg_models.Publication, pubmed_id=pubmed_id)
         queryset = emg_models.Sample.objects \
             .available(self.request) \
             .filter(study__publications=obj)
@@ -363,19 +365,19 @@ class PublicationSampleRelationshipViewSet(mixins.ListModelMixin,
                 Prefetch('runs', queryset=_qs))
         return queryset
 
-    def list(self, request, pub_id, *args, **kwargs):
+    def list(self, request, pubmed_id, *args, **kwargs):
         """
         Retrieves list of studies for the given pipeline version
         Example:
         ---
-        `/api/publications/338/samples` retrieve linked
+        `/publications/{pubmed}/samples` retrieve linked
         studies
 
-        `/api/publications/338/samples?include=runs` with
+        `/publications/{pubmed}/samples?include=runs` with
         samples
         """
         return super(PublicationSampleRelationshipViewSet, self) \
-            .list(request, *args, **kwargs)
+            .list(request, pubmed_id, *args, **kwargs)
 
 
 class SampleRunRelationshipViewSet(mixins.ListModelMixin,
