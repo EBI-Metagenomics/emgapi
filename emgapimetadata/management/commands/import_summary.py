@@ -3,20 +3,26 @@
 
 import os
 import csv
+import logging
 
 from emgapi import models as emg_models
 
 from ..lib import EMGBaseCommand
 
+logger = logging.getLogger(__name__)
+
 
 class Command(EMGBaseCommand):
 
     def populate_from_accession(self, options):
+        logger.info("Found %d" % len(self.obj_list))
         for o in self.obj_list:
-            self.find_path(o)
+            self.find_path(o, options)
 
-    def find_path(self, obj):
-        res = os.path.join(self.rootpath, obj.result_directory)
+    def find_path(self, obj, options):
+        rootpath = options.get('rootpath', None)
+        res = os.path.join(rootpath, obj.result_directory)
+        logger.info("Scanning path: %s" % res)
         if os.path.exists(res):
             if os.path.isdir(res):
                 for root, dirs, files in os.walk(res, topdown=False):
@@ -33,7 +39,6 @@ class Command(EMGBaseCommand):
     def import_summary(self, reader, job):
         anns = []
         for row in reader:
-            print(row)
             try:
                 var = emg_models.VariableNames.objects.get(var_name=row[0])
             except emg_models.VariableNames.DoesNotExist:
