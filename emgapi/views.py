@@ -907,8 +907,6 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         return queryset
 
     def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return emg_serializers.RetrievePublicationSerializer
         return super(PublicationViewSet, self).get_serializer_class()
 
     def retrieve(self, request, *args, **kwargs):
