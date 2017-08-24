@@ -45,8 +45,8 @@ class StudyFilter(django_filters.FilterSet):
             studies = emg_models.Sample.objects.values('study') \
                 .available(self.request) \
                 .filter(
-                    biome__lft__gte=b.lft-1,
-                    biome__rgt__lte=b.rgt+1)
+                    biome__lft__gte=b.lft,
+                    biome__rgt__lte=b.rgt)
             qs = qs.filter(pk__in=studies)
         except emg_models.Biome.DoesNotExist:
             pass
@@ -87,7 +87,7 @@ class SampleFilter(django_filters.FilterSet):
     def filter_biome(self, qs, name, value):
         try:
             b = emg_models.Biome.objects.get(lineage=value)
-            qs = qs.filter(biome__lft__gte=b.lft-1, biome__rgt__lte=b.rgt+1)
+            qs = qs.filter(biome__lft__gte=b.lft, biome__rgt__lte=b.rgt)
         except emg_models.Biome.DoesNotExist:
             pass
         return qs
@@ -181,8 +181,8 @@ class RunFilter(django_filters.FilterSet):
         try:
             b = emg_models.Biome.objects.get(lineage=value)
             qs = qs.filter(
-                sample__biome__lft__gte=b.lft-1,
-                sample__biome__rgt__lte=b.rgt+1)
+                sample__biome__lft__gte=b.lft,
+                sample__biome__rgt__lte=b.rgt)
         except emg_models.Biome.DoesNotExist:
             pass
         return qs
