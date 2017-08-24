@@ -1,9 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import logging
+
 from django.core.management.base import BaseCommand
 
 from emgapi import models as emg_models
+
+logger = logging.getLogger(__name__)
 
 
 class EMGBaseCommand(BaseCommand):
@@ -17,7 +21,7 @@ class EMGBaseCommand(BaseCommand):
         parser.add_argument('rootpath', type=str, default='')
 
     def handle(self, *args, **options):
-        print(options)
+        logger.info("CLI %r" % options)
         self.find_accession(options)
         self.populate_from_accession(options)
 

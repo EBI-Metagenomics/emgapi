@@ -3,19 +3,23 @@
 
 import os
 import csv
+import logging
 
 from emgapimetadata import models as m_models
 
 from ..lib import EMGBaseCommand
+
+logger = logging.getLogger(__name__)
 
 
 class Command(EMGBaseCommand):
 
     def add_arguments(self, parser):
         super(Command, self).add_arguments(parser)
-        parser.add_argument('suffix', nargs='?', type=str, default='.go')
+        parser.add_argument('suffix', nargs='?', type=str, default='.go_slim')
 
     def populate_from_accession(self, options):
+        logger.info("Found %d" % len(self.obj_list))
         for o in self.obj_list:
             self.find_path(o, options)
 
@@ -24,12 +28,15 @@ class Command(EMGBaseCommand):
         suffix = options.get('suffix', None)
 
         res = os.path.join(rootpath, obj.result_directory)
+        logger.info("Scanning path: %s" % res)
         if os.path.exists(res):
             if os.path.isdir(res):
                 for root, dirs, files in os.walk(res, topdown=False):
                     for name in files:
                         if name.endswith(suffix):
-                            with open(os.path.join(root, name)) as csvfile:
+                            _f = os.path.join(root, name)
+                            logger.info("Found: %s" % _f)
+                            with open(_f) as csvfile:
                                 reader = csv.reader(csvfile, delimiter=',')
                                 self.import_go(
                                     reader, obj.accession,
