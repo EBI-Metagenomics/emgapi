@@ -15,7 +15,11 @@ emg:
       KEY_PREFIX: "emg"
   emg_backend_auth: "https://backend"
   # admins:
-  #   - ['admin', 'admin@example.com']
+  #   - ['admin', 'admin@localhost']
+  # email:
+  #   host: localhost
+  #   port: 25
+  #   subject: "EMGAPI"
   # prefix: "/metagenomics"
   # static_root: /home/emg/staticfiles
   mongodb:
