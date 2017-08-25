@@ -4,7 +4,8 @@
 
 # deployment
 gunicorn
-whitenoise
+# Upgrade - breaking change https://github.com/evansd/whitenoise/issues/140
+whitenoise<4
 mysqlclient
 sqlparse
 requests
