@@ -74,7 +74,7 @@ class BiomeStudyRelationshipViewSet(mixins.ListModelMixin,
             .values('study_id')
         queryset = emg_models.Study.objects \
             .available(self.request) \
-            .filter(biome_id__in=studies)
+            .filter(study_id__in=studies)
         if 'samples' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Sample.objects \
                 .available(self.request) \
@@ -85,7 +85,7 @@ class BiomeStudyRelationshipViewSet(mixins.ListModelMixin,
 
     def list(self, request, lineage, *args, **kwargs):
         """
-        Retrieves list of studies for the given pipeline version
+        Retrieves list of studies for the given biome
         Example:
         ---
         `/biomes/root:Environmental:Aquatic/studies` retrieve linked
@@ -95,7 +95,7 @@ class BiomeStudyRelationshipViewSet(mixins.ListModelMixin,
         studies
         """
         return super(BiomeStudyRelationshipViewSet, self) \
-            .list(request, *args, **kwargs)
+            .list(request, lineage, *args, **kwargs)
 
 
 class PublicationStudyRelationshipViewSet(mixins.ListModelMixin,
@@ -305,12 +305,11 @@ class BiomeSampleRelationshipViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         lineage = self.kwargs[self.lookup_field]
         obj = get_object_or_404(emg_models.Biome, lineage=lineage)
-        biomes = emg_models.Biome.objects.values('biome_id') \
-            .filter(lft__gte=obj.lft, rgt__lte=obj.rgt,
-                    depth__gte=obj.depth)
         queryset = emg_models.Sample.objects \
             .available(self.request) \
-            .filter(biome_id__in=biomes) \
+            .filter(
+                biome__lft__gte=obj.lft, biome__rgt__lte=obj.rgt,
+                biome__depth__gte=obj.depth) \
             .prefetch_related('biome', 'study')
         if 'runs' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Run.objects \
@@ -444,7 +443,10 @@ class BiomeTreeViewSet(mixins.ListModelMixin,
     serializer_class = emg_serializers.BiomeSerializer
     queryset = emg_models.Biome.objects.filter(depth=1)
 
+    filter_class = emg_filters.BiomeFilter
+
     filter_backends = (
+        DjangoFilterBackend,
         filters.OrderingFilter,
     )
 

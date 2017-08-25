@@ -186,7 +186,8 @@ class BiomeQuerySet(models.QuerySet):
 class BiomeManager(models.Manager):
 
     def get_queryset(self):
-        return BiomeQuerySet(self.model, using=self._db)
+        return BiomeQuerySet(self.model, using=self._db) \
+            .annotate(studies_count=Count('samples__study', distinct=True))
 
 
 class Biome(models.Model):
@@ -213,7 +214,7 @@ class Biome(models.Model):
         )
 
     def __str__(self):
-        return self.biome_name
+        return self.lineage
 
 
 class PublicationQuerySet(BaseQuerySet):
