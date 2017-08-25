@@ -13,8 +13,8 @@ Requirements:
 - MySQL 5.6 or 5.7
 
 
-Install:
---------
+Configure:
+----------
 
 Create configuration file in `~/.yamjam/config.yaml`::
 
@@ -54,13 +54,16 @@ optional:
 
       static_root: /path/to/static/storage
 
-- Documentation settings:
+- Documentation settings::
 
       documentation:
         title: 'EBI Metagenomics API'
         # url: http://host
         description: 'Is a free resource to visualise and discover metagenomic datasets. For more details go to http://www.ebi.ac.uk/metagenomics/'
 
+
+Install:
+--------
 
 Install Miniconda::
 
@@ -90,8 +93,10 @@ Start application::
 NOTE: `~/emgvar` is used as default directory to store logs, secret key, etc.
 
 
-Tests
------
+Tests:
+------
+
+To run tests::
 
     python setup.py tests
 
