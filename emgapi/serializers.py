@@ -131,6 +131,8 @@ class BiomeSerializer(ExplicitFieldsModelSerializer,
         # /django-rest-framework-json-api/issues/178
         return ()
 
+    studies_count = serializers.IntegerField()
+
     class Meta:
         model = emg_models.Biome
         exclude = (
@@ -633,7 +635,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
     # relationships
     biome = serializers.HyperlinkedRelatedField(
         read_only=True,
-        view_name='emgapi:biomes-children-list',
+        view_name='emgapi:biomes-detail',
         lookup_field='lineage',
     )
 
