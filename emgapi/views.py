@@ -99,7 +99,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     ordering_fields = (
         'lineage',
     )
-    ordering = ('lineage',)
+    ordering = ('biome_id',)
 
     lookup_field = 'lineage'
     lookup_value_regex = '[a-zA-Z0-9\:\-\s\(\)\<\>]+'
@@ -111,7 +111,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         if self.action == 'retrieve':
             queryset = emg_models.Biome.objects.all()
         else:
-            queryset = emg_models.Biome.objects.filter(depth__in=(1, 2))
+            queryset = emg_models.Biome.objects.filter(depth__gt=1)
         return queryset
 
     def list(self, request, *args, **kwargs):
