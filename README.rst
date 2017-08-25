@@ -88,7 +88,7 @@ Start application::
     # start application server
     # for a TCP configuration use: --bind 127.0.0.1:8000
     # for UNIX domain socket use: --bind=unix:$SOCKFILE
-    gunicorn --daemon -p ~/emgvar/django.pid --workers 5 --reload emgcli.wsgi:application
+    emgdeploy --daemon -p ~/emgvar/django.pid --workers 5 --reload emgcli.wsgi:application
 
 NOTE: `~/emgvar` is used as default directory to store logs, secret key, etc.
 
