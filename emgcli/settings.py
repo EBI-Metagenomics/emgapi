@@ -272,6 +272,8 @@ USE_TZ = True
 
 REST_FRAMEWORK = {
 
+    'DEFAULT_VERSION': '0.2',
+
     'PAGE_SIZE': 20,
 
     'EXCEPTION_HANDLER':

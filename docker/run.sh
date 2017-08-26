@@ -53,9 +53,9 @@ start() {
   emgcli migrate --fake-initial
   emgcli collectstatic --noinput
 
+  # development server
   # emgcli runserver 0.0.0.0:8000
-  # emgunicorn
-  gunicorn -p ~/emgvar/django.pid --bind 0.0.0.0:8000 --workers 5 --reload emgcli.wsgi:application
+  emgdeploy -p ~/emgvar/django.pid --bind 0.0.0.0:8000 --workers 5 --reload emgcli.wsgi:application
 
 }
 
