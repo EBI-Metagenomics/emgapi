@@ -31,7 +31,7 @@ setup(
     entry_points={
         'console_scripts': [
             'emgcli=emgcli.manage:main',
-            'emgunicorn=emgcli.gunicorn:main',
+            'emgdeploy=gunicorn.app.wsgiapp:run',
         ],
     },
 )
