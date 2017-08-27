@@ -108,7 +108,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         return super(BiomeViewSet, self).get_serializer_class()
 
     def get_queryset(self):
-        if 'search' in self.request.query_params:
+        if self.action == 'retrieve':
             queryset = emg_models.Biome.objects.all()
         else:
             queryset = emg_models.Biome.objects.filter(depth__in=(1, 2))
@@ -131,7 +131,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         ---
         `/biomes/root:Environmental:Aquatic:Freshwater`
         """
-        return super(StudyViewSet, self).retrieve(request, *args, **kwargs)
+        return super(BiomeViewSet, self).retrieve(request, *args, **kwargs)
 
     @list_route(
         methods=['get', ],
