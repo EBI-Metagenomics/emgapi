@@ -74,11 +74,11 @@ class TestBiomeAPI(APITestCase):
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
 
-        assert len(rsp['data']) == 3
+        assert len(rsp['data']) == 2
         biomes = rsp['data']
         for b in biomes:
             assert b['type'] == 'biomes'
-            assert b['id'] in ('root', 'root:foo', 'root:foo2')
+            assert b['id'] in ('root:foo', 'root:foo2')
 
     def test_samples(self):
         url = reverse('emgapi:biomes-children-list', args=['root:foo'])
