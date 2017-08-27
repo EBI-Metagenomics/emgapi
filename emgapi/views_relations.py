@@ -462,8 +462,7 @@ class BiomeTreeViewSet(mixins.ListModelMixin,
             l = get_object_or_404(emg_models.Biome, lineage=lineage)
             queryset = emg_models.Biome.objects \
                 .filter(lft__gt=l.lft, rgt__lt=l.rgt,
-                        depth__gt=l.depth) \
-                .order_by("-samples_count")
+                        depth__gt=l.depth)
         else:
             queryset = super(BiomeTreeViewSet, self).get_queryset()
         return queryset
