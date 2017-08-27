@@ -68,28 +68,40 @@ class TestBiomeAPI(APITestCase):
                 )
             )
 
+    def test_biomes_list(self):
+        url = reverse('emgapi:biomes-list')
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        rsp = response.json()
+
+        assert len(rsp['data']) == 3
+        biomes = rsp['data']
+        for b in biomes:
+            assert b['type'] == 'biomes'
+            assert b['id'] in ('root', 'root:foo', 'root:foo2')
+
     def test_samples(self):
-        url = reverse('emgapi:biomes-list', args=['root:foo'])
+        url = reverse('emgapi:biomes-children-list', args=['root:foo'])
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
 
         # Data
-        assert len(rsp['data']) == 2
+        assert len(rsp['data']) == 1
 
         biomes = rsp['data']
         for b in biomes:
             assert b['type'] == 'biomes'
-            assert b['id'] in ('root:foo', 'root:foo:bar')
+            assert b['id'] in ('root:foo:bar',)
 
         response = self.client.get(
             biomes[0]['relationships']['samples']['links']['related'])
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
-        assert len(rsp['data']) == 2
+        assert len(rsp['data']) == 1
         for s in rsp['data']:
             assert s['type'] == 'samples'
-            assert s['id'] in ('ERS002', 'ERS004')
+            assert s['id'] in ('ERS004',)
 
     def test_study(self):
         url = reverse('emgapi:studies-detail', args=['SPR0001'])

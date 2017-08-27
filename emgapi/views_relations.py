@@ -436,3 +436,54 @@ class SampleRunRelationshipViewSet(mixins.ListModelMixin,
         """
         return super(SampleRunRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
+
+
+class BiomeTreeViewSet(mixins.ListModelMixin,
+                       viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.BiomeSerializer
+    queryset = emg_models.Biome.objects.filter(depth=1)
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'lineage',
+    )
+    ordering = ('biome_id',)
+
+    lookup_field = 'lineage'
+    lookup_value_regex = '[a-zA-Z0-9\:\-\s\(\)\<\>]+'
+
+    def get_queryset(self):
+        lineage = self.kwargs.get('lineage', None).strip()
+        if lineage:
+            l = get_object_or_404(emg_models.Biome, lineage=lineage)
+            queryset = emg_models.Biome.objects \
+                .filter(lft__gt=l.lft, rgt__lt=l.rgt,
+                        depth__gt=l.depth) \
+                .order_by("-samples_count")
+        else:
+            queryset = super(BiomeTreeViewSet, self).get_queryset()
+        return queryset
+
+    def get_serializer_class(self):
+        return super(BiomeTreeViewSet, self).get_serializer_class()
+
+    def get_serializer_context(self):
+        context = super(BiomeTreeViewSet, self).get_serializer_context()
+        context['lineage'] = self.kwargs.get('lineage')
+        return context
+
+    def list(self, request, lineage, *args, **kwargs):
+        """
+        Retrieves children for the given Biome node.
+        Example:
+        ---
+        `/biomes/root:Environmental:Aquatic/children`
+        list all children
+        """
+
+        return super(BiomeTreeViewSet, self) \
+            .list(request, lineage, *args, **kwargs)
