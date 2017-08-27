@@ -115,7 +115,7 @@ class BiomeSerializer(ExplicitFieldsModelSerializer,
         # /django-rest-framework-json-api/issues/178
         return ()
 
-    biomes = relations.SerializerMethodResourceRelatedField(
+    children = relations.SerializerMethodResourceRelatedField(
         source='get_tree',
         model=emg_models.Biome,
         many=True,
