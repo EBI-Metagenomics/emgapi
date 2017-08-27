@@ -72,12 +72,6 @@ router.register(
 
 router.register(
     r'biomes',
-    views.BiomeRootViewSet,
-    base_name='biomes-root'
-)
-
-router.register(
-    r'biomes/(?P<lineage>[a-zA-Z0-9\:\-\s\(\)\<\>]+)',
     views.BiomeViewSet,
     base_name='biomes'
 )
@@ -141,6 +135,12 @@ urlpatterns += [
 
 # relationship views
 relation_router = DefaultRouter(trailing_slash=False)
+
+relation_router.register(
+    r'biomes/(?P<lineage>[a-zA-Z0-9\:\-\s\(\)\<\>]+)/children',
+    views_relations.BiomeTreeViewSet,
+    base_name='biomes-children'
+)
 
 relation_router.register(
     r'biomes/(?P<lineage>[a-zA-Z0-9\:\-\s\(\)\<\>]+)/studies',
