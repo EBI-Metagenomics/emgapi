@@ -86,7 +86,6 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     serializer_class = emg_serializers.BiomeSerializer
 
     filter_backends = (
-        DjangoFilterBackend,
         filters.SearchFilter,
         filters.OrderingFilter,
     )
@@ -166,11 +165,6 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         for q in queryset:
             q.study_count = biomes[q.biome_id]
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(
-                page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
