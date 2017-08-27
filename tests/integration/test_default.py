@@ -48,7 +48,7 @@ class TestDefaultAPI(object):
     @pytest.mark.parametrize(
         '_view',
         [
-            'emgapi:biomes-root',
+            'emgapi:biomes',
             'emgapi:experiment-types',
             'emgapi:pipelines',
             'emgapi:publications',
