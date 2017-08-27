@@ -59,7 +59,7 @@ class BiomeSerializer(ExplicitFieldsModelSerializer,
     included_serializers = {}
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi:biomes-list',
+        view_name='emgapi:biomes-detail',
         lookup_field='lineage',
     )
 
@@ -110,6 +110,22 @@ class BiomeSerializer(ExplicitFieldsModelSerializer,
     )
 
     def get_samples(self, obj):
+        # TODO: provide counter instead of paginating relationship
+        # workaround https://github.com/django-json-api
+        # /django-rest-framework-json-api/issues/178
+        return ()
+
+    biomes = relations.SerializerMethodResourceRelatedField(
+        source='get_tree',
+        model=emg_models.Biome,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi:biomes-children-list',
+        related_link_url_kwarg='lineage',
+        related_link_lookup_field='lineage',
+    )
+
+    def get_tree(self, obj):
         # TODO: provide counter instead of paginating relationship
         # workaround https://github.com/django-json-api
         # /django-rest-framework-json-api/issues/178
@@ -617,7 +633,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
     # relationships
     biome = serializers.HyperlinkedRelatedField(
         read_only=True,
-        view_name='emgapi:biomes-list',
+        view_name='emgapi:biomes-children-list',
         lookup_field='lineage',
     )
 
@@ -715,7 +731,7 @@ class StudySerializer(ExplicitFieldsModelSerializer,
         related_link_view_name='emgapi:studies-biomes-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession',
-        related_link_self_view_name='emgapi:biomes-list',
+        related_link_self_view_name='emgapi:biomes-children-list',
         related_link_self_lookup_field='lineage'
     )
 

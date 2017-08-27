@@ -79,72 +79,69 @@ class MyDataViewSet(mixins.ListModelMixin,
         return Response(serializer.data)
 
 
-class BiomeViewSet(mixins.ListModelMixin,
+class BiomeViewSet(mixins.RetrieveModelMixin,
+                   mixins.ListModelMixin,
                    viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.BiomeSerializer
 
     filter_backends = (
+        DjangoFilterBackend,
+        filters.SearchFilter,
         filters.OrderingFilter,
+    )
+
+    search_fields = (
+        'lineage',
+        'biome_name',
     )
 
     ordering_fields = (
         'lineage',
-        'samples_count',
-        'study_count',
     )
     ordering = ('lineage',)
 
     lookup_field = 'lineage'
     lookup_value_regex = '[a-zA-Z0-9\:\-\s\(\)\<\>]+'
 
-    def get_queryset(self):
-        if self.action == 'list':
-            lineage = self.kwargs.get('lineage', None).strip()
-            if lineage:
-                l = get_object_or_404(emg_models.Biome, lineage=lineage)
-                queryset = emg_models.Biome.objects \
-                    .filter(lft__gte=l.lft, rgt__lte=l.rgt,
-                            depth__gte=l.depth) \
-                    .order_by("-samples_count")
-            else:
-                queryset = emg_models.Biome.objects.filter(depth=1)
-        else:
-            queryset = super(BiomeViewSet, self).get_queryset()
-        return queryset
-
     def get_serializer_class(self):
         return super(BiomeViewSet, self).get_serializer_class()
 
-    def get_serializer_context(self):
-        context = super(BiomeViewSet, self).get_serializer_context()
-        context['lineage'] = self.kwargs.get('lineage')
-        return context
+    def get_queryset(self):
+        if 'search' in self.request.query_params:
+            queryset = emg_models.Biome.objects.all()
+        else:
+            queryset = emg_models.Biome.objects.filter(depth__in=(1, 2))
+        return queryset
 
-    def list(self, request, lineage, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
-        Retrieves children for the given Biome node.
+        Retrieves top level Biome nodes.
         Example:
         ---
-        `/biomes/root:Environmental:Aquatic`
-        list all children
-        """
-
-        return super(BiomeViewSet, self) \
-            .list(request, lineage, *args, **kwargs)
-
-
-class BiomeRootViewSet(mixins.ListModelMixin,
-                       viewsets.GenericViewSet):
-
-    serializer_class = emg_serializers.Top10BiomeSerializer
-    queryset = emg_models.Biome.objects.filter(depth=1)
-
-    def list(self, request):
-        """
-        Retrieve 10 most popular biome:
-        ---
         `/biomes`
+        """
+
+        return super(BiomeViewSet, self).list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves children for the given lineage
+        Example:
+        ---
+        `/biomes/root:Environmental:Aquatic:Freshwater`
+        """
+        return super(StudyViewSet, self).retrieve(request, *args, **kwargs)
+
+    @list_route(
+        methods=['get', ],
+        serializer_class=emg_serializers.Top10BiomeSerializer
+    )
+    def top10(self, request):
+        """
+        Retrieve 10 most popular biomes:
+        ---
+        `/biomes/top10`
         """
 
         sql = """
