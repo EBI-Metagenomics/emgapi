@@ -551,9 +551,10 @@ class RetrieveRunSerializer(RunSerializer):
             'analysis',
         )
 
+
 # SampleAnn serializer
 
-# class SampleAnnHyperlinkedField(serializers.HyperlinkedIdentityField):
+# class MetadataHyperlinkedField(serializers.HyperlinkedIdentityField):
 #
 #     def get_url(self, obj, view_name, request, format):
 #         kwargs = {
@@ -563,9 +564,8 @@ class RetrieveRunSerializer(RunSerializer):
 #         return reverse(
 #             view_name, kwargs=kwargs, request=request, format=format)
 
-
-class SampleAnnSerializer(ExplicitFieldsModelSerializer,
-                          serializers.HyperlinkedModelSerializer):
+class BaseMetadataSerializer(ExplicitFieldsModelSerializer,
+                             serializers.HyperlinkedModelSerializer):
 
     id = serializers.ReadOnlyField(source="multiple_pk")
 
@@ -583,42 +583,34 @@ class SampleAnnSerializer(ExplicitFieldsModelSerializer,
 
     def get_unit(self, obj):
         return obj.units
+
+
+class SampleAnnSerializer(BaseMetadataSerializer):
 
     sample_accession = serializers.SerializerMethodField()
 
     def get_sample_accession(self, obj):
         return obj.sample.accession
 
+    sample = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emgapi:samples-detail',
+        lookup_field='accession'
+    )
+
     class Meta:
         model = emg_models.SampleAnn
         fields = (
             'id',
-            'sample_accession',
             'var_name',
             'var_value',
             'unit',
+            'sample_accession',
+            'sample',
         )
 
 
-class AnalysisJobAnnSerializer(ExplicitFieldsModelSerializer,
-                               serializers.HyperlinkedModelSerializer):
-
-    id = serializers.ReadOnlyField(source="multiple_pk")
-
-    var_name = serializers.SerializerMethodField()
-
-    def get_var_name(self, obj):
-        return obj.var.var_name
-
-    var_value = serializers.SerializerMethodField()
-
-    def get_var_value(self, obj):
-        return obj.var_val_ucv
-
-    unit = serializers.SerializerMethodField()
-
-    def get_unit(self, obj):
-        return obj.units
+class AnalysisJobAnnSerializer(BaseMetadataSerializer):
 
     class Meta:
         model = emg_models.AnalysisJobAnn

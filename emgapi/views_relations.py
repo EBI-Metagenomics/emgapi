@@ -18,8 +18,8 @@ from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework import viewsets, mixins
-
+from rest_framework import viewsets, mixins, generics
+from rest_framework.response import Response
 from rest_framework import filters
 
 from . import models as emg_models
@@ -532,3 +532,59 @@ class PipelineToolsRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
         """
         return super(PipelineToolsRelationshipViewSet, self) \
             .list(request, release_version, *args, **kwargs)
+
+
+class RunsMetadataView(emg_mixins.MultipleFieldLookupMixin,
+                       generics.ListAPIView):
+
+    serializer_class = emg_serializers.AnalysisJobAnnSerializer
+
+    lookup_fields = ('accession', 'release_version')
+
+    def get_queryset(self):
+        return emg_models.AnalysisJobAnn.objects.all() \
+            .select_related('job', 'var') \
+            .order_by('var')
+
+    def list(self, request, accession, release_version, *args, **kwargs):
+        """
+        Retrieves metadatafor the given analysis job
+        Example:
+        ---
+        `/runs/ERR1385375/3.0/metadata` retrieve metadata
+        """
+
+        queryset = emg_models.AnalysisJobAnn.objects.filter(
+            job__accession=accession,
+            job__pipeline__release_version=release_version) \
+            .select_related('job', 'var') \
+            .order_by('var')
+        serializer = self.get_serializer(
+            queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+class SampleMetadataRelationshipViewSet(mixins.ListModelMixin,
+                                        viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.SampleAnnSerializer
+
+    lookup_field = 'accession'
+
+    def get_queryset(self):
+        accession = self.kwargs[self.lookup_field]
+        return emg_models.SampleAnn.objects.filter(
+            sample__accession=accession) \
+            .select_related('sample', 'var') \
+            .order_by('var')
+
+    def list(self, request, accession, *args, **kwargs):
+        """
+        Retrieves metadatafor the given analysis job
+        Example:
+        ---
+        `/runs/ERR1385375/3.0/metadata` retrieve metadata
+        """
+
+        return super(SampleMetadataRelationshipViewSet, self) \
+            .list(request, accession, *args, **kwargs)

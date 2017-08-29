@@ -218,7 +218,7 @@ class SampleFilter(django_filters.FilterSet):
 
     def filter_metadata_key(self, qs, name, value):
         return qs.filter(
-            metadata__var__var_name__iregex=WORD_MATCH_REGEX.format(value))
+            metadata__var__var_name=value)
 
     metadata_value_gte = django_filters.CharFilter(
         method='filter_metadata_value_gte', distinct=True,
