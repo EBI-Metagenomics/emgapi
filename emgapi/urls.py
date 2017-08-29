@@ -120,7 +120,7 @@ urlpatterns += [
     url(
         (r'^pipeline-tools/(?P<tool_name>[\w+]+)/'
          r'(?P<version>[a-zA-Z0-9\-\.]+)$'),
-        views.PipelineToolAPIView.as_view(),
+        views.PipelineToolInstanceView.as_view(),
         name='pipeline-tools-detail'
     ),
 
@@ -170,6 +170,12 @@ relation_router.register(
     r'pipelines/(?P<release_version>[0-9\.]+)/samples',
     views_relations.PipelineSampleRelationshipViewSet,
     base_name='pipelines-samples'
+)
+
+relation_router.register(
+    r'pipelines/(?P<release_version>[0-9\.]+)/tools',
+    views_relations.PipelineToolsRelationshipViewSet,
+    base_name='pipelines-tools'
 )
 
 relation_router.register(
