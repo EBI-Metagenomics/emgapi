@@ -25,6 +25,7 @@ from rest_framework import filters
 from . import models as emg_models
 from . import serializers as emg_serializers
 from . import filters as emg_filters
+from . import mixins as emg_mixins
 
 
 class BaseStudyRelationshipViewSet(viewsets.GenericViewSet):
@@ -499,3 +500,35 @@ class BiomeTreeViewSet(mixins.ListModelMixin,
 
         return super(BiomeTreeViewSet, self) \
             .list(request, lineage, *args, **kwargs)
+
+
+class PipelineToolsRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
+                                       mixins.ListModelMixin,
+                                       viewsets.GenericViewSet):
+
+    """
+    Pipeline tools endpoint provides detail about the pipeline tools were used
+    to analyse the data in each steps.
+    """
+
+    serializer_class = emg_serializers.PipelineToolSerializer
+
+    lookup_field = 'release_version'
+    lookup_value_regex = '[a-zA-Z0-9.]+'
+
+    def get_queryset(self):
+        release_version = self.kwargs[self.lookup_field]
+        obj = get_object_or_404(
+            emg_models.Pipeline, release_version=release_version)
+        queryset = emg_models.PipelineTool.objects.filter(pipelines=obj)
+        return queryset
+
+    def list(self, request, release_version, *args, **kwargs):
+        """
+        Retrieves list of pipeline tools for the given pipeline version
+        Example:
+        ---
+        `/pipeline/{release_version}/tools`
+        """
+        return super(PipelineToolsRelationshipViewSet, self) \
+            .list(request, release_version, *args, **kwargs)

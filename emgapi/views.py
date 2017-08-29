@@ -700,6 +700,11 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
                       mixins.ListModelMixin,
                       viewsets.GenericViewSet):
 
+    """
+    Pipelines endpoint provides detail about each pipeline version were used
+    to analyse the data.
+    """
+
     serializer_class = emg_serializers.PipelineSerializer
     queryset = emg_models.Pipeline.objects.all()
 
@@ -745,34 +750,14 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         """
         return super(PipelineViewSet, self).list(request, *args, **kwargs)
 
-    @detail_route(
-        methods=['get', ],
-        url_name='tools-list',
-        serializer_class=emg_serializers.PipelineToolSerializer
-    )
-    def tools(self, request, release_version=None):
-        """
-        Retrieves list of pipeline tools for the given pipeline version
-        Example:
-        ---
-        `/pipeline/tools`
-        """
-        obj = self.get_object()
-        queryset = obj.tools.all()
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(
-                page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
+class PipelineToolInstanceView(emg_mixins.MultipleFieldLookupMixin,
+                               generics.RetrieveAPIView):
 
-        serializer = self.get_serializer(
-            queryset, many=True, context={'request': request})
-        return Response(serializer.data)
-
-
-class PipelineToolAPIView(emg_mixins.MultipleFieldLookupMixin,
-                          generics.RetrieveAPIView):
+    """
+    Pipeline tools endpoint provides detail about the pipeline tools were used
+    to analyse the data in each steps.
+    """
 
     serializer_class = emg_serializers.PipelineToolSerializer
     queryset = emg_models.PipelineTool.objects.all()
@@ -786,15 +771,20 @@ class PipelineToolAPIView(emg_mixins.MultipleFieldLookupMixin,
         ---
         `/pipeline-tools/interproscan/5.19-58.0`
         """
-        run = get_object_or_404(
+        obj = get_object_or_404(
             emg_models.PipelineTool,
             tool_name__iexact=tool_name, version=version)
-        serializer = self.get_serializer(run)
+        serializer = self.get_serializer(obj)
         return Response(data=serializer.data)
 
 
 class PipelineToolViewSet(mixins.ListModelMixin,
                           viewsets.GenericViewSet):
+
+    """
+    Pipeline tools endpoint provides detail about the pipeline tools were used
+    to analyse the data in each steps.
+    """
 
     serializer_class = emg_serializers.PipelineToolSerializer
     queryset = emg_models.PipelineTool.objects.all()
