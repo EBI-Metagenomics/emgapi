@@ -200,7 +200,26 @@ class PublicationSerializer(ExplicitFieldsModelSerializer,
 
     class Meta:
         model = emg_models.Publication
-        fields = '__all__'
+        fields = (
+            'url',
+            'pubmed_id',
+            'pubmed_central_id',
+            'pub_title',
+            'pub_abstract',
+            'authors',
+            'doi',
+            'isbn',
+            'published_year',
+            'pub_type',
+            'issue',
+            'volume',
+            'raw_pages',
+            'iso_journal',
+            'medline_journal',
+            'pub_url',
+            'studies_count',
+            'studies',
+        )
 
 
 # Pipeline serializer
