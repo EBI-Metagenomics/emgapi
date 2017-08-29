@@ -441,96 +441,6 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         """
         return super(SampleViewSet, self).list(request, *args, **kwargs)
 
-    @detail_route(
-        methods=['get', ],
-        url_name='metadata-list',
-        serializer_class=emg_serializers.SampleAnnSerializer
-    )
-    def metadata(self, request, accession=None):
-        """
-        Retrieves metadatafor the given sample accession
-        Example:
-        ---
-        `/samples/ERS1015417/metadata` retrieve metadata
-        """
-
-        obj = self.get_object()
-        queryset = obj.metadata.all() \
-            .select_related('sample', 'var') \
-            .order_by('var')
-
-        serializer = self.get_serializer(
-            queryset, many=True, context={'request': request})
-        return Response(serializer.data)
-
-
-# class SampleAnnAPIView(emg_mixins.MultipleFieldLookupMixin,
-#                        generics.RetrieveAPIView):
-#
-#     serializer_class = emg_serializers.SampleAnnSerializer
-#
-#     lookup_fields = ('var__var_name', 'var_val_ucv')
-#
-#     def get_queryset(self):
-#         return emg_models.SampleAnn.objects.all()
-#
-#     def get(self, request, name, value, *args, **kwargs):
-#         """
-#         Retrieves sample annotation for the given sample accession and value
-#         Example:
-#         ---
-#         `/metadata/name/value`
-#         """
-#         sa = emg_models.SampleAnn.objects.get(
-#             var__var_name=name,
-#             var_val_ucv=value
-#         )
-#         serializer = self.get_serializer(sa)
-#         return Response(data=serializer.data)
-
-
-class SampleAnnsViewSet(mixins.ListModelMixin,
-                        viewsets.GenericViewSet):
-
-    serializer_class = emg_serializers.SampleAnnSerializer
-
-    filter_backends = (
-        DjangoFilterBackend,
-        filters.SearchFilter,
-        filters.OrderingFilter,
-    )
-
-    ordering_fields = (
-        'sample',
-        'var',
-    )
-
-    ordering = (
-        'sample',
-        'var',
-    )
-
-    search_fields = (
-        'var__var_name',
-        'var_val_ucv',
-    )
-
-    def get_queryset(self):
-        queryset = emg_models.SampleAnn.objects.all()
-        return queryset
-
-    def get_serializer_class(self):
-        return super(SampleAnnsViewSet, self).get_serializer_class()
-
-    def list(self, request, *args, **kwargs):
-        """
-        Retrieves list of annotaitons
-        Example:
-        ---
-        `/metadata` retrieves list of samples
-        """
-        return super(SampleAnnsViewSet, self).list(request, *args, **kwargs)
-
 
 class RunAPIView(emg_mixins.MultipleFieldLookupMixin,
                  generics.RetrieveAPIView):
@@ -560,36 +470,6 @@ class RunAPIView(emg_mixins.MultipleFieldLookupMixin,
             pipeline__release_version=release_version)
         serializer = self.get_serializer(run)
         return Response(data=serializer.data)
-
-
-class RunAnnsAPIView(emg_mixins.MultipleFieldLookupMixin,
-                     generics.ListAPIView):
-
-    serializer_class = emg_serializers.AnalysisJobAnnSerializer
-
-    lookup_fields = ('accession', 'release_version')
-
-    def get_queryset(self):
-        return emg_models.AnalysisJobAnn.objects.all() \
-            .select_related('job', 'var') \
-            .order_by('var')
-
-    def list(self, request, accession, release_version, *args, **kwargs):
-        """
-        Retrieves metadatafor the given analysis job
-        Example:
-        ---
-        `/runs/ERR1385375/3.0/metadata` retrieve metadata
-        """
-
-        queryset = emg_models.AnalysisJobAnn.objects.filter(
-            job__accession=accession,
-            job__pipeline__release_version=release_version) \
-            .select_related('job', 'var') \
-            .order_by('var')
-        serializer = self.get_serializer(
-            queryset, many=True, context={'request': request})
-        return Response(serializer.data)
 
 
 class RunViewSet(mixins.RetrieveModelMixin,

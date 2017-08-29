@@ -88,17 +88,12 @@ router.register(
     base_name='pipeline-tools'
 )
 
-# router.register(
-#     r'metadata',
-#     views.SampleAnnsViewSet,
-#     base_name='metadata'
-# )
-
 router.register(
     r'mydata',
     views.MyDataViewSet,
     base_name='mydata'
 )
+
 
 urlpatterns += router.urls
 
@@ -111,24 +106,11 @@ urlpatterns += [
     ),
 
     url(
-        (r'^runs/(?P<accession>[a-zA-Z0-9_]+)/(?P<release_version>[0-9\.]+)/'
-         r'metadata$'),
-        views.RunAnnsAPIView.as_view(),
-        name='runs-pipelines-metadata-list'
-    ),
-
-    url(
         (r'^pipeline-tools/(?P<tool_name>[\w+]+)/'
          r'(?P<version>[a-zA-Z0-9\-\.]+)$'),
         views.PipelineToolInstanceView.as_view(),
         name='pipeline-tools-detail'
     ),
-
-    # url(
-    #     (r'^metadata/(?P<name>(.*)+)/(?P<value>(.*)+)$'),
-    #     views.SampleAnnAPIView.as_view(),
-    #     name='metadata-detail'
-    # ),
 
 ]
 
@@ -196,4 +178,22 @@ relation_router.register(
     base_name='samples-runs'
 )
 
+relation_router.register(
+    r'samples/(?P<accession>[a-zA-Z0-9]+)/metadata',
+    views_relations.SampleMetadataRelationshipViewSet,
+    base_name='samples-metadata'
+)
+
+
 urlpatterns += relation_router.urls
+
+urlpatterns += [
+
+    url(
+        (r'^runs/(?P<accession>[a-zA-Z0-9_]+)/(?P<release_version>[0-9\.]+)/'
+         r'metadata$'),
+        views_relations.RunsMetadataView.as_view(),
+        name='runs-pipelines-metadata-list'
+    ),
+
+]
