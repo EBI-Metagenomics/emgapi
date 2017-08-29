@@ -298,7 +298,7 @@ REST_FRAMEWORK = {
         # 'rest_framework_xml.renderers.XMLRenderer',
         # 'rest_framework_yaml.renderers.YAMLRenderer',
         # 'rest_framework_csv.renderers.CSVRenderer',
-        # 'rest_framework.renderers.BrowsableAPIRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
     ),
 
     'DEFAULT_FILTER_BACKENDS': (
