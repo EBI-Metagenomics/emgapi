@@ -261,6 +261,12 @@ class PipelineSampleRelationshipViewSet(mixins.ListModelMixin,
 class ExperimentSampleRelationshipViewSet(mixins.ListModelMixin,
                                           BaseSampleRelationshipViewSet):
 
+    """
+    Experiment types endpoint provides access to the metagenomic studies
+    filteres by various type of experiments. Studies or samples can be
+    filtered by many attributes including metadata.
+    """
+
     lookup_field = 'experiment_type'
 
     def get_queryset(self):

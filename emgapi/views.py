@@ -819,6 +819,12 @@ class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
                             mixins.ListModelMixin,
                             viewsets.GenericViewSet):
 
+    """
+    Experiment types endpoint provides access to the metagenomic studies
+    filteres by various type of experiments. Studies or samples can be
+    filtered by many attributes including metadata.
+    """
+
     serializer_class = emg_serializers.ExperimentTypeSerializer
     queryset = emg_models.ExperimentType.objects.all()
 
