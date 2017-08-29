@@ -149,6 +149,12 @@ relation_router.register(
 )
 
 relation_router.register(
+    r'biomes/(?P<lineage>[a-zA-Z0-9\:\-\s\(\)\<\>]+)/samples',
+    views_relations.BiomeSampleRelationshipViewSet,
+    base_name='biomes-samples'
+)
+
+relation_router.register(
     r'publications/(?P<pubmed_id>[0-9\.]+)/studies',
     views_relations.PublicationStudyRelationshipViewSet,
     base_name='publications-studies'
@@ -170,12 +176,6 @@ relation_router.register(
     r'experiment-types/(?P<experiment_type>[a-zA-Z0-9]+)/samples',
     views_relations.ExperimentSampleRelationshipViewSet,
     base_name='experiment-types-samples'
-)
-
-relation_router.register(
-    r'biomes/(?P<lineage>[a-zA-Z0-9\:\-\s\(\)\<\>]+)/samples',
-    views_relations.BiomeSampleRelationshipViewSet,
-    base_name='biomes-samples'
 )
 
 relation_router.register(
