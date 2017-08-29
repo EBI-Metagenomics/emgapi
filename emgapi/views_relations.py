@@ -54,7 +54,6 @@ class BaseStudyRelationshipViewSet(viewsets.GenericViewSet):
         'centre_name',
         'author_name',
         'author_email',
-        'project_id',
     )
 
 
@@ -101,6 +100,12 @@ class BiomeStudyRelationshipViewSet(mixins.ListModelMixin,
 class PublicationStudyRelationshipViewSet(mixins.ListModelMixin,
                                           BaseStudyRelationshipViewSet):
 
+    """
+    Publications endpoint provides access to the publications linked to
+    metagenomic studies. Related studies can be filtered by many of attributes
+    or searched by: name, abstract, centre name, author, etc.
+    """
+
     lookup_field = 'pubmed_id'
     lookup_value_regex = '[0-9\.]+'
 
@@ -120,7 +125,7 @@ class PublicationStudyRelationshipViewSet(mixins.ListModelMixin,
 
     def list(self, request, pubmed_id, *args, **kwargs):
         """
-        Retrieves list of studies for the given pipeline version
+        Retrieves list of studies for the given Pubmed ID
         Example:
         ---
         `/publications/{pubmed}/studies` retrieve linked
@@ -366,14 +371,14 @@ class PublicationSampleRelationshipViewSet(mixins.ListModelMixin,
 
     def list(self, request, pubmed_id, *args, **kwargs):
         """
-        Retrieves list of studies for the given pipeline version
+        Retrieves list of studies for the given Pubmed ID
         Example:
         ---
         `/publications/{pubmed}/samples` retrieve linked
-        studies
+        samples
 
         `/publications/{pubmed}/samples?include=runs` with
-        samples
+        runs
         """
         return super(PublicationSampleRelationshipViewSet, self) \
             .list(request, pubmed_id, *args, **kwargs)

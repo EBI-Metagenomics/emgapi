@@ -860,6 +860,13 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
                          mixins.ListModelMixin,
                          viewsets.GenericViewSet):
 
+    """
+    Publications endpoint provides access to the publications linked to
+    metagenomic studies. Publications can be filtered by year or searched by:
+    title, abstract, authors, DOI, ISBN. Single publication is retrieved by
+    PUBMED ID.
+    """
+
     serializer_class = emg_serializers.PublicationSerializer
 
     filter_class = emg_filters.PublicationFilter
@@ -872,6 +879,7 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
 
     ordering_fields = (
         'pubmed_id',
+        'published_year',
         'studies_count',
     )
 
@@ -902,7 +910,7 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
 
     def retrieve(self, request, *args, **kwargs):
         """
-        Retrieves publication for the given id
+        Retrieves publication for the given Pubmed ID
         Example:
         ---
         `/publications/{pubmed}`
@@ -921,7 +929,7 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
 
         `/publications?include=studies` with studies
 
-        `/publications?ordering=pubmed_id` ordered by id
+        `/publications?ordering=published_year` ordered by year
 
         Search for:
         ---
