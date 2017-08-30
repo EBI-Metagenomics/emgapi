@@ -26,6 +26,7 @@ from . import models as emg_models
 from . import serializers as emg_serializers
 from . import filters as emg_filters
 from . import mixins as emg_mixins
+from . import pagination as emg_page
 
 
 class BaseStudyRelationshipViewSet(viewsets.GenericViewSet):
@@ -538,6 +539,7 @@ class RunsMetadataView(emg_mixins.MultipleFieldLookupMixin,
                        generics.ListAPIView):
 
     serializer_class = emg_serializers.AnalysisJobAnnSerializer
+    pagination_class = emg_page.MetadataSetPagination
 
     lookup_fields = ('accession', 'release_version')
 
@@ -568,6 +570,7 @@ class SampleMetadataRelationshipViewSet(mixins.ListModelMixin,
                                         viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.SampleAnnSerializer
+    pagination_class = emg_page.MetadataSetPagination
 
     lookup_field = 'accession'
 
