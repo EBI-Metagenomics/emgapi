@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import django_filters
 from django_filters import filters
 
@@ -217,8 +216,9 @@ class SampleFilter(django_filters.FilterSet):
             label='Metadata keyword', help_text='Metadata keyword')
 
     def filter_metadata_key(self, qs, name, value):
-        return qs.filter(
-            metadata__var__var_name=value)
+        m = emg_models.VariableNames.objects.filter(
+            var_name__iregex=WORD_MATCH_REGEX.format(value))
+        return qs.filter(metadata__var__in=m)
 
     metadata_value_gte = django_filters.CharFilter(
         method='filter_metadata_value_gte', distinct=True,
@@ -274,8 +274,7 @@ class SampleFilter(django_filters.FilterSet):
         help_text='Study accession')
 
     def filter_study_accession(self, qs, name, value):
-        return qs.filter(
-            study__accession__iregex=WORD_MATCH_REGEX.format(value))
+        return qs.filter(study__accession=value)
 
     class Meta:
         model = emg_models.Sample
@@ -371,8 +370,7 @@ class RunFilter(django_filters.FilterSet):
         help_text='Sample accession')
 
     def filter_sample_accession(self, qs, name, value):
-        return qs.filter(
-            sample__accession__iregex=WORD_MATCH_REGEX.format(value))
+        return qs.filter(sample__accession=value)
 
     study_accession = django_filters.CharFilter(
         method='filter_study_accession', distinct=True,
@@ -380,8 +378,7 @@ class RunFilter(django_filters.FilterSet):
         help_text='Study accession')
 
     def filter_study_accession(self, qs, name, value):
-        return qs.filter(
-            sample__study__accession__iregex=WORD_MATCH_REGEX.format(value))
+        return qs.filter(sample__study__accession=value)
 
     class Meta:
         model = emg_models.Run
