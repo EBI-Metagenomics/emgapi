@@ -317,6 +317,10 @@ class ExperimentTypeSerializer(ExplicitFieldsModelSerializer,
 class RunSerializer(ExplicitFieldsModelSerializer,
                     serializers.HyperlinkedModelSerializer):
 
+    included_serializers = {
+        'sample': 'emgapi.serializers.SampleSerializer',
+    }
+
     url = serializers.HyperlinkedIdentityField(
         view_name='emgapi:runs-detail',
         lookup_field='accession'
@@ -362,6 +366,7 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     )
 
     def get_pipelines(self, obj):
+        # TODO: push that to queryset
         return emg_models.Pipeline.objects \
             .filter(analysis__accession=obj.accession)
 
@@ -621,7 +626,7 @@ class StudySerializer(ExplicitFieldsModelSerializer,
                       serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
-        'publications': 'emgapi.serializers.PublicationSerializer',
+        # 'publications': 'emgapi.serializers.PublicationSerializer',
         'biomes': 'emgapi.serializers.BiomeSerializer',
         # 'samples': 'emgapi.serializers.SampleSerializer',
     }

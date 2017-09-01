@@ -148,10 +148,8 @@ class StudyFilter(django_filters.FilterSet):
     include = django_filters.CharFilter(
         method='filter_include', distinct=True,
         label='Include',
-        help_text=(
-            'Include related publications and/or biomes in the same '
-            'response.')
-        )
+        help_text=('Include related samples and/or biomes in the same '
+                   'response.'))
 
     def filter_include(self, qs, name, value):
         return qs
@@ -416,6 +414,17 @@ class RunFilter(django_filters.FilterSet):
     def filter_study_accession(self, qs, name, value):
         return qs.filter(sample__study__accession=value)
 
+    # include
+    include = django_filters.CharFilter(
+        method='filter_include', distinct=True,
+        label='Include',
+        help_text=(
+            'Include related sample in the same response.')
+        )
+
+    def filter_include(self, qs, name, value):
+        return qs
+
     class Meta:
         model = emg_models.Run
         fields = (
@@ -426,4 +435,5 @@ class RunFilter(django_filters.FilterSet):
             'instrument_model',
             'species',
             'sample_accession',
+            'include',
         )
