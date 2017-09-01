@@ -24,6 +24,7 @@
 #     modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values
 # or field names.
+
 from __future__ import unicode_literals
 
 from django.db import models
