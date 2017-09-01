@@ -494,10 +494,10 @@ class BaseMetadataSerializer(ExplicitFieldsModelSerializer,
 class SampleAnnSerializer(BaseMetadataSerializer):
 
     # attributes
-    sample_accession = serializers.SerializerMethodField()
-
-    def get_sample_accession(self, obj):
-        return obj.sample.accession
+    # sample_accession = serializers.SerializerMethodField()
+    #
+    # def get_sample_accession(self, obj):
+    #     return obj.sample.accession
 
     # relationships
     sample = serializers.HyperlinkedRelatedField(
@@ -513,7 +513,7 @@ class SampleAnnSerializer(BaseMetadataSerializer):
             'var_name',
             'var_value',
             'unit',
-            'sample_accession',
+            # 'sample_accession',
             'sample',
         )
 
