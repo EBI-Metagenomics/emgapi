@@ -122,8 +122,8 @@ class StudyFilter(django_filters.FilterSet):
 
     other_accession = django_filters.CharFilter(
         name='project_id', distinct=True,
-        label='EAN accession',
-        help_text='EAN accession')
+        label='ENA accession',
+        help_text='ENA accession')
 
     centre_name = django_filters.CharFilter(
         method='filter_centre_name', distinct=True,
@@ -249,8 +249,8 @@ class SampleFilter(django_filters.FilterSet):
 
     other_accession = django_filters.CharFilter(
         name='study__project_id', distinct=True,
-        label='EAN accession',
-        help_text='EAN accession')
+        label='ENA accession',
+        help_text='ENA accession')
 
     species = django_filters.CharFilter(
         method='filter_species', distinct=True,
