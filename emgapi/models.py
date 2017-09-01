@@ -720,9 +720,7 @@ class Metadata(models.Model):
         db_column='UNITS', max_length=25, blank=True, null=True)
 
     class Meta:
-        db_table = 'SAMPLE_ANN'
-        managed = False
-        unique_together = (('var', 'var_val_ucv'),)
+        abstract = True
 
     def __str__(self):
         return "%s %s" % (self.var.var_name, self.var_val_ucv)
