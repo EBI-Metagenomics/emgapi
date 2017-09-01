@@ -586,7 +586,7 @@ class SampleMetadataRelationshipViewSet(mixins.ListModelMixin,
         Retrieves metadatafor the given analysis job
         Example:
         ---
-        `/runs/ERR1385375/3.0/metadata` retrieve metadata
+        `/samples/ERR1385375/3.0/metadata` retrieve metadata
         """
 
         return super(SampleMetadataRelationshipViewSet, self) \
