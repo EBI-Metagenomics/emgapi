@@ -52,12 +52,22 @@ class PublicationFilter(django_filters.FilterSet):
         name='published_year', distinct=True,
         label='Published year', help_text='Published year')
 
+    # include
+    include = django_filters.CharFilter(
+        method='filter_include', distinct=True,
+        label='Include',
+        help_text='Include related studies in the same response')
+
+    def filter_include(self, qs, name, value):
+        return qs
+
     class Meta:
         model = emg_models.Publication
         fields = (
             'doi',
             'isbn',
             'published_year',
+            'include',
         )
 
 
@@ -134,6 +144,18 @@ class StudyFilter(django_filters.FilterSet):
         return qs.filter(
             centre_name__iregex=WORD_MATCH_REGEX.format(value))
 
+    # include
+    include = django_filters.CharFilter(
+        method='filter_include', distinct=True,
+        label='Include',
+        help_text=(
+            'Include related publications and/or biomes in the same '
+            'response.')
+        )
+
+    def filter_include(self, qs, name, value):
+        return qs
+
     class Meta:
         model = emg_models.Study
         fields = (
@@ -141,6 +163,7 @@ class StudyFilter(django_filters.FilterSet):
             'lineage',
             'centre_name',
             'other_accession',
+            'include',
         )
 
 
@@ -222,21 +245,21 @@ class SampleFilter(django_filters.FilterSet):
 
     metadata_value_gte = django_filters.CharFilter(
         method='filter_metadata_value_gte', distinct=True,
-        label='Metadata value',
+        label='Metadata greater/equal then value',
         help_text='Metadata greater/equal then value')
 
     def filter_metadata_value_gte(self, qs, name, value):
         return qs.filter(
-            metadata__var_val_ucv__gte=value)
+            metadata__var_val_ucv__gte=float(value))
 
     metadata_value_lte = django_filters.CharFilter(
         method='filter_metadata_value_lte', distinct=True,
-        label='Metadata value',
+        label='Metadata less/equal then value',
         help_text='Metadata less/equal then value')
 
     def filter_metadata_value_lte(self, qs, name, value):
         return qs.filter(
-            metadata__var_val_ucv__lte=value)
+            metadata__var_val_ucv__lte=float(value))
 
     metadata_value = django_filters.CharFilter(
         method='filter_metadata_value', distinct=True,
@@ -276,6 +299,18 @@ class SampleFilter(django_filters.FilterSet):
     def filter_study_accession(self, qs, name, value):
         return qs.filter(study__accession=value)
 
+    # include
+    include = django_filters.CharFilter(
+        method='filter_include', distinct=True,
+        label='Include',
+        help_text=(
+            'Include related run, metadata and/or biome in the same '
+            'response.')
+        )
+
+    def filter_include(self, qs, name, value):
+        return qs
+
     class Meta:
         model = emg_models.Sample
         fields = (
@@ -294,6 +329,7 @@ class SampleFilter(django_filters.FilterSet):
             'environment_material',
             'environment_feature',
             'study_accession',
+            'include',
         )
 
 
