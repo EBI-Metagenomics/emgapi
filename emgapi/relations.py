@@ -70,3 +70,41 @@ class HyperlinkedSerializerMethodResourceRelatedField(
 
     def to_representation(self, value):
         return [self._to_representation(x) for x in value]
+
+
+# TODO: clean up below
+class AnalysisJobSerializerMethodResourceRelatedField(SerializerMethodResourceRelatedField):  # NOQA
+
+    def get_links(self, obj=None, lookup_field='pk'):
+
+        request = self.context.get('request', None)
+        view = self.context.get('view', None)
+        return_data = collections.OrderedDict()
+
+        kwargs = {
+            lookup_field: getattr(
+                obj, lookup_field) if obj else view.kwargs[lookup_field]
+        }
+
+        self_kwargs = kwargs.copy()
+        self_kwargs.update({
+            'related_field':
+                self.field_name if self.field_name else self.parent.field_name
+        })
+        self_link = self.get_url(
+            'self', self.self_link_view_name, self_kwargs, request)
+
+        related_kwargs = {
+            self.related_link_url_kwarg: kwargs[self.related_link_lookup_field]
+        }
+        # TODO: add related_link_lookup_fields, a list
+        related_kwargs['release_version'] = obj.pipeline.release_version
+
+        related_link = self.get_url(
+            'related', self.related_link_view_name, related_kwargs, request)
+
+        if self_link:
+            return_data.update({'self': self_link})
+        if related_link:
+            return_data.update({'related': related_link})
+        return return_data
