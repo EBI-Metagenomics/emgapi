@@ -149,6 +149,12 @@ relation_router.register(
 )
 
 relation_router.register(
+    r'pipelines/(?P<release_version>[0-9\.]+)/studies',
+    views_relations.PipelineStudyRelationshipViewSet,
+    base_name='pipelines-studies'
+)
+
+relation_router.register(
     r'pipelines/(?P<release_version>[0-9\.]+)/samples',
     views_relations.PipelineSampleRelationshipViewSet,
     base_name='pipelines-samples'
@@ -156,7 +162,7 @@ relation_router.register(
 
 relation_router.register(
     r'pipelines/(?P<release_version>[0-9\.]+)/tools',
-    views_relations.PipelineToolsRelationshipViewSet,
+    views_relations.PipelinePipelineToolRelationshipViewSet,
     base_name='pipelines-tools'
 )
 
@@ -173,13 +179,13 @@ relation_router.register(
 )
 
 relation_router.register(
-    r'samples/(?P<accession>[a-zA-Z0-9]+)/runs',
+    r'samples/(?P<accession>[a-zA-Z0-9\-\_]+)/runs',
     views_relations.SampleRunRelationshipViewSet,
     base_name='samples-runs'
 )
 
 relation_router.register(
-    r'samples/(?P<accession>[a-zA-Z0-9]+)/metadata',
+    r'samples/(?P<accession>[a-zA-Z0-9\-\_]+)/metadata',
     views_relations.SampleMetadataRelationshipViewSet,
     base_name='samples-metadata'
 )
@@ -192,7 +198,7 @@ urlpatterns += [
     url(
         (r'^runs/(?P<accession>[a-zA-Z0-9_]+)/(?P<release_version>[0-9\.]+)/'
          r'metadata$'),
-        views_relations.RunsMetadataView.as_view(),
+        views_relations.RunMetadataView.as_view(),
         name='runs-pipelines-metadata-list'
     ),
 
