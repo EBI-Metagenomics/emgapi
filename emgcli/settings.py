@@ -167,9 +167,9 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_auth',
     # apps
-    'emgapimetadata',
     'emgapi',
-
+    'emgapimetadata',
+    
 ]
 
 MIDDLEWARE = [
@@ -347,6 +347,7 @@ SWAGGER_SETTINGS = {
         # }
     },
     'USE_SESSION_AUTH': True,
+    'VALIDATOR_URL': None
 }
 
 # Custom settings

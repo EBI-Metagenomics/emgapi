@@ -18,8 +18,7 @@ from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework import viewsets, mixins, generics
-from rest_framework.response import Response
+from rest_framework import viewsets, mixins
 from rest_framework import filters
 
 from . import models as emg_models
@@ -84,7 +83,7 @@ class BiomeStudyRelationshipViewSet(mixins.ListModelMixin,
                 Prefetch('samples', queryset=_qs))
         return queryset
 
-    def list(self, request, lineage, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves list of studies for the given biome
         Example:
@@ -96,7 +95,7 @@ class BiomeStudyRelationshipViewSet(mixins.ListModelMixin,
         studies
         """
         return super(BiomeStudyRelationshipViewSet, self) \
-            .list(request, lineage, *args, **kwargs)
+            .list(request, *args, **kwargs)
 
 
 class PublicationStudyRelationshipViewSet(mixins.ListModelMixin,
@@ -125,7 +124,7 @@ class PublicationStudyRelationshipViewSet(mixins.ListModelMixin,
                 Prefetch('samples', queryset=_qs))
         return queryset
 
-    def list(self, request, pubmed_id, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves list of studies for the given Pubmed ID
         Example:
@@ -193,7 +192,7 @@ class StudySampleRelationshipViewSet(mixins.ListModelMixin,
                 Prefetch('runs', queryset=_qs))
         return queryset
 
-    def list(self, request, accession, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves list of samples for the given study accession
         Example:
@@ -237,7 +236,7 @@ class PipelineSampleRelationshipViewSet(mixins.ListModelMixin,
                 Prefetch('runs', queryset=_qs))
         return queryset
 
-    def list(self, request, release_version, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves list of samples for the given pipeline version
         Example:
@@ -272,7 +271,7 @@ class PipelineStudyRelationshipViewSet(mixins.ListModelMixin,
             .filter(samples__analysis__pipeline=pipeline)
         return queryset
 
-    def list(self, request, release_version, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves list of samples for the given pipeline version
         Example:
@@ -314,7 +313,7 @@ class ExperimentSampleRelationshipViewSet(mixins.ListModelMixin,
                 Prefetch('runs', queryset=_qs))
         return queryset
 
-    def list(self, request, experiment_type, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves list of samples for the given experiment type
         Example:
@@ -359,7 +358,7 @@ class BiomeSampleRelationshipViewSet(mixins.ListModelMixin,
                 Prefetch('runs', queryset=_qs))
         return queryset
 
-    def list(self, request, lineage, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves list of samples for the given biome
         Example:
@@ -402,7 +401,7 @@ class PublicationSampleRelationshipViewSet(mixins.ListModelMixin,
                 Prefetch('runs', queryset=_qs))
         return queryset
 
-    def list(self, request, pubmed_id, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves list of studies for the given Pubmed ID
         Example:
@@ -412,7 +411,7 @@ class PublicationSampleRelationshipViewSet(mixins.ListModelMixin,
         `/publications/{pubmed}/samples?include=runs` with runs
         """
         return super(PublicationSampleRelationshipViewSet, self) \
-            .list(request, pubmed_id, *args, **kwargs)
+            .list(request, *args, **kwargs)
 
 
 class SampleRunRelationshipViewSet(mixins.ListModelMixin,
@@ -458,7 +457,7 @@ class SampleRunRelationshipViewSet(mixins.ListModelMixin,
     def get_serializer_class(self):
         return emg_serializers.RunSerializer
 
-    def list(self, request, accession, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves list of runs for the given sample accession
         Example:
@@ -513,7 +512,7 @@ class BiomeTreeViewSet(mixins.ListModelMixin,
         context['lineage'] = self.kwargs.get('lineage')
         return context
 
-    def list(self, request, lineage, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves children for the given Biome node.
         Example:
@@ -522,14 +521,11 @@ class BiomeTreeViewSet(mixins.ListModelMixin,
         list all children
         """
 
-        return super(BiomeTreeViewSet, self) \
-            .list(request, lineage, *args, **kwargs)
+        return super(BiomeTreeViewSet, self).list(request, *args, **kwargs)
 
 
-class PipelinePipelineToolRelationshipViewSet(
-    emg_mixins.MultipleFieldLookupMixin,  # NOQA
-    mixins.ListModelMixin,
-    viewsets.GenericViewSet):
+class PipelinePipelineToolRelationshipViewSet(mixins.ListModelMixin,
+                                              viewsets.GenericViewSet):
 
     """
     Pipeline tools endpoint provides detail about the pipeline tools were used
@@ -548,7 +544,7 @@ class PipelinePipelineToolRelationshipViewSet(
         queryset = emg_models.PipelineTool.objects.filter(pipelines=obj)
         return queryset
 
-    def list(self, request, release_version, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves list of pipeline tools for the given pipeline version
         Example:
@@ -556,23 +552,33 @@ class PipelinePipelineToolRelationshipViewSet(
         `/pipeline/{release_version}/tools`
         """
         return super(PipelinePipelineToolRelationshipViewSet, self) \
-            .list(request, release_version, *args, **kwargs)
+            .list(request, *args, **kwargs)
 
 
-class RunMetadataView(emg_mixins.MultipleFieldLookupMixin,
-                      generics.ListAPIView):
+class RunMetadataViewSet(emg_mixins.MultipleFieldLookupMixin,
+                         mixins.ListModelMixin,
+                         viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.AnalysisJobAnnSerializer
     pagination_class = emg_page.MetadataSetPagination
 
     lookup_fields = ('accession', 'release_version')
 
+    def get_object(self):
+        accession = self.kwargs['accession']
+        release_version = self.kwargs['release_version']
+        return emg_models.AnalysisJobAnn.objects.filter(
+            job__accession=accession,
+            job__pipeline__release_version=release_version) \
+            .select_related('job', 'var') \
+            .order_by('var')
+
     def get_queryset(self):
         return emg_models.AnalysisJobAnn.objects.all() \
             .select_related('job', 'var') \
             .order_by('var')
 
-    def list(self, request, accession, release_version, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves metadatafor the given analysis job
         Example:
@@ -580,14 +586,7 @@ class RunMetadataView(emg_mixins.MultipleFieldLookupMixin,
         `/runs/ERR1385375/3.0/metadata` retrieve metadata
         """
 
-        queryset = emg_models.AnalysisJobAnn.objects.filter(
-            job__accession=accession,
-            job__pipeline__release_version=release_version) \
-            .select_related('job', 'var') \
-            .order_by('var')
-        serializer = self.get_serializer(
-            queryset, many=True, context={'request': request})
-        return Response(serializer.data)
+        return super(RunMetadataViewSet, self).list(request, *args, **kwargs)
 
 
 class SampleMetadataRelationshipViewSet(mixins.ListModelMixin,
@@ -597,6 +596,7 @@ class SampleMetadataRelationshipViewSet(mixins.ListModelMixin,
     pagination_class = emg_page.MetadataSetPagination
 
     lookup_field = 'accession'
+    lookup_value_regex = '[a-zA-Z0-9\-\_]+'
 
     def get_queryset(self):
         accession = self.kwargs[self.lookup_field]
@@ -605,13 +605,13 @@ class SampleMetadataRelationshipViewSet(mixins.ListModelMixin,
             .select_related('sample', 'var') \
             .order_by('var')
 
-    def list(self, request, accession, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves metadatafor the given analysis job
         Example:
         ---
-        `/samples/ERR1385375/3.0/metadata` retrieve metadata
+        `/samples/ERS1015417/metadata` retrieve metadata
         """
 
         return super(SampleMetadataRelationshipViewSet, self) \
-            .list(request, accession, *args, **kwargs)
+            .list(request, *args, **kwargs)
