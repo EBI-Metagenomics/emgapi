@@ -202,7 +202,7 @@ class PipelineToolSerializer(ExplicitFieldsModelSerializer,
     id = serializers.ReadOnlyField(source="multiple_pk")
 
     url = PipelineToolHyperlinkedField(
-        view_name='emgapi:pipeline-tools-detail',
+        view_name='emgapi:pipeline-tools-version-detail',
         lookup_field='tool_name',
     )
 
@@ -270,7 +270,7 @@ class PipelineSerializer(ExplicitFieldsModelSerializer,
         model=emg_models.PipelineTool,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:pipelines-tools-list',
+        related_link_view_name='emgapi:pipelines-pipeline-tools-list',
         related_link_url_kwarg='release_version',
         related_link_lookup_field='release_version',
         related_link_self_lookup_field='tool_name'
@@ -415,7 +415,7 @@ class AnalysisJobHyperlinkedField(serializers.HyperlinkedIdentityField):
             view_name, kwargs=kwargs, request=request, format=format)
 
 
-class RetrieveRunSerializer(RunSerializer):
+class AnalysisSerializer(RunSerializer):
 
     # workaround to provide multiple values in PK
     id = serializers.ReadOnlyField(source="multiple_pk")
@@ -437,7 +437,7 @@ class RetrieveRunSerializer(RunSerializer):
         model=m_models.Annotation,
         many=True,
         read_only=True,
-        related_link_view_name='emgapimetadata:runs-pipelines-annotations-list',  # noqa
+        related_link_view_name='emgapi:runs-pipelines-annotations-list',  # noqa
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
