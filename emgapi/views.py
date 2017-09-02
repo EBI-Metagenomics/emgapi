@@ -230,7 +230,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         `/studies?fields[studies]=accession,samples_count,biomes`
         retrieve only selected fileds
 
-        `/studies?include=publications` with publications
+        `/studies?include=samples` with samples
 
         Filter by:
         ---
@@ -369,7 +369,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
     )
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9_]+'
+    lookup_value_regex = '[a-zA-Z0-9\-\_]+'
 
     def get_queryset(self):
         queryset = emg_models.Sample.objects \

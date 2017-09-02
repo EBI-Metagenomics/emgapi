@@ -239,6 +239,19 @@ class PipelineSerializer(ExplicitFieldsModelSerializer,
     )
 
     # relationships
+    studies = relations.SerializerMethodResourceRelatedField(
+        source='get_studies',
+        model=emg_models.Study,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi:pipelines-studies-list',
+        related_link_url_kwarg='release_version',
+        related_link_lookup_field='release_version',
+    )
+
+    def get_studies(self, obj):
+        return None
+
     samples = relations.SerializerMethodResourceRelatedField(
         source='get_samples',
         model=emg_models.Sample,
@@ -628,7 +641,7 @@ class StudySerializer(ExplicitFieldsModelSerializer,
     included_serializers = {
         # 'publications': 'emgapi.serializers.PublicationSerializer',
         'biomes': 'emgapi.serializers.BiomeSerializer',
-        # 'samples': 'emgapi.serializers.SampleSerializer',
+        'samples': 'emgapi.serializers.SampleSerializer',
     }
 
     url = serializers.HyperlinkedIdentityField(
@@ -645,7 +658,7 @@ class StudySerializer(ExplicitFieldsModelSerializer,
         related_link_view_name='emgapi:studies-biomes-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession',
-        related_link_self_view_name='emgapi:biomes-children-list',
+        related_link_self_view_name='emgapi:biomes-detail',
         related_link_self_lookup_field='lineage'
     )
 

@@ -130,11 +130,9 @@ class PublicationStudyRelationshipViewSet(mixins.ListModelMixin,
         Retrieves list of studies for the given Pubmed ID
         Example:
         ---
-        `/publications/{pubmed}/studies` retrieve linked
-        studies
+        `/publications/{pubmed}/studies` retrieve linked studies
 
-        `/publications/{pubmed}/studies?include=samples` with
-        samples
+        `/publications/{pubmed}/studies?include=samples` with samples
         """
         return super(PublicationStudyRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
@@ -260,6 +258,33 @@ class PipelineSampleRelationshipViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
+class PipelineStudyRelationshipViewSet(mixins.ListModelMixin,
+                                       BaseStudyRelationshipViewSet):
+
+    lookup_field = 'release_version'
+
+    def get_queryset(self):
+        pipeline = get_object_or_404(
+            emg_models.Pipeline,
+            release_version=self.kwargs[self.lookup_field])
+        queryset = emg_models.Study.objects \
+            .available(self.request) \
+            .filter(samples__analysis__pipeline=pipeline)
+        return queryset
+
+    def list(self, request, release_version, *args, **kwargs):
+        """
+        Retrieves list of samples for the given pipeline version
+        Example:
+        ---
+        `/pipeline/3.0/studies` retrieve linked studies
+
+        `/pipeline/3.0/studies?include=samples` with samples
+        """
+        return super(PipelineStudyRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
 class ExperimentSampleRelationshipViewSet(mixins.ListModelMixin,
                                           BaseSampleRelationshipViewSet):
 
@@ -382,11 +407,9 @@ class PublicationSampleRelationshipViewSet(mixins.ListModelMixin,
         Retrieves list of studies for the given Pubmed ID
         Example:
         ---
-        `/publications/{pubmed}/samples` retrieve linked
-        samples
+        `/publications/{pubmed}/samples` retrieve linked samples
 
-        `/publications/{pubmed}/samples?include=runs` with
-        runs
+        `/publications/{pubmed}/samples?include=runs` with runs
         """
         return super(PublicationSampleRelationshipViewSet, self) \
             .list(request, pubmed_id, *args, **kwargs)
@@ -503,9 +526,10 @@ class BiomeTreeViewSet(mixins.ListModelMixin,
             .list(request, lineage, *args, **kwargs)
 
 
-class PipelineToolsRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
-                                       mixins.ListModelMixin,
-                                       viewsets.GenericViewSet):
+class PipelinePipelineToolRelationshipViewSet(
+    emg_mixins.MultipleFieldLookupMixin,  # NOQA
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet):
 
     """
     Pipeline tools endpoint provides detail about the pipeline tools were used
@@ -531,12 +555,12 @@ class PipelineToolsRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
         ---
         `/pipeline/{release_version}/tools`
         """
-        return super(PipelineToolsRelationshipViewSet, self) \
+        return super(PipelinePipelineToolRelationshipViewSet, self) \
             .list(request, release_version, *args, **kwargs)
 
 
-class RunsMetadataView(emg_mixins.MultipleFieldLookupMixin,
-                       generics.ListAPIView):
+class RunMetadataView(emg_mixins.MultipleFieldLookupMixin,
+                      generics.ListAPIView):
 
     serializer_class = emg_serializers.AnalysisJobAnnSerializer
     pagination_class = emg_page.MetadataSetPagination
