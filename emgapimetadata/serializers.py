@@ -28,7 +28,7 @@ class AnnotationSerializer(m_serializers.DocumentSerializer,
                            serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapimetadata:annotations-detail',
+        view_name='emgapi:annotations-detail',
         lookup_field='accession',
     )
 
@@ -37,7 +37,7 @@ class AnnotationSerializer(m_serializers.DocumentSerializer,
         model=emg_models.AnalysisJob,
         many=True,
         read_only=True,
-        related_link_view_name='emgapimetadata:annotations-runs-list',
+        related_link_view_name='emgapi:annotations-runs-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
@@ -57,7 +57,7 @@ class RetriveAnnotationSerializer(m_serializers.DynamicDocumentSerializer,
                                   serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapimetadata:annotations-detail',
+        view_name='emgapi:annotations-detail',
         lookup_field='accession',
     )
 
@@ -66,7 +66,7 @@ class RetriveAnnotationSerializer(m_serializers.DynamicDocumentSerializer,
         model=emg_models.AnalysisJob,
         many=True,
         read_only=True,
-        related_link_view_name='emgapimetadata:annotations-runs-list',
+        related_link_view_name='emgapi:annotations-runs-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )

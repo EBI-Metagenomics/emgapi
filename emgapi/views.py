@@ -24,7 +24,7 @@ from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework import viewsets, mixins, generics
+from rest_framework import viewsets, mixins
 from rest_framework.response import Response
 
 from rest_framework import filters
@@ -37,7 +37,6 @@ from . import models as emg_models
 from . import serializers as emg_serializers
 from . import filters as emg_filters
 from . import permissions as emg_perms
-from . import mixins as emg_mixins
 
 logger = logging.getLogger(__name__)
 
@@ -437,36 +436,6 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         return super(SampleViewSet, self).list(request, *args, **kwargs)
 
 
-class RunAPIView(emg_mixins.MultipleFieldLookupMixin,
-                 generics.RetrieveAPIView):
-
-    serializer_class = emg_serializers.RetrieveRunSerializer
-
-    lookup_fields = ('accession', 'release_version')
-
-    def get_queryset(self):
-        return emg_models.AnalysisJob.objects \
-            .available(self.request) \
-            .select_related(
-                'sample',
-                'pipeline',
-                'analysis_status',
-            )
-
-    def get(self, request, accession, release_version, *args, **kwargs):
-        """
-        Retrieves run for the given accession and pipeline version
-        Example:
-        ---
-        `/runs/ERR1385375/3.0`
-        """
-        run = get_object_or_404(
-            emg_models.AnalysisJob, accession=accession,
-            pipeline__release_version=release_version)
-        serializer = self.get_serializer(run)
-        return Response(data=serializer.data)
-
-
 class RunViewSet(mixins.RetrieveModelMixin,
                  mixins.ListModelMixin,
                  viewsets.GenericViewSet):
@@ -548,7 +517,7 @@ class RunViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='pipelines-list',
-        serializer_class=emg_serializers.RetrieveRunSerializer
+        serializer_class=emg_serializers.AnalysisSerializer
     )
     def analysis(self, request, accession=None):
         """
@@ -577,6 +546,40 @@ class RunViewSet(mixins.RetrieveModelMixin,
         return Response(serializer.data)
 
 
+class AnalysisViewSet(mixins.RetrieveModelMixin,
+                      viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.AnalysisSerializer
+
+    lookup_field = 'release_version'
+    lookup_value_regex = '[0-9.]+'
+
+    def get_object(self):
+        accession = self.kwargs['accession']
+        release_version = self.kwargs['release_version']
+        return get_object_or_404(
+            emg_models.AnalysisJob, accession=accession,
+            pipeline__release_version=release_version)
+
+    def get_queryset(self):
+        return emg_models.AnalysisJob.objects \
+            .available(self.request) \
+            .select_related(
+                'sample',
+                'pipeline',
+                'analysis_status',
+            )
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves run for the given accession and pipeline version
+        Example:
+        ---
+        `/runs/ERR1385375/3.0`
+        """
+        return super(AnalysisViewSet, self).retrieve(request, *args, **kwargs)
+
+
 class PipelineViewSet(mixins.RetrieveModelMixin,
                       mixins.ListModelMixin,
                       viewsets.GenericViewSet):
@@ -602,7 +605,7 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
     # search_fields = ()
 
     lookup_field = 'release_version'
-    lookup_value_regex = '[a-zA-Z0-9.]+'
+    lookup_value_regex = '[0-9.]+'
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -632,33 +635,6 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         return super(PipelineViewSet, self).list(request, *args, **kwargs)
 
 
-class PipelineToolInstanceView(emg_mixins.MultipleFieldLookupMixin,
-                               generics.RetrieveAPIView):
-
-    """
-    Pipeline tools endpoint provides detail about the pipeline tools were used
-    to analyse the data in each steps.
-    """
-
-    serializer_class = emg_serializers.PipelineToolSerializer
-    queryset = emg_models.PipelineTool.objects.all()
-
-    lookup_fields = ('tool_name', 'version')
-
-    def get(self, request, tool_name, version, *args, **kwargs):
-        """
-        Retrieves pipeline tool details for the given pipeline version
-        Example:
-        ---
-        `/pipeline-tools/interproscan/5.19-58.0`
-        """
-        obj = get_object_or_404(
-            emg_models.PipelineTool,
-            tool_name__iexact=tool_name, version=version)
-        serializer = self.get_serializer(obj)
-        return Response(data=serializer.data)
-
-
 class PipelineToolViewSet(mixins.ListModelMixin,
                           viewsets.GenericViewSet):
 
@@ -669,9 +645,6 @@ class PipelineToolViewSet(mixins.ListModelMixin,
 
     serializer_class = emg_serializers.PipelineToolSerializer
     queryset = emg_models.PipelineTool.objects.all()
-
-    # lookup_field = 'tool_name'
-    # lookup_value_regex = '[0-9a-zA-Z\-\.]+'
 
     def get_serializer_class(self):
         return super(PipelineToolViewSet, self).get_serializer_class()
@@ -684,6 +657,41 @@ class PipelineToolViewSet(mixins.ListModelMixin,
         `/pipeline-tools` retrieves list of pipeline tools
         """
         return super(PipelineToolViewSet, self).list(request, *args, **kwargs)
+
+
+class PipelineToolVersionViewSet(mixins.RetrieveModelMixin,
+                                 viewsets.GenericViewSet):
+
+    """
+    Pipeline tools endpoint provides detail about the pipeline tools were used
+    to analyse the data in each steps.
+    """
+
+    serializer_class = emg_serializers.PipelineToolSerializer
+    queryset = emg_models.PipelineTool.objects.all()
+
+    lookup_field = 'version'
+    lookup_value_regex = '[a-zA-Z0-9\-\.]+'
+
+    def get_serializer_class(self):
+        return super(PipelineToolVersionViewSet, self).get_serializer_class()
+
+    def get_object(self):
+        tool_name = self.kwargs['tool_name']
+        version = self.kwargs['version']
+        return get_object_or_404(
+             emg_models.PipelineTool,
+             tool_name__iexact=tool_name, version=version)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves pipeline tool details for the given pipeline version
+        Example:
+        ---
+        `/pipeline-tools/interproscan/5.19-58.0`
+        """
+        return super(PipelineToolVersionViewSet, self) \
+            .retrieve(request, *args, **kwargs)
 
 
 class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
