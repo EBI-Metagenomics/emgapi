@@ -35,7 +35,7 @@ class TestAnnotations(object):
         call_command('import_go', 'ABC01234',
                      os.path.dirname(os.path.abspath(__file__)))
 
-        url = reverse("emgapimetadata:annotations-list")
+        url = reverse("emgapi:annotations-list")
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()

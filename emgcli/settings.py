@@ -167,9 +167,9 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_auth',
     # apps
-    'emgapimetadata',
     'emgapi',
-
+    'emgapimetadata',
+    
 ]
 
 MIDDLEWARE = [
@@ -298,7 +298,7 @@ REST_FRAMEWORK = {
         # 'rest_framework_xml.renderers.XMLRenderer',
         # 'rest_framework_yaml.renderers.YAMLRenderer',
         # 'rest_framework_csv.renderers.CSVRenderer',
-        # 'rest_framework.renderers.BrowsableAPIRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
     ),
 
     'DEFAULT_FILTER_BACKENDS': (
@@ -347,6 +347,7 @@ SWAGGER_SETTINGS = {
         # }
     },
     'USE_SESSION_AUTH': True,
+    'VALIDATOR_URL': None
 }
 
 # Custom settings

@@ -22,15 +22,22 @@ from django.views.generic import RedirectView
 from rest_framework.schemas import get_schema_view
 from rest_framework_swagger.views import get_swagger_view
 
+from rest_auth import views as rest_auth_views
 
-# schema_prefix
-schema_view = get_schema_view(
-    title=settings.EMG_TITLE, url=settings.EMG_URL,
-    description=settings.EMG_DESC)
+from emgapi.urls import router as emg_router
+from emgapi.urls import mydata_router
+from emgapimetadata.urls import mongo_router
+from emgapimetadata.urls import router as emg_ext_router
 
-docs_schema_view = get_swagger_view(
-    title=settings.EMG_TITLE, url=settings.EMG_URL)
+from . import routers
 
+
+# merge all routers
+router = routers.DefaultRouter(trailing_slash=False)
+router.extend(emg_router)
+router.extend(emg_ext_router)
+router.extend(mongo_router)
+router.extend(mydata_router)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
@@ -44,14 +51,36 @@ urlpatterns = [
     url(r'^http-auth/', include('rest_framework.urls',
                                 namespace='rest_framework')),
 
+    url(
+        r'^v0.2/auth/login',
+        rest_auth_views.LoginView.as_view(),
+        name='rest_auth_login'
+    ),
+
+    url(
+        r'^v0.2/auth/logout',
+        rest_auth_views.LogoutView.as_view(),
+        name='rest_auth_logout'
+    ),
+
+    url(r'^v0.2/', include(router.urls,
+                           namespace='emgapi')),
+
+]
+
+# schema_prefix
+schema_view = get_schema_view(
+    title=settings.EMG_TITLE, url=settings.EMG_URL,
+    description=settings.EMG_DESC)
+
+docs_schema_view = get_swagger_view(
+    title=settings.EMG_TITLE, url=settings.EMG_URL)
+
+
+urlpatterns += [
+
     url(r'^schema/', schema_view),
 
     url(r'^docs/', docs_schema_view),
-
-    url(r'^v0.2/', include('emgapi.urls',
-                           namespace='emgapi')),
-
-    url(r'^v0.2/', include('emgapimetadata.urls',
-                           namespace='emgapimetadata')),
 
 ]
