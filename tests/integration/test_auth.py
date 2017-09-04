@@ -26,8 +26,8 @@ from rest_framework.test import APITestCase
 class TestAuthAPI(APITestCase):
 
     def setUp(self):
-        self.login_url = reverse('emgapi:rest_auth_login')
-        self.logout_url = reverse('emgapi:rest_auth_logout')
+        self.login_url = reverse('rest_auth_login')
+        self.logout_url = reverse('rest_auth_logout')
 
     def tearDown(self):
         rsp = self.client.post(self.logout_url, format='json')

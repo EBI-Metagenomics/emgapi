@@ -1,0 +1,21 @@
+{% load staticfiles %}
+{% load i18n %}
+
+{% block breadcrumbs %}
+
+<ul class="breadcrumbs">
+  <li><a href="https://www.ebi.ac.uk/metagenomics">EBI Metagenomics</a></li>
+  {% for breadcrumb_name, breadcrumb_url in breadcrumblist %}
+    {% if forloop.last %}
+      <li>
+        <span class="show-for-sr">Current: </span>{{ breadcrumb_name }}
+      </li>
+    {% else %}
+      <li><a href="{{ breadcrumb_url }}">{{ breadcrumb_name }}</a></li>
+    {% endif %}
+  {% empty %}
+    {% block breadcrumbs_empty %}&nbsp;{% endblock breadcrumbs_empty %}
+  {% endfor %}
+</ul>
+
+{% endblock %}

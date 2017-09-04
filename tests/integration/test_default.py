@@ -40,7 +40,8 @@ class TestDefaultAPI(object):
             "pipelines": "http://testserver/v0.2/pipelines",
             "experiment-types": "http://testserver/v0.2/experiment-types",
             "publications": "http://testserver/v0.2/publications",
-            'pipeline-tools': 'http://testserver/v0.2/pipeline-tools',
+            "pipeline-tools": "http://testserver/v0.2/pipeline-tools",
+            "annotations": "http://testserver/v0.2/annotations",
             "mydata": "http://testserver/v0.2/mydata",
         }
         assert rsp['data'] == expected
@@ -78,7 +79,7 @@ class TestDefaultAPI(object):
             # ('Biome', 'biomes', 'emgapi:biomes', ['root'],
             #  ['samples', 'studies']),
             ('Pipeline', 'pipelines', 'emgapi:pipelines', [],
-             ['samples', 'tools']),
+             ['samples', 'studies', 'tools']),
             ('Publication', 'publications', 'emgapi:publications', [],
              ['studies']),
             ('Run', 'runs', 'emgapi:runs', [],
@@ -117,8 +118,14 @@ class TestDefaultAPI(object):
                 _as = mommy.make('emgapi.AnalysisStatus', pk=3)
                 _p = mommy.make('emgapi.Pipeline', pk=1,
                                 release_version="1.0")
-                mommy.make('emgapi.AnalysisJob', pk=pk, pipeline=_p,
-                           analysis_status=_as, run_status_id=4)
+                _aj = mommy.make('emgapi.AnalysisJob', pk=pk, pipeline=_p,
+                                 analysis_status=_as, run_status_id=4)
+                _biome = mommy.make('emgapi.Biome', pk=pk)
+                _s = mommy.make('emgapi.Sample',
+                                pk=pk, biome=_biome, is_public=1,
+                                analysis=[_aj])
+                mommy.make('emgapi.Study', pk=pk, biome=_biome, is_public=1,
+                           samples=[_s])
             elif _model in ('PipelineTool',):
                 _p = mommy.make('emgapi.Pipeline', pk=pk,
                                 release_version="1.0")

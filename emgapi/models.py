@@ -24,6 +24,7 @@
 #     modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values
 # or field names.
+
 from __future__ import unicode_literals
 
 from django.db import models
@@ -186,14 +187,16 @@ class BiomeQuerySet(models.QuerySet):
 class BiomeManager(models.Manager):
 
     def get_queryset(self):
-        return BiomeQuerySet(self.model, using=self._db)
+        return BiomeQuerySet(self.model, using=self._db) \
+            .annotate(studies_count=Count('samples__study', distinct=True))
 
 
 class Biome(models.Model):
     biome_id = models.SmallIntegerField(
         db_column='BIOME_ID', primary_key=True)
     biome_name = models.CharField(
-        db_column='BIOME_NAME', max_length=60)
+        db_column='BIOME_NAME', max_length=60,
+        help_text="Biome name")
     lft = models.SmallIntegerField(
         db_column='LFT')
     rgt = models.SmallIntegerField(
@@ -201,7 +204,8 @@ class Biome(models.Model):
     depth = models.IntegerField(
         db_column='DEPTH')
     lineage = models.CharField(
-        db_column='LINEAGE', max_length=500)
+        db_column='LINEAGE', max_length=500,
+        help_text="Biome lineage")
 
     objects = BiomeManager()
 
@@ -213,7 +217,7 @@ class Biome(models.Model):
         )
 
     def __str__(self):
-        return self.biome_name
+        return self.lineage
 
 
 class PublicationQuerySet(BaseQuerySet):
@@ -231,33 +235,45 @@ class Publication(models.Model):
     pub_id = models.AutoField(
         db_column='PUB_ID', primary_key=True)
     authors = models.CharField(
-        db_column='AUTHORS', max_length=4000, blank=True, null=True)
+        db_column='AUTHORS', max_length=4000, blank=True, null=True,
+        help_text='Publication authors')
     doi = models.CharField(
-        db_column='DOI', max_length=1500, blank=True, null=True)
+        db_column='DOI', max_length=1500, blank=True, null=True,
+        help_text='DOI')
     isbn = models.CharField(
-        db_column='ISBN', max_length=100, blank=True, null=True)
+        db_column='ISBN', max_length=100, blank=True, null=True,
+        help_text='ISBN')
     iso_journal = models.CharField(
-        db_column='ISO_JOURNAL', max_length=255, blank=True, null=True)
+        db_column='ISO_JOURNAL', max_length=255, blank=True, null=True,
+        help_text='ISO journal')
     issue = models.CharField(
-        db_column='ISSUE', max_length=55, blank=True, null=True)
+        db_column='ISSUE', max_length=55, blank=True, null=True,
+        help_text='Publication issue')
     medline_journal = models.CharField(
-        db_column='MEDLINE_JOURNAL', max_length=255, blank=True, null=True)
+        db_column='MEDLINE_JOURNAL', max_length=255, blank=True, null=True,)
     pub_abstract = models.TextField(
-        db_column='PUB_ABSTRACT', blank=True, null=True)
+        db_column='PUB_ABSTRACT', blank=True, null=True,
+        help_text='Publication abstract')
     pubmed_central_id = models.IntegerField(
-        db_column='PUBMED_CENTRAL_ID', blank=True, null=True)
+        db_column='PUBMED_CENTRAL_ID', blank=True, null=True,
+        help_text='Pubmed Central Identifier')
     pubmed_id = models.IntegerField(
-        db_column='PUBMED_ID', blank=True, null=True)
+        db_column='PUBMED_ID', blank=True, null=True,
+        help_text='Pubmed ID')
     pub_title = models.CharField(
-        db_column='PUB_TITLE', max_length=740)
+        db_column='PUB_TITLE', max_length=740,
+        help_text='Publication title')
     raw_pages = models.CharField(
         db_column='RAW_PAGES', max_length=30, blank=True, null=True)
-    url = models.CharField(
-        db_column='URL', max_length=740, blank=True, null=True)
+    pub_url = models.CharField(
+        db_column='URL', max_length=740, blank=True, null=True,
+        help_text='Publication url')
     volume = models.CharField(
-        db_column='VOLUME', max_length=55, blank=True, null=True)
+        db_column='VOLUME', max_length=55, blank=True, null=True,
+        help_text='Publication volume')
     published_year = models.SmallIntegerField(
-        db_column='PUBLISHED_YEAR', blank=True, null=True)
+        db_column='PUBLISHED_YEAR', blank=True, null=True,
+        help_text='Published year')
     pub_type = models.CharField(
         db_column='PUB_TYPE', max_length=150, blank=True, null=True)
 
@@ -383,47 +399,60 @@ class Sample(models.Model):
     sample_id = models.AutoField(
         db_column='SAMPLE_ID', primary_key=True)
     accession = models.CharField(
-        db_column='EXT_SAMPLE_ID', max_length=20)
+        db_column='EXT_SAMPLE_ID', max_length=20,
+        help_text='Sample accession')
     analysis_completed = models.DateField(
         db_column='ANALYSIS_COMPLETED', blank=True, null=True)
     collection_date = models.DateField(
-        db_column='COLLECTION_DATE', blank=True, null=True)
+        db_column='COLLECTION_DATE', blank=True, null=True,
+        help_text='Collection date')
     geo_loc_name = models.CharField(
-        db_column='GEO_LOC_NAME', max_length=255, blank=True, null=True)
+        db_column='GEO_LOC_NAME', max_length=255, blank=True, null=True,
+        help_text='Name of geographical location')
     is_public = models.IntegerField(
         db_column='IS_PUBLIC', blank=True, null=True)
     metadata_received = models.DateTimeField(
         db_column='METADATA_RECEIVED', blank=True, null=True)
     sample_desc = models.TextField(
-        db_column='SAMPLE_DESC', blank=True, null=True)
+        db_column='SAMPLE_DESC', blank=True, null=True,
+        help_text='Sample description')
     sequencedata_archived = models.DateTimeField(
         db_column='SEQUENCEDATA_ARCHIVED', blank=True, null=True)
     sequencedata_received = models.DateTimeField(
         db_column='SEQUENCEDATA_RECEIVED', blank=True, null=True)
     environment_biome = models.CharField(
-        db_column='ENVIRONMENT_BIOME', max_length=255, blank=True, null=True)
+        db_column='ENVIRONMENT_BIOME', max_length=255, blank=True, null=True,
+        help_text='Environment biome')
     environment_feature = models.CharField(
-        db_column='ENVIRONMENT_FEATURE', max_length=255, blank=True, null=True)
+        db_column='ENVIRONMENT_FEATURE', max_length=255, blank=True, null=True,
+        help_text='Environment feature')
     environment_material = models.CharField(
         db_column='ENVIRONMENT_MATERIAL', max_length=255,
-        blank=True, null=True)
+        blank=True, null=True,
+        help_text='Environment material')
     study = models.ForeignKey(
         Study, db_column='STUDY_ID', related_name='samples',
         on_delete=models.CASCADE)
     sample_name = models.CharField(
-        db_column='SAMPLE_NAME', max_length=255, blank=True, null=True)
+        db_column='SAMPLE_NAME', max_length=255, blank=True, null=True,
+        help_text='Sample name')
     sample_alias = models.CharField(
-        db_column='SAMPLE_ALIAS', max_length=255, blank=True, null=True)
+        db_column='SAMPLE_ALIAS', max_length=255, blank=True, null=True,
+        help_text='Sample alias')
     host_tax_id = models.IntegerField(
-        db_column='HOST_TAX_ID', blank=True, null=True)
+        db_column='HOST_TAX_ID', blank=True, null=True,
+        help_text='Sample host tax id')
     species = models.CharField(
-        db_column='SPECIES', max_length=255, blank=True, null=True)
+        db_column='SPECIES', max_length=255, blank=True, null=True,
+        help_text='Species')
     latitude = models.DecimalField(
         db_column='LATITUDE', max_digits=7, decimal_places=4,
-        blank=True, null=True)
+        blank=True, null=True,
+        help_text='Latitude')
     longitude = models.DecimalField(
         db_column='LONGITUDE', max_digits=7, decimal_places=4,
-        blank=True, null=True)
+        blank=True, null=True,
+        help_text='Longitude')
     last_update = models.DateTimeField(
         db_column='LAST_UPDATE')
     submission_account_id = models.CharField(
@@ -470,9 +499,10 @@ class ExperimentTypeManager(models.Manager):
 
 class ExperimentType(models.Model):
     experiment_type_id = models.AutoField(
-        db_column='EXPERIMENT_TYPE_ID', primary_key=True)
+        db_column='EXPERIMENT_TYPE_ID', primary_key=True,)
     experiment_type = models.CharField(
-        db_column='EXPERIMENT_TYPE', max_length=30)
+        db_column='EXPERIMENT_TYPE', max_length=30,
+        help_text="Experiment type, e.g. metagenomic")
 
     objects = ExperimentTypeManager()
 
@@ -670,6 +700,32 @@ class GscCvCv(models.Model):
         return "%s %s" % (self.var_name, self.var_val_cv)
 
 
+class Metadata(models.Model):
+
+    _id = models.CharField(primary_key=True, max_length=255)
+
+    @property
+    def id(self):
+        return "%s %s" % (self.var.var_name, self.var_val_ucv)
+
+    @id.setter
+    def id(self, value):
+        self._id = "%s %s" % (self.var.var_name, self.var_val_ucv)
+
+    var = models.ForeignKey(
+        'VariableNames', db_column='VAR_ID')
+    var_val_ucv = models.CharField(
+        db_column='VAR_VAL_UCV', max_length=4000, blank=True, null=True)
+    units = models.CharField(
+        db_column='UNITS', max_length=25, blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return "%s %s" % (self.var.var_name, self.var_val_ucv)
+
+
 class SampleAnn(models.Model):
     sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID', primary_key=True,
@@ -689,7 +745,7 @@ class SampleAnn(models.Model):
         unique_together = (('sample', 'var'), ('sample', 'var'),)
 
     def __str__(self):
-        return "%s %s" % (self.sample, self.var)
+        return "%s %s:%r" % (self.sample, self.var.var_name, self.var_val_ucv)
 
     def multiple_pk(self):
         return "%s/%s" % (self.var.var_name, self.var_val_ucv)

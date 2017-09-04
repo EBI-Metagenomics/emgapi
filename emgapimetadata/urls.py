@@ -13,54 +13,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from django.conf.urls import url
-from rest_framework.routers import DefaultRouter
+from rest_framework import routers
 
-# from django.conf.urls import url
-from rest_framework_mongoengine.routers import DefaultRouter \
-    as MongoDefaultRouter
+from rest_framework_mongoengine import routers as m_routers
 
 from . import views as m_views
-from . import other_views as o_views
 
-app_name = "emgapimetadata"
-urlpatterns = []
-
-urlpatterns += [
-
-    url(
-        (r'^annotations/metadata$'),
-        o_views.AnnotationMetadataAPIView.as_view(),
-        name='annotations-metadata-list'
-    ),
-
-]
 
 # MongoDB views
-mongorouter = MongoDefaultRouter(trailing_slash=False)
+mongo_router = m_routers.DefaultRouter(trailing_slash=False)
 
-mongorouter.register(
+mongo_router.register(
     r'annotations',
     m_views.AnnotationViewSet,
     base_name='annotations'
 )
 
-urlpatterns += mongorouter.urls
-
-
-mongorelation_router = DefaultRouter(trailing_slash=False)
-
-mongorelation_router.register(
+mongo_router.register(
     r'annotations/(?P<accession>[a-zA-Z0-9\:]+)/runs',
     m_views.AnnotationRunRelationshipViewSet,
     base_name='annotations-runs'
 )
 
-mongorelation_router.register(
+
+router = routers.DefaultRouter(trailing_slash=False)
+
+router.register(
     (r'runs/(?P<accession>[a-zA-Z0-9_]+)/(?P<release_version>[0-9\.]+)/'
      r'annotations'),
     m_views.AnalysisAnnotationRelViewSet,
     base_name='runs-pipelines-annotations'
 )
-
-urlpatterns += mongorelation_router.urls

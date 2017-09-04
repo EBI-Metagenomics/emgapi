@@ -1,3 +1,7 @@
+{% load staticfiles %}
+{% load i18n %}
+{% load rest_framework %}
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -20,6 +24,10 @@
   <!-- If you link to any other sites frequently, consider optimising performance with a DNS prefetch -->
   <link rel="dns-prefetch" href="//embl.de" />
 
+  <!-- Custom EMG CSS files -->
+  {% include "rest_framework/include/drf_css.html" %}
+  <!-- End of Custom EMG CSS files -->
+
   <!-- If you have custom icon, replace these as appropriate.
        You can generate them at realfavicongenerator.net -->
   <link rel="icon" type="image/x-icon" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/favicon.ico" />
@@ -33,9 +41,6 @@
   <meta name="msapplication-TileColor" content="#2b5797" /> <!-- MS Icons -->
   <meta name="msapplication-TileImage" content="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/mstile-144x144.png" />
 
-  <!-- Custom EMG CSS files -->
-  {% include "rest_framework_swagger/include/swagger_css.html" %}
-  <!-- End of Custom EMG CSS files -->
 
   <!-- CSS: implied media=all -->
   <!-- CSS concatenated and minified via ant build script-->
@@ -63,19 +68,16 @@
   <link rel="stylesheet" href="//www.ebi.ac.uk/web_guidelines/css/compliance/mini/ebi-fluid-embl.css" />
   -->
 
+  <link rel="stylesheet" href="{% static "emgui/css/emg.css" %}" type="text/css" media="all" />
   <!-- end CSS-->
 
 
   <!-- All JavaScript at the bottom, except for Modernizr -->
   <script src="//www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/libraries/modernizr/modernizr.custom.49274.js"></script>
 
-  <!-- Custom EMG JavaScript files -->
-  {% include "rest_framework_swagger/include/swagger_js.html" %}
-  <!-- End of Custom EMG JavaScript files -->
-
 </head>
 
-<body class="level2 swagger-section"><!-- add any of your classes or IDs -->
+<body class="level2"><!-- add any of your classes or IDs -->
   <div id="skip-to">
     <ul>
       <li><a href="#content">Skip to main content</a></li>
@@ -163,8 +165,8 @@
           <nav >
             <ul class="dropdown menu float-left" data-description="navigational">
               <li class=""><a href="/metagenomics">Home</a></li>
-              <li><a data-open="modal-download" href="/metagenomics/api/">API Browser</a></li>
-              <li class="active"><a data-open="modal-download" href="/metagenomics/api/docs/">API Documentation</a></li>
+              <li class="active"><a data-open="modal-download" href="/metagenomics/api/">API Browser</a></li>
+              <li><a data-open="modal-download" href="/metagenomics/api/docs/">API Documentation</a></li>
               <li><a href="#">Support <i class="icon icon-generic" data-icon="x"></i></a></li>
             </ul>
             <ul class="dropdown menu float-right" data-description="tasks">
@@ -189,29 +191,30 @@
       <!-- Suggested layout containers -->
       <section>
 
-        <!-- Your menu structure should make a breadcrumb redundant, but if a breadcrump is needed uncomment the below -->
-        <nav aria-label="You are here:" role="navigation">
-          <ul class="breadcrumbs">
-            <li><a href="https://www.ebi.ac.uk/metagenomics">EBI Metagenomics</a></li>
-            <li><a href="../">API</a></li>
-            <li>
-              <span class="show-for-sr">Current: </span>Documentation
-            </li>
-          </ul>
-        </nav>
+        <div class="container">
 
-        <div id="main-content-area" class="row">
+          <nav aria-label="You are here:" role="navigation">
+            <!-- Your menu structure should make a breadcrumb redundant, but if a breadcrump is needed uncomment the below -->
+            {% include "rest_framework/include/breadcrumbs.html" %}
+          </nav>
+
+          <div id="main-content-area" class="row">
             <section>
-              <!-- Custom EMG API Swagger documentation -->
-              {% include "rest_framework_swagger/include/swagger_doc.html" %}
-              <!-- End of Custom EMG API Swagger documentation -->
+
+              {% block content %}
+              <!-- Custom EMG API browser documentation -->
+              {% include "rest_framework/include/content.html" %}
+              <!-- End of Custom EMG API browser documentation -->
+              {% endblock %}
             </section>
+          </div>
+
         </div>
 
       </section>
       <!-- End suggested layout containers -->
 
-    </div>
+  </div>
 
 
     <footer>
@@ -263,7 +266,11 @@
   <script type="text/JavaScript">$(document).foundationExtendEBI();</script> -->
 <!--
    -->
+    
 
+  <!-- Custom EMG JavaScript files -->
+  {% include "rest_framework/include/drf_js.html" %}
+  <!-- End of Custom EMG JavaScript files -->
 
   <!-- Google Analytics details... -->
   <!-- Change UA-XXXXX-X to be your site's ID -->

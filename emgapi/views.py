@@ -24,7 +24,7 @@ from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework import viewsets, mixins, generics
+from rest_framework import viewsets, mixins
 from rest_framework.response import Response
 
 from rest_framework import filters
@@ -37,7 +37,6 @@ from . import models as emg_models
 from . import serializers as emg_serializers
 from . import filters as emg_filters
 from . import permissions as emg_perms
-from . import mixins as emg_mixins
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +85,6 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     serializer_class = emg_serializers.BiomeSerializer
 
     filter_backends = (
-        DjangoFilterBackend,
         filters.SearchFilter,
         filters.OrderingFilter,
     )
@@ -99,7 +97,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     ordering_fields = (
         'lineage',
     )
-    ordering = ('lineage',)
+    ordering = ('biome_id',)
 
     lookup_field = 'lineage'
     lookup_value_regex = '[a-zA-Z0-9\:\-\s\(\)\<\>]+'
@@ -111,7 +109,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         if self.action == 'retrieve':
             queryset = emg_models.Biome.objects.all()
         else:
-            queryset = emg_models.Biome.objects.filter(depth__in=(1, 2))
+            queryset = emg_models.Biome.objects.filter(depth__gt=1)
         return queryset
 
     def list(self, request, *args, **kwargs):
@@ -166,11 +164,6 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         for q in queryset:
             q.study_count = biomes[q.biome_id]
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(
-                page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -219,11 +212,6 @@ class StudyViewSet(mixins.RetrieveModelMixin,
                 .select_related('biome')
             queryset = queryset.prefetch_related(
                 Prefetch('samples', queryset=_qs))
-        if 'publications' in self.request.GET.get('include', '').split(','):
-            queryset = queryset.prefetch_related(
-                Prefetch(
-                    'publications',
-                    queryset=emg_models.Publication.objects.all()))
         return queryset
 
     def get_serializer_class(self):
@@ -241,7 +229,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         `/studies?fields[studies]=accession,samples_count,biomes`
         retrieve only selected fileds
 
-        `/studies?include=publications` with publications
+        `/studies?include=samples` with samples
 
         Filter by:
         ---
@@ -380,7 +368,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
     )
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9_]+'
+    lookup_value_regex = '[a-zA-Z0-9\-\_]+'
 
     def get_queryset(self):
         queryset = emg_models.Sample.objects \
@@ -447,156 +435,6 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         """
         return super(SampleViewSet, self).list(request, *args, **kwargs)
 
-    @detail_route(
-        methods=['get', ],
-        url_name='metadata-list',
-        serializer_class=emg_serializers.SampleAnnSerializer
-    )
-    def metadata(self, request, accession=None):
-        """
-        Retrieves metadatafor the given sample accession
-        Example:
-        ---
-        `/samples/ERS1015417/metadata` retrieve metadata
-        """
-
-        obj = self.get_object()
-        queryset = obj.metadata.all() \
-            .select_related('sample', 'var') \
-            .order_by('var')
-
-        serializer = self.get_serializer(
-            queryset, many=True, context={'request': request})
-        return Response(serializer.data)
-
-
-# class SampleAnnAPIView(emg_mixins.MultipleFieldLookupMixin,
-#                        generics.RetrieveAPIView):
-#
-#     serializer_class = emg_serializers.SampleAnnSerializer
-#
-#     lookup_fields = ('var__var_name', 'var_val_ucv')
-#
-#     def get_queryset(self):
-#         return emg_models.SampleAnn.objects.all()
-#
-#     def get(self, request, name, value, *args, **kwargs):
-#         """
-#         Retrieves sample annotation for the given sample accession and value
-#         Example:
-#         ---
-#         `/metadata/name/value`
-#         """
-#         sa = emg_models.SampleAnn.objects.get(
-#             var__var_name=name,
-#             var_val_ucv=value
-#         )
-#         serializer = self.get_serializer(sa)
-#         return Response(data=serializer.data)
-
-
-class SampleAnnsViewSet(mixins.ListModelMixin,
-                        viewsets.GenericViewSet):
-
-    serializer_class = emg_serializers.SampleAnnSerializer
-
-    filter_backends = (
-        DjangoFilterBackend,
-        filters.SearchFilter,
-        filters.OrderingFilter,
-    )
-
-    ordering_fields = (
-        'sample',
-        'var',
-    )
-
-    ordering = (
-        'sample',
-        'var',
-    )
-
-    search_fields = (
-        'var__var_name',
-        'var_val_ucv',
-    )
-
-    def get_queryset(self):
-        queryset = emg_models.SampleAnn.objects.all()
-        return queryset
-
-    def get_serializer_class(self):
-        return super(SampleAnnsViewSet, self).get_serializer_class()
-
-    def list(self, request, *args, **kwargs):
-        """
-        Retrieves list of annotaitons
-        Example:
-        ---
-        `/metadata` retrieves list of samples
-        """
-        return super(SampleAnnsViewSet, self).list(request, *args, **kwargs)
-
-
-class RunAPIView(emg_mixins.MultipleFieldLookupMixin,
-                 generics.RetrieveAPIView):
-
-    serializer_class = emg_serializers.RetrieveRunSerializer
-
-    lookup_fields = ('accession', 'release_version')
-
-    def get_queryset(self):
-        return emg_models.AnalysisJob.objects \
-            .available(self.request) \
-            .select_related(
-                'sample',
-                'pipeline',
-                'analysis_status',
-            )
-
-    def get(self, request, accession, release_version, *args, **kwargs):
-        """
-        Retrieves run for the given accession and pipeline version
-        Example:
-        ---
-        `/runs/ERR1385375/3.0`
-        """
-        run = get_object_or_404(
-            emg_models.AnalysisJob, accession=accession,
-            pipeline__release_version=release_version)
-        serializer = self.get_serializer(run)
-        return Response(data=serializer.data)
-
-
-class RunAnnsAPIView(emg_mixins.MultipleFieldLookupMixin,
-                     generics.ListAPIView):
-
-    serializer_class = emg_serializers.AnalysisJobAnnSerializer
-
-    lookup_fields = ('accession', 'release_version')
-
-    def get_queryset(self):
-        return emg_models.AnalysisJobAnn.objects.all() \
-            .select_related('job', 'var') \
-            .order_by('var')
-
-    def list(self, request, accession, release_version, *args, **kwargs):
-        """
-        Retrieves metadatafor the given analysis job
-        Example:
-        ---
-        `/runs/ERR1385375/3.0/metadata` retrieve metadata
-        """
-
-        queryset = emg_models.AnalysisJobAnn.objects.filter(
-            job__accession=accession,
-            job__pipeline__release_version=release_version) \
-            .select_related('job', 'var') \
-            .order_by('var')
-        serializer = self.get_serializer(
-            queryset, many=True, context={'request': request})
-        return Response(serializer.data)
-
 
 class RunViewSet(mixins.RetrieveModelMixin,
                  mixins.ListModelMixin,
@@ -630,10 +468,16 @@ class RunViewSet(mixins.RetrieveModelMixin,
         queryset = emg_models.Run.objects \
             .available(self.request) \
             .prefetch_related(
-                'sample',
                 'analysis_status',
-                'experiment_type'
+                'experiment_type',
             )
+        _qs = emg_models.Sample.objects.available(self.request) \
+            .select_related('biome')
+        __qs = emg_models.Study.objects.available(self.request) \
+            .select_related('biome')
+        _qs = _qs.prefetch_related(Prefetch('study', queryset=__qs))
+        queryset = queryset.prefetch_related(
+            Prefetch('sample', queryset=_qs))
         return queryset
 
     def get_serializer_class(self):
@@ -673,7 +517,7 @@ class RunViewSet(mixins.RetrieveModelMixin,
     @detail_route(
         methods=['get', ],
         url_name='pipelines-list',
-        serializer_class=emg_serializers.RetrieveRunSerializer
+        serializer_class=emg_serializers.AnalysisSerializer
     )
     def analysis(self, request, accession=None):
         """
@@ -702,9 +546,48 @@ class RunViewSet(mixins.RetrieveModelMixin,
         return Response(serializer.data)
 
 
+class AnalysisViewSet(mixins.RetrieveModelMixin,
+                      viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.AnalysisSerializer
+
+    lookup_field = 'release_version'
+    lookup_value_regex = '[0-9.]+'
+
+    def get_object(self):
+        accession = self.kwargs['accession']
+        release_version = self.kwargs['release_version']
+        return get_object_or_404(
+            emg_models.AnalysisJob, accession=accession,
+            pipeline__release_version=release_version)
+
+    def get_queryset(self):
+        return emg_models.AnalysisJob.objects \
+            .available(self.request) \
+            .select_related(
+                'sample',
+                'pipeline',
+                'analysis_status',
+            )
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves run for the given accession and pipeline version
+        Example:
+        ---
+        `/runs/ERR1385375/3.0`
+        """
+        return super(AnalysisViewSet, self).retrieve(request, *args, **kwargs)
+
+
 class PipelineViewSet(mixins.RetrieveModelMixin,
                       mixins.ListModelMixin,
                       viewsets.GenericViewSet):
+
+    """
+    Pipelines endpoint provides detail about each pipeline version were used
+    to analyse the data.
+    """
 
     serializer_class = emg_serializers.PipelineSerializer
     queryset = emg_models.Pipeline.objects.all()
@@ -722,7 +605,7 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
     # search_fields = ()
 
     lookup_field = 'release_version'
-    lookup_value_regex = '[a-zA-Z0-9.]+'
+    lookup_value_regex = '[0-9.]+'
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -751,62 +634,17 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         """
         return super(PipelineViewSet, self).list(request, *args, **kwargs)
 
-    @detail_route(
-        methods=['get', ],
-        url_name='tools-list',
-        serializer_class=emg_serializers.PipelineToolSerializer
-    )
-    def tools(self, request, release_version=None):
-        """
-        Retrieves list of pipeline tools for the given pipeline version
-        Example:
-        ---
-        `/pipeline/tools`
-        """
-        obj = self.get_object()
-        queryset = obj.tools.all()
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(
-                page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(
-            queryset, many=True, context={'request': request})
-        return Response(serializer.data)
-
-
-class PipelineToolAPIView(emg_mixins.MultipleFieldLookupMixin,
-                          generics.RetrieveAPIView):
-
-    serializer_class = emg_serializers.PipelineToolSerializer
-    queryset = emg_models.PipelineTool.objects.all()
-
-    lookup_fields = ('tool_name', 'version')
-
-    def get(self, request, tool_name, version, *args, **kwargs):
-        """
-        Retrieves pipeline tool details for the given pipeline version
-        Example:
-        ---
-        `/pipeline-tools/interproscan/5.19-58.0`
-        """
-        run = get_object_or_404(
-            emg_models.PipelineTool,
-            tool_name__iexact=tool_name, version=version)
-        serializer = self.get_serializer(run)
-        return Response(data=serializer.data)
-
 
 class PipelineToolViewSet(mixins.ListModelMixin,
                           viewsets.GenericViewSet):
 
+    """
+    Pipeline tools endpoint provides detail about the pipeline tools were used
+    to analyse the data in each steps.
+    """
+
     serializer_class = emg_serializers.PipelineToolSerializer
     queryset = emg_models.PipelineTool.objects.all()
-
-    # lookup_field = 'tool_name'
-    # lookup_value_regex = '[0-9a-zA-Z\-\.]+'
 
     def get_serializer_class(self):
         return super(PipelineToolViewSet, self).get_serializer_class()
@@ -821,9 +659,50 @@ class PipelineToolViewSet(mixins.ListModelMixin,
         return super(PipelineToolViewSet, self).list(request, *args, **kwargs)
 
 
+class PipelineToolVersionViewSet(mixins.RetrieveModelMixin,
+                                 viewsets.GenericViewSet):
+
+    """
+    Pipeline tools endpoint provides detail about the pipeline tools were used
+    to analyse the data in each steps.
+    """
+
+    serializer_class = emg_serializers.PipelineToolSerializer
+    queryset = emg_models.PipelineTool.objects.all()
+
+    lookup_field = 'version'
+    lookup_value_regex = '[a-zA-Z0-9\-\.]+'
+
+    def get_serializer_class(self):
+        return super(PipelineToolVersionViewSet, self).get_serializer_class()
+
+    def get_object(self):
+        tool_name = self.kwargs['tool_name']
+        version = self.kwargs['version']
+        return get_object_or_404(
+             emg_models.PipelineTool,
+             tool_name__iexact=tool_name, version=version)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves pipeline tool details for the given pipeline version
+        Example:
+        ---
+        `/pipeline-tools/interproscan/5.19-58.0`
+        """
+        return super(PipelineToolVersionViewSet, self) \
+            .retrieve(request, *args, **kwargs)
+
+
 class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
                             mixins.ListModelMixin,
                             viewsets.GenericViewSet):
+
+    """
+    Experiment types endpoint provides access to the metagenomic studies
+    filteres by various type of experiments. Studies or samples can be
+    filtered by many attributes including metadata.
+    """
 
     serializer_class = emg_serializers.ExperimentTypeSerializer
     queryset = emg_models.ExperimentType.objects.all()
@@ -866,6 +745,13 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
                          mixins.ListModelMixin,
                          viewsets.GenericViewSet):
 
+    """
+    Publications endpoint provides access to the publications linked to
+    metagenomic studies. Publications can be filtered by year or searched by:
+    title, abstract, authors, DOI, ISBN. Single publication is retrieved by
+    PUBMED ID.
+    """
+
     serializer_class = emg_serializers.PublicationSerializer
 
     filter_class = emg_filters.PublicationFilter
@@ -878,6 +764,7 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
 
     ordering_fields = (
         'pubmed_id',
+        'published_year',
         'studies_count',
     )
 
@@ -898,7 +785,9 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
     def get_queryset(self):
         queryset = emg_models.Publication.objects.all()
         if 'studies' in self.request.GET.get('include', '').split(','):
-            _qs = emg_models.Run.objects.select_related('biome')
+            _qs = emg_models.Study.objects \
+                .available(self.request) \
+                .select_related('biome')
             queryset = queryset.prefetch_related(
                 Prefetch('studies', queryset=_qs))
         return queryset
@@ -908,7 +797,7 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
 
     def retrieve(self, request, *args, **kwargs):
         """
-        Retrieves publication for the given id
+        Retrieves publication for the given Pubmed ID
         Example:
         ---
         `/publications/{pubmed}`
@@ -927,7 +816,7 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
 
         `/publications?include=studies` with studies
 
-        `/publications?ordering=pubmed_id` ordered by id
+        `/publications?ordering=published_year` ordered by year
 
         Search for:
         ---

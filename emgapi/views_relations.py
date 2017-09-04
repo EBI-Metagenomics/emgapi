@@ -19,12 +19,13 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import viewsets, mixins
-
 from rest_framework import filters
 
 from . import models as emg_models
 from . import serializers as emg_serializers
 from . import filters as emg_filters
+from . import mixins as emg_mixins
+from . import pagination as emg_page
 
 
 class BaseStudyRelationshipViewSet(viewsets.GenericViewSet):
@@ -54,7 +55,6 @@ class BaseStudyRelationshipViewSet(viewsets.GenericViewSet):
         'centre_name',
         'author_name',
         'author_email',
-        'project_id',
     )
 
 
@@ -74,7 +74,7 @@ class BiomeStudyRelationshipViewSet(mixins.ListModelMixin,
             .values('study_id')
         queryset = emg_models.Study.objects \
             .available(self.request) \
-            .filter(biome_id__in=studies)
+            .filter(study_id__in=studies)
         if 'samples' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Sample.objects \
                 .available(self.request) \
@@ -83,9 +83,9 @@ class BiomeStudyRelationshipViewSet(mixins.ListModelMixin,
                 Prefetch('samples', queryset=_qs))
         return queryset
 
-    def list(self, request, lineage, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
-        Retrieves list of studies for the given pipeline version
+        Retrieves list of studies for the given biome
         Example:
         ---
         `/biomes/root:Environmental:Aquatic/studies` retrieve linked
@@ -100,6 +100,12 @@ class BiomeStudyRelationshipViewSet(mixins.ListModelMixin,
 
 class PublicationStudyRelationshipViewSet(mixins.ListModelMixin,
                                           BaseStudyRelationshipViewSet):
+
+    """
+    Publications endpoint provides access to the publications linked to
+    metagenomic studies. Related studies can be filtered by many of attributes
+    or searched by: name, abstract, centre name, author, etc.
+    """
 
     lookup_field = 'pubmed_id'
     lookup_value_regex = '[0-9\.]+'
@@ -118,16 +124,14 @@ class PublicationStudyRelationshipViewSet(mixins.ListModelMixin,
                 Prefetch('samples', queryset=_qs))
         return queryset
 
-    def list(self, request, pubmed_id, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
-        Retrieves list of studies for the given pipeline version
+        Retrieves list of studies for the given Pubmed ID
         Example:
         ---
-        `/publications/{pubmed}/studies` retrieve linked
-        studies
+        `/publications/{pubmed}/studies` retrieve linked studies
 
-        `/publications/{pubmed}/studies?include=samples` with
-        samples
+        `/publications/{pubmed}/studies?include=samples` with samples
         """
         return super(PublicationStudyRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
@@ -188,7 +192,7 @@ class StudySampleRelationshipViewSet(mixins.ListModelMixin,
                 Prefetch('runs', queryset=_qs))
         return queryset
 
-    def list(self, request, accession, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves list of samples for the given study accession
         Example:
@@ -232,7 +236,7 @@ class PipelineSampleRelationshipViewSet(mixins.ListModelMixin,
                 Prefetch('runs', queryset=_qs))
         return queryset
 
-    def list(self, request, release_version, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves list of samples for the given pipeline version
         Example:
@@ -253,8 +257,41 @@ class PipelineSampleRelationshipViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
+class PipelineStudyRelationshipViewSet(mixins.ListModelMixin,
+                                       BaseStudyRelationshipViewSet):
+
+    lookup_field = 'release_version'
+
+    def get_queryset(self):
+        pipeline = get_object_or_404(
+            emg_models.Pipeline,
+            release_version=self.kwargs[self.lookup_field])
+        queryset = emg_models.Study.objects \
+            .available(self.request) \
+            .filter(samples__analysis__pipeline=pipeline)
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of samples for the given pipeline version
+        Example:
+        ---
+        `/pipeline/3.0/studies` retrieve linked studies
+
+        `/pipeline/3.0/studies?include=samples` with samples
+        """
+        return super(PipelineStudyRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
 class ExperimentSampleRelationshipViewSet(mixins.ListModelMixin,
                                           BaseSampleRelationshipViewSet):
+
+    """
+    Experiment types endpoint provides access to the metagenomic studies
+    filteres by various type of experiments. Studies or samples can be
+    filtered by many attributes including metadata.
+    """
 
     lookup_field = 'experiment_type'
 
@@ -276,7 +313,7 @@ class ExperimentSampleRelationshipViewSet(mixins.ListModelMixin,
                 Prefetch('runs', queryset=_qs))
         return queryset
 
-    def list(self, request, experiment_type, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves list of samples for the given experiment type
         Example:
@@ -305,12 +342,11 @@ class BiomeSampleRelationshipViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         lineage = self.kwargs[self.lookup_field]
         obj = get_object_or_404(emg_models.Biome, lineage=lineage)
-        biomes = emg_models.Biome.objects.values('biome_id') \
-            .filter(lft__gte=obj.lft, rgt__lte=obj.rgt,
-                    depth__gte=obj.depth)
         queryset = emg_models.Sample.objects \
             .available(self.request) \
-            .filter(biome_id__in=biomes) \
+            .filter(
+                biome__lft__gte=obj.lft, biome__rgt__lte=obj.rgt,
+                biome__depth__gte=obj.depth) \
             .prefetch_related('biome', 'study')
         if 'runs' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Run.objects \
@@ -322,7 +358,7 @@ class BiomeSampleRelationshipViewSet(mixins.ListModelMixin,
                 Prefetch('runs', queryset=_qs))
         return queryset
 
-    def list(self, request, lineage, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves list of samples for the given biome
         Example:
@@ -365,19 +401,17 @@ class PublicationSampleRelationshipViewSet(mixins.ListModelMixin,
                 Prefetch('runs', queryset=_qs))
         return queryset
 
-    def list(self, request, pubmed_id, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
-        Retrieves list of studies for the given pipeline version
+        Retrieves list of studies for the given Pubmed ID
         Example:
         ---
-        `/publications/{pubmed}/samples` retrieve linked
-        studies
+        `/publications/{pubmed}/samples` retrieve linked samples
 
-        `/publications/{pubmed}/samples?include=runs` with
-        samples
+        `/publications/{pubmed}/samples?include=runs` with runs
         """
         return super(PublicationSampleRelationshipViewSet, self) \
-            .list(request, pubmed_id, *args, **kwargs)
+            .list(request, *args, **kwargs)
 
 
 class SampleRunRelationshipViewSet(mixins.ListModelMixin,
@@ -423,7 +457,7 @@ class SampleRunRelationshipViewSet(mixins.ListModelMixin,
     def get_serializer_class(self):
         return emg_serializers.RunSerializer
 
-    def list(self, request, accession, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves list of runs for the given sample accession
         Example:
@@ -444,7 +478,10 @@ class BiomeTreeViewSet(mixins.ListModelMixin,
     serializer_class = emg_serializers.BiomeSerializer
     queryset = emg_models.Biome.objects.filter(depth=1)
 
+    filter_class = emg_filters.BiomeFilter
+
     filter_backends = (
+        DjangoFilterBackend,
         filters.OrderingFilter,
     )
 
@@ -462,8 +499,7 @@ class BiomeTreeViewSet(mixins.ListModelMixin,
             l = get_object_or_404(emg_models.Biome, lineage=lineage)
             queryset = emg_models.Biome.objects \
                 .filter(lft__gt=l.lft, rgt__lt=l.rgt,
-                        depth__gt=l.depth) \
-                .order_by("-samples_count")
+                        depth__gt=l.depth)
         else:
             queryset = super(BiomeTreeViewSet, self).get_queryset()
         return queryset
@@ -476,7 +512,7 @@ class BiomeTreeViewSet(mixins.ListModelMixin,
         context['lineage'] = self.kwargs.get('lineage')
         return context
 
-    def list(self, request, lineage, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves children for the given Biome node.
         Example:
@@ -485,5 +521,97 @@ class BiomeTreeViewSet(mixins.ListModelMixin,
         list all children
         """
 
-        return super(BiomeTreeViewSet, self) \
-            .list(request, lineage, *args, **kwargs)
+        return super(BiomeTreeViewSet, self).list(request, *args, **kwargs)
+
+
+class PipelinePipelineToolRelationshipViewSet(mixins.ListModelMixin,
+                                              viewsets.GenericViewSet):
+
+    """
+    Pipeline tools endpoint provides detail about the pipeline tools were used
+    to analyse the data in each steps.
+    """
+
+    serializer_class = emg_serializers.PipelineToolSerializer
+
+    lookup_field = 'release_version'
+    lookup_value_regex = '[a-zA-Z0-9.]+'
+
+    def get_queryset(self):
+        release_version = self.kwargs[self.lookup_field]
+        obj = get_object_or_404(
+            emg_models.Pipeline, release_version=release_version)
+        queryset = emg_models.PipelineTool.objects.filter(pipelines=obj)
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of pipeline tools for the given pipeline version
+        Example:
+        ---
+        `/pipeline/{release_version}/tools`
+        """
+        return super(PipelinePipelineToolRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class RunMetadataViewSet(emg_mixins.MultipleFieldLookupMixin,
+                         mixins.ListModelMixin,
+                         viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.AnalysisJobAnnSerializer
+    pagination_class = emg_page.MetadataSetPagination
+
+    lookup_fields = ('accession', 'release_version')
+
+    def get_object(self):
+        accession = self.kwargs['accession']
+        release_version = self.kwargs['release_version']
+        return emg_models.AnalysisJobAnn.objects.filter(
+            job__accession=accession,
+            job__pipeline__release_version=release_version) \
+            .select_related('job', 'var') \
+            .order_by('var')
+
+    def get_queryset(self):
+        return emg_models.AnalysisJobAnn.objects.all() \
+            .select_related('job', 'var') \
+            .order_by('var')
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves metadatafor the given analysis job
+        Example:
+        ---
+        `/runs/ERR1385375/3.0/metadata` retrieve metadata
+        """
+
+        return super(RunMetadataViewSet, self).list(request, *args, **kwargs)
+
+
+class SampleMetadataRelationshipViewSet(mixins.ListModelMixin,
+                                        viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.SampleAnnSerializer
+    pagination_class = emg_page.MetadataSetPagination
+
+    lookup_field = 'accession'
+    lookup_value_regex = '[a-zA-Z0-9\-\_]+'
+
+    def get_queryset(self):
+        accession = self.kwargs[self.lookup_field]
+        return emg_models.SampleAnn.objects.filter(
+            sample__accession=accession) \
+            .select_related('sample', 'var') \
+            .order_by('var')
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves metadatafor the given analysis job
+        Example:
+        ---
+        `/samples/ERS1015417/metadata` retrieve metadata
+        """
+
+        return super(SampleMetadataRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)

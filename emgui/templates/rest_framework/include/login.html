@@ -1,6 +1,6 @@
 <form id='api_selector'>
   <input id="input_baseUrl" name="baseUrl" type="hidden"/>
-  {% if USE_SESSION_AUTH %}
+
     {% csrf_token %}
     {% if request.user.is_authenticated %}
       <div class="input">
@@ -13,14 +13,12 @@
     {% block extra_nav %}
       {# Override this block to add more buttons, content to nav bar. #}
     {% endblock %}
-  {% endif %}
 
-  {% if USE_SESSION_AUTH %}
     {% if request.user.is_authenticated %}
-      <a id="auth" href="{{ LOGOUT_URL }}?next={{ request.path }}" data-sw-translate><span class="icon icon-functional" data-icon="l"></span>Logout</a>
+      <a id="auth" href="{% url 'rest_framework:logout' %}?next={{ request.path }}" data-sw-translate><span class="icon icon-functional" data-icon="l"></span>Logout</a>
     {% else %}
-      <a id="auth" href="{{ LOGIN_URL }}?next={{ request.path }}" data-sw-translate><span class="icon icon-functional" data-icon="l"></span>Login</a>
+      <a id="auth" href="{% url 'rest_framework:login' %}?next={{ request.path }}" data-sw-translate><span class="icon icon-functional" data-icon="l"></span>Login</a>
     {% endif %}
-  {% endif %}
+
   <!-- <div id='auth_container'></div> -->
 </form>

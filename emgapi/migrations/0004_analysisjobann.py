@@ -13,6 +13,11 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RenameField(
+            model_name='publication',
+            old_name='url',
+            new_name='pub_url',
+        ),
         migrations.AlterModelOptions(
             name='pipelinetool',
             options={'ordering': ('tool_name',)},
@@ -22,7 +27,7 @@ class Migration(migrations.Migration):
             name='AnalysisJobAnn',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('job', models.ForeignKey(db_column='JOB_ID', on_delete=django.db.models.deletion.CASCADE, related_name='metadata', serialize=False, to='emgapi.AnalysisJob')),
+                ('job', models.ForeignKey(db_column='JOB_ID', on_delete=django.db.models.deletion.CASCADE, related_name='analysis_metadata', serialize=False, to='emgapi.AnalysisJob')),
                 ('units', models.CharField(blank=True, db_column='UNITS', max_length=25, null=True)),
                 ('var', models.ForeignKey(db_column='VAR_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.VariableNames')),
                 ('var_val_ucv', models.CharField(blank=True, db_column='VAR_VAL_UCV', max_length=4000, null=True)),
