@@ -30,19 +30,15 @@ class TestBiomeAPI(APITestCase):
 
     def setUp(self):
         self.data = {}
-        self.data['study'] = mommy.make(
-            'emgapi.Study',
-            pk=1,
-            accession="SPR0001",
-            is_public=1,
-        )
 
         self.data['_biomes'] = [
             {'lineage': 'root', 'depth': 1, 'lft': 1, 'rgt': 50},
             {'lineage': 'root:foo', 'depth': 2, 'lft': 2, 'rgt': 25},
+            {'lineage': 'root:foo:bar', 'depth': 3, 'lft': 3, 'rgt': 12},
+            {'lineage': 'root:foo:bar2', 'depth': 3, 'lft': 13, 'rgt': 24},
             {'lineage': 'root:foo2', 'depth': 2, 'lft': 26, 'rgt': 49},
-            {'lineage': 'root:foo:bar', 'depth': 3, 'lft': 3, 'rgt': 24},
-            {'lineage': 'root:foo2:bar2', 'depth': 3, 'lft': 26, 'rgt': 48},
+            {'lineage': 'root:foo2:bar', 'depth': 3, 'lft': 27, 'rgt': 36},
+            {'lineage': 'root:foo2:bar2', 'depth': 3, 'lft': 37, 'rgt': 48},
         ]
         for b in self.data['_biomes']:
             mommy.make(
@@ -54,6 +50,15 @@ class TestBiomeAPI(APITestCase):
                 rgt=b['rgt'],
                 pk=(self.data['_biomes'].index(b)+1)
             )
+
+        self.data['study'] = mommy.make(
+            'emgapi.Study',
+            pk=1,
+            accession="SPR0001",
+            is_public=1,
+            # add root until Biome is dropped from Study
+            biome=emg_models.Biome.objects.get(lineage='root')
+        )
 
         self.data['samples'] = []
         for pk in range(2, len(self.data['_biomes'])+1):
@@ -74,34 +79,50 @@ class TestBiomeAPI(APITestCase):
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
 
-        assert len(rsp['data']) == 3
+        assert len(rsp['data']) == 6
+        expected = (
+            'root:foo',
+            'root:foo:bar',
+            'root:foo:bar2',
+            'root:foo2',
+            'root:foo2:bar',
+            'root:foo2:bar2',
+        )
         biomes = rsp['data']
         for b in biomes:
             assert b['type'] == 'biomes'
-            assert b['id'] in ('root', 'root:foo', 'root:foo2')
+            assert b['id'] in expected
 
-    def test_samples(self):
+    def test_children(self):
         url = reverse('emgapi:biomes-children-list', args=['root:foo'])
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
 
         # Data
-        assert len(rsp['data']) == 1
+        assert len(rsp['data']) == 2
 
         biomes = rsp['data']
         for b in biomes:
             assert b['type'] == 'biomes'
-            assert b['id'] in ('root:foo:bar',)
+            assert b['id'] in ('root:foo:bar', 'root:foo:bar2')
 
-        response = self.client.get(
-            biomes[0]['relationships']['samples']['links']['related'])
+    def test_samples(self):
+        url = reverse('emgapi:biomes-samples-list', args=['root:foo'])
+        response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
-        assert len(rsp['data']) == 1
-        for s in rsp['data']:
+
+        # Data
+        assert len(rsp['data']) == 3
+
+        samples = rsp['data']
+        for s in samples:
             assert s['type'] == 'samples'
-            assert s['id'] in ('ERS004',)
+            assert s['id'] in ('ERS002', 'ERS003', 'ERS004',)
+            b = s['relationships']['biome']['data']
+            assert b['type'] == 'biomes'
+            assert b['id'] in ('root:foo', 'root:foo:bar', 'root:foo:bar2')
 
     def test_study(self):
         url = reverse('emgapi:studies-detail', args=['SPR0001'])
@@ -111,9 +132,11 @@ class TestBiomeAPI(APITestCase):
 
         # Data
         biomes = rsp['data']['relationships']['biomes']['data']
-        assert len(biomes) == 4
+        assert len(biomes) == 6
         _expected_biomes = (
-            'root:foo', 'root:foo2', 'root:foo:bar', 'root:foo2:bar2')
+            'root:foo', 'root:foo:bar', 'root:foo:bar2',
+            'root:foo2', 'root:foo2:bar', 'root:foo2:bar2'
+        )
         for b in biomes:
             assert b['type'] == 'biomes'
             assert b['id'] in _expected_biomes
