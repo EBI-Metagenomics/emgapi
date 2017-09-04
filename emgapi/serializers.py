@@ -432,17 +432,30 @@ class AnalysisSerializer(RunSerializer):
         return obj.pipeline.release_version
 
     # relationships
-    annotations = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
-        source='get_annotations',
-        model=m_models.Annotation,
+    go_terms = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
+        source='get_goterms',
+        model=m_models.GoTerm,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:runs-pipelines-annotations-list',  # noqa
+        related_link_view_name='emgapi:runs-pipelines-goterms-list',  # noqa
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
 
-    def get_annotations(self, obj):
+    def get_goterms(self, obj):
+        return None
+
+    go_slim = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
+        source='get_goslim',
+        model=m_models.GoTerm,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi:runs-pipelines-goslim-list',  # noqa
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
+    )
+
+    def get_goslim(self, obj):
         return None
 
     metadata = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(
@@ -460,17 +473,21 @@ class AnalysisSerializer(RunSerializer):
 
     class Meta:
         model = emg_models.AnalysisJob
-        exclude = (
-            'analysis_status',
-            'run_status_id',
-            'job_operator',
+        fields = (
+            'id',
+            'url',
+            'accession',
+            'pipeline_version',
+            'instrument_platform',
+            'instrument_model',
+            'sample_accession',
+            'study_accession',
             'submit_time',
-            'complete_time',
-            'input_file_name',
-            'result_directory',
-            'pipelines',
-            'pipeline',
-            'analysis',
+            'experiment_type',
+            'metadata',
+            'sample',
+            'go_slim',
+            'go_terms',
         )
 
 

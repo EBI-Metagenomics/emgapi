@@ -24,23 +24,47 @@ from . import views as m_views
 mongo_router = m_routers.DefaultRouter(trailing_slash=False)
 
 mongo_router.register(
-    r'annotations',
-    m_views.AnnotationViewSet,
-    base_name='annotations'
+    r'annotations/go',
+    m_views.GoTermViewSet,
+    base_name='goterms'
+)
+mongo_router.register(
+    r'annotations/interpro',
+    m_views.InterProTermViewSet,
+    base_name='interproterms'
 )
 
 mongo_router.register(
-    r'annotations/(?P<accession>[a-zA-Z0-9\:]+)/runs',
-    m_views.AnnotationRunRelationshipViewSet,
-    base_name='annotations-runs'
+    r'annotations/go/(?P<accession>[a-zA-Z0-9\:]+)/analysis',
+    m_views.GoTermRunRelationshipViewSet,
+    base_name='goterms-analysis'
 )
 
+mongo_router.register(
+    r'annotations/interpro/(?P<accession>[a-zA-Z0-9\:]+)/analysis',
+    m_views.InterProTermRunRelationshipViewSet,
+    base_name='interproterms-analysis'
+)
 
 router = routers.DefaultRouter(trailing_slash=False)
 
 router.register(
     (r'runs/(?P<accession>[a-zA-Z0-9_]+)/(?P<release_version>[0-9\.]+)/'
-     r'annotations'),
-    m_views.AnalysisAnnotationRelViewSet,
-    base_name='runs-pipelines-annotations'
+     r'goterms'),
+    m_views.AnalysisGoTermRelViewSet,
+    base_name='runs-pipelines-goterms'
+)
+
+router.register(
+    (r'runs/(?P<accession>[a-zA-Z0-9_]+)/(?P<release_version>[0-9\.]+)/'
+     r'goslim'),
+    m_views.AnalysisGoSlimRelViewSet,
+    base_name='runs-pipelines-goslim'
+)
+
+router.register(
+    (r'runs/(?P<accession>[a-zA-Z0-9_]+)/(?P<release_version>[0-9\.]+)/'
+     r'interpro'),
+    m_views.AnalysisInterProTermRelViewSet,
+    base_name='runs-pipelines-interpro'
 )
