@@ -17,22 +17,52 @@
 import mongoengine
 
 
-class Annotation(mongoengine.DynamicDocument):
+class BaseAnnotation(mongoengine.DynamicDocument):
 
     accession = mongoengine.StringField(
         primary_key=True, required=True,
         max_length=20, unique_with=('description'))
     description = mongoengine.StringField(required=True, max_length=255)
+
+    meta = {
+        'abstract': True,
+    }
+
+
+class GoTerm(BaseAnnotation):
+
     lineage = mongoengine.StringField(required=True, max_length=255)
+
+
+class InterProTerm(BaseAnnotation):
+    pass
 
 
 class AnalysisJobAnnotation(mongoengine.EmbeddedDocument):
 
-    annotation = mongoengine.ReferenceField(Annotation)
     count = mongoengine.IntField(required=True)
 
+    meta = {
+        'abstract': True,
+    }
 
-class AnalysisJob(mongoengine.Document):
+
+class AnalysisJobGoTermAnnotation(AnalysisJobAnnotation):
+
+    go_term = mongoengine.ReferenceField(GoTerm)
+
+
+class AnalysisJobGoSlimTermAnnotation(AnalysisJobAnnotation):
+
+    go_term = mongoengine.ReferenceField(GoTerm)
+
+
+class AnalysisJobInterProTermAnnotation(AnalysisJobAnnotation):
+
+    interpro_term = mongoengine.ReferenceField(InterProTerm)
+
+
+class BaseAnalysisJob(mongoengine.Document):
 
     accession = mongoengine.StringField(
         primary_key=True, required=True,
@@ -40,5 +70,24 @@ class AnalysisJob(mongoengine.Document):
     pipeline_version = mongoengine.StringField(
         required=True, max_length=20,
         unique_with=('accession'))
-    annotations = mongoengine.EmbeddedDocumentListField(
-        AnalysisJobAnnotation, required=False)
+    meta = {
+        'abstract': True,
+    }
+
+
+class AnalysisJobGoTerm(BaseAnalysisJob):
+
+    go_terms = mongoengine.EmbeddedDocumentListField(
+        AnalysisJobGoTermAnnotation, required=False)
+
+
+class AnalysisJobGoSlimTerm(BaseAnalysisJob):
+
+    go_slim = mongoengine.EmbeddedDocumentListField(
+        AnalysisJobGoSlimTermAnnotation, required=False)
+
+
+class AnalysisJobInterProTerm(BaseAnalysisJob):
+
+    interpro_terms = mongoengine.EmbeddedDocumentListField(
+        AnalysisJobInterProTermAnnotation, required=False)

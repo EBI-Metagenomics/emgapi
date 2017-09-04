@@ -24,11 +24,11 @@ from emgapi import models as emg_models
 from . import models as m_models
 
 
-class AnnotationSerializer(m_serializers.DocumentSerializer,
-                           serializers.HyperlinkedModelSerializer):
+class GoTermSerializer(m_serializers.DocumentSerializer,
+                       serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi:annotations-detail',
+        view_name='emgapi:goterms-detail',
         lookup_field='accession',
     )
 
@@ -37,7 +37,7 @@ class AnnotationSerializer(m_serializers.DocumentSerializer,
         model=emg_models.AnalysisJob,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:annotations-runs-list',
+        related_link_view_name='emgapi:goterms-analysis-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
@@ -46,18 +46,18 @@ class AnnotationSerializer(m_serializers.DocumentSerializer,
         # TODO: provide counter instead of paginating relationship
         # workaround https://github.com/django-json-api
         # /django-rest-framework-json-api/issues/178
-        return ()
+        return None
 
     class Meta:
-        model = m_models.Annotation
+        model = m_models.GoTerm
         fields = '__all__'
 
 
-class RetriveAnnotationSerializer(m_serializers.DynamicDocumentSerializer,
-                                  serializers.HyperlinkedModelSerializer):
+class InterProTermSerializer(m_serializers.DocumentSerializer,
+                             serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi:annotations-detail',
+        view_name='emgapi:interproterms-detail',
         lookup_field='accession',
     )
 
@@ -66,7 +66,7 @@ class RetriveAnnotationSerializer(m_serializers.DynamicDocumentSerializer,
         model=emg_models.AnalysisJob,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:annotations-runs-list',
+        related_link_view_name='emgapi:interproterms-analysis-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
@@ -75,10 +75,70 @@ class RetriveAnnotationSerializer(m_serializers.DynamicDocumentSerializer,
         # TODO: provide counter instead of paginating relationship
         # workaround https://github.com/django-json-api
         # /django-rest-framework-json-api/issues/178
-        return ()
+        return None
+
+    class Meta:
+        model = m_models.GoTerm
+        fields = '__all__'
+
+
+class GoTermRetriveSerializer(m_serializers.DynamicDocumentSerializer,
+                              serializers.HyperlinkedModelSerializer):
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi:goterms-detail',
+        lookup_field='accession',
+    )
+
+    analysis = relations.SerializerMethodResourceRelatedField(
+        source='get_analysis',
+        model=emg_models.AnalysisJob,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi:goterms-analysis-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
+    )
+
+    def get_analysis(self, obj):
+        # TODO: provide counter instead of paginating relationship
+        # workaround https://github.com/django-json-api
+        # /django-rest-framework-json-api/issues/178
+        return None
 
     count = serializers.IntegerField(required=False)
 
     class Meta:
-        model = m_models.Annotation
+        model = m_models.GoTerm
+        fields = '__all__'
+
+
+class InterProTermRetriveSerializer(m_serializers.DynamicDocumentSerializer,
+                                    serializers.HyperlinkedModelSerializer):
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi:interproterms-detail',
+        lookup_field='accession',
+    )
+
+    analysis = relations.SerializerMethodResourceRelatedField(
+        source='get_analysis',
+        model=emg_models.AnalysisJob,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi:interproterms-analysis-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
+    )
+
+    def get_analysis(self, obj):
+        # TODO: provide counter instead of paginating relationship
+        # workaround https://github.com/django-json-api
+        # /django-rest-framework-json-api/issues/178
+        return None
+
+    count = serializers.IntegerField(required=False)
+
+    class Meta:
+        model = m_models.InterProTerm
         fields = '__all__'
