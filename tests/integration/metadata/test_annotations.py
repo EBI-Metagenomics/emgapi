@@ -26,16 +26,30 @@ from rest_framework import status
 from test_utils.emg_fixtures import *  # noqa
 
 
-@pytest.mark.skip(reason="TypeError: 'list' object is not an iterator")
 @pytest.mark.usefixtures('mongodb')
 @pytest.mark.django_db
 class TestAnnotations(object):
 
-    def test_default(self, client, run):
-        call_command('import_go', 'ABC01234',
+    def test_goslim(self, client, run):
+        call_command('import_summary_terms', 'ABC01234',
                      os.path.dirname(os.path.abspath(__file__)))
 
-        url = reverse("emgapi:annotations-list")
+        url = reverse("emgapi:goterms-list")
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        rsp = response.json()
+        assert len(rsp['data']) == 3
+
+        expected = ['GO:0055114', 'GO:0008152', 'GO:0006810']
+        ids = [a['id'] for a in rsp['data']]
+        assert ids == expected
+
+    def test_go(self, client, run):
+        call_command('import_summary_terms', 'ABC01234',
+                     os.path.dirname(os.path.abspath(__file__)),
+                     suffix='.go')
+
+        url = reverse("emgapi:goterms-list")
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
