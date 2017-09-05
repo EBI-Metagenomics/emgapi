@@ -32,7 +32,8 @@ class TestAnnotations(object):
 
     def test_goslim(self, client, run):
         call_command('import_summary', 'ABC01234',
-                     os.path.dirname(os.path.abspath(__file__)))
+                     os.path.dirname(os.path.abspath(__file__)),
+                     suffix='.go_slim')
 
         url = reverse("emgapi:goterms-list")
         response = client.get(url)
@@ -59,3 +60,15 @@ class TestAnnotations(object):
                     'GO:0006412', 'GO:0009058', 'GO:0005975']
         ids = [a['id'] for a in rsp['data']]
         assert ids == expected
+
+    def test_qc(self, client, run):
+        call_command('import_qc', 'ABC01234',
+                     os.path.dirname(os.path.abspath(__file__)))
+
+        url = reverse("emgapi:analysis-pipelines-metadata-list",
+                      args=["ABC01234", "1.0"])
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        rsp = response.json()
+        print(rsp)
+        assert len(rsp['data']) == 12
