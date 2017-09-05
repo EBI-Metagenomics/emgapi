@@ -31,7 +31,7 @@ from test_utils.emg_fixtures import *  # noqa
 class TestAnnotations(object):
 
     def test_goslim(self, client, run):
-        call_command('import_summary_terms', 'ABC01234',
+        call_command('import_summary', 'ABC01234',
                      os.path.dirname(os.path.abspath(__file__)))
 
         url = reverse("emgapi:goterms-list")
@@ -45,7 +45,7 @@ class TestAnnotations(object):
         assert ids == expected
 
     def test_go(self, client, run):
-        call_command('import_summary_terms', 'ABC01234',
+        call_command('import_summary', 'ABC01234',
                      os.path.dirname(os.path.abspath(__file__)),
                      suffix='.go')
 
