@@ -14,8 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from django.apps import AppConfig
-
-
-class EmgapimetadataConfig(AppConfig):
-    name = 'emgapimetadata'
+default_app_config = 'emgapianns.apps.EmgapiannsConfig'

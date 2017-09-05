@@ -28,7 +28,7 @@ from . import models as emg_models
 from . import relations as emg_relations
 
 # TODO: add related_link_lookup_fields, a list
-from emgapimetadata import models as m_models
+from emgapianns import models as m_models
 
 logger = logging.getLogger(__name__)
 
