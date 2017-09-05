@@ -5,7 +5,7 @@ import os
 import csv
 import logging
 
-from emgapimetadata import models as m_models
+from emgapianns import models as m_models
 
 from ..lib import EMGBaseCommand
 
