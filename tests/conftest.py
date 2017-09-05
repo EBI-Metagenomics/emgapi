@@ -39,7 +39,7 @@ def pytest_configure():
 # Mock MongoDB connection
 @pytest.fixture(scope='function')
 def mongodb(request):
-    mongoengine.connect('testdb', host='mongomock://testdb')
+    mongoengine.connect('testdb')
     mongoengine.connection.get_connection()
     db = mongoengine.connection.get_db()
 
