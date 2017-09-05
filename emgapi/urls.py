@@ -159,8 +159,8 @@ router.register(
 router.register(
     r'runs/(?P<accession>[a-zA-Z0-9\-\_]+)/(?P<release_version>[0-9\.]+)/'
     r'metadata',
-    views_relations.RunMetadataViewSet,
-    base_name='runs-pipelines-metadata'
+    views_relations.AnalysisMetadataViewSet,
+    base_name='analysis-pipelines-metadata'
 )
 
 

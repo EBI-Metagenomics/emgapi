@@ -555,9 +555,9 @@ class PipelinePipelineToolRelationshipViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class RunMetadataViewSet(emg_mixins.MultipleFieldLookupMixin,
-                         mixins.ListModelMixin,
-                         viewsets.GenericViewSet):
+class AnalysisMetadataViewSet(emg_mixins.MultipleFieldLookupMixin,
+                              mixins.ListModelMixin,
+                              viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.AnalysisJobAnnSerializer
     pagination_class = emg_page.MetadataSetPagination
@@ -580,13 +580,14 @@ class RunMetadataViewSet(emg_mixins.MultipleFieldLookupMixin,
 
     def list(self, request, *args, **kwargs):
         """
-        Retrieves metadatafor the given analysis job
+        Retrieves metadata for the given analysis job
         Example:
         ---
         `/runs/ERR1385375/3.0/metadata` retrieve metadata
         """
 
-        return super(RunMetadataViewSet, self).list(request, *args, **kwargs)
+        return super(AnalysisMetadataViewSet, self) \
+            .list(request, *args, **kwargs)
 
 
 class SampleMetadataRelationshipViewSet(mixins.ListModelMixin,
