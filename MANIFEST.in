@@ -3,7 +3,7 @@ include LICENSE
 include requirements.txt
 recursive-include emgcli *
 recursive-include emgapi *
-recursive-include emgapimetadata *
+recursive-include emgapianns *
 recursive-include emgui *
 recursive-exclude * __pycache__
 recursive-exclude * *.pyc
