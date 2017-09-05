@@ -700,32 +700,6 @@ class GscCvCv(models.Model):
         return "%s %s" % (self.var_name, self.var_val_cv)
 
 
-class Metadata(models.Model):
-
-    _id = models.CharField(primary_key=True, max_length=255)
-
-    @property
-    def id(self):
-        return "%s %s" % (self.var.var_name, self.var_val_ucv)
-
-    @id.setter
-    def id(self, value):
-        self._id = "%s %s" % (self.var.var_name, self.var_val_ucv)
-
-    var = models.ForeignKey(
-        'VariableNames', db_column='VAR_ID')
-    var_val_ucv = models.CharField(
-        db_column='VAR_VAL_UCV', max_length=4000, blank=True, null=True)
-    units = models.CharField(
-        db_column='UNITS', max_length=25, blank=True, null=True)
-
-    class Meta:
-        abstract = True
-
-    def __str__(self):
-        return "%s %s" % (self.var.var_name, self.var_val_ucv)
-
-
 class SampleAnn(models.Model):
     sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID', primary_key=True,
