@@ -49,21 +49,24 @@ mongo_router.register(
 router = routers.DefaultRouter(trailing_slash=False)
 
 router.register(
-    (r'runs/(?P<accession>[a-zA-Z0-9_]+)/(?P<release_version>[0-9\.]+)/'
+    (r'runs/(?P<accession>[a-zA-Z0-9_]+)/'
+     r'pipelines/(?P<release_version>[0-9\.]+)/'
      r'goterms'),
     m_views.AnalysisGoTermRelViewSet,
     base_name='runs-pipelines-goterms'
 )
 
 router.register(
-    (r'runs/(?P<accession>[a-zA-Z0-9_]+)/(?P<release_version>[0-9\.]+)/'
+    (r'runs/(?P<accession>[a-zA-Z0-9_]+)/'
+     r'pipelines/(?P<release_version>[0-9\.]+)/'
      r'goslim'),
     m_views.AnalysisGoSlimRelViewSet,
     base_name='runs-pipelines-goslim'
 )
 
 router.register(
-    (r'runs/(?P<accession>[a-zA-Z0-9_]+)/(?P<release_version>[0-9\.]+)/'
+    (r'runs/(?P<accession>[a-zA-Z0-9_]+)/'
+     r'pipelines/(?P<release_version>[0-9\.]+)/'
      r'interpro'),
     m_views.AnalysisInterProTermRelViewSet,
     base_name='runs-pipelines-interpro'

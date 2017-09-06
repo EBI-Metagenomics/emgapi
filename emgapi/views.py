@@ -522,7 +522,7 @@ class RunViewSet(mixins.RetrieveModelMixin,
     )
     def analysis(self, request, accession=None):
         """
-        Retrieves list of analysis for the given run
+        Retrieves list of analysis results for the given run
         Example:
         ---
         `/runs/ERR1385375/analysis`
@@ -573,10 +573,10 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
 
     def retrieve(self, request, *args, **kwargs):
         """
-        Retrieves run for the given accession and pipeline version
+        Retrieves analysis result for the given accession and pipeline version
         Example:
         ---
-        `/runs/ERR1385375/3.0`
+        `/runs/ERR1385375/pipelines/3.0`
         """
         return super(AnalysisViewSet, self).retrieve(request, *args, **kwargs)
 

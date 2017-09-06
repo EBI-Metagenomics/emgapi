@@ -212,10 +212,10 @@ class AnalysisGoTermRelViewSet(emg_mixins.MultipleFieldLookupMixin,
 
     def list(self, request, accession, release_version, *args, **kwargs):
         """
-        Retrieves run for the given accession and pipeline version
+        Retrieves GO terms for the given run and pipeline version
         Example:
         ---
-        `/runs/ERR1385375/3.0/annotations`
+        `/runs/ERR1385375/pipelines/3.0/goterms`
         """
 
         analysis = m_models.AnalysisJobGoTerm.objects.filter(
@@ -267,10 +267,10 @@ class AnalysisGoSlimRelViewSet(emg_mixins.MultipleFieldLookupMixin,
 
     def list(self, request, accession, release_version, *args, **kwargs):
         """
-        Retrieves run for the given accession and pipeline version
+        Retrieves GO slim for the given run and pipeline version
         Example:
         ---
-        `/runs/ERR1385375/3.0/annotations`
+        `/runs/ERR1385375/pipelines/3.0/goslim`
         """
 
         analysis = m_models.AnalysisJobGoSlimTerm.objects.filter(
@@ -322,10 +322,10 @@ class AnalysisInterProTermRelViewSet(emg_mixins.MultipleFieldLookupMixin,
 
     def list(self, request, accession, release_version, *args, **kwargs):
         """
-        Retrieves run for the given accession and pipeline version
+        Retrieves InterPro terms for the given run and pipeline version
         Example:
         ---
-        `/runs/ERR1385375/3.0/annotations`
+        `/runs/ERR1385375/pipelines/3.0/interpro`
         """
 
         analysis = m_models.AnalysisJobInterProTerm.objects.filter(
