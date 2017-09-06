@@ -580,10 +580,10 @@ class AnalysisMetadataViewSet(emg_mixins.MultipleFieldLookupMixin,
 
     def list(self, request, *args, **kwargs):
         """
-        Retrieves metadata for the given analysis job
+        Retrieves metadata for the run and pipeline version
         Example:
         ---
-        `/runs/ERR1385375/3.0/metadata` retrieve metadata
+        `/runs/ERR1385375/pipelines/3.0/metadata` retrieve metadata
         """
 
         return super(AnalysisMetadataViewSet, self) \
