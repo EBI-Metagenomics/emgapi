@@ -515,42 +515,30 @@ class RunViewSet(mixins.RetrieveModelMixin,
         """
         return super(RunViewSet, self).retrieve(request, *args, **kwargs)
 
-    @detail_route(
-        methods=['get', ],
-        url_name='pipelines-list',
-        serializer_class=emg_serializers.AnalysisSerializer
-    )
-    def analysis(self, request, accession=None):
-        """
-        Retrieves list of analysis results for the given run
-        Example:
-        ---
-        `/runs/ERR1385375/analysis`
-        """
-        queryset = emg_models.AnalysisJob.objects \
-            .available(self.request) \
-            .filter(accession=accession) \
-            .select_related(
-                'sample',
-                'pipeline',
-                'analysis_status',
-            )
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(
-                page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(
-            queryset, many=True, context={'request': request})
-        return Response(serializer.data)
-
 
 class AnalysisViewSet(mixins.RetrieveModelMixin,
+                      mixins.ListModelMixin,
                       viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
+
+    filter_class = emg_filters.AnalysisJobFilter
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'accession',
+    )
+
+    ordering = ('-accession',)
+
+    search_fields = (
+        '@sample__metadata__var_val_ucv',
+    )
 
     lookup_field = 'release_version'
     lookup_value_regex = '[0-9.]+'
@@ -563,13 +551,25 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
             pipeline__release_version=release_version)
 
     def get_queryset(self):
-        return emg_models.AnalysisJob.objects \
+        accession = self.kwargs['accession']
+        queryset = emg_models.AnalysisJob.objects \
             .available(self.request) \
+            .filter(accession=accession) \
             .select_related(
                 'sample',
                 'pipeline',
                 'analysis_status',
             )
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves analysis result for the given accession and pipeline version
+        Example:
+        ---
+        `/runs/ERR1385375/pipelines`
+        """
+        return super(AnalysisViewSet, self).list(request, *args, **kwargs)
 
     def retrieve(self, request, *args, **kwargs):
         """

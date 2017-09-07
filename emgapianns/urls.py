@@ -30,7 +30,7 @@ mongo_router.register(
 )
 mongo_router.register(
     r'annotations/interpro',
-    m_views.InterProTermViewSet,
+    m_views.InterproTermViewSet,
     base_name='interproterms'
 )
 
@@ -42,7 +42,7 @@ mongo_router.register(
 
 mongo_router.register(
     r'annotations/interpro/(?P<accession>[a-zA-Z0-9\:]+)/analysis',
-    m_views.InterProTermRunRelationshipViewSet,
+    m_views.InterproTermRunRelationshipViewSet,
     base_name='interproterms-analysis'
 )
 
@@ -68,6 +68,6 @@ router.register(
     (r'runs/(?P<accession>[a-zA-Z0-9_]+)/'
      r'pipelines/(?P<release_version>[0-9\.]+)/'
      r'interpro'),
-    m_views.AnalysisInterProTermRelViewSet,
+    m_views.AnalysisInterproTermRelViewSet,
     base_name='runs-pipelines-interpro'
 )
