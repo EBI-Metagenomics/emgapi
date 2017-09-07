@@ -66,7 +66,7 @@ class TestAnnotations(object):
                      os.path.dirname(os.path.abspath(__file__)),
                      suffix='.ipr')
 
-        url = reverse("emgapi:interproterms-list")
+        url = reverse("emgapi:interproidentifier-list")
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
