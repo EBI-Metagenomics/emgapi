@@ -458,9 +458,9 @@ class AnalysisSerializer(RunSerializer):
     def get_goslim(self, obj):
         return None
 
-    interpro_terms = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
-        source='get_interproterms',
-        model=m_models.InterProTerm,
+    interpro_identifiers = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
+        source='get_interproidentifier',
+        model=m_models.InterproIdentifier,
         many=True,
         read_only=True,
         related_link_view_name='emgapi:runs-pipelines-interpro-list',  # noqa
@@ -468,7 +468,7 @@ class AnalysisSerializer(RunSerializer):
         related_link_lookup_field='accession'
     )
 
-    def get_interproterms(self, obj):
+    def get_interproidentifier(self, obj):
         return None
 
     metadata = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(
@@ -491,8 +491,6 @@ class AnalysisSerializer(RunSerializer):
             'url',
             'accession',
             'pipeline_version',
-            'instrument_platform',
-            'instrument_model',
             'sample_accession',
             'study_accession',
             'submit_time',
@@ -501,7 +499,7 @@ class AnalysisSerializer(RunSerializer):
             'sample',
             'go_slim',
             'go_terms',
-            'interpro_terms',
+            'interpro_identifiers',
         )
 
 
