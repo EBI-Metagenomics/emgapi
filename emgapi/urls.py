@@ -69,6 +69,11 @@ router.register(
     base_name='publications'
 )
 
+router.register(
+    r'runs/(?P<accession>[a-zA-Z0-9_]+)/analysis',
+    views.AnalysisResultViewSet,
+    base_name='runs-pipelines'
+)
 
 router.register(
     r'runs/(?P<accession>[a-zA-Z0-9_]+)/pipelines',
