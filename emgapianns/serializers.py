@@ -53,11 +53,11 @@ class GoTermSerializer(m_serializers.DocumentSerializer,
         fields = '__all__'
 
 
-class InterproTermSerializer(m_serializers.DocumentSerializer,
-                             serializers.HyperlinkedModelSerializer):
+class InterproIdentifierSerializer(m_serializers.DocumentSerializer,
+                                   serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi:interproterms-detail',
+        view_name='emgapi:interproidentifier-detail',
         lookup_field='accession',
     )
 
@@ -66,7 +66,7 @@ class InterproTermSerializer(m_serializers.DocumentSerializer,
         model=emg_models.AnalysisJob,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:interproterms-analysis-list',
+        related_link_view_name='emgapi:interproidentifier-analysis-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
@@ -78,7 +78,7 @@ class InterproTermSerializer(m_serializers.DocumentSerializer,
         return None
 
     class Meta:
-        model = m_models.InterproTerm
+        model = m_models.InterproIdentifier
         fields = '__all__'
 
 
@@ -113,11 +113,12 @@ class GoTermRetriveSerializer(m_serializers.DynamicDocumentSerializer,
         fields = '__all__'
 
 
-class InterproTermRetriveSerializer(m_serializers.DynamicDocumentSerializer,
-                                    serializers.HyperlinkedModelSerializer):
+class InterproIdentifierRetriveSerializer(  # NOQA
+    m_serializers.DynamicDocumentSerializer,
+    serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi:interproterms-detail',
+        view_name='emgapi:interproidentifier-detail',
         lookup_field='accession',
     )
 
@@ -126,7 +127,7 @@ class InterproTermRetriveSerializer(m_serializers.DynamicDocumentSerializer,
         model=emg_models.AnalysisJob,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:interproterms-analysis-list',
+        related_link_view_name='emgapi:interproidentifier-analysis-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
@@ -140,5 +141,5 @@ class InterproTermRetriveSerializer(m_serializers.DynamicDocumentSerializer,
     count = serializers.IntegerField(required=False)
 
     class Meta:
-        model = m_models.InterproTerm
+        model = m_models.InterproIdentifier
         fields = '__all__'

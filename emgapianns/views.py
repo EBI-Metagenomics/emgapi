@@ -53,22 +53,22 @@ class GoTermViewSet(m_viewset.ReadOnlyModelViewSet):
         return super(GoTermViewSet, self).get_serializer_class()
 
 
-class InterproTermViewSet(m_viewset.ReadOnlyModelViewSet):
+class InterproIdentifierViewSet(m_viewset.ReadOnlyModelViewSet):
 
-    serializer_class = m_serializers.InterproTermSerializer
+    serializer_class = m_serializers.InterproIdentifierSerializer
 
     lookup_field = 'accession'
     lookup_value_regex = '[a-zA-Z0-9\:]+'
 
     def get_queryset(self):
-        return m_models.InterproTerm.objects.all()
+        return m_models.InterproIdentifier.objects.all()
 
     def get_object(self):
         accession = self.kwargs.get('accession', None)
-        return m_models.InterproTerm.objects(accession=accession).first()
+        return m_models.InterproIdentifier.objects(accession=accession).first()
 
     def get_serializer_class(self):
-        return super(InterproTermViewSet, self).get_serializer_class()
+        return super(InterproIdentifierViewSet, self).get_serializer_class()
 
 
 class GoTermRunRelationshipViewSet(mixins.ListModelMixin,
@@ -132,8 +132,8 @@ class GoTermRunRelationshipViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class InterproTermRunRelationshipViewSet(mixins.ListModelMixin,
-                                         viewsets.GenericViewSet):
+class InterproIdentifierRunRelationshipViewSet(mixins.ListModelMixin,
+                                               viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
 
@@ -159,10 +159,10 @@ class InterproTermRunRelationshipViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         annotation = get_object_or_404(
-            m_models.InterproTerm.objects,
+            m_models.InterproIdentifier.objects,
             accession=self.kwargs[self.lookup_field])
-        run_ids = m_models.AnalysisJobInterproTerm.objects \
-            .filter(interpro_terms__interpro_term=annotation.pk) \
+        run_ids = m_models.AnalysisJobInterproIdentifier.objects \
+            .filter(interpro_identifiers__interpro_identifier=annotation.pk) \
             .only('accession')
         run_ids = [str(r.accession) for r in run_ids]
         queryset = emg_models.AnalysisJob.objects \
@@ -185,7 +185,7 @@ class InterproTermRunRelationshipViewSet(mixins.ListModelMixin,
         ---
         `/annotations/GO:009579/analysis`
         """
-        return super(InterproTermRunRelationshipViewSet, self) \
+        return super(InterproIdentifierRunRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
 
 
@@ -299,11 +299,11 @@ class AnalysisGoSlimRelViewSet(emg_mixins.MultipleFieldLookupMixin,
         return Response(serializer.data)
 
 
-class AnalysisInterproTermRelViewSet(emg_mixins.MultipleFieldLookupMixin,
-                                     mixins.ListModelMixin,
-                                     m_viewset.GenericViewSet):
+class AnalysisInterproIdentifierRelViewSet(emg_mixins.MultipleFieldLookupMixin,
+                                           mixins.ListModelMixin,
+                                           m_viewset.GenericViewSet):
 
-    serializer_class = m_serializers.InterproTermRetriveSerializer
+    serializer_class = m_serializers.InterproIdentifierRetriveSerializer
 
     lookup_fields = ('accession', 'release_version')
 
@@ -324,17 +324,17 @@ class AnalysisInterproTermRelViewSet(emg_mixins.MultipleFieldLookupMixin,
         `/runs/ERR1385375/pipelines/3.0/interpro`
         """
 
-        analysis = m_models.AnalysisJobInterproTerm.objects.filter(
+        analysis = m_models.AnalysisJobInterproIdentifier.objects.filter(
             accession=accession, pipeline_version=release_version).first()
 
         ann_ids = []
         if analysis is not None:
-            ann_ids = [a.interpro_term.pk for a in analysis.interpro_terms]
+            ann_ids = [a.interpro_identifier.pk for a in analysis.interpro_identifiers]  # NOQA
             ann_counts = {
-                a.interpro_term.pk: a.count for a in analysis.interpro_terms
+                a.interpro_identifier.pk: a.count for a in analysis.interpro_identifiers  # NOQA
             }
 
-        queryset = m_models.InterproTerm.objects.filter(pk__in=ann_ids)
+        queryset = m_models.InterproIdentifier.objects.filter(pk__in=ann_ids)
 
         page = self.paginate_queryset(queryset)
         for p in page:
