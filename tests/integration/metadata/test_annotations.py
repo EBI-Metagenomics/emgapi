@@ -86,4 +86,14 @@ class TestAnnotations(object):
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
-        assert len(rsp['data']) == 12
+        assert len(rsp['data']) == 5
+
+        expected = [
+            'Submitted nucleotide sequences/12345',
+            'Nucleotide sequences after format-specific filtering/12345',
+            'Predicted CDS/12345',
+            'Predicted CDS with InterProScan match/12345',
+            'Total InterProScan matches/12345678'
+        ]
+        ids = [a['id'] for a in rsp['data']]
+        assert ids == expected
