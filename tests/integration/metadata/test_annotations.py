@@ -26,16 +26,31 @@ from rest_framework import status
 from test_utils.emg_fixtures import *  # noqa
 
 
-@pytest.mark.skip(reason="TypeError: 'list' object is not an iterator")
 @pytest.mark.usefixtures('mongodb')
 @pytest.mark.django_db
 class TestAnnotations(object):
 
-    def test_default(self, client, run):
-        call_command('import_go', 'ABC01234',
-                     os.path.dirname(os.path.abspath(__file__)))
+    def test_goslim(self, client, run):
+        call_command('import_summary', 'ABC01234',
+                     os.path.dirname(os.path.abspath(__file__)),
+                     suffix='.go_slim')
 
-        url = reverse("emgapi:annotations-list")
+        url = reverse("emgapi:goterms-list")
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        rsp = response.json()
+        assert len(rsp['data']) == 3
+
+        expected = ['GO:0055114', 'GO:0008152', 'GO:0006810']
+        ids = [a['id'] for a in rsp['data']]
+        assert ids == expected
+
+    def test_go(self, client, run):
+        call_command('import_summary', 'ABC01234',
+                     os.path.dirname(os.path.abspath(__file__)),
+                     suffix='.go')
+
+        url = reverse("emgapi:goterms-list")
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -45,3 +60,15 @@ class TestAnnotations(object):
                     'GO:0006412', 'GO:0009058', 'GO:0005975']
         ids = [a['id'] for a in rsp['data']]
         assert ids == expected
+
+    def test_qc(self, client, run):
+        call_command('import_qc', 'ABC01234',
+                     os.path.dirname(os.path.abspath(__file__)))
+
+        url = reverse("emgapi:analysis-pipelines-metadata-list",
+                      args=["ABC01234", "1.0"])
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        rsp = response.json()
+        print(rsp)
+        assert len(rsp['data']) == 12

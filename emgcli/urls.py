@@ -26,8 +26,8 @@ from rest_auth import views as rest_auth_views
 
 from emgapi.urls import router as emg_router
 from emgapi.urls import mydata_router
-from emgapimetadata.urls import mongo_router
-from emgapimetadata.urls import router as emg_ext_router
+from emgapianns.urls import mongo_router
+from emgapianns.urls import router as emg_ext_router
 
 from . import routers
 
