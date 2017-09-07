@@ -19,7 +19,7 @@ import logging
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework import filters, mixins
+from rest_framework import filters, mixins, viewsets
 from rest_framework.response import Response
 
 from rest_framework_mongoengine import viewsets as m_viewset
@@ -53,33 +53,33 @@ class GoTermViewSet(m_viewset.ReadOnlyModelViewSet):
         return super(GoTermViewSet, self).get_serializer_class()
 
 
-class InterProTermViewSet(m_viewset.ReadOnlyModelViewSet):
+class InterproTermViewSet(m_viewset.ReadOnlyModelViewSet):
 
-    serializer_class = m_serializers.InterProTermSerializer
+    serializer_class = m_serializers.InterproTermSerializer
 
     lookup_field = 'accession'
     lookup_value_regex = '[a-zA-Z0-9\:]+'
 
     def get_queryset(self):
-        return m_models.InterProTerm.objects.all()
+        return m_models.InterproTerm.objects.all()
 
     def get_object(self):
         accession = self.kwargs.get('accession', None)
-        return m_models.InterProTerm.objects(accession=accession).first()
+        return m_models.InterproTerm.objects(accession=accession).first()
 
     def get_serializer_class(self):
-        return super(InterProTermViewSet, self).get_serializer_class()
+        return super(InterproTermViewSet, self).get_serializer_class()
 
 
 class GoTermRunRelationshipViewSet(mixins.ListModelMixin,
-                                   m_viewset.GenericViewSet):
+                                   viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
 
-    # filter_class = emg_filters.RunFilter
+    filter_class = emg_filters.AnalysisJobFilter
 
     filter_backends = (
-        # DjangoFilterBackend,
+        DjangoFilterBackend,
         filters.SearchFilter,
         filters.OrderingFilter,
     )
@@ -134,12 +134,12 @@ class GoTermRunRelationshipViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class InterProTermRunRelationshipViewSet(mixins.ListModelMixin,
-                                         m_viewset.GenericViewSet):
+class InterproTermRunRelationshipViewSet(mixins.ListModelMixin,
+                                         viewsets.GenericViewSet):
 
-    serializer_class = emg_serializers.RunSerializer
+    serializer_class = emg_serializers.AnalysisSerializer
 
-    filter_class = emg_filters.RunFilter
+    filter_class = emg_filters.AnalysisJobFilter
 
     filter_backends = (
         DjangoFilterBackend,
@@ -154,8 +154,6 @@ class InterProTermRunRelationshipViewSet(mixins.ListModelMixin,
     ordering = ('-accession',)
 
     search_fields = (
-        'instrument_platform',
-        'instrument_model',
         '@sample__metadata__var_val_ucv',
     )
 
@@ -163,13 +161,13 @@ class InterProTermRunRelationshipViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         annotation = get_object_or_404(
-            m_models.InterProTerm.objects,
+            m_models.InterproTerm.objects,
             accession=self.kwargs[self.lookup_field])
-        run_ids = m_models.AnalysisJobInterProTerm.objects \
+        run_ids = m_models.AnalysisJobInterproTerm.objects \
             .filter(interpro_terms__interpro_term=annotation.pk) \
             .only('accession')
         run_ids = [str(r.accession) for r in run_ids]
-        queryset = emg_models.Run.objects \
+        queryset = emg_models.AnalysisJob.objects \
             .filter(accession__in=run_ids) \
             .available(self.request) \
             .select_related(
@@ -180,16 +178,16 @@ class InterProTermRunRelationshipViewSet(mixins.ListModelMixin,
         return queryset
 
     def get_serializer_class(self):
-        return emg_serializers.RunSerializer
+        return emg_serializers.AnalysisSerializer
 
     def list(self, request, accession, *args, **kwargs):
         """
         Retrieves list of runs for the given sample accession
         Example:
         ---
-        `/annotations/GO0001/runs`
+        `/annotations/GO0001/analysis`
         """
-        return super(InterProTermRunRelationshipViewSet, self) \
+        return super(InterproTermRunRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
 
 
@@ -303,11 +301,11 @@ class AnalysisGoSlimRelViewSet(emg_mixins.MultipleFieldLookupMixin,
         return Response(serializer.data)
 
 
-class AnalysisInterProTermRelViewSet(emg_mixins.MultipleFieldLookupMixin,
+class AnalysisInterproTermRelViewSet(emg_mixins.MultipleFieldLookupMixin,
                                      mixins.ListModelMixin,
                                      m_viewset.GenericViewSet):
 
-    serializer_class = m_serializers.InterProTermRetriveSerializer
+    serializer_class = m_serializers.InterproTermRetriveSerializer
 
     lookup_fields = ('accession', 'release_version')
 
@@ -328,7 +326,7 @@ class AnalysisInterProTermRelViewSet(emg_mixins.MultipleFieldLookupMixin,
         `/runs/ERR1385375/pipelines/3.0/interpro`
         """
 
-        analysis = m_models.AnalysisJobInterProTerm.objects.filter(
+        analysis = m_models.AnalysisJobInterproTerm.objects.filter(
             accession=accession, pipeline_version=release_version).first()
 
         ann_ids = []
@@ -338,7 +336,7 @@ class AnalysisInterProTermRelViewSet(emg_mixins.MultipleFieldLookupMixin,
                 a.interpro_term.pk: a.count for a in analysis.interpro_terms
             }
 
-        queryset = m_models.InterProTerm.objects.filter(pk__in=ann_ids)
+        queryset = m_models.InterproTerm.objects.filter(pk__in=ann_ids)
 
         page = self.paginate_queryset(queryset)
         for p in page:
