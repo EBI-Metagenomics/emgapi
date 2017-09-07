@@ -78,7 +78,7 @@ class InterProTermSerializer(m_serializers.DocumentSerializer,
         return None
 
     class Meta:
-        model = m_models.GoTerm
+        model = m_models.InterProTerm
         fields = '__all__'
 
 
