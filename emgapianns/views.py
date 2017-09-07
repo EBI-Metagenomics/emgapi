@@ -166,7 +166,7 @@ class InterProTermRunRelationshipViewSet(mixins.ListModelMixin,
             m_models.InterProTerm.objects,
             accession=self.kwargs[self.lookup_field])
         run_ids = m_models.AnalysisJobInterProTerm.objects \
-            .filter(go_terms__go_term=annotation.pk) \
+            .filter(interpro_terms__interpro_term=annotation.pk) \
             .only('accession')
         run_ids = [str(r.accession) for r in run_ids]
         queryset = emg_models.Run.objects \
