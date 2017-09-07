@@ -420,7 +420,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
 
         Filter by:
         ---
-        `/samples?experiment_type=metagenomics`
+        `/samples?experiment_type=metagenomic`
 
         `/samples?species=sapiens`
 
@@ -500,7 +500,7 @@ class RunViewSet(mixins.RetrieveModelMixin,
 
         Filter by:
         ---
-        `/runs?experiment_type=metagenomics`
+        `/runs?experiment_type=metagenomic`
 
         `/runs?biome=root:Environmental:Aquatic:Marine`
         """
@@ -526,7 +526,6 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
 
     filter_backends = (
         DjangoFilterBackend,
-        filters.SearchFilter,
         filters.OrderingFilter,
     )
 
@@ -535,10 +534,6 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
     )
 
     ordering = ('-accession',)
-
-    search_fields = (
-        '@sample__metadata__var_val_ucv',
-    )
 
     lookup_field = 'release_version'
     lookup_value_regex = '[0-9.]+'
