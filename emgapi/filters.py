@@ -37,6 +37,12 @@ def metadata_keywords():
     return [(k['var_name'], k['var_name']) for k in keywords]
 
 
+def pipeline_version():
+    pipelines = emg_models.Pipeline.objects.all() \
+        .order_by('release_version').distinct()
+    return [(p.pk, p.release_version) for p in pipelines]
+
+
 class PublicationFilter(django_filters.FilterSet):
 
     doi = django_filters.CharFilter(
@@ -436,4 +442,23 @@ class RunFilter(django_filters.FilterSet):
             'species',
             'sample_accession',
             'include',
+        )
+
+
+class AnalysisJobFilter(RunFilter):
+
+    pipeline_version = filters.ChoiceFilter(
+        choices=pipeline_version(),
+        name='pipeline', distinct=True,
+        label='Pipeline version', help_text='Pipeline version')
+
+    class Meta:
+        model = emg_models.AnalysisJob
+        fields = (
+            'biome_name',
+            'lineage',
+            'experiment_type',
+            'species',
+            'sample_accession',
+            'pipeline_version'
         )
