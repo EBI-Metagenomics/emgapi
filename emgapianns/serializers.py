@@ -53,7 +53,7 @@ class GoTermSerializer(m_serializers.DocumentSerializer,
         fields = '__all__'
 
 
-class InterProTermSerializer(m_serializers.DocumentSerializer,
+class InterproTermSerializer(m_serializers.DocumentSerializer,
                              serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
@@ -78,7 +78,7 @@ class InterProTermSerializer(m_serializers.DocumentSerializer,
         return None
 
     class Meta:
-        model = m_models.InterProTerm
+        model = m_models.InterproTerm
         fields = '__all__'
 
 
@@ -113,7 +113,7 @@ class GoTermRetriveSerializer(m_serializers.DynamicDocumentSerializer,
         fields = '__all__'
 
 
-class InterProTermRetriveSerializer(m_serializers.DynamicDocumentSerializer,
+class InterproTermRetriveSerializer(m_serializers.DynamicDocumentSerializer,
                                     serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
@@ -140,5 +140,5 @@ class InterProTermRetriveSerializer(m_serializers.DynamicDocumentSerializer,
     count = serializers.IntegerField(required=False)
 
     class Meta:
-        model = m_models.InterProTerm
+        model = m_models.InterproTerm
         fields = '__all__'
