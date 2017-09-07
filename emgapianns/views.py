@@ -91,8 +91,6 @@ class GoTermRunRelationshipViewSet(mixins.ListModelMixin,
     ordering = ('-accession',)
 
     search_fields = (
-        'instrument_platform',
-        'instrument_model',
         '@sample__metadata__var_val_ucv',
     )
 
@@ -128,7 +126,7 @@ class GoTermRunRelationshipViewSet(mixins.ListModelMixin,
         Retrieves list of runs for the given sample accession
         Example:
         ---
-        `/annotations/GO:0001/runs`
+        `/annotations/go-terms/GO:009579/runs`
         """
         return super(GoTermRunRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
@@ -185,7 +183,7 @@ class InterproTermRunRelationshipViewSet(mixins.ListModelMixin,
         Retrieves list of runs for the given sample accession
         Example:
         ---
-        `/annotations/GO0001/analysis`
+        `/annotations/GO:009579/analysis`
         """
         return super(InterproTermRunRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
