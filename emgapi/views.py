@@ -480,6 +480,11 @@ class RunViewSet(mixins.RetrieveModelMixin,
             Prefetch('sample', queryset=_qs))
         return queryset
 
+    def get_object(self):
+        return emg_models.Run.objects \
+            .filter(accession=self.kwargs['accession']) \
+            .distinct().last()
+
     def get_serializer_class(self):
         return super(RunViewSet, self).get_serializer_class()
 
@@ -508,11 +513,7 @@ class RunViewSet(mixins.RetrieveModelMixin,
         ---
         `/runs/SRR062157`
         """
-        run = emg_models.Run.objects \
-            .filter(accession=self.kwargs['accession']) \
-            .distinct().last()
-        serializer = self.get_serializer(run, context={'request': request})
-        return Response(serializer.data)
+        return super(RunViewSet, self).retrieve(request, *args, **kwargs)
 
     @detail_route(
         methods=['get', ],
@@ -521,7 +522,7 @@ class RunViewSet(mixins.RetrieveModelMixin,
     )
     def analysis(self, request, accession=None):
         """
-        Retrieves list of analysis for the given run
+        Retrieves list of analysis results for the given run
         Example:
         ---
         `/runs/ERR1385375/analysis`
@@ -572,10 +573,10 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
 
     def retrieve(self, request, *args, **kwargs):
         """
-        Retrieves run for the given accession and pipeline version
+        Retrieves analysis result for the given accession and pipeline version
         Example:
         ---
-        `/runs/ERR1385375/3.0`
+        `/runs/ERR1385375/pipelines/3.0`
         """
         return super(AnalysisViewSet, self).retrieve(request, *args, **kwargs)
 

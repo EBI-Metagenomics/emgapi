@@ -653,7 +653,7 @@ class VariableNames(models.Model):
     var_id = models.SmallIntegerField(
         db_column='VAR_ID', primary_key=True)
     var_name = models.CharField(
-        db_column='VAR_NAME', unique=True, max_length=100)
+        db_column='VAR_NAME', unique=True, max_length=50)
     definition = models.TextField(
         db_column='DEFINITION', blank=True, null=True)
     value_syntax = models.CharField(
@@ -700,32 +700,6 @@ class GscCvCv(models.Model):
         return "%s %s" % (self.var_name, self.var_val_cv)
 
 
-class Metadata(models.Model):
-
-    _id = models.CharField(primary_key=True, max_length=255)
-
-    @property
-    def id(self):
-        return "%s %s" % (self.var.var_name, self.var_val_ucv)
-
-    @id.setter
-    def id(self, value):
-        self._id = "%s %s" % (self.var.var_name, self.var_val_ucv)
-
-    var = models.ForeignKey(
-        'VariableNames', db_column='VAR_ID')
-    var_val_ucv = models.CharField(
-        db_column='VAR_VAL_UCV', max_length=4000, blank=True, null=True)
-    units = models.CharField(
-        db_column='UNITS', max_length=25, blank=True, null=True)
-
-    class Meta:
-        abstract = True
-
-    def __str__(self):
-        return "%s %s" % (self.var.var_name, self.var_val_ucv)
-
-
 class SampleAnn(models.Model):
     sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID', primary_key=True,
@@ -751,14 +725,27 @@ class SampleAnn(models.Model):
         return "%s/%s" % (self.var.var_name, self.var_val_ucv)
 
 
+class AnalysisMetadataVariableNames(models.Model):
+    var_name = models.CharField(
+        db_column='VAR_NAME', unique=True, max_length=100)
+    description = models.CharField(
+        db_column='DESCRIPTION', max_length=255, blank=True, null=True)
+
+    class Meta:
+        db_table = 'SUMMARY_VARIABLE_NAMES'
+        unique_together = (('var_name', 'description'),)
+
+    def __str__(self):
+        return self.var_name
+
+
 class AnalysisJobAnn(models.Model):
     job = models.ForeignKey(
         AnalysisJob, db_column='JOB_ID',
         related_name="analysis_metadata")
     units = models.CharField(
         db_column='UNITS', max_length=25, blank=True, null=True)
-    var = models.ForeignKey(
-        'VariableNames', db_column='VAR_ID')
+    var = models.ForeignKey(AnalysisMetadataVariableNames)
     var_val_ucv = models.CharField(
         db_column='VAR_VAL_UCV', max_length=4000, blank=True, null=True)
 

@@ -71,7 +71,7 @@ router.register(
 
 
 router.register(
-    r'runs/(?P<accession>[a-zA-Z0-9_]+)',
+    r'runs/(?P<accession>[a-zA-Z0-9_]+)/pipelines',
     views.AnalysisViewSet,
     base_name='runs-pipelines'
 )
@@ -157,10 +157,11 @@ router.register(
 )
 
 router.register(
-    r'runs/(?P<accession>[a-zA-Z0-9\-\_]+)/(?P<release_version>[0-9\.]+)/'
-    r'metadata',
-    views_relations.RunMetadataViewSet,
-    base_name='runs-pipelines-metadata'
+    (r'runs/(?P<accession>[a-zA-Z0-9\-\_]+)/'
+     r'pipelines/(?P<release_version>[0-9\.]+)/'
+     r'metadata'),
+    views_relations.AnalysisMetadataViewSet,
+    base_name='analysis-pipelines-metadata'
 )
 
 

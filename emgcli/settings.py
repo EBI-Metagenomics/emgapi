@@ -168,7 +168,7 @@ INSTALLED_APPS = [
     'rest_auth',
     # apps
     'emgapi',
-    'emgapimetadata',
+    'emgapianns',
     
 ]
 
