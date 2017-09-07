@@ -463,7 +463,7 @@ class RunViewSet(mixins.RetrieveModelMixin,
     )
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9]+'
+    lookup_value_regex = '[a-zA-Z0-9\_]+'
 
     def get_queryset(self):
         queryset = emg_models.Run.objects \
