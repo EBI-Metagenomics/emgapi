@@ -278,9 +278,9 @@ class AnalysisGoSlimRelViewSet(emg_mixins.MultipleFieldLookupMixin,
 
         ann_ids = []
         if analysis is not None:
-            ann_ids = [a.go_term.pk for a in analysis.goslim]
+            ann_ids = [a.go_term.pk for a in analysis.go_slim]
             ann_counts = {
-                a.go_term.pk: a.count for a in analysis.goslim
+                a.go_term.pk: a.count for a in analysis.go_slim
             }
 
         queryset = m_models.GoTerm.objects.filter(pk__in=ann_ids)
