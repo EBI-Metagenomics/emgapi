@@ -599,9 +599,6 @@ class AnalysisJob(models.Model):
 
     objects = RunManager()
 
-    def multiple_pk(self):
-        return "%s/%s" % (self.accession, self.pipeline.release_version)
-
     class Meta:
         db_table = 'ANALYSIS_JOB'
         unique_together = (('job_id', 'accession'), ('pipeline', 'accession'),)
@@ -609,6 +606,9 @@ class AnalysisJob(models.Model):
 
     def __str__(self):
         return self.accession
+
+    def multiple_pk(self):
+        return "%s/%s" % (self.accession, self.pipeline.release_version)
 
 
 class StudyErrorType(models.Model):

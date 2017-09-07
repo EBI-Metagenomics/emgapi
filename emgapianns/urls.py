@@ -59,7 +59,7 @@ router.register(
 router.register(
     (r'runs/(?P<accession>[a-zA-Z0-9_]+)/'
      r'pipelines/(?P<release_version>[0-9\.]+)/'
-     r'goslim'),
+     r'go-slim'),
     m_views.AnalysisGoSlimRelViewSet,
     base_name='runs-pipelines-goslim'
 )

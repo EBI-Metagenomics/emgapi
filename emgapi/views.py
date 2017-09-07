@@ -264,10 +264,10 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     )
     def recent(self, request):
         """
-        Retrieve 20 latest studies
+        Retrieve 20 most recent studies
         Example:
         ---
-        `/studies/recent` retrieve recent studies
+        `/studies/recent`
         """
         limit = settings.EMG_DEFAULT_LIMIT
         queryset = emg_models.Study.objects \
@@ -463,6 +463,7 @@ class RunViewSet(mixins.RetrieveModelMixin,
     )
 
     lookup_field = 'accession'
+    lookup_value_regex = '[a-zA-Z0-9]+'
 
     def get_queryset(self):
         queryset = emg_models.Run.objects \
@@ -534,8 +535,8 @@ class AnalysisResultViewSet(mixins.ListModelMixin,
 
     ordering = ('-accession',)
 
-    lookup_field = 'release_version'
-    lookup_value_regex = '[0-9.]+'
+    lookup_field = 'accession'
+    lookup_value_regex = '[a-zA-Z0-9]+'
 
     def get_queryset(self):
         accession = self.kwargs['accession']
@@ -551,10 +552,10 @@ class AnalysisResultViewSet(mixins.ListModelMixin,
 
     def list(self, request, *args, **kwargs):
         """
-        Retrieves analysis result for the given accession and pipeline version
+        Retrieves analysis result for the given accession
         Example:
         ---
-        `/runs/ERR1385375/pipelines`
+        `/runs/ERR1385375/analysis`
         """
         return super(AnalysisResultViewSet, self) \
             .list(request, *args, **kwargs)
