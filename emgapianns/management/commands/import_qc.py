@@ -30,22 +30,24 @@ class Command(EMGBaseCommand):
                         if name in ('new.summary',):
                             with open(os.path.join(root, name)) as csvfile:
                                 reader = csv.reader(csvfile, delimiter='\t')
-                                self.import_summary(reader, obj)
+                                self.import_qc(reader, obj)
             elif os.path.isfile(res):
                 raise NotImplementedError("Give path to directory.")
         else:
             raise NotImplementedError("Path %r doesn't exist." % res)
 
-    def import_summary(self, reader, job):
+    def import_qc(self, reader, job):
         anns = []
         for row in reader:
             try:
-                var = emg_models.VariableNames.objects.get(var_name=row[0])
-            except emg_models.VariableNames.DoesNotExist:
-                var = emg_models.VariableNames(var_name=row[0])
+                var = emg_models.AnalysisMetadataVariableNames.objects \
+                    .get(var_name=row[0])
+            except emg_models.AnalysisMetadataVariableNames.DoesNotExist:
+                var = emg_models.AnalysisMetadataVariableNames(var_name=row[0])
                 var.save()
                 # becuase PK is not AutoField
-                var = emg_models.VariableNames.objects.get(var_name=row[0])
+                var = emg_models.AnalysisMetadataVariableNames.objects \
+                    .get(var_name=row[0])
             job_ann = emg_models.AnalysisJobAnn()
             job_ann.job = job
             job_ann.var = var
