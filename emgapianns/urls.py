@@ -29,9 +29,9 @@ mongo_router.register(
     base_name='goterms'
 )
 mongo_router.register(
-    r'annotations/interpro-terms',
-    m_views.InterproTermViewSet,
-    base_name='interproterms'
+    r'annotations/interpro-identifiers',
+    m_views.InterproIdentifierViewSet,
+    base_name='interproidentifier'
 )
 
 mongo_router.register(
@@ -41,9 +41,9 @@ mongo_router.register(
 )
 
 mongo_router.register(
-    r'annotations/interpro-terms/(?P<accession>[a-zA-Z0-9\:]+)/analysis',
-    m_views.InterproTermRunRelationshipViewSet,
-    base_name='interproterms-analysis'
+    r'annotations/interpro-identifiers/(?P<accession>[a-zA-Z0-9\:]+)/analysis',
+    m_views.InterproIdentifierRunRelationshipViewSet,
+    base_name='interproidentifier-analysis'
 )
 
 router = routers.DefaultRouter(trailing_slash=False)
@@ -67,7 +67,7 @@ router.register(
 router.register(
     (r'runs/(?P<accession>[a-zA-Z0-9_]+)/'
      r'pipelines/(?P<release_version>[0-9\.]+)/'
-     r'interpro-terms'),
-    m_views.AnalysisInterproTermRelViewSet,
+     r'interpro-identifiers'),
+    m_views.AnalysisInterproIdentifierRelViewSet,
     base_name='runs-pipelines-interpro'
 )
