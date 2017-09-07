@@ -70,5 +70,4 @@ class TestAnnotations(object):
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
-        print(rsp)
         assert len(rsp['data']) == 12
