@@ -28,7 +28,9 @@ class Command(EMGBaseCommand):
                 for root, dirs, files in os.walk(res, topdown=False):
                     for name in files:
                         if name in ('new.summary',):
-                            with open(os.path.join(root, name)) as csvfile:
+                            _f = os.path.join(root, name)
+                            logger.info("Found: %s" % _f)
+                            with open(_f) as csvfile:
                                 reader = csv.reader(csvfile, delimiter='\t')
                                 self.import_qc(reader, obj)
             elif os.path.isfile(res):
@@ -39,6 +41,7 @@ class Command(EMGBaseCommand):
     def import_qc(self, reader, job):
         anns = []
         for row in reader:
+            var = None
             try:
                 var = emg_models.AnalysisMetadataVariableNames.objects \
                     .get(var_name=row[0])
@@ -48,9 +51,12 @@ class Command(EMGBaseCommand):
                 # becuase PK is not AutoField
                 var = emg_models.AnalysisMetadataVariableNames.objects \
                     .get(var_name=row[0])
-            job_ann = emg_models.AnalysisJobAnn()
-            job_ann.job = job
-            job_ann.var = var
-            job_ann.var_val_ucv = row[1]
-            anns.append(job_ann)
+            if var is not None:
+                job_ann = emg_models.AnalysisJobAnn()
+                job_ann.job = job
+                job_ann.var = var
+                job_ann.var_val_ucv = row[1]
+                anns.append(job_ann)
         emg_models.AnalysisJobAnn.objects.bulk_create(anns)
+        logger.info(
+            "Total %d Annotations for Run: %s" % (len(anns), job))
