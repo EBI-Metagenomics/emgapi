@@ -41,9 +41,10 @@ class TestDefaultAPI(object):
             "experiment-types": "http://testserver/v0.2/experiment-types",
             "publications": "http://testserver/v0.2/publications",
             "pipeline-tools": "http://testserver/v0.2/pipeline-tools",
-            "annotations/go": "http://testserver/v0.2/annotations/go",
-            "annotations/interpro":
-                "http://testserver/v0.2/annotations/interpro",
+            "annotations/go-terms":
+                "http://testserver/v0.2/annotations/go-terms",
+            "annotations/interpro-identifiers":
+                "http://testserver/v0.2/annotations/interpro-identifiers",
             "mydata": "http://testserver/v0.2/mydata",
         }
         assert rsp['data'] == expected
