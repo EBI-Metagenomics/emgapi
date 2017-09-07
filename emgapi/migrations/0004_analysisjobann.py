@@ -22,15 +22,29 @@ class Migration(migrations.Migration):
             name='pipelinetool',
             options={'ordering': ('tool_name',)},
         ),
-
+        migrations.CreateModel(
+            name='AnalysisMetadataVariableNames',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('var_name', models.CharField(db_column='VAR_NAME', max_length=100, unique=True)),
+                ('description', models.CharField(blank=True, db_column='DESCRIPTION', max_length=255, null=True)),
+            ],
+            options={
+                'db_table': 'SUMMARY_VARIABLE_NAMES',
+            },
+        ),
+        migrations.AlterUniqueTogether(
+            name='analysismetadatavariablenames',
+            unique_together=set([('var_name', 'description')]),
+        ),
         migrations.CreateModel(
             name='AnalysisJobAnn',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('job', models.ForeignKey(db_column='JOB_ID', on_delete=django.db.models.deletion.CASCADE, related_name='analysis_metadata', serialize=False, to='emgapi.AnalysisJob')),
                 ('units', models.CharField(blank=True, db_column='UNITS', max_length=25, null=True)),
-                ('var', models.ForeignKey(db_column='VAR_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.VariableNames')),
+                ('var', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='emgapi.AnalysisMetadataVariableNames')),
                 ('var_val_ucv', models.CharField(blank=True, db_column='VAR_VAL_UCV', max_length=4000, null=True)),
+                ('job', models.ForeignKey(db_column='JOB_ID', on_delete=django.db.models.deletion.CASCADE, related_name='analysis_metadata', to='emgapi.AnalysisJob')),
             ],
             options={
                 'db_table': 'ANALYSIS_JOB_ANN',
@@ -40,32 +54,4 @@ class Migration(migrations.Migration):
             name='analysisjobann',
             unique_together=set([('job', 'var')]),
         ),
-
-        migrations.RunSQL(
-            # Production FOREIGN KEY may be different
-            # """
-            # ALTER TABLE GSC_CV_CV
-            #     DROP FOREIGN KEY GSC_CV_CV_ibfk_1,
-            #     MODIFY VAR_NAME VARCHAR(255);
-            # """
-            """
-            LOCK TABLES
-                GSC_CV_CV WRITE,
-                VARIABLE_NAMES WRITE;
-
-            ALTER TABLE GSC_CV_CV
-                DROP FOREIGN KEY GSC_CV_CV_VAR_NAME_7b3b67e1_fk_VARIABLE_NAMES_VAR_ID,
-                MODIFY VAR_NAME VARCHAR(255);
-
-            ALTER TABLE VARIABLE_NAMES
-                MODIFY VAR_NAME VARCHAR(255);
-
-            ALTER TABLE GSC_CV_CV
-                ADD CONSTRAINT GSC_CV_CV_VAR_NAME_7b3b67e1_fk_VARIABLE_NAMES_VAR_ID FOREIGN KEY (VAR_NAME)
-                      REFERENCES VARIABLE_NAMES (VAR_NAME);
-
-            UNLOCK TABLES;
-            """
-        ),
-
     ]
