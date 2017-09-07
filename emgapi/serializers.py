@@ -501,6 +501,7 @@ class AnalysisSerializer(RunSerializer):
             'sample',
             'go_slim',
             'go_terms',
+            'interpro_terms',
         )
 
 
