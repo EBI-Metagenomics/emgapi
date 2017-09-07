@@ -81,7 +81,7 @@ class TestAnnotations(object):
         call_command('import_qc', 'ABC01234',
                      os.path.dirname(os.path.abspath(__file__)))
 
-        url = reverse("emgapi:analysis-pipelines-metadata-list",
+        url = reverse("emgapi:runs-pipelines-metadata-list",
                       args=["ABC01234", "1.0"])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
