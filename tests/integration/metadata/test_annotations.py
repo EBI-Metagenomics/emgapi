@@ -61,6 +61,22 @@ class TestAnnotations(object):
         ids = [a['id'] for a in rsp['data']]
         assert ids == expected
 
+    def test_ipr(self, client, run):
+        call_command('import_summary', 'ABC01234',
+                     os.path.dirname(os.path.abspath(__file__)),
+                     suffix='.ipr')
+
+        url = reverse("emgapi:interproterms-list")
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        rsp = response.json()
+        assert len(rsp['data']) == 6
+
+        expected = ['IPR006882', 'IPR008659', 'IPR007875',
+                    'IPR033393', 'IPR015072', 'IPR024581']
+        ids = [a['id'] for a in rsp['data']]
+        assert ids == expected
+
     def test_qc(self, client, run):
         call_command('import_qc', 'ABC01234',
                      os.path.dirname(os.path.abspath(__file__)))
@@ -70,5 +86,4 @@ class TestAnnotations(object):
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
-        print(rsp)
         assert len(rsp['data']) == 12

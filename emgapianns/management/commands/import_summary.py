@@ -38,23 +38,27 @@ class Command(EMGBaseCommand):
                             logger.info("Found: %s" % _f)
                             with open(_f) as csvfile:
                                 reader = csv.reader(csvfile, delimiter=',')
-                                self.load_from_summary_file(
-                                    reader, obj.accession,
-                                    obj.pipeline.release_version
-                                )
+                                if self.suffix == '.ipr':
+                                    self.load_ipr_from_summary_file(
+                                        reader, obj.accession,
+                                        obj.pipeline.release_version
+                                    )
+                                elif self.suffix in ('.go_slim', '.go'):
+                                    self.load_go_from_summary_file(
+                                        reader, obj.accession,
+                                        obj.pipeline.release_version
+                                    )
                             continue
             elif os.path.isfile(res):
                 raise NotImplementedError("Give path to directory.")
         else:
             raise NotImplementedError("Path '%r' doesn't exist." % res)
 
-    def load_from_summary_file(self, reader, accession, pipeline):  # noqa
+    def load_go_from_summary_file(self, reader, accession, pipeline):  # noqa
         if self.suffix == '.go_slim':
             run = m_models.AnalysisJobGoSlimTerm()
         elif self.suffix == '.go':
             run = m_models.AnalysisJobGoTerm()
-        elif self.suffix == '.ipr':
-            run = m_models.AnalysisJobInterProTerm()
         run.accession = accession
         run.pipeline_version = pipeline
         new_anns = []
@@ -89,13 +93,52 @@ class Command(EMGBaseCommand):
                             go_term=ann
                         )
                         run.go_terms.append(rann)
-                    elif self.suffix == '.ipr':
+        if len(anns) > 0:
+            logger.info(
+                "Total %d Annotations for Run: %s" % (len(anns), accession))
+            if len(new_anns) > 0:
+                m_models.GoTerm.objects.insert(new_anns)
+                logger.info(
+                    "Created %d new GoTerm Annotations" % len(new_anns))
+            run.save()
+            logger.info("Saved Run %r" % run)
+
+    def load_ipr_from_summary_file(self, reader, accession, pipeline):  # noqa
+        if self.suffix == '.ipr':
+            run = m_models.AnalysisJobInterProTerm()
+        run.accession = accession
+        run.pipeline_version = pipeline
+        new_anns = []
+        anns = []
+        for row in reader:
+            try:
+                row[0].lower().startswith('ipr')
+            except KeyError:
+                pass
+            else:
+                ann = None
+                try:
+                    ann = m_models.InterProTerm.objects.get(accession=row[0])
+                except m_models.InterProTerm.DoesNotExist:
+                    ann = m_models.InterProTerm(
+                        accession=row[0],
+                        description=row[1],
+                    )
+                    new_anns.append(ann)
+                if ann is not None:
+                    anns.append(ann)
+                    if self.suffix == '.ipr':
                         rann = m_models.AnalysisJobInterProTermAnnotation(
-                            count=row[3],
+                            count=row[2],
                             interpro_term=ann
                         )
                         run.interpro_terms.append(rann)
         if len(anns) > 0:
+            logger.info(
+                "Total %d Annotations for Run: %s" % (len(anns), accession))
             if len(new_anns) > 0:
-                m_models.GoTerm.objects.insert(new_anns)
+                m_models.InterProTerm.objects.insert(new_anns)
+                logger.info(
+                    "Created %d new IPR Annotations" % len(new_anns))
             run.save()
+            logger.info("Saved Run %r" % run)
