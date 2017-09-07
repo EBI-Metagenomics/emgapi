@@ -105,7 +105,7 @@ class Command(EMGBaseCommand):
 
     def load_ipr_from_summary_file(self, reader, accession, pipeline):  # noqa
         if self.suffix == '.ipr':
-            run = m_models.AnalysisJobInterProTerm()
+            run = m_models.AnalysisJobInterproTerm()
         run.accession = accession
         run.pipeline_version = pipeline
         new_anns = []
@@ -118,9 +118,9 @@ class Command(EMGBaseCommand):
             else:
                 ann = None
                 try:
-                    ann = m_models.InterProTerm.objects.get(accession=row[0])
-                except m_models.InterProTerm.DoesNotExist:
-                    ann = m_models.InterProTerm(
+                    ann = m_models.InterproTerm.objects.get(accession=row[0])
+                except m_models.InterproTerm.DoesNotExist:
+                    ann = m_models.InterproTerm(
                         accession=row[0],
                         description=row[1],
                     )
@@ -128,7 +128,7 @@ class Command(EMGBaseCommand):
                 if ann is not None:
                     anns.append(ann)
                     if self.suffix == '.ipr':
-                        rann = m_models.AnalysisJobInterProTermAnnotation(
+                        rann = m_models.AnalysisJobInterproTermAnnotation(
                             count=row[2],
                             interpro_term=ann
                         )
@@ -137,7 +137,7 @@ class Command(EMGBaseCommand):
             logger.info(
                 "Total %d Annotations for Run: %s" % (len(anns), accession))
             if len(new_anns) > 0:
-                m_models.InterProTerm.objects.insert(new_anns)
+                m_models.InterproTerm.objects.insert(new_anns)
                 logger.info(
                     "Created %d new IPR Annotations" % len(new_anns))
             run.save()

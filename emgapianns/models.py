@@ -34,7 +34,7 @@ class GoTerm(BaseAnnotation):
     lineage = mongoengine.StringField(required=True, max_length=255)
 
 
-class InterProTerm(BaseAnnotation):
+class InterproTerm(BaseAnnotation):
     pass
 
 
@@ -57,9 +57,9 @@ class AnalysisJobGoSlimTermAnnotation(AnalysisJobAnnotation):
     go_term = mongoengine.ReferenceField(GoTerm)
 
 
-class AnalysisJobInterProTermAnnotation(AnalysisJobAnnotation):
+class AnalysisJobInterproTermAnnotation(AnalysisJobAnnotation):
 
-    interpro_term = mongoengine.ReferenceField(InterProTerm)
+    interpro_term = mongoengine.ReferenceField(InterproTerm)
 
 
 class BaseAnalysisJob(mongoengine.Document):
@@ -87,7 +87,7 @@ class AnalysisJobGoSlimTerm(BaseAnalysisJob):
         AnalysisJobGoSlimTermAnnotation, required=False)
 
 
-class AnalysisJobInterProTerm(BaseAnalysisJob):
+class AnalysisJobInterproTerm(BaseAnalysisJob):
 
     interpro_terms = mongoengine.EmbeddedDocumentListField(
-        AnalysisJobInterProTermAnnotation, required=False)
+        AnalysisJobInterproTermAnnotation, required=False)

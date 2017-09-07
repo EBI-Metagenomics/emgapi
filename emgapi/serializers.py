@@ -460,7 +460,7 @@ class AnalysisSerializer(RunSerializer):
 
     interpro_terms = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
         source='get_interproterms',
-        model=m_models.InterProTerm,
+        model=m_models.InterproTerm,
         many=True,
         read_only=True,
         related_link_view_name='emgapi:runs-pipelines-interpro-list',  # noqa
