@@ -166,7 +166,7 @@ router.register(
      r'pipelines/(?P<release_version>[0-9\.]+)/'
      r'metadata'),
     views_relations.AnalysisMetadataViewSet,
-    base_name='analysis-pipelines-metadata'
+    base_name='runs-pipelines-metadata'
 )
 
 

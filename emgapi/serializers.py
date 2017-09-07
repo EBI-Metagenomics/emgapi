@@ -476,7 +476,7 @@ class AnalysisSerializer(RunSerializer):
         model=emg_models.AnalysisJobAnn,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:analysis-pipelines-metadata-list',
+        related_link_view_name='emgapi:runs-pipelines-metadata-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
