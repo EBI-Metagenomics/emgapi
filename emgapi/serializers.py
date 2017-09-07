@@ -491,8 +491,6 @@ class AnalysisSerializer(RunSerializer):
             'url',
             'accession',
             'pipeline_version',
-            'instrument_platform',
-            'instrument_model',
             'sample_accession',
             'study_accession',
             'submit_time',
