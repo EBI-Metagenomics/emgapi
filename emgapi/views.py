@@ -516,9 +516,8 @@ class RunViewSet(mixins.RetrieveModelMixin,
         return super(RunViewSet, self).retrieve(request, *args, **kwargs)
 
 
-class AnalysisViewSet(mixins.RetrieveModelMixin,
-                      mixins.ListModelMixin,
-                      viewsets.GenericViewSet):
+class AnalysisResultViewSet(mixins.ListModelMixin,
+                            viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
 
@@ -534,6 +533,37 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
     )
 
     ordering = ('-accession',)
+
+    lookup_field = 'release_version'
+    lookup_value_regex = '[0-9.]+'
+
+    def get_queryset(self):
+        accession = self.kwargs['accession']
+        queryset = emg_models.AnalysisJob.objects \
+            .available(self.request) \
+            .filter(accession=accession) \
+            .select_related(
+                'sample',
+                'pipeline',
+                'analysis_status',
+            )
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves analysis result for the given accession and pipeline version
+        Example:
+        ---
+        `/runs/ERR1385375/pipelines`
+        """
+        return super(AnalysisResultViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class AnalysisViewSet(mixins.RetrieveModelMixin,
+                      viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.AnalysisSerializer
 
     lookup_field = 'release_version'
     lookup_value_regex = '[0-9.]+'
@@ -556,15 +586,6 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
                 'analysis_status',
             )
         return queryset
-
-    def list(self, request, *args, **kwargs):
-        """
-        Retrieves analysis result for the given accession and pipeline version
-        Example:
-        ---
-        `/runs/ERR1385375/pipelines`
-        """
-        return super(AnalysisViewSet, self).list(request, *args, **kwargs)
 
     def retrieve(self, request, *args, **kwargs):
         """

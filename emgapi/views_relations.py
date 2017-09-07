@@ -534,6 +534,15 @@ class PipelinePipelineToolRelationshipViewSet(mixins.ListModelMixin,
 
     serializer_class = emg_serializers.PipelineToolSerializer
 
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'tool_name',
+    )
+    ordering = ('tool_name',)
+
     lookup_field = 'release_version'
     lookup_value_regex = '[a-zA-Z0-9.]+'
 
@@ -595,6 +604,15 @@ class SampleMetadataRelationshipViewSet(mixins.ListModelMixin,
 
     serializer_class = emg_serializers.SampleAnnSerializer
     pagination_class = emg_page.MetadataSetPagination
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'var_id',
+    )
+    ordering = ('var_id',)
 
     lookup_field = 'accession'
     lookup_value_regex = '[a-zA-Z0-9\-\_]+'
