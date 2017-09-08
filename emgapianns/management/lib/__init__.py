@@ -32,10 +32,10 @@ class EMGBaseCommand(BaseCommand):
                 .filter(sample__study__accession=self.accession).available()
             if len(self.obj_list) < 1:
                 self.obj_list = emg_models.AnalysisJob.objects \
-                    .filter(sample__accession=self.accession)
+                    .filter(sample__accession=self.accession).available()
             if len(self.obj_list) < 1:
                 self.obj_list = emg_models.AnalysisJob.objects \
-                    .filter(accession=self.accession)
+                    .filter(accession=self.accession).available()
             if len(self.obj_list) < 1:
                 raise AttributeError(
                     "Invalid accession: %s" % self.accession)
