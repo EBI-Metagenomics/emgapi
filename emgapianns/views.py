@@ -211,7 +211,7 @@ class AnalysisGoTermRelViewSet(emg_mixins.MultipleFieldLookupMixin,
         Retrieves GO terms for the given run and pipeline version
         Example:
         ---
-        `/runs/ERR1385375/pipelines/3.0/goterms`
+        `/runs/ERR1385375/pipelines/3.0/go-terms`
         """
 
         analysis = m_models.AnalysisJobGoTerm.objects.filter(
@@ -266,7 +266,7 @@ class AnalysisGoSlimRelViewSet(emg_mixins.MultipleFieldLookupMixin,
         Retrieves GO slim for the given run and pipeline version
         Example:
         ---
-        `/runs/ERR1385375/pipelines/3.0/goslim`
+        `/runs/ERR1385375/pipelines/3.0/go-slim`
         """
 
         analysis = m_models.AnalysisJobGoSlimTerm.objects.filter(
@@ -321,7 +321,7 @@ class AnalysisInterproIdentifierRelViewSet(emg_mixins.MultipleFieldLookupMixin,
         Retrieves InterPro terms for the given run and pipeline version
         Example:
         ---
-        `/runs/ERR1385375/pipelines/3.0/interpro`
+        `/runs/ERR1385375/pipelines/3.0/interpro-identifiers`
         """
 
         analysis = m_models.AnalysisJobInterproIdentifier.objects.filter(
