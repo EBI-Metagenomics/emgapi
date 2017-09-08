@@ -37,8 +37,8 @@ class EMGBaseCommand(BaseCommand):
                 self.obj_list = emg_models.AnalysisJob.objects \
                     .filter(accession=self.accession).available()
             if len(self.obj_list) < 1:
-                raise AttributeError(
-                    "Invalid accession: %s" % self.accession)
+                logger.error(
+                    "Study %s has no runs, SKIPPING!" % self.accession)
 
     def populate_from_accession(self, options):
         raise NotImplementedError()
