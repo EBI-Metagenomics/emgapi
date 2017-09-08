@@ -573,19 +573,15 @@ class AnalysisMetadataViewSet(emg_mixins.MultipleFieldLookupMixin,
 
     lookup_fields = ('accession', 'release_version')
 
-    def get_object(self):
+    def get_queryset(self):
         accession = self.kwargs['accession']
         release_version = self.kwargs['release_version']
-        return emg_models.AnalysisJobAnn.objects.filter(
+        queryset = emg_models.AnalysisJobAnn.objects.filter(
             job__accession=accession,
             job__pipeline__release_version=release_version) \
             .select_related('job', 'var') \
             .order_by('var')
-
-    def get_queryset(self):
-        return emg_models.AnalysisJobAnn.objects.all() \
-            .select_related('job', 'var') \
-            .order_by('var')
+        return queryset
 
     def list(self, request, *args, **kwargs):
         """
@@ -619,10 +615,11 @@ class SampleMetadataRelationshipViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         accession = self.kwargs[self.lookup_field]
-        return emg_models.SampleAnn.objects.filter(
+        queryset = emg_models.SampleAnn.objects.filter(
             sample__accession=accession) \
             .select_related('sample', 'var') \
             .order_by('var')
+        return queryset
 
     def list(self, request, *args, **kwargs):
         """
