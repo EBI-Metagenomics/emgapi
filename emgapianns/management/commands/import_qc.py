@@ -36,7 +36,7 @@ class Command(EMGBaseCommand):
             elif os.path.isfile(res):
                 raise NotImplementedError("Give path to directory.")
         else:
-            raise NotImplementedError("Path %r doesn't exist." % res)
+            logger.info("Path %r doesn't exist." % res)
 
     def import_qc(self, reader, job):
         anns = []
@@ -52,11 +52,9 @@ class Command(EMGBaseCommand):
                 var = emg_models.AnalysisMetadataVariableNames.objects \
                     .get(var_name=row[0])
             if var is not None:
-                job_ann = emg_models.AnalysisJobAnn()
-                job_ann.job = job
-                job_ann.var = var
-                job_ann.var_val_ucv = row[1]
+                job_ann = emg_models.AnalysisJobAnn.objects.get_or_create(
+                    job=job, var=var, var_val_ucv=row[1]
+                )
                 anns.append(job_ann)
-        emg_models.AnalysisJobAnn.objects.bulk_create(anns)
         logger.info(
             "Total %d Annotations for Run: %s" % (len(anns), job))
