@@ -52,7 +52,7 @@ class Command(EMGBaseCommand):
             elif os.path.isfile(res):
                 raise NotImplementedError("Give path to directory.")
         else:
-            raise NotImplementedError("Path '%r' doesn't exist." % res)
+            logger.error("Path %r doesn't exist. SKIPPING!" % res)
 
     def load_go_from_summary_file(self, reader, accession, pipeline):  # noqa
         if self.suffix == '.go_slim':

@@ -36,7 +36,7 @@ class Command(EMGBaseCommand):
             elif os.path.isfile(res):
                 raise NotImplementedError("Give path to directory.")
         else:
-            logger.info("Path %r doesn't exist." % res)
+            logger.error("Path %r doesn't exist. SKIPPING!" % res)
 
     def import_qc(self, reader, job):
         anns = []
