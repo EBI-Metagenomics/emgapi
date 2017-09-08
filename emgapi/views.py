@@ -21,6 +21,7 @@ from collections import OrderedDict
 from django.conf import settings
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
+from django.http import Http404
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -482,9 +483,16 @@ class RunViewSet(mixins.RetrieveModelMixin,
         return queryset
 
     def get_object(self):
-        return emg_models.Run.objects \
+        queryset = emg_models.Run.objects \
+            .available(self.request) \
             .filter(accession=self.kwargs['accession']) \
             .distinct().last()
+        if queryset is None:
+            raise Http404(
+                ('No %s matches the given query.' %
+                 emg_models.Run._meta.object_name)
+            )
+        return queryset
 
     def get_serializer_class(self):
         return super(RunViewSet, self).get_serializer_class()
