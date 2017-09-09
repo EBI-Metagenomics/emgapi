@@ -17,7 +17,21 @@
 from rest_framework import routers
 
 
+class ApiRootView(routers.APIRootView):
+    """
+    EBI Metagenomics API
+    """
+    pass
+
+
 class DefaultRouter(routers.DefaultRouter):
+
+    """
+    Custom default router extends the rest_framework DefaultRouter and
+    adds in a default API root view
+    """
+
+    APIRootView = ApiRootView
 
     def extend(self, router):
         self.registry.extend(router.registry)
