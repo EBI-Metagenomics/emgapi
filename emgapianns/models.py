@@ -22,7 +22,9 @@ class BaseAnnotation(mongoengine.DynamicDocument):
     accession = mongoengine.StringField(
         primary_key=True, required=True,
         max_length=20, unique_with=('description'))
-    description = mongoengine.StringField(required=True, max_length=255)
+    description = mongoengine.StringField(
+        required=True, max_length=255,
+        unique_with=('accession'))
 
     meta = {
         'abstract': True,
@@ -70,6 +72,7 @@ class BaseAnalysisJob(mongoengine.Document):
     pipeline_version = mongoengine.StringField(
         required=True, max_length=20,
         unique_with=('accession'))
+
     meta = {
         'abstract': True,
     }
