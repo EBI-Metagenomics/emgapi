@@ -11,14 +11,14 @@ Metagenomics service is a large-scale platform for analysing and archiving metag
 EMG API
 =======
 
-Configure:
-----------
+Configure
+---------
 
 Create configuration file in `~/.yamjam/config.yaml <docker/config.yaml>`_.
 
 
-Install:
---------
+Install
+-------
 
 Install Miniconda::
 
@@ -48,8 +48,16 @@ Start application::
 NOTE: `~/emgvar` is used as default directory to store logs, etc.
 
 
-Tests:
-------
+Run in Docker
+-------------
+
+Start containers using::
+
+    docker-compose -f docker/docker-compose.yml up --build --abort-on-container-exit
+
+
+Tests
+-----
 
 To run tests::
 
