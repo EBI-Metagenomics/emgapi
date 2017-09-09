@@ -389,6 +389,12 @@ class SampleManager(models.Manager):
 
     def get_queryset(self):
         return SampleQuerySet(self.model, using=self._db) \
+            .extra(
+                {
+                    'longitude': "CAST(longitude as DECIMAL(10,5))",
+                    'latitude': "CAST(latitude as DECIMAL(10,5))"
+                }
+            ) \
             .annotate(runs_count=Count('runs'))
 
     def available(self, request):
