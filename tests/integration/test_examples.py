@@ -15,8 +15,12 @@
 # limitations under the License.
 
 import pytest
-
+import os
 import sys
+
+from jsonapi_client import Session
+
+from django.core.management import call_command
 
 # import fixtures
 from test_utils.emg_fixtures import *  # noqa
@@ -24,31 +28,48 @@ from test_utils.emg_fixtures import *  # noqa
 
 @pytest.mark.skipif(sys.version_info < (3, 6),
                     reason="requires Python 3.6")
+@pytest.mark.usefixtures('mongodb')
 @pytest.mark.django_db
-def test_list_samples(live_server, runs):
-    """
-    List samples and its metadata for given study
-    """
+class TestExamples(object):
 
-    from jsonapi_client import Session
+    def test_list(self, live_server, runs):
+        """
+        List samples and its metadata for given study
+        """
 
-    with Session('%s/v0.2/' % live_server.url) as s:
-        study = s.get('studies', 'SRP0025').resource
-        assert study.accession == 'SRP0025'
-        # list samples
-        sample_list = study.samples
-        assert len(sample_list) == 1
-        for sample in sample_list:
-            # list runs
-            run_list = sample.runs
-            assert len(run_list) == 1
-            for run in run_list:
-                print(
-                    study.accession,
-                    study.project_id,
-                    sample.accession,
-                    # sample.biome.biome_name,
-                    sample.runs_count,
-                    run.accession,
-                    run.experiment_type,
-                )
+        with Session('%s/v0.2/' % live_server.url) as s:
+            study = s.get('studies', 'SRP0025').resource
+            assert study.accession == 'SRP0025'
+            # list samples
+            sample_list = study.samples
+            assert len(sample_list) == 1
+            for sample in sample_list:
+                # list runs
+                run_list = sample.runs
+                assert len(run_list) == 1
+                for run in run_list:
+                    print(
+                        study.accession,
+                        study.project_id,
+                        sample.accession,
+                        sample.biome.biome_name,
+                        sample.runs_count,
+                        run.accession,
+                        run.experiment_type.experiment_type,
+                    )
+
+    def test_annotations(self, live_server, run):
+        call_command('import_summary', 'ABC01234',
+                     os.path.join(
+                         os.path.dirname(os.path.abspath(__file__)),
+                         'metadata'
+                     ), suffix='.go_slim')
+
+        with Session('%s/v0.2/' % live_server.url) as s:
+            run = s.get('runs', 'ABC01234').resource
+            for analysis in run.analysis:
+                go_terms = []
+                for go in analysis.go_slim:
+                    go_terms.append(go.accession)
+                expected = ['GO:0006810', 'GO:0008152', 'GO:0055114']
+                assert go_terms == expected
