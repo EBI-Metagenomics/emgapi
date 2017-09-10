@@ -71,8 +71,8 @@ class InterproIdentifierViewSet(m_viewset.ReadOnlyModelViewSet):
         return super(InterproIdentifierViewSet, self).get_serializer_class()
 
 
-class GoTermRunRelationshipViewSet(mixins.ListModelMixin,
-                                   viewsets.GenericViewSet):
+class GoTermAnalysisRelationshipViewSet(mixins.ListModelMixin,
+                                        viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
 
@@ -128,12 +128,12 @@ class GoTermRunRelationshipViewSet(mixins.ListModelMixin,
         ---
         `/annotations/go-terms/GO:009579/runs`
         """
-        return super(GoTermRunRelationshipViewSet, self) \
+        return super(GoTermAnalysisRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
 
 
-class InterproIdentifierRunRelationshipViewSet(mixins.ListModelMixin,
-                                               viewsets.GenericViewSet):
+class InterproIdentifierAnalysisRelationshipViewSet(mixins.ListModelMixin,
+                                                    viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
 
@@ -185,13 +185,13 @@ class InterproIdentifierRunRelationshipViewSet(mixins.ListModelMixin,
         ---
         `/annotations/GO:009579/analysis`
         """
-        return super(InterproIdentifierRunRelationshipViewSet, self) \
+        return super(InterproIdentifierAnalysisRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
 
 
-class AnalysisGoTermRelViewSet(emg_mixins.MultipleFieldLookupMixin,
-                               mixins.ListModelMixin,
-                               m_viewset.GenericViewSet):
+class AnalysisGoTermRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
+                                        mixins.ListModelMixin,
+                                        m_viewset.GenericViewSet):
 
     serializer_class = m_serializers.GoTermRetriveSerializer
 
@@ -244,9 +244,9 @@ class AnalysisGoTermRelViewSet(emg_mixins.MultipleFieldLookupMixin,
         return Response(serializer.data)
 
 
-class AnalysisGoSlimRelViewSet(emg_mixins.MultipleFieldLookupMixin,
-                               mixins.ListModelMixin,
-                               m_viewset.GenericViewSet):
+class AnalysisGoSlimRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
+                                        mixins.ListModelMixin,
+                                        m_viewset.GenericViewSet):
 
     serializer_class = m_serializers.GoTermRetriveSerializer
 
@@ -299,9 +299,9 @@ class AnalysisGoSlimRelViewSet(emg_mixins.MultipleFieldLookupMixin,
         return Response(serializer.data)
 
 
-class AnalysisInterproIdentifierRelViewSet(emg_mixins.MultipleFieldLookupMixin,
-                                           mixins.ListModelMixin,
-                                           m_viewset.GenericViewSet):
+class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
+    emg_mixins.MultipleFieldLookupMixin,
+    mixins.ListModelMixin, m_viewset.GenericViewSet):
 
     serializer_class = m_serializers.InterproIdentifierRetriveSerializer
 
