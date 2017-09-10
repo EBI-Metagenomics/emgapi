@@ -36,13 +36,13 @@ mongo_router.register(
 
 mongo_router.register(
     r'annotations/go-terms/(?P<accession>[a-zA-Z0-9\:]+)/analysis',
-    m_views.GoTermRunRelationshipViewSet,
+    m_views.GoTermAnalysisRelationshipViewSet,
     base_name='goterms-analysis'
 )
 
 mongo_router.register(
     r'annotations/interpro-identifiers/(?P<accession>[a-zA-Z0-9\:]+)/analysis',
-    m_views.InterproIdentifierRunRelationshipViewSet,
+    m_views.InterproIdentifierAnalysisRelationshipViewSet,
     base_name='interproidentifier-analysis'
 )
 
@@ -52,7 +52,7 @@ router.register(
     (r'runs/(?P<accession>[a-zA-Z0-9_]+)/'
      r'pipelines/(?P<release_version>[0-9\.]+)/'
      r'go-terms'),
-    m_views.AnalysisGoTermRelViewSet,
+    m_views.AnalysisGoTermRelationshipViewSet,
     base_name='runs-pipelines-goterms'
 )
 
@@ -60,7 +60,7 @@ router.register(
     (r'runs/(?P<accession>[a-zA-Z0-9_]+)/'
      r'pipelines/(?P<release_version>[0-9\.]+)/'
      r'go-slim'),
-    m_views.AnalysisGoSlimRelViewSet,
+    m_views.AnalysisGoSlimRelationshipViewSet,
     base_name='runs-pipelines-goslim'
 )
 
@@ -68,6 +68,6 @@ router.register(
     (r'runs/(?P<accession>[a-zA-Z0-9_]+)/'
      r'pipelines/(?P<release_version>[0-9\.]+)/'
      r'interpro-identifiers'),
-    m_views.AnalysisInterproIdentifierRelViewSet,
+    m_views.AnalysisInterproIdentifierRelationshipViewSet,
     base_name='runs-pipelines-interpro'
 )
