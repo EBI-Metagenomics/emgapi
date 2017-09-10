@@ -514,7 +514,7 @@ class BiomeTreeViewSet(mixins.ListModelMixin,
 
     def list(self, request, *args, **kwargs):
         """
-        Retrieves children for the given Biome node.
+        Retrieves children for the given Biome node
         Example:
         ---
         `/biomes/root:Environmental:Aquatic/children`

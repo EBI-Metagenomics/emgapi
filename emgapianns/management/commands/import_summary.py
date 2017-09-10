@@ -40,13 +40,11 @@ class Command(EMGBaseCommand):
                                 reader = csv.reader(csvfile, delimiter=',')
                                 if self.suffix == '.ipr':
                                     self.load_ipr_from_summary_file(
-                                        reader, obj.accession,
-                                        obj.pipeline.release_version
+                                        reader, obj
                                     )
                                 elif self.suffix in ('.go_slim', '.go'):
                                     self.load_go_from_summary_file(
-                                        reader, obj.accession,
-                                        obj.pipeline.release_version
+                                        reader, obj
                                     )
                             continue
             elif os.path.isfile(res):
@@ -54,13 +52,15 @@ class Command(EMGBaseCommand):
         else:
             logger.error("Path %r doesn't exist. SKIPPING!" % res)
 
-    def load_go_from_summary_file(self, reader, accession, pipeline):  # noqa
-        if self.suffix == '.go_slim':
-            run = m_models.AnalysisJobGoSlimTerm()
-        elif self.suffix == '.go':
+    def load_go_from_summary_file(self, reader, obj):  # noqa
+        try:
+            run = m_models.AnalysisJobGoTerm.objects.get(
+                accession=obj.accession)
+        except m_models.AnalysisJobGoTerm.DoesNotExist:
             run = m_models.AnalysisJobGoTerm()
-        run.accession = accession
-        run.pipeline_version = pipeline
+        run.accession = obj.accession
+        run.pipeline_version = obj.pipeline.release_version
+        run.job_id = obj.job_id
         new_anns = []
         anns = []
         for row in reader:
@@ -82,7 +82,7 @@ class Command(EMGBaseCommand):
                 if ann is not None:
                     anns.append(ann)
                     if self.suffix == '.go_slim':
-                        rann = m_models.AnalysisJobGoSlimTermAnnotation(
+                        rann = m_models.AnalysisJobGoTermAnnotation(
                             count=row[3],
                             go_term=ann
                         )
@@ -95,7 +95,8 @@ class Command(EMGBaseCommand):
                         run.go_terms.append(rann)
         if len(anns) > 0:
             logger.info(
-                "Total %d Annotations for Run: %s" % (len(anns), accession))
+                "Total %d Annotations for Run: %s" % (
+                    len(anns), obj.accession))
             if len(new_anns) > 0:
                 m_models.GoTerm.objects.insert(new_anns)
                 logger.info(
@@ -103,11 +104,15 @@ class Command(EMGBaseCommand):
             run.save()
             logger.info("Saved Run %r" % run)
 
-    def load_ipr_from_summary_file(self, reader, accession, pipeline):  # noqa
-        if self.suffix == '.ipr':
+    def load_ipr_from_summary_file(self, reader, obj):  # noqa
+        try:
+            run = m_models.AnalysisJobInterproIdentifier.objects.get(
+                accession=obj.accession)
+        except m_models.AnalysisJobInterproIdentifier.DoesNotExist:
             run = m_models.AnalysisJobInterproIdentifier()
-        run.accession = accession
-        run.pipeline_version = pipeline
+        run.accession = obj.accession
+        run.pipeline_version = obj.pipeline.release_version
+        run.job_id = obj.job_id
         new_anns = []
         anns = []
         for row in reader:
@@ -136,7 +141,8 @@ class Command(EMGBaseCommand):
                         run.interpro_identifiers.append(rann)
         if len(anns) > 0:
             logger.info(
-                "Total %d Annotations for Run: %s" % (len(anns), accession))
+                "Total %d Annotations for Run: %s" % (
+                    len(anns), obj.accession))
             if len(new_anns) > 0:
                 m_models.InterproIdentifier.objects.insert(new_anns)
                 logger.info(

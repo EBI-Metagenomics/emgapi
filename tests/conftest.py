@@ -39,13 +39,12 @@ def pytest_configure():
 # Mock MongoDB connection
 @pytest.fixture(scope='function')
 def mongodb(request):
-    mongoengine.connect('testdb')
-    mongoengine.connection.get_connection()
-    db = mongoengine.connection.get_db()
+    db = mongoengine.connect('testdb')
 
     def finalizer():
-        mongoengine.connection.disconnect()
-        db.collection.drop()
+        db.drop_database('testdb')
+        db.close()
+
     request.addfinalizer(finalizer)
 
     return db
