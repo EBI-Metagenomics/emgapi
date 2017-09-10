@@ -40,14 +40,15 @@ class GoTermViewSet(m_viewset.ReadOnlyModelViewSet):
     serializer_class = m_serializers.GoTermSerializer
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9\:]+'
+    lookup_value_regex = 'GO:[0-9]+'
 
     def get_queryset(self):
         return m_models.GoTerm.objects.all()
 
     def get_object(self):
-        accession = self.kwargs.get('accession', None)
-        return m_models.GoTerm.objects(accession=accession).first()
+        accession = self.kwargs[self.lookup_field]
+        return get_object_or_404(
+            m_models.GoTerm.objects, accession=accession)
 
     def get_serializer_class(self):
         return super(GoTermViewSet, self).get_serializer_class()
@@ -58,14 +59,15 @@ class InterproIdentifierViewSet(m_viewset.ReadOnlyModelViewSet):
     serializer_class = m_serializers.InterproIdentifierSerializer
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9\:]+'
+    lookup_value_regex = 'IPR[0-9]+'
 
     def get_queryset(self):
         return m_models.InterproIdentifier.objects.all()
 
     def get_object(self):
-        accession = self.kwargs.get('accession', None)
-        return m_models.InterproIdentifier.objects(accession=accession).first()
+        accession = self.kwargs[self.lookup_field]
+        return get_object_or_404(
+            m_models.InterproIdentifier.objects, accession=accession)
 
     def get_serializer_class(self):
         return super(InterproIdentifierViewSet, self).get_serializer_class()
