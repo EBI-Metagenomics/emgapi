@@ -17,7 +17,7 @@
 from rest_framework import routers
 
 
-class ApiView(routers.APIRootView):
+class ApiBrowserView(routers.APIRootView):
     """
     EBI Metagenomics API
     """
@@ -31,7 +31,7 @@ class DefaultRouter(routers.DefaultRouter):
     adds in a default API root view
     """
 
-    APIRootView = ApiView
+    APIRootView = ApiBrowserView
 
     def extend(self, router):
         self.registry.extend(router.registry)
