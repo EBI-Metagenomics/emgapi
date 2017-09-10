@@ -60,10 +60,8 @@ class TestExamples(object):
 
     def test_annotations(self, live_server, run):
         call_command('import_summary', 'ABC01234',
-                     os.path.join(
-                         os.path.dirname(os.path.abspath(__file__)),
-                         'metadata'
-                     ), suffix='.go_slim')
+                     os.path.dirname(os.path.abspath(__file__)),
+                     suffix='.go_slim')
 
         with Session('%s/v0.2/' % live_server.url) as s:
             run = s.get('runs', 'ABC01234').resource

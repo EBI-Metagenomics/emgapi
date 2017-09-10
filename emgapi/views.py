@@ -115,7 +115,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
 
     def list(self, request, *args, **kwargs):
         """
-        Retrieves top level Biome nodes.
+        Retrieves top level Biome nodes
         Example:
         ---
         `/biomes`
@@ -138,7 +138,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     )
     def top10(self, request):
         """
-        Retrieve 10 most popular biomes:
+        Retrieve 10 most popular biomes
         ---
         `/biomes/top10`
         """
