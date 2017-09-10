@@ -149,6 +149,18 @@ class GoTermAnalysisRelationshipViewSet(mixins.ListModelMixin,
     lookup_field = 'accession'
 
     def get_queryset(self):
+        return emg_models.AnalysisJob.objects.available(self.request)
+
+    def get_serializer_class(self):
+        return emg_serializers.AnalysisSerializer
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of analysis results for the given GO term
+        Example:
+        ---
+        `/annotations/go-terms/GO:009579/analysis`
+        """
         accession = self.kwargs[self.lookup_field]
         annotation = get_object_or_404(
             m_models.GoTerm.objects, accession=accession)
@@ -164,25 +176,19 @@ class GoTermAnalysisRelationshipViewSet(mixins.ListModelMixin,
         queryset = emg_models.AnalysisJob.objects \
             .filter(accession__in=job_ids) \
             .available(self.request) \
-            .select_related(
+            .prefetch_related(
                 'sample',
                 'analysis_status',
-                'experiment_type'
+                'experiment_type',
+                'pipeline'
             )
-        return queryset
-
-    def get_serializer_class(self):
-        return emg_serializers.AnalysisSerializer
-
-    def list(self, request, accession, *args, **kwargs):
-        """
-        Retrieves list of analysis results for the given GO term
-        Example:
-        ---
-        `/annotations/go-terms/GO:009579/analysis`
-        """
-        return super(GoTermAnalysisRelationshipViewSet, self) \
-            .list(request, *args, **kwargs)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class InterproIdentifierAnalysisRelationshipViewSet(mixins.ListModelMixin,
@@ -211,6 +217,18 @@ class InterproIdentifierAnalysisRelationshipViewSet(mixins.ListModelMixin,
     lookup_field = 'accession'
 
     def get_queryset(self):
+        return emg_models.AnalysisJob.objects.available(self.request)
+
+    def get_serializer_class(self):
+        return emg_serializers.AnalysisSerializer
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of analysis results for the given InterPro identifier
+        Example:
+        ---
+        `/annotations/interpro-identifier/IPR020405/analysis`
+        """
         accession = self.kwargs[self.lookup_field]
         annotation = get_object_or_404(
             m_models.InterproIdentifier.objects, accession=accession)
@@ -223,25 +241,19 @@ class InterproIdentifierAnalysisRelationshipViewSet(mixins.ListModelMixin,
         queryset = emg_models.AnalysisJob.objects \
             .filter(accession__in=job_ids) \
             .available(self.request) \
-            .select_related(
+            .prefetch_related(
                 'sample',
                 'analysis_status',
-                'experiment_type'
+                'experiment_type',
+                'pipeline'
             )
-        return queryset
-
-    def get_serializer_class(self):
-        return emg_serializers.AnalysisSerializer
-
-    def list(self, request, accession, *args, **kwargs):
-        """
-        Retrieves list of analysis results for the given InterPro identifier
-        Example:
-        ---
-        `/annotations/interpro-identifier/IPR020405/analysis`
-        """
-        return super(InterproIdentifierAnalysisRelationshipViewSet, self) \
-            .list(request, *args, **kwargs)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class AnalysisGoTermRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
@@ -253,13 +265,7 @@ class AnalysisGoTermRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
     lookup_fields = ('accession', 'release_version')
 
     def get_queryset(self):
-        return emg_models.AnalysisJob.objects \
-            .available(self.request) \
-            .select_related(
-                'sample',
-                'pipeline',
-                'analysis_status',
-            )
+        return emg_models.AnalysisJob.objects.available(self.request)
 
     def list(self, request, accession, release_version, *args, **kwargs):
         """
@@ -308,13 +314,7 @@ class AnalysisGoSlimRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
     lookup_fields = ('accession', 'release_version')
 
     def get_queryset(self):
-        return emg_models.AnalysisJob.objects \
-            .available(self.request) \
-            .select_related(
-                'sample',
-                'pipeline',
-                'analysis_status',
-            )
+        return emg_models.AnalysisJob.objects.available(self.request)
 
     def list(self, request, accession, release_version, *args, **kwargs):
         """
@@ -363,13 +363,7 @@ class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
     lookup_fields = ('accession', 'release_version')
 
     def get_queryset(self):
-        return emg_models.AnalysisJob.objects \
-            .available(self.request) \
-            .select_related(
-                'sample',
-                'pipeline',
-                'analysis_status',
-            )
+        return emg_models.AnalysisJob.objects.available(self.request)
 
     def list(self, request, accession, release_version, *args, **kwargs):
         """
