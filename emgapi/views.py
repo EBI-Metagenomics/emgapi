@@ -101,7 +101,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     ordering = ('biome_id',)
 
     lookup_field = 'lineage'
-    lookup_value_regex = '[a-zA-Z0-9\:\-\s\(\)\<\>]+'
+    lookup_value_regex = '[\w\s]+'
 
     def get_serializer_class(self):
         return super(BiomeViewSet, self).get_serializer_class()
