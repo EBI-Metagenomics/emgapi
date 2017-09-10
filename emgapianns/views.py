@@ -148,13 +148,10 @@ class GoTermAnalysisRelationshipViewSet(mixins.ListModelMixin,
 
     lookup_field = 'accession'
 
-    def get_object(self):
-        accession = self.kwargs[self.lookup_field]
-        return get_object_or_404(
-            m_models.GoTerm.objects, accession=accession)
-
     def get_queryset(self):
-        annotation = self.get_object()
+        accession = self.kwargs[self.lookup_field]
+        annotation = get_object_or_404(
+            m_models.GoTerm.objects, accession=accession)
         logger.info("get accession %s" % annotation.accession)
         job_ids = m_models.AnalysisJobGoTerm.objects \
             .filter(
@@ -219,7 +216,9 @@ class InterproIdentifierAnalysisRelationshipViewSet(mixins.ListModelMixin,
             m_models.InterproIdentifier.objects, accession=accession)
 
     def get_queryset(self):
-        annotation = self.get_object()
+        accession = self.kwargs[self.lookup_field]
+        annotation = get_object_or_404(
+            m_models.InterproIdentifier.objects, accession=accession)
         logger.info("get identifier %s" % annotation.accession)
         job_ids = m_models.AnalysisJobInterproIdentifier.objects \
             .filter(interpro_identifiers__interpro_identifier=annotation) \
