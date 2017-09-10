@@ -599,6 +599,10 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
     def get_study_accession(self, obj):
         return obj.study.accession
 
+    latitude = serializers.FloatField()
+
+    longitude = serializers.FloatField()
+
     # relationships
     biome = serializers.HyperlinkedRelatedField(
         read_only=True,
@@ -643,12 +647,29 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
 
     class Meta:
         model = emg_models.Sample
-        exclude = (
-            'is_public',
-            'submission_account_id',
-            'metadata_received',
-            'sequencedata_archived',
-            'sequencedata_received',
+        fields = (
+            'url',
+            'study_accession',
+            'runs_count',
+            'accession',
+            'analysis_completed',
+            'collection_date',
+            'geo_loc_name',
+            'longitude',
+            'latitude',
+            'sample_desc',
+            'environment_biome',
+            'environment_feature',
+            'environment_material',
+            'sample_name',
+            'sample_alias',
+            'host_tax_id',
+            'species',
+            'last_update',
+            'biome',
+            'study',
+            'runs',
+            'metadata',
         )
 
 

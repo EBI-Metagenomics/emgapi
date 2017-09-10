@@ -96,8 +96,8 @@ class TestSampleAPI(APITestCase):
         assert _attr['sample-alias'] == "DRS012345"
         assert not _attr['host-tax-id']
         assert not _attr['species']
-        assert _attr['latitude'] == "12.3456"
-        assert _attr['longitude'] == "123.4567"
+        assert _attr['latitude'] == 12.3456
+        assert _attr['longitude'] == 123.4567
         # assert _attr['last_update'] == str(self.data['date'])
 
     def test_public(self):

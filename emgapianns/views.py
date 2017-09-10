@@ -16,6 +16,8 @@
 
 import logging
 
+from mongoengine.queryset.visitor import Q
+
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -37,42 +39,92 @@ logger = logging.getLogger(__name__)
 
 class GoTermViewSet(m_viewset.ReadOnlyModelViewSet):
 
+    """
+    Provides list of GO terms.
+    """
+
     serializer_class = m_serializers.GoTermSerializer
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9\:]+'
+    lookup_value_regex = 'GO:[0-9]+'
 
     def get_queryset(self):
         return m_models.GoTerm.objects.all()
 
     def get_object(self):
-        accession = self.kwargs.get('accession', None)
-        return m_models.GoTerm.objects(accession=accession).first()
+        accession = self.kwargs[self.lookup_field]
+        return get_object_or_404(
+            m_models.GoTerm.objects, accession=accession)
 
     def get_serializer_class(self):
         return super(GoTermViewSet, self).get_serializer_class()
 
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of GO terms
+        Example:
+        ---
+        `/annotations/go-terms`
+        """
+        return super(GoTermViewSet, self) \
+            .list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves GO term
+        Example:
+        ---
+        `/annotations/go-terms/GO:009579`
+        """
+        return super(GoTermViewSet, self) \
+            .retrieve(request, *args, **kwargs)
+
 
 class InterproIdentifierViewSet(m_viewset.ReadOnlyModelViewSet):
+
+    """
+    Provides list of InterPro identifiers.
+    """
 
     serializer_class = m_serializers.InterproIdentifierSerializer
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9\:]+'
+    lookup_value_regex = 'IPR[0-9]+'
 
     def get_queryset(self):
         return m_models.InterproIdentifier.objects.all()
 
     def get_object(self):
-        accession = self.kwargs.get('accession', None)
-        return m_models.InterproIdentifier.objects(accession=accession).first()
+        accession = self.kwargs[self.lookup_field]
+        return get_object_or_404(
+            m_models.InterproIdentifier.objects, accession=accession)
 
     def get_serializer_class(self):
         return super(InterproIdentifierViewSet, self).get_serializer_class()
 
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of InterPro identifier
+        Example:
+        ---
+        `/annotations/interpro-identifier`
+        """
+        return super(InterproIdentifierViewSet, self) \
+            .list(request, *args, **kwargs)
 
-class GoTermRunRelationshipViewSet(mixins.ListModelMixin,
-                                   viewsets.GenericViewSet):
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves InterPro identifier
+        Example:
+        ---
+        `/annotations/interpro-identifier/IPR020405`
+        """
+        return super(InterproIdentifierViewSet, self) \
+            .retrieve(request, *args, **kwargs)
+
+
+class GoTermAnalysisRelationshipViewSet(mixins.ListModelMixin,
+                                        viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
 
@@ -96,20 +148,24 @@ class GoTermRunRelationshipViewSet(mixins.ListModelMixin,
 
     lookup_field = 'accession'
 
+    def get_object(self):
+        accession = self.kwargs[self.lookup_field]
+        return get_object_or_404(
+            m_models.GoTerm.objects, accession=accession)
+
     def get_queryset(self):
-        annotation = get_object_or_404(
-            m_models.GoTerm.objects,
-            accession=self.kwargs[self.lookup_field])
-        run_ids = m_models.AnalysisJobGoTerm.objects \
-            .filter(go_terms__go_term=annotation.pk) \
-            .only('accession', 'pipeline_version')
-        run_ids2 = m_models.AnalysisJobGoSlimTerm.objects \
-            .filter(go_slim__go_term=annotation.pk) \
-            .only('accession', 'pipeline_version')
-        run_ids = [str(r.accession) for r in run_ids]
-        run_ids.extend([str(r.accession) for r in run_ids2])
+        annotation = self.get_object()
+        logger.info("get accession %s" % annotation.accession)
+        job_ids = m_models.AnalysisJobGoTerm.objects \
+            .filter(
+                Q(go_slim__go_term=annotation) |
+                Q(go_terms__go_term=annotation)
+            ) \
+            .only('job_id')
+        logger.info("Found %d analysis" % len(job_ids))
+        job_ids = [str(j.accession) for j in job_ids]
         queryset = emg_models.AnalysisJob.objects \
-            .filter(accession__in=run_ids) \
+            .filter(accession__in=job_ids) \
             .available(self.request) \
             .select_related(
                 'sample',
@@ -123,17 +179,17 @@ class GoTermRunRelationshipViewSet(mixins.ListModelMixin,
 
     def list(self, request, accession, *args, **kwargs):
         """
-        Retrieves list of runs for the given sample accession
+        Retrieves list of analysis results for the given GO term
         Example:
         ---
-        `/annotations/go-terms/GO:009579/runs`
+        `/annotations/go-terms/GO:009579/analysis`
         """
-        return super(GoTermRunRelationshipViewSet, self) \
+        return super(GoTermAnalysisRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
 
 
-class InterproIdentifierRunRelationshipViewSet(mixins.ListModelMixin,
-                                               viewsets.GenericViewSet):
+class InterproIdentifierAnalysisRelationshipViewSet(mixins.ListModelMixin,
+                                                    viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
 
@@ -157,16 +213,21 @@ class InterproIdentifierRunRelationshipViewSet(mixins.ListModelMixin,
 
     lookup_field = 'accession'
 
+    def get_object(self):
+        accession = self.kwargs[self.lookup_field]
+        return get_object_or_404(
+            m_models.InterproIdentifier.objects, accession=accession)
+
     def get_queryset(self):
-        annotation = get_object_or_404(
-            m_models.InterproIdentifier.objects,
-            accession=self.kwargs[self.lookup_field])
-        run_ids = m_models.AnalysisJobInterproIdentifier.objects \
-            .filter(interpro_identifiers__interpro_identifier=annotation.pk) \
-            .only('accession')
-        run_ids = [str(r.accession) for r in run_ids]
+        annotation = self.get_object()
+        logger.info("get identifier %s" % annotation.accession)
+        job_ids = m_models.AnalysisJobInterproIdentifier.objects \
+            .filter(interpro_identifiers__interpro_identifier=annotation) \
+            .only('job_id')
+        logger.info("Found %d analysis" % len(job_ids))
+        job_ids = [str(j.accession) for j in job_ids]
         queryset = emg_models.AnalysisJob.objects \
-            .filter(accession__in=run_ids) \
+            .filter(accession__in=job_ids) \
             .available(self.request) \
             .select_related(
                 'sample',
@@ -180,18 +241,18 @@ class InterproIdentifierRunRelationshipViewSet(mixins.ListModelMixin,
 
     def list(self, request, accession, *args, **kwargs):
         """
-        Retrieves list of runs for the given sample accession
+        Retrieves list of analysis results for the given InterPro identifier
         Example:
         ---
-        `/annotations/GO:009579/analysis`
+        `/annotations/interpro-identifier/IPR020405/analysis`
         """
-        return super(InterproIdentifierRunRelationshipViewSet, self) \
+        return super(InterproIdentifierAnalysisRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
 
 
-class AnalysisGoTermRelViewSet(emg_mixins.MultipleFieldLookupMixin,
-                               mixins.ListModelMixin,
-                               m_viewset.GenericViewSet):
+class AnalysisGoTermRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
+                                        mixins.ListModelMixin,
+                                        m_viewset.GenericViewSet):
 
     serializer_class = m_serializers.GoTermRetriveSerializer
 
@@ -244,9 +305,9 @@ class AnalysisGoTermRelViewSet(emg_mixins.MultipleFieldLookupMixin,
         return Response(serializer.data)
 
 
-class AnalysisGoSlimRelViewSet(emg_mixins.MultipleFieldLookupMixin,
-                               mixins.ListModelMixin,
-                               m_viewset.GenericViewSet):
+class AnalysisGoSlimRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
+                                        mixins.ListModelMixin,
+                                        m_viewset.GenericViewSet):
 
     serializer_class = m_serializers.GoTermRetriveSerializer
 
@@ -269,7 +330,7 @@ class AnalysisGoSlimRelViewSet(emg_mixins.MultipleFieldLookupMixin,
         `/runs/ERR1385375/pipelines/3.0/go-slim`
         """
 
-        analysis = m_models.AnalysisJobGoSlimTerm.objects.filter(
+        analysis = m_models.AnalysisJobGoTerm.objects.filter(
             accession=accession, pipeline_version=release_version).first()
 
         ann_ids = []
@@ -299,9 +360,9 @@ class AnalysisGoSlimRelViewSet(emg_mixins.MultipleFieldLookupMixin,
         return Response(serializer.data)
 
 
-class AnalysisInterproIdentifierRelViewSet(emg_mixins.MultipleFieldLookupMixin,
-                                           mixins.ListModelMixin,
-                                           m_viewset.GenericViewSet):
+class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
+    emg_mixins.MultipleFieldLookupMixin,
+    mixins.ListModelMixin, m_viewset.GenericViewSet):
 
     serializer_class = m_serializers.InterproIdentifierRetriveSerializer
 
@@ -318,7 +379,7 @@ class AnalysisInterproIdentifierRelViewSet(emg_mixins.MultipleFieldLookupMixin,
 
     def list(self, request, accession, release_version, *args, **kwargs):
         """
-        Retrieves InterPro terms for the given run and pipeline version
+        Retrieves InterPro identifiers for the given run and pipeline version
         Example:
         ---
         `/runs/ERR1385375/pipelines/3.0/interpro-identifiers`
