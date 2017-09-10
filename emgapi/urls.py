@@ -82,7 +82,7 @@ router.register(
 )
 
 router.register(
-    r'pipeline-tools/(?P<tool_name>[\w\s]+)',
+    r'pipeline-tools/(?P<tool_name>[a-zA-Z0-9\:\-\s\(\)\<\>]+)',
     views.PipelineToolVersionViewSet,
     base_name='pipeline-tools-version'
 )
@@ -90,19 +90,19 @@ router.register(
 
 # relationship views
 router.register(
-    r'biomes/(?P<lineage>[\w\s]+)/children',
+    r'biomes/(?P<lineage>[a-zA-Z0-9\:\-\s\(\)\<\>]+)/children',
     views_relations.BiomeTreeViewSet,
     base_name='biomes-children'
 )
 
 router.register(
-    r'biomes/(?P<lineage>[\w\s]+)/studies',
+    r'biomes/(?P<lineage>[a-zA-Z0-9\:\-\s\(\)\<\>]+)/studies',
     views_relations.BiomeStudyRelationshipViewSet,
     base_name='biomes-studies'
 )
 
 router.register(
-    r'biomes/(?P<lineage>[\w\s]+)/samples',
+    r'biomes/(?P<lineage>[a-zA-Z0-9\:\-\s\(\)\<\>]+)/samples',
     views_relations.BiomeSampleRelationshipViewSet,
     base_name='biomes-samples'
 )
