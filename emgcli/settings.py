@@ -78,8 +78,8 @@ LOGGING = {
             'level': 'DEBUG',
             'class': LOGGING_CLASS,
             'filename': os.path.join(LOGDIR, 'emg.log').replace('\\', '/'),
-            'maxBytes': 1024*1024*5,  # 5 MB
-            'backupCount': 10,
+            'maxBytes': 1024*1024*10,
+            'backupCount': 50,
             'formatter': 'default',
         },
         'null': {
