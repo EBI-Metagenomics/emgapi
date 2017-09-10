@@ -20,3 +20,4 @@ from rest_framework_json_api.renderers import JSONRenderer
 
 class DefaultJSONRenderer(JSONRenderer):
     media_type = 'application/json'
+    format = 'application/json'
