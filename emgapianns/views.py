@@ -210,11 +210,6 @@ class InterproIdentifierAnalysisRelationshipViewSet(mixins.ListModelMixin,
 
     lookup_field = 'accession'
 
-    def get_object(self):
-        accession = self.kwargs[self.lookup_field]
-        return get_object_or_404(
-            m_models.InterproIdentifier.objects, accession=accession)
-
     def get_queryset(self):
         accession = self.kwargs[self.lookup_field]
         annotation = get_object_or_404(
