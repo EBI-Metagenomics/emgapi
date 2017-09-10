@@ -14,6 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from django.db.models import FloatField
+from django.db.models.functions import Cast
+
 import django_filters
 from django_filters import filters
 
@@ -247,23 +250,25 @@ class SampleFilter(django_filters.FilterSet):
             var_name__iregex=WORD_MATCH_REGEX.format(value))
         return qs.filter(metadata__var__in=m)
 
-    metadata_value_gte = django_filters.CharFilter(
+    metadata_value_gte = django_filters.NumberFilter(
         method='filter_metadata_value_gte', distinct=True,
         label='Metadata greater/equal then value',
         help_text='Metadata greater/equal then value')
 
     def filter_metadata_value_gte(self, qs, name, value):
-        return qs.filter(
-            metadata__var_val_ucv__gte=float(value))
+        return qs.annotate(
+            float_value=Cast('metadata__var_val_ucv', FloatField())) \
+            .filter(float_value__gte=float(value))
 
-    metadata_value_lte = django_filters.CharFilter(
+    metadata_value_lte = django_filters.NumberFilter(
         method='filter_metadata_value_lte', distinct=True,
         label='Metadata less/equal then value',
         help_text='Metadata less/equal then value')
 
     def filter_metadata_value_lte(self, qs, name, value):
-        return qs.filter(
-            metadata__var_val_ucv__lte=float(value))
+        return qs.annotate(
+            float_value=Cast('metadata__var_val_ucv', FloatField())) \
+            .filter(float_value__lte=float(value))
 
     metadata_value = django_filters.CharFilter(
         method='filter_metadata_value', distinct=True,
@@ -295,6 +300,42 @@ class SampleFilter(django_filters.FilterSet):
     def filter_geo_loc_name(self, qs, name, value):
         return qs.filter(geo_loc_name__iregex=WORD_MATCH_REGEX.format(value))
 
+    latitude_gte = django_filters.NumberFilter(
+        method='filter_latitude_gte', distinct=True,
+        label='Latitude greater/equal then value',
+        help_text='Latitude greater/equal then value')
+
+    def filter_latitude_gte(self, qs, name, value):
+        return qs.extra({'latitude': "CAST(latitude as DECIMAL(10,5))"}) \
+            .filter(latitude__gte=value)
+
+    latitude_lte = django_filters.NumberFilter(
+        method='filter_latitude_lte', distinct=True,
+        label='Latitude less/equal then value',
+        help_text='Latitude less/equal then value')
+
+    def filter_latitude_lte(self, qs, name, value):
+        return qs.extra({'latitude': "CAST(latitude as DECIMAL(10,5))"}) \
+            .filter(latitude__lte=value)
+
+    longitude_gte = django_filters.NumberFilter(
+        method='filter_longitude_gte', distinct=True,
+        label='Longitude greater/equal then value',
+        help_text='Longitude greater/equal then value')
+
+    def filter_longitude_gte(self, qs, name, value):
+        return qs.extra({'longitude': "CAST(longitude as DECIMAL(10,5))"}) \
+            .filter(longitude__gte=value)
+
+    longitude_lte = django_filters.NumberFilter(
+        method='filter_longitude_lte', distinct=True,
+        label='Longitude less/equal then value',
+        help_text='Longitude less/equal then value')
+
+    def filter_longitude_lte(self, qs, name, value):
+        return qs.extra({'longitude': "CAST(longitude as DECIMAL(10,5))"}) \
+            .filter(longitude__lte=value)
+
     study_accession = django_filters.CharFilter(
         method='filter_study_accession', distinct=True,
         label='Study accession',
@@ -322,6 +363,10 @@ class SampleFilter(django_filters.FilterSet):
             'biome_name',
             'lineage',
             'geo_loc_name',
+            'latitude_gte',
+            'latitude_lte',
+            'longitude_gte',
+            'longitude_lte',
             'species',
             'instrument_model',
             'instrument_platform',
