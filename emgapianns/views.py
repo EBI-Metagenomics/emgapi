@@ -182,7 +182,7 @@ class GoTermAnalysisRelationshipViewSet(mixins.ListModelMixin,
                 'experiment_type',
                 'pipeline'
             )
-        page = self.paginate_queryset(queryset)
+        page = self.paginate_queryset(self.filter_queryset(queryset))
         if page is not None:
             serializer = self.get_serializer(
                 page, many=True, context={'request': request})
@@ -247,7 +247,7 @@ class InterproIdentifierAnalysisRelationshipViewSet(mixins.ListModelMixin,
                 'experiment_type',
                 'pipeline'
             )
-        page = self.paginate_queryset(queryset)
+        page = self.paginate_queryset(self.filter_queryset(queryset))
         if page is not None:
             serializer = self.get_serializer(
                 page, many=True, context={'request': request})
