@@ -18,7 +18,7 @@ import logging
 
 from mongoengine.queryset.visitor import Q
 
-from django.shortcuts import get_object_or_404
+from django.http import Http404
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import filters, mixins, viewsets
@@ -52,9 +52,14 @@ class GoTermViewSet(m_viewset.ReadOnlyModelViewSet):
         return m_models.GoTerm.objects.all()
 
     def get_object(self):
-        accession = self.kwargs[self.lookup_field]
-        return get_object_or_404(
-            m_models.GoTerm.objects, accession=accession)
+        try:
+            accession = self.kwargs[self.lookup_field]
+            return m_models.GoTerm.objects.get(accession=accession)
+        except KeyError:
+            raise Http404(("Attribute error '%s'." % self.lookup_field))
+        except m_models.GoTerm.DoesNotExist:
+            raise Http404(('No %s matches the given query.' %
+                           m_models.GoTerm.__class__.__name__))
 
     def get_serializer_class(self):
         return super(GoTermViewSet, self).get_serializer_class()
@@ -95,9 +100,14 @@ class InterproIdentifierViewSet(m_viewset.ReadOnlyModelViewSet):
         return m_models.InterproIdentifier.objects.all()
 
     def get_object(self):
-        accession = self.kwargs[self.lookup_field]
-        return get_object_or_404(
-            m_models.InterproIdentifier.objects, accession=accession)
+        try:
+            accession = self.kwargs[self.lookup_field]
+            return m_models.InterproIdentifier.objects.get(accession=accession)
+        except KeyError:
+            raise Http404(("Attribute error '%s'." % self.lookup_field))
+        except m_models.InterproIdentifier.DoesNotExist:
+            raise Http404(('No %s matches the given query.' %
+                           m_models.GoTerm.__class__.__name__))
 
     def get_serializer_class(self):
         return super(InterproIdentifierViewSet, self).get_serializer_class()
@@ -162,8 +172,13 @@ class GoTermAnalysisRelationshipViewSet(mixins.ListModelMixin,
         `/annotations/go-terms/GO:009579/analysis`
         """
         accession = self.kwargs[self.lookup_field]
-        annotation = get_object_or_404(
-            m_models.GoTerm.objects, accession=accession)
+        try:
+            annotation = m_models.GoTerm.objects.get(accession=accession)
+        except KeyError:
+            raise Http404(("Attribute error '%s'." % self.lookup_field))
+        except m_models.GoTerm.DoesNotExist:
+            raise Http404(('No %s matches the given query.' %
+                           m_models.GoTerm.__class__.__name__))
         logger.info("get accession %s" % annotation.accession)
         job_ids = m_models.AnalysisJobGoTerm.objects \
             .filter(
@@ -230,8 +245,14 @@ class InterproIdentifierAnalysisRelationshipViewSet(mixins.ListModelMixin,
         `/annotations/interpro-identifier/IPR020405/analysis`
         """
         accession = self.kwargs[self.lookup_field]
-        annotation = get_object_or_404(
-            m_models.InterproIdentifier.objects, accession=accession)
+        try:
+            annotation = m_models.InterproIdentifier.objects \
+                .get(accession=accession)
+        except KeyError:
+            raise Http404(("Attribute error '%s'." % self.lookup_field))
+        except m_models.InterproIdentifier.DoesNotExist:
+            raise Http404(('No %s matches the given query.' %
+                           m_models.InterproIdentifier.__class__.__name__))
         logger.info("get identifier %s" % annotation.accession)
         job_ids = m_models.AnalysisJobInterproIdentifier.objects \
             .filter(interpro_identifiers__interpro_identifier=annotation) \
