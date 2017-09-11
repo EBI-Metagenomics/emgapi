@@ -30,7 +30,7 @@ from test_utils.emg_fixtures import *  # noqa
 @pytest.mark.django_db
 class TestAnnotations(object):
 
-    def test_goslim(self, client, run):
+    def test_go(self, client, run):
         call_command('import_summary', 'ABC01234',
                      os.path.dirname(os.path.abspath(__file__)),
                      suffix='.go_slim')
@@ -45,21 +45,11 @@ class TestAnnotations(object):
         ids = [a['id'] for a in rsp['data']]
         assert ids == expected
 
-    def test_go(self, client, run):
-        call_command('import_summary', 'ABC01234',
-                     os.path.dirname(os.path.abspath(__file__)),
-                     suffix='.go')
-
-        url = reverse("emgapi:goterms-list")
+        url = reverse("emgapi:goterms-detail", args=['GO:0055114'])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
-        assert len(rsp['data']) == 6
-
-        expected = ['GO:0055114', 'GO:0008152', 'GO:0006810',
-                    'GO:0006412', 'GO:0009058', 'GO:0005975']
-        ids = [a['id'] for a in rsp['data']]
-        assert ids == expected
+        assert rsp['data']['id'] == 'GO:0055114'
 
     def test_ipr(self, client, run):
         call_command('import_summary', 'ABC01234',
@@ -77,23 +67,17 @@ class TestAnnotations(object):
         ids = [a['id'] for a in rsp['data']]
         assert ids == expected
 
-    def test_qc(self, client, run):
-        call_command('import_qc', 'ABC01234',
-                     os.path.dirname(os.path.abspath(__file__)))
-
-        url = reverse("emgapi:runs-pipelines-metadata-list",
-                      args=["ABC01234", "1.0"])
+        url = reverse("emgapi:interproidentifier-detail", args=['IPR006882'])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
-        assert len(rsp['data']) == 5
+        assert rsp['data']['id'] == 'IPR006882'
 
-        expected = [
-            'Submitted nucleotide sequences/12345',
-            'Nucleotide sequences after format-specific filtering/12345',
-            'Predicted CDS/12345',
-            'Predicted CDS with InterProScan match/12345',
-            'Total InterProScan matches/12345678'
-        ]
-        ids = [a['id'] for a in rsp['data']]
-        assert ids == expected
+    def test_object_does_not_exist(self, client):
+        url = reverse("emgapi:goterms-detail", args=['GO:0123'])
+        response = client.get(url)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+        url = reverse("emgapi:interproidentifier-detail", args=['IPR0123'])
+        response = client.get(url)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
