@@ -101,12 +101,6 @@ class BiomeStudyRelationshipViewSet(mixins.ListModelMixin,
 class PublicationStudyRelationshipViewSet(mixins.ListModelMixin,
                                           BaseStudyRelationshipViewSet):
 
-    """
-    Publications endpoint provides access to the publications linked to
-    metagenomic studies. Related studies can be filtered by many of attributes
-    or searched by: name, abstract, centre name, author, etc.
-    """
-
     lookup_field = 'pubmed_id'
     lookup_value_regex = '[0-9\.]+'
 
@@ -286,12 +280,6 @@ class PipelineStudyRelationshipViewSet(mixins.ListModelMixin,
 
 class ExperimentSampleRelationshipViewSet(mixins.ListModelMixin,
                                           BaseSampleRelationshipViewSet):
-
-    """
-    Experiment types endpoint provides access to the metagenomic studies
-    filteres by various type of experiments. Studies or samples can be
-    filtered by many attributes including metadata.
-    """
 
     lookup_field = 'experiment_type'
 
@@ -526,11 +514,6 @@ class BiomeTreeViewSet(mixins.ListModelMixin,
 
 class PipelinePipelineToolRelationshipViewSet(mixins.ListModelMixin,
                                               viewsets.GenericViewSet):
-
-    """
-    Pipeline tools endpoint provides detail about the pipeline tools were used
-    to analyse the data in each steps.
-    """
 
     serializer_class = emg_serializers.PipelineToolSerializer
 
