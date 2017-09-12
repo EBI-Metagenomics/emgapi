@@ -221,7 +221,18 @@ class PipelineToolSerializer(ExplicitFieldsModelSerializer,
 
     class Meta:
         model = emg_models.PipelineTool
-        fields = '__all__'
+        fields = (
+            'id',
+            'url',
+            'tool_name',
+            'description',
+            'web_link',
+            'version',
+            'exe_command',
+            'configuration_file',
+            'notes',
+            'pipelines',
+        )
 
 
 # Pipeline serializer
