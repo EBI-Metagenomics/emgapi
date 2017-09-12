@@ -45,8 +45,9 @@ logger = logging.getLogger(__name__)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VAR_DIR = os.path.join(expanduser("~"), 'emgvar') 
-
+VAR_DIR = os.path.join(expanduser("~"), 'emgvar')
+EMG_CONF = yamjam(os.environ.get('EMG_CONFIG',
+                  os.path.join(expanduser("~"), '.yamjam', 'config.yaml')))
 
 LOGDIR = os.path.join(VAR_DIR, 'log')
 if not os.path.exists(LOGDIR):
@@ -169,7 +170,7 @@ INSTALLED_APPS = [
     # apps
     'emgapi',
     'emgapianns',
-    
+
 ]
 
 MIDDLEWARE = [
@@ -220,19 +221,17 @@ WSGI_APPLICATION = 'emgcli.wsgi.application'
 #     }
 # }
 try:
-    DATABASES = yamjam()['emg']['databases']
+    DATABASES = EMG_CONF['emg']['databases']
 except KeyError:
     raise KeyError("Config must container default database.")
 
 try:
-    SESSION_ENGINE = yamjam()['emg']['session_engine']
+    SESSION_ENGINE = EMG_CONF['emg']['session_engine']
 except KeyError:
     pass
-    # warnings.warn("SESSION_ENGINE not configured, using default",
-    #               RuntimeWarning)
 
 try:
-    CACHES = yamjam()['emg']['caches']
+    CACHES = EMG_CONF['emg']['caches']
 except KeyError:
     pass
 
@@ -365,7 +364,7 @@ AUTHENTICATION_BACKENDS = (
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 try:
-    FORCE_SCRIPT_NAME = yamjam()['emg']['prefix'].rstrip('/')
+    FORCE_SCRIPT_NAME = EMG_CONF['emg']['prefix'].rstrip('/')
     if not FORCE_SCRIPT_NAME.startswith("/"):
         FORCE_SCRIPT_NAME = "/%s" % FORCE_SCRIPT_NAME
 except KeyError:
@@ -373,7 +372,7 @@ except KeyError:
 
 
 try:
-    STATIC_ROOT = yamjam()['emg']['static_root']
+    STATIC_ROOT = EMG_CONF['emg']['static_root']
 except KeyError:
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
@@ -388,7 +387,7 @@ STATICFILES_FINDERS = (
 
 # Security
 try:
-    ALLOWED_HOSTS = yamjam()['emg']['allowed_host']
+    ALLOWED_HOSTS = EMG_CONF['emg']['allowed_host']
 except KeyError:
     ALLOWED_HOSTS = ["*"]
     warnings.warn("ALLOWED_HOSTS not configured using wildecard",
@@ -405,11 +404,12 @@ CORS_URLS_REGEX = r'^%s/.*$' % FORCE_SCRIPT_NAME
 # CORS_URLS_ALLOW_ALL_REGEX = ()
 CORS_ALLOW_METHODS = (
     'GET',
+    'HEAD',
     'OPTIONS'
 )
 
 try:
-    ADMINS = yamjam()['emg']['admins']
+    ADMINS = EMG_CONF['emg']['admins']
     MANAGERS = ADMINS
     # IGNORABLE_404_URLS
 except KeyError:
@@ -418,7 +418,7 @@ except KeyError:
                   RuntimeWarning)
 
 try:
-    EMAIL_HOST = yamjam()['emg']['email']['host']
+    EMAIL_HOST = EMG_CONF['emg']['email']['host']
     MIDDLEWARE += ('django.middleware.common.BrokenLinkEmailsMiddleware',)
 except KeyError:
     warnings.warn(
@@ -426,36 +426,36 @@ except KeyError:
         RuntimeWarning
     )
 try:
-    EMAIL_PORT = yamjam()['emg']['email']['post']
+    EMAIL_PORT = EMG_CONF['emg']['email']['post']
 except KeyError:
     pass
 try:
-    EMAIL_SUBJECT_PREFIX = yamjam()['emg']['email']['subject']
+    EMAIL_SUBJECT_PREFIX = EMG_CONF['emg']['email']['subject']
 except KeyError:
     pass
 
 # EMG
 try:
-    EMG_BACKEND_AUTH_URL = yamjam()['emg']['emg_backend_auth']
+    EMG_BACKEND_AUTH_URL = EMG_CONF['emg']['emg_backend_auth']
 except KeyError:
     EMG_BACKEND_AUTH_URL = None
 
 # Documentation
 try:
-    EMG_TITLE = yamjam()['emg']['documentation']['title']
+    EMG_TITLE = EMG_CONF['emg']['documentation']['title']
 except KeyError:
     EMG_TITLE = 'EBI Metagenomics API'
 try:
-    EMG_URL = yamjam()['emg']['documentation']['url']
+    EMG_URL = EMG_CONF['emg']['documentation']['url']
 except KeyError:
     EMG_URL = FORCE_SCRIPT_NAME
 try:
-    EMG_DESC = yamjam()['emg']['documentation']['description']
+    EMG_DESC = EMG_CONF['emg']['documentation']['description']
 except KeyError:
     EMG_DESC = 'EBI Metagenomics API'
 
 # MongoDB
 import mongoengine
 
-mongodb = yamjam()['emg']['mongodb']
+mongodb = EMG_CONF['emg']['mongodb']
 MONGO_CONN = mongoengine.connect(**mongodb)
