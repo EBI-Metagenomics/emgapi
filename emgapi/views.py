@@ -610,11 +610,6 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
                       mixins.ListModelMixin,
                       viewsets.GenericViewSet):
 
-    """
-    Pipelines endpoint provides detail about each pipeline version were used
-    to analyse the data.
-    """
-
     serializer_class = emg_serializers.PipelineSerializer
     queryset = emg_models.Pipeline.objects.all()
 
@@ -664,11 +659,6 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
 class PipelineToolViewSet(mixins.ListModelMixin,
                           viewsets.GenericViewSet):
 
-    """
-    Pipeline tools endpoint provides detail about the pipeline tools were used
-    to analyse the data in each steps.
-    """
-
     serializer_class = emg_serializers.PipelineToolSerializer
     queryset = emg_models.PipelineTool.objects.all()
 
@@ -687,11 +677,6 @@ class PipelineToolViewSet(mixins.ListModelMixin,
 
 class PipelineToolVersionViewSet(mixins.RetrieveModelMixin,
                                  viewsets.GenericViewSet):
-
-    """
-    Pipeline tools endpoint provides detail about the pipeline tools were used
-    to analyse the data in each steps.
-    """
 
     serializer_class = emg_serializers.PipelineToolSerializer
     queryset = emg_models.PipelineTool.objects.all()
@@ -723,12 +708,6 @@ class PipelineToolVersionViewSet(mixins.RetrieveModelMixin,
 class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
                             mixins.ListModelMixin,
                             viewsets.GenericViewSet):
-
-    """
-    Experiment types endpoint provides access to the metagenomic studies
-    filteres by various type of experiments. Studies or samples can be
-    filtered by many attributes including metadata.
-    """
 
     serializer_class = emg_serializers.ExperimentTypeSerializer
     queryset = emg_models.ExperimentType.objects.all()
@@ -770,13 +749,6 @@ class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
 class PublicationViewSet(mixins.RetrieveModelMixin,
                          mixins.ListModelMixin,
                          viewsets.GenericViewSet):
-
-    """
-    Publications endpoint provides access to the publications linked to
-    metagenomic studies. Publications can be filtered by year or searched by:
-    title, abstract, authors, DOI, ISBN. Single publication is retrieved by
-    PUBMED ID.
-    """
 
     serializer_class = emg_serializers.PublicationSerializer
 
