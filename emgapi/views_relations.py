@@ -554,6 +554,15 @@ class AnalysisMetadataViewSet(emg_mixins.MultipleFieldLookupMixin,
     serializer_class = emg_serializers.AnalysisJobAnnSerializer
     pagination_class = emg_page.MetadataSetPagination
 
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'var_id',
+    )
+    ordering = ('var_id',)
+
     lookup_fields = ('accession', 'release_version')
 
     def get_queryset(self):

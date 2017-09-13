@@ -57,7 +57,7 @@ start() {
 
   # development server
   # emgcli runserver 0.0.0.0:8000
-  emgdeploy -p ~/emgvar/emg.pid --bind 0.0.0.0:8000 --workers 5 --reload emgcli.wsgi:application
+  emgdeploy -p ~/emg/emg.pid --bind 0.0.0.0:8000 --workers 5 --reload emgcli.wsgi:application
 
 }
 
