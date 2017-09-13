@@ -57,7 +57,7 @@ start() {
 
   # development server
   # emgcli runserver 0.0.0.0:8000
-  emgdeploy -p ~/emg/emg.pid --bind 0.0.0.0:8000 --workers 5 --reload emgcli.wsgi:application
+  emgdeploy -p ${HOME}/emg/emg.pid --bind 0.0.0.0:8000 --workers 5 --reload emgcli.wsgi:application
 
 }
 
@@ -82,13 +82,17 @@ docker() {
 }
 
 travis() {
-  export PATH=$condaDir/bin:$PATH
-  # Install source, otherwise OSError: [Errno 2] No such file or directory:
-  #     '/home/travis/build/ola-t/ebi-metagenomics-api/staticfiles/'
+  # Install source, otherwise OSError: [Errno 2] No such file or directory.
   install_src
   cd $srcDir
   python -V
   python setup.py test
+}
+
+travis_conda() {
+  export PATH=$condaDir/bin:$PATH
+  # Install source, otherwise OSError: [Errno 2] No such file or directory.
+  travis
 }
 
 
