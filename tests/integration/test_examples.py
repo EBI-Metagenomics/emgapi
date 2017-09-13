@@ -30,14 +30,15 @@ from test_utils.emg_fixtures import *  # noqa
 @pytest.mark.django_db
 class TestExamples(object):
 
-    def test_list(self, live_server, runs):
+    def test_list(self, live_server, runs, api_version):
         """
         List samples and its metadata for given study
         """
 
         from jsonapi_client import Session
 
-        with Session('%s/v0.2/' % live_server.url) as s:
+        api_base = '%s/%s/' % (live_server.url, api_version)
+        with Session(api_base) as s:
             study = s.get('studies', 'SRP0025').resource
             assert study.accession == 'SRP0025'
             # list samples
@@ -58,14 +59,15 @@ class TestExamples(object):
                         run.experiment_type.experiment_type,
                     )
 
-    def test_annotations(self, live_server, run):
+    def test_annotations(self, live_server, run, api_version):
         from jsonapi_client import Session
 
         call_command('import_summary', 'ABC01234',
                      os.path.dirname(os.path.abspath(__file__)),
                      suffix='.go_slim')
 
-        with Session('%s/v0.2/' % live_server.url) as s:
+        api_base = '%s/%s/' % (live_server.url, api_version)
+        with Session(api_base) as s:
             run = s.get('runs', 'ABC01234').resource
             for analysis in run.analysis:
                 go_terms = []
