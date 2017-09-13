@@ -16,7 +16,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ../:/home/emg/src
-      - ../docker/config.yaml:/home/emg/.yamjam/config.yaml:ro
+      - ../docker/config.yaml:/home/emg/emg/config.yaml:ro
     links:
       - mysql
       - redis
