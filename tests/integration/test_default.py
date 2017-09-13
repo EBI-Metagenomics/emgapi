@@ -23,29 +23,32 @@ from django.urls.exceptions import NoReverseMatch
 
 from rest_framework import status
 
+# import fixtures
+from test_utils.emg_fixtures import *  # noqa
+
 
 class TestDefaultAPI(object):
 
-    def test_default(self, client):
+    def test_default(self, client, api_version):
         url = reverse('emgapi:api-root')
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
 
+        host = "http://testserver/%s" % api_version
         expected = {
-            "biomes": "http://testserver/v0.2/biomes",
-            "studies": "http://testserver/v0.2/studies",
-            "samples": "http://testserver/v0.2/samples",
-            "runs": "http://testserver/v0.2/runs",
-            "pipelines": "http://testserver/v0.2/pipelines",
-            "experiment-types": "http://testserver/v0.2/experiment-types",
-            "publications": "http://testserver/v0.2/publications",
-            "pipeline-tools": "http://testserver/v0.2/pipeline-tools",
-            "annotations/go-terms":
-                "http://testserver/v0.2/annotations/go-terms",
+            "biomes": "%s/biomes" % host,
+            "studies": "%s/studies" % host,
+            "samples": "%s/samples" % host,
+            "runs": "%s/runs" % host,
+            "pipelines": "%s/pipelines" % host,
+            "experiment-types": "%s/experiment-types" % host,
+            "publications": "%s/publications" % host,
+            "pipeline-tools": "%s/pipeline-tools" % host,
+            "annotations/go-terms": "%s/annotations/go-terms" % host,
             "annotations/interpro-identifiers":
-                "http://testserver/v0.2/annotations/interpro-identifiers",
-            "mydata": "http://testserver/v0.2/mydata",
+                "%s/annotations/interpro-identifiers" % host,
+            "mydata": "%s/mydata" % host,
         }
         assert rsp['data'] == expected
 
@@ -97,7 +100,7 @@ class TestDefaultAPI(object):
     )
     @pytest.mark.django_db
     def test_list(self, client, _model, _camelcase, _view, _view_args,
-                  relations):
+                  relations, api_version):
         model_name = "emgapi.%s" % _model
         view_name = "%s-list" % _view
 
@@ -160,10 +163,11 @@ class TestDefaultAPI(object):
         assert rsp['meta']['pagination']['count'] == 100
 
         # Links
+        host = "http://testserver/%s" % api_version
         _view_url = _view.split(":")[1]
-        first_link = 'http://testserver/v0.2/%s?page=1' % _view_url
-        last_link = 'http://testserver/v0.2/%s?page=5' % _view_url
-        next_link = 'http://testserver/v0.2/%s?page=2' % _view_url
+        first_link = '%s/%s?page=1' % (host, _view_url)
+        last_link = '%s/%s?page=5' % (host, _view_url)
+        next_link = '%s/%s?page=2' % (host, _view_url)
         assert rsp['links']['first'] == first_link
         assert rsp['links']['last'] == last_link
         assert rsp['links']['next'] == next_link
