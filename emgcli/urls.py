@@ -31,6 +31,7 @@ from emgapianns.urls import router as emg_ext_router
 
 from . import routers
 
+api_version = settings.REST_FRAMEWORK['DEFAULT_VERSION']
 
 # merge all routers
 router = routers.DefaultRouter(trailing_slash=False)
@@ -38,6 +39,7 @@ router.extend(emg_router)
 router.extend(emg_ext_router)
 router.extend(mongo_router)
 router.extend(mydata_router)
+
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
@@ -52,19 +54,19 @@ urlpatterns = [
                                 namespace='rest_framework')),
 
     url(
-        r'^v0.2/auth/login',
+        r'^v%s/auth/login' % api_version,
         rest_auth_views.LoginView.as_view(),
         name='rest_auth_login'
     ),
 
     url(
-        r'^v0.2/auth/logout',
+        r'^v%s/auth/logout' % api_version,
         rest_auth_views.LogoutView.as_view(),
         name='rest_auth_logout'
     ),
 
-    url(r'^v0.2/', include(router.urls,
-                           namespace='emgapi')),
+    url(r'^v%s/' % api_version, include(router.urls,
+                                        namespace='emgapi')),
 
 ]
 
