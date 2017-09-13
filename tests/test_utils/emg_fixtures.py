@@ -16,9 +16,16 @@
 
 import pytest
 
+from django.conf import settings
+
 from model_mommy import mommy
 
 from emgapi import models as emg_models
+
+
+@pytest.fixture
+def api_version():
+    return "v%s" % settings.REST_FRAMEWORK['DEFAULT_VERSION']
 
 
 @pytest.fixture
