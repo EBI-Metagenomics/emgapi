@@ -45,6 +45,7 @@ is_db_running() {
 
 install_src() {
   echo "Installing EMG API..."
+    pip install "git+git://github.com/ola-t/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
   pip install -U $srcDir
 }
 
@@ -66,7 +67,6 @@ start() {
 install() {
   create_venv
   python -V
-  pip install "git+git://github.com/ola-t/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
 }
 
 install_docker() {
