@@ -21,8 +21,10 @@ create_venv() {
   export PATH=$condaDir/bin:$PATH
   rm -rf miniconda.sh
   hash -r
+  conda install python=${pythonVer} -y
   # conda update -q conda
   conda info -a
+  python -V
 
   # TODO: wait until 4.4 https://github.com/conda/conda/issues/3200
   #conda create -q -n test-environment python=$pythonVer
