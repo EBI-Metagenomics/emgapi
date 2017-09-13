@@ -34,7 +34,7 @@ before_script:
   # - docker run --rm --name redis -p 6379:6379 -d redis
   - flake8 --version
   - flake8 -v .
-  - mkdir -p ~/.yamjam && cp travis/config.yaml ~/.yamjam/
+  - mkdir -p ~/.yamjam && cp travis/config.yaml ~/emg/
 
 script:
   - SRCDIR=$(pwd) docker/run.sh travis
