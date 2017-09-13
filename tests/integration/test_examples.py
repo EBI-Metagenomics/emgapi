@@ -18,8 +18,6 @@ import pytest
 import os
 import sys
 
-from jsonapi_client import Session
-
 from django.core.management import call_command
 
 # import fixtures
@@ -36,6 +34,8 @@ class TestExamples(object):
         """
         List samples and its metadata for given study
         """
+
+        from jsonapi_client import Session
 
         with Session('%s/v0.2/' % live_server.url) as s:
             study = s.get('studies', 'SRP0025').resource
@@ -59,6 +59,8 @@ class TestExamples(object):
                     )
 
     def test_annotations(self, live_server, run):
+        from jsonapi_client import Session
+
         call_command('import_summary', 'ABC01234',
                      os.path.dirname(os.path.abspath(__file__)),
                      suffix='.go_slim')
