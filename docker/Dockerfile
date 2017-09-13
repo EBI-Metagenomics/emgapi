@@ -21,4 +21,6 @@ USER emg
 ENV HOME /home/emg
 WORKDIR /home/emg
 
+RUN mkdir -p $HOME/emg
+
 ENTRYPOINT ["/tmp/docker/run.sh", "docker"]

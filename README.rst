@@ -14,7 +14,7 @@ EMG API
 Configure
 ---------
 
-Create configuration file in `~/.yamjam/config.yaml <docker/config.yaml>`_.
+Create configuration file in `~/path/to/config.yaml <docker/config.yaml>`_.
 
 
 Install
@@ -25,13 +25,13 @@ Install Miniconda::
     wget https://repo.continuum.io/miniconda/Miniconda3-4.3.21-Linux-x86_64.sh
     bash Miniconda3-4.3.21-Linux-x86_64.sh
 
-    export PATH=~/conda/bin:$PATH
+    export PATH=~/miniconda/bin:$PATH
 
 
 Install application::
 
     pip install "git+git://github.com/ola-t/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
-    pip install "git+git://github.com/ProteinsWebTeam/ebi-metagenomics-api@master#egg=emgcli"
+    pip install https://github.com/ProteinsWebTeam/ebi-metagenomics-api/archive/$latestTag.tar.gz
 
 
 Start application::
