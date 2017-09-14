@@ -324,6 +324,8 @@ class Study(models.Model):
         db_column='EXT_STUDY_ID', max_length=20, unique=True)
     centre_name = models.CharField(
         db_column='CENTRE_NAME', max_length=255, blank=True, null=True)
+    experimental_factor = models.CharField(
+        db_column='EXPERIMENTAL_FACTOR', max_length=255, blank=True, null=True)
     is_public = models.IntegerField(
         db_column='IS_PUBLIC', blank=True, null=True)
     public_release_date = models.DateField(
@@ -583,6 +585,8 @@ class AnalysisJob(models.Model):
     analysis_status = models.ForeignKey(
         AnalysisStatus, db_column='ANALYSIS_STATUS_ID',
         on_delete=models.CASCADE)
+    re_run_count = models.IntegerField(
+        db_column='RE_RUN_COUNT', blank=True, null=True)
     input_file_name = models.CharField(
         db_column='INPUT_FILE_NAME', max_length=50)
     result_directory = models.CharField(
@@ -590,6 +594,8 @@ class AnalysisJob(models.Model):
     sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID', related_name='analysis',
         on_delete=models.CASCADE)
+    is_production_run = models.TextField(
+        db_column='IS_PRODUCTION_RUN', blank=True, null=True)
     experiment_type = models.ForeignKey(
         ExperimentType, db_column='EXPERIMENT_TYPE_ID',
         related_name='analysis',
