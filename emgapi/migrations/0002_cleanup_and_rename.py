@@ -34,23 +34,18 @@ class Migration(migrations.Migration):
             name='accession',
             field=models.CharField(db_column='EXTERNAL_RUN_IDS', max_length=100),
         ),
-        migrations.RemoveField(
-            model_name='analysisjob',
-            name='re_run_count',
-        ),
-        migrations.RemoveField(
-            model_name='analysisjob',
-            name='is_production_run',
-        ),
+        # migrations.RemoveField(
+        #     model_name='analysisjob',
+        #     name='re_run_count',
+        # ),
+        # migrations.RemoveField(
+        #     model_name='analysisjob',
+        #     name='is_production_run',
+        # ),
         migrations.RenameField(
             model_name='sample',
             old_name='ext_sample_id',
             new_name='accession',
-        ),
-        migrations.AlterField(
-            model_name='sample',
-            name='accession',
-            field=models.CharField(db_column='EXT_SAMPLE_ID', max_length=20),
         ),
         migrations.RenameField(
             model_name='study',
@@ -62,10 +57,10 @@ class Migration(migrations.Migration):
             name='accession',
             field=models.CharField(db_column='EXT_STUDY_ID', max_length=20, unique=True),
         ),
-        migrations.RemoveField(
-            model_name='study',
-            name='experimental_factor',
-        ),
+        # migrations.RemoveField(
+        #     model_name='study',
+        #     name='experimental_factor',
+        # ),
         migrations.RemoveField(
             model_name='study',
             name='ncbi_project_id',
