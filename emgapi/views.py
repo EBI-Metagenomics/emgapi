@@ -91,11 +91,12 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     )
 
     search_fields = (
-        'lineage',
         'biome_name',
+        'lineage',
     )
 
     ordering_fields = (
+        'biome_name',
         'lineage',
     )
     ordering = ('biome_id',)
@@ -185,6 +186,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 
     ordering_fields = (
         'accession',
+        'study_name',
         'last_update',
         'samples_count',
         'runs_count',
@@ -350,6 +352,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
 
     ordering_fields = (
         'accession',
+        'sample_name',
         'last_update',
         'runs_count',
     )
