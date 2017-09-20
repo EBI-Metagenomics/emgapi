@@ -176,21 +176,21 @@ class StudyFilter(django_filters.FilterSet):
 
 class SampleFilter(django_filters.FilterSet):
 
-    experiment_type = filters.ModelChoiceFilter(
+    experiment_type = filters.ModelMultipleChoiceFilter(
         queryset=emg_models.ExperimentType.objects.all(),
         to_field_name='experiment_type',
-        method='filter_experiment_type', distinct=True,
+        method='filter_experiment_type',
+        distinct=True,
         label='Experiment type',
-        help_text='Experiment type')
+        help_text='Experiment type'
+    )
 
-    def filter_experiment_type(self, qs, name, value):
-        try:
-            analysis = emg_models.AnalysisJob.objects \
-                .filter(experiment_type__experiment_type=value) \
-                .values('sample')
+    def filter_experiment_type(self, qs, name, values):
+        analysis = emg_models.AnalysisJob.objects \
+            .filter(experiment_type__in=values) \
+            .values('sample')
+        if len(analysis) > 0:
             qs = qs.filter(pk__in=analysis)
-        except emg_models.Biome.DoesNotExist:
-            pass
         return qs
 
     biome_name = django_filters.CharFilter(
@@ -384,17 +384,13 @@ class SampleFilter(django_filters.FilterSet):
 
 class RunFilter(django_filters.FilterSet):
 
-    experiment_type = filters.ModelChoiceFilter(
+    experiment_type = filters.ModelMultipleChoiceFilter(
         queryset=emg_models.ExperimentType.objects.all(),
         to_field_name='experiment_type',
-        method='filter_experiment_type', distinct=True,
+        name='experiment_type__experiment_type',
+        distinct=True,
         label='Experiment type',
         help_text='Experiment type')
-
-    def filter_experiment_type(self, qs, name, value):
-        return qs.filter(
-            experiment_type__experiment_type__iregex=WORD_MATCH_REGEX.format(value)  # NOQA
-            )
 
     biome_name = django_filters.CharFilter(
         method='filter_biome_name', distinct=True,
