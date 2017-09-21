@@ -14,11 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from django import forms
 from django.db.models import FloatField
 from django.db.models.functions import Cast
+from django.utils.datastructures import MultiValueDict
+from django.utils.six import string_types
 
 import django_filters
 from django_filters import filters
+from django_filters import widgets
 
 from . import models as emg_models
 
@@ -174,6 +178,42 @@ class StudyFilter(django_filters.FilterSet):
         )
 
 
+class QueryArrayWidget(widgets.BaseCSVWidget, forms.TextInput):
+    """
+    Fix django_filter.widgets to allow csv values on ModelMultipleChoiceFilter
+
+    Enables request query array notation that might be consumed by
+    MultipleChoiceFilter
+    1. Values can be provided as csv string:  ?foo=bar,baz
+    2. Values can be provided as query array: ?foo[]=bar&foo[]=baz
+    3. Values can be provided as query array: ?foo=bar&foo=baz
+    Note: Duplicate and empty values are skipped from results
+    """
+    def value_from_datadict(self, data, files, name):
+        if isinstance(data, MultiValueDict):
+            data = data.copy()
+        for key, value in data.items():
+            # treat value as csv string: ?foo=1,2
+            if isinstance(value, string_types):
+                data[key] = [
+                    x.strip() for x in value.rstrip(',').split(',') if x]
+        data = MultiValueDict(data)
+
+        if not isinstance(data, MultiValueDict):
+            values_list = data.getlist(name, data.getlist('%s[]' % name)) or []
+        else:
+            values_list = data.get(name, [])
+        # apparently its an array, so no need to process it's values as csv
+        # ?foo=1&foo=2 -> data.getlist(foo) -> foo = [1, 2]
+        # ?foo[]=1&foo[]=2 -> data.getlist(foo[]) -> foo = [1, 2]
+        if len(values_list) > 0:
+            ret = [x for x in values_list if x]
+        else:
+            ret = []
+
+        return list(set(ret))
+
+
 class SampleFilter(django_filters.FilterSet):
 
     experiment_type = filters.ModelMultipleChoiceFilter(
@@ -182,7 +222,8 @@ class SampleFilter(django_filters.FilterSet):
         method='filter_experiment_type',
         distinct=True,
         label='Experiment type',
-        help_text='Experiment type'
+        help_text='Experiment type',
+        widget=QueryArrayWidget
     )
 
     def filter_experiment_type(self, qs, name, values):
@@ -390,7 +431,9 @@ class RunFilter(django_filters.FilterSet):
         name='experiment_type__experiment_type',
         distinct=True,
         label='Experiment type',
-        help_text='Experiment type')
+        help_text='Experiment type',
+        widget=QueryArrayWidget
+    )
 
     biome_name = django_filters.CharFilter(
         method='filter_biome_name', distinct=True,
