@@ -504,7 +504,7 @@ class AnalysisSerializer(RunSerializer):
             'pipeline_version',
             'sample_accession',
             'study_accession',
-            'submit_time',
+            'complete_time',
             'experiment_type',
             'metadata',
             'sample',
