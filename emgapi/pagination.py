@@ -20,3 +20,8 @@ from rest_framework import pagination
 class MetadataSetPagination(pagination.PageNumberPagination):
 
     page_size = 100
+
+
+class LargeSetPagination(pagination.PageNumberPagination):
+
+    max_page_size = 250
