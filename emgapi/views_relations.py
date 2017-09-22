@@ -31,6 +31,7 @@ from . import pagination as emg_page
 class BaseStudyRelationshipViewSet(viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.StudySerializer
+    pagination_class = emg_page.LargeSetPagination
 
     filter_class = emg_filters.StudyFilter
 
@@ -134,6 +135,7 @@ class PublicationStudyRelationshipViewSet(mixins.ListModelMixin,
 class BaseSampleRelationshipViewSet(viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.SampleSerializer
+    pagination_class = emg_page.LargeSetPagination
 
     filter_class = emg_filters.SampleFilter
 
@@ -406,6 +408,7 @@ class SampleRunRelationshipViewSet(mixins.ListModelMixin,
                                    viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.RunSerializer
+    pagination_class = emg_page.LargeSetPagination
 
     filter_class = emg_filters.RunFilter
 
