@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from rest_framework import pagination
+from rest_framework_json_api import pagination
 
 
 class MetadataSetPagination(pagination.PageNumberPagination):
