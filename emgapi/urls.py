@@ -132,6 +132,12 @@ router.register(
 )
 
 router.register(
+    r'pipelines/(?P<release_version>[0-9\.]+)/analysis',
+    views_relations.PipelineAnalysisRelationshipViewSet,
+    base_name='pipelines-analysis'
+)
+
+router.register(
     r'pipelines/(?P<release_version>[0-9\.]+)/tools',
     views_relations.PipelinePipelineToolRelationshipViewSet,
     base_name='pipelines-pipeline-tools'

@@ -276,6 +276,19 @@ class PipelineSerializer(ExplicitFieldsModelSerializer,
     def get_samples(self, obj):
         return None
 
+    analysis = relations.SerializerMethodResourceRelatedField(
+        source='get_analysis',
+        model=emg_models.AnalysisJob,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi:pipelines-analysis-list',
+        related_link_url_kwarg='release_version',
+        related_link_lookup_field='release_version',
+    )
+
+    def get_analysis(self, obj):
+        return None
+
     tools = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
         source='get_tools',
         model=emg_models.PipelineTool,
