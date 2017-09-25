@@ -253,6 +253,46 @@ class PipelineSampleRelationshipViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
+class PipelineAnalysisRelationshipViewSet(mixins.ListModelMixin,
+                                          viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.AnalysisSerializer
+
+    filter_class = emg_filters.AnalysisJobFilter
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'accession',
+    )
+    ordering = ('accession',)
+
+    lookup_field = 'release_version'
+
+    def get_queryset(self):
+        pipeline = get_object_or_404(
+            emg_models.Pipeline,
+            release_version=self.kwargs[self.lookup_field])
+        queryset = emg_models.AnalysisJob.objects \
+            .available(self.request) \
+            .filter(pipeline=pipeline)
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of analysis results for the given pipeline version
+        Example:
+        ---
+        `/pipeline/4.0/analysis` retrieve linked analysis
+
+        """
+        return super(PipelineAnalysisRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
 class PipelineStudyRelationshipViewSet(mixins.ListModelMixin,
                                        BaseStudyRelationshipViewSet):
 
