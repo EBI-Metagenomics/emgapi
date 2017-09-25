@@ -85,7 +85,7 @@ class TestDefaultAPI(object):
             # ('Biome', 'biomes', 'emgapi:biomes', ['root'],
             #  ['samples', 'studies']),
             ('Pipeline', 'pipelines', 'emgapi:pipelines', [],
-             ['samples', 'studies', 'tools']),
+             ['samples', 'studies', 'tools', 'analysis']),
             ('Publication', 'publications', 'emgapi:publications', [],
              ['studies']),
             ('Run', 'runs', 'emgapi:runs', [],
