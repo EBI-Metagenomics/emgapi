@@ -38,36 +38,34 @@ class TestSampleAPI(APITestCase):
             biome_name="foo",
             lineage="root:foo",
             pk=123)
-        self.data['studies'] = []
-        self.data['studies'].append(
-            mommy.make(
-                'emgapi.Sample',
-                biome=_biome,
-                pk=123,
-                sample_desc="abcdefghijklmnoprstuvwyz",
-                accession="DRS012345",
-                analysis_completed=self.data['date'].date(),
-                collection_date=self.data['date'].date(),
-                geo_loc_name="Geo Location",
-                is_public=1,
-                metadata_received=self.data['date'],
-                sequencedata_archived=self.data['date'],
-                sequencedata_received=self.data['date'],
-                environment_biome=None,
-                environment_feature="abcdef",
-                environment_material="abcdef",
-                sample_name="DRS012345",
-                sample_alias="DRS012345",
-                host_tax_id=None,
-                species=None,
-                latitude="12.3456",
-                longitude="123.4567",
-                last_update=self.data['date'],
-                submission_account_id="Webin-842"
-            )
-        )
+        self.data['samples'] = [mommy.make(
+            'emgapi.Sample',
+            biome=_biome,
+            pk=123,
+            sample_desc="abcdefghijklmnoprstuvwyz",
+            accession="DRS012345",
+            analysis_completed=self.data['date'].date(),
+            collection_date=self.data['date'].date(),
+            geo_loc_name="Geo Location",
+            is_public=1,
+            metadata_received=self.data['date'],
+            sequencedata_archived=self.data['date'],
+            sequencedata_received=self.data['date'],
+            environment_biome=None,
+            environment_feature="abcdef",
+            environment_material="abcdef",
+            sample_name="DRS012345",
+            sample_alias="DRS012345",
+            host_tax_id=None,
+            species=None,
+            latitude="12.3456",
+            longitude="123.4567",
+            last_update=self.data['date'],
+            submission_account_id="Webin-842"
+        )]
         # private
-        mommy.make("emgapi.Sample", pk=456, biome=_biome, is_public=0)
+        mommy.make("emgapi.Study", pk=123, is_public=1,
+                   samples=self.data['samples'])
 
     def test_details(self):
         url = reverse("emgapi:samples-detail", args=["DRS012345"])
