@@ -488,6 +488,46 @@ class RunFilter(django_filters.FilterSet):
         return qs.filter(
             instrument_model__iregex=WORD_MATCH_REGEX.format(value))
 
+    metadata_key = filters.ChoiceFilter(
+            choices=metadata_keywords(),
+            method='filter_metadata_key',
+            name='metadata_key', distinct=True,
+            label='Metadata keyword', help_text='Metadata keyword')
+
+    def filter_metadata_key(self, qs, name, value):
+        m = emg_models.VariableNames.objects.filter(
+            var_name__iregex=WORD_MATCH_REGEX.format(value))
+        return qs.filter(sample__metadata__var__in=m)
+
+    metadata_value_gte = django_filters.NumberFilter(
+        method='filter_metadata_value_gte', distinct=True,
+        label='Metadata greater/equal then value',
+        help_text='Metadata greater/equal then value')
+
+    def filter_metadata_value_gte(self, qs, name, value):
+        return qs.annotate(
+            float_value=Cast('sample__metadata__var_val_ucv', FloatField())) \
+            .filter(float_value__gte=float(value))
+
+    metadata_value_lte = django_filters.NumberFilter(
+        method='filter_metadata_value_lte', distinct=True,
+        label='Metadata less/equal then value',
+        help_text='Metadata less/equal then value')
+
+    def filter_metadata_value_lte(self, qs, name, value):
+        return qs.annotate(
+            float_value=Cast('sample__metadata__var_val_ucv', FloatField())) \
+            .filter(float_value__lte=float(value))
+
+    metadata_value = django_filters.CharFilter(
+        method='filter_metadata_value', distinct=True,
+        label='Metadata value',
+        help_text='Metadata exact value')
+
+    def filter_metadata_value(self, qs, name, value):
+        return qs.filter(
+            sample__metadata__var_val_ucv=value)
+
     sample_accession = django_filters.CharFilter(
         method='filter_sample_accession', distinct=True,
         label='Sample accession',

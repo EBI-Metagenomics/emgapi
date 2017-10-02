@@ -176,8 +176,13 @@ class StudySampleRelationshipViewSet(mixins.ListModelMixin,
             emg_models.Study, accession=self.kwargs[self.lookup_field])
         queryset = emg_models.Sample.objects \
             .available(self.request) \
-            .filter(study_id=study.pk) \
-            .prefetch_related('biome', 'study')
+            .filter(study_id=study.pk)
+        _qs = emg_models.Biome.objects.all()
+        queryset = queryset.prefetch_related(
+            Prefetch('biome', queryset=_qs))
+        _qs = emg_models.Study.objects.available(self.request)
+        queryset = queryset.prefetch_related(
+            Prefetch('study', queryset=_qs))
         if 'runs' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Run.objects \
                 .available(self.request) \
@@ -220,8 +225,13 @@ class PipelineSampleRelationshipViewSet(mixins.ListModelMixin,
             release_version=self.kwargs[self.lookup_field])
         queryset = emg_models.Sample.objects \
             .available(self.request) \
-            .filter(analysis__pipeline=pipeline) \
-            .prefetch_related('biome', 'study')
+            .filter(analysis__pipeline=pipeline)
+        _qs = emg_models.Biome.objects.all()
+        queryset = queryset.prefetch_related(
+            Prefetch('biome', queryset=_qs))
+        _qs = emg_models.Study.objects.available(self.request)
+        queryset = queryset.prefetch_related(
+            Prefetch('study', queryset=_qs))
         if 'runs' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Run.objects \
                 .available(self.request) \
@@ -331,8 +341,13 @@ class ExperimentSampleRelationshipViewSet(mixins.ListModelMixin,
             experiment_type=self.kwargs[self.lookup_field])
         queryset = emg_models.Sample.objects \
             .available(self.request) \
-            .filter(runs__experiment_type=experiment_type) \
-            .prefetch_related('biome', 'study')
+            .filter(runs__experiment_type=experiment_type)
+        _qs = emg_models.Biome.objects.all()
+        queryset = queryset.prefetch_related(
+            Prefetch('biome', queryset=_qs))
+        _qs = emg_models.Study.objects.available(self.request)
+        queryset = queryset.prefetch_related(
+            Prefetch('study', queryset=_qs))
         if 'runs' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Run.objects \
                 .available(self.request) \
@@ -376,8 +391,13 @@ class BiomeSampleRelationshipViewSet(mixins.ListModelMixin,
             .available(self.request) \
             .filter(
                 biome__lft__gte=obj.lft, biome__rgt__lte=obj.rgt,
-                biome__depth__gte=obj.depth) \
-            .prefetch_related('biome', 'study')
+                biome__depth__gte=obj.depth)
+        _qs = emg_models.Biome.objects.all()
+        queryset = queryset.prefetch_related(
+            Prefetch('biome', queryset=_qs))
+        _qs = emg_models.Study.objects.available(self.request)
+        queryset = queryset.prefetch_related(
+            Prefetch('study', queryset=_qs))
         if 'runs' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Run.objects \
                 .available(self.request) \
@@ -421,6 +441,12 @@ class PublicationSampleRelationshipViewSet(mixins.ListModelMixin,
         queryset = emg_models.Sample.objects \
             .available(self.request) \
             .filter(study__publications=obj)
+        _qs = emg_models.Biome.objects.all()
+        queryset = queryset.prefetch_related(
+            Prefetch('biome', queryset=_qs))
+        _qs = emg_models.Study.objects.available(self.request)
+        queryset = queryset.prefetch_related(
+            Prefetch('study', queryset=_qs))
         if 'runs' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Run.objects \
                 .available(self.request) \

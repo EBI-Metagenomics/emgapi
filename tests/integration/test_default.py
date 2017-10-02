@@ -117,9 +117,8 @@ class TestDefaultAPI(object):
                 _s = mommy.make('emgapi.Sample',
                                 pk=pk, biome=_biome, is_public=1,
                                 analysis=[_aj])
-                if _model in ('Study',):
-                    mommy.make(model_name, pk=pk, biome=_biome, is_public=1,
-                               samples=[_s])
+                mommy.make('emgapi.Study', pk=pk, biome=_biome, is_public=1,
+                           samples=[_s])
             elif _model in ('Run',):
                 _as = mommy.make('emgapi.AnalysisStatus', pk=3)
                 _p = mommy.make('emgapi.Pipeline', pk=1,
