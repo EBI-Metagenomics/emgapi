@@ -287,8 +287,7 @@ class SampleFilter(django_filters.FilterSet):
             label='Metadata keyword', help_text='Metadata keyword')
 
     def filter_metadata_key(self, qs, name, value):
-        m = emg_models.VariableNames.objects.filter(
-            var_name__iregex=WORD_MATCH_REGEX.format(value))
+        m = emg_models.VariableNames.objects.filter(var_name=value)
         return qs.filter(metadata__var__in=m)
 
     metadata_value_gte = django_filters.NumberFilter(
@@ -495,8 +494,7 @@ class RunFilter(django_filters.FilterSet):
             label='Metadata keyword', help_text='Metadata keyword')
 
     def filter_metadata_key(self, qs, name, value):
-        m = emg_models.VariableNames.objects.filter(
-            var_name__iregex=WORD_MATCH_REGEX.format(value))
+        m = emg_models.VariableNames.objects.filter(var_name=value)
         return qs.filter(sample__metadata__var__in=m)
 
     metadata_value_gte = django_filters.NumberFilter(
