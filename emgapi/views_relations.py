@@ -54,8 +54,6 @@ class BaseStudyRelationshipViewSet(viewsets.GenericViewSet):
         '@study_name',
         '@study_abstract',
         'centre_name',
-        'author_name',
-        'author_email',
     )
 
 
