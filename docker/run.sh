@@ -16,15 +16,7 @@ check_conda() {
 }
 
 create_venv() {
-  # UnsatisfiableError: The following specifications were found to be in conflict:
-  # - python 3.4*
-  # - urllib3 -> ipaddress -> python 2.7*
-  if [[ $pythonVer = "3.4" ]]; then
-    m="https://repo.continuum.io/miniconda/Miniconda3-4.3.27.1-Linux-x86.sh"
-  else
-    m="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
-  fi
-    wget --quiet $m -O miniconda.sh
+  wget --quiet https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
   /bin/bash miniconda.sh -b -p $condaDir
   export PATH=$condaDir/bin:$PATH
   rm -rf miniconda.sh
