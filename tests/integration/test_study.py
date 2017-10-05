@@ -50,8 +50,6 @@ class TestStudyAPI(APITestCase):
                 study_name="Example study name",
                 study_status="FINISHED",
                 data_origination="HARVESTED",
-                author_email=None,
-                author_name=None,
                 last_update=self.data['date'],
                 submission_account_id="Webin-842",
                 result_directory="2017/05/SRP01234",
@@ -73,7 +71,7 @@ class TestStudyAPI(APITestCase):
         assert rsp['data']['type'] == "studies"
         assert rsp['data']['id'] == "SRP01234"
         _attr = rsp['data']['attributes']
-        assert(len(_attr) == 12)
+        assert(len(_attr) == 10)
         assert _attr['accession'] == "SRP01234"
         assert _attr['centre-name'] == "Centre Name"
         assert not _attr['public-release-date']
@@ -81,8 +79,6 @@ class TestStudyAPI(APITestCase):
         assert _attr['study-name'] == "Example study name"
         # assert _attr['study_status'] == "FINISHED"
         assert _attr['data-origination'] == "HARVESTED"
-        assert not _attr['author-email']
-        assert not _attr['author-name']
         # assert _attr['last_update'] == str(self.data['date'])
         # assert _attr['first_created'] == str(self.data['date'])
         assert _attr['project-id'] == "PRJDB1234"

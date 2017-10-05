@@ -199,8 +199,6 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         '@study_name',
         '@study_abstract',
         'centre_name',
-        'author_name',
-        'author_email',
         'project_id',
     )
 
