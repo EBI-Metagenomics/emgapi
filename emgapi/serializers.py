@@ -372,12 +372,12 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     sample_accession = serializers.SerializerMethodField()
 
     def get_sample_accession(self, obj):
-        return obj.sample.accession
+        return getattr(obj.sample, 'accession', None)
 
     study_accession = serializers.SerializerMethodField()
 
     def get_study_accession(self, obj):
-        return obj.sample.study.accession
+        return getattr(obj.sample.study, 'accession', None)
 
     # relationship
     experiment_type = serializers.HyperlinkedRelatedField(
@@ -621,7 +621,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
     study_accession = serializers.SerializerMethodField()
 
     def get_study_accession(self, obj):
-        return obj.study.accession
+        return getattr(obj.study, 'accession', None)
 
     latitude = serializers.FloatField()
 
