@@ -783,6 +783,8 @@ class StudySerializer(ExplicitFieldsModelSerializer,
             'result_directory',
             'first_created',
             'study_status',
+            'author_email',
+            'author_name',
         )
 
 
