@@ -440,7 +440,7 @@ class Sample(models.Model):
         help_text='Environment material')
     study = models.ForeignKey(
         Study, db_column='STUDY_ID', related_name='samples',
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE, blank=True, null=True)
     sample_name = models.CharField(
         db_column='SAMPLE_NAME', max_length=255, blank=True, null=True,
         help_text='Sample name')
@@ -541,7 +541,7 @@ class Run(models.Model):
         db_column='RUN_STATUS_ID', blank=True, null=True)
     sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID', related_name='runs',
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE, blank=True, null=True)
     analysis_status = models.ForeignKey(
         AnalysisStatus, db_column='ANALYSIS_STATUS_ID',
         on_delete=models.CASCADE)
@@ -593,7 +593,7 @@ class AnalysisJob(models.Model):
         db_column='RESULT_DIRECTORY', max_length=100)
     sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID', related_name='analysis',
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE, blank=True, null=True)
     is_production_run = models.TextField(
         db_column='IS_PRODUCTION_RUN', blank=True, null=True)
     experiment_type = models.ForeignKey(
