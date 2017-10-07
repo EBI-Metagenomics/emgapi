@@ -58,6 +58,7 @@ class Command(EMGBaseCommand):
                 accession=obj.accession)
         except m_models.AnalysisJobGoTerm.DoesNotExist:
             run = m_models.AnalysisJobGoTerm()
+        run.analysis_id = str(obj.job_id)
         run.accession = obj.accession
         run.pipeline_version = obj.pipeline.release_version
         run.job_id = obj.job_id
@@ -110,6 +111,7 @@ class Command(EMGBaseCommand):
                 accession=obj.accession)
         except m_models.AnalysisJobInterproIdentifier.DoesNotExist:
             run = m_models.AnalysisJobInterproIdentifier()
+        run.analysis_id = str(obj.job_id)
         run.accession = obj.accession
         run.pipeline_version = obj.pipeline.release_version
         run.job_id = obj.job_id
