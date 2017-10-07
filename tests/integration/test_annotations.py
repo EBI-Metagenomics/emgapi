@@ -30,8 +30,9 @@ from test_utils.emg_fixtures import *  # noqa
 @pytest.mark.django_db
 class TestAnnotations(object):
 
-    def test_go(self, client, run):
-        call_command('import_summary', 'ABC01234',
+    def test_goslim(self, client, run):
+        assert run.accession == 'ABC01234'
+        call_command('import_summary', run.accession,
                      os.path.dirname(os.path.abspath(__file__)),
                      suffix='.go_slim')
 
@@ -51,8 +52,33 @@ class TestAnnotations(object):
         rsp = response.json()
         assert rsp['data']['id'] == 'GO:0055114'
 
+    def test_go(self, client, run):
+        assert run.accession == 'ABC01234'
+        call_command('import_summary', run.accession,
+                     os.path.dirname(os.path.abspath(__file__)),
+                     suffix='.go')
+
+        url = reverse("emgapi:goterms-list")
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        rsp = response.json()
+        assert len(rsp['data']) == 6
+
+        expected = ['GO:0055114', 'GO:0008152', 'GO:0006810',
+                    'GO:0006412', 'GO:0009058', 'GO:0005975']
+        ids = [a['id'] for a in rsp['data']]
+        print(ids)
+        assert ids == expected
+
+        url = reverse("emgapi:goterms-detail", args=['GO:0055114'])
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        rsp = response.json()
+        assert rsp['data']['id'] == 'GO:0055114'
+
     def test_ipr(self, client, run):
-        call_command('import_summary', 'ABC01234',
+        assert run.accession == 'ABC01234'
+        call_command('import_summary', run.accession,
                      os.path.dirname(os.path.abspath(__file__)),
                      suffix='.ipr')
 
@@ -74,10 +100,57 @@ class TestAnnotations(object):
         assert rsp['data']['id'] == 'IPR006882'
 
     def test_object_does_not_exist(self, client):
-        url = reverse("emgapi:goterms-detail", args=['GO:0123'])
+        url = reverse("emgapi:goterms-detail", args=['GO:9999'])
         response = client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-        url = reverse("emgapi:interproidentifier-detail", args=['IPR0123'])
+        url = reverse("emgapi:interproidentifier-detail", args=['IPR9999'])
         response = client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_relations(self, client, run):
+        assert run.accession == 'ABC01234'
+        call_command('import_summary', run.accession,
+                     os.path.dirname(os.path.abspath(__file__)),
+                     suffix='.go_slim')
+        call_command('import_summary', run.accession,
+                     os.path.dirname(os.path.abspath(__file__)),
+                     suffix='.go')
+        call_command('import_summary', run.accession,
+                     os.path.dirname(os.path.abspath(__file__)),
+                     suffix='.ipr')
+
+        url = reverse("emgapi:runs-pipelines-goslim-list",
+                      args=[run.accession, '1.0'])
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        rsp = response.json()
+        assert len(rsp['data']) == 3
+
+        expected = ['GO:0006810', 'GO:0008152', 'GO:0055114']
+        ids = [a['id'] for a in rsp['data']]
+        assert ids == expected
+
+        url = reverse("emgapi:runs-pipelines-goterms-list",
+                      args=[run.accession, '1.0'])
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        rsp = response.json()
+        assert len(rsp['data']) == 6
+
+        expected = ['GO:0005975', 'GO:0006412', 'GO:0006810',
+                    'GO:0008152', 'GO:0009058', 'GO:0055114']
+        ids = [a['id'] for a in rsp['data']]
+        assert ids == expected
+
+        url = reverse("emgapi:runs-pipelines-interpro-list",
+                      args=[run.accession, '1.0'])
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        rsp = response.json()
+        assert len(rsp['data']) == 6
+
+        expected = ['IPR006882', 'IPR007875', 'IPR008659',
+                    'IPR015072', 'IPR024581', 'IPR033393']
+        ids = [a['id'] for a in rsp['data']]
+        assert ids == expected

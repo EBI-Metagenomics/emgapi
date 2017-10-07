@@ -19,6 +19,7 @@ import logging
 from mongoengine.queryset.visitor import Q
 
 from django.http import Http404
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import filters, mixins, viewsets
@@ -180,7 +181,7 @@ class GoTermAnalysisRelationshipViewSet(mixins.ListModelMixin,
             raise Http404(('No %s matches the given query.' %
                            m_models.GoTerm.__class__.__name__))
         logger.info("get accession %s" % annotation.accession)
-        job_ids = m_models.AnalysisJobGoTerm2.objects \
+        job_ids = m_models.AnalysisJobGoTerm.objects \
             .filter(
                 Q(go_slim__go_term=annotation) |
                 Q(go_terms__go_term=annotation)
@@ -254,7 +255,7 @@ class InterproIdentifierAnalysisRelationshipViewSet(mixins.ListModelMixin,
             raise Http404(('No %s matches the given query.' %
                            m_models.InterproIdentifier.__class__.__name__))
         logger.info("get identifier %s" % annotation.accession)
-        job_ids = m_models.AnalysisJobInterproIdentifier2.objects \
+        job_ids = m_models.AnalysisJobInterproIdentifier.objects \
             .filter(interpro_identifiers__interpro_identifier=annotation) \
             .only('job_id')
         logger.info("Found %d analysis" % len(job_ids))
@@ -296,11 +297,17 @@ class AnalysisGoTermRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
         `/runs/ERR1385375/pipelines/3.0/go-terms`
         """
 
-        job = emg_models.AnalysisJob.objects.get(
-            accession=accession, pipeline__release_version=release_version
+        job = get_object_or_404(
+            emg_models.AnalysisJob, accession=accession,
+            pipeline__release_version=release_version
         )
-        analysis = m_models.AnalysisJobGoTerm2.objects \
-            .get(analysis_id=str(job.job_id))
+
+        try:
+            analysis = m_models.AnalysisJobGoTerm.objects \
+                .get(analysis_id=str(job.job_id))
+        except m_models.AnalysisJobGoTerm.DoesNotExist:
+            raise Http404(('No %s matches the given query.' %
+                           m_models.AnalysisJobGoTerm.__class__.__name__))
 
         ann_ids = []
         if analysis is not None:
@@ -348,11 +355,17 @@ class AnalysisGoSlimRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
         `/runs/ERR1385375/pipelines/3.0/go-slim`
         """
 
-        job = emg_models.AnalysisJob.objects.get(
-            accession=accession, pipeline__release_version=release_version
+        job = get_object_or_404(
+            emg_models.AnalysisJob, accession=accession,
+            pipeline__release_version=release_version
         )
-        analysis = m_models.AnalysisJobGoTerm2.objects \
-            .get(analysis_id=str(job.job_id))
+
+        try:
+            analysis = m_models.AnalysisJobGoTerm.objects \
+                .get(analysis_id=str(job.job_id))
+        except m_models.AnalysisJobGoTerm.DoesNotExist:
+            raise Http404(('No %s matches the given query.' %
+                           m_models.AnalysisJobGoTerm.__class__.__name__))
 
         ann_ids = []
         if analysis is not None:
@@ -400,11 +413,19 @@ class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
         `/runs/ERR1385375/pipelines/3.0/interpro-identifiers`
         """
 
-        job = emg_models.AnalysisJob.objects.get(
-            accession=accession, pipeline__release_version=release_version
+        job = get_object_or_404(
+            emg_models.AnalysisJob, accession=accession,
+            pipeline__release_version=release_version
         )
-        analysis = m_models.AnalysisJobInterproIdentifier2.objects \
+        analysis = m_models.AnalysisJobInterproIdentifier.objects \
             .get(analysis_id=str(job.job_id))
+        try:
+            analysis = m_models.AnalysisJobInterproIdentifier.objects \
+                .get(analysis_id=str(job.job_id))
+        except m_models.AnalysisJobInterproIdentifier.DoesNotExist:
+            raise Http404(
+                ('No %s matches the given query.' %
+                 m_models.AnalysisJobInterproIdentifier.__class__.__name__))
 
         ann_ids = []
         if analysis is not None:
