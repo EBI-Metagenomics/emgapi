@@ -377,7 +377,7 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     study_accession = serializers.SerializerMethodField()
 
     def get_study_accession(self, obj):
-        return getattr(obj.sample.study, 'accession', None)
+        return getattr(getattr(obj.sample, 'study', None), 'accession', None)
 
     # relationship
     experiment_type = serializers.HyperlinkedRelatedField(
