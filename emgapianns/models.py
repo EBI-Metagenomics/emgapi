@@ -61,15 +61,19 @@ class AnalysisJobInterproIdentifierAnnotation(BaseAnalysisJobAnnotation):
 
 class BaseAnalysisJob(mongoengine.Document):
 
-    accession = mongoengine.StringField(
-        primary_key=True, required=True,
-        max_length=20, unique_with=('job_id', 'pipeline_version'))
-    pipeline_version = mongoengine.StringField(
-        required=True, max_length=5, unique_with=('accession'))
-    job_id = mongoengine.IntField(required=True, unique_with=('accession'))
+    analysis_id = mongoengine.StringField(primary_key=True, required=True,
+                                          max_length=50)
+    accession = mongoengine.StringField(required=True, max_length=20)
+    pipeline_version = mongoengine.StringField(required=True, max_length=5)
+    job_id = mongoengine.IntField(required=True)
 
     meta = {
         'abstract': True,
+        # 'indexes': [
+        #     'accession',
+        #     'pipeline_version',
+        #     'job_id',
+        # ]
     }
 
 
@@ -83,40 +87,6 @@ class AnalysisJobGoTerm(BaseAnalysisJob):
 
 
 class AnalysisJobInterproIdentifier(BaseAnalysisJob):
-
-    interpro_identifiers = mongoengine.EmbeddedDocumentListField(
-        AnalysisJobInterproIdentifierAnnotation, required=False)
-
-
-class BaseAnalysisJob2(mongoengine.Document):
-
-    analysis_id = mongoengine.StringField(primary_key=True, required=True,
-                                          max_length=50)
-    accession = mongoengine.StringField(required=True, max_length=20)
-    pipeline_version = mongoengine.StringField(required=True, max_length=5)
-    job_id = mongoengine.IntField(required=True)
-
-    meta = {
-        'abstract': True,
-        'indexes': [
-            'accession',
-            'pipeline_version',
-            'job_id',
-            '$accession',
-        ]
-    }
-
-
-class AnalysisJobGoTerm2(BaseAnalysisJob2):
-
-    go_terms = mongoengine.EmbeddedDocumentListField(
-        AnalysisJobGoTermAnnotation, required=False)
-
-    go_slim = mongoengine.EmbeddedDocumentListField(
-        AnalysisJobGoTermAnnotation, required=False)
-
-
-class AnalysisJobInterproIdentifier2(BaseAnalysisJob2):
 
     interpro_identifiers = mongoengine.EmbeddedDocumentListField(
         AnalysisJobInterproIdentifierAnnotation, required=False)
