@@ -31,6 +31,7 @@ from emgapi import serializers as emg_serializers
 from emgapi import models as emg_models
 from emgapi import filters as emg_filters
 from emgapi import mixins as emg_mixins
+from emgapi import pagination as emg_page
 
 from . import serializers as m_serializers
 from . import models as m_models
@@ -309,12 +310,12 @@ class AnalysisGoTermRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
             raise Http404(('No %s matches the given query.' %
                            m_models.AnalysisJobGoTerm.__class__.__name__))
 
-        ann_ids = []
+        ann_ids = list()
+        ann_counts = dict()
         if analysis is not None:
-            ann_ids = [a.go_term.pk for a in analysis.go_terms]
-            ann_counts = {
-                a.go_term.pk: a.count for a in analysis.go_terms
-            }
+            for a in analysis.go_terms:
+                ann_ids.append(a.go_term.pk)
+                ann_counts[a.go_term.pk] = a.count
 
         queryset = m_models.GoTerm.objects.filter(pk__in=ann_ids)
 
@@ -342,6 +343,8 @@ class AnalysisGoSlimRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
 
     serializer_class = m_serializers.GoTermRetriveSerializer
 
+    pagination_class = emg_page.MaxSetPagination
+
     lookup_fields = ('accession', 'release_version')
 
     def get_queryset(self):
@@ -367,12 +370,12 @@ class AnalysisGoSlimRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
             raise Http404(('No %s matches the given query.' %
                            m_models.AnalysisJobGoTerm.__class__.__name__))
 
-        ann_ids = []
+        ann_ids = list()
+        ann_counts = dict()
         if analysis is not None:
-            ann_ids = [a.go_term.pk for a in analysis.go_slim]
-            ann_counts = {
-                a.go_term.pk: a.count for a in analysis.go_slim
-            }
+            for a in analysis.go_slim:
+                ann_ids.append(a.go_term.pk)
+                ann_counts[a.go_term.pk] = a.count
 
         queryset = m_models.GoTerm.objects.filter(pk__in=ann_ids)
 
@@ -417,8 +420,6 @@ class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
             emg_models.AnalysisJob, accession=accession,
             pipeline__release_version=release_version
         )
-        analysis = m_models.AnalysisJobInterproIdentifier.objects \
-            .get(analysis_id=str(job.job_id))
         try:
             analysis = m_models.AnalysisJobInterproIdentifier.objects \
                 .get(analysis_id=str(job.job_id))
@@ -428,11 +429,11 @@ class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
                  m_models.AnalysisJobInterproIdentifier.__class__.__name__))
 
         ann_ids = []
+        ann_counts = dict()
         if analysis is not None:
-            ann_ids = [a.interpro_identifier.pk for a in analysis.interpro_identifiers]  # NOQA
-            ann_counts = {
-                a.interpro_identifier.pk: a.count for a in analysis.interpro_identifiers  # NOQA
-            }
+            for a in analysis.interpro_identifiers:
+                ann_ids.append(a.interpro_identifier.pk)
+                ann_counts[a.interpro_identifier.pk] = a.count
 
         queryset = m_models.InterproIdentifier.objects.filter(pk__in=ann_ids)
 
