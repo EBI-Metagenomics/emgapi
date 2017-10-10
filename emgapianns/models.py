@@ -20,11 +20,9 @@ import mongoengine
 class BaseAnnotation(mongoengine.DynamicDocument):
 
     accession = mongoengine.StringField(
-        primary_key=True, required=True,
-        max_length=20, unique_with=('description'))
+        primary_key=True, required=True, max_length=20)
     description = mongoengine.StringField(
-        required=True, max_length=255,
-        unique_with=('accession'))
+        required=True, max_length=255)
 
     meta = {
         'abstract': True,
@@ -69,11 +67,6 @@ class BaseAnalysisJob(mongoengine.Document):
 
     meta = {
         'abstract': True,
-        # 'indexes': [
-        #     'accession',
-        #     'pipeline_version',
-        #     'job_id',
-        # ]
     }
 
 
