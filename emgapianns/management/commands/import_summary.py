@@ -54,8 +54,8 @@ class Command(EMGBaseCommand):
 
     def load_go_from_summary_file(self, reader, obj):  # noqa
         try:
-            run = m_models.AnalysisJobGoTerm.objects.get(
-                accession=obj.accession)
+            run = m_models.AnalysisJobGoTerm.objects \
+                .get(analysis_id=obj.job_id)
         except m_models.AnalysisJobGoTerm.DoesNotExist:
             run = m_models.AnalysisJobGoTerm()
         run.analysis_id = str(obj.job_id)
@@ -108,7 +108,7 @@ class Command(EMGBaseCommand):
     def load_ipr_from_summary_file(self, reader, obj):  # noqa
         try:
             run = m_models.AnalysisJobInterproIdentifier.objects.get(
-                accession=obj.accession)
+                analysis_id=obj.job_id)
         except m_models.AnalysisJobInterproIdentifier.DoesNotExist:
             run = m_models.AnalysisJobInterproIdentifier()
         run.analysis_id = str(obj.job_id)
