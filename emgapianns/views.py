@@ -19,6 +19,7 @@ import logging
 from mongoengine.queryset.visitor import Q
 
 from django.http import Http404
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import filters, mixins, viewsets
@@ -30,6 +31,7 @@ from emgapi import serializers as emg_serializers
 from emgapi import models as emg_models
 from emgapi import filters as emg_filters
 from emgapi import mixins as emg_mixins
+from emgapi import pagination as emg_page
 
 from . import serializers as m_serializers
 from . import models as m_models
@@ -187,9 +189,9 @@ class GoTermAnalysisRelationshipViewSet(mixins.ListModelMixin,
             ) \
             .only('job_id')
         logger.info("Found %d analysis" % len(job_ids))
-        job_ids = [str(j.accession) for j in job_ids]
+        job_ids = [str(j.job_id) for j in job_ids]
         queryset = emg_models.AnalysisJob.objects \
-            .filter(accession__in=job_ids) \
+            .filter(job_id__in=job_ids) \
             .available(self.request) \
             .prefetch_related(
                 'sample',
@@ -258,9 +260,9 @@ class InterproIdentifierAnalysisRelationshipViewSet(mixins.ListModelMixin,
             .filter(interpro_identifiers__interpro_identifier=annotation) \
             .only('job_id')
         logger.info("Found %d analysis" % len(job_ids))
-        job_ids = [str(j.accession) for j in job_ids]
+        job_ids = [str(j.job_id) for j in job_ids]
         queryset = emg_models.AnalysisJob.objects \
-            .filter(accession__in=job_ids) \
+            .filter(job_id__in=job_ids) \
             .available(self.request) \
             .prefetch_related(
                 'sample',
@@ -296,15 +298,24 @@ class AnalysisGoTermRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
         `/runs/ERR1385375/pipelines/3.0/go-terms`
         """
 
-        analysis = m_models.AnalysisJobGoTerm.objects.filter(
-            accession=accession, pipeline_version=release_version).first()
+        job = get_object_or_404(
+            emg_models.AnalysisJob, accession=accession,
+            pipeline__release_version=release_version
+        )
 
-        ann_ids = []
+        try:
+            analysis = m_models.AnalysisJobGoTerm.objects \
+                .get(analysis_id=str(job.job_id))
+        except m_models.AnalysisJobGoTerm.DoesNotExist:
+            raise Http404(('No %s matches the given query.' %
+                           m_models.AnalysisJobGoTerm.__class__.__name__))
+
+        ann_ids = list()
+        ann_counts = dict()
         if analysis is not None:
-            ann_ids = [a.go_term.pk for a in analysis.go_terms]
-            ann_counts = {
-                a.go_term.pk: a.count for a in analysis.go_terms
-            }
+            for a in analysis.go_terms:
+                ann_ids.append(a.go_term.pk)
+                ann_counts[a.go_term.pk] = a.count
 
         queryset = m_models.GoTerm.objects.filter(pk__in=ann_ids)
 
@@ -332,6 +343,8 @@ class AnalysisGoSlimRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
 
     serializer_class = m_serializers.GoTermRetriveSerializer
 
+    pagination_class = emg_page.MaxSetPagination
+
     lookup_fields = ('accession', 'release_version')
 
     def get_queryset(self):
@@ -345,15 +358,24 @@ class AnalysisGoSlimRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
         `/runs/ERR1385375/pipelines/3.0/go-slim`
         """
 
-        analysis = m_models.AnalysisJobGoTerm.objects.filter(
-            accession=accession, pipeline_version=release_version).first()
+        job = get_object_or_404(
+            emg_models.AnalysisJob, accession=accession,
+            pipeline__release_version=release_version
+        )
 
-        ann_ids = []
+        try:
+            analysis = m_models.AnalysisJobGoTerm.objects \
+                .get(analysis_id=str(job.job_id))
+        except m_models.AnalysisJobGoTerm.DoesNotExist:
+            raise Http404(('No %s matches the given query.' %
+                           m_models.AnalysisJobGoTerm.__class__.__name__))
+
+        ann_ids = list()
+        ann_counts = dict()
         if analysis is not None:
-            ann_ids = [a.go_term.pk for a in analysis.go_slim]
-            ann_counts = {
-                a.go_term.pk: a.count for a in analysis.go_slim
-            }
+            for a in analysis.go_slim:
+                ann_ids.append(a.go_term.pk)
+                ann_counts[a.go_term.pk] = a.count
 
         queryset = m_models.GoTerm.objects.filter(pk__in=ann_ids)
 
@@ -394,15 +416,24 @@ class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
         `/runs/ERR1385375/pipelines/3.0/interpro-identifiers`
         """
 
-        analysis = m_models.AnalysisJobInterproIdentifier.objects.filter(
-            accession=accession, pipeline_version=release_version).first()
+        job = get_object_or_404(
+            emg_models.AnalysisJob, accession=accession,
+            pipeline__release_version=release_version
+        )
+        try:
+            analysis = m_models.AnalysisJobInterproIdentifier.objects \
+                .get(analysis_id=str(job.job_id))
+        except m_models.AnalysisJobInterproIdentifier.DoesNotExist:
+            raise Http404(
+                ('No %s matches the given query.' %
+                 m_models.AnalysisJobInterproIdentifier.__class__.__name__))
 
         ann_ids = []
+        ann_counts = dict()
         if analysis is not None:
-            ann_ids = [a.interpro_identifier.pk for a in analysis.interpro_identifiers]  # NOQA
-            ann_counts = {
-                a.interpro_identifier.pk: a.count for a in analysis.interpro_identifiers  # NOQA
-            }
+            for a in analysis.interpro_identifiers:
+                ann_ids.append(a.interpro_identifier.pk)
+                ann_counts[a.interpro_identifier.pk] = a.count
 
         queryset = m_models.InterproIdentifier.objects.filter(pk__in=ann_ids)
 
