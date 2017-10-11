@@ -41,7 +41,7 @@ class TestCLI(object):
         rsp = response.json()
         assert len(rsp['data']) == 3
 
-        expected = ['GO:0055114', 'GO:0008152', 'GO:0006810']
+        expected = ['GO:0030246', 'GO:0046906', 'GO:0043167']
         ids = [a['id'] for a in rsp['data']]
         assert ids == expected
 
@@ -56,9 +56,10 @@ class TestCLI(object):
         rsp = response.json()
         assert len(rsp['data']) == 6
 
-        expected = ['GO:0055114', 'GO:0008152', 'GO:0006810',
-                    'GO:0006412', 'GO:0009058', 'GO:0005975']
+        expected = ['GO:0030170', 'GO:0019842', 'GO:0030246',
+                    'GO:0046906', 'GO:0043167', 'GO:0005515']
         ids = [a['id'] for a in rsp['data']]
+        print(ids)
         assert ids == expected
 
     def test_ipr(self, client, run):
@@ -72,8 +73,8 @@ class TestCLI(object):
         rsp = response.json()
         assert len(rsp['data']) == 6
 
-        expected = ['IPR006882', 'IPR008659', 'IPR007875',
-                    'IPR033393', 'IPR015072', 'IPR024581']
+        expected = ['IPR009739', 'IPR021425', 'IPR021710',
+                    'IPR033771', 'IPR024561', 'IPR013698']
         ids = [a['id'] for a in rsp['data']]
         assert ids == expected
 
