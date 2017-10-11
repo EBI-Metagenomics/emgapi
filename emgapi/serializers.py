@@ -250,18 +250,18 @@ class PipelineSerializer(ExplicitFieldsModelSerializer,
     )
 
     # relationships
-    studies = relations.SerializerMethodResourceRelatedField(
-        source='get_studies',
-        model=emg_models.Study,
-        many=True,
-        read_only=True,
-        related_link_view_name='emgapi:pipelines-studies-list',
-        related_link_url_kwarg='release_version',
-        related_link_lookup_field='release_version',
-    )
-
-    def get_studies(self, obj):
-        return None
+    # studies = relations.SerializerMethodResourceRelatedField(
+    #     source='get_studies',
+    #     model=emg_models.Study,
+    #     many=True,
+    #     read_only=True,
+    #     related_link_view_name='emgapi:pipelines-studies-list',
+    #     related_link_url_kwarg='release_version',
+    #     related_link_lookup_field='release_version',
+    # )
+    #
+    # def get_studies(self, obj):
+    #     return None
 
     samples = relations.SerializerMethodResourceRelatedField(
         source='get_samples',
