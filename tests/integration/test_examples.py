@@ -73,5 +73,5 @@ class TestExamples(object):
                 go_terms = []
                 for go in analysis.go_slim:
                     go_terms.append(go.accession)
-                expected = ['GO:0006810', 'GO:0008152', 'GO:0055114']
+                expected = ['GO:0030246', 'GO:0043167', 'GO:0046906']
                 assert go_terms == expected
