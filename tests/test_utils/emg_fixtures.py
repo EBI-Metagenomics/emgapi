@@ -171,3 +171,24 @@ def run_with_sample(analysis_status, pipeline, experiment_type):
         input_file_name="ABC_FASTQ",
         result_directory="path/version_1.0/ABC_FASTQ",
     )
+
+
+@pytest.fixture
+def analysis_results(analysis_status, experiment_type):
+    pipeline_version = [1, 2]
+    res = dict()
+    for pipe in pipeline_version:
+        v = "%s.0" % pipe
+        p = mommy.make('emgapi.Pipeline', pk=pipe, release_version=v)
+        res[v] = mommy.make(
+            'emgapi.AnalysisJob',
+            pk=pipe*100,
+            accession="ABC01234",
+            run_status_id=4,
+            experiment_type_id=experiment_type.pk,
+            pipeline_id=p.pk,
+            analysis_status_id=analysis_status.pk,
+            input_file_name="ABC_FASTQ",
+            result_directory="path/version_%s/ABC_FASTQ" % v,
+        )
+    return res
