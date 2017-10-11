@@ -59,7 +59,7 @@ class TestExamples(object):
                         run.experiment_type.experiment_type,
                     )
 
-    def test_annotations(self, live_server, run, api_version):
+    def test_annotations(self, live_server, run_with_sample, api_version):
         from jsonapi_client import Session
 
         call_command('import_summary', 'ABC01234',
