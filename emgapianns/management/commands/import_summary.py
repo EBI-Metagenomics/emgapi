@@ -46,7 +46,6 @@ class Command(EMGBaseCommand):
                                     self.load_go_from_summary_file(
                                         reader, obj
                                     )
-                            continue
             elif os.path.isfile(res):
                 raise NotImplementedError("Give path to directory.")
         else:
