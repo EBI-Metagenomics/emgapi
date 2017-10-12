@@ -16,7 +16,10 @@ class Command(EMGBaseCommand):
 
     def add_arguments(self, parser):
         super(Command, self).add_arguments(parser)
-        parser.add_argument('suffix', nargs='?', type=str, default='.go_slim')
+        parser.add_argument(
+            'suffix', nargs='?', type=str,
+            default='.go_slim', choices=['.ipr', '.go', '.go_slim'],
+            help='summary: .go_slim, .go, .ipr (default: %(default)s)')
 
     def populate_from_accession(self, options):
         logger.info("Found %d" % len(self.obj_list))
@@ -27,27 +30,24 @@ class Command(EMGBaseCommand):
         rootpath = options.get('rootpath', None)
         self.suffix = options.get('suffix', None)
 
-        res = os.path.join(rootpath, obj.result_directory)
-        logger.info("Scanning path: %s" % res)
+        name = "%s_summary%s" % (obj.input_file_name, self.suffix)
+        res = os.path.join(rootpath, obj.result_directory, name)
+        logger.info("Found: %s" % res)
         if os.path.exists(res):
-            if os.path.isdir(res):
-                for root, dirs, files in os.walk(res, topdown=False):
-                    for name in files:
-                        if name.endswith(self.suffix):
-                            _f = os.path.join(root, name)
-                            logger.info("Found: %s" % _f)
-                            with open(_f) as csvfile:
-                                reader = csv.reader(csvfile, delimiter=',')
-                                if self.suffix == '.ipr':
-                                    self.load_ipr_from_summary_file(
-                                        reader, obj
-                                    )
-                                elif self.suffix in ('.go_slim', '.go'):
-                                    self.load_go_from_summary_file(
-                                        reader, obj
-                                    )
-            elif os.path.isfile(res):
-                raise NotImplementedError("Give path to directory.")
+            if os.path.isfile(res):
+                logger.info("Loading: %s" % res)
+                with open(res) as csvfile:
+                    reader = csv.reader(csvfile, delimiter=',')
+                    if self.suffix == '.ipr':
+                        self.load_ipr_from_summary_file(
+                            reader, obj
+                        )
+                    elif self.suffix in ('.go_slim', '.go'):
+                        self.load_go_from_summary_file(
+                            reader, obj
+                        )
+            else:
+                logger.error("Path %r exist. No summary. SKIPPING!" % res)
         else:
             logger.error("Path %r doesn't exist. SKIPPING!" % res)
 
