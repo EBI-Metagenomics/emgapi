@@ -21,10 +21,9 @@ import mongoengine
 
 class BaseAnnotation(mongoengine.DynamicDocument):
 
-    accession = mongoengine.StringField(
-        primary_key=True, required=True, max_length=20)
-    description = mongoengine.StringField(
-        required=True, max_length=255)
+    accession = mongoengine.StringField(primary_key=True, required=True,
+                                        max_length=20)
+    description = mongoengine.StringField(required=True, max_length=255)
 
     meta = {
         'abstract': True,
@@ -110,7 +109,6 @@ class AnalysisJobTaxonomy(mongoengine.Document):
                                           max_length=50)
     accession = mongoengine.StringField(required=True, max_length=20)
     pipeline_version = mongoengine.StringField(required=True, max_length=5)
-    job_id = mongoengine.IntField(required=True)
 
     taxonomy_ssu = mongoengine.EmbeddedDocumentListField(
         AnalysisJobOrganism, required=False)
