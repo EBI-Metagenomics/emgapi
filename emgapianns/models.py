@@ -17,6 +17,8 @@
 import mongoengine
 
 
+# Annotations model
+
 class BaseAnnotation(mongoengine.DynamicDocument):
 
     accession = mongoengine.StringField(
@@ -84,3 +86,34 @@ class AnalysisJobInterproIdentifier(BaseAnalysisJob):
 
     interpro_identifiers = mongoengine.EmbeddedDocumentListField(
         AnalysisJobInterproIdentifierAnnotation, required=False)
+
+
+# Taxonomic model
+
+class Organism(mongoengine.DynamicDocument):
+
+    name = mongoengine.StringField(
+        primary_key=True, required=True, max_length=20)
+    ancestors = mongoengine.ListField(mongoengine.StringField(), default=list)
+    parent = mongoengine.StringField(required=True, max_length=255)
+
+
+class AnalysisJobOrganism(mongoengine.EmbeddedDocument):
+
+    count = mongoengine.IntField(required=True)
+    organism = mongoengine.ReferenceField(Organism)
+
+
+class AnalysisJobTaxonomy(mongoengine.Document):
+
+    analysis_id = mongoengine.StringField(primary_key=True, required=True,
+                                          max_length=50)
+    accession = mongoengine.StringField(required=True, max_length=20)
+    pipeline_version = mongoengine.StringField(required=True, max_length=5)
+    job_id = mongoengine.IntField(required=True)
+
+    taxonomy_ssu = mongoengine.EmbeddedDocumentListField(
+        AnalysisJobOrganism, required=False)
+
+    taxonomy_lsu = mongoengine.EmbeddedDocumentListField(
+        AnalysisJobOrganism, required=False)
