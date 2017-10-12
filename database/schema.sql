@@ -407,6 +407,23 @@ CREATE TABLE `STUDY_PUBLICATION` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `STUDY_SAMPLE`
+--
+
+DROP TABLE IF EXISTS `STUDY_SAMPLE`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `STUDY_SAMPLE` (
+  `STUDY_ID` int(11) NOT NULL,
+  `SAMPLE_ID` int(11) NOT NULL,
+  PRIMARY KEY (`STUDY_ID`,`SAMPLE_ID`),
+  KEY `STUDY_SAMPLE_SAMPLE_ID_910fcb8d_fk_SAMPLE_SAMPLE_ID` (`SAMPLE_ID`),
+  CONSTRAINT `STUDY_SAMPLE_SAMPLE_ID_910fcb8d_fk_SAMPLE_SAMPLE_ID` FOREIGN KEY (`SAMPLE_ID`) REFERENCES `SAMPLE` (`SAMPLE_ID`),
+  CONSTRAINT `STUDY_SAMPLE_STUDY_ID_5e6f0a9a_fk_STUDY_STUDY_ID` FOREIGN KEY (`STUDY_ID`) REFERENCES `STUDY` (`STUDY_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `SUMMARY_VARIABLE_NAMES`
 --
 
