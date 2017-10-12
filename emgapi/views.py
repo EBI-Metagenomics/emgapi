@@ -351,6 +351,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
 
     ordering_fields = (
         'accession',
+        'study__accession',
         'sample_name',
         'last_update',
         'runs_count',
