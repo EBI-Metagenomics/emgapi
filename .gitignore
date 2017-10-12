@@ -5,3 +5,6 @@ __pycache__
 var
 dist
 .eggs
+*.iml
+*.idea
+.idea
