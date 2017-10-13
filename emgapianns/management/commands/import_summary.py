@@ -101,8 +101,8 @@ class Command(EMGBaseCommand):
                 m_models.GoTerm.objects.insert(new_anns)
                 logger.info(
                     "Created %d new GoTerm Annotations" % len(new_anns))
-            run.save()
-            logger.info("Saved Run %r" % run)
+        run.save()
+        logger.info("Saved Run %r" % run)
 
     def load_ipr_from_summary_file(self, reader, obj):  # noqa
         try:
@@ -148,5 +148,5 @@ class Command(EMGBaseCommand):
                 m_models.InterproIdentifier.objects.insert(new_anns)
                 logger.info(
                     "Created %d new IPR Annotations" % len(new_anns))
-            run.save()
-            logger.info("Saved Run %r" % run)
+        run.save()
+        logger.info("Saved Run %r" % run)
