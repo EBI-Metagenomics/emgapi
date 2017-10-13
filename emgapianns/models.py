@@ -91,10 +91,11 @@ class AnalysisJobInterproIdentifier(BaseAnalysisJob):
 
 class Organism(mongoengine.DynamicDocument):
 
-    name = mongoengine.StringField(
-        primary_key=True, required=True, max_length=20)
+    lineage = mongoengine.StringField(
+        primary_key=True, required=True, max_length=255)
     ancestors = mongoengine.ListField(mongoengine.StringField(), default=list)
-    parent = mongoengine.StringField(required=True, max_length=255)
+    name = mongoengine.StringField(required=True, max_length=100)
+    parent = mongoengine.StringField(required=True, max_length=100)
     prefix = mongoengine.StringField(required=True, max_length=10)
 
 
