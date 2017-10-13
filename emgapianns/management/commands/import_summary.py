@@ -35,17 +35,20 @@ class Command(EMGBaseCommand):
         logger.info("Found: %s" % res)
         if os.path.exists(res):
             if os.path.isfile(res):
-                logger.info("Loading: %s" % res)
-                with open(res) as csvfile:
-                    reader = csv.reader(csvfile, delimiter=',')
-                    if self.suffix == '.ipr':
-                        self.load_ipr_from_summary_file(
-                            reader, obj
-                        )
-                    elif self.suffix in ('.go_slim', '.go'):
-                        self.load_go_from_summary_file(
-                            reader, obj
-                        )
+                if os.stat(res).st_size > 0:
+                    logger.info("Loading: %s" % res)
+                    with open(res) as csvfile:
+                        reader = csv.reader(csvfile, delimiter=',')
+                        if self.suffix == '.ipr':
+                            self.load_ipr_from_summary_file(
+                                reader, obj
+                            )
+                        elif self.suffix in ('.go_slim', '.go'):
+                            self.load_go_from_summary_file(
+                                reader, obj
+                            )
+                else:
+                    logger.error("Path %r exist. Empty file. SKIPPING!" % res)
             else:
                 logger.error("Path %r exist. No summary. SKIPPING!" % res)
         else:
