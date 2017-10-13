@@ -107,6 +107,45 @@ class TestAnnotations(object):
         response = client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
+    def test_empty(self, client, run_emptyresults):
+        job = run_emptyresults.accession
+        version = run_emptyresults.pipeline.release_version
+        assert job == 'EMPTY_ABC01234'
+
+        call_command('import_summary', job,
+                     os.path.dirname(os.path.abspath(__file__)),
+                     suffix='.go_slim')
+        call_command('import_summary', job,
+                     os.path.dirname(os.path.abspath(__file__)),
+                     suffix='.go')
+        call_command('import_summary', job,
+                     os.path.dirname(os.path.abspath(__file__)),
+                     suffix='.ipr')
+
+        url = reverse("emgapi:runs-pipelines-goslim-list",
+                      args=[job, version])
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        rsp = response.json()
+
+        assert len(rsp['data']) == 0
+
+        url = reverse("emgapi:runs-pipelines-goterms-list",
+                      args=[job, version])
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        rsp = response.json()
+
+        assert len(rsp['data']) == 0
+
+        url = reverse("emgapi:runs-pipelines-interpro-list",
+                      args=[job, version])
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        rsp = response.json()
+
+        assert len(rsp['data']) == 0
+
     @pytest.mark.parametrize(
         'pipeline_version', [
             {'version': '1.0', 'expected': {
