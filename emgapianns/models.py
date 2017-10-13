@@ -49,12 +49,13 @@ class BaseAnalysisJobAnnotation(mongoengine.EmbeddedDocument):
 
 class AnalysisJobGoTermAnnotation(BaseAnalysisJobAnnotation):
 
-    go_term = mongoengine.ReferenceField(GoTerm)
+    go_term = mongoengine.ReferenceField(GoTerm, required=True)
 
 
 class AnalysisJobInterproIdentifierAnnotation(BaseAnalysisJobAnnotation):
 
-    interpro_identifier = mongoengine.ReferenceField(InterproIdentifier)
+    interpro_identifier = mongoengine.ReferenceField(InterproIdentifier,
+                                                     required=True)
 
 
 class BaseAnalysisJob(mongoengine.Document):
