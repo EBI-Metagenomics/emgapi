@@ -124,9 +124,9 @@ def runs(samples, analysis_status, pipeline, experiment_type):
                 sample_id=pk,
                 accession="ABC_{:0>3}".format(pk),
                 run_status_id=4,
-                experiment_type_id=experiment_type.pk,
-                pipeline_id=pipeline.pk,
-                analysis_status_id=analysis_status.pk,
+                experiment_type=experiment_type,
+                pipeline=pipeline,
+                analysis_status=analysis_status,
                 input_file_name="ABC_FASTQ",
                 result_directory="path/version_1.0/ABC_FASTQ",
             )
@@ -141,11 +141,26 @@ def run(analysis_status, pipeline, experiment_type):
         pk=1234,
         accession="ABC01234",
         run_status_id=4,
-        experiment_type_id=experiment_type.pk,
-        pipeline_id=pipeline.pk,
-        analysis_status_id=analysis_status.pk,
+        experiment_type=experiment_type,
+        pipeline=pipeline,
+        analysis_status=analysis_status,
         input_file_name="ABC_FASTQ",
         result_directory="path/version_1.0/ABC_FASTQ",
+    )
+
+
+@pytest.fixture
+def run_emptyresults(analysis_status, pipeline, experiment_type):
+    return mommy.make(
+        'emgapi.AnalysisJob',
+        pk=1234,
+        accession="EMPTY_ABC01234",
+        run_status_id=4,
+        experiment_type=experiment_type,
+        pipeline=pipeline,
+        analysis_status=analysis_status,
+        input_file_name="EMPTY_ABC_FASTQ",
+        result_directory="emptypath/version_1.0/EMPTY_ABC_FASTQ",
     )
 
 
@@ -165,9 +180,9 @@ def run_with_sample(analysis_status, pipeline, experiment_type):
         accession="ABC01234",
         run_status_id=4,
         sample_id=sample.pk,
-        experiment_type_id=experiment_type.pk,
-        pipeline_id=pipeline.pk,
-        analysis_status_id=analysis_status.pk,
+        experiment_type=experiment_type,
+        pipeline=pipeline,
+        analysis_status=analysis_status,
         input_file_name="ABC_FASTQ",
         result_directory="path/version_1.0/ABC_FASTQ",
     )
@@ -185,9 +200,9 @@ def analysis_results(analysis_status, experiment_type):
             pk=pipe*100,
             accession="ABC01234",
             run_status_id=4,
-            experiment_type_id=experiment_type.pk,
-            pipeline_id=p.pk,
-            analysis_status_id=analysis_status.pk,
+            experiment_type=experiment_type,
+            pipeline=p,
+            analysis_status=analysis_status,
             input_file_name="ABC_FASTQ",
             result_directory="path/version_%s/ABC_FASTQ" % v,
         )
