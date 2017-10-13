@@ -21,20 +21,18 @@ class Command(EMGBaseCommand):
 
     def find_path(self, obj, options):
         rootpath = options.get('rootpath', None)
-        res = os.path.join(rootpath, obj.result_directory)
-        logger.info("Scanning path: %s" % res)
+        res = os.path.join(
+            rootpath, obj.result_directory, 'charts', 'new.summary')
+        logger.info("Found: %s" % res)
         if os.path.exists(res):
-            if os.path.isdir(res):
-                for root, dirs, files in os.walk(res, topdown=False):
-                    for name in files:
-                        if name in ('new.summary',):
-                            _f = os.path.join(root, name)
-                            logger.info("Found: %s" % _f)
-                            with open(_f) as csvfile:
-                                reader = csv.reader(csvfile, delimiter='\t')
-                                self.import_qc(reader, obj)
-            elif os.path.isfile(res):
-                raise NotImplementedError("Give path to directory.")
+            if os.path.isfile(res):
+                logger.info("Found: %s" % res)
+                with open(res) as csvfile:
+                    reader = csv.reader(csvfile, delimiter='\t')
+                    logger.info("foo")
+                    self.import_qc(reader, obj)
+            else:
+                logger.error("Path %r exist. No summary. SKIPPING!" % res)
         else:
             logger.error("Path %r doesn't exist. SKIPPING!" % res)
 
