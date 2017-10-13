@@ -303,12 +303,12 @@ class AnalysisGoTermRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
             pipeline__release_version=release_version
         )
 
+        analysis = None
         try:
             analysis = m_models.AnalysisJobGoTerm.objects \
                 .get(analysis_id=str(job.job_id))
         except m_models.AnalysisJobGoTerm.DoesNotExist:
-            raise Http404(('No %s matches the given query.' %
-                           m_models.AnalysisJobGoTerm.__class__.__name__))
+            pass
 
         ann_ids = list()
         ann_counts = dict()
@@ -363,12 +363,12 @@ class AnalysisGoSlimRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
             pipeline__release_version=release_version
         )
 
+        analysis = None
         try:
             analysis = m_models.AnalysisJobGoTerm.objects \
                 .get(analysis_id=str(job.job_id))
         except m_models.AnalysisJobGoTerm.DoesNotExist:
-            raise Http404(('No %s matches the given query.' %
-                           m_models.AnalysisJobGoTerm.__class__.__name__))
+            pass
 
         ann_ids = list()
         ann_counts = dict()
@@ -420,13 +420,13 @@ class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
             emg_models.AnalysisJob, accession=accession,
             pipeline__release_version=release_version
         )
+
+        analysis = None
         try:
             analysis = m_models.AnalysisJobInterproIdentifier.objects \
                 .get(analysis_id=str(job.job_id))
         except m_models.AnalysisJobInterproIdentifier.DoesNotExist:
-            raise Http404(
-                ('No %s matches the given query.' %
-                 m_models.AnalysisJobInterproIdentifier.__class__.__name__))
+            pass
 
         ann_ids = []
         ann_counts = dict()
