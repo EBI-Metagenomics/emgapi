@@ -26,11 +26,14 @@ class Command(EMGBaseCommand):
         logger.info("Found: %s" % res)
         if os.path.exists(res):
             if os.path.isfile(res):
-                logger.info("Found: %s" % res)
-                with open(res) as csvfile:
-                    reader = csv.reader(csvfile, delimiter='\t')
-                    logger.info("foo")
-                    self.import_qc(reader, obj)
+                if os.stat(res).st_size > 0:
+                    logger.info("Found: %s" % res)
+                    with open(res) as csvfile:
+                        reader = csv.reader(csvfile, delimiter='\t')
+                        logger.info("foo")
+                        self.import_qc(reader, obj)
+                else:
+                    logger.error("Path %r exist. Empty file. SKIPPING!" % res)
             else:
                 logger.error("Path %r exist. No summary. SKIPPING!" % res)
         else:
