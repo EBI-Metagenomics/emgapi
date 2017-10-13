@@ -95,6 +95,7 @@ class Organism(mongoengine.DynamicDocument):
         primary_key=True, required=True, max_length=20)
     ancestors = mongoengine.ListField(mongoengine.StringField(), default=list)
     parent = mongoengine.StringField(required=True, max_length=255)
+    prefix = mongoengine.StringField(required=True, max_length=10)
 
 
 class AnalysisJobOrganism(mongoengine.EmbeddedDocument):
