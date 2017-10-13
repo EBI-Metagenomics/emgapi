@@ -40,13 +40,9 @@ class Command(EMGBaseCommand):
                     with open(res) as csvfile:
                         reader = csv.reader(csvfile, delimiter=',')
                         if self.suffix == '.ipr':
-                            self.load_ipr_from_summary_file(
-                                reader, obj
-                            )
+                            self.load_ipr_from_summary_file(reader, obj)
                         elif self.suffix in ('.go_slim', '.go'):
-                            self.load_go_from_summary_file(
-                                reader, obj
-                            )
+                            self.load_go_from_summary_file(reader, obj)
                 else:
                     logger.error("Path %r exist. Empty file. SKIPPING!" % res)
             else:
@@ -115,7 +111,8 @@ class Command(EMGBaseCommand):
             run = m_models.AnalysisJobInterproIdentifier()
         run.analysis_id = str(obj.job_id)
         run.accession = obj.accession
-        run.pipeline_version = obj.pipeline.release_version
+        version = obj.pipeline.release_version
+        run.pipeline_version = version
         run.job_id = obj.job_id
         new_anns = []
         anns = []
@@ -145,8 +142,8 @@ class Command(EMGBaseCommand):
                         run.interpro_identifiers.append(rann)
         if len(anns) > 0:
             logger.info(
-                "Total %d Annotations for Run: %s" % (
-                    len(anns), obj.accession))
+                "Total %d Annotations for Run: %s %s" % (
+                    len(anns), obj.accession, version))
             if len(new_anns) > 0:
                 m_models.InterproIdentifier.objects.insert(new_anns)
                 logger.info(
