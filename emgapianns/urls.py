@@ -83,3 +83,11 @@ router.register(
     m_views.AnalysisInterproIdentifierRelationshipViewSet,
     base_name='runs-pipelines-interpro'
 )
+
+router.register(
+    (r'runs/(?P<accession>[a-zA-Z0-9_]+)/'
+     r'pipelines/(?P<release_version>[0-9\.]+)/'
+     r'organisms'),
+    m_views.AnalysisOrganismRelationshipViewSet,
+    base_name='runs-pipelines-organisms'
+)
