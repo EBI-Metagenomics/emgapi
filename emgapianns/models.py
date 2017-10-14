@@ -105,15 +105,12 @@ class AnalysisJobOrganism(mongoengine.EmbeddedDocument):
     organism = mongoengine.ReferenceField(Organism)
 
 
-class AnalysisJobTaxonomy(mongoengine.Document):
+class AnalysisJobTaxonomy(mongoengine.DynamicDocument):
 
     analysis_id = mongoengine.StringField(primary_key=True, required=True,
                                           max_length=50)
     accession = mongoengine.StringField(required=True, max_length=20)
     pipeline_version = mongoengine.StringField(required=True, max_length=5)
 
-    taxonomy_ssu = mongoengine.EmbeddedDocumentListField(
-        AnalysisJobOrganism, required=False)
-
-    taxonomy_lsu = mongoengine.EmbeddedDocumentListField(
+    taxonomy = mongoengine.EmbeddedDocumentListField(
         AnalysisJobOrganism, required=False)
