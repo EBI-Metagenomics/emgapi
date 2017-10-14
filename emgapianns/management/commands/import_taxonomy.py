@@ -13,10 +13,14 @@ logger = logging.getLogger(__name__)
 
 
 ORGANISM_PREFIX = {
-    '1.0': ['k', 'p', 'c', 'o', 'f', 'g', 's'],
-    '2.0': ['k', 'p', 'c', 'o', 'f', 'g', 's'],
-    '3.0': ['k', 'p', 'c', 'o', 'f', 'g', 's'],
-    '4.0': ['sk', 'k', 'p', 'c', 'o', 'f', 'g', 's'],
+    '1.0': ['kingdom', 'phylum', 'class', 'order', 'family', 'genus',
+            'species'],
+    '2.0': ['kingdom', 'phylum', 'class', 'order', 'family', 'genus',
+            'species'],
+    '3.0': ['kingdom', 'phylum', 'class', 'order', 'family', 'genus',
+            'species'],
+    '4.0': ['super kingdom', 'kingdom', 'phylum', 'class', 'order', 'family',
+            'genus', 'species'],
 }
 
 
@@ -65,23 +69,29 @@ class Command(EMGBaseCommand):
         orgs = []
         for row in reader:
             count = row[0]
-            lineage = row[1:]
+            lineage = list(map(str.rstrip, row[1:]))
             if len(lineage) > 1:
                 name = lineage[-1]
                 ancestors = lineage[0:-1]
                 parent = ancestors[-1]
                 prefix = ORGANISM_PREFIX[version][len(ancestors)]
             else:
-                name = lineage[0] if len(lineage) > 0 else "Unassigned"
-                ancestors = []
-                parent = None
-                prefix = ORGANISM_PREFIX[version][len(ancestors)]
+                try:
+                    name = lineage[0]
+                except KeyError:
+                    continue
+                if name:
+                    ancestors = []
+                    parent = None
+                    prefix = ORGANISM_PREFIX[version][len(ancestors)]
+                else:
+                    continue
             organism = None
             try:
-                organism = m_models.Organism.objects.get(pk=lineage)
+                organism = m_models.Organism.objects.get(pk=":".join(lineage))
             except m_models.Organism.DoesNotExist:
                 organism = m_models.Organism(
-                    lineage=",".join(lineage), name=name, parent=parent,
+                    lineage=":".join(lineage), name=name, parent=parent,
                     ancestors=ancestors, prefix=prefix
                 )
                 new_orgs.append(organism)
@@ -91,7 +101,7 @@ class Command(EMGBaseCommand):
                     count=count,
                     organism=organism
                 )
-                run.taxonomy.append(rorg)
+                run.otu.append(rorg)
 
         if len(orgs) > 0:
             logger.info(
