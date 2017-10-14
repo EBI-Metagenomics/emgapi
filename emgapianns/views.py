@@ -568,3 +568,73 @@ class OrganismTreeViewSet(mixins.ListModelMixin,
         """
         return super(OrganismTreeViewSet, self) \
             .list(request, *args, **kwargs)
+
+
+class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
+                                          mixins.ListModelMixin,
+                                          m_viewset.GenericViewSet):
+
+    serializer_class = m_serializers.OrganismRetriveSerializer
+
+    pagination_class = emg_page.MaxSetPagination
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'name',
+        'prefix',
+        'lineage',
+    )
+
+    lookup_fields = ('accession', 'release_version')
+
+    def get_queryset(self):
+        return emg_models.AnalysisJob.objects.available(self.request)
+
+    def list(self, request, accession, release_version, *args, **kwargs):
+        """
+        Retrieves GO slim for the given run and pipeline version
+        Example:
+        ---
+        `/runs/ERR1385375/pipelines/3.0/organisms`
+        """
+
+        job = get_object_or_404(
+            emg_models.AnalysisJob, accession=accession,
+            pipeline__release_version=release_version
+        )
+
+        analysis = None
+        try:
+            analysis = m_models.AnalysisJobTaxonomy.objects \
+                .get(analysis_id=str(job.job_id))
+        except m_models.AnalysisJobTaxonomy.DoesNotExist:
+            pass
+
+        ann_ids = list()
+        ann_counts = dict()
+        if analysis is not None:
+            for a in analysis.taxonomy:
+                ann_ids.append(a.organism.lineage)
+                ann_counts[a.organism.pk] = a.count
+
+        queryset = m_models.Organism.objects.filter(pk__in=ann_ids)
+
+        page = self.paginate_queryset(queryset)
+        for p in page:
+            p.count = ann_counts[p.pk]
+        if page is not None:
+            serializer = self.get_serializer(
+                page,
+                many=True,
+                context={'request': request}
+            )
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(
+            queryset,
+            many=True,
+            context={'request': request}
+        )
+        return Response(serializer.data)
