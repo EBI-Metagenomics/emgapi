@@ -1,8 +1,8 @@
 2	Bacteria	Proteobacteria	Gammaproteobacteria	XanthomonadalesXanthomonadaceae
 319	
-3	Bacteria	Bacteroidetes	Saprospirae	Saprospirales	Saprospiraceae
-2	Bacteria	Proteobacteria	Gammaproteobacteria	PseudomonadalesMoraxellaceae	Acinetobacter	johnsonii
-3	Bacteria	Actinobacteria	Actinobacteria	Actinomycetales	ACK-M1
+20	Bacteria
+15	Bacteria	Proteobacteria
+50	Bacteria	Proteobacteria	Alphaproteobacteria
 1	Bacteria	Chlorobi	OPB56
 42	Bacteria	Proteobacteria	Alphaproteobacteria	RhodobacteralesRhodobacteraceae
 1	Bacteria	Proteobacteria	Alphaproteobacteria	Sphingomonadales
