@@ -101,7 +101,7 @@ class Command(EMGBaseCommand):
                     count=count,
                     organism=organism
                 )
-                run.otu.append(rorg)
+                run.taxonomy.append(rorg)
 
         if len(orgs) > 0:
             logger.info(

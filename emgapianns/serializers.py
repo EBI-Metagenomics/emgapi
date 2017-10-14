@@ -145,7 +145,7 @@ class InterproIdentifierRetriveSerializer(  # NOQA
         fields = '__all__'
 
 
-class OrganismSerializer(m_serializers.DocumentSerializer,
+class OrganismSerializer(m_serializers.DynamicDocumentSerializer,
                          serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
@@ -173,4 +173,24 @@ class OrganismSerializer(m_serializers.DocumentSerializer,
             'prefix',
             'name',
             'children',
+        )
+
+
+class OrganismRetriveSerializer(m_serializers.DynamicDocumentSerializer,
+                                serializers.HyperlinkedModelSerializer):
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi:organisms-detail',
+        lookup_field='lineage',
+    )
+
+    count = serializers.IntegerField(required=False)
+
+    class Meta:
+        model = m_models.Organism
+        fields = (
+            'url',
+            'prefix',
+            'name',
+            'count',
         )
