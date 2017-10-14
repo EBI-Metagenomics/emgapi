@@ -46,6 +46,18 @@ mongo_router.register(
     base_name='interproidentifier-analysis'
 )
 
+mongo_router.register(
+    r'annotations/organisms',
+    m_views.OrganismViewSet,
+    base_name='organisms'
+)
+
+mongo_router.register(
+    r'annotations/organisms/(?P<lineage>[a-zA-Z0-9\_\-\:\s]+)/children',
+    m_views.OrganismTreeViewSet,
+    base_name='organisms-children'
+)
+
 router = routers.DefaultRouter(trailing_slash=False)
 
 router.register(

@@ -112,5 +112,5 @@ class AnalysisJobTaxonomy(mongoengine.DynamicDocument):
     accession = mongoengine.StringField(required=True, max_length=20)
     pipeline_version = mongoengine.StringField(required=True, max_length=5)
 
-    taxonomy = mongoengine.EmbeddedDocumentListField(
+    otu = mongoengine.EmbeddedDocumentListField(
         AnalysisJobOrganism, required=False)
