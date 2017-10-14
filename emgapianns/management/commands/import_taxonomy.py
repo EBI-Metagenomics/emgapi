@@ -51,7 +51,6 @@ class Command(EMGBaseCommand):
             logger.error("Path %r doesn't exist. SKIPPING!" % res)
 
     def load_organism_from_summary_file(self, reader, obj):  # noqa
-
         try:
             run = m_models.AnalysisJobTaxonomy.objects \
                 .get(pk=str(obj.job_id))
@@ -92,7 +91,7 @@ class Command(EMGBaseCommand):
                     count=count,
                     organism=organism
                 )
-                run.taxonomy_ssu.append(rorg)
+                run.taxonomy.append(rorg)
 
         if len(orgs) > 0:
             logger.info(
