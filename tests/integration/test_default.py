@@ -48,6 +48,7 @@ class TestDefaultAPI(object):
             "annotations/go-terms": "%s/annotations/go-terms" % host,
             "annotations/interpro-identifiers":
                 "%s/annotations/interpro-identifiers" % host,
+            "annotations/organisms": "%s/annotations/organisms" % host,
             "mydata": "%s/mydata" % host,
         }
         assert rsp['data'] == expected
@@ -63,6 +64,9 @@ class TestDefaultAPI(object):
             'emgapi:runs',
             'emgapi:studies',
             'emgapi:pipeline-tools',
+            'emgapi:goterms',
+            'emgapi:interproidentifier',
+            'emgapi:organisms',
             pytest.mark.xfail('viewdoesnotexist', raises=NoReverseMatch),
         ]
     )
