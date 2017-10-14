@@ -453,3 +453,118 @@ class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
             context={'request': request}
         )
         return Response(serializer.data)
+
+
+class OrganismViewSet(m_viewset.ReadOnlyModelViewSet):
+
+    """
+    Provides list of Organisms.
+    """
+
+    serializer_class = m_serializers.OrganismSerializer
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'name',
+        'prefix',
+        'lineage',
+    )
+
+    lookup_field = 'lineage'
+    lookup_value_regex = '[a-zA-Z0-9\_\-\:\s]+'
+
+    def get_queryset(self):
+        return m_models.Organism.objects.all()
+
+    def get_object(self):
+        try:
+            lineage = self.kwargs[self.lookup_field]
+            return m_models.Organism.objects.get(lineage=lineage)
+        except KeyError:
+            raise Http404(("Attribute error '%s'." % self.lookup_field))
+        except m_models.Organism.DoesNotExist:
+            raise Http404(('No %s matches the given query.' %
+                           m_models.Organism.__class__.__name__))
+
+    def get_serializer_class(self):
+        return super(OrganismViewSet, self).get_serializer_class()
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of Organisms
+        Example:
+        ---
+        `/annotations/organisms`
+        """
+        return super(OrganismViewSet, self) \
+            .list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves Organism
+        Example:
+        ---
+        `/annotations/organisms/Bacteria:Chlorobi:OPB56`
+        """
+        return super(OrganismViewSet, self) \
+            .retrieve(request, *args, **kwargs)
+
+
+class OrganismTreeViewSet(mixins.ListModelMixin,
+                          m_viewset.GenericViewSet):
+
+    """
+    Provides list of Organisms.
+    """
+
+    serializer_class = m_serializers.OrganismSerializer
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'name',
+        'prefix',
+        'lineage',
+    )
+
+    lookup_field = 'lineage'
+    lookup_value_regex = '[a-zA-Z0-9\_\-\:\s]+'
+
+    def get_queryset(self):
+        lineage = self.kwargs.get('lineage', None).strip()
+        if lineage:
+            try:
+                organism = m_models.Organism.objects.get(lineage=lineage)
+            except KeyError:
+                raise Http404(("Attribute error '%s'." % self.lookup_field))
+            except m_models.Organism.DoesNotExist:
+                raise Http404(('No %s matches the given query.' %
+                               m_models.Organism.__class__.__name__))
+            queryset = m_models.Organism.objects \
+                .filter(ancestors=organism.name)
+        else:
+            queryset = super(OrganismTreeViewSet, self).get_queryset()
+        return queryset
+
+    def get_serializer_class(self):
+        return super(OrganismTreeViewSet, self).get_serializer_class()
+
+    def get_serializer_context(self):
+        context = super(OrganismTreeViewSet, self).get_serializer_context()
+        context['lineage'] = self.kwargs.get('lineage')
+        return context
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of Organisms
+        Example:
+        ---
+        `/annotations/organisms`
+        """
+        return super(OrganismTreeViewSet, self) \
+            .list(request, *args, **kwargs)

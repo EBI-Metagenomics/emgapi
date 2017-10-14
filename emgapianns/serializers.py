@@ -143,3 +143,34 @@ class InterproIdentifierRetriveSerializer(  # NOQA
     class Meta:
         model = m_models.InterproIdentifier
         fields = '__all__'
+
+
+class OrganismSerializer(m_serializers.DocumentSerializer,
+                         serializers.HyperlinkedModelSerializer):
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi:organisms-detail',
+        lookup_field='lineage',
+    )
+
+    children = relations.SerializerMethodResourceRelatedField(
+        source='get_children',
+        model=m_models.Organism,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi:organisms-children-list',
+        related_link_url_kwarg='lineage',
+        related_link_lookup_field='lineage',
+    )
+
+    def get_children(self, obj):
+        return None
+
+    class Meta:
+        model = m_models.Organism
+        fields = (
+            'url',
+            'prefix',
+            'name',
+            'children',
+        )
