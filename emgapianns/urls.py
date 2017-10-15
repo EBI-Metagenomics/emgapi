@@ -58,6 +58,12 @@ mongo_router.register(
     base_name='organisms-children'
 )
 
+mongo_router.register(
+    r'annotations/organisms/(?P<lineage>[a-zA-Z0-9\_\-\:\s]+)/analysis',
+    m_views.OrganismAnalysisRelationshipViewSet,
+    base_name='organisms-analysis'
+)
+
 router = routers.DefaultRouter(trailing_slash=False)
 
 router.register(
