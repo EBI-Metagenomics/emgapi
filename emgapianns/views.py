@@ -474,7 +474,7 @@ class OrganismViewSet(m_viewset.ReadOnlyModelViewSet):
     )
 
     lookup_field = 'lineage'
-    lookup_value_regex = '[a-zA-Z0-9\_\-\:\s]+'
+    lookup_value_regex = '[a-zA-Z0-9\_\-\.\:\s]+'
 
     def get_queryset(self):
         return m_models.Organism.objects.all()
