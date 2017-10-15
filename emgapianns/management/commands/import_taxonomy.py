@@ -76,16 +76,20 @@ class Command(EMGBaseCommand):
                 parent = ancestors[-1]
                 prefix = ORGANISM_PREFIX[version][len(ancestors)]
             else:
+                ancestors = []
+                parent = None
                 try:
-                    name = lineage[0]
+                    if len(lineage[0]) > 0:
+                        name = lineage[0]
+                        prefix = ORGANISM_PREFIX[version][len(ancestors)]
+                    else:
+                        name = "Unusigned"
+                        prefix = None
+                        lineage = ["Unusigned"]
                 except KeyError:
-                    continue
-                if name:
-                    ancestors = []
-                    parent = None
-                    prefix = ORGANISM_PREFIX[version][len(ancestors)]
-                else:
-                    continue
+                    name = "Unusigned"
+                    prefix = None
+                    lineage = ["Unusigned"]
             organism = None
             try:
                 organism = m_models.Organism.objects.get(pk=":".join(lineage))
@@ -95,6 +99,7 @@ class Command(EMGBaseCommand):
                     ancestors=ancestors, prefix=prefix
                 )
                 new_orgs.append(organism)
+
             if organism is not None:
                 orgs.append(organism)
                 rorg = m_models.AnalysisJobOrganism(
