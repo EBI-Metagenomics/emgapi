@@ -39,12 +39,12 @@ class TestAnnotations(object):
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
-        assert len(rsp['data']) == 7
+        assert len(rsp['data']) == 8
 
         expected = [
-            'XanthomonadalesXanthomonadaceae', 'Bacteria', 'Proteobacteria',
-            'Alphaproteobacteria', 'OPB56', 'RhodobacteralesRhodobacteraceae',
-            'Sphingomonadales',
+            'XanthomonadalesXanthomonadaceae', 'Unusigned', 'Bacteria',
+            'Proteobacteria', 'Alphaproteobacteria', 'OPB56',
+            'RhodobacteralesRhodobacteraceae', 'Sphingomonadales'
         ]
         ids = [a['attributes']['name'] for a in rsp['data']]
         assert ids == expected
