@@ -638,3 +638,74 @@ class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
             context={'request': request}
         )
         return Response(serializer.data)
+
+
+class OrganismAnalysisRelationshipViewSet(mixins.ListModelMixin,
+                                          viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.AnalysisSerializer
+
+    filter_class = emg_filters.AnalysisJobFilter
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'accession',
+    )
+
+    ordering = ('-accession',)
+
+    search_fields = (
+        '@sample__metadata__var_val_ucv',
+    )
+
+    lookup_field = 'lineage'
+
+    def get_queryset(self):
+        return emg_models.AnalysisJob.objects.available(self.request)
+
+    def get_serializer_class(self):
+        return emg_serializers.AnalysisSerializer
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of analysis results for the given InterPro identifier
+        Example:
+        ---
+        `/annotations/organisms/Bacteria:Chlorobi:OPB56/analysis`
+        """
+        lineage = self.kwargs[self.lookup_field]
+        try:
+            organism = m_models.Organism.objects \
+                .get(lineage=lineage)
+        except KeyError:
+            raise Http404(("Attribute error '%s'." % self.lookup_field))
+        except m_models.Organism.DoesNotExist:
+            raise Http404(('No %s matches the given query.' %
+                           m_models.Organism.__class__.__name__))
+        logger.info("get identifier %s" % organism.lineage)
+        job_ids = m_models.AnalysisJobTaxonomy.objects \
+            .filter(taxonomy__organism=organism) \
+            .only('analysis_id')
+        logger.info("Found %d analysis" % len(job_ids))
+        job_ids = [str(j.analysis_id) for j in job_ids]
+        queryset = emg_models.AnalysisJob.objects \
+            .filter(job_id__in=job_ids) \
+            .available(self.request) \
+            .prefetch_related(
+                'sample',
+                'analysis_status',
+                'experiment_type',
+                'pipeline'
+            )
+        page = self.paginate_queryset(self.filter_queryset(queryset))
+        if page is not None:
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
