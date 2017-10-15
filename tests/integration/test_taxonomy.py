@@ -73,3 +73,43 @@ class TestAnnotations(object):
         url = reverse("emgapi:organisms-detail", args=['abc'])
         response = client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_empty(self, client, run_emptyresults):
+        job = run_emptyresults.accession
+        version = run_emptyresults.pipeline.release_version
+        assert job == 'EMPTY_ABC01234'
+
+        call_command('import_taxonomy', job,
+                     os.path.dirname(os.path.abspath(__file__)))
+
+        url = reverse("emgapi:runs-pipelines-organisms-list",
+                      args=[job, version])
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        rsp = response.json()
+
+        assert len(rsp['data']) == 0
+
+    def test_relations(self, client, run):
+        call_command('import_taxonomy', run.accession,
+                     os.path.dirname(os.path.abspath(__file__)))
+
+        url = reverse("emgapi:runs-pipelines-organisms-list",
+                      args=[run.accession, run.pipeline.release_version])
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        rsp = response.json()
+
+        assert len(rsp['data']) == 8
+
+        expected = {
+            'Bacteria': 20, 'OPB56': 1, 'Proteobacteria': 15,
+            'Alphaproteobacteria': 50, 'RhodobacteralesRhodobacteraceae': 42,
+            'Sphingomonadales': 1, 'XanthomonadalesXanthomonadaceae': 2,
+            'Unusigned': 319}
+
+        ids = {
+            a['attributes']['name']: a['attributes']['count']
+            for a in rsp['data']
+        }
+        assert ids == expected
