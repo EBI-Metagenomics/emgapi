@@ -97,6 +97,7 @@ class Organism(mongoengine.DynamicDocument):
     name = mongoengine.StringField(required=True, max_length=100)
     parent = mongoengine.StringField(required=True, max_length=100)
     prefix = mongoengine.StringField(required=True, max_length=10)
+    otu_id = mongoengine.StringField(max_length=20)
 
 
 class AnalysisJobOrganism(mongoengine.EmbeddedDocument):
