@@ -453,3 +453,259 @@ class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
             context={'request': request}
         )
         return Response(serializer.data)
+
+
+class OrganismViewSet(m_viewset.ReadOnlyModelViewSet):
+
+    """
+    Provides list of Organisms.
+    """
+
+    serializer_class = m_serializers.OrganismSerializer
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'name',
+        'prefix',
+        'lineage',
+    )
+
+    lookup_field = 'lineage'
+    lookup_value_regex = '[a-zA-Z0-9\_\-\.\:\s]+'
+
+    def get_queryset(self):
+        return m_models.Organism.objects.all()
+
+    def get_object(self):
+        try:
+            lineage = self.kwargs[self.lookup_field]
+            return m_models.Organism.objects.get(lineage=lineage)
+        except KeyError:
+            raise Http404(("Attribute error '%s'." % self.lookup_field))
+        except m_models.Organism.DoesNotExist:
+            raise Http404(('No %s matches the given query.' %
+                           m_models.Organism.__class__.__name__))
+
+    def get_serializer_class(self):
+        return super(OrganismViewSet, self).get_serializer_class()
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of Organisms
+        Example:
+        ---
+        `/annotations/organisms`
+        """
+        return super(OrganismViewSet, self) \
+            .list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves Organism
+        Example:
+        ---
+        `/annotations/organisms/Bacteria:Chlorobi:OPB56`
+        """
+        return super(OrganismViewSet, self) \
+            .retrieve(request, *args, **kwargs)
+
+
+class OrganismTreeViewSet(mixins.ListModelMixin,
+                          m_viewset.GenericViewSet):
+
+    """
+    Provides list of Organisms.
+    """
+
+    serializer_class = m_serializers.OrganismSerializer
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'name',
+        'prefix',
+        'lineage',
+    )
+
+    lookup_field = 'lineage'
+    lookup_value_regex = '[a-zA-Z0-9\_\-\:\s]+'
+
+    def get_queryset(self):
+        lineage = self.kwargs.get('lineage', None).strip()
+        if lineage:
+            try:
+                organism = m_models.Organism.objects.get(lineage=lineage)
+            except KeyError:
+                raise Http404(("Attribute error '%s'." % self.lookup_field))
+            except m_models.Organism.DoesNotExist:
+                raise Http404(('No %s matches the given query.' %
+                               m_models.Organism.__class__.__name__))
+            queryset = m_models.Organism.objects \
+                .filter(ancestors=organism.name)
+        else:
+            queryset = super(OrganismTreeViewSet, self).get_queryset()
+        return queryset
+
+    def get_serializer_class(self):
+        return super(OrganismTreeViewSet, self).get_serializer_class()
+
+    def get_serializer_context(self):
+        context = super(OrganismTreeViewSet, self).get_serializer_context()
+        context['lineage'] = self.kwargs.get('lineage')
+        return context
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of Organisms
+        Example:
+        ---
+        `/annotations/organisms`
+        """
+        return super(OrganismTreeViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
+                                          mixins.ListModelMixin,
+                                          m_viewset.GenericViewSet):
+
+    serializer_class = m_serializers.OrganismRetriveSerializer
+
+    pagination_class = emg_page.MaxSetPagination
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'name',
+        'prefix',
+        'lineage',
+    )
+
+    lookup_fields = ('accession', 'release_version')
+
+    def get_queryset(self):
+        return emg_models.AnalysisJob.objects.available(self.request)
+
+    def list(self, request, accession, release_version, *args, **kwargs):
+        """
+        Retrieves GO slim for the given run and pipeline version
+        Example:
+        ---
+        `/runs/ERR1385375/pipelines/3.0/organisms`
+        """
+
+        job = get_object_or_404(
+            emg_models.AnalysisJob, accession=accession,
+            pipeline__release_version=release_version
+        )
+
+        analysis = None
+        try:
+            analysis = m_models.AnalysisJobTaxonomy.objects \
+                .get(analysis_id=str(job.job_id))
+        except m_models.AnalysisJobTaxonomy.DoesNotExist:
+            pass
+
+        ann_ids = list()
+        ann_counts = dict()
+        if analysis is not None:
+            for a in analysis.taxonomy:
+                ann_ids.append(a.organism.lineage)
+                ann_counts[a.organism.pk] = a.count
+
+        queryset = m_models.Organism.objects.filter(pk__in=ann_ids)
+
+        page = self.paginate_queryset(queryset)
+        for p in page:
+            p.count = ann_counts[p.pk]
+        if page is not None:
+            serializer = self.get_serializer(
+                page,
+                many=True,
+                context={'request': request}
+            )
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(
+            queryset,
+            many=True,
+            context={'request': request}
+        )
+        return Response(serializer.data)
+
+
+class OrganismAnalysisRelationshipViewSet(mixins.ListModelMixin,
+                                          viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.AnalysisSerializer
+
+    filter_class = emg_filters.AnalysisJobFilter
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'accession',
+    )
+
+    ordering = ('-accession',)
+
+    search_fields = (
+        '@sample__metadata__var_val_ucv',
+    )
+
+    lookup_field = 'lineage'
+
+    def get_queryset(self):
+        return emg_models.AnalysisJob.objects.available(self.request)
+
+    def get_serializer_class(self):
+        return emg_serializers.AnalysisSerializer
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of analysis results for the given InterPro identifier
+        Example:
+        ---
+        `/annotations/organisms/Bacteria:Chlorobi:OPB56/analysis`
+        """
+        lineage = self.kwargs[self.lookup_field]
+        try:
+            organism = m_models.Organism.objects \
+                .get(lineage=lineage)
+        except KeyError:
+            raise Http404(("Attribute error '%s'." % self.lookup_field))
+        except m_models.Organism.DoesNotExist:
+            raise Http404(('No %s matches the given query.' %
+                           m_models.Organism.__class__.__name__))
+        logger.info("get identifier %s" % organism.lineage)
+        job_ids = m_models.AnalysisJobTaxonomy.objects \
+            .filter(taxonomy__organism=organism) \
+            .only('analysis_id')
+        logger.info("Found %d analysis" % len(job_ids))
+        job_ids = [str(j.analysis_id) for j in job_ids]
+        queryset = emg_models.AnalysisJob.objects \
+            .filter(job_id__in=job_ids) \
+            .available(self.request) \
+            .prefetch_related(
+                'sample',
+                'analysis_status',
+                'experiment_type',
+                'pipeline'
+            )
+        page = self.paginate_queryset(self.filter_queryset(queryset))
+        if page is not None:
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)

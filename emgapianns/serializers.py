@@ -143,3 +143,88 @@ class InterproIdentifierRetriveSerializer(  # NOQA
     class Meta:
         model = m_models.InterproIdentifier
         fields = '__all__'
+
+
+class OrganismSerializer(m_serializers.DynamicDocumentSerializer,
+                         serializers.HyperlinkedModelSerializer):
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi:organisms-detail',
+        lookup_field='lineage',
+    )
+
+    children = relations.SerializerMethodResourceRelatedField(
+        source='get_children',
+        model=m_models.Organism,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi:organisms-children-list',
+        related_link_url_kwarg='lineage',
+        related_link_lookup_field='lineage',
+    )
+
+    def get_children(self, obj):
+        return None
+
+    analysis = relations.SerializerMethodResourceRelatedField(
+        source='get_analysis',
+        model=emg_models.AnalysisJob,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi:organisms-analysis-list',
+        related_link_url_kwarg='lineage',
+        related_link_lookup_field='lineage'
+    )
+
+    def get_analysis(self, obj):
+        # TODO: provide counter instead of paginating relationship
+        # workaround https://github.com/django-json-api
+        # /django-rest-framework-json-api/issues/178
+        return None
+
+    class Meta:
+        model = m_models.Organism
+        fields = (
+            'url',
+            'prefix',
+            'name',
+            'children',
+            'analysis',
+        )
+
+
+class OrganismRetriveSerializer(m_serializers.DynamicDocumentSerializer,
+                                serializers.HyperlinkedModelSerializer):
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi:organisms-detail',
+        lookup_field='lineage',
+    )
+
+    analysis = relations.SerializerMethodResourceRelatedField(
+        source='get_analysis',
+        model=emg_models.AnalysisJob,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi:organisms-analysis-list',
+        related_link_url_kwarg='lineage',
+        related_link_lookup_field='lineage'
+    )
+
+    def get_analysis(self, obj):
+        # TODO: provide counter instead of paginating relationship
+        # workaround https://github.com/django-json-api
+        # /django-rest-framework-json-api/issues/178
+        return None
+
+    count = serializers.IntegerField(required=False)
+
+    class Meta:
+        model = m_models.Organism
+        fields = (
+            'url',
+            'prefix',
+            'name',
+            'count',
+            'analysis',
+        )
