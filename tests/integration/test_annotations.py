@@ -149,18 +149,33 @@ class TestAnnotations(object):
     @pytest.mark.parametrize(
         'pipeline_version', [
             {'version': '1.0', 'expected': {
-                'go_slim': ['GO:0030246', 'GO:0043167', 'GO:0046906'],
-                'go_terms': ['GO:0005515', 'GO:0019842', 'GO:0030170',
-                             'GO:0030246', 'GO:0043167', 'GO:0046906'],
-                'interpro': ['IPR009739', 'IPR013698', 'IPR021425',
-                             'IPR021710', 'IPR024561', 'IPR033771'],
+                'go_slim': {
+                    'GO:0030246': 23011, 'GO:0043167': 3222011,
+                    'GO:0046906': 232611
+                },
+                'go_terms': {
+                    'GO:0005515': 6016, 'GO:0019842': 1377,
+                    'GO:0030170': 2885, 'GO:0030246': 230,
+                    'GO:0043167': 32220, 'GO:0046906': 2326
+                },
+                'interpro': {
+                    'IPR009739': 1, 'IPR013698': 6, 'IPR021425': 2,
+                    'IPR021710': 3, 'IPR024561': 5, 'IPR033771': 4
+                },
             }},
             {'version': '2.0', 'expected': {
-                'go_slim': ['GO:0005618', 'GO:0009276', 'GO:0016020'],
-                'go_terms': ['GO:0005575', 'GO:0005576', 'GO:0005618',
-                             'GO:0009276', 'GO:0016020', 'GO:0019867'],
-                'interpro': ['IPR006677', 'IPR010326', 'IPR011459',
-                             'IPR023385', 'IPR024548', 'IPR031692'],
+                'go_slim': {
+                    'GO:0005618': 1222, 'GO:0009276': 0,
+                    'GO:0016020': 1414622
+                },
+                'go_terms': {
+                    'GO:0005575': 67, 'GO:0005576': 37, 'GO:0005618': 12,
+                    'GO:0009276': 0, 'GO:0016020': 14146, 'GO:0019867': 504
+                },
+                'interpro': {
+                    'IPR006677': 3, 'IPR010326': 1, 'IPR011459': 6,
+                    'IPR023385': 5, 'IPR024548': 2, 'IPR031692': 4
+                },
             }}
         ]
     )
@@ -186,7 +201,10 @@ class TestAnnotations(object):
         assert len(rsp['data']) == 3
 
         expected = pipeline_version['expected']['go_slim']
-        ids = [a['id'] for a in rsp['data']]
+        ids = {
+            a['attributes']['accession']: a['attributes']['count']
+            for a in rsp['data']
+        }
         assert ids == expected
 
         url = reverse("emgapi:runs-pipelines-goterms-list",
@@ -198,7 +216,10 @@ class TestAnnotations(object):
         assert len(rsp['data']) == 6
 
         expected = pipeline_version['expected']['go_terms']
-        ids = [a['id'] for a in rsp['data']]
+        ids = {
+            a['attributes']['accession']: a['attributes']['count']
+            for a in rsp['data']
+        }
         assert ids == expected
 
         url = reverse("emgapi:runs-pipelines-interpro-list",
@@ -210,5 +231,8 @@ class TestAnnotations(object):
         assert len(rsp['data']) == 6
 
         expected = pipeline_version['expected']['interpro']
-        ids = [a['id'] for a in rsp['data']]
+        ids = {
+            a['attributes']['accession']: a['attributes']['count']
+            for a in rsp['data']
+        }
         assert ids == expected

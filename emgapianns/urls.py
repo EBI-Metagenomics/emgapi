@@ -46,6 +46,24 @@ mongo_router.register(
     base_name='interproidentifier-analysis'
 )
 
+mongo_router.register(
+    r'annotations/organisms',
+    m_views.OrganismViewSet,
+    base_name='organisms'
+)
+
+mongo_router.register(
+    r'annotations/organisms/(?P<lineage>[a-zA-Z0-9\_\-\.\:\s]+)/children',
+    m_views.OrganismTreeViewSet,
+    base_name='organisms-children'
+)
+
+mongo_router.register(
+    r'annotations/organisms/(?P<lineage>[a-zA-Z0-9\_\-\.\:\s]+)/analysis',
+    m_views.OrganismAnalysisRelationshipViewSet,
+    base_name='organisms-analysis'
+)
+
 router = routers.DefaultRouter(trailing_slash=False)
 
 router.register(
@@ -70,4 +88,12 @@ router.register(
      r'interpro-identifiers'),
     m_views.AnalysisInterproIdentifierRelationshipViewSet,
     base_name='runs-pipelines-interpro'
+)
+
+router.register(
+    (r'runs/(?P<accession>[a-zA-Z0-9_]+)/'
+     r'pipelines/(?P<release_version>[0-9\.]+)/'
+     r'organisms'),
+    m_views.AnalysisOrganismRelationshipViewSet,
+    base_name='runs-pipelines-organisms'
 )

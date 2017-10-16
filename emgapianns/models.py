@@ -17,12 +17,13 @@
 import mongoengine
 
 
+# Annotations model
+
 class BaseAnnotation(mongoengine.DynamicDocument):
 
-    accession = mongoengine.StringField(
-        primary_key=True, required=True, max_length=20)
-    description = mongoengine.StringField(
-        required=True, max_length=255)
+    accession = mongoengine.StringField(primary_key=True, required=True,
+                                        max_length=20)
+    description = mongoengine.StringField(required=True, max_length=255)
 
     meta = {
         'abstract': True,
@@ -84,3 +85,32 @@ class AnalysisJobInterproIdentifier(BaseAnalysisJob):
 
     interpro_identifiers = mongoengine.EmbeddedDocumentListField(
         AnalysisJobInterproIdentifierAnnotation, required=False)
+
+
+# Taxonomic model
+
+class Organism(mongoengine.DynamicDocument):
+
+    lineage = mongoengine.StringField(
+        primary_key=True, required=True, max_length=255)
+    ancestors = mongoengine.ListField(mongoengine.StringField(), default=list)
+    name = mongoengine.StringField(required=True, max_length=100)
+    parent = mongoengine.StringField(required=True, max_length=100)
+    prefix = mongoengine.StringField(required=True, max_length=10)
+
+
+class AnalysisJobOrganism(mongoengine.EmbeddedDocument):
+
+    count = mongoengine.IntField(required=True)
+    organism = mongoengine.ReferenceField(Organism)
+
+
+class AnalysisJobTaxonomy(mongoengine.DynamicDocument):
+
+    analysis_id = mongoengine.StringField(primary_key=True, required=True,
+                                          max_length=50)
+    accession = mongoengine.StringField(required=True, max_length=20)
+    pipeline_version = mongoengine.StringField(required=True, max_length=5)
+
+    taxonomy = mongoengine.EmbeddedDocumentListField(
+        AnalysisJobOrganism, required=False)
