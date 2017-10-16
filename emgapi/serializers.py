@@ -461,7 +461,7 @@ class AnalysisSerializer(RunSerializer):
         model=m_models.GoTerm,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:runs-pipelines-goterms-list',  # noqa
+        related_link_view_name='emgapi:runs-pipelines-goterms-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
@@ -474,7 +474,7 @@ class AnalysisSerializer(RunSerializer):
         model=m_models.GoTerm,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:runs-pipelines-goslim-list',  # noqa
+        related_link_view_name='emgapi:runs-pipelines-goslim-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
@@ -487,25 +487,12 @@ class AnalysisSerializer(RunSerializer):
         model=m_models.InterproIdentifier,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:runs-pipelines-interpro-list',  # noqa
+        related_link_view_name='emgapi:runs-pipelines-interpro-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
 
     def get_interproidentifier(self, obj):
-        return None
-
-    organisms = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
-        source='get_organisms',
-        model=m_models.GoTerm,
-        many=True,
-        read_only=True,
-        related_link_view_name='emgapi:runs-pipelines-organisms-list',  # noqa
-        related_link_url_kwarg='accession',
-        related_link_lookup_field='accession'
-    )
-
-    def get_organisms(self, obj):
         return None
 
     metadata = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(
@@ -521,6 +508,19 @@ class AnalysisSerializer(RunSerializer):
     def get_metadata(self, obj):
         return None
 
+    taxonomy = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
+        source='get_taxonomy',
+        model=m_models.Organism,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi:runs-pipelines-taxonomy-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
+    )
+
+    def get_taxonomy(self, obj):
+        return None
+
     class Meta:
         model = emg_models.AnalysisJob
         fields = (
@@ -534,7 +534,7 @@ class AnalysisSerializer(RunSerializer):
             'experiment_type',
             'metadata',
             'sample',
-            'organisms',
+            'taxonomy',
             'go_slim',
             'go_terms',
             'interpro_identifiers',

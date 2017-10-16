@@ -93,7 +93,7 @@ router.register(
 router.register(
     (r'runs/(?P<accession>[a-zA-Z0-9_]+)/'
      r'pipelines/(?P<release_version>[0-9\.]+)/'
-     r'organisms'),
+     r'taxonomy'),
     m_views.AnalysisOrganismRelationshipViewSet,
-    base_name='runs-pipelines-organisms'
+    base_name='runs-pipelines-taxonomy'
 )
