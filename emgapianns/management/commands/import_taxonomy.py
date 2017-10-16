@@ -34,23 +34,32 @@ class Command(EMGBaseCommand):
         for o in self.obj_list:
             self.find_path(o, options)
 
+    def load_data_from_file(self, f, obj):
+        if f is not None and os.path.exists(f) and os.path.isfile(f):
+            logger.info("Found: %s" % f)
+            with open(f) as csvfile:
+                reader = csv.reader(csvfile, delimiter='\t')
+                self.load_organism_from_summary_file(reader, obj)
+        else:
+            logger.error("Path %r exist. No Taxonomy SKIPPING!" % f)
+
     def find_path(self, obj, options):
         rootpath = options.get('rootpath', None)
 
         res = os.path.join(rootpath, obj.result_directory, 'taxonomy-summary')
         if os.path.exists(res):
-            _f = None
-            if obj.pipeline.release_version in ('1.0', '2.0', '3.0'):
-                logger.info("Pipeline version: %s" %
-                            obj.pipeline.release_version)
+            logger.info("Pipeline version: %s" %
+                        obj.pipeline.release_version)
+            if obj.pipeline.release_version in ('1.0', '2.0', '3.0',):
                 _f = os.path.join(res, 'krona-input.txt')
-            if _f is not None and os.path.exists(_f) and os.path.isfile(_f):
-                logger.info("Found: %s" % _f)
-                with open(_f) as csvfile:
-                    reader = csv.reader(csvfile, delimiter='\t')
-                    self.load_organism_from_summary_file(reader, obj)
+                self.load_data_from_file(_f, obj)
+            elif obj.pipeline.release_version in ('4.0',):
+                for t in ['SSU', 'LSU']:
+                    name = "%s_SSU.fasta.mseq.txt" % (obj.input_file_name)
+                    _f = os.path.join(res, t, name)
+                    self.load_data_from_file(_f, obj)
             else:
-                logger.error("Path %r exist. No Taxonomy SKIPPING!" % res)
+                logger.error("Pipeline not supported SKIPPING!")
         else:
             logger.error("Path %r doesn't exist. SKIPPING!" % res)
 
