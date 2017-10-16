@@ -555,6 +555,9 @@ class AnalysisResultViewSet(mixins.ListModelMixin,
     lookup_field = 'accession'
     lookup_value_regex = '[a-zA-Z0-9]+'
 
+    def get_serializer_class(self):
+        return super(AnalysisResultViewSet, self).get_serializer_class()
+
     def get_queryset(self):
         accession = self.kwargs['accession']
         queryset = emg_models.AnalysisJob.objects \
