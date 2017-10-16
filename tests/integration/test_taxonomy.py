@@ -82,7 +82,7 @@ class TestAnnotations(object):
         call_command('import_taxonomy', job,
                      os.path.dirname(os.path.abspath(__file__)))
 
-        url = reverse("emgapi:runs-pipelines-organisms-list",
+        url = reverse("emgapi:runs-pipelines-taxonomy-list",
                       args=[job, version])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -94,7 +94,7 @@ class TestAnnotations(object):
         call_command('import_taxonomy', run.accession,
                      os.path.dirname(os.path.abspath(__file__)))
 
-        url = reverse("emgapi:runs-pipelines-organisms-list",
+        url = reverse("emgapi:runs-pipelines-taxonomy-list",
                       args=[run.accession, run.pipeline.release_version])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK

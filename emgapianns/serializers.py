@@ -193,29 +193,7 @@ class OrganismSerializer(m_serializers.DynamicDocumentSerializer,
         )
 
 
-class OrganismRetriveSerializer(m_serializers.DynamicDocumentSerializer,
-                                serializers.HyperlinkedModelSerializer):
-
-    url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi:organisms-detail',
-        lookup_field='lineage',
-    )
-
-    analysis = relations.SerializerMethodResourceRelatedField(
-        source='get_analysis',
-        model=emg_models.AnalysisJob,
-        many=True,
-        read_only=True,
-        related_link_view_name='emgapi:organisms-analysis-list',
-        related_link_url_kwarg='lineage',
-        related_link_lookup_field='lineage'
-    )
-
-    def get_analysis(self, obj):
-        # TODO: provide counter instead of paginating relationship
-        # workaround https://github.com/django-json-api
-        # /django-rest-framework-json-api/issues/178
-        return None
+class OrganismRetriveSerializer(OrganismSerializer):
 
     count = serializers.IntegerField(required=False)
 
@@ -226,5 +204,6 @@ class OrganismRetriveSerializer(m_serializers.DynamicDocumentSerializer,
             'prefix',
             'name',
             'count',
+            'children',
             'analysis',
         )
