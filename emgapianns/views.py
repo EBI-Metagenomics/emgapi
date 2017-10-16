@@ -24,6 +24,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import filters, mixins, viewsets
 from rest_framework.response import Response
+from rest_framework.decorators import list_route
 
 from rest_framework_mongoengine import viewsets as m_viewset
 
@@ -564,7 +565,7 @@ class OrganismTreeViewSet(mixins.ListModelMixin,
         Retrieves list of Organisms
         Example:
         ---
-        `/annotations/organisms`
+        `/annotations/organisms/Bacteria:Chlorobi/children`
         """
         return super(OrganismTreeViewSet, self) \
             .list(request, *args, **kwargs)
@@ -595,10 +596,11 @@ class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
 
     def list(self, request, accession, release_version, *args, **kwargs):
         """
-        Retrieves GO slim for the given run and pipeline version
+        Retrieves 16SrRNA Taxonomic analysis for the given run and pipeline
+        version
         Example:
         ---
-        `/runs/ERR1385375/pipelines/3.0/organisms`
+        `/runs/ERR1385375/pipelines/3.0/taxonomy`
         """
 
         job = get_object_or_404(
@@ -616,7 +618,109 @@ class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
         ann_ids = list()
         ann_counts = dict()
         if analysis is not None:
-            for a in analysis.taxonomy:
+            for a in getattr(analysis, 'taxonomy', []):
+                ann_ids.append(a.organism.lineage)
+                ann_counts[a.organism.pk] = a.count
+
+        queryset = m_models.Organism.objects.filter(pk__in=ann_ids)
+
+        page = self.paginate_queryset(queryset)
+        for p in page:
+            p.count = ann_counts[p.pk]
+        if page is not None:
+            serializer = self.get_serializer(
+                page,
+                many=True,
+                context={'request': request}
+            )
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(
+            queryset,
+            many=True,
+            context={'request': request}
+        )
+        return Response(serializer.data)
+
+    @list_route(
+        methods=['get', ],
+        serializer_class=m_serializers.OrganismRetriveSerializer
+    )
+    def ssu(self, request, accession, release_version, *args, **kwargs):
+        """
+        Retrieves SSU Taxonomic analysis for the given run and pipeline
+        version
+        Example:
+        ---
+        `/runs/ERR1385375/pipelines/3.0/taxonomy/ssu`
+        """
+
+        job = get_object_or_404(
+            emg_models.AnalysisJob, accession=accession,
+            pipeline__release_version=release_version
+        )
+
+        analysis = None
+        try:
+            analysis = m_models.AnalysisJobTaxonomy.objects \
+                .get(analysis_id=str(job.job_id))
+        except m_models.AnalysisJobTaxonomy.DoesNotExist:
+            pass
+
+        ann_ids = list()
+        ann_counts = dict()
+        if analysis is not None:
+            for a in getattr(analysis, 'taxonomy_ssu', []):
+                ann_ids.append(a.organism.lineage)
+                ann_counts[a.organism.pk] = a.count
+
+        queryset = m_models.Organism.objects.filter(pk__in=ann_ids)
+
+        page = self.paginate_queryset(queryset)
+        for p in page:
+            p.count = ann_counts[p.pk]
+        if page is not None:
+            serializer = self.get_serializer(
+                page,
+                many=True,
+                context={'request': request}
+            )
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(
+            queryset,
+            many=True,
+            context={'request': request}
+        )
+        return Response(serializer.data)
+
+    @list_route(
+        methods=['get', ],
+        serializer_class=m_serializers.OrganismRetriveSerializer
+    )
+    def lsu(self, request, accession, release_version, *args, **kwargs):
+        """
+        Retrieves LSU Taxonomic analysis for the given run and pipeline
+        version
+        Example:
+        ---
+        `/runs/ERR1385375/pipelines/3.0/taxonomy/lsu`
+        """
+
+        job = get_object_or_404(
+            emg_models.AnalysisJob, accession=accession,
+            pipeline__release_version=release_version
+        )
+
+        analysis = None
+        try:
+            analysis = m_models.AnalysisJobTaxonomy.objects \
+                .get(analysis_id=str(job.job_id))
+        except m_models.AnalysisJobTaxonomy.DoesNotExist:
+            pass
+
+        ann_ids = list()
+        ann_counts = dict()
+        if analysis is not None:
+            for a in getattr(analysis, 'taxonomy_lsu', []):
                 ann_ids.append(a.organism.lineage)
                 ann_counts[a.organism.pk] = a.count
 
@@ -673,7 +777,7 @@ class OrganismAnalysisRelationshipViewSet(mixins.ListModelMixin,
 
     def list(self, request, *args, **kwargs):
         """
-        Retrieves list of analysis results for the given InterPro identifier
+        Retrieves list of analysis results for the given Organism
         Example:
         ---
         `/annotations/organisms/Bacteria:Chlorobi:OPB56/analysis`
