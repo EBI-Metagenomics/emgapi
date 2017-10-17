@@ -43,10 +43,10 @@ class BaseQuerySet(models.QuerySet):
                 'all': Q(is_public=1),
             },
             'RunQuerySet': {
-                'all': Q(run_status_id=3) | Q(run_status_id=4),
+                'all': Q(analysis_status_id=3, run_status_id=4),
             },
             'AnalysisJobQuerySet': {
-                'all': Q(run_status_id=3) | Q(run_status_id=4),
+                'all': Q(analysis_status_id=3, run_status_id=4),
             },
         }
         if request is not None:
