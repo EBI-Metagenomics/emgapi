@@ -235,6 +235,12 @@ try:
 except KeyError:
     pass
 
+try:
+    CONN_MAX_AGE = EMG_CONF['emg']['conn_max_age']
+except KeyError:
+    pass
+
+
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
