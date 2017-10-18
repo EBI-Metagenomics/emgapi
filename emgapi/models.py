@@ -190,7 +190,7 @@ class BiomeManager(models.Manager):
 
     def get_queryset(self):
         return BiomeQuerySet(self.model, using=self._db) \
-            .annotate(studies_count=Count('samples__study', distinct=True))
+            .annotate(studies_count=Count('samples__studies', distinct=True))
 
 
 class Biome(models.Model):
@@ -362,6 +362,9 @@ class Study(models.Model):
     publications = models.ManyToManyField(
         Publication, through='StudyPublication', related_name='studies')
 
+    samples = models.ManyToManyField(
+        'Sample', through='StudySample', related_name='studies')
+
     objects = StudyManager()
 
     class Meta:
@@ -383,6 +386,19 @@ class StudyPublication(models.Model):
     class Meta:
         db_table = 'STUDY_PUBLICATION'
         unique_together = (('study', 'pub'),)
+
+
+class StudySample(models.Model):
+    study = models.ForeignKey(
+        Study, db_column='STUDY_ID',
+        primary_key=True, on_delete=models.CASCADE)
+    sample = models.ForeignKey(
+        'Sample', db_column='SAMPLE_ID', on_delete=models.CASCADE)
+
+    class Meta:
+        managed = False
+        db_table = 'STUDY_SAMPLE'
+        unique_together = (('study', 'sample'),)
 
 
 class SampleQuerySet(BaseQuerySet):
@@ -440,9 +456,9 @@ class Sample(models.Model):
         db_column='ENVIRONMENT_MATERIAL', max_length=255,
         blank=True, null=True,
         help_text='Environment material')
-    study = models.ForeignKey(
-        Study, db_column='STUDY_ID', related_name='samples',
-        on_delete=models.CASCADE, blank=True, null=True)
+    # study = models.ForeignKey(
+    #     Study, db_column='STUDY_ID', related_name='samples',
+    #     on_delete=models.CASCADE, blank=True, null=True)
     sample_name = models.CharField(
         db_column='SAMPLE_NAME', max_length=255, blank=True, null=True,
         help_text='Sample name')
