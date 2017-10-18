@@ -22,8 +22,8 @@ Install
 
 Install Miniconda::
 
-    wget https://repo.continuum.io/miniconda/Miniconda3-4.3.21-Linux-x86_64.sh
-    bash Miniconda3-4.3.21-Linux-x86_64.sh
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    bash Miniconda3-latest-Linux-x86_64.sh
 
     export PATH=~/miniconda/bin:$PATH
 
@@ -31,7 +31,7 @@ Install Miniconda::
 Install application::
 
     pip install "git+git://github.com/ola-t/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
-    pip install https://github.com/ProteinsWebTeam/ebi-metagenomics-api/archive/$latestTag.tar.gz
+    pip install https://github.com/EBI-Metagenomics/emgapi/archive/$latestTag.tar.gz
 
 
 Start application::
