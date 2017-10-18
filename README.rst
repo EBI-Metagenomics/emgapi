@@ -1,5 +1,5 @@
-.. image:: https://travis-ci.org/ProteinsWebTeam/ebi-metagenomics-api.svg?branch=master
-    :target: https://travis-ci.org/ProteinsWebTeam/ebi-metagenomics-api
+.. image:: https://travis-ci.org/EBI-Metagenomics/emgapi.svg?branch=master
+    :target: https://travis-ci.org/EBI-Metagenomics/emgapi
 
 
 Introduction
