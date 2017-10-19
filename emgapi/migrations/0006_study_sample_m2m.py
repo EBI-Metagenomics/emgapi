@@ -16,19 +16,20 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='StudySample',
             fields=[
-                ('study', models.ForeignKey(db_column='STUDY_ID', on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to='emgapi.Study')),
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('study', models.ForeignKey(db_column='STUDY_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.Study')),
                 ('sample', models.ForeignKey(db_column='SAMPLE_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.Sample')),
             ],
             options={
                 'db_table': 'STUDY_SAMPLE',
             },
         ),
+        migrations.AlterUniqueTogether(
+            name='studysample',
+            unique_together=set([('study', 'sample')]),
+        ),
         migrations.RunSQL(
             "INSERT INTO STUDY_SAMPLE (study_id, sample_id) "
-            "SELECT study_id, sample_id from SAMPLE where sample_id>0;"
-        ),
-        migrations.RemoveField(
-            model_name='sample',
-            name='study',
+            "SELECT study_id, sample_id from SAMPLE where sample_id>0"
         ),
     ]
