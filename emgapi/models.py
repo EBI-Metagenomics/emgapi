@@ -390,13 +390,11 @@ class StudyPublication(models.Model):
 
 class StudySample(models.Model):
     study = models.ForeignKey(
-        Study, db_column='STUDY_ID',
-        primary_key=True, on_delete=models.CASCADE)
+        Study, db_column='STUDY_ID', on_delete=models.CASCADE)
     sample = models.ForeignKey(
         'Sample', db_column='SAMPLE_ID', on_delete=models.CASCADE)
 
     class Meta:
-        managed = False
         db_table = 'STUDY_SAMPLE'
         unique_together = (('study', 'sample'),)
 
