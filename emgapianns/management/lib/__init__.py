@@ -29,7 +29,7 @@ class EMGBaseCommand(BaseCommand):
         self.accession = options.get('accession', None)
         if self.accession:
             self.obj_list = emg_models.AnalysisJob.objects \
-                .filter(sample__study__accession=self.accession).available()
+                .filter(sample__studies__accession=self.accession).available()
             if len(self.obj_list) < 1:
                 self.obj_list = emg_models.AnalysisJob.objects \
                     .filter(sample__accession=self.accession).available()
