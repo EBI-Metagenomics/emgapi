@@ -23,4 +23,9 @@ class Migration(migrations.Migration):
             name='study',
             field=models.ForeignKey(blank=True, db_column='STUDY_ID', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='samples', to='emgapi.Study'),
         ),
+        migrations.AlterField(
+            model_name='sample',
+            name='accession',
+            field=models.CharField(db_column='EXT_SAMPLE_ID', max_length=20, unique=True),
+        ),
     ]

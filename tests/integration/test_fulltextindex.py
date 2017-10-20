@@ -93,7 +93,7 @@ def create_samples(count):
                 "emgapi.Sample",
                 pk=pk,
                 biome=_biome,
-                study=_study,
+                studies=[_study],
                 sample_name="Sample findme",
                 is_public=1
             )
@@ -106,7 +106,7 @@ def create_samples(count):
                 "emgapi.Sample",
                 pk=pk,
                 biome=_biome,
-                study=_study,
+                studies=[_study],
                 sample_name="Sample hideme",
                 is_public=1
             )

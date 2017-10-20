@@ -70,7 +70,7 @@ class BiomeStudyRelationshipViewSet(mixins.ListModelMixin,
             .filter(
                 biome__lft__gte=obj.lft, biome__rgt__lte=obj.rgt,
                 biome__depth__gte=obj.depth) \
-            .values('study_id')
+            .values('studies')
         queryset = emg_models.Study.objects \
             .available(self.request) \
             .filter(study_id__in=studies)
@@ -174,13 +174,13 @@ class StudySampleRelationshipViewSet(mixins.ListModelMixin,
             emg_models.Study, accession=self.kwargs[self.lookup_field])
         queryset = emg_models.Sample.objects \
             .available(self.request) \
-            .filter(study_id=study.pk)
+            .filter(studies__in=[study])
         _qs = emg_models.Biome.objects.all()
         queryset = queryset.prefetch_related(
             Prefetch('biome', queryset=_qs))
         _qs = emg_models.Study.objects.available(self.request)
-        queryset = queryset.prefetch_related(
-            Prefetch('study', queryset=_qs))
+        # queryset = queryset.prefetch_related(
+        #     Prefetch('studies', queryset=_qs))
         if 'runs' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Run.objects \
                 .available(self.request) \
@@ -394,8 +394,8 @@ class BiomeSampleRelationshipViewSet(mixins.ListModelMixin,
         queryset = queryset.prefetch_related(
             Prefetch('biome', queryset=_qs))
         _qs = emg_models.Study.objects.available(self.request)
-        queryset = queryset.prefetch_related(
-            Prefetch('study', queryset=_qs))
+        # queryset = queryset.prefetch_related(
+        #     Prefetch('study', queryset=_qs))
         if 'runs' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Run.objects \
                 .available(self.request) \
@@ -524,6 +524,35 @@ class SampleRunRelationshipViewSet(mixins.ListModelMixin,
         `/samples/ERS1015417/runs?experiment_type=metagenomics`
         """
         return super(SampleRunRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class SampleStudiesRelationshipViewSet(mixins.ListModelMixin,
+                                       BaseStudyRelationshipViewSet):
+
+    lookup_field = 'accession'
+
+    def get_queryset(self):
+        sample = get_object_or_404(
+            emg_models.Sample,
+            accession=self.kwargs[self.lookup_field])
+        queryset = emg_models.Study.objects \
+            .available(self.request) \
+            .filter(samples=sample)
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of runs for the given sample accession
+        Example:
+        ---
+        `/samples/ERS1015417/studies`
+
+        Filter by:
+        ---
+        `/sample/ERS1015417/studies`
+        """
+        return super(SampleStudiesRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
 
 

@@ -363,7 +363,7 @@ class Study(models.Model):
         Publication, through='StudyPublication', related_name='studies')
 
     samples = models.ManyToManyField(
-        'Sample', through='StudySample', related_name='studies')
+        'Sample', through='StudySample', related_name='studies', blank=True)
 
     objects = StudyManager()
 
@@ -423,7 +423,7 @@ class Sample(models.Model):
     sample_id = models.AutoField(
         db_column='SAMPLE_ID', primary_key=True)
     accession = models.CharField(
-        db_column='EXT_SAMPLE_ID', max_length=20,
+        db_column='EXT_SAMPLE_ID', max_length=20, unique=True,
         help_text='Sample accession')
     analysis_completed = models.DateField(
         db_column='ANALYSIS_COMPLETED', blank=True, null=True)
