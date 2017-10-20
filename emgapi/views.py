@@ -380,9 +380,10 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         _qs = emg_models.Biome.objects.all()
         queryset = queryset.prefetch_related(
             Prefetch('biome', queryset=_qs))
-        _qs = emg_models.Study.objects.available(self.request)
-        queryset = queryset.prefetch_related(
-            Prefetch('study', queryset=_qs))
+        # _qs = emg_models.Study.objects.available(self.request)
+        # queryset = queryset.prefetch_related(
+        #     Prefetch('studies', queryset=_qs))
+
         if 'runs' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Run.objects \
                 .available(self.request) \
@@ -391,8 +392,8 @@ class SampleViewSet(mixins.RetrieveModelMixin,
                 )
             queryset = queryset.prefetch_related(
                 Prefetch('runs', queryset=_qs))
-        if 'study' in self.request.GET.get('include', '').split(','):
-            queryset = queryset.select_related('study__biome')
+        # if 'studies' in self.request.GET.get('include', '').split(','):
+        #     queryset = queryset.select_related('studies')
         return queryset
 
     def get_serializer_class(self):
@@ -483,9 +484,6 @@ class RunViewSet(mixins.RetrieveModelMixin,
             )
         _qs = emg_models.Sample.objects.available(self.request) \
             .select_related('biome')
-        __qs = emg_models.Study.objects.available(self.request) \
-            .select_related('biome')
-        _qs = _qs.prefetch_related(Prefetch('study', queryset=__qs))
         queryset = queryset.prefetch_related(
             Prefetch('sample', queryset=_qs))
         return queryset
