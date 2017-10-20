@@ -72,7 +72,7 @@ def samples(biome, studies):
                 'emgapi.Sample',
                 biome=biome,
                 pk=pk,
-                study_id=pk,
+                studies=[s],
                 accession="ERS0{:0>3}".format(pk),
                 is_public=1,
                 species="homo sapiense",

@@ -51,15 +51,6 @@ class TestBiomeAPI(APITestCase):
                 pk=(self.data['_biomes'].index(b)+1)
             )
 
-        self.data['study'] = mommy.make(
-            'emgapi.Study',
-            pk=1,
-            accession="SPR0001",
-            is_public=1,
-            # add root until Biome is dropped from Study
-            biome=emg_models.Biome.objects.get(lineage='root')
-        )
-
         self.data['samples'] = []
         for pk in range(2, len(self.data['_biomes'])+1):
             self.data['samples'].append(
@@ -68,10 +59,19 @@ class TestBiomeAPI(APITestCase):
                     pk=pk,
                     biome=emg_models.Biome.objects.get(pk=pk),
                     accession="ERS{:0>3}".format(pk),
-                    is_public=1,
-                    study=self.data['study']
+                    is_public=1
                 )
             )
+
+        self.data['study'] = mommy.make(
+            'emgapi.Study',
+            pk=1,
+            accession="SPR0001",
+            is_public=1,
+            # add root until Biome is dropped from Study
+            biome=emg_models.Biome.objects.get(lineage='root'),
+            samples=self.data['samples']
+        )
 
     def test_biomes_list(self):
         url = reverse('emgapi:biomes-list')

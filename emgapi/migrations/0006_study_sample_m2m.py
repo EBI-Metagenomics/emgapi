@@ -32,4 +32,8 @@ class Migration(migrations.Migration):
             "INSERT INTO STUDY_SAMPLE (study_id, sample_id) "
             "SELECT study_id, sample_id from SAMPLE where sample_id>0"
         ),
+        migrations.RemoveField(
+            model_name='sample',
+            name='study',
+        ),
     ]
