@@ -93,7 +93,7 @@ class TestDefaultAPI(object):
             ('Publication', 'publications', 'emgapi:publications', [],
              ['studies']),
             ('Run', 'runs', 'emgapi:runs', [],
-             ['pipelines', 'analysis', 'experiment-type', 'sample']),
+             ['pipelines', 'analysis', 'experiment-type', 'sample', 'study']),
             ('Sample', 'samples', 'emgapi:samples', [],
              ['biome', 'studies', 'runs', 'metadata']),
             ('Study', 'studies', 'emgapi:studies', [],

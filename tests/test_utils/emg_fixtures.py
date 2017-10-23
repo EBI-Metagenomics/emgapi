@@ -86,6 +86,43 @@ def samples(biome, studies):
 
 
 @pytest.fixture
+def study(biome):
+    return mommy.make(
+        'emgapi.Study',
+        biome=biome,
+        # pk=111,
+        # accession="SRP0001",
+        centre_name="Centre Name",
+        is_public=1,
+        public_release_date=None,
+        study_name="Example study name 0001",
+        study_status="FINISHED",
+        data_origination="HARVESTED",
+        submission_account_id="User-123",
+        result_directory="2017/05/SRP0001",
+        project_id="PRJDB0001"
+    )
+
+
+@pytest.fixture
+def sample(biome, study):
+    sample = mommy.make(
+        'emgapi.Sample',
+        biome=biome,
+        pk=111,
+        accession="ERS0001",
+        primary_accession="SAMS0001",
+        is_public=1,
+        species="homo sapiense",
+        sample_name="Example sample name 0001",
+        latitude=123.123,
+        longitude=456.456,
+        geo_loc_name="INSTITUTE"
+    )
+    mommy.make("emgapi.StudySample", study=study, sample=sample)
+    return sample
+
+@pytest.fixture
 def analysis_status():
     a = mommy.make(
         'emgapi.AnalysisStatus',
@@ -113,7 +150,7 @@ def experiment_type():
 
 
 @pytest.fixture
-def runs(samples, analysis_status, pipeline, experiment_type):
+def runs(study, samples, analysis_status, pipeline, experiment_type):
     jobs = []
     for s in samples:
         pk = s.pk
@@ -121,8 +158,10 @@ def runs(samples, analysis_status, pipeline, experiment_type):
             mommy.prepare(
                 'emgapi.AnalysisJob',
                 pk=pk,
-                sample_id=pk,
+                sample=s,
+                study=study,
                 accession="ABC_{:0>3}".format(pk),
+                secondary_accession="DEF_{:0>3}".format(pk),
                 run_status_id=4,
                 experiment_type=experiment_type,
                 pipeline=pipeline,
@@ -135,11 +174,13 @@ def runs(samples, analysis_status, pipeline, experiment_type):
 
 
 @pytest.fixture
-def run(analysis_status, pipeline, experiment_type):
+def run(study, sample, analysis_status, pipeline, experiment_type):
     return mommy.make(
         'emgapi.AnalysisJob',
         pk=1234,
         accession="ABC01234",
+        sample=sample,
+        study=study,
         run_status_id=4,
         experiment_type=experiment_type,
         pipeline=pipeline,
@@ -150,11 +191,13 @@ def run(analysis_status, pipeline, experiment_type):
 
 
 @pytest.fixture
-def run_emptyresults(analysis_status, pipeline, experiment_type):
+def run_emptyresults(study, sample, analysis_status, pipeline, experiment_type):
     return mommy.make(
         'emgapi.AnalysisJob',
         pk=1234,
         accession="EMPTY_ABC01234",
+        sample=sample,
+        study=study,
         run_status_id=4,
         experiment_type=experiment_type,
         pipeline=pipeline,
@@ -165,7 +208,7 @@ def run_emptyresults(analysis_status, pipeline, experiment_type):
 
 
 @pytest.fixture
-def run_with_sample(analysis_status, pipeline, experiment_type):
+def run_with_sample(study, analysis_status, pipeline, experiment_type):
     sample = mommy.make(
         'emgapi.Sample',
         biome=biome,
@@ -179,7 +222,8 @@ def run_with_sample(analysis_status, pipeline, experiment_type):
         pk=1234,
         accession="ABC01234",
         run_status_id=4,
-        sample_id=sample.pk,
+        sample=sample,
+        study=study,
         experiment_type=experiment_type,
         pipeline=pipeline,
         analysis_status=analysis_status,
@@ -189,7 +233,7 @@ def run_with_sample(analysis_status, pipeline, experiment_type):
 
 
 @pytest.fixture
-def analysis_results(analysis_status, experiment_type):
+def analysis_results(study, sample, analysis_status, experiment_type):
     pipeline_version = [1, 2]
     res = dict()
     for pipe in pipeline_version:
@@ -199,6 +243,8 @@ def analysis_results(analysis_status, experiment_type):
             'emgapi.AnalysisJob',
             pk=pipe*100,
             accession="ABC01234",
+            study=study,
+            sample=sample,
             run_status_id=4,
             experiment_type=experiment_type,
             pipeline=p,
