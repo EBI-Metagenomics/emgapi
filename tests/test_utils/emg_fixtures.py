@@ -122,6 +122,7 @@ def sample(biome, study):
     mommy.make("emgapi.StudySample", study=study, sample=sample)
     return sample
 
+
 @pytest.fixture
 def analysis_status():
     a = mommy.make(
@@ -191,7 +192,8 @@ def run(study, sample, analysis_status, pipeline, experiment_type):
 
 
 @pytest.fixture
-def run_emptyresults(study, sample, analysis_status, pipeline, experiment_type):
+def run_emptyresults(study, sample, analysis_status, pipeline,
+                     experiment_type):
     return mommy.make(
         'emgapi.AnalysisJob',
         pk=1234,
