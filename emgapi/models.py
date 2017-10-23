@@ -424,7 +424,10 @@ class Sample(models.Model):
         db_column='SAMPLE_ID', primary_key=True)
     accession = models.CharField(
         db_column='EXT_SAMPLE_ID', max_length=20, unique=True,
-        help_text='Sample accession')
+        help_text='Secondary accession')
+    primary_accession = models.CharField(
+        db_column='PRIMARY_ACCESSION', max_length=20,
+        help_text='Primary accession')
     analysis_completed = models.DateField(
         db_column='ANALYSIS_COMPLETED', blank=True, null=True)
     collection_date = models.DateField(
@@ -456,7 +459,7 @@ class Sample(models.Model):
         help_text='Environment material')
     # study = models.ForeignKey(
     #     Study, db_column='STUDY_ID', related_name='samples',
-    #     on_delete=models.CASCADE, blank=True, null=True)
+    #     on_delete=models.CASCADE, blank=True)
     sample_name = models.CharField(
         db_column='SAMPLE_NAME', max_length=255, blank=True, null=True,
         help_text='Sample name')
@@ -553,11 +556,16 @@ class RunManager(models.Manager):
 class Run(models.Model):
     accession = models.CharField(
         db_column='EXTERNAL_RUN_IDS', max_length=100, primary_key=True)
+    secondary_accession = models.CharField(
+        db_column='SECONDARY_ACCESSION', max_length=100)
     run_status_id = models.IntegerField(
         db_column='RUN_STATUS_ID', blank=True, null=True)
     sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID', related_name='runs',
-        on_delete=models.CASCADE, blank=True, null=True)
+        on_delete=models.CASCADE)
+    study = models.ForeignKey(
+        Study, db_column='STUDY_ID', related_name='runs',
+        on_delete=models.CASCADE)
     analysis_status = models.ForeignKey(
         AnalysisStatus, db_column='ANALYSIS_STATUS_ID',
         on_delete=models.CASCADE)
@@ -589,6 +597,8 @@ class AnalysisJob(models.Model):
         db_column='JOB_ID', primary_key=True)
     accession = models.CharField(
         db_column='EXTERNAL_RUN_IDS', max_length=100)
+    secondary_accession = models.CharField(
+        db_column='SECONDARY_ACCESSION', max_length=100)
     job_operator = models.CharField(
         db_column='JOB_OPERATOR', max_length=15)
     pipeline = models.ForeignKey(
@@ -609,7 +619,10 @@ class AnalysisJob(models.Model):
         db_column='RESULT_DIRECTORY', max_length=100)
     sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID', related_name='analysis',
-        on_delete=models.CASCADE, blank=True, null=True)
+        on_delete=models.CASCADE)
+    study = models.ForeignKey(
+        Study, db_column='STUDY_ID', related_name='analysis',
+        on_delete=models.CASCADE)
     is_production_run = models.TextField(
         db_column='IS_PRODUCTION_RUN', blank=True, null=True)
     experiment_type = models.ForeignKey(
