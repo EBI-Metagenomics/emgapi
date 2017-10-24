@@ -1,17 +1,17 @@
 import logging
 
-logger = logging.getLogger(__name__)
-
-try:
-    from django_slack import slack_message
-except:
-    logger.error("Cannot resolve 'django_slack.log.SlackExceptionHandler':"
-                 " No module named django_slack")
-
 from django.conf import settings
 from django.middleware.common import BrokenLinkEmailsMiddleware
 
 from django.utils.encoding import force_text
+
+logger = logging.getLogger(__name__)
+
+try:
+    from django_slack import slack_message
+except ImportError:
+    logger.error("Cannot resolve 'django_slack.log.SlackExceptionHandler':"
+                 " No module named django_slack")
 
 
 class BrokenLinkSlackMiddleware(BrokenLinkEmailsMiddleware):
