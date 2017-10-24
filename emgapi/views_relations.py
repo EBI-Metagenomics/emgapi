@@ -551,10 +551,10 @@ class BiomeTreeViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         lineage = self.kwargs.get('lineage', None).strip()
         if lineage:
-            l = get_object_or_404(emg_models.Biome, lineage=lineage)
+            _lineage = get_object_or_404(emg_models.Biome, lineage=lineage)
             queryset = emg_models.Biome.objects \
-                .filter(lft__gt=l.lft, rgt__lt=l.rgt,
-                        depth__gt=l.depth)
+                .filter(lft__gt=_lineage.lft, rgt__lt=_lineage.rgt,
+                        depth__gt=_lineage.depth)
         else:
             queryset = super(BiomeTreeViewSet, self).get_queryset()
         return queryset
