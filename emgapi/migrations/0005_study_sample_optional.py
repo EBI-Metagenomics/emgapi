@@ -54,8 +54,8 @@ class Migration(migrations.Migration):
             name='StudySample',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('study', models.ForeignKey(db_column='STUDY_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.Study')),
-                ('sample', models.ForeignKey(db_column='SAMPLE_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.Sample')),
+                ('study', models.ForeignKey(db_column='STUDY_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.Study', related_name='study_sample_set')),
+                ('sample', models.ForeignKey(db_column='SAMPLE_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.Sample', related_name='study_sample_set')),
             ],
             options={
                 'db_table': 'STUDY_SAMPLE',

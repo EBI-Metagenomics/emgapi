@@ -30,6 +30,7 @@ from __future__ import unicode_literals
 from django.db import models
 from django.db.models import Count
 from django.db.models import Q
+from django.db.models import Prefetch
 
 
 class BaseQuerySet(models.QuerySet):
@@ -190,7 +191,7 @@ class BiomeManager(models.Manager):
 
     def get_queryset(self):
         return BiomeQuerySet(self.model, using=self._db) \
-            .annotate(studies_count=Count('samples__studies', distinct=True))
+            .annotate(samples_count=Count('samples', distinct=True))
 
 
 class Biome(models.Model):
@@ -230,7 +231,8 @@ class PublicationManager(models.Manager):
 
     def get_queryset(self):
         return PublicationQuerySet(self.model, using=self._db) \
-            .annotate(studies_count=Count('studies', distinct=True))
+            .annotate(studies_count=Count('studies', distinct=True)) \
+            .annotate(samples_count=Count('studies__samples', distinct=True))
 
 
 class Publication(models.Model):
@@ -286,7 +288,7 @@ class Publication(models.Model):
         ordering = ('pubmed_id',)
 
     def __str__(self):
-        return self.pub_title
+        return self.pubmed_id
 
 
 class StudyQuerySet(BaseQuerySet):
@@ -305,9 +307,10 @@ class StudyQuerySet(BaseQuerySet):
 class StudyManager(models.Manager):
 
     def get_queryset(self):
+        # TODO: remove biome when schema updated
         return StudyQuerySet(self.model, using=self._db) \
-            .annotate(samples_count=Count('samples', distinct=True)) \
-            .annotate(runs_count=Count('samples__runs', distinct=True))
+            .select_related('biome') \
+            .annotate(samples_count=Count('samples', distinct=True))
 
     def available(self, request):
         return self.get_queryset().available(request)
@@ -390,9 +393,11 @@ class StudyPublication(models.Model):
 
 class StudySample(models.Model):
     study = models.ForeignKey(
-        Study, db_column='STUDY_ID', on_delete=models.CASCADE)
+        'Study', db_column='STUDY_ID', on_delete=models.CASCADE,
+        related_name='study_sample_set')
     sample = models.ForeignKey(
-        'Sample', db_column='SAMPLE_ID', on_delete=models.CASCADE)
+        'Sample', db_column='SAMPLE_ID', on_delete=models.CASCADE,
+        related_name='study_sample_set')
 
     class Meta:
         db_table = 'STUDY_SAMPLE'
@@ -407,6 +412,7 @@ class SampleManager(models.Manager):
 
     def get_queryset(self):
         return SampleQuerySet(self.model, using=self._db) \
+            .select_related('biome') \
             .extra(
                 {
                     'longitude': "CAST(longitude as DECIMAL(10,5))",
@@ -457,9 +463,6 @@ class Sample(models.Model):
         db_column='ENVIRONMENT_MATERIAL', max_length=255,
         blank=True, null=True,
         help_text='Environment material')
-    # study = models.ForeignKey(
-    #     Study, db_column='STUDY_ID', related_name='samples',
-    #     on_delete=models.CASCADE, blank=True)
     sample_name = models.CharField(
         db_column='SAMPLE_NAME', max_length=255, blank=True, null=True,
         help_text='Sample name')
@@ -550,7 +553,16 @@ class RunManager(models.Manager):
         return RunQuerySet(self.model, using=self._db)
 
     def available(self, request):
-        return self.get_queryset().available(request)
+        queryset = self.get_queryset().available(request) \
+            .select_related(
+                'analysis_status',
+                'experiment_type',
+            )
+        _qs = Study.objects.available(request)
+        queryset = queryset.prefetch_related(Prefetch('study', queryset=_qs))
+        _qs = Sample.objects.available(request).select_related('biome')
+        queryset = queryset.prefetch_related(Prefetch('sample', queryset=_qs))
+        return queryset
 
 
 class Run(models.Model):
@@ -590,6 +602,29 @@ class Run(models.Model):
 
     def __str__(self):
         return self.accession
+
+
+class AnalysisJobQuerySet(BaseQuerySet):
+    pass
+
+
+class AnalysisJobManager(models.Manager):
+
+    def get_queryset(self):
+        return AnalysisJobQuerySet(self.model, using=self._db)
+
+    def available(self, request):
+        queryset = self.get_queryset().available(request) \
+            .select_related(
+                'pipeline',
+                'analysis_status',
+                'experiment_type',
+            )
+        _qs = Study.objects.available(request)
+        queryset = queryset.prefetch_related(Prefetch('study', queryset=_qs))
+        _qs = Sample.objects.available(request).select_related('biome')
+        queryset = queryset.prefetch_related(Prefetch('sample', queryset=_qs))
+        return queryset
 
 
 class AnalysisJob(models.Model):
@@ -638,7 +673,7 @@ class AnalysisJob(models.Model):
         db_column='INSTRUMENT_MODEL', max_length=50,
         blank=True, null=True)
 
-    objects = RunManager()
+    objects = AnalysisJobManager()
 
     class Meta:
         db_table = 'ANALYSIS_JOB'
