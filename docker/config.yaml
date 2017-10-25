@@ -14,15 +14,6 @@ emg:
       LOCATION: "redis://redis:6379/0"
       KEY_PREFIX: "emg"
   emg_backend_auth: "https://backend"
-  # NEVER allow wildcard on production
-  # allowed_host:
-  #   - '*'
-  # admins:
-  #   - ['admin', 'admin@localhost']
-  # email:
-  #   host: localhost
-  #   port: 25
-  #   subject: "EMGAPI"
   # prefix: "/metagenomics"
   # static_root: /home/emg/staticfiles
   mongodb:
