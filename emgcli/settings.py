@@ -49,7 +49,10 @@ EMG_DIR = os.environ.get('EMG_CONFIG', os.path.join(expanduser("~"), 'emg'))
 EMG_CONF = yamjam(os.path.join(EMG_DIR, 'config.yaml'))
 
 
-LOGDIR = os.path.join(EMG_DIR, 'log')
+try:
+    LOGDIR = EMG_CONF['emg']['log_dir']
+except KeyError:
+    LOGDIR = os.path.join(EMG_DIR, 'log')
 if not os.path.exists(LOGDIR):
     os.makedirs(LOGDIR)
 
@@ -133,9 +136,14 @@ def create_secret_key(var_dir):
 
 # SECURITY WARNING: keep the secret key used in production secret!
 try:
+    SECRET_KEY_DIR = EMG_CONF['emg']['secret_key']
+except KeyError:
+    SECRET_KEY_DIR = EMG_DIR
+
+try:
     SECRET_KEY
 except NameError:
-    SECRET_KEY = create_secret_key(EMG_DIR)
+    SECRET_KEY = create_secret_key(SECRET_KEY_DIR)
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
