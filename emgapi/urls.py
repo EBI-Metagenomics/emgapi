@@ -162,6 +162,12 @@ router.register(
 )
 
 router.register(
+    r'experiment-types/(?P<experiment_type>[a-zA-Z0-9]+)/runs',
+    views_relations.ExperimentRunRelationshipViewSet,
+    base_name='experiment-types-runs'
+)
+
+router.register(
     r'samples/(?P<accession>[a-zA-Z0-9\-\_]+)/studies',
     views_relations.SampleStudiesRelationshipViewSet,
     base_name='samples-studies'

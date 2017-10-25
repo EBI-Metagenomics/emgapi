@@ -206,14 +206,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     lookup_value_regex = '[a-zA-Z0-9]+'
 
     def get_queryset(self):
-        queryset = emg_models.Study.objects \
-            .available(self.request)
-        if 'samples' in self.request.GET.get('include', '').split(','):
-            _qs = emg_models.Sample.objects \
-                .available(self.request) \
-                .select_related('biome')
-            queryset = queryset.prefetch_related(
-                Prefetch('samples', queryset=_qs))
+        queryset = emg_models.Study.objects.available(self.request)
         return queryset
 
     def get_serializer_class(self):
@@ -231,7 +224,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         `/studies?fields[studies]=accession,samples_count,biomes`
         retrieve only selected fileds
 
-        `/studies?include=samples` with samples
+        `/studies?include=biomes` with biomes
 
         Filter by:
         ---
@@ -253,10 +246,10 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         Retrieves study for the given accession
         Example:
         ---
-        `/studies/ERP009004` retrieve study SRP001634
+        `/studies/ERP009004` retrieve study ERP009004
 
-        `/studies/ERP009004?include=samples`
-        with samples
+        `/studies/ERP009004?include=samples,biomes,publications`
+        with samples, biomes and publications
         """
         return super(StudyViewSet, self).retrieve(request, *args, **kwargs)
 
@@ -351,7 +344,6 @@ class SampleViewSet(mixins.RetrieveModelMixin,
 
     ordering_fields = (
         'accession',
-        'study__accession',
         'sample_name',
         'last_update',
         'runs_count',
@@ -360,6 +352,8 @@ class SampleViewSet(mixins.RetrieveModelMixin,
     ordering = ('-last_update',)
 
     search_fields = (
+        'accession',
+        'primary_accession',
         '@sample_name',
         '@sample_desc',
         'sample_alias',
@@ -380,10 +374,6 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         _qs = emg_models.Biome.objects.all()
         queryset = queryset.prefetch_related(
             Prefetch('biome', queryset=_qs))
-        # _qs = emg_models.Study.objects.available(self.request)
-        # queryset = queryset.prefetch_related(
-        #     Prefetch('studies', queryset=_qs))
-
         if 'runs' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Run.objects \
                 .available(self.request) \
@@ -476,16 +466,7 @@ class RunViewSet(mixins.RetrieveModelMixin,
     lookup_value_regex = '[a-zA-Z0-9\_]+'
 
     def get_queryset(self):
-        queryset = emg_models.Run.objects \
-            .available(self.request) \
-            .prefetch_related(
-                'analysis_status',
-                'experiment_type',
-            )
-        _qs = emg_models.Sample.objects.available(self.request) \
-            .select_related('biome')
-        queryset = queryset.prefetch_related(
-            Prefetch('sample', queryset=_qs))
+        queryset = emg_models.Run.objects.available(self.request)
         return queryset
 
     def get_object(self):
@@ -560,12 +541,7 @@ class AnalysisResultViewSet(mixins.ListModelMixin,
         accession = self.kwargs['accession']
         queryset = emg_models.AnalysisJob.objects \
             .available(self.request) \
-            .filter(accession=accession) \
-            .select_related(
-                'sample',
-                'pipeline',
-                'analysis_status',
-            )
+            .filter(accession=accession)
         return queryset
 
     def list(self, request, *args, **kwargs):
@@ -598,12 +574,7 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
         accession = self.kwargs['accession']
         queryset = emg_models.AnalysisJob.objects \
             .available(self.request) \
-            .filter(accession=accession) \
-            .select_related(
-                'sample',
-                'pipeline',
-                'analysis_status',
-            )
+            .filter(accession=accession)
         return queryset
 
     def retrieve(self, request, *args, **kwargs):
@@ -629,6 +600,8 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
 
     ordering_fields = (
         'release_version',
+        'samples_count',
+        'analysis_count',
     )
 
     ordering = ('release_version',)
@@ -794,8 +767,7 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         queryset = emg_models.Publication.objects.all()
         if 'studies' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Study.objects \
-                .available(self.request) \
-                .select_related('biome')
+                .available(self.request)
             queryset = queryset.prefetch_related(
                 Prefetch('studies', queryset=_qs))
         return queryset
