@@ -116,7 +116,7 @@ class TestDefaultAPI(object):
                 _sm = mommy.make('emgapi.Sample',
                                  pk=pk, biome=_biome, is_public=1)
                 _st = mommy.make('emgapi.Study', pk=pk, biome=_biome,
-                                 is_public=1)
+                                 is_public=1, samples=[_sm])
                 _as = mommy.make('emgapi.AnalysisStatus', pk=3)
                 _p = mommy.make('emgapi.Pipeline', pk=1, release_version="1.0")
                 mommy.make('emgapi.AnalysisJob', pk=pk, pipeline=_p,
@@ -127,7 +127,7 @@ class TestDefaultAPI(object):
                 _sm = mommy.make('emgapi.Sample',
                                  pk=pk, biome=_biome, is_public=1)
                 _st = mommy.make('emgapi.Study', pk=pk, biome=_biome,
-                                 is_public=1)
+                                 is_public=1, samples=[_sm])
                 _as = mommy.make('emgapi.AnalysisStatus', pk=3)
                 _p = mommy.make('emgapi.Pipeline', pk=1, release_version="1.0")
                 mommy.make('emgapi.AnalysisJob', pk=pk, pipeline=_p,
