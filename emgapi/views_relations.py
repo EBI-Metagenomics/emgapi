@@ -498,16 +498,12 @@ class SampleRunRelationshipViewSet(BaseRunRelationshipViewSet):
         sample = get_object_or_404(
             emg_models.Sample, accession=self.kwargs[self.lookup_field])
         queryset = emg_models.Run.objects.available(self.request) \
-            .filter(sample_id=sample)
-        _qs = emg_models.Sample.objects.available(self.request)
-        queryset = queryset.prefetch_related(Prefetch('sample', queryset=_qs))
-        _qs = emg_models.Study.objects.available(self.request)
-        queryset = queryset.prefetch_related(Prefetch('study', queryset=_qs))
-        queryset = queryset.distinct()
+            .filter(sample_id=sample) \
+            .distinct()
         return queryset
 
     def get_serializer_class(self):
-        return super(ExperimentRunRelationshipViewSet,
+        return super(SampleRunRelationshipViewSet,
                      self).get_serializer_class()
 
     def list(self, request, *args, **kwargs):

@@ -28,8 +28,9 @@ class EMGBaseCommand(BaseCommand):
     def find_accession(self, options):
         self.accession = options.get('accession', None)
         if self.accession:
+            print(emg_models.AnalysisJob.objects.all())
             self.obj_list = emg_models.AnalysisJob.objects \
-                .filter(sample__studies__accession=self.accession).available()
+                .filter(study__accession=self.accession).available()
             if len(self.obj_list) < 1:
                 self.obj_list = emg_models.AnalysisJob.objects \
                     .filter(sample__accession=self.accession).available()
@@ -38,7 +39,7 @@ class EMGBaseCommand(BaseCommand):
                     .filter(accession=self.accession).available()
             if len(self.obj_list) < 1:
                 logger.error(
-                    "Study %s has no runs, SKIPPING!" % self.accession)
+                    "No runs %s, SKIPPING!" % self.accession)
 
     def populate_from_accession(self, options):
         raise NotImplementedError()
