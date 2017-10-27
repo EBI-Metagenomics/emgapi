@@ -58,10 +58,10 @@ class BaseQuerySet(models.QuerySet):
             _query_filters['SampleQuerySet']['authenticated'] = \
                 (Q(submission_account_id=_username) | Q(is_public=1))
             _query_filters['RunQuerySet']['authenticated'] = \
-                (Q(sample__submission_account_id=_username, run_status_id=2) |
+                (Q(study__submission_account_id=_username, run_status_id=2) |
                  Q(run_status_id=4))
             _query_filters['AnalysisJobQuerySet']['authenticated'] = \
-                (Q(sample__submission_account_id=_username, run_status_id=2) |
+                (Q(study__submission_account_id=_username, run_status_id=2) |
                  Q(run_status_id=4))
 
         q = list()
