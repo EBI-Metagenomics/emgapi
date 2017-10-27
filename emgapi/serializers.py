@@ -26,6 +26,7 @@ from rest_framework_json_api import relations
 
 from . import models as emg_models
 from . import relations as emg_relations
+from . import fields as emg_fields
 
 # TODO: add related_link_lookup_fields, a list
 from emgapianns import models as m_models
@@ -608,7 +609,29 @@ class AnalysisJobAnnSerializer(BaseMetadataSerializer):
             'id',
             'var_name',
             'var_value',
-            'unit',
+        )
+
+
+class StudyAnnSerializer(ExplicitFieldsModelSerializer,
+                         serializers.HyperlinkedModelSerializer):
+
+    # workaround to provide multiple values in PK
+    id = emg_fields.IdentifierField()
+
+    # attributes
+    var_name = serializers.SerializerMethodField()
+
+    def get_var_name(self, obj):
+        return obj['var__var_name']
+
+    total_value = serializers.IntegerField()
+
+    class Meta:
+        model = emg_models.AnalysisJobAnn
+        fields = (
+            'id',
+            'var_name',
+            'total_value',
         )
 
 

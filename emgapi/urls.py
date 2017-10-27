@@ -175,6 +175,14 @@ router.register(
     base_name='runs-pipelines-metadata'
 )
 
+router.register(
+    (r'studies/(?P<accession>[a-zA-Z0-9\-\_]+)/'
+     r'pipelines/(?P<release_version>[0-9\.]+)/'
+     r'summary'),
+    views_relations.StudySummaryViewSet,
+    base_name='studies-pipelines-summary'
+)
+
 
 mydata_router = routers.DefaultRouter(trailing_slash=False)
 
