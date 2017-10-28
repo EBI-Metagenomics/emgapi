@@ -190,7 +190,7 @@ def run_with_sample(analysis_status, pipeline, experiment_type):
 
 @pytest.fixture
 def analysis_results(analysis_status, experiment_type):
-    pipeline_version = [1, 2]
+    pipeline_version = [1, 4]
     res = dict()
     for pipe in pipeline_version:
         v = "%s.0" % pipe

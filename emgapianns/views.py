@@ -529,6 +529,7 @@ class OrganismTreeViewSet(mixins.ListModelMixin,
 
     ordering_fields = (
         'name',
+        'domain',
         'prefix',
         'lineage',
     )
@@ -619,7 +620,7 @@ class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
         ann_counts = dict()
         if analysis is not None:
             for a in getattr(analysis, 'taxonomy', []):
-                ann_ids.append(a.organism.lineage)
+                ann_ids.append(a.organism.pk)
                 ann_counts[a.organism.pk] = a.count
 
         queryset = m_models.Organism.objects.filter(pk__in=ann_ids)
@@ -670,7 +671,7 @@ class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
         ann_counts = dict()
         if analysis is not None:
             for a in getattr(analysis, 'taxonomy_ssu', []):
-                ann_ids.append(a.organism.lineage)
+                ann_ids.append(a.organism.pk)
                 ann_counts[a.organism.pk] = a.count
 
         queryset = m_models.Organism.objects.filter(pk__in=ann_ids)
@@ -721,7 +722,7 @@ class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
         ann_counts = dict()
         if analysis is not None:
             for a in getattr(analysis, 'taxonomy_lsu', []):
-                ann_ids.append(a.organism.lineage)
+                ann_ids.append(a.organism.pk)
                 ann_counts[a.organism.pk] = a.count
 
         queryset = m_models.Organism.objects.filter(pk__in=ann_ids)

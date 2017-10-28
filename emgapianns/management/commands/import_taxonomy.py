@@ -4,6 +4,7 @@
 import os
 import csv
 import logging
+import re
 
 from emgapianns import models as m_models
 
@@ -12,7 +13,7 @@ from ..lib import EMGBaseCommand
 logger = logging.getLogger(__name__)
 
 
-ORGANISM_PREFIX = {
+ORGANISM_RANK = {
     '1.0': ['kingdom', 'phylum', 'class', 'order', 'family', 'genus',
             'species'],
     '2.0': ['kingdom', 'phylum', 'class', 'order', 'family', 'genus',
@@ -52,18 +53,36 @@ class Command(EMGBaseCommand):
                         obj.pipeline.release_version)
             if obj.pipeline.release_version in ('1.0', '2.0', '3.0',):
                 _f = os.path.join(res, 'krona-input.txt')
-                self.load_data_from_file(_f, obj)
+                if os.path.exists(_f):
+                    logger.info("Taxonomy loading: %s" % _f)
+                    with open(_f) as csvfile:
+                        reader = csv.reader(csvfile, delimiter='\t')
+                        self.load_organism_from_summary_file(
+                            reader, obj, 'taxonomy')
             elif obj.pipeline.release_version in ('4.0',):
-                for t in ['SSU', 'LSU']:
-                    name = "%s_SSU.fasta.mseq.txt" % (obj.input_file_name)
-                    _f = os.path.join(res, t, name)
-                    self.load_data_from_file(_f, obj)
+                name = "%s_SSU.fasta.mseq.txt" % (obj.input_file_name)
+                _f = os.path.join(res, 'SSU', name)
+                if os.path.exists(_f):
+                    logger.info("SSU loading: %s" % _f)
+                    with open(_f) as csvfile:
+                        reader = csv.reader(csvfile, delimiter='\t')
+                        self.load_organism_from_summary_file(
+                            reader, obj, 'taxonomy_ssu')
+                name = "%s_LSU.fasta.mseq.txt" % (obj.input_file_name)
+                _f = os.path.join(res, 'LSU', name)
+                if os.path.exists(_f):
+                    logger.info("LSU loading: %s" % _f)
+                    reader = csv.reader(_f, delimiter='\t')
+                    with open(_f) as csvfile:
+                        reader = csv.reader(csvfile, delimiter='\t')
+                        self.load_organism_from_summary_file(
+                            reader, obj, 'taxonomy_lsu')
             else:
                 logger.error("Pipeline not supported SKIPPING!")
         else:
             logger.error("Path %r doesn't exist. SKIPPING!" % res)
 
-    def load_organism_from_summary_file(self, reader, obj):  # noqa
+    def load_organism_from_summary_file(self, reader, obj, tax):  # noqa
         try:
             run = m_models.AnalysisJobTaxonomy.objects \
                 .get(pk=str(obj.job_id))
@@ -74,40 +93,65 @@ class Command(EMGBaseCommand):
         version = obj.pipeline.release_version
         run.pipeline_version = version
 
-        new_orgs = list()
+        # new_orgs = list()
         orgs = []
         for row in reader:
+            if len(row) < 1:
+                continue
             count = row[0]
-            lineage = list(map(str.rstrip, row[1:]))
+
+            def clean_prefix(s):
+                return re.sub(r"[a-zA-Z]+__", "", s.rstrip())
+            lineage = list(map(clean_prefix, row[1:]))
+
             if len(lineage) > 1:
+                hierarchy = {
+                    r: a for r, a in zip(ORGANISM_RANK[version], lineage)
+                }
+                domain = lineage[0]
                 name = lineage[-1]
                 ancestors = lineage[0:-1]
                 parent = ancestors[-1]
-                prefix = ORGANISM_PREFIX[version][len(ancestors)]
+                rank = ORGANISM_RANK[version][len(ancestors)]
             else:
                 ancestors = []
                 parent = None
                 try:
                     if len(lineage[0]) > 0:
+                        hierarchy = {
+                            r: a for r, a in zip(ORGANISM_RANK[version],
+                                                 lineage)
+                        }
+                        domain = lineage[0]
                         name = lineage[0]
-                        prefix = ORGANISM_PREFIX[version][len(ancestors)]
+                        rank = ORGANISM_RANK[version][len(ancestors)]
                     else:
-                        name = "Unusigned"
-                        prefix = None
+                        name = 'Unusigned'
+                        rank = None
                         lineage = ["Unusigned"]
+                        hierarchy = {}
+                        domain = None
                 except KeyError:
-                    name = "Unusigned"
-                    prefix = None
+                    name = 'Unusigned'
+                    rank = None
                     lineage = ["Unusigned"]
+                    hierarchy = {}
+                    domain = None
             organism = None
             try:
-                organism = m_models.Organism.objects.get(pk=":".join(lineage))
+                organism = m_models.Organism.objects.get(
+                    lineage=":".join(lineage), rank=rank,
+                    pipeline_version=version
+                )
             except m_models.Organism.DoesNotExist:
                 organism = m_models.Organism(
                     lineage=":".join(lineage), name=name, parent=parent,
-                    ancestors=ancestors, prefix=prefix
+                    ancestors=ancestors, hierarchy=hierarchy,
+                    rank=rank, pipeline_version=version, domain=domain
                 )
-                new_orgs.append(organism)
+                #  TODO https://github.com/MongoEngine/mongoengine/issues/1685
+                organism.save()
+                # new_orgs.append(organism)
 
             if organism is not None:
                 orgs.append(organism)
@@ -115,15 +159,17 @@ class Command(EMGBaseCommand):
                     count=count,
                     organism=organism
                 )
-                run.taxonomy.append(rorg)
+                t = getattr(run, tax, list())
+                t.append(rorg)
+                setattr(run, tax, t)
 
         if len(orgs) > 0:
             logger.info(
                 "Total %d Organisms for Run: %s %s" % (
                     len(orgs), obj.accession, version))
-            if len(new_orgs) > 0:
-                m_models.Organism.objects.insert(new_orgs)
-                logger.info(
-                    "Created %d new Organisms" % len(new_orgs))
+            # if len(new_orgs) > 0:
+            #     m_models.Organism.objects.insert(new_orgs)
+            #     logger.info(
+            #         "Created %d new Organisms" % len(new_orgs))
             run.save()
             logger.info("Saved Run %r" % run)

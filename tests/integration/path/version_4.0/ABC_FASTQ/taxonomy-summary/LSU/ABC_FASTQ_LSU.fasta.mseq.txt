@@ -1,0 +1,8 @@
+2	sk__Archaea
+24	sk__Bacteria
+4	sk__Bacteria	k__	p__Actinobacteria	c__Actinobacteria
+4	sk__Bacteria	k__	p__Actinobacteria	c__Actinobacteria	o__Candidatus_Actinomarinales	f__Candidatus_Actinomarinaceae	g__Candidatus_Actinomarina
+1	sk__Eukaryota	k__	p__	c__	o__	f__Acanthocystidae	g__Pterocystis
+1	sk__Eukaryota	k__	p__	c__	o__Bicosoecida	f__	g__Nerada	s__Nerada_mexicana
+1	sk__Eukaryota	k__Viridiplantae
+3	sk__Eukaryota	k__Viridiplantae	p__Chlorophyta

@@ -28,7 +28,7 @@ from test_utils.emg_fixtures import *  # noqa
 
 @pytest.mark.usefixtures('mongodb')
 @pytest.mark.django_db
-class TestAnnotations(object):
+class TestTaxonomy(object):
 
     def test_organism_list(self, client, run):
         assert run.accession == 'ABC01234'
