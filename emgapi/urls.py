@@ -174,20 +174,6 @@ router.register(
 )
 
 router.register(
-    r'samples/(?P<accession>[a-zA-Z0-9\-\_]+)/metadata',
-    views_relations.SampleMetadataRelationshipViewSet,
-    base_name='samples-metadata'
-)
-
-router.register(
-    (r'runs/(?P<accession>[a-zA-Z0-9\-\_]+)/'
-     r'pipelines/(?P<release_version>[0-9\.]+)/'
-     r'metadata'),
-    views_relations.AnalysisMetadataViewSet,
-    base_name='runs-pipelines-metadata'
-)
-
-router.register(
     (r'studies/(?P<accession>[a-zA-Z0-9\-\_]+)/'
      r'pipelines/(?P<release_version>[0-9\.]+)/'
      r'summary'),
