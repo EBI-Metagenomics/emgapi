@@ -412,7 +412,6 @@ class SampleManager(models.Manager):
 
     def get_queryset(self):
         return SampleQuerySet(self.model, using=self._db) \
-            .select_related('biome') \
             .extra(
                 {
                     'longitude': "CAST(longitude as DECIMAL(10,5))",
@@ -422,7 +421,15 @@ class SampleManager(models.Manager):
             .annotate(runs_count=Count('runs'))
 
     def available(self, request):
-        return self.get_queryset().available(request)
+        queryset = self.get_queryset().available(request)
+        queryset = queryset.prefetch_related(
+            Prefetch('biome', queryset=Biome.objects.all()))
+        _qs = SampleAnn.objects.all() \
+            .prefetch_related(
+                Prefetch('var', queryset=VariableNames.objects.all())
+            )
+        return queryset.prefetch_related(
+            Prefetch('metadata', queryset=_qs))
 
 
 class Sample(models.Model):
@@ -491,6 +498,16 @@ class Sample(models.Model):
     biome = models.ForeignKey(
         Biome, db_column='BIOME_ID', related_name='samples',
         on_delete=models.CASCADE)
+
+    @property
+    def sample_metadata(self):
+        return [
+            {
+                'key': v.var.var_name,
+                'value': v.var_val_ucv,
+                'unit': v.units
+            } for v in self.metadata.all()
+        ]
 
     objects = SampleManager()
 
@@ -672,6 +689,15 @@ class AnalysisJob(models.Model):
     instrument_model = models.CharField(
         db_column='INSTRUMENT_MODEL', max_length=50,
         blank=True, null=True)
+
+    @property
+    def analysis_summary(self):
+        return [
+            {
+                'key': v.var.var_name,
+                'value': v.var_val_ucv
+            } for v in self.analysis_metadata.all()
+        ]
 
     objects = AnalysisJobManager()
 
