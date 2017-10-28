@@ -145,18 +145,6 @@ class InterproIdentifierRetriveSerializer(  # NOQA
         fields = '__all__'
 
 
-ORGANISM_RANK = {
-    '1.0': ['kingdom', 'phylum', 'class', 'order', 'family', 'genus',
-            'species'],
-    '2.0': ['kingdom', 'phylum', 'class', 'order', 'family', 'genus',
-            'species'],
-    '3.0': ['kingdom', 'phylum', 'class', 'order', 'family', 'genus',
-            'species'],
-    '4.0': ['super kingdom', 'kingdom', 'phylum', 'class', 'order', 'family',
-            'genus', 'species'],
-}
-
-
 class OrganismSerializer(m_serializers.DynamicDocumentSerializer,
                          serializers.HyperlinkedModelSerializer):
 
@@ -181,21 +169,21 @@ class OrganismSerializer(m_serializers.DynamicDocumentSerializer,
     def get_children(self, obj):
         return None
 
-    # analysis = relations.SerializerMethodResourceRelatedField(
-    #     source='get_analysis',
-    #     model=emg_models.AnalysisJob,
-    #     many=True,
-    #     read_only=True,
-    #     related_link_view_name='emgapi:organisms-analysis-list',
-    #     related_link_url_kwarg='lineage',
-    #     related_link_lookup_field='lineage'
-    # )
-    #
-    # def get_analysis(self, obj):
-    #     # TODO: provide counter instead of paginating relationship
-    #     # workaround https://github.com/django-json-api
-    #     # /django-rest-framework-json-api/issues/178
-    #     return None
+    analysis = relations.SerializerMethodResourceRelatedField(
+        source='get_analysis',
+        model=emg_models.AnalysisJob,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi:organisms-analysis-list',
+        related_link_url_kwarg='lineage',
+        related_link_lookup_field='lineage'
+    )
+
+    def get_analysis(self, obj):
+        # TODO: provide counter instead of paginating relationship
+        # workaround https://github.com/django-json-api
+        # /django-rest-framework-json-api/issues/178
+        return None
 
     class Meta:
         model = m_models.Organism
@@ -206,7 +194,7 @@ class OrganismSerializer(m_serializers.DynamicDocumentSerializer,
             'rank',
             'name',
             'children',
-            # 'analysis',
+            'analysis',
         )
 
 
@@ -223,6 +211,6 @@ class OrganismRetriveSerializer(OrganismSerializer):
             'rank',
             'name',
             'count',
-            # 'children',
-            # 'analysis',
+            'children',
+            'analysis',
         )

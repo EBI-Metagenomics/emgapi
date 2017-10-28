@@ -523,21 +523,18 @@ class AnalysisSerializer(RunSerializer):
 
     class Meta:
         model = emg_models.AnalysisJob
-        fields = (
-            'id',
-            'url',
-            'accession',
-            'pipeline_version',
-            'sample_accession',
-            'study_accession',
-            'complete_time',
-            'experiment_type',
-            'metadata',
-            'sample',
-            'taxonomy',
-            'go_slim',
-            'go_terms',
-            'interpro_identifiers',
+        exclude = (
+            're_run_count',
+            'input_file_name',
+            'result_directory',
+            'is_production_run',
+            'run_status_id',
+            'job_operator',
+            'submit_time',
+            'pipelines',
+            'pipeline',
+            'analysis_status',
+            'analysis',
         )
 
 
