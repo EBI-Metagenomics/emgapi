@@ -188,9 +188,8 @@ class GoTermAnalysisRelationshipViewSet(mixins.ListModelMixin,
                 Q(go_slim__go_term=annotation) |
                 Q(go_terms__go_term=annotation)
             ) \
-            .only('job_id')
+            .distinct('job_id')
         logger.info("Found %d analysis" % len(job_ids))
-        job_ids = [str(j.job_id) for j in job_ids]
         queryset = emg_models.AnalysisJob.objects \
             .filter(job_id__in=job_ids) \
             .available(self.request) \
@@ -259,9 +258,8 @@ class InterproIdentifierAnalysisRelationshipViewSet(mixins.ListModelMixin,
         logger.info("get identifier %s" % annotation.accession)
         job_ids = m_models.AnalysisJobInterproIdentifier.objects \
             .filter(interpro_identifiers__interpro_identifier=annotation) \
-            .only('job_id')
+            .distinct('job_id')
         logger.info("Found %d analysis" % len(job_ids))
-        job_ids = [str(j.job_id) for j in job_ids]
         queryset = emg_models.AnalysisJob.objects \
             .filter(job_id__in=job_ids) \
             .available(self.request) \
@@ -456,7 +454,8 @@ class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
         return Response(serializer.data)
 
 
-class OrganismViewSet(m_viewset.ReadOnlyModelViewSet):
+class OrganismViewSet(mixins.ListModelMixin,
+                      m_viewset.GenericViewSet):
 
     """
     Provides list of Organisms.
@@ -480,16 +479,6 @@ class OrganismViewSet(m_viewset.ReadOnlyModelViewSet):
     def get_queryset(self):
         return m_models.Organism.objects.all()
 
-    def get_object(self):
-        try:
-            lineage = self.kwargs[self.lookup_field]
-            return m_models.Organism.objects.get(lineage=lineage)
-        except KeyError:
-            raise Http404(("Attribute error '%s'." % self.lookup_field))
-        except m_models.Organism.DoesNotExist:
-            raise Http404(('No %s matches the given query.' %
-                           m_models.Organism.__class__.__name__))
-
     def get_serializer_class(self):
         return super(OrganismViewSet, self).get_serializer_class()
 
@@ -502,16 +491,6 @@ class OrganismViewSet(m_viewset.ReadOnlyModelViewSet):
         """
         return super(OrganismViewSet, self) \
             .list(request, *args, **kwargs)
-
-    def retrieve(self, request, *args, **kwargs):
-        """
-        Retrieves Organism
-        Example:
-        ---
-        `/annotations/organisms/Bacteria:Chlorobi:OPB56`
-        """
-        return super(OrganismViewSet, self) \
-            .retrieve(request, *args, **kwargs)
 
 
 class OrganismTreeViewSet(mixins.ListModelMixin,
@@ -539,18 +518,13 @@ class OrganismTreeViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         lineage = self.kwargs.get('lineage', None).strip()
-        if lineage:
-            try:
-                organism = m_models.Organism.objects.get(lineage=lineage)
-            except KeyError:
-                raise Http404(("Attribute error '%s'." % self.lookup_field))
-            except m_models.Organism.DoesNotExist:
-                raise Http404(('No %s matches the given query.' %
-                               m_models.Organism.__class__.__name__))
-            queryset = m_models.Organism.objects \
-                .filter(ancestors=organism.name)
-        else:
-            queryset = super(OrganismTreeViewSet, self).get_queryset()
+        organism = m_models.Organism.objects \
+            .filter(lineage=lineage) \
+            .only('name').distinct('name')
+        if len(organism) == 0:
+            raise Http404(("Attribute error '%s'." % self.lookup_field))
+        queryset = m_models.Organism.objects \
+            .filter(Q(ancestors__in=organism) | Q(name__in=organism))
         return queryset
 
     def get_serializer_class(self):
@@ -784,20 +758,17 @@ class OrganismAnalysisRelationshipViewSet(mixins.ListModelMixin,
         `/annotations/organisms/Bacteria:Chlorobi:OPB56/analysis`
         """
         lineage = self.kwargs[self.lookup_field]
-        try:
-            organism = m_models.Organism.objects \
-                .get(lineage=lineage)
-        except KeyError:
+        organism = m_models.Organism.objects.filter(lineage=lineage) \
+            .only('id')
+        if len(organism) == 0:
             raise Http404(("Attribute error '%s'." % self.lookup_field))
-        except m_models.Organism.DoesNotExist:
-            raise Http404(('No %s matches the given query.' %
-                           m_models.Organism.__class__.__name__))
-        logger.info("get identifier %s" % organism.lineage)
         job_ids = m_models.AnalysisJobTaxonomy.objects \
-            .filter(taxonomy__organism=organism) \
-            .only('analysis_id')
+            .filter(
+                Q(taxonomy__organism__in=organism) |
+                Q(taxonomy_lsu__organism__in=organism) |
+                Q(taxonomy_ssu__organism__in=organism)
+            ).distinct('job_id')
         logger.info("Found %d analysis" % len(job_ids))
-        job_ids = [str(j.analysis_id) for j in job_ids]
         queryset = emg_models.AnalysisJob.objects \
             .filter(job_id__in=job_ids) \
             .available(self.request) \

@@ -100,6 +100,10 @@ class Organism(mongoengine.Document):
     rank = mongoengine.StringField()
     pipeline_version = mongoengine.StringField(required=True)
 
+    meta = {
+        'ordering': ['lineage']
+    }
+
 
 class AnalysisJobOrganism(mongoengine.EmbeddedDocument):
 
@@ -107,11 +111,16 @@ class AnalysisJobOrganism(mongoengine.EmbeddedDocument):
     organism = mongoengine.ReferenceField(Organism)
 
 
-class AnalysisJobTaxonomy(mongoengine.DynamicDocument):
+class AnalysisJobTaxonomy(mongoengine.Document):
 
     analysis_id = mongoengine.StringField(primary_key=True)
     accession = mongoengine.StringField(required=True)
     pipeline_version = mongoengine.StringField(required=True)
+    job_id = mongoengine.IntField(required=True)
 
     taxonomy = mongoengine.EmbeddedDocumentListField(
         AnalysisJobOrganism, required=False)
+    taxonomy_lsu = mongoengine.EmbeddedDocumentListField(
+        AnalysisJobOrganism, required=False)
+    taxonomy_ssu = mongoengine.EmbeddedDocumentListField(
+            AnalysisJobOrganism, required=False)

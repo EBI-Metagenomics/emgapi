@@ -92,6 +92,7 @@ class Command(EMGBaseCommand):
         run.accession = obj.accession
         version = obj.pipeline.release_version
         run.pipeline_version = version
+        run.job_id = obj.job_id
 
         # new_orgs = list()
         orgs = []
