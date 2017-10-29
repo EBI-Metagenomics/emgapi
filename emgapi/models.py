@@ -30,6 +30,7 @@ from __future__ import unicode_literals
 from django.db import models
 from django.db.models import Count
 from django.db.models import Q
+from django.db.models import Prefetch
 
 
 class BaseQuerySet(models.QuerySet):
@@ -190,7 +191,7 @@ class BiomeManager(models.Manager):
 
     def get_queryset(self):
         return BiomeQuerySet(self.model, using=self._db) \
-            .annotate(studies_count=Count('samples__study', distinct=True))
+            .annotate(samples_count=Count('samples', distinct=True))
 
 
 class Biome(models.Model):
@@ -230,7 +231,8 @@ class PublicationManager(models.Manager):
 
     def get_queryset(self):
         return PublicationQuerySet(self.model, using=self._db) \
-            .annotate(studies_count=Count('studies', distinct=True))
+            .annotate(studies_count=Count('studies', distinct=True)) \
+            .annotate(samples_count=Count('studies__samples', distinct=True))
 
 
 class Publication(models.Model):
@@ -286,7 +288,7 @@ class Publication(models.Model):
         ordering = ('pubmed_id',)
 
     def __str__(self):
-        return self.pub_title
+        return self.pubmed_id
 
 
 class StudyQuerySet(BaseQuerySet):
@@ -307,7 +309,7 @@ class StudyManager(models.Manager):
     def get_queryset(self):
         return StudyQuerySet(self.model, using=self._db) \
             .annotate(samples_count=Count('samples', distinct=True)) \
-            .annotate(runs_count=Count('samples__runs', distinct=True))
+            .select_related('biome')
 
     def available(self, request):
         return self.get_queryset().available(request)
@@ -392,6 +394,10 @@ class SampleQuerySet(BaseQuerySet):
 class SampleManager(models.Manager):
 
     def get_queryset(self):
+        _qs = SampleAnn.objects.all() \
+            .prefetch_related(
+                Prefetch('var', queryset=VariableNames.objects.all())
+            )
         return SampleQuerySet(self.model, using=self._db) \
             .extra(
                 {
@@ -399,7 +405,11 @@ class SampleManager(models.Manager):
                     'latitude': "CAST(latitude as DECIMAL(10,5))"
                 }
             ) \
-            .annotate(runs_count=Count('runs'))
+            .annotate(runs_count=Count('runs')) \
+            .prefetch_related(
+                Prefetch('biome', queryset=Biome.objects.all()),
+                Prefetch('metadata', queryset=_qs)
+            )
 
     def available(self, request):
         return self.get_queryset().available(request)
@@ -472,6 +482,16 @@ class Sample(models.Model):
         Biome, db_column='BIOME_ID', related_name='samples',
         on_delete=models.CASCADE)
 
+    @property
+    def sample_metadata(self):
+        return [
+            {
+                'key': v.var.var_name,
+                'value': v.var_val_ucv,
+                'unit': v.units or None
+            } for v in self.metadata.all()
+        ]
+
     objects = SampleManager()
 
     class Meta:
@@ -530,7 +550,11 @@ class RunQuerySet(BaseQuerySet):
 class RunManager(models.Manager):
 
     def get_queryset(self):
-        return RunQuerySet(self.model, using=self._db)
+        return RunQuerySet(self.model, using=self._db) \
+            .select_related(
+                'sample', 'sample__study',
+                'analysis_status', 'experiment_type'
+            )
 
     def available(self, request):
         return self.get_queryset().available(request)
@@ -568,6 +592,34 @@ class Run(models.Model):
 
     def __str__(self):
         return self.accession
+
+
+class AnalysisJobQuerySet(BaseQuerySet):
+    pass
+
+
+class AnalysisJobManager(models.Manager):
+
+    def get_queryset(self):
+        queryset = AnalysisJobQuerySet(self.model, using=self._db)
+        _qs = AnalysisJobAnn.objects.all() \
+            .prefetch_related(
+                Prefetch(
+                    'var',
+                    queryset=AnalysisMetadataVariableNames.objects.all()
+                )
+            )
+        return queryset.select_related(
+            'sample',
+            'pipeline',
+            'analysis_status',
+            'pipeline',
+        ).prefetch_related(
+            Prefetch('analysis_metadata', queryset=_qs)
+        )
+
+    def available(self, request):
+        return self.get_queryset().available(request)
 
 
 class AnalysisJob(models.Model):
@@ -611,7 +663,16 @@ class AnalysisJob(models.Model):
         db_column='INSTRUMENT_MODEL', max_length=50,
         blank=True, null=True)
 
-    objects = RunManager()
+    @property
+    def analysis_summary(self):
+        return [
+            {
+                'key': v.var.var_name,
+                'value': v.var_val_ucv
+            } for v in self.analysis_metadata.all()
+        ]
+
+    objects = AnalysisJobManager()
 
     class Meta:
         db_table = 'ANALYSIS_JOB'

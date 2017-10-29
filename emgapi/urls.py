@@ -162,17 +162,17 @@ router.register(
 )
 
 router.register(
-    r'samples/(?P<accession>[a-zA-Z0-9\-\_]+)/metadata',
-    views_relations.SampleMetadataRelationshipViewSet,
-    base_name='samples-metadata'
+    (r'studies/(?P<accession>[a-zA-Z0-9\-\_]+)/'
+     r'pipelines/(?P<release_version>[0-9\.]+)/'
+     r'summary'),
+    views_relations.StudySummaryViewSet,
+    base_name='studies-pipelines-summary'
 )
 
 router.register(
-    (r'runs/(?P<accession>[a-zA-Z0-9\-\_]+)/'
-     r'pipelines/(?P<release_version>[0-9\.]+)/'
-     r'metadata'),
-    views_relations.AnalysisMetadataViewSet,
-    base_name='runs-pipelines-metadata'
+    r'experiment-types/(?P<experiment_type>[a-zA-Z0-9]+)/runs',
+    views_relations.ExperimentRunRelationshipViewSet,
+    base_name='experiment-types-runs'
 )
 
 

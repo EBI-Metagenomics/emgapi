@@ -99,6 +99,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     ordering_fields = (
         'biome_name',
         'lineage',
+        'samples_count'
     )
     ordering = ('biome_id',)
 
@@ -207,7 +208,8 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 
     def get_queryset(self):
         queryset = emg_models.Study.objects \
-            .available(self.request)
+            .available(self.request) \
+            .select_related('biome')
         if 'samples' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Sample.objects \
                 .available(self.request) \
@@ -273,7 +275,8 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         """
         limit = settings.EMG_DEFAULT_LIMIT
         queryset = emg_models.Study.objects \
-            .recent(self.request)[:limit]
+            .recent(self.request)[:limit] \
+            .select_related('biome')
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(
@@ -377,9 +380,6 @@ class SampleViewSet(mixins.RetrieveModelMixin,
     def get_queryset(self):
         queryset = emg_models.Sample.objects \
             .available(self.request)
-        _qs = emg_models.Biome.objects.all()
-        queryset = queryset.prefetch_related(
-            Prefetch('biome', queryset=_qs))
         _qs = emg_models.Study.objects.available(self.request)
         queryset = queryset.prefetch_related(
             Prefetch('study', queryset=_qs))
@@ -600,12 +600,7 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
         accession = self.kwargs['accession']
         queryset = emg_models.AnalysisJob.objects \
             .available(self.request) \
-            .filter(accession=accession) \
-            .select_related(
-                'sample',
-                'pipeline',
-                'analysis_status',
-            )
+            .filter(accession=accession)
         return queryset
 
     def retrieve(self, request, *args, **kwargs):

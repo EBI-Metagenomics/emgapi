@@ -78,7 +78,7 @@ class TestSampleAPI(APITestCase):
         assert rsp['data']['type'] == "samples"
         assert rsp['data']['id'] == "DRS012345"
         _attr = rsp['data']['attributes']
-        assert(len(_attr) == 17)
+        assert(len(_attr) == 18)
         assert _attr['accession'] == "DRS012345"
         assert _attr['sample-desc'] == "abcdefghijklmnoprstuvwyz"
         assert _attr['analysis-completed'] == str(self.data['date'].date())
