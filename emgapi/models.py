@@ -191,7 +191,7 @@ class BiomeManager(models.Manager):
 
     def get_queryset(self):
         return BiomeQuerySet(self.model, using=self._db) \
-            .annotate(studies_count=Count('samples__study', distinct=True))
+            .annotate(samples_count=Count('samples', distinct=True))
 
 
 class Biome(models.Model):
@@ -231,7 +231,8 @@ class PublicationManager(models.Manager):
 
     def get_queryset(self):
         return PublicationQuerySet(self.model, using=self._db) \
-            .annotate(studies_count=Count('studies', distinct=True))
+            .annotate(studies_count=Count('studies', distinct=True)) \
+            .annotate(samples_count=Count('studies__samples', distinct=True))
 
 
 class Publication(models.Model):
@@ -287,7 +288,7 @@ class Publication(models.Model):
         ordering = ('pubmed_id',)
 
     def __str__(self):
-        return self.pub_title
+        return self.pubmed_id
 
 
 class StudyQuerySet(BaseQuerySet):
@@ -308,7 +309,7 @@ class StudyManager(models.Manager):
     def get_queryset(self):
         return StudyQuerySet(self.model, using=self._db) \
             .annotate(samples_count=Count('samples', distinct=True)) \
-            .annotate(runs_count=Count('samples__runs', distinct=True))
+            .select_related('biome')
 
     def available(self, request):
         return self.get_queryset().available(request)
@@ -393,6 +394,10 @@ class SampleQuerySet(BaseQuerySet):
 class SampleManager(models.Manager):
 
     def get_queryset(self):
+        _qs = SampleAnn.objects.all() \
+            .prefetch_related(
+                Prefetch('var', queryset=VariableNames.objects.all())
+            )
         return SampleQuerySet(self.model, using=self._db) \
             .extra(
                 {
@@ -400,18 +405,14 @@ class SampleManager(models.Manager):
                     'latitude': "CAST(latitude as DECIMAL(10,5))"
                 }
             ) \
-            .annotate(runs_count=Count('runs'))
-
-    def available(self, request):
-        _qs = SampleAnn.objects.all() \
-            .prefetch_related(
-                Prefetch('var', queryset=VariableNames.objects.all())
-            )
-        return self.get_queryset().available(request) \
+            .annotate(runs_count=Count('runs')) \
             .prefetch_related(
                 Prefetch('biome', queryset=Biome.objects.all()),
                 Prefetch('metadata', queryset=_qs)
             )
+
+    def available(self, request):
+        return self.get_queryset().available(request)
 
 
 class Sample(models.Model):
@@ -549,7 +550,11 @@ class RunQuerySet(BaseQuerySet):
 class RunManager(models.Manager):
 
     def get_queryset(self):
-        return RunQuerySet(self.model, using=self._db)
+        return RunQuerySet(self.model, using=self._db) \
+            .select_related(
+                'sample', 'sample__study',
+                'analysis_status', 'experiment_type'
+            )
 
     def available(self, request):
         return self.get_queryset().available(request)
@@ -596,14 +601,25 @@ class AnalysisJobQuerySet(BaseQuerySet):
 class AnalysisJobManager(models.Manager):
 
     def get_queryset(self):
-        return AnalysisJobQuerySet(self.model, using=self._db)
+        queryset = AnalysisJobQuerySet(self.model, using=self._db)
+        _qs = AnalysisJobAnn.objects.all() \
+            .prefetch_related(
+                Prefetch(
+                    'var',
+                    queryset=AnalysisMetadataVariableNames.objects.all()
+                )
+            )
+        return queryset.select_related(
+            'sample',
+            'pipeline',
+            'analysis_status',
+            'pipeline',
+        ).prefetch_related(
+            Prefetch('analysis_metadata', queryset=_qs)
+        )
 
     def available(self, request):
-        _qs = AnalysisJobAnn.objects.all().select_related('var')
-        return self.get_queryset().available(request) \
-            .prefetch_related(
-                Prefetch('analysis_metadata', queryset=_qs)
-            )
+        return self.get_queryset().available(request)
 
 
 class AnalysisJob(models.Model):

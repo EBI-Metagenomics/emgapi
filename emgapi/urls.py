@@ -169,6 +169,12 @@ router.register(
     base_name='studies-pipelines-summary'
 )
 
+router.register(
+    r'experiment-types/(?P<experiment_type>[a-zA-Z0-9]+)/runs',
+    views_relations.ExperimentRunRelationshipViewSet,
+    base_name='experiment-types-runs'
+)
+
 
 mydata_router = routers.DefaultRouter(trailing_slash=False)
 

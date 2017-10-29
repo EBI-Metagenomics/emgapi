@@ -104,7 +104,7 @@ class BiomeSerializer(ExplicitFieldsModelSerializer,
         return None
 
     # counters
-    studies_count = serializers.IntegerField()
+    samples_count = serializers.IntegerField()
 
     class Meta:
         model = emg_models.Biome
@@ -156,8 +156,22 @@ class PublicationSerializer(ExplicitFieldsModelSerializer,
     def get_studies(self, obj):
         return None
 
+    samples = relations.SerializerMethodResourceRelatedField(
+        source='get_samples',
+        model=emg_models.Publication,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi:publications-samples-list',
+        related_link_url_kwarg='pubmed_id',
+        related_link_lookup_field='pubmed_id',
+    )
+
+    def get_samples(self, obj):
+        return None
+
     # counters
     studies_count = serializers.IntegerField()
+    samples_count = serializers.IntegerField()
 
     class Meta:
         model = emg_models.Publication
@@ -179,7 +193,9 @@ class PublicationSerializer(ExplicitFieldsModelSerializer,
             'medline_journal',
             'pub_url',
             'studies_count',
+            'samples_count',
             'studies',
+            'samples',
         )
 
 
@@ -340,6 +356,19 @@ class ExperimentTypeSerializer(ExplicitFieldsModelSerializer,
     def get_samples(self, obj):
         return None
 
+    runs = relations.SerializerMethodResourceRelatedField(
+        source='get_runs',
+        model=emg_models.Run,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi:experiment-types-runs-list',
+        related_link_url_kwarg='experiment_type',
+        related_link_lookup_field='experiment_type',
+    )
+
+    def get_runs(self, obj):
+        return None
+
     # counters
     samples_count = serializers.IntegerField()
 
@@ -455,6 +484,11 @@ class AnalysisSerializer(RunSerializer):
 
     def get_pipeline_version(self, obj):
         return obj.pipeline.release_version
+
+    experiment_type = serializers.SerializerMethodField()
+
+    def get_experiment_type(self, obj):
+        return obj.experiment_type.experiment_type
 
     analysis_summary = serializers.ListField()
 
@@ -708,8 +742,6 @@ class StudySerializer(ExplicitFieldsModelSerializer,
 
     # counters
     samples_count = serializers.IntegerField()
-
-    runs_count = serializers.IntegerField()
 
     class Meta:
         model = emg_models.Study
