@@ -89,14 +89,20 @@ class AnalysisJobInterproIdentifier(BaseAnalysisJob):
 
 # Taxonomic model
 
-class Organism(mongoengine.DynamicDocument):
+class Organism(mongoengine.Document):
 
-    lineage = mongoengine.StringField(
-        primary_key=True, required=True, max_length=255)
+    lineage = mongoengine.StringField(required=True)
     ancestors = mongoengine.ListField(mongoengine.StringField(), default=list)
-    name = mongoengine.StringField(required=True, max_length=100)
-    parent = mongoengine.StringField(required=True, max_length=100)
-    prefix = mongoengine.StringField(required=True, max_length=10)
+    hierarchy = mongoengine.DictField()
+    domain = mongoengine.StringField()
+    name = mongoengine.StringField()
+    parent = mongoengine.StringField()
+    rank = mongoengine.StringField()
+    pipeline_version = mongoengine.StringField(required=True)
+
+    meta = {
+        'ordering': ['lineage']
+    }
 
 
 class AnalysisJobOrganism(mongoengine.EmbeddedDocument):
@@ -105,12 +111,16 @@ class AnalysisJobOrganism(mongoengine.EmbeddedDocument):
     organism = mongoengine.ReferenceField(Organism)
 
 
-class AnalysisJobTaxonomy(mongoengine.DynamicDocument):
+class AnalysisJobTaxonomy(mongoengine.Document):
 
-    analysis_id = mongoengine.StringField(primary_key=True, required=True,
-                                          max_length=50)
-    accession = mongoengine.StringField(required=True, max_length=20)
-    pipeline_version = mongoengine.StringField(required=True, max_length=5)
+    analysis_id = mongoengine.StringField(primary_key=True)
+    accession = mongoengine.StringField(required=True)
+    pipeline_version = mongoengine.StringField(required=True)
+    job_id = mongoengine.IntField(required=True)
 
     taxonomy = mongoengine.EmbeddedDocumentListField(
         AnalysisJobOrganism, required=False)
+    taxonomy_lsu = mongoengine.EmbeddedDocumentListField(
+        AnalysisJobOrganism, required=False)
+    taxonomy_ssu = mongoengine.EmbeddedDocumentListField(
+            AnalysisJobOrganism, required=False)

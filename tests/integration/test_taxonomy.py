@@ -28,7 +28,7 @@ from test_utils.emg_fixtures import *  # noqa
 
 @pytest.mark.usefixtures('mongodb')
 @pytest.mark.django_db
-class TestAnnotations(object):
+class TestTaxonomy(object):
 
     def test_organism_list(self, client, run):
         assert run.accession == 'ABC01234'
@@ -42,9 +42,9 @@ class TestAnnotations(object):
         assert len(rsp['data']) == 8
 
         expected = [
-            'XanthomonadalesXanthomonadaceae', 'Unusigned', 'Bacteria',
-            'Proteobacteria', 'Alphaproteobacteria', 'OPB56',
-            'RhodobacteralesRhodobacteraceae', 'Sphingomonadales'
+            'Bacteria', 'OPB56', 'Proteobacteria', 'Alphaproteobacteria',
+            'RhodobacteralesRhodobacteraceae', 'Sphingomonadales',
+            'XanthomonadalesXanthomonadaceae', 'Unusigned'
         ]
         ids = [a['attributes']['name'] for a in rsp['data']]
         assert ids == expected
@@ -59,18 +59,20 @@ class TestAnnotations(object):
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
-        assert len(rsp['data']) == 2
+        assert len(rsp['data']) == 3
 
         expected = [
+            'Bacteria:Proteobacteria:Alphaproteobacteria',
             ('Bacteria:Proteobacteria:Alphaproteobacteria'
              ':RhodobacteralesRhodobacteraceae'),
-            'Bacteria:Proteobacteria:Alphaproteobacteria:Sphingomonadales'
+            ('Bacteria:Proteobacteria:Alphaproteobacteria'
+             ':Sphingomonadales')
         ]
         ids = [a['id'] for a in rsp['data']]
         assert ids == expected
 
     def test_object_does_not_exist(self, client):
-        url = reverse("emgapi:organisms-detail", args=['abc'])
+        url = reverse("emgapi:organisms-children-list", args=['abc'])
         response = client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
