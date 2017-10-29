@@ -30,6 +30,7 @@ from __future__ import unicode_literals
 from django.db import models
 from django.db.models import Count
 from django.db.models import Q
+from django.db.models import Prefetch
 
 
 class BaseQuerySet(models.QuerySet):
@@ -402,7 +403,15 @@ class SampleManager(models.Manager):
             .annotate(runs_count=Count('runs'))
 
     def available(self, request):
-        return self.get_queryset().available(request)
+        _qs = SampleAnn.objects.all() \
+            .prefetch_related(
+                Prefetch('var', queryset=VariableNames.objects.all())
+            )
+        return self.get_queryset().available(request) \
+            .prefetch_related(
+                Prefetch('biome', queryset=Biome.objects.all()),
+                Prefetch('metadata', queryset=_qs)
+            )
 
 
 class Sample(models.Model):
@@ -471,6 +480,16 @@ class Sample(models.Model):
     biome = models.ForeignKey(
         Biome, db_column='BIOME_ID', related_name='samples',
         on_delete=models.CASCADE)
+
+    @property
+    def sample_metadata(self):
+        return [
+            {
+                'key': v.var.var_name,
+                'value': v.var_val_ucv,
+                'unit': v.units or None
+            } for v in self.metadata.all()
+        ]
 
     objects = SampleManager()
 
@@ -570,6 +589,23 @@ class Run(models.Model):
         return self.accession
 
 
+class AnalysisJobQuerySet(BaseQuerySet):
+    pass
+
+
+class AnalysisJobManager(models.Manager):
+
+    def get_queryset(self):
+        return AnalysisJobQuerySet(self.model, using=self._db)
+
+    def available(self, request):
+        _qs = AnalysisJobAnn.objects.all().select_related('var')
+        return self.get_queryset().available(request) \
+            .prefetch_related(
+                Prefetch('analysis_metadata', queryset=_qs)
+            )
+
+
 class AnalysisJob(models.Model):
     job_id = models.BigAutoField(
         db_column='JOB_ID', primary_key=True)
@@ -611,7 +647,16 @@ class AnalysisJob(models.Model):
         db_column='INSTRUMENT_MODEL', max_length=50,
         blank=True, null=True)
 
-    objects = RunManager()
+    @property
+    def analysis_summary(self):
+        return [
+            {
+                'key': v.var.var_name,
+                'value': v.var_val_ucv
+            } for v in self.analysis_metadata.all()
+        ]
+
+    objects = AnalysisJobManager()
 
     class Meta:
         db_table = 'ANALYSIS_JOB'

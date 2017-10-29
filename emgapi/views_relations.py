@@ -177,9 +177,6 @@ class StudySampleRelationshipViewSet(mixins.ListModelMixin,
         queryset = emg_models.Sample.objects \
             .available(self.request) \
             .filter(study_id=study.pk)
-        _qs = emg_models.Biome.objects.all()
-        queryset = queryset.prefetch_related(
-            Prefetch('biome', queryset=_qs))
         _qs = emg_models.Study.objects.available(self.request)
         queryset = queryset.prefetch_related(
             Prefetch('study', queryset=_qs))
@@ -342,9 +339,6 @@ class ExperimentSampleRelationshipViewSet(mixins.ListModelMixin,
         queryset = emg_models.Sample.objects \
             .available(self.request) \
             .filter(runs__experiment_type=experiment_type)
-        _qs = emg_models.Biome.objects.all()
-        queryset = queryset.prefetch_related(
-            Prefetch('biome', queryset=_qs))
         _qs = emg_models.Study.objects.available(self.request)
         queryset = queryset.prefetch_related(
             Prefetch('study', queryset=_qs))
@@ -392,9 +386,6 @@ class BiomeSampleRelationshipViewSet(mixins.ListModelMixin,
             .filter(
                 biome__lft__gte=obj.lft, biome__rgt__lte=obj.rgt,
                 biome__depth__gte=obj.depth)
-        _qs = emg_models.Biome.objects.all()
-        queryset = queryset.prefetch_related(
-            Prefetch('biome', queryset=_qs))
         _qs = emg_models.Study.objects.available(self.request)
         queryset = queryset.prefetch_related(
             Prefetch('study', queryset=_qs))
@@ -616,35 +607,6 @@ class PipelinePipelineToolRelationshipViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class AnalysisMetadataViewSet(emg_mixins.MultipleFieldLookupMixin,
-                              viewsets.GenericViewSet):
-
-    serializer_class = emg_serializers.AnalysisJobAnnSerializer
-
-    lookup_fields = ('accession', 'release_version')
-
-    def get_queryset(self):
-        accession = self.kwargs['accession']
-        release_version = self.kwargs['release_version']
-        queryset = emg_models.AnalysisJobAnn.objects.filter(
-            job__accession=accession,
-            job__pipeline__release_version=release_version) \
-            .select_related('job', 'var') \
-            .order_by('var')
-        return queryset
-
-    def list(self, request, *args, **kwargs):
-        """
-        Retrieves metadata for the run and pipeline version
-        Example:
-        ---
-        `/runs/ERR1385375/pipelines/3.0/metadata` retrieve metadata
-        """
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
-
 class StudySummaryViewSet(emg_mixins.MultipleFieldLookupMixin,
                           viewsets.GenericViewSet):
 
@@ -669,33 +631,6 @@ class StudySummaryViewSet(emg_mixins.MultipleFieldLookupMixin,
         Example:
         ---
         `/studies/ERP001736/pipelines/2.0/summary` retrieve summary
-        """
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
-
-class SampleMetadataRelationshipViewSet(viewsets.GenericViewSet):
-
-    serializer_class = emg_serializers.SampleAnnSerializer
-
-    lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9\-\_]+'
-
-    def get_queryset(self):
-        accession = self.kwargs[self.lookup_field]
-        queryset = emg_models.SampleAnn.objects.filter(
-            sample__accession=accession) \
-            .select_related('sample', 'var') \
-            .order_by('var')
-        return queryset
-
-    def list(self, request, *args, **kwargs):
-        """
-        Retrieves metadatafor the given analysis job
-        Example:
-        ---
-        `/samples/ERS1015417/metadata` retrieve metadata
         """
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)

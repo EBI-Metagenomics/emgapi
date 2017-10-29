@@ -456,6 +456,8 @@ class AnalysisSerializer(RunSerializer):
     def get_pipeline_version(self, obj):
         return obj.pipeline.release_version
 
+    analysis_summary = serializers.ListField()
+
     # relationships
     go_terms = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
         source='get_goterms',
@@ -496,19 +498,6 @@ class AnalysisSerializer(RunSerializer):
     def get_interproidentifier(self, obj):
         return None
 
-    metadata = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(
-        source='get_metadata',
-        model=emg_models.AnalysisJobAnn,
-        many=True,
-        read_only=True,
-        related_link_view_name='emgapi:runs-pipelines-metadata-list',
-        related_link_url_kwarg='accession',
-        related_link_lookup_field='accession'
-    )
-
-    def get_metadata(self, obj):
-        return None
-
     taxonomy = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
         source='get_taxonomy',
         model=m_models.Organism,
@@ -541,77 +530,6 @@ class AnalysisSerializer(RunSerializer):
 
 # SampleAnn serializer
 
-# class MetadataHyperlinkedField(serializers.HyperlinkedIdentityField):
-#
-#     def get_url(self, obj, view_name, request, format):
-#         kwargs = {
-#             'name': obj.var.var_name,
-#             'value': obj.var_val_ucv
-#         }
-#         return reverse(
-#             view_name, kwargs=kwargs, request=request, format=format)
-
-class BaseMetadataSerializer(ExplicitFieldsModelSerializer,
-                             serializers.HyperlinkedModelSerializer):
-
-    # workaround to provide multiple values in PK
-    id = serializers.ReadOnlyField(source="multiple_pk")
-
-    # attributes
-    var_name = serializers.SerializerMethodField()
-
-    def get_var_name(self, obj):
-        return obj.var.var_name
-
-    var_value = serializers.SerializerMethodField()
-
-    def get_var_value(self, obj):
-        return obj.var_val_ucv
-
-    unit = serializers.SerializerMethodField()
-
-    def get_unit(self, obj):
-        return obj.units
-
-
-class SampleAnnSerializer(BaseMetadataSerializer):
-
-    # attributes
-    # sample_accession = serializers.SerializerMethodField()
-    #
-    # def get_sample_accession(self, obj):
-    #     return obj.sample.accession
-
-    # relationships
-    sample = serializers.HyperlinkedRelatedField(
-        read_only=True,
-        view_name='emgapi:samples-detail',
-        lookup_field='accession'
-    )
-
-    class Meta:
-        model = emg_models.SampleAnn
-        fields = (
-            'id',
-            'var_name',
-            'var_value',
-            'unit',
-            # 'sample_accession',
-            'sample',
-        )
-
-
-class AnalysisJobAnnSerializer(BaseMetadataSerializer):
-
-    class Meta:
-        model = emg_models.AnalysisJobAnn
-        fields = (
-            'id',
-            'var_name',
-            'var_value',
-        )
-
-
 class StudyAnnSerializer(ExplicitFieldsModelSerializer,
                          serializers.HyperlinkedModelSerializer):
 
@@ -643,7 +561,6 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
     included_serializers = {
         'biome': 'emgapi.serializers.BiomeSerializer',
         'runs': 'emgapi.serializers.RunSerializer',
-        'metadata': 'emgapi.serializers.SampleAnnSerializer',
     }
 
     url = serializers.HyperlinkedIdentityField(
@@ -660,6 +577,8 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
     latitude = serializers.FloatField()
 
     longitude = serializers.FloatField()
+
+    sample_metadata = serializers.ListField()
 
     # relationships
     biome = serializers.HyperlinkedRelatedField(
@@ -685,19 +604,6 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
     )
 
     def get_runs(self, obj):
-        return None
-
-    metadata = relations.SerializerMethodResourceRelatedField(
-        source='get_metadata',
-        model=emg_models.SampleAnn,
-        many=True,
-        read_only=True,
-        related_link_view_name='emgapi:samples-metadata-list',
-        related_link_url_kwarg='accession',
-        related_link_lookup_field='accession'
-    )
-
-    def get_metadata(self, obj):
         return None
 
     # counters
@@ -727,7 +633,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
             'biome',
             'study',
             'runs',
-            'metadata',
+            'sample_metadata',
         )
 
 
@@ -737,7 +643,6 @@ class RetrieveSampleSerializer(SampleSerializer):
         'biome': 'emgapi.serializers.BiomeSerializer',
         'study': 'emgapi.serializers.StudySerializer',
         'runs': 'emgapi.serializers.RunSerializer',
-        'metadata': 'emgapi.serializers.SampleAnnSerializer',
     }
 
 

@@ -377,9 +377,6 @@ class SampleViewSet(mixins.RetrieveModelMixin,
     def get_queryset(self):
         queryset = emg_models.Sample.objects \
             .available(self.request)
-        _qs = emg_models.Biome.objects.all()
-        queryset = queryset.prefetch_related(
-            Prefetch('biome', queryset=_qs))
         _qs = emg_models.Study.objects.available(self.request)
         queryset = queryset.prefetch_related(
             Prefetch('study', queryset=_qs))
