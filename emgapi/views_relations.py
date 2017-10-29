@@ -496,8 +496,7 @@ class SampleRunRelationshipViewSet(BaseRunRelationshipViewSet):
         return queryset
 
     def get_serializer_class(self):
-        return super(SampleRunRelationshipViewSet,
-                     self).get_serializer_class()
+        return super(SampleRunRelationshipViewSet, self).get_serializer_class()
 
     def list(self, request, *args, **kwargs):
         """

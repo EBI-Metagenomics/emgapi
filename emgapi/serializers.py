@@ -399,22 +399,10 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     def get_accession(self, obj):
         return obj.accession
 
-    # sample_accession = serializers.SerializerMethodField()
-    #
-    # def get_sample_accession(self, obj):
-    #     return getattr(obj.sample, 'accession', None)
-    #
-    # study_accession = serializers.SerializerMethodField()
-    #
-    # def get_study_accession(self, obj):
-    #     return getattr(obj.study, 'accession', None)
+    experiment_type = serializers.SerializerMethodField()
 
-    # relationship
-    experiment_type = serializers.HyperlinkedRelatedField(
-        read_only=True,
-        view_name='emgapi:experiment-types-detail',
-        lookup_field='experiment_type'
-    )
+    def get_experiment_type(self, obj):
+        return obj.experiment_type.experiment_type
 
     # relationships
     sample = serializers.HyperlinkedRelatedField(
@@ -490,6 +478,11 @@ class AnalysisSerializer(RunSerializer):
 
     def get_pipeline_version(self, obj):
         return obj.pipeline.release_version
+
+    experiment_type = serializers.SerializerMethodField()
+
+    def get_experiment_type(self, obj):
+        return obj.experiment_type.experiment_type
 
     analysis_summary = serializers.ListField()
 
@@ -597,7 +590,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
                        serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
-        'studies': 'emgapi.serializers.StudySerializer',
+        # 'studies': 'emgapi.serializers.StudySerializer',
         'biome': 'emgapi.serializers.BiomeSerializer',
         'runs': 'emgapi.serializers.RunSerializer',
     }
@@ -685,7 +678,7 @@ class RetrieveSampleSerializer(SampleSerializer):
 
     included_serializers = {
         'biome': 'emgapi.serializers.BiomeSerializer',
-        'studies': 'emgapi.serializers.StudySerializer',
+        # 'studies': 'emgapi.serializers.StudySerializer',
         'runs': 'emgapi.serializers.RunSerializer',
     }
 
