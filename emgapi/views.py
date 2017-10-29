@@ -99,6 +99,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     ordering_fields = (
         'biome_name',
         'lineage',
+        'samples_count',
     )
     ordering = ('biome_id',)
 
@@ -394,9 +395,6 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         Example:
         ---
         `/samples/ERS1015417`
-
-        `/samples/ERS1015417?include=metadata` with metadata
-
         """
         return super(SampleViewSet, self).retrieve(request, *args, **kwargs)
 
@@ -410,8 +408,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         `/samples?fields[samples]=accession,runs_count,biome`
         retrieve only selected fileds
 
-        `/samples?include=metadata,runs,study`
-        with related metadata, runs and studies
+        `/samples?include=runs` with related runs
 
         `/samples?ordering=accession` ordered by accession
 
