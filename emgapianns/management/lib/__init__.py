@@ -28,7 +28,6 @@ class EMGBaseCommand(BaseCommand):
     def find_accession(self, options):
         self.accession = options.get('accession', None)
         if self.accession:
-            print(emg_models.AnalysisJob.objects.all())
             self.obj_list = emg_models.AnalysisJob.objects \
                 .filter(study__accession=self.accession).available()
             if len(self.obj_list) < 1:

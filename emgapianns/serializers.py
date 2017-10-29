@@ -149,22 +149,23 @@ class OrganismSerializer(m_serializers.DynamicDocumentSerializer,
                          serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi:organisms-detail',
+        view_name='emgapi:organisms-children-list',
         lookup_field='lineage',
     )
 
-    children = relations.SerializerMethodResourceRelatedField(
-        source='get_children',
-        model=m_models.Organism,
-        many=True,
-        read_only=True,
-        related_link_view_name='emgapi:organisms-children-list',
-        related_link_url_kwarg='lineage',
-        related_link_lookup_field='lineage',
-    )
-
-    def get_children(self, obj):
-        return None
+    # attributes
+    # children = relations.SerializerMethodResourceRelatedField(
+    #     source='get_children',
+    #     model=m_models.Organism,
+    #     many=True,
+    #     read_only=True,
+    #     related_link_view_name='emgapi:organisms-children-list',
+    #     related_link_url_kwarg='lineage',
+    #     related_link_lookup_field='lineage',
+    # )
+    #
+    # def get_children(self, obj):
+    #     return None
 
     analysis = relations.SerializerMethodResourceRelatedField(
         source='get_analysis',
@@ -184,12 +185,9 @@ class OrganismSerializer(m_serializers.DynamicDocumentSerializer,
 
     class Meta:
         model = m_models.Organism
-        fields = (
-            'url',
-            'prefix',
-            'name',
-            'children',
-            'analysis',
+        exclude = (
+            'id',
+            'ancestors',
         )
 
 
@@ -199,11 +197,7 @@ class OrganismRetriveSerializer(OrganismSerializer):
 
     class Meta:
         model = m_models.Organism
-        fields = (
-            'url',
-            'prefix',
-            'name',
-            'count',
-            'children',
-            'analysis',
+        exclude = (
+            'id',
+            'ancestors',
         )
