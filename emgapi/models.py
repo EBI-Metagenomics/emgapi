@@ -319,7 +319,7 @@ class StudyManager(models.Manager):
         return self.get_queryset().available(request).recent()
 
     def mydata(self, request):
-        return self.get_queryset().mydata(request).recent()
+        return self.get_queryset().mydata(request)
 
 
 class Study(models.Model):
@@ -411,6 +411,10 @@ class SampleQuerySet(BaseQuerySet):
 class SampleManager(models.Manager):
 
     def get_queryset(self):
+        _qs = SampleAnn.objects.all() \
+            .prefetch_related(
+                Prefetch('var', queryset=VariableNames.objects.all())
+            )
         return SampleQuerySet(self.model, using=self._db) \
             .extra(
                 {
@@ -418,18 +422,14 @@ class SampleManager(models.Manager):
                     'latitude': "CAST(latitude as DECIMAL(10,5))"
                 }
             ) \
-            .annotate(runs_count=Count('runs'))
+            .annotate(runs_count=Count('runs')) \
+            .prefetch_related(
+                Prefetch('biome', queryset=Biome.objects.all()),
+                Prefetch('metadata', queryset=_qs)
+            )
 
     def available(self, request):
-        queryset = self.get_queryset().available(request)
-        queryset = queryset.prefetch_related(
-            Prefetch('biome', queryset=Biome.objects.all()))
-        _qs = SampleAnn.objects.all() \
-            .prefetch_related(
-                Prefetch('var', queryset=VariableNames.objects.all())
-            )
-        return queryset.prefetch_related(
-            Prefetch('metadata', queryset=_qs))
+        return self.get_queryset().available(request)
 
 
 class Sample(models.Model):
@@ -505,7 +505,7 @@ class Sample(models.Model):
             {
                 'key': v.var.var_name,
                 'value': v.var_val_ucv,
-                'unit': v.units
+                'unit': v.units or None
             } for v in self.metadata.all()
         ]
 
@@ -567,19 +567,25 @@ class RunQuerySet(BaseQuerySet):
 class RunManager(models.Manager):
 
     def get_queryset(self):
-        return RunQuerySet(self.model, using=self._db)
-
-    def available(self, request):
-        queryset = self.get_queryset().available(request) \
+        return RunQuerySet(self.model, using=self._db) \
             .select_related(
                 'analysis_status',
                 'experiment_type',
             )
-        _qs = Study.objects.available(request)
-        queryset = queryset.prefetch_related(Prefetch('study', queryset=_qs))
-        _qs = Sample.objects.available(request).select_related('biome')
-        queryset = queryset.prefetch_related(Prefetch('sample', queryset=_qs))
-        return queryset
+
+    def available(self, request):
+        return self.get_queryset().available(request) \
+            .prefetch_related(
+                Prefetch(
+                    'study',
+                    queryset=Study.objects.available(request)
+                ),
+                Prefetch(
+                    'sample',
+                    queryset=Sample.objects.available(
+                        request).select_related('biome')
+                )
+            )
 
 
 class Run(models.Model):
@@ -628,20 +634,26 @@ class AnalysisJobQuerySet(BaseQuerySet):
 class AnalysisJobManager(models.Manager):
 
     def get_queryset(self):
-        return AnalysisJobQuerySet(self.model, using=self._db)
-
-    def available(self, request):
-        queryset = self.get_queryset().available(request) \
+        return AnalysisJobQuerySet(self.model, using=self._db) \
             .select_related(
                 'pipeline',
                 'analysis_status',
                 'experiment_type',
             )
-        _qs = Study.objects.available(request)
-        queryset = queryset.prefetch_related(Prefetch('study', queryset=_qs))
-        _qs = Sample.objects.available(request).select_related('biome')
-        queryset = queryset.prefetch_related(Prefetch('sample', queryset=_qs))
-        return queryset
+
+    def available(self, request):
+        return self.get_queryset().available(request) \
+            .prefetch_related(
+                Prefetch(
+                    'study',
+                    queryset=Study.objects.available(request)
+                ),
+                Prefetch(
+                    'sample',
+                    queryset=Sample.objects.available(
+                        request).select_related('biome')
+                )
+            )
 
 
 class AnalysisJob(models.Model):
