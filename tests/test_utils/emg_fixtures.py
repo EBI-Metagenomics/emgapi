@@ -203,7 +203,7 @@ def pipeline():
 
 @pytest.fixture
 def pipelines():
-    pipeline_version = [1, 2]
+    pipeline_version = [1, 4]
     pipeliens = list()
     for pipe in pipeline_version:
         pipeliens.append(

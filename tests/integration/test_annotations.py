@@ -163,7 +163,7 @@ class TestAnnotations(object):
                     'IPR021710': 3, 'IPR024561': 5, 'IPR033771': 4
                 },
             }},
-            {'version': '2.0', 'expected': {
+            {'version': '4.0', 'expected': {
                 'go_slim': {
                     'GO:0005618': 1222, 'GO:0009276': 0,
                     'GO:0016020': 1414622
