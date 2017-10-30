@@ -94,7 +94,7 @@ class Command(EMGBaseCommand):
         run.pipeline_version = version
         run.job_id = obj.job_id
 
-        # new_orgs = list()
+        new_orgs = list()
         orgs = []
         for row in reader:
             if len(row) < 1:
@@ -145,14 +145,15 @@ class Command(EMGBaseCommand):
                     pipeline_version=version
                 )
             except m_models.Organism.DoesNotExist:
+                #  TODO https://github.com/MongoEngine/mongoengine/issues/1685
+                pk = "%s|%s" % (":".join(lineage), version)
                 organism = m_models.Organism(
+                    id=pk,
                     lineage=":".join(lineage), name=name, parent=parent,
                     ancestors=ancestors, hierarchy=hierarchy,
                     rank=rank, pipeline_version=version, domain=domain
                 )
-                #  TODO https://github.com/MongoEngine/mongoengine/issues/1685
-                organism.save()
-                # new_orgs.append(organism)
+                new_orgs.append(organism)
 
             if organism is not None:
                 orgs.append(organism)
@@ -168,9 +169,9 @@ class Command(EMGBaseCommand):
             logger.info(
                 "Total %d Organisms for Run: %s %s" % (
                     len(orgs), obj.accession, version))
-            # if len(new_orgs) > 0:
-            #     m_models.Organism.objects.insert(new_orgs)
-            #     logger.info(
-            #         "Created %d new Organisms" % len(new_orgs))
+            if len(new_orgs) > 0:
+                m_models.Organism.objects.insert(new_orgs)
+                logger.info(
+                    "Created %d new Organisms" % len(new_orgs))
             run.save()
             logger.info("Saved Run %r" % run)
