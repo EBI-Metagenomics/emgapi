@@ -91,6 +91,7 @@ class AnalysisJobInterproIdentifier(BaseAnalysisJob):
 
 class Organism(mongoengine.Document):
 
+    id = mongoengine.StringField(primary_key=True)
     lineage = mongoengine.StringField(required=True)
     ancestors = mongoengine.ListField(mongoengine.StringField(), default=list)
     hierarchy = mongoengine.DictField()
