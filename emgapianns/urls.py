@@ -53,13 +53,14 @@ mongo_router.register(
 )
 
 mongo_router.register(
-    r'annotations/organisms/(?P<lineage>[a-zA-Z0-9\_\-\.\:\s]+)/children',
+    r'annotations/organisms/(?P<lineage>[a-zA-Z0-9\_\-\.\:\(\)\<\>\s]+)',
     m_views.OrganismTreeViewSet,
     base_name='organisms-children'
 )
 
 mongo_router.register(
-    r'annotations/organisms/(?P<lineage>[a-zA-Z0-9\_\-\.\:\s]+)/analysis',
+    (r'annotations/organisms/(?P<lineage>[a-zA-Z0-9\_\-\.\:\(\)\<\>\s]+)/'
+     r'analysis'),
     m_views.OrganismAnalysisRelationshipViewSet,
     base_name='organisms-analysis'
 )
