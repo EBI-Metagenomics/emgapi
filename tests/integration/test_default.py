@@ -85,17 +85,17 @@ class TestDefaultAPI(object):
         '_model, _camelcase, _view, _view_args, relations',
         [
             ('ExperimentType', 'experiment-types', 'emgapi:experiment-types',
-             [], ['samples']),
+             [], ['samples', 'runs']),
             # ('Biome', 'biomes', 'emgapi:biomes', ['root'],
             #  ['samples', 'studies']),
             ('Pipeline', 'pipelines', 'emgapi:pipelines', [],
              ['samples', 'studies', 'tools', 'analysis']),
             ('Publication', 'publications', 'emgapi:publications', [],
-             ['studies']),
+             ['studies', 'samples']),
             ('Run', 'runs', 'emgapi:runs', [],
-             ['pipelines', 'analysis', 'experiment-type', 'sample']),
+             ['pipelines', 'analysis', 'experiment-type', 'sample', 'study']),
             ('Sample', 'samples', 'emgapi:samples', [],
-             ['biome', 'study', 'runs', 'metadata']),
+             ['biome', 'studies', 'runs', 'metadata']),
             ('Study', 'studies', 'emgapi:studies', [],
              ['biomes', 'publications', 'samples']),
             ('PipelineTool', 'pipeline-tools', 'emgapi:pipeline-tools', [],
@@ -112,29 +112,27 @@ class TestDefaultAPI(object):
         # https://code.djangoproject.com/ticket/17653
         for pk in range(1, 101):
             if _model in ('Study', 'Sample'):
-                _as = mommy.make('emgapi.AnalysisStatus', pk=3)
-                _p = mommy.make('emgapi.Pipeline', pk=1,
-                                release_version="1.0")
-                _aj = mommy.make('emgapi.AnalysisJob', pk=pk, pipeline=_p,
-                                 analysis_status=_as, run_status_id=4)
                 _biome = mommy.make('emgapi.Biome', pk=pk)
-                _s = mommy.make('emgapi.Sample',
-                                pk=pk, biome=_biome, is_public=1,
-                                analysis=[_aj])
-                mommy.make('emgapi.Study', pk=pk, biome=_biome, is_public=1,
-                           samples=[_s])
+                _sm = mommy.make('emgapi.Sample',
+                                 pk=pk, biome=_biome, is_public=1)
+                _st = mommy.make('emgapi.Study', pk=pk, biome=_biome,
+                                 is_public=1, samples=[_sm])
+                _as = mommy.make('emgapi.AnalysisStatus', pk=3)
+                _p = mommy.make('emgapi.Pipeline', pk=1, release_version="1.0")
+                mommy.make('emgapi.AnalysisJob', pk=pk, pipeline=_p,
+                           analysis_status=_as, run_status_id=4,
+                           study=_st, sample=_sm)
             elif _model in ('Run',):
-                _as = mommy.make('emgapi.AnalysisStatus', pk=3)
-                _p = mommy.make('emgapi.Pipeline', pk=1,
-                                release_version="1.0")
-                _aj = mommy.make('emgapi.AnalysisJob', pk=pk, pipeline=_p,
-                                 analysis_status=_as, run_status_id=4)
                 _biome = mommy.make('emgapi.Biome', pk=pk)
-                _s = mommy.make('emgapi.Sample',
-                                pk=pk, biome=_biome, is_public=1,
-                                analysis=[_aj])
-                mommy.make('emgapi.Study', pk=pk, biome=_biome, is_public=1,
-                           samples=[_s])
+                _sm = mommy.make('emgapi.Sample',
+                                 pk=pk, biome=_biome, is_public=1)
+                _st = mommy.make('emgapi.Study', pk=pk, biome=_biome,
+                                 is_public=1, samples=[_sm])
+                _as = mommy.make('emgapi.AnalysisStatus', pk=3)
+                _p = mommy.make('emgapi.Pipeline', pk=1, release_version="1.0")
+                mommy.make('emgapi.AnalysisJob', pk=pk, pipeline=_p,
+                           analysis_status=_as, run_status_id=4,
+                           study=_st, sample=_sm)
             elif _model in ('PipelineTool',):
                 _p = mommy.make('emgapi.Pipeline', pk=pk,
                                 release_version="1.0")

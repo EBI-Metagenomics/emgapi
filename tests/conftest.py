@@ -31,7 +31,6 @@ def pytest_configure():
     # TODO: backend mock to replace FakeEMGBackend
     # settings.EMG_BACKEND_AUTH_URL = 'http://fake_backend/auth'
     settings.AUTHENTICATION_BACKENDS = ('test_utils.FakeEMGBackend',)
-
     # disconnect main database
     mongoengine.connection.disconnect()
 

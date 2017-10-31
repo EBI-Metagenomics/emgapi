@@ -56,7 +56,7 @@ class TestExamples(object):
                         sample.biome.biome_name,
                         sample.runs_count,
                         run.accession,
-                        run.experiment_type.experiment_type,
+                        run.experiment_type,
                     )
 
     def test_annotations(self, live_server, run_with_sample, api_version):
