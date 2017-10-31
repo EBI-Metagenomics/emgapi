@@ -115,7 +115,7 @@ class StudyFilter(django_filters.FilterSet):
     def filter_lineage(self, qs, name, value):
         try:
             b = emg_models.Biome.objects.get(lineage=value)
-            studies = emg_models.Sample.objects.values('study') \
+            studies = emg_models.Sample.objects.values('studies') \
                 .available(self.request) \
                 .filter(
                     biome__lft__gte=b.lft,
@@ -135,7 +135,7 @@ class StudyFilter(django_filters.FilterSet):
             biome_ids = emg_models.Biome.objects.filter(
                 lineage__iregex=WORD_MATCH_REGEX.format(value)) \
                 .values('biome_id')
-            studies = emg_models.Sample.objects.values('study') \
+            studies = emg_models.Sample.objects.values('studies') \
                 .available(self.request) \
                 .filter(biome__biome_id__in=biome_ids)
             qs = qs.filter(pk__in=studies)
@@ -267,7 +267,7 @@ class SampleFilter(django_filters.FilterSet):
         samples = emg_models.Run.objects.values('sample_id') \
             .available(self.request) \
             .filter(instrument_platform__iregex=WORD_MATCH_REGEX.format(value))
-        return qs.filter(pk__in=samples).select_related('study', 'biome')
+        return qs.filter(pk__in=samples)
 
     instrument_model = django_filters.CharFilter(
         method='filter_instrument_model', distinct=True,
@@ -278,7 +278,7 @@ class SampleFilter(django_filters.FilterSet):
         samples = emg_models.Run.objects.values('sample_id') \
             .available(self.request) \
             .filter(instrument_model__iregex=WORD_MATCH_REGEX.format(value))
-        return qs.filter(pk__in=samples).select_related('study', 'biome')
+        return qs.filter(pk__in=samples)
 
     metadata_key = filters.ChoiceFilter(
             choices=metadata_keywords(),
@@ -320,7 +320,7 @@ class SampleFilter(django_filters.FilterSet):
             metadata__var_val_ucv=value)
 
     other_accession = django_filters.CharFilter(
-        name='study__project_id', distinct=True,
+        name='studies__project_id', distinct=True,
         label='ENA accession',
         help_text='ENA accession')
 
@@ -382,7 +382,7 @@ class SampleFilter(django_filters.FilterSet):
         help_text='Study accession')
 
     def filter_study_accession(self, qs, name, value):
-        return qs.filter(study__accession=value)
+        return qs.filter(studies__accession=value)
 
     # include
     include = django_filters.CharFilter(
@@ -540,7 +540,7 @@ class RunFilter(django_filters.FilterSet):
         help_text='Study accession')
 
     def filter_study_accession(self, qs, name, value):
-        return qs.filter(sample__study__accession=value)
+        return qs.filter(sample__studies__accession=value)
 
     # include
     include = django_filters.CharFilter(

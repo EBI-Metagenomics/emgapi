@@ -15,7 +15,7 @@ services:
   - mongodb
 
 before_install:
-  - pip install flake8 pycodestyle pep8-naming
+  - pip install "flake8==3.4" pycodestyle pep8-naming
   - python setup.py sdist
 
 install:
