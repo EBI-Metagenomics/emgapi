@@ -34,22 +34,36 @@ class TestCLI(object):
         call_command('import_qc', 'ABC01234',
                      os.path.dirname(os.path.abspath(__file__)))
 
-        url = reverse("emgapi:runs-pipelines-metadata-list",
+        url = reverse("emgapi:runs-pipelines-detail",
                       args=["ABC01234", "1.0"])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
-        assert len(rsp['data']) == 5
+        assert len(rsp['data']['attributes']['analysis-summary']) == 5
 
         expected = [
-            'Submitted nucleotide sequences/12345',
-            'Nucleotide sequences after format-specific filtering/12345',
-            'Predicted CDS/12345',
-            'Predicted CDS with InterProScan match/12345',
-            'Total InterProScan matches/12345678'
+            {
+                'key': 'Submitted nucleotide sequences',
+                'value': '12345'
+            },
+            {
+                'key': 'Nucleotide sequences after format-specific filtering',
+                'value': '12345'
+            },
+            {
+                'key': 'Predicted CDS',
+                'value': '12345'
+            },
+            {
+                'key': 'Predicted CDS with InterProScan match',
+                'value': '12345'
+            },
+            {
+                'key': 'Total InterProScan matches',
+                'value': '12345678'
+            }
         ]
-        ids = [a['id'] for a in rsp['data']]
-        assert ids == expected
+        assert rsp['data']['attributes']['analysis-summary'] == expected
 
     def test_empty_qc(self, client, run_emptyresults):
         job = run_emptyresults.accession
@@ -58,9 +72,9 @@ class TestCLI(object):
         call_command('import_qc', job,
                      os.path.dirname(os.path.abspath(__file__)))
 
-        url = reverse("emgapi:runs-pipelines-metadata-list",
+        url = reverse("emgapi:runs-pipelines-detail",
                       args=[job, version])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
-        assert len(rsp['data']) == 0
+        assert len(rsp['data']['attributes']['analysis-summary']) == 0

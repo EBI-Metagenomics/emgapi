@@ -15,92 +15,49 @@
 # limitations under the License.
 
 
-# import pytest
-from datetime import datetime
+import pytest
 
 from django.core.urlresolvers import reverse
 
 from rest_framework import status
-from rest_framework.test import APITestCase
 
-from model_mommy import mommy
-
-from emgapi.models import Sample  # noqa
+from test_utils.emg_fixtures import *  # noqa
 
 
-class TestSampleAPI(APITestCase):
+@pytest.mark.django_db
+class TestSampleAPI(object):
 
-    def setUp(self):
-        self.data = {}
-        self.data['date'] = datetime.now()
-        _biome = mommy.make(
-            'emgapi.Biome',
-            biome_name="foo",
-            lineage="root:foo",
-            pk=123)
-        self.data['samples'] = [mommy.make(
-            'emgapi.Sample',
-            biome=_biome,
-            pk=123,
-            sample_desc="abcdefghijklmnoprstuvwyz",
-            accession="DRS012345",
-            analysis_completed=self.data['date'].date(),
-            collection_date=self.data['date'].date(),
-            geo_loc_name="Geo Location",
-            is_public=1,
-            metadata_received=self.data['date'],
-            sequencedata_archived=self.data['date'],
-            sequencedata_received=self.data['date'],
-            environment_biome=None,
-            environment_feature="abcdef",
-            environment_material="abcdef",
-            sample_name="DRS012345",
-            sample_alias="DRS012345",
-            host_tax_id=None,
-            species=None,
-            latitude="12.3456",
-            longitude="123.4567",
-            last_update=self.data['date'],
-            submission_account_id="Webin-842"
-        )]
-        # private
-        mommy.make("emgapi.Study", pk=123, is_public=1,
-                   samples=self.data['samples'])
-
-    def test_details(self):
-        url = reverse("emgapi:samples-detail", args=["DRS012345"])
-        response = self.client.get(url)
+    def test_details(self, client, sample):
+        url = reverse("emgapi:samples-detail", args=["ERS01234"])
+        response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
 
         # Data
         assert len(rsp) == 1
         assert rsp['data']['type'] == "samples"
-        assert rsp['data']['id'] == "DRS012345"
+        assert rsp['data']['id'] == "ERS01234"
         _attr = rsp['data']['attributes']
-        assert(len(_attr) == 17)
-        assert _attr['accession'] == "DRS012345"
+        assert(len(_attr) == 18)
+        assert _attr['accession'] == "ERS01234"
+        assert _attr['primary-accession'] == "SAMS01234"
         assert _attr['sample-desc'] == "abcdefghijklmnoprstuvwyz"
-        assert _attr['analysis-completed'] == str(self.data['date'].date())
-        assert _attr['collection-date'] == str(self.data['date'].date())
+        assert _attr['analysis-completed'] == "1970-01-01"
+        assert _attr['collection-date'] == "1970-01-01"
         assert _attr['geo-loc-name'] == "Geo Location"
-        # assert _attr['metadata_received'] == str(self.data['date'])
-        # assert _attr['sequencedata_archived'] == str(self.data['date'])
-        # assert _attr['sequencedata_received'] == str(self.data['date'])
         assert not _attr['environment-biome']
         assert _attr['environment-feature'] == "abcdef"
         assert _attr['environment-material'] == "abcdef"
-        assert _attr['sample-name'] == "DRS012345"
-        assert _attr['sample-alias'] == "DRS012345"
+        assert _attr['sample-name'] == "Example sample name ERS01234"
+        assert _attr['sample-alias'] == "ERS01234"
         assert not _attr['host-tax-id']
-        assert not _attr['species']
+        assert _attr['species'] == "homo sapiense"
         assert _attr['latitude'] == 12.3456
-        assert _attr['longitude'] == 123.4567
-        # assert _attr['last_update'] == str(self.data['date'])
+        assert _attr['longitude'] == 456.456
 
-    def test_public(self):
+    def test_public(self, client, sample, sample_private):
         url = reverse("emgapi:samples-list")
-        response = self.client.get(url)
+        response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
 
@@ -112,7 +69,7 @@ class TestSampleAPI(APITestCase):
         # Data
         assert len(rsp['data']) == 1
 
-        for d in rsp['data']:
-            assert d['type'] == "samples"
-            assert d['id'] == "DRS012345"
-            assert d['attributes']['accession'] == "DRS012345"
+        d = rsp['data'][0]
+        assert d['type'] == "samples"
+        assert d['id'] == "ERS01234"
+        assert d['attributes']['accession'] == "ERS01234"

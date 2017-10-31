@@ -30,6 +30,7 @@ from __future__ import unicode_literals
 from django.db import models
 from django.db.models import Count
 from django.db.models import Q
+from django.db.models import Prefetch
 
 
 class BaseQuerySet(models.QuerySet):
@@ -57,10 +58,10 @@ class BaseQuerySet(models.QuerySet):
             _query_filters['SampleQuerySet']['authenticated'] = \
                 (Q(submission_account_id=_username) | Q(is_public=1))
             _query_filters['RunQuerySet']['authenticated'] = \
-                (Q(sample__submission_account_id=_username, run_status_id=2) |
+                (Q(study__submission_account_id=_username, run_status_id=2) |
                  Q(run_status_id=4))
             _query_filters['AnalysisJobQuerySet']['authenticated'] = \
-                (Q(sample__submission_account_id=_username, run_status_id=2) |
+                (Q(study__submission_account_id=_username, run_status_id=2) |
                  Q(run_status_id=4))
 
         q = list()
@@ -190,7 +191,7 @@ class BiomeManager(models.Manager):
 
     def get_queryset(self):
         return BiomeQuerySet(self.model, using=self._db) \
-            .annotate(studies_count=Count('samples__study', distinct=True))
+            .annotate(samples_count=Count('samples', distinct=True))
 
 
 class Biome(models.Model):
@@ -230,7 +231,8 @@ class PublicationManager(models.Manager):
 
     def get_queryset(self):
         return PublicationQuerySet(self.model, using=self._db) \
-            .annotate(studies_count=Count('studies', distinct=True))
+            .annotate(studies_count=Count('studies', distinct=True)) \
+            .annotate(samples_count=Count('studies__samples', distinct=True))
 
 
 class Publication(models.Model):
@@ -286,7 +288,7 @@ class Publication(models.Model):
         ordering = ('pubmed_id',)
 
     def __str__(self):
-        return self.pub_title
+        return self.pubmed_id
 
 
 class StudyQuerySet(BaseQuerySet):
@@ -305,9 +307,10 @@ class StudyQuerySet(BaseQuerySet):
 class StudyManager(models.Manager):
 
     def get_queryset(self):
+        # TODO: remove biome when schema updated
         return StudyQuerySet(self.model, using=self._db) \
-            .annotate(samples_count=Count('samples', distinct=True)) \
-            .annotate(runs_count=Count('samples__runs', distinct=True))
+            .select_related('biome') \
+            .annotate(samples_count=Count('samples', distinct=True))
 
     def available(self, request):
         return self.get_queryset().available(request)
@@ -316,7 +319,7 @@ class StudyManager(models.Manager):
         return self.get_queryset().available(request).recent()
 
     def mydata(self, request):
-        return self.get_queryset().mydata(request).recent()
+        return self.get_queryset().mydata(request)
 
 
 class Study(models.Model):
@@ -362,6 +365,9 @@ class Study(models.Model):
     publications = models.ManyToManyField(
         Publication, through='StudyPublication', related_name='studies')
 
+    samples = models.ManyToManyField(
+        'Sample', through='StudySample', related_name='studies', blank=True)
+
     objects = StudyManager()
 
     class Meta:
@@ -385,6 +391,19 @@ class StudyPublication(models.Model):
         unique_together = (('study', 'pub'),)
 
 
+class StudySample(models.Model):
+    study = models.ForeignKey(
+        'Study', db_column='STUDY_ID', on_delete=models.CASCADE,
+        related_name='study_sample_set')
+    sample = models.ForeignKey(
+        'Sample', db_column='SAMPLE_ID', on_delete=models.CASCADE,
+        related_name='study_sample_set')
+
+    class Meta:
+        db_table = 'STUDY_SAMPLE'
+        unique_together = (('study', 'sample'),)
+
+
 class SampleQuerySet(BaseQuerySet):
     pass
 
@@ -392,6 +411,10 @@ class SampleQuerySet(BaseQuerySet):
 class SampleManager(models.Manager):
 
     def get_queryset(self):
+        _qs = SampleAnn.objects.all() \
+            .prefetch_related(
+                Prefetch('var', queryset=VariableNames.objects.all())
+            )
         return SampleQuerySet(self.model, using=self._db) \
             .extra(
                 {
@@ -399,7 +422,11 @@ class SampleManager(models.Manager):
                     'latitude': "CAST(latitude as DECIMAL(10,5))"
                 }
             ) \
-            .annotate(runs_count=Count('runs'))
+            .annotate(runs_count=Count('runs')) \
+            .prefetch_related(
+                Prefetch('biome', queryset=Biome.objects.all()),
+                Prefetch('metadata', queryset=_qs)
+            )
 
     def available(self, request):
         return self.get_queryset().available(request)
@@ -409,8 +436,11 @@ class Sample(models.Model):
     sample_id = models.AutoField(
         db_column='SAMPLE_ID', primary_key=True)
     accession = models.CharField(
-        db_column='EXT_SAMPLE_ID', max_length=20,
-        help_text='Sample accession')
+        db_column='EXT_SAMPLE_ID', max_length=20, unique=True,
+        help_text='Secondary accession')
+    primary_accession = models.CharField(
+        db_column='PRIMARY_ACCESSION', max_length=20,
+        help_text='Primary accession')
     analysis_completed = models.DateField(
         db_column='ANALYSIS_COMPLETED', blank=True, null=True)
     collection_date = models.DateField(
@@ -440,9 +470,6 @@ class Sample(models.Model):
         db_column='ENVIRONMENT_MATERIAL', max_length=255,
         blank=True, null=True,
         help_text='Environment material')
-    study = models.ForeignKey(
-        Study, db_column='STUDY_ID', related_name='samples',
-        on_delete=models.CASCADE, blank=True, null=True)
     sample_name = models.CharField(
         db_column='SAMPLE_NAME', max_length=255, blank=True, null=True,
         help_text='Sample name')
@@ -471,6 +498,16 @@ class Sample(models.Model):
     biome = models.ForeignKey(
         Biome, db_column='BIOME_ID', related_name='samples',
         on_delete=models.CASCADE)
+
+    @property
+    def sample_metadata(self):
+        return [
+            {
+                'key': v.var.var_name,
+                'value': v.var_val_ucv,
+                'unit': v.units or None
+            } for v in self.metadata.all()
+        ]
 
     objects = SampleManager()
 
@@ -530,20 +567,40 @@ class RunQuerySet(BaseQuerySet):
 class RunManager(models.Manager):
 
     def get_queryset(self):
-        return RunQuerySet(self.model, using=self._db)
+        return RunQuerySet(self.model, using=self._db) \
+            .select_related(
+                'analysis_status',
+                'experiment_type',
+            )
 
     def available(self, request):
-        return self.get_queryset().available(request)
+        return self.get_queryset().available(request) \
+            .prefetch_related(
+                Prefetch(
+                    'study',
+                    queryset=Study.objects.available(request)
+                ),
+                Prefetch(
+                    'sample',
+                    queryset=Sample.objects.available(
+                        request).select_related('biome')
+                )
+            )
 
 
 class Run(models.Model):
     accession = models.CharField(
         db_column='EXTERNAL_RUN_IDS', max_length=100, primary_key=True)
+    secondary_accession = models.CharField(
+        db_column='SECONDARY_ACCESSION', max_length=100)
     run_status_id = models.IntegerField(
         db_column='RUN_STATUS_ID', blank=True, null=True)
     sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID', related_name='runs',
-        on_delete=models.CASCADE, blank=True, null=True)
+        on_delete=models.CASCADE)
+    study = models.ForeignKey(
+        Study, db_column='STUDY_ID', related_name='runs',
+        on_delete=models.CASCADE)
     analysis_status = models.ForeignKey(
         AnalysisStatus, db_column='ANALYSIS_STATUS_ID',
         on_delete=models.CASCADE)
@@ -570,11 +627,42 @@ class Run(models.Model):
         return self.accession
 
 
+class AnalysisJobQuerySet(BaseQuerySet):
+    pass
+
+
+class AnalysisJobManager(models.Manager):
+
+    def get_queryset(self):
+        return AnalysisJobQuerySet(self.model, using=self._db) \
+            .select_related(
+                'pipeline',
+                'analysis_status',
+                'experiment_type',
+            )
+
+    def available(self, request):
+        return self.get_queryset().available(request) \
+            .prefetch_related(
+                Prefetch(
+                    'study',
+                    queryset=Study.objects.available(request)
+                ),
+                Prefetch(
+                    'sample',
+                    queryset=Sample.objects.available(
+                        request).select_related('biome')
+                )
+            )
+
+
 class AnalysisJob(models.Model):
     job_id = models.BigAutoField(
         db_column='JOB_ID', primary_key=True)
     accession = models.CharField(
         db_column='EXTERNAL_RUN_IDS', max_length=100)
+    secondary_accession = models.CharField(
+        db_column='SECONDARY_ACCESSION', max_length=100)
     job_operator = models.CharField(
         db_column='JOB_OPERATOR', max_length=15)
     pipeline = models.ForeignKey(
@@ -595,7 +683,10 @@ class AnalysisJob(models.Model):
         db_column='RESULT_DIRECTORY', max_length=100)
     sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID', related_name='analysis',
-        on_delete=models.CASCADE, blank=True, null=True)
+        on_delete=models.CASCADE)
+    study = models.ForeignKey(
+        Study, db_column='STUDY_ID', related_name='analysis',
+        on_delete=models.CASCADE)
     is_production_run = models.TextField(
         db_column='IS_PRODUCTION_RUN', blank=True, null=True)
     experiment_type = models.ForeignKey(
@@ -611,7 +702,16 @@ class AnalysisJob(models.Model):
         db_column='INSTRUMENT_MODEL', max_length=50,
         blank=True, null=True)
 
-    objects = RunManager()
+    @property
+    def analysis_summary(self):
+        return [
+            {
+                'key': v.var.var_name,
+                'value': v.var_val_ucv
+            } for v in self.analysis_metadata.all()
+        ]
+
+    objects = AnalysisJobManager()
 
     class Meta:
         db_table = 'ANALYSIS_JOB'
