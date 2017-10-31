@@ -18,6 +18,7 @@
 from django.conf.urls import include, url
 from django.conf import settings
 from django.views.generic import RedirectView
+from django.views.generic import TemplateView
 
 from rest_framework.schemas import get_schema_view
 from rest_framework_swagger.views import get_swagger_view
@@ -49,6 +50,8 @@ urlpatterns = [
 
     url(r'^$', RedirectView.as_view(
         pattern_name='emgapi:api-root', permanent=False)),
+
+    url(r'^500$', TemplateView.as_view(template_name='500.html')),
 
     url(r'^http-auth/', include('rest_framework.urls',
                                 namespace='rest_framework')),
