@@ -18,7 +18,6 @@
 import logging
 
 # from django.utils.text import Truncator
-from rest_framework.reverse import reverse
 
 # from rest_framework import serializers
 from rest_framework_json_api import serializers
@@ -201,24 +200,13 @@ class PublicationSerializer(ExplicitFieldsModelSerializer,
 
 # PipelineTool serializer
 
-class PipelineToolHyperlinkedField(serializers.HyperlinkedIdentityField):
-
-    def get_url(self, obj, view_name, request, format):
-        kwargs = {
-            'tool_name': obj.tool_name,
-            'version': obj.version
-        }
-        return reverse(
-            view_name, kwargs=kwargs, request=request, format=format)
-
-
 class PipelineToolSerializer(ExplicitFieldsModelSerializer,
                              serializers.HyperlinkedModelSerializer):
 
     # workaround to provide multiple values in PK
     id = serializers.ReadOnlyField(source="multiple_pk")
 
-    url = PipelineToolHyperlinkedField(
+    url = emg_fields.PipelineToolHyperlinkedField(
         view_name='emgapi:pipeline-tools-version-detail',
         lookup_field='tool_name',
     )
@@ -452,23 +440,12 @@ class RunSerializer(ExplicitFieldsModelSerializer,
         )
 
 
-class AnalysisJobHyperlinkedField(serializers.HyperlinkedIdentityField):
-
-    def get_url(self, obj, view_name, request, format):
-        kwargs = {
-            'accession': obj.accession,
-            'release_version': obj.pipeline.release_version
-        }
-        return reverse(
-            view_name, kwargs=kwargs, request=request, format=format)
-
-
 class AnalysisSerializer(RunSerializer):
 
     # workaround to provide multiple values in PK
     id = serializers.ReadOnlyField(source="multiple_pk")
 
-    url = AnalysisJobHyperlinkedField(
+    url = emg_fields.AnalysisJobHyperlinkedField(
         view_name='emgapi:runs-pipelines-detail',
         lookup_field='accession'
     )
@@ -598,6 +575,11 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
     )
 
     # attributes
+    biosample = serializers.SerializerMethodField()
+
+    def get_biosample(self, obj):
+        return obj.primary_accession
+
     latitude = serializers.FloatField()
 
     longitude = serializers.FloatField()
@@ -649,7 +631,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
             'url',
             'runs_count',
             'accession',
-            'primary_accession',
+            'biosample',
             'analysis_completed',
             'collection_date',
             'geo_loc_name',
