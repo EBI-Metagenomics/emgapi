@@ -15,6 +15,7 @@
 # limitations under the License.
 
 from django import forms
+from django.db.models import Q
 from django.db.models import FloatField
 from django.db.models.functions import Cast
 from django.utils.datastructures import MultiValueDict
@@ -143,10 +144,15 @@ class StudyFilter(django_filters.FilterSet):
             pass
         return qs
 
-    other_accession = django_filters.CharFilter(
-        name='project_id', distinct=True,
-        label='ENA accession',
-        help_text='ENA accession')
+    accession = django_filters.CharFilter(
+        method='filter_study_accession', distinct=True,
+        label='Accession',
+        help_text='Study or Project accession')
+
+    def filter_study_accession(self, qs, name, value):
+        return qs.filter(
+            Q(accession=value) | Q(project_id=value)
+        )
 
     centre_name = django_filters.CharFilter(
         method='filter_centre_name', distinct=True,
@@ -170,10 +176,10 @@ class StudyFilter(django_filters.FilterSet):
     class Meta:
         model = emg_models.Study
         fields = (
+            'accession',
             'biome_name',
             'lineage',
             'centre_name',
-            'other_accession',
             'include',
         )
 
@@ -319,11 +325,6 @@ class SampleFilter(django_filters.FilterSet):
         return qs.filter(
             metadata__var_val_ucv=value)
 
-    other_accession = django_filters.CharFilter(
-        name='studies__project_id', distinct=True,
-        label='ENA accession',
-        help_text='ENA accession')
-
     species = django_filters.CharFilter(
         method='filter_species', distinct=True,
         label='Species',
@@ -378,11 +379,13 @@ class SampleFilter(django_filters.FilterSet):
 
     study_accession = django_filters.CharFilter(
         method='filter_study_accession', distinct=True,
-        label='Study accession',
-        help_text='Study accession')
+        label='Accession',
+        help_text='Study or Project accession')
 
     def filter_study_accession(self, qs, name, value):
-        return qs.filter(studies__accession=value)
+        return qs.filter(
+            Q(studies__accession=value) | Q(studies__project_id=value)
+        )
 
     # include
     include = django_filters.CharFilter(
@@ -414,7 +417,6 @@ class SampleFilter(django_filters.FilterSet):
             'metadata_value_gte',
             'metadata_value_lte',
             'metadata_value',
-            'other_accession',
             'environment_material',
             'environment_feature',
             'study_accession',

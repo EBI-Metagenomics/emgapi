@@ -15,6 +15,7 @@
 # limitations under the License.
 
 from rest_framework import serializers
+from rest_framework.reverse import reverse
 
 
 class IdentifierField(serializers.Field):
@@ -24,3 +25,25 @@ class IdentifierField(serializers.Field):
 
     def to_representation(self, obj):
         return obj.__class__.__name__
+
+
+class PipelineToolHyperlinkedField(serializers.HyperlinkedIdentityField):
+
+    def get_url(self, obj, view_name, request, format):
+        kwargs = {
+            'tool_name': obj.tool_name,
+            'version': obj.version
+        }
+        return reverse(
+            view_name, kwargs=kwargs, request=request, format=format)
+
+
+class AnalysisJobHyperlinkedField(serializers.HyperlinkedIdentityField):
+
+    def get_url(self, obj, view_name, request, format):
+        kwargs = {
+            'accession': obj.accession,
+            'release_version': obj.pipeline.release_version
+        }
+        return reverse(
+            view_name, kwargs=kwargs, request=request, format=format)

@@ -19,6 +19,7 @@ import operator
 from collections import OrderedDict
 
 from django.conf import settings
+from django.db.models import Q
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 from django.http import Http404
@@ -69,8 +70,7 @@ class MyDataViewSet(mixins.ListModelMixin,
         `/mydata` retrieve own studies
         """
         queryset = emg_models.Study.objects \
-            .mydata(self.request) \
-            .select_related('biome')
+            .mydata(self.request)
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(
@@ -208,7 +208,19 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 
     def get_queryset(self):
         queryset = emg_models.Study.objects.available(self.request)
+        if 'samples' in self.request.GET.get('include', '').split(','):
+            _qs = emg_models.Sample.objects.available(self.request)
+            queryset = queryset.prefetch_related(
+                Prefetch('samples', queryset=_qs)
+            )
         return queryset
+
+    def get_object(self):
+        return get_object_or_404(
+            self.get_queryset(),
+            Q(accession=self.kwargs['accession']) |
+            Q(project_id=self.kwargs['accession'])
+        )
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -222,7 +234,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         ---
         `/studies`
 
-        `/studies?fields[studies]=accession,samples_count,biomes`
+        `/studies?fields[studies]=accession,study_name,samples_count,biomes`
         retrieve only selected fileds
 
         `/studies?include=biomes` with biomes
@@ -384,6 +396,13 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         #     queryset = queryset.select_related('studies')
         return queryset
 
+    def get_object(self):
+        return get_object_or_404(
+            self.get_queryset(),
+            Q(accession=self.kwargs['accession']) |
+            Q(primary_accession=self.kwargs['accession'])
+        )
+
     def get_serializer_class(self):
         if self.action == 'retrieve':
             return emg_serializers.RetrieveSampleSerializer
@@ -464,10 +483,11 @@ class RunViewSet(mixins.RetrieveModelMixin,
         return queryset
 
     def get_object(self):
-        queryset = emg_models.Run.objects \
-            .available(self.request) \
-            .filter(accession=self.kwargs['accession']) \
-            .distinct().last()
+        queryset = self.get_queryset() \
+            .filter(
+                Q(accession=self.kwargs['accession']) |
+                Q(secondary_accession=self.kwargs['accession'])
+            ).distinct().last()
         if queryset is None:
             raise Http404(
                 ('No %s matches the given query.' %
@@ -538,6 +558,14 @@ class AnalysisResultViewSet(mixins.ListModelMixin,
             .filter(accession=accession)
         return queryset
 
+    def get_object(self):
+        return get_object_or_404(
+            self.get_queryset(),
+            Q(pipeline__release_version=self.kwargs['release_version']) &
+            Q(accession=self.kwargs['accession']) |
+            Q(secondary_accession=self.kwargs['accession'])
+        )
+
     def list(self, request, *args, **kwargs):
         """
         Retrieves analysis result for the given accession
@@ -557,19 +585,20 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
     lookup_field = 'release_version'
     lookup_value_regex = '[0-9.]+'
 
-    def get_object(self):
-        accession = self.kwargs['accession']
-        release_version = self.kwargs['release_version']
-        return get_object_or_404(
-            emg_models.AnalysisJob, accession=accession,
-            pipeline__release_version=release_version)
-
     def get_queryset(self):
         accession = self.kwargs['accession']
         queryset = emg_models.AnalysisJob.objects \
             .available(self.request) \
             .filter(accession=accession)
         return queryset
+
+    def get_object(self):
+        return get_object_or_404(
+            self.get_queryset(),
+            Q(pipeline__release_version=self.kwargs['release_version']) &
+            Q(accession=self.kwargs['accession']) |
+            Q(secondary_accession=self.kwargs['accession'])
+        )
 
     def retrieve(self, request, *args, **kwargs):
         """
