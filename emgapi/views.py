@@ -70,8 +70,7 @@ class MyDataViewSet(mixins.ListModelMixin,
         `/mydata` retrieve own studies
         """
         queryset = emg_models.Study.objects \
-            .mydata(self.request) \
-            .select_related('biome')
+            .mydata(self.request)
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(
