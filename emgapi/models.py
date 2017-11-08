@@ -309,7 +309,7 @@ class StudyManager(models.Manager):
     def get_queryset(self):
         # TODO: remove biome when schema updated
         return StudyQuerySet(self.model, using=self._db) \
-            .select_related('biome') \
+            .defer('biome') \
             .annotate(samples_count=Count('samples', distinct=True))
 
     def available(self, request):
@@ -393,11 +393,9 @@ class StudyPublication(models.Model):
 
 class StudySample(models.Model):
     study = models.ForeignKey(
-        'Study', db_column='STUDY_ID', on_delete=models.CASCADE,
-        related_name='study_sample_set')
+        'Study', db_column='STUDY_ID', on_delete=models.CASCADE)
     sample = models.ForeignKey(
-        'Sample', db_column='SAMPLE_ID', on_delete=models.CASCADE,
-        related_name='study_sample_set')
+        'Sample', db_column='SAMPLE_ID', on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'STUDY_SAMPLE'
@@ -411,11 +409,15 @@ class SampleQuerySet(BaseQuerySet):
 class SampleManager(models.Manager):
 
     def get_queryset(self):
+        return SampleQuerySet(self.model, using=self._db)
+
+    def available(self, request):
         _qs = SampleAnn.objects.all() \
             .prefetch_related(
                 Prefetch('var', queryset=VariableNames.objects.all())
             )
-        return SampleQuerySet(self.model, using=self._db) \
+        _qs2 = Study.objects.available(request)
+        return self.get_queryset().available(request) \
             .extra(
                 {
                     'longitude': "CAST(longitude as DECIMAL(10,5))",
@@ -424,12 +426,10 @@ class SampleManager(models.Manager):
             ) \
             .annotate(runs_count=Count('runs')) \
             .prefetch_related(
+                Prefetch('studies', queryset=_qs2),
                 Prefetch('biome', queryset=Biome.objects.all()),
                 Prefetch('metadata', queryset=_qs)
             )
-
-    def available(self, request):
-        return self.get_queryset().available(request)
 
 
 class Sample(models.Model):
