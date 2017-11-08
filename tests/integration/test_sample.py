@@ -40,7 +40,7 @@ class TestSampleAPI(object):
         _attr = rsp['data']['attributes']
         assert(len(_attr) == 18)
         assert _attr['accession'] == "ERS01234"
-        assert _attr['primary-accession'] == "SAMS01234"
+        assert _attr['biosample'] == "SAMS01234"
         assert _attr['sample-desc'] == "abcdefghijklmnoprstuvwyz"
         assert _attr['analysis-completed'] == "1970-01-01"
         assert _attr['collection-date'] == "1970-01-01"
