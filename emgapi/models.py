@@ -597,10 +597,10 @@ class Run(models.Model):
         db_column='RUN_STATUS_ID', blank=True, null=True)
     sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID', related_name='runs',
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE, blank=True, null=True)
     study = models.ForeignKey(
         Study, db_column='STUDY_ID', related_name='runs',
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE, blank=True, null=True)
     analysis_status = models.ForeignKey(
         AnalysisStatus, db_column='ANALYSIS_STATUS_ID',
         on_delete=models.CASCADE)
