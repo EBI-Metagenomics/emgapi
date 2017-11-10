@@ -357,6 +357,19 @@ class ExperimentTypeSerializer(ExplicitFieldsModelSerializer,
     def get_runs(self, obj):
         return None
 
+    analysis = relations.SerializerMethodResourceRelatedField(
+        source='get_analysis',
+        model=emg_models.AnalysisJob,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi:experiment-types-analysis-list',
+        related_link_url_kwarg='experiment_type',
+        related_link_lookup_field='experiment_type',
+    )
+
+    def get_analysis(self, obj):
+        return None
+
     # counters
     samples_count = serializers.IntegerField()
     runs_count = serializers.IntegerField()
