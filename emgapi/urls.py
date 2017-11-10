@@ -119,11 +119,11 @@ router.register(
     base_name='studies-samples'
 )
 
-router.register(
-    r'pipelines/(?P<release_version>[0-9\.]+)/studies',
-    views_relations.PipelineStudyRelationshipViewSet,
-    base_name='pipelines-studies'
-)
+# router.register(
+#     r'pipelines/(?P<release_version>[0-9\.]+)/studies',
+#     views_relations.PipelineStudyRelationshipViewSet,
+#     base_name='pipelines-studies'
+# )
 
 router.register(
     r'pipelines/(?P<release_version>[0-9\.]+)/samples',
@@ -145,7 +145,7 @@ router.register(
 
 router.register(
     r'experiment-types/(?P<experiment_type>[a-zA-Z0-9]+)/samples',
-    views_relations.ExperimentSampleRelationshipViewSet,
+    views_relations.ExperimentTypeSampleRelationshipViewSet,
     base_name='experiment-types-samples'
 )
 
@@ -163,8 +163,14 @@ router.register(
 
 router.register(
     r'experiment-types/(?P<experiment_type>[a-zA-Z0-9]+)/runs',
-    views_relations.ExperimentRunRelationshipViewSet,
+    views_relations.ExperimentTypeRunRelationshipViewSet,
     base_name='experiment-types-runs'
+)
+
+router.register(
+    r'experiment-types/(?P<experiment_type>[a-zA-Z0-9]+)/analysis',
+    views_relations.ExperimentTypeAnalysisRelationshipViewSet,
+    base_name='experiment-types-analysis'
 )
 
 router.register(
