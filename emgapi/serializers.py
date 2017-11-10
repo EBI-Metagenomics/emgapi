@@ -689,6 +689,11 @@ class StudySerializer(ExplicitFieldsModelSerializer,
         lookup_field='accession',
     )
 
+    bioproject = serializers.SerializerMethodField()
+
+    def get_bioproject(self, obj):
+        return obj.project_id
+
     # relationships
     biomes = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
         many=True,
@@ -741,6 +746,7 @@ class StudySerializer(ExplicitFieldsModelSerializer,
         exclude = (
             # TODO: remove biome when schema updated
             'biome',
+            'project_id',
             'is_public',
             'experimental_factor',
             'submission_account_id',
