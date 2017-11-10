@@ -47,7 +47,7 @@ class TestStudyAPI(object):
         assert _attr['study-name'] == "Example study name SRP01234"
         assert _attr['data-origination'] == "HARVESTED"
         assert _attr['last-update'] == "1970-01-01T00:00:00"
-        assert _attr['project-id'] == "PRJDB1234"
+        assert _attr['bioproject'] == "PRJDB1234"
 
     def test_public(self, client, study, study_private):
         url = reverse("emgapi:studies-list")

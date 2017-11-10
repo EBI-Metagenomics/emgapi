@@ -51,7 +51,7 @@ class TestExamples(object):
                 for run in run_list:
                     print(
                         study.accession,
-                        study.project_id,
+                        study.bioproject,
                         sample.accession,
                         sample.biome.biome_name,
                         sample.runs_count,
