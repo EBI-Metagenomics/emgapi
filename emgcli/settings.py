@@ -166,7 +166,6 @@ INSTALLED_APPS = [
     # rest framework
     'rest_framework',
     'rest_framework.authtoken',
-    'rest_framework_swagger',
     'rest_framework_mongoengine',
     'django_filters',
     'rest_auth',
