@@ -245,8 +245,7 @@ class PipelineSampleRelationshipViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class PipelineAnalysisRelationshipViewSet(mixins.ListModelMixin,
-                                          viewsets.GenericViewSet):
+class BaseAnalysisRelationshipViewSet(viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
 
@@ -261,6 +260,10 @@ class PipelineAnalysisRelationshipViewSet(mixins.ListModelMixin,
         'accession',
     )
     ordering = ('accession',)
+
+
+class PipelineAnalysisRelationshipViewSet(mixins.ListModelMixin,
+                                          BaseAnalysisRelationshipViewSet):
 
     lookup_field = 'release_version'
 
@@ -285,35 +288,78 @@ class PipelineAnalysisRelationshipViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class PipelineStudyRelationshipViewSet(mixins.ListModelMixin,
-                                       BaseStudyRelationshipViewSet):
+class ExperimentTypeAnalysisRelationshipViewSet(mixins.ListModelMixin,
+                                                BaseAnalysisRelationshipViewSet):  # noqa
 
-    lookup_field = 'release_version'
+    lookup_field = 'experiment_type'
 
     def get_queryset(self):
-        pipeline = get_object_or_404(
-            emg_models.Pipeline,
-            release_version=self.kwargs[self.lookup_field])
-        queryset = emg_models.Study.objects \
+        experiment_type = get_object_or_404(
+            emg_models.ExperimentType,
+            experiment_type=self.kwargs[self.lookup_field])
+        queryset = emg_models.AnalysisJob.objects \
             .available(self.request) \
-            .filter(samples__analysis__pipeline=pipeline)
+            .filter(experiment_type=experiment_type)
+        if 'sample' in self.request.GET.get('include', '').split(','):
+            _qs = emg_models.Sample.objects.available(self.request)
+            queryset = queryset.prefetch_related(
+                Prefetch('sample', queryset=_qs))
+        if 'study' in self.request.GET.get('include', '').split(','):
+            _qs = emg_models.Study.objects.available(self.request)
+            queryset = queryset.prefetch_related(
+                Prefetch('study', queryset=_qs))
         return queryset
 
     def list(self, request, *args, **kwargs):
         """
-        Retrieves list of samples for the given pipeline version
+        Retrieves list of samples for the given experiment type
         Example:
         ---
-        `/pipeline/3.0/studies` retrieve linked studies
+        `/experiments/metagenomic/samples` retrieve linked samples
 
-        `/pipeline/3.0/studies?include=samples` with samples
+        `/experiments/metagenomic/samples?include=runs` with runs
+
+        Filter by:
+        ---
+        `/experiments/metagenomic/samples?biome=root%3AEnvironmental
+        %3AAquatic` filtered by biome
+
+        `/experiments/metagenomic/samples?geo_loc_name=Alberta`
+        filtered by localtion
         """
-        return super(PipelineStudyRelationshipViewSet, self) \
+        return super(ExperimentTypeAnalysisRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
 
 
-class ExperimentSampleRelationshipViewSet(mixins.ListModelMixin,
-                                          BaseSampleRelationshipViewSet):
+# class PipelineStudyRelationshipViewSet(mixins.ListModelMixin,
+#                                        BaseStudyRelationshipViewSet):
+#
+#     lookup_field = 'release_version'
+#
+#     def get_queryset(self):
+#         pipeline = get_object_or_404(
+#             emg_models.Pipeline,
+#             release_version=self.kwargs[self.lookup_field])
+#         queryset = emg_models.Study.objects \
+#             .available(self.request) \
+#             .filter(samples__analysis__pipeline=pipeline)
+#         return queryset
+#
+#     def list(self, request, *args, **kwargs):
+#         """
+#         Retrieves list of samples for the given pipeline version
+#         Example:
+#         ---
+#         `/pipeline/3.0/studies` retrieve linked studies
+#
+#         `/pipeline/3.0/studies?include=samples` with samples
+#         """
+#         return super(PipelineStudyRelationshipViewSet, self) \
+#             .list(request, *args, **kwargs)
+
+
+class ExperimentTypeSampleRelationshipViewSet(mixins.ListModelMixin,
+                                              BaseSampleRelationshipViewSet):
 
     lookup_field = 'experiment_type'
 
@@ -349,7 +395,7 @@ class ExperimentSampleRelationshipViewSet(mixins.ListModelMixin,
         `/experiments/metagenomic/samples?geo_loc_name=Alberta`
         filtered by localtion
         """
-        return super(ExperimentSampleRelationshipViewSet, self) \
+        return super(ExperimentTypeSampleRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
 
 
@@ -455,7 +501,7 @@ class BaseRunRelationshipViewSet(mixins.ListModelMixin,
     )
 
 
-class ExperimentRunRelationshipViewSet(BaseRunRelationshipViewSet):
+class ExperimentTypeRunRelationshipViewSet(BaseRunRelationshipViewSet):
 
     lookup_field = 'experiment_type'
 
@@ -469,7 +515,7 @@ class ExperimentRunRelationshipViewSet(BaseRunRelationshipViewSet):
         return queryset
 
     def get_serializer_class(self):
-        return super(ExperimentRunRelationshipViewSet,
+        return super(ExperimentTypeRunRelationshipViewSet,
                      self).get_serializer_class()
 
     def list(self, request, *args, **kwargs):
@@ -479,7 +525,7 @@ class ExperimentRunRelationshipViewSet(BaseRunRelationshipViewSet):
         ---
         `/experiment-type/ERS1015417/runs`
         """
-        return super(ExperimentRunRelationshipViewSet, self) \
+        return super(ExperimentTypeRunRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
 
 
