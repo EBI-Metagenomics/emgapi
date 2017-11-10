@@ -20,8 +20,9 @@ from django.conf import settings
 from django.views.generic import RedirectView
 from django.views.generic import TemplateView
 
+from rest_framework import status
 from rest_framework.schemas import get_schema_view
-from rest_framework_swagger.views import get_swagger_view
+from rest_framework.renderers import BaseRenderer, JSONRenderer
 
 from rest_auth import views as rest_auth_views
 
@@ -30,9 +31,13 @@ from emgapi.urls import mydata_router
 from emgapianns.urls import mongo_router
 from emgapianns.urls import router as emg_ext_router
 
+from openapi_codec import OpenAPICodec
+
 from . import routers
 
+
 api_version = settings.REST_FRAMEWORK['DEFAULT_VERSION']
+
 
 # merge all routers
 router = routers.DefaultRouter(trailing_slash=False)
@@ -73,19 +78,29 @@ urlpatterns = [
 
 ]
 
-# schema_prefix
+
+class OpenAPIRenderer(BaseRenderer):
+    media_type = 'application/openapi+json'
+    charset = None
+    format = 'openapi'
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        if renderer_context['response'].status_code != status.HTTP_200_OK:
+            return JSONRenderer().render(data)
+        return OpenAPICodec().encode(data)
+
+
 schema_view = get_schema_view(
     title=settings.EMG_TITLE, url=settings.EMG_URL,
-    description=settings.EMG_DESC)
-
-docs_schema_view = get_swagger_view(
-    title=settings.EMG_TITLE, url=settings.EMG_URL)
+    description=settings.EMG_DESC, renderer_classes=[OpenAPIRenderer]
+)
 
 
 urlpatterns += [
 
-    url(r'^schema/', schema_view),
+    url(r'^schema/$', schema_view, name="schema_view"),
 
-    url(r'^docs/', docs_schema_view),
+    url(r'^docs/',
+        TemplateView.as_view(template_name='swagger-ui/index.html')),
 
 ]
