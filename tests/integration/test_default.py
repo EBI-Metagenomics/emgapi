@@ -85,7 +85,7 @@ class TestDefaultAPI(object):
         '_model, _camelcase, _view, _view_args, relations',
         [
             ('ExperimentType', 'experiment-types', 'emgapi:experiment-types',
-             [], ['samples', 'runs']),
+             [], ['samples', 'runs', 'analysis']),
             # ('Biome', 'biomes', 'emgapi:biomes', ['root'],
             #  ['samples', 'studies']),
             ('Pipeline', 'pipelines', 'emgapi:pipelines', [],
