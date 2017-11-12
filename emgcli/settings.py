@@ -449,6 +449,8 @@ try:
     SLACK_TOKEN = EMG_CONF['emg']['slack']['token']
     SLACK_CHANNEL = EMG_CONF['emg']['slack']['channel']
     SLACK_USERNAME = EMG_CONF['emg']['slack']['username']
+    SLACK_FAIL_SILENTLY = EMG_CONF['emg']['slack']['fail_silently']
+    SLACK_BACKEND = 'django_slack.backends.RequestsBackend'
     INSTALLED_APPS += ('django_slack',)
     MIDDLEWARE += ('emgcli.middleware.BrokenLinkSlackMiddleware',)
 
