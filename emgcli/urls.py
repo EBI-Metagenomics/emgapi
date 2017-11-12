@@ -24,7 +24,8 @@ from rest_framework import status
 from rest_framework.schemas import get_schema_view
 from rest_framework.renderers import BaseRenderer, JSONRenderer
 
-from rest_auth import views as rest_auth_views
+from rest_framework_jwt.views import obtain_jwt_token
+from rest_framework_jwt.views import verify_jwt_token
 
 from emgapi.urls import router as emg_router
 from emgapi.urls import mydata_router
@@ -47,8 +48,7 @@ router.extend(mongo_router)
 router.extend(mydata_router)
 
 
-# Wire up our API using automatic URL routing.
-# Additionally, we include login URLs for the browsable API.
+# API URL routing.
 urlpatterns = [
 
     # url(r'^admin/', admin.site.urls),
@@ -56,25 +56,21 @@ urlpatterns = [
     url(r'^$', RedirectView.as_view(
         pattern_name='emgapi:api-root', permanent=False)),
 
-    url(r'^500$', TemplateView.as_view(template_name='500.html')),
+    url(r'^v%s/' % api_version, include(router.urls,
+                                        namespace='emgapi')),
+
+]
+
+# API authentication routing.
+urlpatterns += [
 
     url(r'^http-auth/', include('rest_framework.urls',
                                 namespace='rest_framework')),
 
-    url(
-        r'^v%s/auth/login' % api_version,
-        rest_auth_views.LoginView.as_view(),
-        name='rest_auth_login'
-    ),
+    url(r'^v%s/utils/token/obtain' % api_version, obtain_jwt_token),
+    url(r'^v%s/utils/token/verify' % api_version, verify_jwt_token),
 
-    url(
-        r'^v%s/auth/logout' % api_version,
-        rest_auth_views.LogoutView.as_view(),
-        name='rest_auth_logout'
-    ),
-
-    url(r'^v%s/' % api_version, include(router.urls,
-                                        namespace='emgapi')),
+    # url(r'^500$', TemplateView.as_view(template_name='500.html')),
 
 ]
 
