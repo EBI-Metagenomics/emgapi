@@ -32,6 +32,7 @@ import os
 import warnings
 import logging
 import binascii
+import datetime
 
 from os.path import expanduser
 
@@ -165,10 +166,10 @@ INSTALLED_APPS = [
     'corsheaders',
     # rest framework
     'rest_framework',
-    'rest_framework.authtoken',
+    # 'rest_framework.authtoken',
     'rest_framework_mongoengine',
+    'rest_framework_jwt',
     'django_filters',
-    'rest_auth',
     # apps
     'emgapi',
     'emgapianns',
@@ -315,9 +316,9 @@ REST_FRAMEWORK = {
         'rest_framework_json_api.metadata.JSONAPIMetadata',
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         # 'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
@@ -338,20 +339,6 @@ JSON_API_PLURALIZE_TYPES = True
 # settings These can either be configured under SWAGGER_SETTINGS or Django settings.
 LOGIN_URL = 'rest_framework:login'
 LOGOUT_URL = 'rest_framework:logout'
-
-SWAGGER_SETTINGS = {
-    'ENABLED_METHODS': [
-        'get',
-        'post',
-    ],
-    'SECURITY_DEFINITIONS': {
-        # 'basic': {
-        #     'type': 'basic'
-        # }
-    },
-    'USE_SESSION_AUTH': True,
-    'VALIDATOR_URL': None
-}
 
 # Custom settings
 try:
@@ -412,6 +399,11 @@ CORS_ALLOW_METHODS = (
     'HEAD',
     'OPTIONS'
 )
+
+JWT_AUTH = {
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=108000),
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+}
 
 try:
     ADMINS = EMG_CONF['emg']['admins']
