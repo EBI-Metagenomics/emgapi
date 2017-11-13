@@ -17,7 +17,7 @@ django-slack
 # django-redis>=4.4
 
 # log handler
-ConcurrentLogHandler
+ConcurrentLogHandler~=0.9.1
 
 # dependences
 Django~=1.11.1
@@ -27,6 +27,7 @@ django-filter~=1.0.3
 # djangorestframework-jsonapi~=2.2.0
 djangorestframework-jwt~=1.11.0
 django-cors-headers~=1.3.1
+openapi-codec
 
 # optional serializers
 # djangorestframework-xml~=1.3.0
@@ -36,10 +37,7 @@ django-cors-headers~=1.3.1
 # schema
 coreapi~=2.3.0
 
-# docs
-django-rest-swagger~=2.1.2
-
 # mongo
 mongoengine~=0.14.3
 pymongo~=3.5.0
-django-rest-framework-mongoengine
+django-rest-framework-mongoengine~=3.3.1
