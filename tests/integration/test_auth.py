@@ -13,59 +13,70 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
-
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
-from rest_framework.authtoken.models import Token
 
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 
-class TestAuthAPI(APITestCase):
+class TestTokenAuthAPI(APITestCase):
 
-    def setUp(self):
-        self.login_url = reverse('rest_auth_login')
-        self.logout_url = reverse('rest_auth_logout')
-
-    def tearDown(self):
-        rsp = self.client.post(self.logout_url, format='json')
-        assert rsp.status_code == status.HTTP_200_OK
-
-    def test_default(self):
+    def test_default_token(self):
         data = {
             'username': 'username',
-            'password': 'secret'
+            'password': 'secret',
         }
-        rsp = self.client.post(self.login_url, data=data, format='json')
-        token = rsp.json()['data']['attributes']['key']
-        assert rsp.status_code == status.HTTP_200_OK
-        assert User.objects.count() == 1
-        assert User.objects.get().username == 'username'
-        assert Token.objects.get(user_id=User.objects.get().id).key == token
 
         rsp = self.client.post(
-            self.logout_url,
-            format='json'
+            reverse('obtain_jwt_token'), data=data, format='json')
+        token = rsp.json()['data']['token']
+        assert rsp.status_code == status.HTTP_200_OK
+
+        data = {
+            'token': token,
+        }
+
+        rsp = self.client.post(
+            reverse('verify_jwt_token'), format='json', data=data)
+        assert rsp.status_code == status.HTTP_200_OK
+
+        rsp = self.client.get(
+            reverse('emgapi:mydata-list'),
+            HTTP_AUTHORIZATION='Bearer {}'.format(token)
         )
         assert rsp.status_code == status.HTTP_200_OK
-        assert User.objects.count() == 1
-        assert User.objects.get().username == 'username'
-        with pytest.raises(Token.DoesNotExist):
-            Token.objects.get(user_id=User.objects.get().id).key
 
-    def test_bad_request(self):
-        expected_rsp = [
+    def test_invalid_credentials(self):
+        error = {
+            'non_field_errors':
+                ['Unable to log in with provided credentials.']
+        }
+        data = {
+            'username': 'abc',
+            'password': '123',
+        }
+
+        rsp = self.client.post(
+            reverse('obtain_jwt_token'), data=data, format='json')
+        assert rsp.json()['errors'] == error
+        assert rsp.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_unauthorized(self):
+        error = [
             {
-                'detail': 'This field is required.',
+                'detail': 'Error decoding signature.',
                 'source': {
-                    'pointer': '/data/attributes/password'
+                    'pointer': '/data'
                 },
-                'status': '400'
+                'status': '401',
             }
         ]
-        rsp = self.client.post(self.login_url, data={}, format='json')
-        assert rsp.status_code == status.HTTP_400_BAD_REQUEST
-        assert rsp.json()['errors'] == expected_rsp
+
+        rsp = self.client.get(
+            reverse('emgapi:mydata-list'),
+            HTTP_AUTHORIZATION='Bearer 12345'
+        )
+        assert rsp.status_code == status.HTTP_401_UNAUTHORIZED
+        assert rsp.json()['errors'] == error
         assert User.objects.count() == 0

@@ -298,7 +298,7 @@ class StudyQuerySet(BaseQuerySet):
             _username = request.user.username
             return self.distinct() \
                 .filter(Q(submission_account_id=_username))
-        return self.available(request)
+        return ()
 
     def recent(self):
         return self.order_by('-last_update')
