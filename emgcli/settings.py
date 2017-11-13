@@ -276,7 +276,7 @@ USE_TZ = False
 
 REST_FRAMEWORK = {
 
-    'DEFAULT_VERSION': '0.3',
+    'DEFAULT_VERSION': '0.4',
 
     'PAGE_SIZE': 20,
 
