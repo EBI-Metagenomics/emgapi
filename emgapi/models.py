@@ -424,7 +424,6 @@ class SampleManager(models.Manager):
                     'latitude': "CAST(latitude as DECIMAL(10,5))"
                 }
             ) \
-            .annotate(runs_count=Count('runs')) \
             .prefetch_related(
                 Prefetch('studies', queryset=_qs2),
                 Prefetch('biome', queryset=Biome.objects.all()),
