@@ -23,6 +23,8 @@ from rest_framework import status
 
 from model_mommy import mommy
 
+from test_utils.emg_fixtures import * # noqa
+
 
 @pytest.mark.django_db
 class TestPermissionsAPI(object):
@@ -72,12 +74,20 @@ class TestPermissionsAPI(object):
              ['SRP0113', 'SRP0115', 'SRP0121']),
         ]
     )
-    def test_list(self, client, view, username, count, ids, bad_ids):
+    def test_list(self, apiclient, view, username, count, ids, bad_ids):
+        auth = None
         if username is not None:
-            client.login(username=username, password='secret')
+            data = {
+                "username": username,
+                "password": "secret",
+            }
+            rsp = apiclient.post(
+                reverse('obtain_jwt_token'), data=data, format='json')
+            token = rsp.json()['data']['token']
+            auth = 'Bearer {}'.format(token)
 
         url = reverse(view)
-        response = client.get(url)
+        response = apiclient.get(url, HTTP_AUTHORIZATION=auth)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
 
@@ -93,19 +103,35 @@ class TestPermissionsAPI(object):
         ids.extend(bad_ids)
         assert set(ids) - set([d['id'] for d in rsp['data']]) == set(bad_ids)
 
-        client.logout()
+    def test_detail(self, apiclient):
+        data = {
+            "username": "Webin-000",
+            "password": "secret",
+        }
+        rsp = apiclient.post(
+            reverse('obtain_jwt_token'), data=data, format='json')
+        token = rsp.json()['data']['token']
 
-    def test_unauthorized(self, client):
-        expected_rsp = [
-            {
-                'detail': 'Authentication credentials were not provided.',
-                'source': {
-                    'pointer': '/data'
-                },
-                'status': '403'
-            }
-        ]
-        url = reverse('emgapi:mydata-list')
-        response = client.get(url)
-        assert response.status_code == status.HTTP_403_FORBIDDEN
-        assert response.json()['errors'] == expected_rsp
+        url = reverse("emgapi:studies-detail", args=['SRP0113'])
+        response = apiclient.get(
+            url, HTTP_AUTHORIZATION='Bearer {}'.format(token))
+        assert response.status_code == status.HTTP_200_OK
+        rsp = response.json()
+
+        assert rsp['data']['id'] == 'SRP0113'
+
+        url = reverse("emgapi:studies-detail", args=['SRP0115'])
+        response = apiclient.get(
+            url, HTTP_AUTHORIZATION='Bearer {}'.format(token))
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+        url = reverse("emgapi:studies-detail", args=['SRP0121'])
+        response = apiclient.get(
+            url, HTTP_AUTHORIZATION='Bearer {}'.format(token))
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    @pytest.mark.parametrize('accession', ['SRP0113', 'SRP0115', 'SRP0121'])
+    def test_not_found(self, apiclient, accession):
+        url = reverse("emgapi:studies-detail", args=[accession])
+        response = apiclient.get(url)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
