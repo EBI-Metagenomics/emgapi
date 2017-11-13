@@ -54,7 +54,6 @@ class TestExamples(object):
                         study.bioproject,
                         sample.accession,
                         sample.biome.biome_name,
-                        sample.runs_count,
                         run.accession,
                         run.experiment_type,
                     )

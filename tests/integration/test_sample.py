@@ -38,7 +38,7 @@ class TestSampleAPI(object):
         assert rsp['data']['type'] == "samples"
         assert rsp['data']['id'] == "ERS01234"
         _attr = rsp['data']['attributes']
-        assert(len(_attr) == 18)
+        assert(len(_attr) == 17)
         assert _attr['accession'] == "ERS01234"
         assert _attr['biosample'] == "SAMS01234"
         assert _attr['sample-desc'] == "abcdefghijklmnoprstuvwyz"

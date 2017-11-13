@@ -635,34 +635,15 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
     def get_runs(self, obj):
         return None
 
-    # counters
-    runs_count = serializers.IntegerField()
-
     class Meta:
         model = emg_models.Sample
-        fields = (
-            'url',
-            'runs_count',
-            'accession',
-            'biosample',
-            'analysis_completed',
-            'collection_date',
-            'geo_loc_name',
-            'longitude',
-            'latitude',
-            'sample_desc',
-            'environment_biome',
-            'environment_feature',
-            'environment_material',
-            'sample_name',
-            'sample_alias',
-            'host_tax_id',
-            'species',
-            'last_update',
-            'biome',
-            'studies',
-            'runs',
-            'sample_metadata'
+        exclude = (
+            'primary_accession',
+            'is_public',
+            'metadata_received',
+            'sequencedata_received',
+            'sequencedata_archived',
+            'submission_account_id',
         )
 
 
