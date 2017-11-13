@@ -20,19 +20,25 @@ from django.conf import settings
 from django.views.generic import RedirectView
 from django.views.generic import TemplateView
 
+from rest_framework import status
 from rest_framework.schemas import get_schema_view
-from rest_framework_swagger.views import get_swagger_view
+from rest_framework.renderers import BaseRenderer, JSONRenderer
 
-from rest_auth import views as rest_auth_views
+from rest_framework_jwt.views import obtain_jwt_token
+from rest_framework_jwt.views import verify_jwt_token
 
 from emgapi.urls import router as emg_router
 from emgapi.urls import mydata_router
 from emgapianns.urls import mongo_router
 from emgapianns.urls import router as emg_ext_router
 
+from openapi_codec import OpenAPICodec
+
 from . import routers
 
+
 api_version = settings.REST_FRAMEWORK['DEFAULT_VERSION']
+
 
 # merge all routers
 router = routers.DefaultRouter(trailing_slash=False)
@@ -42,8 +48,7 @@ router.extend(mongo_router)
 router.extend(mydata_router)
 
 
-# Wire up our API using automatic URL routing.
-# Additionally, we include login URLs for the browsable API.
+# API URL routing.
 urlpatterns = [
 
     # url(r'^admin/', admin.site.urls),
@@ -51,41 +56,49 @@ urlpatterns = [
     url(r'^$', RedirectView.as_view(
         pattern_name='emgapi:api-root', permanent=False)),
 
-    url(r'^500$', TemplateView.as_view(template_name='500.html')),
-
-    url(r'^http-auth/', include('rest_framework.urls',
-                                namespace='rest_framework')),
-
-    url(
-        r'^v%s/auth/login' % api_version,
-        rest_auth_views.LoginView.as_view(),
-        name='rest_auth_login'
-    ),
-
-    url(
-        r'^v%s/auth/logout' % api_version,
-        rest_auth_views.LogoutView.as_view(),
-        name='rest_auth_logout'
-    ),
-
     url(r'^v%s/' % api_version, include(router.urls,
                                         namespace='emgapi')),
 
 ]
 
-# schema_prefix
+# API authentication routing.
+urlpatterns += [
+
+    url(r'^http-auth/', include('rest_framework.urls',
+                                namespace='rest_framework')),
+
+    url(r'^v%s/utils/token/obtain' % api_version, obtain_jwt_token,
+        name='obtain_jwt_token'),
+    url(r'^v%s/utils/token/verify' % api_version, verify_jwt_token,
+        name='verify_jwt_token'),
+
+    # url(r'^500$', TemplateView.as_view(template_name='500.html')),
+
+]
+
+
+class OpenAPIRenderer(BaseRenderer):
+    media_type = 'application/openapi+json'
+    charset = None
+    format = 'openapi'
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        if renderer_context['response'].status_code != status.HTTP_200_OK:
+            return JSONRenderer().render(data)
+        return OpenAPICodec().encode(data)
+
+
 schema_view = get_schema_view(
     title=settings.EMG_TITLE, url=settings.EMG_URL,
-    description=settings.EMG_DESC)
-
-docs_schema_view = get_swagger_view(
-    title=settings.EMG_TITLE, url=settings.EMG_URL)
+    description=settings.EMG_DESC, renderer_classes=[OpenAPIRenderer]
+)
 
 
 urlpatterns += [
 
-    url(r'^schema/', schema_view),
+    url(r'^schema/$', schema_view, name="schema_view"),
 
-    url(r'^docs/', docs_schema_view),
+    url(r'^docs/',
+        TemplateView.as_view(template_name='swagger-ui/index.html')),
 
 ]
