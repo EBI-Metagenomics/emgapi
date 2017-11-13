@@ -67,8 +67,10 @@ urlpatterns += [
     url(r'^http-auth/', include('rest_framework.urls',
                                 namespace='rest_framework')),
 
-    url(r'^v%s/utils/token/obtain' % api_version, obtain_jwt_token),
-    url(r'^v%s/utils/token/verify' % api_version, verify_jwt_token),
+    url(r'^v%s/utils/token/obtain' % api_version, obtain_jwt_token,
+        name='obtain_jwt_token'),
+    url(r'^v%s/utils/token/verify' % api_version, verify_jwt_token,
+        name='verify_jwt_token'),
 
     # url(r'^500$', TemplateView.as_view(template_name='500.html')),
 
