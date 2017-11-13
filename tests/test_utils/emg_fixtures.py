@@ -20,6 +20,18 @@ from django.conf import settings
 
 from emgapi import models as emg_models
 
+__all__ = ['apiclient', 'api_version', 'biome', 'studies',
+           'samples', 'study', 'study_private', 'sample', 'sample_private',
+           'analysis_status', 'pipeline', 'pipelines', 'experiment_type',
+           'runs', 'run', 'run_emptyresults', 'run_with_sample',
+           'analysis_results']
+
+
+@pytest.fixture()
+def apiclient():
+    from rest_framework.test import APIClient
+    return APIClient()
+
 
 @pytest.fixture
 def api_version():

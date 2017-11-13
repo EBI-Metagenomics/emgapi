@@ -16,6 +16,8 @@
 
 from django.contrib.auth.models import User
 
+USERNAMES = ('username', 'Webin-000', 'Webin-111')
+
 
 class FakeEMGBackend(object):
 
@@ -23,11 +25,14 @@ class FakeEMGBackend(object):
     supports_object_permissions = False
 
     def authenticate(self, request, username=None, password=None):
-        user, created = User.objects.get_or_create(
-            username__iexact=username,
-            defaults={'username': username.lower()}
-        )
-        return user
+        if username in USERNAMES and password == 'secret':
+            user, created = User.objects.get_or_create(
+                username__iexact=username,
+                defaults={'username': username.lower()}
+            )
+            return user
+        else:
+            return None
 
     def get_user(self, user_id):
         try:
