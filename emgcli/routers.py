@@ -17,7 +17,7 @@
 from rest_framework import routers
 
 
-class EBIMetagenomicsAPIView(routers.APIRootView):
+class MetagenomicsAPIView(routers.APIRootView):
     """
     EBI Metagenomics API provides programmatic access to the data for cross-database complex queries. For more details review the documentation.  # noqa
     """
@@ -31,7 +31,7 @@ class DefaultRouter(routers.DefaultRouter):
     adds in a default API root view
     """
 
-    APIRootView = EBIMetagenomicsAPIView
+    APIRootView = MetagenomicsAPIView
 
     def extend(self, router):
         self.registry.extend(router.registry)
