@@ -38,31 +38,37 @@ class BaseQuerySet(models.QuerySet):
     def available(self, request=None):
         _query_filters = {
             'StudyQuerySet': {
-                'all': Q(is_public=1),
+                'all': [Q(is_public=1), ],
             },
             'SampleQuerySet': {
-                'all': Q(is_public=1),
+                'all': [Q(is_public=1), ],
             },
             'RunQuerySet': {
-                'all': Q(analysis_status_id=3, run_status_id=4),
+                'all': [
+                    Q(run_status_id=4),
+                    Q(analysis_status_id=3) | Q(analysis_status_id=6)
+                ],
             },
             'AnalysisJobQuerySet': {
-                'all': Q(analysis_status_id=3, run_status_id=4),
+                'all': [
+                    Q(run_status_id=4),
+                    Q(analysis_status_id=3) | Q(analysis_status_id=6)
+                ],
             },
         }
 
         if request is not None and request.user.is_authenticated():
             _username = request.user.username
             _query_filters['StudyQuerySet']['authenticated'] = \
-                (Q(submission_account_id=_username) | Q(is_public=1))
+                [Q(submission_account_id=_username) | Q(is_public=1)]
             _query_filters['SampleQuerySet']['authenticated'] = \
-                (Q(submission_account_id=_username) | Q(is_public=1))
+                [Q(submission_account_id=_username) | Q(is_public=1)]
             _query_filters['RunQuerySet']['authenticated'] = \
-                (Q(study__submission_account_id=_username, run_status_id=2) |
-                 Q(run_status_id=4))
+                [Q(study__submission_account_id=_username, run_status_id=2) |
+                 Q(run_status_id=4)]
             _query_filters['AnalysisJobQuerySet']['authenticated'] = \
-                (Q(study__submission_account_id=_username, run_status_id=2) |
-                 Q(run_status_id=4))
+                [Q(study__submission_account_id=_username, run_status_id=2) |
+                 Q(run_status_id=4)]
 
         q = list()
         try:
@@ -70,9 +76,9 @@ class BaseQuerySet(models.QuerySet):
             if isinstance(self, self.__class__):
                 if request is not None and request.user.is_authenticated():
                     if not request.user.is_superuser:
-                        q.append(_instance['authenticated'])
+                        q.extend(_instance['authenticated'])
                 else:
-                    q.append(_instance['all'])
+                    q.extend(_instance['all'])
             return self.distinct().filter(*q)
         except KeyError:
             pass
