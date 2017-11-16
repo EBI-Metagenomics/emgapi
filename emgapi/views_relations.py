@@ -614,8 +614,8 @@ class BiomeTreeViewSet(mixins.ListModelMixin,
         if lineage:
             _lineage = get_object_or_404(emg_models.Biome, lineage=lineage)
             queryset = emg_models.Biome.objects \
-                .filter(lft__gt=_lineage.lft, rgt__lt=_lineage.rgt,
-                        depth__gt=_lineage.depth)
+                .filter(lft__gte=_lineage.lft, rgt__lte=_lineage.rgt,
+                        depth__gte=_lineage.depth)
         else:
             queryset = super(BiomeTreeViewSet, self).get_queryset()
         return queryset
