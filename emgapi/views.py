@@ -475,7 +475,7 @@ class RunViewSet(mixins.RetrieveModelMixin,
     )
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9\_]+'
+    lookup_value_regex = '[a-zA-Z0-9_\-\,\s]+'
 
     def get_queryset(self):
         queryset = emg_models.Run.objects.available(self.request)
@@ -545,7 +545,7 @@ class AnalysisResultViewSet(mixins.ListModelMixin,
     ordering = ('-accession',)
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9]+'
+    lookup_value_regex = '[a-zA-Z0-9_\-\,\s]+'
 
     def get_serializer_class(self):
         return super(AnalysisResultViewSet, self).get_serializer_class()
