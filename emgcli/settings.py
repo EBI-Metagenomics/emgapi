@@ -278,14 +278,14 @@ REST_FRAMEWORK = {
 
     'DEFAULT_VERSION': '0.4',
 
-    'PAGE_SIZE': 20,
+    'PAGE_SIZE': 25,
 
     'EXCEPTION_HANDLER':
         'rest_framework_json_api.exceptions.exception_handler',
 
     'DEFAULT_PAGINATION_CLASS':
         # 'rest_framework.pagination.PageNumberPagination',
-        'rest_framework_json_api.pagination.PageNumberPagination',
+        'emgcli.pagination.DefaultPagination',
 
     'DEFAULT_PARSER_CLASSES': (
         'rest_framework_json_api.parsers.JSONParser',
