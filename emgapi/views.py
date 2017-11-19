@@ -39,7 +39,6 @@ from . import models as emg_models
 from . import serializers as emg_serializers
 from . import filters as emg_filters
 from . import permissions as emg_perms
-from . import pagination as emg_page
 
 logger = logging.getLogger(__name__)
 
@@ -529,7 +528,6 @@ class AnalysisResultViewSet(mixins.ListModelMixin,
                             viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
-    pagination_class = emg_page.LargeSetPagination
 
     filter_class = emg_filters.AnalysisJobFilter
 
