@@ -70,13 +70,13 @@ router.register(
 )
 
 router.register(
-    r'runs/(?P<accession>[a-zA-Z0-9_]+)/analysis',
+    r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)/analysis',
     views.AnalysisResultViewSet,
     base_name='runs-pipelines'
 )
 
 router.register(
-    r'runs/(?P<accession>[a-zA-Z0-9_]+)/pipelines',
+    r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)/pipelines',
     views.AnalysisViewSet,
     base_name='runs-pipelines'
 )

@@ -688,10 +688,10 @@ class AnalysisJob(models.Model):
         db_column='RESULT_DIRECTORY', max_length=100)
     sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID', related_name='analysis',
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE, blank=True, null=True)
     study = models.ForeignKey(
         Study, db_column='STUDY_ID', related_name='analysis',
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE, blank=True, null=True)
     is_production_run = models.TextField(
         db_column='IS_PRODUCTION_RUN', blank=True, null=True)
     experiment_type = models.ForeignKey(
