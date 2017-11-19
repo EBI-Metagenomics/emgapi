@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
+
 from django.db.models import Sum
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
@@ -27,13 +29,13 @@ from . import models as emg_models
 from . import serializers as emg_serializers
 from . import filters as emg_filters
 from . import mixins as emg_mixins
-from . import pagination as emg_page
+
+logger = logging.getLogger(__name__)
 
 
 class BaseStudyRelationshipViewSet(viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.StudySerializer
-    pagination_class = emg_page.LargeSetPagination
 
     filter_class = emg_filters.StudyFilter
 
@@ -133,7 +135,6 @@ class PublicationStudyRelationshipViewSet(mixins.ListModelMixin,
 class BaseSampleRelationshipViewSet(viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.SampleSerializer
-    pagination_class = emg_page.LargeSetPagination
 
     filter_class = emg_filters.SampleFilter
 
@@ -478,7 +479,6 @@ class BaseRunRelationshipViewSet(mixins.ListModelMixin,
                                  viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.RunSerializer
-    pagination_class = emg_page.LargeSetPagination
 
     filter_class = emg_filters.RunFilter
 

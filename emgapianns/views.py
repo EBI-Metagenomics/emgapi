@@ -32,10 +32,11 @@ from emgapi import serializers as emg_serializers
 from emgapi import models as emg_models
 from emgapi import filters as emg_filters
 from emgapi import mixins as emg_mixins
-from emgapi import pagination as emg_page
+
 
 from . import serializers as m_serializers
 from . import models as m_models
+from . import pagination as m_page
 
 logger = logging.getLogger(__name__)
 
@@ -284,7 +285,7 @@ class AnalysisGoTermRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
 
     serializer_class = m_serializers.GoTermRetriveSerializer
 
-    pagination_class = emg_page.MaxSetPagination
+    pagination_class = m_page.MaxSetPagination
 
     lookup_fields = ('accession', 'release_version')
 
@@ -335,7 +336,7 @@ class AnalysisGoSlimRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
 
     serializer_class = m_serializers.GoTermRetriveSerializer
 
-    pagination_class = emg_page.MaxSetPagination
+    pagination_class = m_page.MaxSetPagination
 
     lookup_fields = ('accession', 'release_version')
 
@@ -386,7 +387,7 @@ class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
 
     serializer_class = m_serializers.InterproIdentifierRetriveSerializer
 
-    pagination_class = emg_page.MaxSetPagination
+    pagination_class = m_page.MaxSetPagination
 
     lookup_fields = ('accession', 'release_version')
 
@@ -529,7 +530,7 @@ class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
 
     serializer_class = m_serializers.OrganismRetriveSerializer
 
-    pagination_class = emg_page.MaxSetPagination
+    pagination_class = m_page.MaxSetPagination
 
     filter_backends = (
         filters.OrderingFilter,
