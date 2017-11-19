@@ -160,14 +160,14 @@ class TestDefaultAPI(object):
 
         # Meta
         assert rsp['meta']['pagination']['page'] == 1
-        assert rsp['meta']['pagination']['pages'] == 5
+        assert rsp['meta']['pagination']['pages'] == 4
         assert rsp['meta']['pagination']['count'] == 100
 
         # Links
         host = "http://testserver/%s" % api_version
         _view_url = _view.split(":")[1]
         first_link = '%s/%s?page=1' % (host, _view_url)
-        last_link = '%s/%s?page=5' % (host, _view_url)
+        last_link = '%s/%s?page=4' % (host, _view_url)
         next_link = '%s/%s?page=2' % (host, _view_url)
         assert rsp['links']['first'] == first_link
         assert rsp['links']['last'] == last_link
@@ -175,7 +175,7 @@ class TestDefaultAPI(object):
         assert rsp['links']['prev'] is None
 
         # Data
-        assert len(rsp['data']) == 20
+        assert len(rsp['data']) == 25
 
         for d in rsp['data']:
             assert d['type'] == _camelcase
