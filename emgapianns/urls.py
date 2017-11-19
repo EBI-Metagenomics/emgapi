@@ -68,7 +68,7 @@ mongo_router.register(
 router = routers.DefaultRouter(trailing_slash=False)
 
 router.register(
-    (r'runs/(?P<accession>[a-zA-Z0-9_]+)/'
+    (r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)/'
      r'pipelines/(?P<release_version>[0-9\.]+)/'
      r'go-terms'),
     m_views.AnalysisGoTermRelationshipViewSet,
@@ -76,7 +76,7 @@ router.register(
 )
 
 router.register(
-    (r'runs/(?P<accession>[a-zA-Z0-9_]+)/'
+    (r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)/'
      r'pipelines/(?P<release_version>[0-9\.]+)/'
      r'go-slim'),
     m_views.AnalysisGoSlimRelationshipViewSet,
@@ -84,7 +84,7 @@ router.register(
 )
 
 router.register(
-    (r'runs/(?P<accession>[a-zA-Z0-9_]+)/'
+    (r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)/'
      r'pipelines/(?P<release_version>[0-9\.]+)/'
      r'interpro-identifiers'),
     m_views.AnalysisInterproIdentifierRelationshipViewSet,
@@ -92,7 +92,7 @@ router.register(
 )
 
 router.register(
-    (r'runs/(?P<accession>[a-zA-Z0-9_]+)/'
+    (r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)/'
      r'pipelines/(?P<release_version>[0-9\.]+)/'
      r'taxonomy'),
     m_views.AnalysisOrganismRelationshipViewSet,
