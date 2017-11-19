@@ -52,11 +52,35 @@ class AnalysisJobGoTermAnnotation(BaseAnalysisJobAnnotation):
 
     go_term = mongoengine.ReferenceField(GoTerm, required=True)
 
+    @property
+    def accession(self):
+        return self.go_term.accession
+
+    @property
+    def description(self):
+        return self.go_term.description
+
+    @property
+    def lineage(self):
+        return self.go_term.lineage
+
 
 class AnalysisJobInterproIdentifierAnnotation(BaseAnalysisJobAnnotation):
 
     interpro_identifier = mongoengine.ReferenceField(InterproIdentifier,
                                                      required=True)
+
+    @property
+    def accession(self):
+        return self.interpro_identifier.accession
+
+    @property
+    def description(self):
+        return self.interpro_identifier.description
+
+    @property
+    def lineage(self):
+        return self.interpro_identifier.lineage
 
 
 class BaseAnalysisJob(mongoengine.Document):
@@ -110,6 +134,38 @@ class AnalysisJobOrganism(mongoengine.EmbeddedDocument):
 
     count = mongoengine.IntField(required=True)
     organism = mongoengine.ReferenceField(Organism)
+
+    @property
+    def lineage(self):
+        return self.organism.lineage
+
+    @property
+    def ancestors(self):
+        return self.organism.ancestors
+
+    @property
+    def hierarchy(self):
+        return self.organism.hierarchy
+
+    @property
+    def domain(self):
+        return self.organism.domain
+
+    @property
+    def name(self):
+        return self.organism.name
+
+    @property
+    def parent(self):
+        return self.organism.parent
+
+    @property
+    def rank(self):
+        return self.organism.rank
+
+    @property
+    def pipeline_version(self):
+        return self.organism.pipeline_version
 
 
 class AnalysisJobTaxonomy(mongoengine.Document):
