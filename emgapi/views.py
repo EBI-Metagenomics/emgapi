@@ -557,14 +557,6 @@ class AnalysisResultViewSet(mixins.ListModelMixin,
             .filter(accession=accession)
         return queryset
 
-    def get_object(self):
-        return get_object_or_404(
-            self.get_queryset(),
-            Q(pipeline__release_version=self.kwargs['release_version']) &
-            Q(accession=self.kwargs['accession']) |
-            Q(secondary_accession=self.kwargs['accession'])
-        )
-
     def list(self, request, *args, **kwargs):
         """
         Retrieves analysis result for the given accession
@@ -585,16 +577,14 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
     lookup_value_regex = '[0-9.]+'
 
     def get_queryset(self):
-        accession = self.kwargs['accession']
-        queryset = emg_models.AnalysisJob.objects \
+        return emg_models.AnalysisJob.objects \
             .available(self.request) \
-            .filter(accession=accession)
-        return queryset
+            .filter(accession=self.kwargs['accession'])
 
     def get_object(self):
         return get_object_or_404(
             self.get_queryset(),
-            Q(pipeline__release_version=self.kwargs['release_version']) &
+            Q(pipeline__release_version=self.kwargs['release_version']),
             Q(accession=self.kwargs['accession']) |
             Q(secondary_accession=self.kwargs['accession'])
         )
