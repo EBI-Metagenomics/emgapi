@@ -284,10 +284,12 @@ class AnalysisGoTermRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
 
     serializer_class = m_serializers.GoTermRetriveSerializer
 
+    pagination_class = emg_page.MaxSetPagination
+
     lookup_fields = ('accession', 'release_version')
 
     def get_queryset(self):
-        return emg_models.AnalysisJob.objects.available(self.request)
+        return m_models.GoTerm.objects.all()
 
     def list(self, request, accession, release_version, *args, **kwargs):
         """
@@ -309,18 +311,9 @@ class AnalysisGoTermRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
         except m_models.AnalysisJobGoTerm.DoesNotExist:
             pass
 
-        ann_ids = list()
-        ann_counts = dict()
-        if analysis is not None:
-            for a in analysis.go_terms:
-                ann_ids.append(a.go_term.pk)
-                ann_counts[a.go_term.pk] = a.count
-
-        queryset = m_models.GoTerm.objects.filter(pk__in=ann_ids)
+        queryset = getattr(analysis, 'go_terms', [])
 
         page = self.paginate_queryset(queryset)
-        for p in page:
-            p.count = ann_counts[p.pk]
         if page is not None:
             serializer = self.get_serializer(
                 page,
@@ -347,7 +340,7 @@ class AnalysisGoSlimRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
     lookup_fields = ('accession', 'release_version')
 
     def get_queryset(self):
-        return emg_models.AnalysisJob.objects.available(self.request)
+        return m_models.GoTerm.objects.all()
 
     def list(self, request, accession, release_version, *args, **kwargs):
         """
@@ -369,18 +362,9 @@ class AnalysisGoSlimRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
         except m_models.AnalysisJobGoTerm.DoesNotExist:
             pass
 
-        ann_ids = list()
-        ann_counts = dict()
-        if analysis is not None:
-            for a in analysis.go_slim:
-                ann_ids.append(a.go_term.pk)
-                ann_counts[a.go_term.pk] = a.count
-
-        queryset = m_models.GoTerm.objects.filter(pk__in=ann_ids)
+        queryset = getattr(analysis, 'go_slim', [])
 
         page = self.paginate_queryset(queryset)
-        for p in page:
-            p.count = ann_counts[p.pk]
         if page is not None:
             serializer = self.get_serializer(
                 page,
@@ -402,10 +386,12 @@ class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
 
     serializer_class = m_serializers.InterproIdentifierRetriveSerializer
 
+    pagination_class = emg_page.MaxSetPagination
+
     lookup_fields = ('accession', 'release_version')
 
     def get_queryset(self):
-        return emg_models.AnalysisJob.objects.available(self.request)
+        return m_models.InterproIdentifier.objects.all()
 
     def list(self, request, accession, release_version, *args, **kwargs):
         """
@@ -427,18 +413,9 @@ class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
         except m_models.AnalysisJobInterproIdentifier.DoesNotExist:
             pass
 
-        ann_ids = []
-        ann_counts = dict()
-        if analysis is not None:
-            for a in analysis.interpro_identifiers:
-                ann_ids.append(a.interpro_identifier.pk)
-                ann_counts[a.interpro_identifier.pk] = a.count
-
-        queryset = m_models.InterproIdentifier.objects.filter(pk__in=ann_ids)
+        queryset = getattr(analysis, 'interpro_identifiers', [])
 
         page = self.paginate_queryset(queryset)
-        for p in page:
-            p.count = ann_counts[p.pk]
         if page is not None:
             serializer = self.get_serializer(
                 page,
@@ -567,7 +544,7 @@ class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
     lookup_fields = ('accession', 'release_version')
 
     def get_queryset(self):
-        return emg_models.AnalysisJob.objects.available(self.request)
+        return m_models.Organism.objects.all()
 
     def list(self, request, accession, release_version, *args, **kwargs):
         """
@@ -590,18 +567,9 @@ class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
         except m_models.AnalysisJobTaxonomy.DoesNotExist:
             pass
 
-        ann_ids = list()
-        ann_counts = dict()
-        if analysis is not None:
-            for a in getattr(analysis, 'taxonomy', []):
-                ann_ids.append(a.organism.pk)
-                ann_counts[a.organism.pk] = a.count
-
-        queryset = m_models.Organism.objects.filter(pk__in=ann_ids)
+        queryset = getattr(analysis, 'taxonomy', [])
 
         page = self.paginate_queryset(queryset)
-        for p in page:
-            p.count = ann_counts[p.pk]
         if page is not None:
             serializer = self.get_serializer(
                 page,
@@ -641,18 +609,9 @@ class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
         except m_models.AnalysisJobTaxonomy.DoesNotExist:
             pass
 
-        ann_ids = list()
-        ann_counts = dict()
-        if analysis is not None:
-            for a in getattr(analysis, 'taxonomy_ssu', []):
-                ann_ids.append(a.organism.pk)
-                ann_counts[a.organism.pk] = a.count
-
-        queryset = m_models.Organism.objects.filter(pk__in=ann_ids)
+        queryset = getattr(analysis, 'taxonomy_ssu', [])
 
         page = self.paginate_queryset(queryset)
-        for p in page:
-            p.count = ann_counts[p.pk]
         if page is not None:
             serializer = self.get_serializer(
                 page,
@@ -692,18 +651,9 @@ class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
         except m_models.AnalysisJobTaxonomy.DoesNotExist:
             pass
 
-        ann_ids = list()
-        ann_counts = dict()
-        if analysis is not None:
-            for a in getattr(analysis, 'taxonomy_lsu', []):
-                ann_ids.append(a.organism.pk)
-                ann_counts[a.organism.pk] = a.count
-
-        queryset = m_models.Organism.objects.filter(pk__in=ann_ids)
+        queryset = getattr(analysis, 'taxonomy_lsu', [])
 
         page = self.paginate_queryset(queryset)
-        for p in page:
-            p.count = ann_counts[p.pk]
         if page is not None:
             serializer = self.get_serializer(
                 page,

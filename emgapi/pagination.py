@@ -17,11 +17,6 @@
 from rest_framework_json_api import pagination
 
 
-class MetadataSetPagination(pagination.PageNumberPagination):
-
-    page_size = 100
-
-
 class LargeSetPagination(pagination.PageNumberPagination):
 
     max_page_size = 250
@@ -29,5 +24,5 @@ class LargeSetPagination(pagination.PageNumberPagination):
 
 class MaxSetPagination(pagination.PageNumberPagination):
 
-    page_size = 250
-    max_page_size = 250
+    page_size = 1000
+    max_page_size = 1000
