@@ -587,6 +587,9 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
             Q(secondary_accession=self.kwargs['accession'])
         )
 
+    def get_serializer_class(self):
+        return super(AnalysisViewSet, self).get_serializer_class()
+
     def retrieve(self, request, *args, **kwargs):
         """
         Retrieves analysis result for the given accession and pipeline version
