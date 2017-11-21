@@ -453,7 +453,7 @@ class RunSerializer(ExplicitFieldsModelSerializer,
         )
 
 
-class AnalysisSerializer(RunSerializer):
+class BaseAnalysisSerializer(RunSerializer):
 
     # workaround to provide multiple values in PK
     id = serializers.ReadOnlyField(source="multiple_pk")
@@ -516,19 +516,6 @@ class AnalysisSerializer(RunSerializer):
     def get_interproidentifier(self, obj):
         return None
 
-    taxonomy = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
-        source='get_taxonomy',
-        model=m_models.Organism,
-        many=True,
-        read_only=True,
-        related_link_view_name='emgapi:runs-pipelines-taxonomy-list',
-        related_link_url_kwarg='accession',
-        related_link_lookup_field='accession'
-    )
-
-    def get_taxonomy(self, obj):
-        return None
-
     class Meta:
         model = emg_models.AnalysisJob
         exclude = (
@@ -544,6 +531,48 @@ class AnalysisSerializer(RunSerializer):
             'analysis_status',
             'analysis',
         )
+
+
+class AnalysisSerializer(BaseAnalysisSerializer):
+
+    taxonomy = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
+        source='get_taxonomy',
+        model=m_models.Organism,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi:runs-pipelines-taxonomy-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
+    )
+
+    def get_taxonomy(self, obj):
+        return None
+
+    taxonomy_lsu = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
+        source='get_taxonomy_lsu',
+        model=m_models.Organism,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi:runs-pipelines-taxonomy-lsu',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
+    )
+
+    def get_taxonomy_lsu(self, obj):
+        return None
+
+    taxonomy_ssu = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
+        source='get_taxonomy_ssu',
+        model=m_models.Organism,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi:runs-pipelines-taxonomy-ssu',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
+    )
+
+    def get_taxonomy_ssu(self, obj):
+        return None
 
 
 # SampleAnn serializer
