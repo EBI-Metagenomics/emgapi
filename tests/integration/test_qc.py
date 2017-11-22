@@ -35,7 +35,7 @@ class TestCLI(object):
                      os.path.dirname(os.path.abspath(__file__)))
 
         url = reverse("emgapi:runs-pipelines-detail",
-                      args=["ABC01234", "1.0"])
+                      args=["ABC01234", "2.0"])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()

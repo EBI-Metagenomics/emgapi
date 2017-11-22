@@ -3,7 +3,6 @@
 5	sk__Bacteria	k__	p__Actinobacteria	c__Actinobacteria	o__Candidatus_Actinomarinales	f__Candidatus_Actinomarinaceae	g__Candidatus_Actinomarina
 3	sk__Bacteria	k__	p__Actinobacteria	c__Actinobacteria	o__Corynebacteriales	f__Corynebacteriaceae
 1	sk__Eukaryota	k__	p__	c__	o__	f__Chlamydophryidae
-1	sk__Eukaryota	k__	p__	c__	o__Choanoflagellida
 1	sk__Eukaryota	k__	p__	c__	o__Phaeocystales	f__Phaeocystaceae	g__Phaeocystis
 3	sk__Eukaryota	k__	p__	c__	o__Prymnesiales
 2	sk__Eukaryota	k__	p__	c__	o__Prymnesiales	f__Chrysochromulinaceae	g__Chrysochromulina

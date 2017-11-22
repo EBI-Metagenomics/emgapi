@@ -90,19 +90,19 @@ router.register(
 
 # relationship views
 router.register(
-    r'biomes/(?P<lineage>[a-zA-Z0-9\:\-\s\(\)\<\>]+)/children',
+    r'biomes/(?P<lineage>[^\/]+)/children',
     views_relations.BiomeTreeViewSet,
     base_name='biomes-children'
 )
 
 router.register(
-    r'biomes/(?P<lineage>[a-zA-Z0-9\:\-\s\(\)\<\>]+)/studies',
+    r'biomes/(?P<lineage>[^\/]+)/studies',
     views_relations.BiomeStudyRelationshipViewSet,
     base_name='biomes-studies'
 )
 
 router.register(
-    r'biomes/(?P<lineage>[a-zA-Z0-9\:\-\s\(\)\<\>]+)/samples',
+    r'biomes/(?P<lineage>[^\/]+)/samples',
     views_relations.BiomeSampleRelationshipViewSet,
     base_name='biomes-samples'
 )

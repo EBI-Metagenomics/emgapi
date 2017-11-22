@@ -607,7 +607,7 @@ class BiomeTreeViewSet(mixins.ListModelMixin,
     ordering = ('biome_id',)
 
     lookup_field = 'lineage'
-    lookup_value_regex = '[a-zA-Z0-9\:\-\s\(\)\<\>]+'
+    lookup_value_regex = '[^\/]+'
 
     def get_queryset(self):
         lineage = self.kwargs.get('lineage', None).strip()

@@ -207,15 +207,15 @@ def analysis_status():
 @pytest.fixture
 def pipeline():
     return emg_models.Pipeline.objects.create(
-        pk=1,
-        release_version="1.0",
+        pk=2,
+        release_version="2.0",
         release_date="1970-01-01",
     )
 
 
 @pytest.fixture
 def pipelines():
-    pipeline_version = [1, 4]
+    pipeline_version = [1, 2, 4]
     pipeliens = list()
     for pipe in pipeline_version:
         pipeliens.append(
@@ -252,7 +252,7 @@ def runs(study, samples, analysis_status, pipeline, experiment_type):
                 pipeline=pipeline,
                 analysis_status=analysis_status,
                 input_file_name="ABC_FASTQ",
-                result_directory="path/version_1.0/ABC_FASTQ",
+                result_directory="path/version_2.0/ABC_FASTQ",
                 submit_time="1970-01-01 00:00:00",
             )
         )
@@ -271,7 +271,7 @@ def run(study, sample, analysis_status, pipeline, experiment_type):
         pipeline=pipeline,
         analysis_status=analysis_status,
         input_file_name="ABC_FASTQ",
-        result_directory="path/version_1.0/ABC_FASTQ",
+        result_directory="path/version_2.0/ABC_FASTQ",
         submit_time="1970-01-01 00:00:00",
     )
 
@@ -289,7 +289,7 @@ def run_emptyresults(study, sample, analysis_status, pipeline,
         pipeline=pipeline,
         analysis_status=analysis_status,
         input_file_name="EMPTY_ABC_FASTQ",
-        result_directory="emptypath/version_1.0/EMPTY_ABC_FASTQ",
+        result_directory="emptypath/version_2.0/EMPTY_ABC_FASTQ",
         submit_time="1970-01-01 00:00:00",
     )
 
@@ -306,7 +306,7 @@ def run_with_sample(study, sample, analysis_status, pipeline, experiment_type):
         pipeline=pipeline,
         analysis_status=analysis_status,
         input_file_name="ABC_FASTQ",
-        result_directory="path/version_1.0/ABC_FASTQ",
+        result_directory="path/version_2.0/ABC_FASTQ",
         submit_time="1970-01-01 00:00:00",
     )
 

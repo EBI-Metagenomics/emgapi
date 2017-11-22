@@ -46,22 +46,30 @@ class Command(EMGBaseCommand):
 
     def find_path(self, obj, options):
         rootpath = options.get('rootpath', None)
-
-        res = os.path.join(rootpath, obj.result_directory, 'taxonomy-summary')
+        res = os.path.join(rootpath, obj.result_directory)
         if os.path.exists(res):
             logger.info("Pipeline version: %s" %
                         obj.pipeline.release_version)
-            if obj.pipeline.release_version in ('1.0', '2.0', '3.0',):
-                _f = os.path.join(res, 'krona-input.txt')
+            if obj.pipeline.release_version in ('1.0',):
+                _f = os.path.join(res, 'taxonomy-summary', 'krona-input.txt')
                 if os.path.exists(_f):
                     logger.info("Taxonomy loading: %s" % _f)
                     with open(_f) as csvfile:
                         reader = csv.reader(csvfile, delimiter='\t')
                         self.load_organism_from_summary_file(
                             reader, obj, 'taxonomy')
+            elif obj.pipeline.release_version in ('2.0', '3.0',):
+                name = "%s_qiime_assigned_taxonomy.txt" % (obj.input_file_name)
+                _f = os.path.join(res, 'cr_otus', name)
+                if os.path.exists(_f):
+                    logger.info("Taxonomy loading: %s" % _f)
+                    with open(_f) as csvfile:
+                        reader = csv.DictReader(csvfile, delimiter='\t')
+                        self.load_organism_from_summary_file(
+                            reader, obj, 'taxonomy', otu=True)
             elif obj.pipeline.release_version in ('4.0',):
                 name = "%s_SSU.fasta.mseq.txt" % (obj.input_file_name)
-                _f = os.path.join(res, 'SSU', name)
+                _f = os.path.join(res, 'taxonomy-summary', 'SSU', name)
                 if os.path.exists(_f):
                     logger.info("SSU loading: %s" % _f)
                     with open(_f) as csvfile:
@@ -69,10 +77,9 @@ class Command(EMGBaseCommand):
                         self.load_organism_from_summary_file(
                             reader, obj, 'taxonomy_ssu')
                 name = "%s_LSU.fasta.mseq.txt" % (obj.input_file_name)
-                _f = os.path.join(res, 'LSU', name)
+                _f = os.path.join(res, 'taxonomy-summary', 'LSU', name)
                 if os.path.exists(_f):
                     logger.info("LSU loading: %s" % _f)
-                    reader = csv.reader(_f, delimiter='\t')
                     with open(_f) as csvfile:
                         reader = csv.reader(csvfile, delimiter='\t')
                         self.load_organism_from_summary_file(
@@ -82,7 +89,7 @@ class Command(EMGBaseCommand):
         else:
             logger.error("Path %r doesn't exist. SKIPPING!" % res)
 
-    def load_organism_from_summary_file(self, reader, obj, tax):  # noqa
+    def _instantiate_entry(self, obj):
         try:
             run = m_models.AnalysisJobTaxonomy.objects \
                 .get(pk=str(obj.job_id))
@@ -90,22 +97,48 @@ class Command(EMGBaseCommand):
             run = m_models.AnalysisJobTaxonomy()
         run.analysis_id = str(obj.job_id)
         run.accession = obj.accession
-        version = obj.pipeline.release_version
-        run.pipeline_version = version
+        run.pipeline_version = obj.pipeline.release_version
         run.job_id = obj.job_id
+        return run
 
-        new_orgs = list()
-        orgs = []
+    def _get_unassigned(self, name='Unassigned'):
+        name = 'Unassigned'
+        rank = None
+        lineage = ["Unassigned"]
+        hierarchy = {}
+        domain = None
+        ancestors = []
+        parent = None
+        return name, rank, lineage, hierarchy, domain, ancestors, parent
+
+    def load_organism_from_summary_file(self, reader, obj, tax, otu=False):  # noqa
+        run = self._instantiate_entry(obj)
+        version = obj.pipeline.release_version
+        new_orgs = dict()
+        orgs = list()
         for row in reader:
-            if len(row) < 1:
-                continue
-            count = row[0]
+            if otu:
+                count = int(float(row[obj.accession]))
+                _l = row['taxonomy'].replace('Root;', '') \
+                    .replace("/", "|").split(";")
+                otu_id = row.get('#OTU ID', None)
+            else:
+                if len(row) < 1:
+                    continue
+                count = int(float(row[0]))
+                _l = row[1:]
+                otu_id = None
 
             def clean_prefix(s):
                 return re.sub(r"[a-zA-Z]+__", "", s.rstrip())
-            lineage = list(map(clean_prefix, row[1:]))
+            lineage = list(map(clean_prefix, _l))
 
             if len(lineage) > 1:
+                for l in reversed(lineage):
+                    if len(l) < 1:
+                        lineage.remove(l)
+                    else:
+                        break
                 hierarchy = {
                     r: a for r, a in zip(ORGANISM_RANK[version], lineage)
                 }
@@ -115,10 +148,10 @@ class Command(EMGBaseCommand):
                 parent = ancestors[-1]
                 rank = ORGANISM_RANK[version][len(ancestors)]
             else:
-                ancestors = []
-                parent = None
                 try:
                     if len(lineage[0]) > 0:
+                        ancestors = []
+                        parent = None
                         hierarchy = {
                             r: a for r, a in zip(ORGANISM_RANK[version],
                                                  lineage)
@@ -127,39 +160,36 @@ class Command(EMGBaseCommand):
                         name = lineage[0]
                         rank = ORGANISM_RANK[version][len(ancestors)]
                     else:
-                        name = 'Unusigned'
-                        rank = None
-                        lineage = ["Unusigned"]
-                        hierarchy = {}
-                        domain = None
+                        name, rank, lineage, hierarchy, domain, ancestors, \
+                            parent = self._get_unassigned()
                 except KeyError:
-                    name = 'Unusigned'
-                    rank = None
-                    lineage = ["Unusigned"]
-                    hierarchy = {}
-                    domain = None
+                    name, rank, lineage, hierarchy, domain, ancestors,\
+                        parent = self._get_unassigned()
             organism = None
+            _lineage = ":".join(lineage)
             try:
                 organism = m_models.Organism.objects.get(
-                    lineage=":".join(lineage), rank=rank,
+                    lineage=_lineage, rank=rank,
                     pipeline_version=version
                 )
             except m_models.Organism.DoesNotExist:
-                #  TODO https://github.com/MongoEngine/mongoengine/issues/1685
-                pk = "%s|%s" % (":".join(lineage), version)
-                organism = m_models.Organism(
-                    id=pk,
-                    lineage=":".join(lineage), name=name, parent=parent,
-                    ancestors=ancestors, hierarchy=hierarchy,
-                    rank=rank, pipeline_version=version, domain=domain
-                )
-                new_orgs.append(organism)
+                # TODO: https://github.com/MongoEngine/mongoengine/issues/1685
+                # pk = {'lineage': ":".join(lineage), 'version': version}
+                pk = "{}|{}".format(_lineage, version)
+                try:
+                    organism = new_orgs[pk]
+                except KeyError:
+                    organism = m_models.Organism(
+                        id=pk, lineage=_lineage, name=name, parent=parent,
+                        ancestors=ancestors, hierarchy=hierarchy,
+                        rank=rank, pipeline_version=version, domain=domain,
+                    )
+                    new_orgs[pk] = organism
+                    orgs.append(organism)
 
             if organism is not None:
-                orgs.append(organism)
                 rorg = m_models.AnalysisJobOrganism(
-                    count=count,
-                    organism=organism
+                    count=count, organism=organism, otu=otu_id
                 )
                 t = getattr(run, tax, list())
                 t.append(rorg)
@@ -170,7 +200,7 @@ class Command(EMGBaseCommand):
                 "Total %d Organisms for Run: %s %s" % (
                     len(orgs), obj.accession, version))
             if len(new_orgs) > 0:
-                m_models.Organism.objects.insert(new_orgs)
+                m_models.Organism.objects.insert(new_orgs.values())
                 logger.info(
                     "Created %d new Organisms" % len(new_orgs))
             run.save()
