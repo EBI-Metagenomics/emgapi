@@ -121,12 +121,12 @@ class TestTaxonomy(object):
                         ('Flavobacteriaceae', 117948): 2,
                         ('Flavobacteriaceae', 117949): 3,
                         ('Unassigned', 578211): 1,
+                        ('Unassigned', 0): 158687,
+                        ('Bacteria', 674344): 1,
                         ('lwoffii|10', 1097359): 1,
                         ('Alphaproteobacteria', 34419): 2,
                         ('Cohaesibacter', 172411): 1,
-                        ('Unassigned', 230083): 1,
-                        ('Pelagibacteraceae', 838668): 10,
-                        ('Phyllobacteriaceae', 571263): 1,
+                        ('Unassigned', 230083): 1
                     }
                 },
             },

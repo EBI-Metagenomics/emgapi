@@ -119,7 +119,8 @@ class Command(EMGBaseCommand):
         for row in reader:
             if otu:
                 count = int(float(row[obj.accession]))
-                _l = row['taxonomy'].replace('Root;', '') \
+                _l = row['taxonomy'] \
+                    .replace('Root;', '').replace('Root', '') \
                     .replace("/", "|").split(";")
                 otu_id = row.get('#OTU ID', None)
             else:
@@ -132,13 +133,13 @@ class Command(EMGBaseCommand):
             def clean_prefix(s):
                 return re.sub(r"[a-zA-Z]+__", "", s.rstrip())
             lineage = list(map(clean_prefix, _l))
-
             if len(lineage) > 1:
                 for l in reversed(lineage):
                     if len(l) < 1:
                         lineage.remove(l)
                     else:
                         break
+            if len(lineage) > 1:
                 hierarchy = {
                     r: a for r, a in zip(ORGANISM_RANK[version], lineage)
                 }
