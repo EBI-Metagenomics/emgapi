@@ -29,13 +29,13 @@ class EMGBaseCommand(BaseCommand):
         self.accession = options.get('accession', None)
         if self.accession:
             self.obj_list = emg_models.AnalysisJob.objects \
-                .filter(study__accession=self.accession).available()
+                .filter(study__accession=self.accession).all()
             if len(self.obj_list) < 1:
                 self.obj_list = emg_models.AnalysisJob.objects \
-                    .filter(sample__accession=self.accession).available()
+                    .filter(sample__accession=self.accession).all()
             if len(self.obj_list) < 1:
                 self.obj_list = emg_models.AnalysisJob.objects \
-                    .filter(accession=self.accession).available()
+                    .filter(accession=self.accession).all()
             if len(self.obj_list) < 1:
                 logger.error(
                     "No runs %s, SKIPPING!" % self.accession)
