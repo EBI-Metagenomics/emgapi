@@ -101,10 +101,11 @@ class Command(EMGBaseCommand):
         run.job_id = obj.job_id
         return run
 
-    def _get_unassigned(self, name='Unassigned'):
-        name = 'Unassigned'
+    def _get_unassigned(self, name):
+        if len(name) < 1:
+            raise AttributeError('Name not provided.')
         rank = None
-        lineage = ["Unassigned"]
+        lineage = [name]
         hierarchy = {}
         domain = None
         ancestors = []
@@ -120,7 +121,7 @@ class Command(EMGBaseCommand):
             if otu:
                 count = int(float(row[obj.accession]))
                 _l = row['taxonomy'] \
-                    .replace('Root;', '').replace('Root', '') \
+                    .replace('Root;', '') \
                     .replace("/", "|").split(";")
                 otu_id = row.get('#OTU ID', None)
             else:
@@ -133,12 +134,13 @@ class Command(EMGBaseCommand):
             def clean_prefix(s):
                 return re.sub(r"[a-zA-Z]+__", "", s.rstrip())
             lineage = list(map(clean_prefix, _l))
-            if len(lineage) > 1:
-                for l in reversed(lineage):
-                    if len(l) < 1:
-                        lineage.remove(l)
-                    else:
-                        break
+
+            for l in reversed(lineage):
+                if len(l) < 1:
+                    lineage.remove(l)
+                else:
+                    break
+
             if len(lineage) > 1:
                 hierarchy = {
                     r: a for r, a in zip(ORGANISM_RANK[version], lineage)
@@ -150,7 +152,7 @@ class Command(EMGBaseCommand):
                 rank = ORGANISM_RANK[version][len(ancestors)]
             else:
                 try:
-                    if len(lineage[0]) > 0:
+                    if lineage[0] not in ('Root',) and len(lineage[0]) > 0:
                         ancestors = []
                         parent = None
                         hierarchy = {
@@ -162,10 +164,13 @@ class Command(EMGBaseCommand):
                         rank = ORGANISM_RANK[version][len(ancestors)]
                     else:
                         name, rank, lineage, hierarchy, domain, ancestors, \
-                            parent = self._get_unassigned()
+                            parent = self._get_unassigned("Unassigned")
+                except IndexError:
+                    name, rank, lineage, hierarchy, domain, ancestors,\
+                        parent = self._get_unassigned("Unclassified")
                 except KeyError:
                     name, rank, lineage, hierarchy, domain, ancestors,\
-                        parent = self._get_unassigned()
+                        parent = self._get_unassigned("Unassigned")
             organism = None
             _lineage = ":".join(lineage)
             try:

@@ -1,10 +1,10 @@
 #OTU ID	ABC01234	taxonomy
-117948	2.0	Root;k__Bacteria;p__Bacteroidetes;c__Flavobacteriia;o__Flavobacteriales;f__Flavobacteriaceae;g__;s__
-117949	3.0	Root;k__Bacteria;p__Bacteroidetes;c__Flavobacteriia;o__Flavobacteriales;f__Flavobacteriaceae;g__;s__
-578211	1.0	Root;k__
-0	158687	Root
+117948	6	Root;k__Bacteria;p__Bacteroidetes;c__Flavobacteriia;o__Flavobacteriales;f__Flavobacteriaceae;g__;s__
+234071	100	Root;k__Bacteria;p__Bacteroidetes;c__Flavobacteriia;o__Flavobacteriales;f__Flavobacteriaceae;g__;s__
 674344	1	Root;k__Bacteria;p__;c__;o__;f__;g__;s__
-1097359	1.0	Root;k__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;o__Pseudomonadales;f__Moraxellaceae;g__Acinetobacter;s__lwoffii/10
-34419	2.0	Root;k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__;f__;g__;s__
-172411	1.0	Root;k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rhizobiales;f__Cohaesibacteraceae;g__Cohaesibacter;s__
-230083	1.0	
+111111	2	Root;k__;p__;c__;o__;f__;g__;s__
+1097359	3	Root;k__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;o__Pseudomonadales;f__Moraxellaceae;g__Acinetobacter;s__lwoffii/10
+67842	4	Root;k__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;o__Pseudomonadales;f__Moraxellaceae;g__Acinetobacter;s__
+359105	5	Root;k__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;o__Pseudomonadales;f__Moraxellaceae;g__;s__
+830429	6	Root;k__Bacteria;p__Chloroflexi;c__SAR202;o__;f__;g__;s__
+0	12345	Root
