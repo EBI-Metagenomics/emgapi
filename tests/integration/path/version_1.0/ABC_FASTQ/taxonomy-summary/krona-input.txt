@@ -6,3 +6,4 @@
 1	Bacteria	Chlorobi	OPB56
 42	Bacteria	Proteobacteria	Alphaproteobacteria	RhodobacteralesRhodobacteraceae
 1	Bacteria	Proteobacteria	Alphaproteobacteria	Sphingomonadales
+1	Bacteria	Proteobacteria	Gammaproteobacteria

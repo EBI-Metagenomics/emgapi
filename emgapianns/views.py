@@ -41,6 +41,22 @@ from . import pagination as m_page
 logger = logging.getLogger(__name__)
 
 
+class RetrieveListModelMixin(object):
+    """
+    Overide retrieve method to retrieve a list of model instances.
+    """
+    def retrieve(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
 class GoTermViewSet(m_viewset.ReadOnlyModelViewSet):
 
     """
@@ -432,11 +448,12 @@ class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
         return Response(serializer.data)
 
 
-class OrganismViewSet(mixins.ListModelMixin,
+class OrganismViewSet(RetrieveListModelMixin,
+                      mixins.ListModelMixin,
                       m_viewset.GenericViewSet):
 
     """
-    Provides list of Organisms.
+    Retrieves children for the given lineage
     """
 
     serializer_class = m_serializers.OrganismSerializer
@@ -452,9 +469,12 @@ class OrganismViewSet(mixins.ListModelMixin,
     )
 
     lookup_field = 'lineage'
-    lookup_value_regex = '[a-zA-Z0-9\_\-\.\:\s]+'
+    lookup_value_regex = '[^\/]+'
 
     def get_queryset(self):
+        if self.action == 'retrieve':
+            lineage = self.kwargs[self.lookup_field]
+            return m_models.Organism.objects.filter(lineage=lineage)
         return m_models.Organism.objects.all()
 
     def get_serializer_class(self):
@@ -469,6 +489,16 @@ class OrganismViewSet(mixins.ListModelMixin,
         """
         return super(OrganismViewSet, self) \
             .list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves list of Organisms for the given lineage.
+        Example:
+        ---
+        `/annotations/organisms/Bacteria:Chlorobi`
+        """
+        return super(OrganismViewSet, self) \
+            .retrieve(request, *args, **kwargs)
 
 
 class OrganismTreeViewSet(mixins.ListModelMixin,
@@ -492,7 +522,7 @@ class OrganismTreeViewSet(mixins.ListModelMixin,
     )
 
     lookup_field = 'lineage'
-    lookup_value_regex = '[a-zA-Z0-9\_\-\:\s]+'
+    lookup_value_regex = '[^\/]+'
 
     def get_queryset(self):
         lineage = self.kwargs.get('lineage', None).strip()
@@ -553,7 +583,7 @@ class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
         version
         Example:
         ---
-        `/runs/ERR1385375/pipelines/3.0/taxonomy`
+        `/runs/ERR771104/pipelines/2.0/taxonomy`
         """
 
         job = get_object_or_404(
@@ -591,11 +621,11 @@ class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
     )
     def ssu(self, request, accession, release_version, *args, **kwargs):
         """
-        Retrieves SSU Taxonomic analysis for the given run and pipeline
-        version
+        Retrieves SSU (16S and 18S) Taxonomic analysis for the given run
+        and pipeline version
         Example:
         ---
-        `/runs/ERR1385375/pipelines/3.0/taxonomy/ssu`
+        `/runs/ERR771104/pipelines/4.0/taxonomy/ssu`
         """
 
         job = get_object_or_404(
@@ -633,11 +663,11 @@ class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
     )
     def lsu(self, request, accession, release_version, *args, **kwargs):
         """
-        Retrieves LSU Taxonomic analysis for the given run and pipeline
-        version
+        Retrieves LSU (23S and 28S) Taxonomic analysis for the given run
+        and pipeline version
         Example:
         ---
-        `/runs/ERR1385375/pipelines/3.0/taxonomy/lsu`
+        `/runs/ERR771104/pipelines/4.0/taxonomy/lsu`
         """
 
         job = get_object_or_404(

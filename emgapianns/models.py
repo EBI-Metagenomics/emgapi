@@ -132,8 +132,9 @@ class Organism(mongoengine.Document):
 
 class AnalysisJobOrganism(mongoengine.EmbeddedDocument):
 
-    count = mongoengine.IntField(required=True)
     organism = mongoengine.ReferenceField(Organism)
+    count = mongoengine.IntField(required=True)
+    otu = mongoengine.StringField()
 
     @property
     def lineage(self):
