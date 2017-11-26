@@ -30,7 +30,7 @@ from test_utils.emg_fixtures import *  # noqa
 class TestDefaultAPI(object):
 
     def test_default(self, client, api_version):
-        url = reverse('emgapi:api-root')
+        url = reverse('emgapi_v1:api-root')
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -56,17 +56,17 @@ class TestDefaultAPI(object):
     @pytest.mark.parametrize(
         '_view',
         [
-            'emgapi:biomes',
-            'emgapi:experiment-types',
-            'emgapi:pipelines',
-            'emgapi:publications',
-            'emgapi:samples',
-            'emgapi:runs',
-            'emgapi:studies',
-            'emgapi:pipeline-tools',
-            'emgapi:goterms',
-            'emgapi:interproidentifier',
-            'emgapi:organisms',
+            'emgapi_v1:biomes',
+            'emgapi_v1:experiment-types',
+            'emgapi_v1:pipelines',
+            'emgapi_v1:publications',
+            'emgapi_v1:samples',
+            'emgapi_v1:runs',
+            'emgapi_v1:studies',
+            'emgapi_v1:pipeline-tools',
+            'emgapi_v1:goterms',
+            'emgapi_v1:interproidentifier',
+            'emgapi_v1:organisms',
             pytest.mark.xfail('viewdoesnotexist', raises=NoReverseMatch),
         ]
     )
@@ -84,21 +84,22 @@ class TestDefaultAPI(object):
     @pytest.mark.parametrize(
         '_model, _camelcase, _view, _view_args, relations',
         [
-            ('ExperimentType', 'experiment-types', 'emgapi:experiment-types',
+            ('ExperimentType', 'experiment-types',
+             'emgapi_v1:experiment-types',
              [], ['samples', 'runs', 'analysis']),
-            # ('Biome', 'biomes', 'emgapi:biomes', ['root'],
+            # ('Biome', 'biomes', 'emgapi_v1:biomes', ['root'],
             #  ['samples', 'studies']),
-            ('Pipeline', 'pipelines', 'emgapi:pipelines', [],
+            ('Pipeline', 'pipelines', 'emgapi_v1:pipelines', [],
              ['samples', 'studies', 'tools', 'analysis']),
-            ('Publication', 'publications', 'emgapi:publications', [],
+            ('Publication', 'publications', 'emgapi_v1:publications', [],
              ['studies', 'samples']),
-            ('Run', 'runs', 'emgapi:runs', [],
+            ('Run', 'runs', 'emgapi_v1:runs', [],
              ['pipelines', 'analysis', 'experiment-type', 'sample', 'study']),
-            ('Sample', 'samples', 'emgapi:samples', [],
+            ('Sample', 'samples', 'emgapi_v1:samples', [],
              ['biome', 'studies', 'runs', 'metadata']),
-            ('Study', 'studies', 'emgapi:studies', [],
+            ('Study', 'studies', 'emgapi_v1:studies', [],
              ['biomes', 'publications', 'samples']),
-            ('PipelineTool', 'pipeline-tools', 'emgapi:pipeline-tools', [],
+            ('PipelineTool', 'pipeline-tools', 'emgapi_v1:pipeline-tools', [],
              ['pipelines']),
         ]
     )

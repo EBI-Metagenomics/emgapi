@@ -276,7 +276,10 @@ USE_TZ = False
 
 REST_FRAMEWORK = {
 
-    'DEFAULT_VERSION': '0.4',
+    'DEFAULT_VERSIONING_CLASS':
+        'rest_framework.versioning.NamespaceVersioning',
+
+    'DEFAULT_VERSION': '1',
 
     'PAGE_SIZE': 25,
 

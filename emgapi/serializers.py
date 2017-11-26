@@ -58,7 +58,7 @@ class BiomeSerializer(ExplicitFieldsModelSerializer,
     included_serializers = {}
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi:biomes-detail',
+        view_name='emgapi_v1:biomes-detail',
         lookup_field='lineage',
     )
 
@@ -68,7 +68,7 @@ class BiomeSerializer(ExplicitFieldsModelSerializer,
         model=emg_models.Biome,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:biomes-studies-list',
+        related_link_view_name='emgapi_v1:biomes-studies-list',
         related_link_url_kwarg='lineage',
         related_link_lookup_field='lineage',
     )
@@ -81,7 +81,7 @@ class BiomeSerializer(ExplicitFieldsModelSerializer,
         model=emg_models.Biome,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:biomes-samples-list',
+        related_link_view_name='emgapi_v1:biomes-samples-list',
         related_link_url_kwarg='lineage',
         related_link_lookup_field='lineage',
     )
@@ -94,7 +94,7 @@ class BiomeSerializer(ExplicitFieldsModelSerializer,
         model=emg_models.Biome,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:biomes-children-list',
+        related_link_view_name='emgapi_v1:biomes-children-list',
         related_link_url_kwarg='lineage',
         related_link_lookup_field='lineage',
     )
@@ -137,7 +137,7 @@ class PublicationSerializer(ExplicitFieldsModelSerializer,
     }
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi:publications-detail',
+        view_name='emgapi_v1:publications-detail',
         lookup_field='pubmed_id',
     )
 
@@ -147,7 +147,7 @@ class PublicationSerializer(ExplicitFieldsModelSerializer,
         model=emg_models.Publication,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:publications-studies-list',
+        related_link_view_name='emgapi_v1:publications-studies-list',
         related_link_url_kwarg='pubmed_id',
         related_link_lookup_field='pubmed_id',
     )
@@ -160,7 +160,7 @@ class PublicationSerializer(ExplicitFieldsModelSerializer,
         model=emg_models.Publication,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:publications-samples-list',
+        related_link_view_name='emgapi_v1:publications-samples-list',
         related_link_url_kwarg='pubmed_id',
         related_link_lookup_field='pubmed_id',
     )
@@ -207,7 +207,7 @@ class PipelineToolSerializer(ExplicitFieldsModelSerializer,
     id = serializers.ReadOnlyField(source="multiple_pk")
 
     url = emg_fields.PipelineToolHyperlinkedField(
-        view_name='emgapi:pipeline-tools-version-detail',
+        view_name='emgapi_v1:pipeline-tools-version-detail',
         lookup_field='tool_name',
     )
 
@@ -217,7 +217,7 @@ class PipelineToolSerializer(ExplicitFieldsModelSerializer,
         read_only=True,
         source='get_pipelines',
         model=emg_models.Pipeline,
-        related_link_self_view_name='emgapi:pipelines-detail',
+        related_link_self_view_name='emgapi_v1:pipelines-detail',
         related_link_self_lookup_field='release_version'
     )
 
@@ -250,7 +250,7 @@ class PipelineSerializer(ExplicitFieldsModelSerializer,
     }
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi:pipelines-detail',
+        view_name='emgapi_v1:pipelines-detail',
         lookup_field='release_version',
     )
 
@@ -260,7 +260,7 @@ class PipelineSerializer(ExplicitFieldsModelSerializer,
     #     model=emg_models.Study,
     #     many=True,
     #     read_only=True,
-    #     related_link_view_name='emgapi:pipelines-studies-list',
+    #     related_link_view_name='emgapi_v1:pipelines-studies-list',
     #     related_link_url_kwarg='release_version',
     #     related_link_lookup_field='release_version',
     # )
@@ -273,7 +273,7 @@ class PipelineSerializer(ExplicitFieldsModelSerializer,
         model=emg_models.Sample,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:pipelines-samples-list',
+        related_link_view_name='emgapi_v1:pipelines-samples-list',
         related_link_url_kwarg='release_version',
         related_link_lookup_field='release_version',
     )
@@ -286,7 +286,7 @@ class PipelineSerializer(ExplicitFieldsModelSerializer,
         model=emg_models.AnalysisJob,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:pipelines-analysis-list',
+        related_link_view_name='emgapi_v1:pipelines-analysis-list',
         related_link_url_kwarg='release_version',
         related_link_lookup_field='release_version',
     )
@@ -299,7 +299,7 @@ class PipelineSerializer(ExplicitFieldsModelSerializer,
         model=emg_models.PipelineTool,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:pipelines-pipeline-tools-list',
+        related_link_view_name='emgapi_v1:pipelines-pipeline-tools-list',
         related_link_url_kwarg='release_version',
         related_link_lookup_field='release_version',
         related_link_self_lookup_field='tool_name'
@@ -326,7 +326,7 @@ class ExperimentTypeSerializer(ExplicitFieldsModelSerializer,
     included_serializers = {}
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi:experiment-types-detail',
+        view_name='emgapi_v1:experiment-types-detail',
         lookup_field='experiment_type',
     )
 
@@ -336,7 +336,7 @@ class ExperimentTypeSerializer(ExplicitFieldsModelSerializer,
         model=emg_models.Sample,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:experiment-types-samples-list',
+        related_link_view_name='emgapi_v1:experiment-types-samples-list',
         related_link_url_kwarg='experiment_type',
         related_link_lookup_field='experiment_type',
     )
@@ -349,7 +349,7 @@ class ExperimentTypeSerializer(ExplicitFieldsModelSerializer,
         model=emg_models.Run,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:experiment-types-runs-list',
+        related_link_view_name='emgapi_v1:experiment-types-runs-list',
         related_link_url_kwarg='experiment_type',
         related_link_lookup_field='experiment_type',
     )
@@ -362,7 +362,7 @@ class ExperimentTypeSerializer(ExplicitFieldsModelSerializer,
         model=emg_models.AnalysisJob,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:experiment-types-analysis-list',
+        related_link_view_name='emgapi_v1:experiment-types-analysis-list',
         related_link_url_kwarg='experiment_type',
         related_link_lookup_field='experiment_type',
     )
@@ -390,7 +390,7 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     }
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi:runs-detail',
+        view_name='emgapi_v1:runs-detail',
         lookup_field='accession'
     )
 
@@ -408,13 +408,13 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     # relationships
     sample = serializers.HyperlinkedRelatedField(
         read_only=True,
-        view_name='emgapi:samples-detail',
+        view_name='emgapi_v1:samples-detail',
         lookup_field='accession'
     )
 
     study = serializers.HyperlinkedRelatedField(
         read_only=True,
-        view_name='emgapi:studies-detail',
+        view_name='emgapi_v1:studies-detail',
         lookup_field='accession'
     )
 
@@ -423,7 +423,7 @@ class RunSerializer(ExplicitFieldsModelSerializer,
         read_only=True,
         source='get_pipelines',
         model=emg_models.Pipeline,
-        related_link_self_view_name='emgapi:pipelines-detail',
+        related_link_self_view_name='emgapi_v1:pipelines-detail',
         related_link_self_lookup_field='release_version'
     )
 
@@ -437,7 +437,7 @@ class RunSerializer(ExplicitFieldsModelSerializer,
         read_only=True,
         source='get_analysis',
         model=emg_models.AnalysisJob,
-        related_link_view_name='emgapi:runs-pipelines-list',
+        related_link_view_name='emgapi_v1:runs-pipelines-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession',
     )
@@ -459,7 +459,7 @@ class BaseAnalysisSerializer(RunSerializer):
     id = serializers.ReadOnlyField(source="multiple_pk")
 
     url = emg_fields.AnalysisJobHyperlinkedField(
-        view_name='emgapi:runs-pipelines-detail',
+        view_name='emgapi_v1:runs-pipelines-detail',
         lookup_field='accession'
     )
 
@@ -482,7 +482,7 @@ class BaseAnalysisSerializer(RunSerializer):
         model=m_models.GoTerm,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:runs-pipelines-goterms-list',
+        related_link_view_name='emgapi_v1:runs-pipelines-goterms-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
@@ -495,7 +495,7 @@ class BaseAnalysisSerializer(RunSerializer):
         model=m_models.GoTerm,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:runs-pipelines-goslim-list',
+        related_link_view_name='emgapi_v1:runs-pipelines-goslim-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
@@ -508,7 +508,7 @@ class BaseAnalysisSerializer(RunSerializer):
         model=m_models.InterproIdentifier,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:runs-pipelines-interpro-list',
+        related_link_view_name='emgapi_v1:runs-pipelines-interpro-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
@@ -540,7 +540,7 @@ class AnalysisSerializer(BaseAnalysisSerializer):
         model=m_models.Organism,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:runs-pipelines-taxonomy-list',
+        related_link_view_name='emgapi_v1:runs-pipelines-taxonomy-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
@@ -553,7 +553,7 @@ class AnalysisSerializer(BaseAnalysisSerializer):
         model=m_models.Organism,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:runs-pipelines-taxonomy-lsu',
+        related_link_view_name='emgapi_v1:runs-pipelines-taxonomy-lsu',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
@@ -566,7 +566,7 @@ class AnalysisSerializer(BaseAnalysisSerializer):
         model=m_models.Organism,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:runs-pipelines-taxonomy-ssu',
+        related_link_view_name='emgapi_v1:runs-pipelines-taxonomy-ssu',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
@@ -612,7 +612,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
     }
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi:samples-detail',
+        view_name='emgapi_v1:samples-detail',
         lookup_field='accession'
     )
 
@@ -631,7 +631,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
     # relationships
     biome = serializers.HyperlinkedRelatedField(
         read_only=True,
-        view_name='emgapi:biomes-detail',
+        view_name='emgapi_v1:biomes-detail',
         lookup_field='lineage',
     )
 
@@ -640,10 +640,10 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
         model=emg_models.Study,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:samples-studies-list',
+        related_link_view_name='emgapi_v1:samples-studies-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession',
-        related_link_self_view_name='emgapi:studies-detail',
+        related_link_self_view_name='emgapi_v1:studies-detail',
         related_link_self_lookup_field='accession'
     )
 
@@ -656,7 +656,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
         model=emg_models.Run,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:samples-runs-list',
+        related_link_view_name='emgapi_v1:samples-runs-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession',
     )
@@ -695,7 +695,7 @@ class StudySerializer(ExplicitFieldsModelSerializer,
     }
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi:studies-detail',
+        view_name='emgapi_v1:studies-detail',
         lookup_field='accession',
     )
 
@@ -710,10 +710,10 @@ class StudySerializer(ExplicitFieldsModelSerializer,
         read_only=True,
         source='get_biomes',
         model=emg_models.Biome,
-        related_link_view_name='emgapi:studies-biomes-list',
+        related_link_view_name='emgapi_v1:studies-biomes-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession',
-        related_link_self_view_name='emgapi:biomes-detail',
+        related_link_self_view_name='emgapi_v1:biomes-detail',
         related_link_self_lookup_field='lineage'
     )
 
@@ -727,7 +727,7 @@ class StudySerializer(ExplicitFieldsModelSerializer,
         model=emg_models.Publication,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:studies-publications-list',
+        related_link_view_name='emgapi_v1:studies-publications-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession',
     )
@@ -740,7 +740,7 @@ class StudySerializer(ExplicitFieldsModelSerializer,
         model=emg_models.Sample,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:studies-samples-list',
+        related_link_view_name='emgapi_v1:studies-samples-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession',
     )
