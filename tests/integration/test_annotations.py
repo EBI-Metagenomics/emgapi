@@ -36,7 +36,7 @@ class TestAnnotations(object):
                      os.path.dirname(os.path.abspath(__file__)),
                      suffix='.go_slim')
 
-        url = reverse("emgapi:goterms-list")
+        url = reverse("emgapi_v1:goterms-list")
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -46,7 +46,7 @@ class TestAnnotations(object):
         ids = [a['id'] for a in rsp['data']]
         assert ids == expected
 
-        url = reverse("emgapi:goterms-detail", args=['GO:0030246'])
+        url = reverse("emgapi_v1:goterms-detail", args=['GO:0030246'])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -58,7 +58,7 @@ class TestAnnotations(object):
                      os.path.dirname(os.path.abspath(__file__)),
                      suffix='.go')
 
-        url = reverse("emgapi:goterms-list")
+        url = reverse("emgapi_v1:goterms-list")
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -69,7 +69,7 @@ class TestAnnotations(object):
         ids = [a['id'] for a in rsp['data']]
         assert ids == expected
 
-        url = reverse("emgapi:goterms-detail", args=['GO:0030170'])
+        url = reverse("emgapi_v1:goterms-detail", args=['GO:0030170'])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -81,7 +81,7 @@ class TestAnnotations(object):
                      os.path.dirname(os.path.abspath(__file__)),
                      suffix='.ipr')
 
-        url = reverse("emgapi:interproidentifier-list")
+        url = reverse("emgapi_v1:interproidentifier-list")
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -92,18 +92,19 @@ class TestAnnotations(object):
         ids = [a['id'] for a in rsp['data']]
         assert ids == expected
 
-        url = reverse("emgapi:interproidentifier-detail", args=['IPR009739'])
+        url = reverse("emgapi_v1:interproidentifier-detail",
+                      args=['IPR009739'])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
         assert rsp['data']['id'] == 'IPR009739'
 
     def test_object_does_not_exist(self, client):
-        url = reverse("emgapi:goterms-detail", args=['GO:9999'])
+        url = reverse("emgapi_v1:goterms-detail", args=['GO:9999'])
         response = client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-        url = reverse("emgapi:interproidentifier-detail", args=['IPR9999'])
+        url = reverse("emgapi_v1:interproidentifier-detail", args=['IPR9999'])
         response = client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -122,7 +123,7 @@ class TestAnnotations(object):
                      os.path.dirname(os.path.abspath(__file__)),
                      suffix='.ipr')
 
-        url = reverse("emgapi:runs-pipelines-goslim-list",
+        url = reverse("emgapi_v1:runs-pipelines-goslim-list",
                       args=[job, version])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -130,7 +131,7 @@ class TestAnnotations(object):
 
         assert len(rsp['data']) == 0
 
-        url = reverse("emgapi:runs-pipelines-goterms-list",
+        url = reverse("emgapi_v1:runs-pipelines-goterms-list",
                       args=[job, version])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -138,7 +139,7 @@ class TestAnnotations(object):
 
         assert len(rsp['data']) == 0
 
-        url = reverse("emgapi:runs-pipelines-interpro-list",
+        url = reverse("emgapi_v1:runs-pipelines-interpro-list",
                       args=[job, version])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -192,7 +193,7 @@ class TestAnnotations(object):
                      os.path.dirname(os.path.abspath(__file__)),
                      suffix='.ipr')
 
-        url = reverse("emgapi:runs-pipelines-goslim-list",
+        url = reverse("emgapi_v1:runs-pipelines-goslim-list",
                       args=[job, version])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -207,7 +208,7 @@ class TestAnnotations(object):
         }
         assert ids == expected
 
-        url = reverse("emgapi:runs-pipelines-goterms-list",
+        url = reverse("emgapi_v1:runs-pipelines-goterms-list",
                       args=[job, version])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -222,7 +223,7 @@ class TestAnnotations(object):
         }
         assert ids == expected
 
-        url = reverse("emgapi:runs-pipelines-interpro-list",
+        url = reverse("emgapi_v1:runs-pipelines-interpro-list",
                       args=[job, version])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
