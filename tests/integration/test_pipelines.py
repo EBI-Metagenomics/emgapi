@@ -26,6 +26,6 @@ from rest_framework.test import APITestCase
 class TestPipelineAPI(APITestCase):
 
     def test_default(self):
-        url = reverse('emgapi:pipelines-list')
+        url = reverse('emgapi_v1:pipelines-list')
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
