@@ -15,7 +15,6 @@
 
 import logging
 
-from django.db.models import Sum
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 
@@ -23,12 +22,10 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import viewsets, mixins
 from rest_framework import filters
-from rest_framework.response import Response
 
 from . import models as emg_models
 from . import serializers as emg_serializers
 from . import filters as emg_filters
-from . import mixins as emg_mixins
 
 logger = logging.getLogger(__name__)
 
@@ -673,33 +670,3 @@ class PipelinePipelineToolRelationshipViewSet(mixins.ListModelMixin,
         """
         return super(PipelinePipelineToolRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
-
-
-class StudySummaryViewSet(emg_mixins.MultipleFieldLookupMixin,
-                          viewsets.GenericViewSet):
-
-    serializer_class = emg_serializers.StudyAnnSerializer
-
-    lookup_fields = ('accession', 'release_version')
-
-    def get_queryset(self):
-        accession = self.kwargs['accession']
-        release_version = self.kwargs['release_version']
-        queryset = emg_models.AnalysisJobAnn.objects.filter(
-            job__study__accession=accession,
-            job__pipeline__release_version=release_version) \
-            .select_related('job', 'var') \
-            .values('var__var_name') \
-            .annotate(total_value=Sum('var_val_ucv'))
-        return queryset
-
-    def list(self, request, *args, **kwargs):
-        """
-        Retrieves summary for the study and pipeline version
-        Example:
-        ---
-        `/studies/ERP001736/pipelines/2.0/summary` retrieve summary
-        """
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
