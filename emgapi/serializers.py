@@ -17,9 +17,6 @@
 
 import logging
 
-# from django.utils.text import Truncator
-
-# from rest_framework import serializers
 from rest_framework_json_api import serializers
 from rest_framework_json_api import relations
 
