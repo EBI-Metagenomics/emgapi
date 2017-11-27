@@ -26,7 +26,6 @@ from django.http import Http404
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework import viewsets, mixins
 from rest_framework.response import Response
 
 from rest_framework import filters
@@ -34,17 +33,16 @@ from rest_framework.decorators import detail_route, list_route
 # from rest_framework import authentication
 from rest_framework import permissions
 
-
 from . import models as emg_models
 from . import serializers as emg_serializers
 from . import filters as emg_filters
 from . import permissions as emg_perms
+from . import viewsets as emg_viewsets
 
 logger = logging.getLogger(__name__)
 
 
-class MyDataViewSet(mixins.ListModelMixin,
-                    viewsets.GenericViewSet):
+class MyDataViewSet(emg_viewsets.ReadOnlyListModelViewSet):
 
     serializer_class = emg_serializers.StudySerializer
     permission_classes = (
@@ -78,9 +76,7 @@ class MyDataViewSet(mixins.ListModelMixin,
         return Response(serializer.data)
 
 
-class BiomeViewSet(mixins.RetrieveModelMixin,
-                   mixins.ListModelMixin,
-                   viewsets.GenericViewSet):
+class BiomeViewSet(emg_viewsets.ReadOnlyModelViewSet):
 
     serializer_class = emg_serializers.BiomeSerializer
 
@@ -121,7 +117,6 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         ---
         `/biomes`
         """
-
         return super(BiomeViewSet, self).list(request, *args, **kwargs)
 
     def retrieve(self, request, *args, **kwargs):
@@ -170,9 +165,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         return Response(serializer.data)
 
 
-class StudyViewSet(mixins.RetrieveModelMixin,
-                   mixins.ListModelMixin,
-                   viewsets.GenericViewSet):
+class StudyViewSet(emg_viewsets.ReadOnlyModelViewSet):
 
     serializer_class = emg_serializers.StudySerializer
 
@@ -249,7 +242,6 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 
         `/studies?search=microbial%20fuel%20cells`
         """
-
         return super(StudyViewSet, self).list(request, *args, **kwargs)
 
     def retrieve(self, request, *args, **kwargs):
@@ -339,9 +331,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         return Response(serializer.data)
 
 
-class SampleViewSet(mixins.RetrieveModelMixin,
-                    mixins.ListModelMixin,
-                    viewsets.GenericViewSet):
+class SampleViewSet(emg_viewsets.ReadOnlyModelViewSet):
 
     serializer_class = emg_serializers.SampleSerializer
 
@@ -447,9 +437,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         return super(SampleViewSet, self).list(request, *args, **kwargs)
 
 
-class RunViewSet(mixins.RetrieveModelMixin,
-                 mixins.ListModelMixin,
-                 viewsets.GenericViewSet):
+class RunViewSet(emg_viewsets.ReadOnlyModelViewSet):
 
     serializer_class = emg_serializers.RunSerializer
 
@@ -524,8 +512,7 @@ class RunViewSet(mixins.RetrieveModelMixin,
         return super(RunViewSet, self).retrieve(request, *args, **kwargs)
 
 
-class AnalysisResultViewSet(mixins.ListModelMixin,
-                            viewsets.GenericViewSet):
+class AnalysisResultViewSet(emg_viewsets.ReadOnlyListModelViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
 
@@ -566,8 +553,7 @@ class AnalysisResultViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class AnalysisViewSet(mixins.RetrieveModelMixin,
-                      viewsets.GenericViewSet):
+class AnalysisViewSet(emg_viewsets.ReadOnlyRetrieveModelViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
 
@@ -600,9 +586,7 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
         return super(AnalysisViewSet, self).retrieve(request, *args, **kwargs)
 
 
-class PipelineViewSet(mixins.RetrieveModelMixin,
-                      mixins.ListModelMixin,
-                      viewsets.GenericViewSet):
+class PipelineViewSet(emg_viewsets.ReadOnlyModelViewSet):
 
     serializer_class = emg_serializers.PipelineSerializer
     queryset = emg_models.Pipeline.objects.all()
@@ -652,8 +636,7 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         return super(PipelineViewSet, self).list(request, *args, **kwargs)
 
 
-class PipelineToolViewSet(mixins.ListModelMixin,
-                          viewsets.GenericViewSet):
+class PipelineToolViewSet(emg_viewsets.ReadOnlyListModelViewSet):
 
     serializer_class = emg_serializers.PipelineToolSerializer
     queryset = emg_models.PipelineTool.objects.all()
@@ -671,8 +654,7 @@ class PipelineToolViewSet(mixins.ListModelMixin,
         return super(PipelineToolViewSet, self).list(request, *args, **kwargs)
 
 
-class PipelineToolVersionViewSet(mixins.RetrieveModelMixin,
-                                 viewsets.GenericViewSet):
+class PipelineToolVersionViewSet(emg_viewsets.ReadOnlyRetrieveModelViewSet):
 
     serializer_class = emg_serializers.PipelineToolSerializer
     queryset = emg_models.PipelineTool.objects.all()
@@ -701,9 +683,7 @@ class PipelineToolVersionViewSet(mixins.RetrieveModelMixin,
             .retrieve(request, *args, **kwargs)
 
 
-class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
-                            mixins.ListModelMixin,
-                            viewsets.GenericViewSet):
+class ExperimentTypeViewSet(emg_viewsets.ReadOnlyModelViewSet):
 
     serializer_class = emg_serializers.ExperimentTypeSerializer
     queryset = emg_models.ExperimentType.objects.all()
@@ -742,9 +722,7 @@ class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
             .list(request, *args, **kwargs)
 
 
-class PublicationViewSet(mixins.RetrieveModelMixin,
-                         mixins.ListModelMixin,
-                         viewsets.GenericViewSet):
+class PublicationViewSet(emg_viewsets.ReadOnlyModelViewSet):
 
     serializer_class = emg_serializers.PublicationSerializer
 
