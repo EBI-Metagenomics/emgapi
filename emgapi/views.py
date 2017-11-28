@@ -200,7 +200,8 @@ class StudyViewSet(emg_viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         queryset = emg_models.Study.objects.available(self.request)
         if 'samples' in self.request.GET.get('include', '').split(','):
-            _qs = emg_models.Sample.objects.available(self.request)
+            _qs = emg_models.Sample.objects \
+                .available(self.request, prefetch=True)
             queryset = queryset.prefetch_related(
                 Prefetch('samples', queryset=_qs)
             )
@@ -371,7 +372,7 @@ class SampleViewSet(emg_viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         queryset = emg_models.Sample.objects \
-            .available(self.request)
+            .available(self.request, prefetch=True)
         if 'runs' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Run.objects \
                 .available(self.request) \
@@ -380,8 +381,6 @@ class SampleViewSet(emg_viewsets.ReadOnlyModelViewSet):
                 )
             queryset = queryset.prefetch_related(
                 Prefetch('runs', queryset=_qs))
-        # if 'studies' in self.request.GET.get('include', '').split(','):
-        #     queryset = queryset.select_related('studies')
         return queryset
 
     def get_object(self):

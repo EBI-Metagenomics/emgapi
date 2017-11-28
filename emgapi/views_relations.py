@@ -26,6 +26,7 @@ from rest_framework import filters
 from . import models as emg_models
 from . import serializers as emg_serializers
 from . import filters as emg_filters
+from . import viewsets as emg_viewsets
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +78,7 @@ class BiomeStudyRelationshipViewSet(mixins.ListModelMixin,
             .filter(study_id__in=studies)
         if 'samples' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Sample.objects \
-                .available(self.request)
+                .available(self.request, prefetch=True)
             queryset = queryset.prefetch_related(
                 Prefetch('samples', queryset=_qs))
         return queryset
@@ -111,7 +112,7 @@ class PublicationStudyRelationshipViewSet(mixins.ListModelMixin,
             .filter(publications=obj)
         if 'samples' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Sample.objects \
-                .available(self.request)
+                .available(self.request, prefetch=True)
             queryset = queryset.prefetch_related(
                 Prefetch('samples', queryset=_qs))
         return queryset
@@ -171,7 +172,7 @@ class StudySampleRelationshipViewSet(mixins.ListModelMixin,
         study = get_object_or_404(
             emg_models.Study, accession=self.kwargs[self.lookup_field])
         queryset = emg_models.Sample.objects \
-            .available(self.request) \
+            .available(self.request, prefetch=True) \
             .filter(studies__in=[study])
         _qs = emg_models.Study.objects.available(self.request)
         # queryset = queryset.prefetch_related(
@@ -214,7 +215,7 @@ class PipelineSampleRelationshipViewSet(mixins.ListModelMixin,
             emg_models.Pipeline,
             release_version=self.kwargs[self.lookup_field])
         queryset = emg_models.Sample.objects \
-            .available(self.request) \
+            .available(self.request, prefetch=True) \
             .filter(analysis__pipeline=pipeline)
         if 'runs' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Run.objects.available(self.request)
@@ -299,7 +300,8 @@ class ExperimentTypeAnalysisRelationshipViewSet(mixins.ListModelMixin,
             .available(self.request) \
             .filter(experiment_type=experiment_type)
         if 'sample' in self.request.GET.get('include', '').split(','):
-            _qs = emg_models.Sample.objects.available(self.request)
+            _qs = emg_models.Sample.objects.available(
+                self.request, prefetch=True)
             queryset = queryset.prefetch_related(
                 Prefetch('sample', queryset=_qs))
         if 'study' in self.request.GET.get('include', '').split(','):
@@ -366,7 +368,7 @@ class ExperimentTypeSampleRelationshipViewSet(mixins.ListModelMixin,
             emg_models.ExperimentType,
             experiment_type=self.kwargs[self.lookup_field])
         queryset = emg_models.Sample.objects \
-            .available(self.request) \
+            .available(self.request, prefetch=True) \
             .filter(runs__experiment_type=experiment_type)
         if 'runs' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Run.objects.available(self.request)
@@ -406,7 +408,7 @@ class BiomeSampleRelationshipViewSet(mixins.ListModelMixin,
         lineage = self.kwargs[self.lookup_field]
         obj = get_object_or_404(emg_models.Biome, lineage=lineage)
         queryset = emg_models.Sample.objects \
-            .available(self.request) \
+            .available(self.request, prefetch=True) \
             .filter(
                 biome__lft__gte=obj.lft, biome__rgt__lte=obj.rgt,
                 biome__depth__gte=obj.depth)
@@ -449,7 +451,7 @@ class PublicationSampleRelationshipViewSet(mixins.ListModelMixin,
         pubmed_id = self.kwargs[self.lookup_field]
         obj = get_object_or_404(emg_models.Publication, pubmed_id=pubmed_id)
         queryset = emg_models.Sample.objects \
-            .available(self.request) \
+            .available(self.request, prefetch=True) \
             .filter(studies__publications=obj)
         if 'runs' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Run.objects.available(self.request)
@@ -472,8 +474,7 @@ class PublicationSampleRelationshipViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class BaseRunRelationshipViewSet(mixins.ListModelMixin,
-                                 viewsets.GenericViewSet):
+class BaseRunRelationshipViewSet(emg_viewsets.ReadOnlyListModelViewSet):
 
     serializer_class = emg_serializers.RunSerializer
 
@@ -585,8 +586,7 @@ class SampleStudiesRelationshipViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class BiomeTreeViewSet(mixins.ListModelMixin,
-                       viewsets.GenericViewSet):
+class BiomeTreeViewSet(emg_viewsets.ReadOnlyListModelViewSet):
 
     serializer_class = emg_serializers.BiomeSerializer
     queryset = emg_models.Biome.objects.filter(depth=1)
@@ -637,8 +637,7 @@ class BiomeTreeViewSet(mixins.ListModelMixin,
         return super(BiomeTreeViewSet, self).list(request, *args, **kwargs)
 
 
-class PipelinePipelineToolRelationshipViewSet(mixins.ListModelMixin,
-                                              viewsets.GenericViewSet):
+class PipelinePipelineToolRelationshipViewSet(emg_viewsets.ReadOnlyListModelViewSet):  # noqa
 
     serializer_class = emg_serializers.PipelineToolSerializer
 
@@ -669,4 +668,32 @@ class PipelinePipelineToolRelationshipViewSet(mixins.ListModelMixin,
         `/pipeline/{release_version}/tools`
         """
         return super(PipelinePipelineToolRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class SampleMetadataRelationshipViewSet(emg_viewsets.ReadOnlyListModelViewSet):
+
+    serializer_class = emg_serializers.SampleAnnSerializer
+
+    lookup_field = 'accession'
+    lookup_value_regex = '[a-zA-Z0-9\-\_]+'
+
+    def get_queryset(self):
+        accession = self.kwargs[self.lookup_field]
+        return emg_models.SampleAnn.objects \
+            .filter(sample__accession=accession) \
+            .prefetch_related(Prefetch(
+                'sample',
+                queryset=emg_models.Sample.objects.available(self.request)
+            )) \
+            .order_by('var')
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves metadatafor the given analysis job
+        Example:
+        ---
+        `/samples/ERS1015417/metadata` retrieve metadata
+        """
+        return super(SampleMetadataRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
