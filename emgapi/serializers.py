@@ -599,6 +599,56 @@ class StudyAnnSerializer(ExplicitFieldsModelSerializer,
 
 # Sample serializer
 
+class BaseMetadataSerializer(ExplicitFieldsModelSerializer,
+                             serializers.HyperlinkedModelSerializer):
+
+    # workaround to provide multiple values in PK
+    id = serializers.ReadOnlyField(source="multiple_pk")
+
+    # attributes
+    var_name = serializers.SerializerMethodField()
+
+    def get_var_name(self, obj):
+        return obj.var.var_name
+
+    var_value = serializers.SerializerMethodField()
+
+    def get_var_value(self, obj):
+        return obj.var_val_ucv
+
+    unit = serializers.SerializerMethodField()
+
+    def get_unit(self, obj):
+        return obj.units
+
+
+class SampleAnnSerializer(BaseMetadataSerializer):
+
+    # attributes
+    # sample_accession = serializers.SerializerMethodField()
+    #
+    # def get_sample_accession(self, obj):
+    #     return obj.sample.accession
+
+    # relationships
+    sample = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emgapi_v1:samples-detail',
+        lookup_field='accession'
+    )
+
+    class Meta:
+        model = emg_models.SampleAnn
+        fields = (
+            'id',
+            'var_name',
+            'var_value',
+            'unit',
+            # 'sample_accession',
+            'sample',
+        )
+
+
 class SampleSerializer(ExplicitFieldsModelSerializer,
                        serializers.HyperlinkedModelSerializer):
 
@@ -606,6 +656,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
         # 'studies': 'emgapi.serializers.StudySerializer',
         'biome': 'emgapi.serializers.BiomeSerializer',
         'runs': 'emgapi.serializers.RunSerializer',
+        'metadata': 'emgapi.serializers.SampleAnnSerializer',
     }
 
     url = serializers.HyperlinkedIdentityField(
@@ -623,7 +674,18 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
 
     longitude = serializers.FloatField()
 
-    sample_metadata = serializers.ListField()
+    metadata = relations.SerializerMethodResourceRelatedField(
+        source='get_metadata',
+        model=emg_models.SampleAnn,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:samples-metadata-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
+    )
+
+    def get_metadata(self, obj):
+        return None
 
     # relationships
     biome = serializers.HyperlinkedRelatedField(
@@ -645,8 +707,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
     )
 
     def get_studies(self, obj):
-        return emg_models.Study.objects.available(self.context['request']) \
-            .filter(samples=obj)
+        return obj.studies.available(self.context['request'])
 
     runs = relations.SerializerMethodResourceRelatedField(
         source='get_runs',
@@ -679,6 +740,7 @@ class RetrieveSampleSerializer(SampleSerializer):
         'biome': 'emgapi.serializers.BiomeSerializer',
         # 'studies': 'emgapi.serializers.StudySerializer',
         'runs': 'emgapi.serializers.RunSerializer',
+        'metadata': 'emgapi.serializers.SampleAnnSerializer',
     }
 
 

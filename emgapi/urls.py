@@ -179,6 +179,11 @@ router.register(
     base_name='samples-studies'
 )
 
+router.register(
+    r'samples/(?P<accession>[a-zA-Z0-9\-\_]+)/metadata',
+    views_relations.SampleMetadataRelationshipViewSet,
+    base_name='samples-metadata'
+)
 
 mydata_router = routers.DefaultRouter(trailing_slash=False)
 
