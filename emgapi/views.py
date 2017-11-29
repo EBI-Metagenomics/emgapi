@@ -140,12 +140,14 @@ class BiomeViewSet(emg_viewsets.ReadOnlyModelViewSet):
         """
 
         sql = """
-        SELECT parent.BIOME_ID, COUNT(distinct sample.STUDY_ID) as study_count
+        SELECT parent.BIOME_ID, COUNT(distinct ss.STUDY_ID) as study_count
         FROM BIOME_HIERARCHY_TREE AS node,
             BIOME_HIERARCHY_TREE AS parent,
-            SAMPLE as sample
+            SAMPLE as sample,
+            STUDY_SAMPLE as ss
         WHERE node.lft BETWEEN parent.lft AND parent.rgt
             AND node.BIOME_ID = sample.BIOME_ID
+            AND sample.SAMPLE_ID = ss.SAMPLE_ID
             AND parent.DEPTH > 1
             AND sample.IS_PUBLIC = 1
         GROUP BY parent.BIOME_ID
@@ -233,7 +235,7 @@ class StudyViewSet(emg_viewsets.ReadOnlyModelViewSet):
 
         Filter by:
         ---
-        `/studies?biome=root:Environmental:Terrestrial:Soil`
+        `/studies?lineage=root:Environmental:Terrestrial:Soil`
 
         `/studies?centre_name=BioProject`
 
