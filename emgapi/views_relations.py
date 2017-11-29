@@ -67,15 +67,12 @@ class BiomeStudyRelationshipViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         lineage = self.kwargs[self.lookup_field]
         obj = get_object_or_404(emg_models.Biome, lineage=lineage)
-        studies = emg_models.Sample.objects \
-            .available(self.request) \
-            .filter(
-                biome__lft__gte=obj.lft, biome__rgt__lte=obj.rgt,
-                biome__depth__gte=obj.depth) \
-            .values('studies')
         queryset = emg_models.Study.objects \
             .available(self.request) \
-            .filter(study_id__in=studies)
+            .filter(
+                samples__biome__lft__gte=obj.lft,
+                samples__biome__rgt__lte=obj.rgt,
+                samples__biome__depth__gte=obj.depth)
         if 'samples' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Sample.objects \
                 .available(self.request, prefetch=True)
@@ -195,7 +192,7 @@ class StudySampleRelationshipViewSet(mixins.ListModelMixin,
 
         Filter by:
         ---
-        `/studies/ERP009004/samples?biome=root%3AEnvironmental%3AAquatic`
+        `/studies/ERP009004/samples?lineage=root%3AEnvironmental%3AAquatic`
         filtered by biome
 
         `/studies/ERP009004/samples?geo_loc_name=Alberta` filtered by
