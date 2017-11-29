@@ -28,6 +28,7 @@ from django_filters import widgets
 from . import models as emg_models
 
 WORD_MATCH_REGEX = r"{0}"
+FLOAT_MATCH_REGEX = r"^[0-9 \.\,]+$"
 
 
 def published_year():
@@ -147,7 +148,7 @@ class StudyFilter(django_filters.FilterSet):
     accession = django_filters.CharFilter(
         method='filter_study_accession', distinct=True,
         label='Accession',
-        help_text='Study or Project accession')
+        help_text='Study or BioProject accession')
 
     def filter_study_accession(self, qs, name, value):
         return qs.filter(
@@ -302,8 +303,9 @@ class SampleFilter(django_filters.FilterSet):
         help_text='Metadata greater/equal then value')
 
     def filter_metadata_value_gte(self, qs, name, value):
-        return qs.annotate(
-            float_value=Cast('metadata__var_val_ucv', FloatField())) \
+        return qs.filter(metadata__var_val_ucv__iregex=FLOAT_MATCH_REGEX) \
+            .annotate(float_value=Cast(
+                'metadata__var_val_ucv', FloatField())) \
             .filter(float_value__gte=float(value))
 
     metadata_value_lte = django_filters.NumberFilter(
@@ -312,8 +314,9 @@ class SampleFilter(django_filters.FilterSet):
         help_text='Metadata less/equal then value')
 
     def filter_metadata_value_lte(self, qs, name, value):
-        return qs.annotate(
-            float_value=Cast('metadata__var_val_ucv', FloatField())) \
+        return qs.filter(metadata__var_val_ucv__iregex=FLOAT_MATCH_REGEX) \
+            .annotate(float_value=Cast(
+                'metadata__var_val_ucv', FloatField())) \
             .filter(float_value__lte=float(value))
 
     metadata_value = django_filters.CharFilter(
@@ -322,8 +325,8 @@ class SampleFilter(django_filters.FilterSet):
         help_text='Metadata exact value')
 
     def filter_metadata_value(self, qs, name, value):
-        return qs.filter(
-            metadata__var_val_ucv=value)
+        return qs.filter(metadata__var_val_ucv__iregex=FLOAT_MATCH_REGEX) \
+            .filter(metadata__var_val_ucv=value)
 
     species = django_filters.CharFilter(
         method='filter_species', distinct=True,
@@ -347,8 +350,9 @@ class SampleFilter(django_filters.FilterSet):
         help_text='Latitude greater/equal then value')
 
     def filter_latitude_gte(self, qs, name, value):
-        return qs.extra({'latitude': "CAST(latitude as DECIMAL(10,5))"}) \
-            .filter(latitude__gte=value)
+        return qs.annotate(
+            latitude_cast=Cast('latitude', FloatField())) \
+            .filter(latitude_cast__gte=float(value))
 
     latitude_lte = django_filters.NumberFilter(
         method='filter_latitude_lte', distinct=True,
@@ -356,8 +360,9 @@ class SampleFilter(django_filters.FilterSet):
         help_text='Latitude less/equal then value')
 
     def filter_latitude_lte(self, qs, name, value):
-        return qs.extra({'latitude': "CAST(latitude as DECIMAL(10,5))"}) \
-            .filter(latitude__lte=value)
+        return qs.annotate(
+            latitude_cast=Cast('latitude', FloatField())) \
+            .filter(latitude_cast__lte=float(value))
 
     longitude_gte = django_filters.NumberFilter(
         method='filter_longitude_gte', distinct=True,
@@ -365,8 +370,9 @@ class SampleFilter(django_filters.FilterSet):
         help_text='Longitude greater/equal then value')
 
     def filter_longitude_gte(self, qs, name, value):
-        return qs.extra({'longitude': "CAST(longitude as DECIMAL(10,5))"}) \
-            .filter(longitude__gte=value)
+        return qs.annotate(
+            longitude_cast=Cast('longitude', FloatField())) \
+            .filter(longitude_cast__gte=float(value))
 
     longitude_lte = django_filters.NumberFilter(
         method='filter_longitude_lte', distinct=True,
@@ -374,13 +380,14 @@ class SampleFilter(django_filters.FilterSet):
         help_text='Longitude less/equal then value')
 
     def filter_longitude_lte(self, qs, name, value):
-        return qs.extra({'longitude': "CAST(longitude as DECIMAL(10,5))"}) \
-            .filter(longitude__lte=value)
+        return qs.annotate(
+            longitude_cast=Cast('longitude', FloatField())) \
+            .filter(longitude_cast__lte=float(value))
 
     study_accession = django_filters.CharFilter(
         method='filter_study_accession', distinct=True,
         label='Accession',
-        help_text='Study or Project accession')
+        help_text='Study or BioProject accession')
 
     def filter_study_accession(self, qs, name, value):
         return qs.filter(
