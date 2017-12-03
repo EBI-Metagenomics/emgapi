@@ -74,7 +74,7 @@ class TestBiomeAPI(APITestCase):
         )
 
     def test_biomes_list(self):
-        url = reverse('emgapi:biomes-list')
+        url = reverse('emgapi_v1:biomes-list')
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -94,7 +94,7 @@ class TestBiomeAPI(APITestCase):
             assert b['id'] in expected
 
     def test_children(self):
-        url = reverse('emgapi:biomes-children-list', args=['root:foo'])
+        url = reverse('emgapi_v1:biomes-children-list', args=['root:foo'])
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -108,7 +108,7 @@ class TestBiomeAPI(APITestCase):
             assert b['id'] in ('root:foo', 'root:foo:bar', 'root:foo:bar2')
 
     def test_samples(self):
-        url = reverse('emgapi:biomes-samples-list', args=['root:foo'])
+        url = reverse('emgapi_v1:biomes-samples-list', args=['root:foo'])
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -125,7 +125,7 @@ class TestBiomeAPI(APITestCase):
             assert b['id'] in ('root:foo', 'root:foo:bar', 'root:foo:bar2')
 
     def test_study(self):
-        url = reverse('emgapi:studies-detail', args=['SPR0001'])
+        url = reverse('emgapi_v1:studies-detail', args=['SPR0001'])
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()

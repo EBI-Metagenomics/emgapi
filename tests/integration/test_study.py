@@ -29,7 +29,7 @@ from test_utils.emg_fixtures import *  # noqa
 class TestStudyAPI(object):
 
     def test_details(self, client, study):
-        url = reverse("emgapi:studies-detail", args=["SRP01234"])
+        url = reverse("emgapi_v1:studies-detail", args=["SRP01234"])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -50,7 +50,7 @@ class TestStudyAPI(object):
         assert _attr['bioproject'] == "PRJDB1234"
 
     def test_public(self, client, study, study_private):
-        url = reverse("emgapi:studies-list")
+        url = reverse("emgapi_v1:studies-list")
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
