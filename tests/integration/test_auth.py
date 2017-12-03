@@ -29,7 +29,7 @@ class TestTokenAuthAPI(APITestCase):
         }
 
         rsp = self.client.post(
-            reverse('obtain_jwt_token'), data=data, format='json')
+            reverse('obtain_jwt_token_v1'), data=data, format='json')
         token = rsp.json()['data']['token']
         assert rsp.status_code == status.HTTP_200_OK
 
@@ -38,11 +38,11 @@ class TestTokenAuthAPI(APITestCase):
         }
 
         rsp = self.client.post(
-            reverse('verify_jwt_token'), format='json', data=data)
+            reverse('verify_jwt_token_v1'), format='json', data=data)
         assert rsp.status_code == status.HTTP_200_OK
 
         rsp = self.client.get(
-            reverse('emgapi:mydata-list'),
+            reverse('emgapi_v1:mydata-list'),
             HTTP_AUTHORIZATION='Bearer {}'.format(token)
         )
         assert rsp.status_code == status.HTTP_200_OK
@@ -58,7 +58,7 @@ class TestTokenAuthAPI(APITestCase):
         }
 
         rsp = self.client.post(
-            reverse('obtain_jwt_token'), data=data, format='json')
+            reverse('obtain_jwt_token_v1'), data=data, format='json')
         assert rsp.json()['errors'] == error
         assert rsp.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -74,7 +74,7 @@ class TestTokenAuthAPI(APITestCase):
         ]
 
         rsp = self.client.get(
-            reverse('emgapi:mydata-list'),
+            reverse('emgapi_v1:mydata-list'),
             HTTP_AUTHORIZATION='Bearer 12345'
         )
         assert rsp.status_code == status.HTTP_401_UNAUTHORIZED

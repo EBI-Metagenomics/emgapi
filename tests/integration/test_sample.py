@@ -28,7 +28,7 @@ from test_utils.emg_fixtures import *  # noqa
 class TestSampleAPI(object):
 
     def test_details(self, client, sample):
-        url = reverse("emgapi:samples-detail", args=["ERS01234"])
+        url = reverse("emgapi_v1:samples-detail", args=["ERS01234"])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -38,7 +38,7 @@ class TestSampleAPI(object):
         assert rsp['data']['type'] == "samples"
         assert rsp['data']['id'] == "ERS01234"
         _attr = rsp['data']['attributes']
-        assert(len(_attr) == 17)
+        assert(len(_attr) == 16)
         assert _attr['accession'] == "ERS01234"
         assert _attr['biosample'] == "SAMS01234"
         assert _attr['sample-desc'] == "abcdefghijklmnoprstuvwyz"
@@ -56,7 +56,7 @@ class TestSampleAPI(object):
         assert _attr['longitude'] == 456.456
 
     def test_public(self, client, sample, sample_private):
-        url = reverse("emgapi:samples-list")
+        url = reverse("emgapi_v1:samples-list")
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()

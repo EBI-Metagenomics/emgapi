@@ -28,7 +28,7 @@ class GoTermSerializer(m_serializers.DocumentSerializer,
                        serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi:goterms-detail',
+        view_name='emgapi_v1:goterms-detail',
         lookup_field='accession',
     )
 
@@ -37,7 +37,7 @@ class GoTermSerializer(m_serializers.DocumentSerializer,
         model=emg_models.AnalysisJob,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:goterms-analysis-list',
+        related_link_view_name='emgapi_v1:goterms-analysis-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
@@ -57,7 +57,7 @@ class InterproIdentifierSerializer(m_serializers.DocumentSerializer,
                                    serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi:interproidentifier-detail',
+        view_name='emgapi_v1:interproidentifier-detail',
         lookup_field='accession',
     )
 
@@ -66,7 +66,7 @@ class InterproIdentifierSerializer(m_serializers.DocumentSerializer,
         model=emg_models.AnalysisJob,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:interproidentifier-analysis-list',
+        related_link_view_name='emgapi_v1:interproidentifier-analysis-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
@@ -86,7 +86,7 @@ class GoTermRetriveSerializer(m_serializers.DynamicDocumentSerializer,
                               serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi:goterms-detail',
+        view_name='emgapi_v1:goterms-detail',
         lookup_field='accession',
     )
 
@@ -95,7 +95,7 @@ class GoTermRetriveSerializer(m_serializers.DynamicDocumentSerializer,
         model=emg_models.AnalysisJob,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:goterms-analysis-list',
+        related_link_view_name='emgapi_v1:goterms-analysis-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
@@ -118,7 +118,7 @@ class InterproIdentifierRetriveSerializer(  # NOQA
     serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi:interproidentifier-detail',
+        view_name='emgapi_v1:interproidentifier-detail',
         lookup_field='accession',
     )
 
@@ -127,7 +127,7 @@ class InterproIdentifierRetriveSerializer(  # NOQA
         model=emg_models.AnalysisJob,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:interproidentifier-analysis-list',
+        related_link_view_name='emgapi_v1:interproidentifier-analysis-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
@@ -149,7 +149,7 @@ class OrganismSerializer(m_serializers.DynamicDocumentSerializer,
                          serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi:organisms-children-list',
+        view_name='emgapi_v1:organisms-children-list',
         lookup_field='lineage',
     )
 
@@ -159,7 +159,7 @@ class OrganismSerializer(m_serializers.DynamicDocumentSerializer,
     #     model=m_models.Organism,
     #     many=True,
     #     read_only=True,
-    #     related_link_view_name='emgapi:organisms-children-list',
+    #     related_link_view_name='emgapi_v1:organisms-children-list',
     #     related_link_url_kwarg='lineage',
     #     related_link_lookup_field='lineage',
     # )
@@ -172,7 +172,7 @@ class OrganismSerializer(m_serializers.DynamicDocumentSerializer,
         model=emg_models.AnalysisJob,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi:organisms-analysis-list',
+        related_link_view_name='emgapi_v1:organisms-analysis-list',
         related_link_url_kwarg='lineage',
         related_link_lookup_field='lineage'
     )
