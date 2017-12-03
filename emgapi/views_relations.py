@@ -31,36 +31,7 @@ from . import viewsets as emg_viewsets
 logger = logging.getLogger(__name__)
 
 
-class BaseStudyRelationshipViewSet(viewsets.GenericViewSet):
-
-    serializer_class = emg_serializers.StudySerializer
-
-    filter_class = emg_filters.StudyFilter
-
-    filter_backends = (
-        DjangoFilterBackend,
-        filters.SearchFilter,
-        filters.OrderingFilter,
-    )
-
-    ordering_fields = (
-        'accession',
-        'last_update',
-        'samples_count',
-        'runs_count',
-    )
-
-    ordering = ('-last_update',)
-
-    search_fields = (
-        '@study_name',
-        '@study_abstract',
-        'centre_name',
-    )
-
-
-class BiomeStudyRelationshipViewSet(mixins.ListModelMixin,
-                                    BaseStudyRelationshipViewSet):
+class BiomeStudyRelationshipViewSet(emg_viewsets.BaseStudyRelationshipGenericViewSet):  # noqa
 
     lookup_field = 'lineage'
 
@@ -95,11 +66,9 @@ class BiomeStudyRelationshipViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class PublicationStudyRelationshipViewSet(mixins.ListModelMixin,
-                                          BaseStudyRelationshipViewSet):
+class PublicationStudyRelationshipViewSet(emg_viewsets.BaseStudyRelationshipGenericViewSet):  # noqa
 
     lookup_field = 'pubmed_id'
-    lookup_value_regex = '[0-9\.]+'
 
     def get_queryset(self):
         pubmed_id = self.kwargs[self.lookup_field]
@@ -127,41 +96,7 @@ class PublicationStudyRelationshipViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class BaseSampleRelationshipViewSet(viewsets.GenericViewSet):
-
-    serializer_class = emg_serializers.SampleSerializer
-
-    filter_class = emg_filters.SampleFilter
-
-    filter_backends = (
-        DjangoFilterBackend,
-        filters.SearchFilter,
-        filters.OrderingFilter,
-    )
-
-    ordering_fields = (
-        'accession',
-        'last_update',
-        'runs_count',
-    )
-
-    ordering = ('-last_update',)
-
-    search_fields = (
-        '@sample_name',
-        '@sample_desc',
-        'sample_alias',
-        'species',
-        'environment_feature',
-        'environment_biome',
-        'environment_feature',
-        'environment_material',
-        '@metadata__var_val_ucv',
-    )
-
-
-class StudySampleRelationshipViewSet(mixins.ListModelMixin,
-                                     BaseSampleRelationshipViewSet):
+class StudySampleRelationshipViewSet(emg_viewsets.BaseSampleRelationshipGenericViewSet):  # noqa
 
     lookup_field = 'accession'
 
@@ -202,8 +137,7 @@ class StudySampleRelationshipViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class PipelineSampleRelationshipViewSet(mixins.ListModelMixin,
-                                        BaseSampleRelationshipViewSet):
+class PipelineSampleRelationshipViewSet(emg_viewsets.BaseSampleRelationshipGenericViewSet):  # noqa
 
     lookup_field = 'release_version'
 
@@ -241,25 +175,7 @@ class PipelineSampleRelationshipViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class BaseAnalysisRelationshipViewSet(viewsets.GenericViewSet):
-
-    serializer_class = emg_serializers.AnalysisSerializer
-
-    filter_class = emg_filters.AnalysisJobFilter
-
-    filter_backends = (
-        DjangoFilterBackend,
-        filters.OrderingFilter,
-    )
-
-    ordering_fields = (
-        'accession',
-    )
-    ordering = ('accession',)
-
-
-class PipelineAnalysisRelationshipViewSet(mixins.ListModelMixin,
-                                          BaseAnalysisRelationshipViewSet):
+class PipelineAnalysisRelationshipViewSet(emg_viewsets.BaseAnalysisRelationshipGenericViewSet):  # noqa
 
     lookup_field = 'release_version'
 
@@ -284,8 +200,7 @@ class PipelineAnalysisRelationshipViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class ExperimentTypeAnalysisRelationshipViewSet(mixins.ListModelMixin,
-                                                BaseAnalysisRelationshipViewSet):  # noqa
+class ExperimentTypeAnalysisRelationshipViewSet(emg_viewsets.BaseAnalysisRelationshipGenericViewSet):  # noqa
 
     lookup_field = 'experiment_type'
 
@@ -312,24 +227,14 @@ class ExperimentTypeAnalysisRelationshipViewSet(mixins.ListModelMixin,
         Retrieves list of samples for the given experiment type
         Example:
         ---
-        `/experiments/metagenomic/samples` retrieve linked samples
+        `/experiments/metagenomic/analysis` retrieve linked analysis
 
-        `/experiments/metagenomic/samples?include=runs` with runs
-
-        Filter by:
-        ---
-        `/experiments/metagenomic/samples?biome=root%3AEnvironmental
-        %3AAquatic` filtered by biome
-
-        `/experiments/metagenomic/samples?geo_loc_name=Alberta`
-        filtered by localtion
         """
         return super(ExperimentTypeAnalysisRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
 
 
-# class PipelineStudyRelationshipViewSet(mixins.ListModelMixin,
-#                                        BaseStudyRelationshipViewSet):
+# class PipelineStudyRelationshipViewSet(emg_viewsets.BaseStudyRelationshipGenericViewSet):  # noqa
 #
 #     lookup_field = 'release_version'
 #
@@ -355,8 +260,7 @@ class ExperimentTypeAnalysisRelationshipViewSet(mixins.ListModelMixin,
 #             .list(request, *args, **kwargs)
 
 
-class ExperimentTypeSampleRelationshipViewSet(mixins.ListModelMixin,
-                                              BaseSampleRelationshipViewSet):
+class ExperimentTypeSampleRelationshipViewSet(emg_viewsets.BaseSampleRelationshipGenericViewSet):  # noqa
 
     lookup_field = 'experiment_type'
 
@@ -396,8 +300,7 @@ class ExperimentTypeSampleRelationshipViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class BiomeSampleRelationshipViewSet(mixins.ListModelMixin,
-                                     BaseSampleRelationshipViewSet):
+class BiomeSampleRelationshipViewSet(emg_viewsets.BaseSampleRelationshipGenericViewSet):  # noqa
 
     lookup_field = 'lineage'
 
@@ -438,11 +341,9 @@ class BiomeSampleRelationshipViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class PublicationSampleRelationshipViewSet(mixins.ListModelMixin,
-                                           BaseSampleRelationshipViewSet):
+class PublicationSampleRelationshipViewSet(emg_viewsets.BaseSampleRelationshipGenericViewSet):  # noqa
 
     lookup_field = 'pubmed_id'
-    lookup_value_regex = '[0-9\.]+'
 
     def get_queryset(self):
         pubmed_id = self.kwargs[self.lookup_field]
@@ -471,32 +372,7 @@ class PublicationSampleRelationshipViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class BaseRunRelationshipViewSet(emg_viewsets.ReadOnlyListModelViewSet):
-
-    serializer_class = emg_serializers.RunSerializer
-
-    filter_class = emg_filters.RunFilter
-
-    filter_backends = (
-        DjangoFilterBackend,
-        filters.SearchFilter,
-        filters.OrderingFilter,
-    )
-
-    ordering_fields = (
-        'accession',
-    )
-
-    ordering = ('-accession',)
-
-    search_fields = (
-        'instrument_platform',
-        'instrument_model',
-        '@sample__metadata__var_val_ucv',
-    )
-
-
-class ExperimentTypeRunRelationshipViewSet(BaseRunRelationshipViewSet):
+class ExperimentTypeRunRelationshipViewSet(emg_viewsets.BaseRunRelationshipGenericViewSet):  # noqa
 
     lookup_field = 'experiment_type'
 
@@ -524,7 +400,7 @@ class ExperimentTypeRunRelationshipViewSet(BaseRunRelationshipViewSet):
             .list(request, *args, **kwargs)
 
 
-class SampleRunRelationshipViewSet(BaseRunRelationshipViewSet):
+class SampleRunRelationshipViewSet(emg_viewsets.BaseRunRelationshipGenericViewSet):  # noqa
 
     lookup_field = 'accession'
 
@@ -554,8 +430,7 @@ class SampleRunRelationshipViewSet(BaseRunRelationshipViewSet):
             .list(request, *args, **kwargs)
 
 
-class SampleStudiesRelationshipViewSet(mixins.ListModelMixin,
-                                       BaseStudyRelationshipViewSet):
+class SampleStudiesRelationshipViewSet(emg_viewsets.BaseStudyRelationshipGenericViewSet):  # noqa
 
     lookup_field = 'accession'
 
@@ -583,7 +458,8 @@ class SampleStudiesRelationshipViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class BiomeTreeViewSet(emg_viewsets.ReadOnlyListModelViewSet):
+class BiomeTreeViewSet(mixins.ListModelMixin,
+                       viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.BiomeSerializer
     queryset = emg_models.Biome.objects.filter(depth=1)
@@ -634,7 +510,8 @@ class BiomeTreeViewSet(emg_viewsets.ReadOnlyListModelViewSet):
         return super(BiomeTreeViewSet, self).list(request, *args, **kwargs)
 
 
-class PipelinePipelineToolRelationshipViewSet(emg_viewsets.ReadOnlyListModelViewSet):  # noqa
+class PipelinePipelineToolRelationshipViewSet(mixins.ListModelMixin,
+                                              viewsets.GenericViewSet):  # noqa
 
     serializer_class = emg_serializers.PipelineToolSerializer
 
@@ -668,7 +545,8 @@ class PipelinePipelineToolRelationshipViewSet(emg_viewsets.ReadOnlyListModelView
             .list(request, *args, **kwargs)
 
 
-class SampleMetadataRelationshipViewSet(emg_viewsets.ReadOnlyListModelViewSet):
+class SampleMetadataRelationshipViewSet(mixins.ListModelMixin,
+                                        viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.SampleAnnSerializer
 
