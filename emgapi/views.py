@@ -29,6 +29,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
 
 from rest_framework import filters
+from rest_framework import viewsets, mixins
 from rest_framework.decorators import detail_route, list_route
 # from rest_framework import authentication
 from rest_framework import permissions
@@ -42,7 +43,8 @@ from . import viewsets as emg_viewsets
 logger = logging.getLogger(__name__)
 
 
-class MyDataViewSet(emg_viewsets.ReadOnlyListModelViewSet):
+class MyDataViewSet(mixins.ListModelMixin,
+                    emg_viewsets.BaseStudyGenericViewSet):
 
     serializer_class = emg_serializers.StudySerializer
     permission_classes = (
@@ -76,7 +78,9 @@ class MyDataViewSet(emg_viewsets.ReadOnlyListModelViewSet):
         return Response(serializer.data)
 
 
-class BiomeViewSet(emg_viewsets.ReadOnlyModelViewSet):
+class BiomeViewSet(mixins.RetrieveModelMixin,
+                   mixins.ListModelMixin,
+                   viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.BiomeSerializer
 
@@ -167,34 +171,9 @@ class BiomeViewSet(emg_viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
 
-class StudyViewSet(emg_viewsets.ReadOnlyModelViewSet):
-
-    serializer_class = emg_serializers.StudySerializer
-
-    filter_class = emg_filters.StudyFilter
-
-    filter_backends = (
-        DjangoFilterBackend,
-        filters.SearchFilter,
-        filters.OrderingFilter,
-    )
-
-    ordering_fields = (
-        'accession',
-        'study_name',
-        'last_update',
-        'samples_count',
-        'runs_count',
-    )
-
-    ordering = ('-last_update',)
-
-    search_fields = (
-        '@study_name',
-        '@study_abstract',
-        'centre_name',
-        'project_id',
-    )
+class StudyViewSet(mixins.RetrieveModelMixin,
+                   mixins.ListModelMixin,
+                   emg_viewsets.BaseStudyGenericViewSet):
 
     lookup_field = 'accession'
     lookup_value_regex = '[a-zA-Z0-9]+'
@@ -334,40 +313,9 @@ class StudyViewSet(emg_viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
 
-class SampleViewSet(emg_viewsets.ReadOnlyModelViewSet):
-
-    serializer_class = emg_serializers.SampleSerializer
-
-    filter_class = emg_filters.SampleFilter
-
-    filter_backends = (
-        DjangoFilterBackend,
-        filters.SearchFilter,
-        filters.OrderingFilter,
-    )
-
-    ordering_fields = (
-        'accession',
-        'sample_name',
-        'last_update',
-        'runs_count',
-    )
-
-    ordering = ('-last_update',)
-
-    search_fields = (
-        'accession',
-        'primary_accession',
-        '@sample_name',
-        '@sample_desc',
-        'sample_alias',
-        'species',
-        'environment_feature',
-        'environment_biome',
-        'environment_feature',
-        'environment_material',
-        '@metadata__var_val_ucv',
-    )
+class SampleViewSet(mixins.RetrieveModelMixin,
+                    mixins.ListModelMixin,
+                    emg_viewsets.BaseSampleGenericViewSet):
 
     lookup_field = 'accession'
     lookup_value_regex = '[a-zA-Z0-9\-\_]+'
@@ -438,7 +386,9 @@ class SampleViewSet(emg_viewsets.ReadOnlyModelViewSet):
         return super(SampleViewSet, self).list(request, *args, **kwargs)
 
 
-class RunViewSet(emg_viewsets.ReadOnlyModelViewSet):
+class RunViewSet(mixins.RetrieveModelMixin,
+                 mixins.ListModelMixin,
+                 emg_viewsets.BaseRunGenericViewSet):
 
     serializer_class = emg_serializers.RunSerializer
 
@@ -457,6 +407,8 @@ class RunViewSet(emg_viewsets.ReadOnlyModelViewSet):
     ordering = ('-accession',)
 
     search_fields = (
+        'accession',
+        'secondary_accession',
         'instrument_platform',
         'instrument_model',
         '@sample__metadata__var_val_ucv',
@@ -513,7 +465,8 @@ class RunViewSet(emg_viewsets.ReadOnlyModelViewSet):
         return super(RunViewSet, self).retrieve(request, *args, **kwargs)
 
 
-class AnalysisResultViewSet(emg_viewsets.ReadOnlyListModelViewSet):
+class AnalysisResultViewSet(mixins.ListModelMixin,
+                            emg_viewsets.BaseAnalysisRelationshipGenericViewSet):  # noqa
 
     serializer_class = emg_serializers.AnalysisSerializer
 
@@ -554,7 +507,8 @@ class AnalysisResultViewSet(emg_viewsets.ReadOnlyListModelViewSet):
             .list(request, *args, **kwargs)
 
 
-class AnalysisViewSet(emg_viewsets.ReadOnlyRetrieveModelViewSet):
+class AnalysisViewSet(mixins.RetrieveModelMixin,
+                      emg_viewsets.BaseAnalysisRelationshipGenericViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
 
@@ -587,7 +541,9 @@ class AnalysisViewSet(emg_viewsets.ReadOnlyRetrieveModelViewSet):
         return super(AnalysisViewSet, self).retrieve(request, *args, **kwargs)
 
 
-class PipelineViewSet(emg_viewsets.ReadOnlyModelViewSet):
+class PipelineViewSet(mixins.RetrieveModelMixin,
+                      mixins.ListModelMixin,
+                      viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.PipelineSerializer
     queryset = emg_models.Pipeline.objects.all()
@@ -637,7 +593,8 @@ class PipelineViewSet(emg_viewsets.ReadOnlyModelViewSet):
         return super(PipelineViewSet, self).list(request, *args, **kwargs)
 
 
-class PipelineToolViewSet(emg_viewsets.ReadOnlyListModelViewSet):
+class PipelineToolViewSet(mixins.ListModelMixin,
+                          viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.PipelineToolSerializer
     queryset = emg_models.PipelineTool.objects.all()
@@ -655,7 +612,8 @@ class PipelineToolViewSet(emg_viewsets.ReadOnlyListModelViewSet):
         return super(PipelineToolViewSet, self).list(request, *args, **kwargs)
 
 
-class PipelineToolVersionViewSet(emg_viewsets.ReadOnlyRetrieveModelViewSet):
+class PipelineToolVersionViewSet(mixins.RetrieveModelMixin,
+                                 viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.PipelineToolSerializer
     queryset = emg_models.PipelineTool.objects.all()
@@ -684,7 +642,9 @@ class PipelineToolVersionViewSet(emg_viewsets.ReadOnlyRetrieveModelViewSet):
             .retrieve(request, *args, **kwargs)
 
 
-class ExperimentTypeViewSet(emg_viewsets.ReadOnlyModelViewSet):
+class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
+                            mixins.ListModelMixin,
+                            viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.ExperimentTypeSerializer
     queryset = emg_models.ExperimentType.objects.all()
@@ -723,7 +683,9 @@ class ExperimentTypeViewSet(emg_viewsets.ReadOnlyModelViewSet):
             .list(request, *args, **kwargs)
 
 
-class PublicationViewSet(emg_viewsets.ReadOnlyModelViewSet):
+class PublicationViewSet(mixins.RetrieveModelMixin,
+                         mixins.ListModelMixin,
+                         viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.PublicationSerializer
 

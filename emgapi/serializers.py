@@ -722,6 +722,9 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
     def get_runs(self, obj):
         return None
 
+    # counters
+    # runs_count = serializers.IntegerField()
+
     class Meta:
         model = emg_models.Sample
         exclude = (

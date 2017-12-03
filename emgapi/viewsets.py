@@ -15,31 +15,143 @@
 
 import logging
 
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets
+from rest_framework import filters
+
+from django_filters.rest_framework import DjangoFilterBackend
+
+from . import serializers as emg_serializers
+from . import filters as emg_filters
+from . import mixins as emg_mixins
 
 logger = logging.getLogger(__name__)
 
 
-class ReadOnlyListModelViewSet(mixins.ListModelMixin,
-                               viewsets.GenericViewSet):
-    """
-    A viewset that provides default `list()` action.
-    """
+# Base classes
+
+class BaseStudyGenericViewSet(viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.StudySerializer
+
+    filter_class = emg_filters.StudyFilter
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'accession',
+        'last_update',
+        'samples_count',
+        'runs_count',
+    )
+
+    ordering = ('-last_update',)
+
+    search_fields = (
+        '@study_name',
+        '@study_abstract',
+        'centre_name',
+        'project_id',
+    )
+
+
+class BaseStudyRelationshipGenericViewSet(emg_mixins.ListModelMixin,
+                                          BaseStudyGenericViewSet):
     pass
 
 
-class ReadOnlyRetrieveModelViewSet(mixins.RetrieveModelMixin,
-                                   viewsets.GenericViewSet):
-    """
-    A viewset that provides default `retrieve()` action.
-    """
+class BaseSampleGenericViewSet(viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.SampleSerializer
+
+    filter_class = emg_filters.SampleFilter
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'accession',
+        'sample_name',
+        'last_update',
+    )
+
+    ordering = ('-last_update',)
+
+    search_fields = (
+        'accession',
+        'primary_accession',
+        '@sample_name',
+        '@sample_desc',
+        'sample_alias',
+        'species',
+        'environment_feature',
+        'environment_biome',
+        'environment_feature',
+        'environment_material',
+        '@metadata__var_val_ucv',
+    )
+
+
+class BaseSampleRelationshipGenericViewSet(emg_mixins.ListModelMixin,
+                                           BaseSampleGenericViewSet):
     pass
 
 
-class ReadOnlyModelViewSet(mixins.RetrieveModelMixin,
-                           mixins.ListModelMixin,
-                           viewsets.GenericViewSet):
-    """
-    A viewset that provides default `list()` and `retrieve()` actions.
-    """
+class BaseRunGenericViewSet(viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.RunSerializer
+
+    filter_class = emg_filters.RunFilter
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'accession',
+    )
+
+    ordering = ('-accession',)
+
+    search_fields = (
+        'accession',
+        'secondary_accession',
+        'instrument_platform',
+        'instrument_model',
+        '@sample__metadata__var_val_ucv',
+    )
+
+
+class BaseRunRelationshipGenericViewSet(emg_mixins.ListModelMixin,
+                                        BaseRunGenericViewSet):
+    pass
+
+
+class BaseAnalysisGenericViewSet(viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.AnalysisSerializer
+
+    filter_class = emg_filters.AnalysisJobFilter
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'accession',
+    )
+    ordering = ('accession',)
+
+
+class BaseAnalysisRelationshipGenericViewSet(emg_mixins.ListModelMixin,
+                                             BaseAnalysisGenericViewSet):
     pass
