@@ -35,7 +35,7 @@ class TestTaxonomy(object):
         call_command('import_taxonomy', run.accession,
                      os.path.dirname(os.path.abspath(__file__)))
 
-        url = reverse("emgapi:organisms-list")
+        url = reverse("emgapi_v1:organisms-list")
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -54,7 +54,7 @@ class TestTaxonomy(object):
         call_command('import_taxonomy', run.accession,
                      os.path.dirname(os.path.abspath(__file__)))
 
-        url = reverse("emgapi:organisms-children-list",
+        url = reverse("emgapi_v1:organisms-children-list",
                       args=['Bacteria:Proteobacteria:Alphaproteobacteria'])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -72,7 +72,7 @@ class TestTaxonomy(object):
         assert ids == expected
 
     def test_object_does_not_exist(self, client):
-        url = reverse("emgapi:organisms-children-list", args=['abc'])
+        url = reverse("emgapi_v1:organisms-children-list", args=['abc'])
         response = client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -84,7 +84,7 @@ class TestTaxonomy(object):
         call_command('import_taxonomy', job,
                      os.path.dirname(os.path.abspath(__file__)))
 
-        url = reverse("emgapi:runs-pipelines-taxonomy-list",
+        url = reverse("emgapi_v1:runs-pipelines-taxonomy-list",
                       args=[job, version])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -96,7 +96,7 @@ class TestTaxonomy(object):
         call_command('import_taxonomy', run.accession,
                      os.path.dirname(os.path.abspath(__file__)))
 
-        url = reverse("emgapi:runs-pipelines-taxonomy-list",
+        url = reverse("emgapi_v1:runs-pipelines-taxonomy-list",
                       args=[run.accession, run.pipeline.release_version])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK

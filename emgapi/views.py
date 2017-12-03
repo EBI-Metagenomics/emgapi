@@ -26,25 +26,25 @@ from django.http import Http404
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework import viewsets, mixins
 from rest_framework.response import Response
 
 from rest_framework import filters
+from rest_framework import viewsets, mixins
 from rest_framework.decorators import detail_route, list_route
 # from rest_framework import authentication
 from rest_framework import permissions
-
 
 from . import models as emg_models
 from . import serializers as emg_serializers
 from . import filters as emg_filters
 from . import permissions as emg_perms
+from . import viewsets as emg_viewsets
 
 logger = logging.getLogger(__name__)
 
 
 class MyDataViewSet(mixins.ListModelMixin,
-                    viewsets.GenericViewSet):
+                    emg_viewsets.BaseStudyGenericViewSet):
 
     serializer_class = emg_serializers.StudySerializer
     permission_classes = (
@@ -121,7 +121,6 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         ---
         `/biomes`
         """
-
         return super(BiomeViewSet, self).list(request, *args, **kwargs)
 
     def retrieve(self, request, *args, **kwargs):
@@ -145,12 +144,14 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         """
 
         sql = """
-        SELECT parent.BIOME_ID, COUNT(distinct sample.STUDY_ID) as study_count
+        SELECT parent.BIOME_ID, COUNT(distinct ss.STUDY_ID) as study_count
         FROM BIOME_HIERARCHY_TREE AS node,
             BIOME_HIERARCHY_TREE AS parent,
-            SAMPLE as sample
+            SAMPLE as sample,
+            STUDY_SAMPLE as ss
         WHERE node.lft BETWEEN parent.lft AND parent.rgt
             AND node.BIOME_ID = sample.BIOME_ID
+            AND sample.SAMPLE_ID = ss.SAMPLE_ID
             AND parent.DEPTH > 1
             AND sample.IS_PUBLIC = 1
         GROUP BY parent.BIOME_ID
@@ -172,34 +173,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
 
 class StudyViewSet(mixins.RetrieveModelMixin,
                    mixins.ListModelMixin,
-                   viewsets.GenericViewSet):
-
-    serializer_class = emg_serializers.StudySerializer
-
-    filter_class = emg_filters.StudyFilter
-
-    filter_backends = (
-        DjangoFilterBackend,
-        filters.SearchFilter,
-        filters.OrderingFilter,
-    )
-
-    ordering_fields = (
-        'accession',
-        'study_name',
-        'last_update',
-        'samples_count',
-        'runs_count',
-    )
-
-    ordering = ('-last_update',)
-
-    search_fields = (
-        '@study_name',
-        '@study_abstract',
-        'centre_name',
-        'project_id',
-    )
+                   emg_viewsets.BaseStudyGenericViewSet):
 
     lookup_field = 'accession'
     lookup_value_regex = '[a-zA-Z0-9]+'
@@ -207,7 +181,8 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     def get_queryset(self):
         queryset = emg_models.Study.objects.available(self.request)
         if 'samples' in self.request.GET.get('include', '').split(','):
-            _qs = emg_models.Sample.objects.available(self.request)
+            _qs = emg_models.Sample.objects \
+                .available(self.request, prefetch=True)
             queryset = queryset.prefetch_related(
                 Prefetch('samples', queryset=_qs)
             )
@@ -239,7 +214,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 
         Filter by:
         ---
-        `/studies?biome=root:Environmental:Terrestrial:Soil`
+        `/studies?lineage=root:Environmental:Terrestrial:Soil`
 
         `/studies?centre_name=BioProject`
 
@@ -249,7 +224,6 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 
         `/studies?search=microbial%20fuel%20cells`
         """
-
         return super(StudyViewSet, self).list(request, *args, **kwargs)
 
     def retrieve(self, request, *args, **kwargs):
@@ -341,47 +315,14 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 
 class SampleViewSet(mixins.RetrieveModelMixin,
                     mixins.ListModelMixin,
-                    viewsets.GenericViewSet):
-
-    serializer_class = emg_serializers.SampleSerializer
-
-    filter_class = emg_filters.SampleFilter
-
-    filter_backends = (
-        DjangoFilterBackend,
-        filters.SearchFilter,
-        filters.OrderingFilter,
-    )
-
-    ordering_fields = (
-        'accession',
-        'sample_name',
-        'last_update',
-        'runs_count',
-    )
-
-    ordering = ('-last_update',)
-
-    search_fields = (
-        'accession',
-        'primary_accession',
-        '@sample_name',
-        '@sample_desc',
-        'sample_alias',
-        'species',
-        'environment_feature',
-        'environment_biome',
-        'environment_feature',
-        'environment_material',
-        '@metadata__var_val_ucv',
-    )
+                    emg_viewsets.BaseSampleGenericViewSet):
 
     lookup_field = 'accession'
     lookup_value_regex = '[a-zA-Z0-9\-\_]+'
 
     def get_queryset(self):
         queryset = emg_models.Sample.objects \
-            .available(self.request)
+            .available(self.request, prefetch=True)
         if 'runs' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Run.objects \
                 .available(self.request) \
@@ -390,8 +331,6 @@ class SampleViewSet(mixins.RetrieveModelMixin,
                 )
             queryset = queryset.prefetch_related(
                 Prefetch('runs', queryset=_qs))
-        # if 'studies' in self.request.GET.get('include', '').split(','):
-        #     queryset = queryset.select_related('studies')
         return queryset
 
     def get_object(self):
@@ -449,7 +388,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
 
 class RunViewSet(mixins.RetrieveModelMixin,
                  mixins.ListModelMixin,
-                 viewsets.GenericViewSet):
+                 emg_viewsets.BaseRunGenericViewSet):
 
     serializer_class = emg_serializers.RunSerializer
 
@@ -468,6 +407,8 @@ class RunViewSet(mixins.RetrieveModelMixin,
     ordering = ('-accession',)
 
     search_fields = (
+        'accession',
+        'secondary_accession',
         'instrument_platform',
         'instrument_model',
         '@sample__metadata__var_val_ucv',
@@ -525,7 +466,7 @@ class RunViewSet(mixins.RetrieveModelMixin,
 
 
 class AnalysisResultViewSet(mixins.ListModelMixin,
-                            viewsets.GenericViewSet):
+                            emg_viewsets.BaseAnalysisRelationshipGenericViewSet):  # noqa
 
     serializer_class = emg_serializers.AnalysisSerializer
 
@@ -567,7 +508,7 @@ class AnalysisResultViewSet(mixins.ListModelMixin,
 
 
 class AnalysisViewSet(mixins.RetrieveModelMixin,
-                      viewsets.GenericViewSet):
+                      emg_viewsets.BaseAnalysisRelationshipGenericViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
 
