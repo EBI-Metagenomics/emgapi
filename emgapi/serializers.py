@@ -572,31 +572,6 @@ class AnalysisSerializer(BaseAnalysisSerializer):
         return None
 
 
-# SampleAnn serializer
-
-class StudyAnnSerializer(ExplicitFieldsModelSerializer,
-                         serializers.HyperlinkedModelSerializer):
-
-    # workaround to provide multiple values in PK
-    id = emg_fields.IdentifierField()
-
-    # attributes
-    var_name = serializers.SerializerMethodField()
-
-    def get_var_name(self, obj):
-        return obj['var__var_name']
-
-    total_value = serializers.IntegerField()
-
-    class Meta:
-        model = emg_models.AnalysisJobAnn
-        fields = (
-            'id',
-            'var_name',
-            'total_value',
-        )
-
-
 # Sample serializer
 
 class BaseMetadataSerializer(ExplicitFieldsModelSerializer,
@@ -606,14 +581,14 @@ class BaseMetadataSerializer(ExplicitFieldsModelSerializer,
     id = serializers.ReadOnlyField(source="multiple_pk")
 
     # attributes
-    var_name = serializers.SerializerMethodField()
+    key = serializers.SerializerMethodField()
 
-    def get_var_name(self, obj):
+    def get_key(self, obj):
         return obj.var.var_name
 
-    var_value = serializers.SerializerMethodField()
+    value = serializers.SerializerMethodField()
 
-    def get_var_value(self, obj):
+    def get_value(self, obj):
         return obj.var_val_ucv
 
     unit = serializers.SerializerMethodField()
@@ -641,8 +616,8 @@ class SampleAnnSerializer(BaseMetadataSerializer):
         model = emg_models.SampleAnn
         fields = (
             'id',
-            'var_name',
-            'var_value',
+            'key',
+            'value',
             'unit',
             # 'sample_accession',
             'sample',
