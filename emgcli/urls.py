@@ -37,9 +37,6 @@ from openapi_codec import OpenAPICodec
 from . import routers
 
 
-api_version = settings.REST_FRAMEWORK['DEFAULT_VERSION']
-
-
 # merge all routers
 router = routers.DefaultRouter(trailing_slash=False)
 router.extend(emg_router)
@@ -48,29 +45,27 @@ router.extend(mongo_router)
 router.extend(mydata_router)
 
 
-# API URL routing.
+# API authentication routing.
 urlpatterns = [
 
     # url(r'^admin/', admin.site.urls),
-
-    url(r'^$', RedirectView.as_view(
-        pattern_name='emgapi:api-root', permanent=False)),
-
-    url(r'^v%s/' % api_version, include(router.urls,
-                                        namespace='emgapi')),
-
-]
-
-# API authentication routing.
-urlpatterns += [
-
     url(r'^http-auth/', include('rest_framework.urls',
                                 namespace='rest_framework')),
 
-    url(r'^v%s/utils/token/obtain' % api_version, obtain_jwt_token,
-        name='obtain_jwt_token'),
-    url(r'^v%s/utils/token/verify' % api_version, verify_jwt_token,
-        name='verify_jwt_token'),
+]
+
+# API URL routing.
+urlpatterns += [
+
+    url(r'^$', RedirectView.as_view(
+        pattern_name='emgapi_v1:api-root', permanent=False)),
+
+    url(r'^v1/', include(router.urls, namespace='emgapi_v1')),
+
+    url(r'^v1/utils/token/obtain', obtain_jwt_token,
+        name='obtain_jwt_token_v1'),
+    url(r'^v1/utils/token/verify', verify_jwt_token,
+        name='verify_jwt_token_v1'),
 
     # url(r'^500$', TemplateView.as_view(template_name='500.html')),
 

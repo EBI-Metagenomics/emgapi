@@ -45,7 +45,7 @@ class TestRunAPI(APITestCase):
                    pipeline=_p, run_status_id=2,
                    study=st, sample=_s2)
 
-        url = reverse("emgapi:samples-list")
+        url = reverse("emgapi_v1:samples-list")
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()

@@ -61,15 +61,15 @@ class TestPermissionsAPI(object):
         'view, username, count, ids, bad_ids',
         [
             # private
-            ('emgapi:studies-list', 'Webin-111', 5,
+            ('emgapi_v1:studies-list', 'Webin-111', 5,
              ['SRP0111', 'SRP0112', 'SRP0114', 'SRP0115', 'SRP0120'],
              ['SRP0113', 'SRP0121']),
             # mydata
-            ('emgapi:mydata-list', 'Webin-111', 2,
+            ('emgapi_v1:mydata-list', 'Webin-111', 2,
              ['SRP0114', 'SRP0115'],
              []),
             # public
-            ('emgapi:studies-list', None, 4,
+            ('emgapi_v1:studies-list', None, 4,
              ['SRP0111', 'SRP0112', 'SRP0114', 'SRP0120'],
              ['SRP0113', 'SRP0115', 'SRP0121']),
         ]
@@ -82,7 +82,7 @@ class TestPermissionsAPI(object):
                 "password": "secret",
             }
             rsp = apiclient.post(
-                reverse('obtain_jwt_token'), data=data, format='json')
+                reverse('obtain_jwt_token_v1'), data=data, format='json')
             token = rsp.json()['data']['token']
             auth = 'Bearer {}'.format(token)
 
@@ -109,10 +109,10 @@ class TestPermissionsAPI(object):
             "password": "secret",
         }
         rsp = apiclient.post(
-            reverse('obtain_jwt_token'), data=data, format='json')
+            reverse('obtain_jwt_token_v1'), data=data, format='json')
         token = rsp.json()['data']['token']
 
-        url = reverse("emgapi:studies-detail", args=['SRP0113'])
+        url = reverse("emgapi_v1:studies-detail", args=['SRP0113'])
         response = apiclient.get(
             url, HTTP_AUTHORIZATION='Bearer {}'.format(token))
         assert response.status_code == status.HTTP_200_OK
@@ -120,18 +120,18 @@ class TestPermissionsAPI(object):
 
         assert rsp['data']['id'] == 'SRP0113'
 
-        url = reverse("emgapi:studies-detail", args=['SRP0115'])
+        url = reverse("emgapi_v1:studies-detail", args=['SRP0115'])
         response = apiclient.get(
             url, HTTP_AUTHORIZATION='Bearer {}'.format(token))
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-        url = reverse("emgapi:studies-detail", args=['SRP0121'])
+        url = reverse("emgapi_v1:studies-detail", args=['SRP0121'])
         response = apiclient.get(
             url, HTTP_AUTHORIZATION='Bearer {}'.format(token))
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     @pytest.mark.parametrize('accession', ['SRP0113', 'SRP0115', 'SRP0121'])
     def test_not_found(self, apiclient, accession):
-        url = reverse("emgapi:studies-detail", args=[accession])
+        url = reverse("emgapi_v1:studies-detail", args=[accession])
         response = apiclient.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND

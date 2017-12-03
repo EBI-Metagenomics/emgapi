@@ -75,8 +75,7 @@ class BaseQuerySet(models.QuerySet):
             _instance = _query_filters[self.__class__.__name__]
             if isinstance(self, self.__class__):
                 if request is not None and request.user.is_authenticated():
-                    if not request.user.is_superuser:
-                        q.extend(_instance['authenticated'])
+                    q.extend(_instance['authenticated'])
                 else:
                     q.extend(_instance['all'])
             return self.distinct().filter(*q)
@@ -417,24 +416,20 @@ class SampleManager(models.Manager):
     def get_queryset(self):
         return SampleQuerySet(self.model, using=self._db)
 
-    def available(self, request):
-        _qs = SampleAnn.objects.all() \
-            .prefetch_related(
-                Prefetch('var', queryset=VariableNames.objects.all())
-            )
-        _qs2 = Study.objects.available(request)
-        return self.get_queryset().available(request) \
-            .extra(
+    def available(self, request, prefetch=False):
+        queryset = self.get_queryset().available(request)
+        if prefetch:
+            queryset = queryset.extra(
                 {
                     'longitude': "CAST(longitude as DECIMAL(10,5))",
                     'latitude': "CAST(latitude as DECIMAL(10,5))"
                 }
-            ) \
-            .prefetch_related(
-                Prefetch('studies', queryset=_qs2),
-                Prefetch('biome', queryset=Biome.objects.all()),
-                Prefetch('metadata', queryset=_qs)
             )
+            queryset = queryset.prefetch_related(
+                Prefetch('biome', queryset=Biome.objects.all()),
+                Prefetch('studies', queryset=Study.objects.available(request))
+            )
+        return queryset
 
 
 class Sample(models.Model):
@@ -588,7 +583,7 @@ class RunManager(models.Manager):
                 Prefetch(
                     'sample',
                     queryset=Sample.objects.available(
-                        request).select_related('biome')
+                        request)
                 )
             )
 
@@ -656,7 +651,7 @@ class AnalysisJobManager(models.Manager):
                 Prefetch(
                     'sample',
                     queryset=Sample.objects.available(
-                        request).select_related('biome')
+                        request)
                 )
             )
 
@@ -819,6 +814,19 @@ class GscCvCv(models.Model):
         return "%s %s" % (self.var_name, self.var_val_cv)
 
 
+class SampleAnnQuerySet(BaseQuerySet):
+    pass
+
+
+class SampleAnnManager(models.Manager):
+
+    def get_queryset(self):
+        return SampleAnnQuerySet(self.model, using=self._db) \
+            .prefetch_related(
+                Prefetch('var', queryset=VariableNames.objects.all())
+            )
+
+
 class SampleAnn(models.Model):
     sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID', primary_key=True,
@@ -832,6 +840,8 @@ class SampleAnn(models.Model):
         'VariableNames', db_column='VAR_ID')
     var_val_ucv = models.CharField(
         db_column='VAR_VAL_UCV', max_length=4000, blank=True, null=True)
+
+    objects = SampleAnnManager()
 
     class Meta:
         db_table = 'SAMPLE_ANN'
