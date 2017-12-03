@@ -14,10 +14,40 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import csv
 
 from rest_framework_json_api.renderers import JSONRenderer
+from rest_framework_csv.renderers import CSVRenderer
+from rest_framework_csv.misc import Echo
 
 
 class DefaultJSONRenderer(JSONRenderer):
     media_type = 'application/json'
     format = 'application/json'
+
+
+class CSVStreamingRenderer(CSVRenderer):
+    """
+    Based on rest_framework_csv.renderers.CSVStreamingRenderer,
+    tabilize() call is not iterator-friendly.
+    """
+
+    def render(self, data, media_type=None, renderer_context={}):
+
+        queryset = data['queryset']
+        serializer = data['serializer']
+        context = data['context']
+
+        csv_buffer = Echo()
+        csv_writer = csv.writer(csv_buffer)
+
+        header_fields = list()
+        for item in queryset:
+            if len(header_fields) < 1:
+                header_fields = list(serializer(item, context=context).fields)
+                yield csv_writer.writerow(header_fields)
+            items = serializer(item, context=context).data
+            ordered = [items[column] for column in header_fields]
+            yield csv_writer.writerow([
+                elem.encode('utf-8') for elem in ordered
+            ])
