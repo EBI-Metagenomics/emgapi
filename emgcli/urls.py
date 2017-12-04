@@ -18,7 +18,8 @@
 from django.conf.urls import include, url
 from django.conf import settings
 from django.views.generic import RedirectView
-from django.views.generic import TemplateView
+# from django.middleware import csrf
+from django.views.generic.base import TemplateView
 
 from rest_framework import status
 from rest_framework.schemas import get_schema_view
@@ -36,8 +37,30 @@ from openapi_codec import OpenAPICodec
 
 from . import routers
 
-# slack handle that now
-# handler500 = 'emgcli.views.handler500'
+
+# class ObtainCSRFToken(APIView):
+#
+#     def get(self, request, *args, **kwargs):
+#         token = csrf.get_token(request)
+#         return Response(token)
+#
+#
+# obtain_csrf_token = ObtainCSRFToken.as_view()
+
+
+class Handler500(TemplateView):
+    template_name = "rest_framework/500.html"
+
+    @classmethod
+    def as_error_view(cls):
+        v = cls.as_view()
+
+        def view(request):
+            return v(request).render()
+        return view
+
+
+handler500 = Handler500.as_error_view()
 
 # merge all routers
 router = routers.DefaultRouter(trailing_slash=False)
@@ -69,7 +92,7 @@ urlpatterns += [
     url(r'^v1/utils/token/verify', verify_jwt_token,
         name='verify_jwt_token_v1'),
 
-    # url(r'^500$', TemplateView.as_view(template_name='500.html')),
+    url(r'^500$', TemplateView.as_view(template_name='500.html')),
 
 ]
 
