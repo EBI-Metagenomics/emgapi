@@ -451,7 +451,7 @@ class OrganismViewSet(emg_mixins.ListModelMixin,
     )
 
     lookup_field = 'lineage'
-    lookup_value_regex = '[a-zA-Z0-9\_\-\.\:\s]+'
+    lookup_value_regex = '[^/]+'
 
     def get_queryset(self):
         return m_models.Organism.objects.all()
@@ -491,7 +491,7 @@ class OrganismTreeViewSet(emg_mixins.ListModelMixin,
     )
 
     lookup_field = 'lineage'
-    lookup_value_regex = '[a-zA-Z0-9\_\-\:\s]+'
+    lookup_value_regex = '[^/]+'
 
     def get_queryset(self):
         lineage = self.kwargs.get('lineage', None).strip()
@@ -679,18 +679,6 @@ class OrganismAnalysisRelationshipViewSet(emg_mixins.ListModelMixin,
     lookup_field = 'lineage'
 
     def get_queryset(self):
-        return emg_models.AnalysisJob.objects.available(self.request)
-
-    def get_serializer_class(self):
-        return emg_serializers.AnalysisSerializer
-
-    def list(self, request, *args, **kwargs):
-        """
-        Retrieves list of analysis results for the given Organism
-        Example:
-        ---
-        `/annotations/organisms/Bacteria:Chlorobi:OPB56/analysis`
-        """
         lineage = self.kwargs[self.lookup_field]
         organism = m_models.Organism.objects.filter(lineage=lineage) \
             .only('id')
@@ -703,19 +691,20 @@ class OrganismAnalysisRelationshipViewSet(emg_mixins.ListModelMixin,
                 Q(taxonomy_ssu__organism__in=organism)
             ).distinct('job_id')
         logger.info("Found %d analysis" % len(job_ids))
-        queryset = emg_models.AnalysisJob.objects \
+        return emg_models.AnalysisJob.objects \
             .filter(job_id__in=job_ids) \
-            .available(self.request) \
-            .prefetch_related(
-                'sample',
-                'analysis_status',
-                'experiment_type',
-                'pipeline'
-            )
-        page = self.paginate_queryset(self.filter_queryset(queryset))
-        if page is not None:
-            serializer = self.get_serializer(
-                page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+            .available(self.request)
+
+    def get_serializer_class(self):
+        return emg_serializers.AnalysisSerializer
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of analysis results for the given Organism
+        Example:
+        ---
+        `/annotations/organisms/Bacteria:Chlorobi:OPB56/analysis`
+        """
+
+        return super(OrganismAnalysisRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
