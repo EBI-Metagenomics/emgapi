@@ -419,6 +419,7 @@ class SampleManager(models.Manager):
     def available(self, request, prefetch=False):
         queryset = self.get_queryset().available(request)
         if prefetch:
+            _qs = SampleAnn.objects.all()
             queryset = queryset.extra(
                 {
                     'longitude': "CAST(longitude as DECIMAL(10,5))",
@@ -427,7 +428,8 @@ class SampleManager(models.Manager):
             )
             queryset = queryset.prefetch_related(
                 Prefetch('biome', queryset=Biome.objects.all()),
-                Prefetch('studies', queryset=Study.objects.available(request))
+                Prefetch('studies', queryset=Study.objects.available(request)),
+                Prefetch('metadata', queryset=_qs)
             )
         return queryset
 
