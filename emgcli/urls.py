@@ -36,6 +36,7 @@ from openapi_codec import OpenAPICodec
 
 from . import routers
 
+handler500 = 'emgcli.views.handler500'
 
 # merge all routers
 router = routers.DefaultRouter(trailing_slash=False)
