@@ -649,6 +649,9 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
 
     longitude = serializers.FloatField()
 
+    # sample_metadata = serializers.ListField()
+
+    # relationships
     metadata = relations.SerializerMethodResourceRelatedField(
         source='get_metadata',
         model=emg_models.SampleAnn,
@@ -662,7 +665,6 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
     def get_metadata(self, obj):
         return None
 
-    # relationships
     biome = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name='emgapi_v1:biomes-detail',
