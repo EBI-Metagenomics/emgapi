@@ -22,7 +22,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from . import serializers as emg_serializers
 from . import filters as emg_filters
-from . import mixins as emg_mixins
 
 logger = logging.getLogger(__name__)
 
@@ -56,11 +55,6 @@ class BaseStudyGenericViewSet(viewsets.GenericViewSet):
         'centre_name',
         'project_id',
     )
-
-
-class BaseStudyRelationshipGenericViewSet(emg_mixins.ListModelMixin,
-                                          BaseStudyGenericViewSet):
-    pass
 
 
 class BaseSampleGenericViewSet(viewsets.GenericViewSet):
@@ -98,11 +92,6 @@ class BaseSampleGenericViewSet(viewsets.GenericViewSet):
     )
 
 
-class BaseSampleRelationshipGenericViewSet(emg_mixins.ListModelMixin,
-                                           BaseSampleGenericViewSet):
-    pass
-
-
 class BaseRunGenericViewSet(viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.RunSerializer
@@ -130,11 +119,6 @@ class BaseRunGenericViewSet(viewsets.GenericViewSet):
     )
 
 
-class BaseRunRelationshipGenericViewSet(emg_mixins.ListModelMixin,
-                                        BaseRunGenericViewSet):
-    pass
-
-
 class BaseAnalysisGenericViewSet(viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
@@ -150,8 +134,3 @@ class BaseAnalysisGenericViewSet(viewsets.GenericViewSet):
         'accession',
     )
     ordering = ('accession',)
-
-
-class BaseAnalysisRelationshipGenericViewSet(emg_mixins.ListModelMixin,
-                                             BaseAnalysisGenericViewSet):
-    pass

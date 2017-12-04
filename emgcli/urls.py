@@ -21,6 +21,8 @@ from django.views.generic import RedirectView
 # from django.middleware import csrf
 from django.views.generic.base import TemplateView
 
+# from rest_framework.response import Response
+# from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.schemas import get_schema_view
 from rest_framework.renderers import BaseRenderer, JSONRenderer
