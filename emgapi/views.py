@@ -37,14 +37,15 @@ from rest_framework import permissions
 from . import models as emg_models
 from . import serializers as emg_serializers
 from . import filters as emg_filters
+from . import mixins as emg_mixins
 from . import permissions as emg_perms
 from . import viewsets as emg_viewsets
 
 logger = logging.getLogger(__name__)
 
 
-class MyDataViewSet(mixins.ListModelMixin,
-                    emg_viewsets.BaseStudyGenericViewSet):
+class MyDataViewSet(emg_mixins.ListModelMixin,
+                    viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.StudySerializer
     permission_classes = (
@@ -67,15 +68,7 @@ class MyDataViewSet(mixins.ListModelMixin,
         ---
         `/mydata` retrieve own studies
         """
-        queryset = emg_models.Study.objects \
-            .mydata(self.request)
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(
-                page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        return super(MyDataViewSet, self).list(request, *args, **kwargs)
 
 
 class BiomeViewSet(mixins.RetrieveModelMixin,
