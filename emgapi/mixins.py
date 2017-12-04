@@ -37,15 +37,19 @@ class ListModelMixin(object):
         queryset = self.filter_queryset(self.get_queryset())
 
         if isinstance(request.accepted_renderer, CSVStreamingRenderer):
-            response = StreamingHttpResponse(request.accepted_renderer.render({
-                'queryset': queryset,
-                'serializer': self.get_serializer_class(),
-                'context': {'request': request},
-            }), content_type='text/csv')
+            response = StreamingHttpResponse(
+                request.accepted_renderer.render({
+                    'queryset': queryset,
+                    'serializer': self.get_serializer_class(),
+                    'context': {'request': request},
+                }), content_type='text/csv')
             try:
                 filename = queryset.model.__name__
             except AttributeError:
-                filename = queryset._name
+                try:
+                    filename = queryset._name
+                except AttributeError:
+                    filename = queryset._document.__name__
             response['Content-Disposition'] = \
                 'attachment; filename="{}.csv"'.format(filename)
             return response
