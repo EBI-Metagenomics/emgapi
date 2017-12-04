@@ -634,11 +634,16 @@ class AnalysisJobQuerySet(BaseQuerySet):
 class AnalysisJobManager(models.Manager):
 
     def get_queryset(self):
+        _qs = AnalysisJobAnn.objects.all() \
+            .select_related('var')
         return AnalysisJobQuerySet(self.model, using=self._db) \
             .select_related(
                 'pipeline',
                 'analysis_status',
                 'experiment_type',
+            ) \
+            .prefetch_related(
+                Prefetch('analysis_metadata', queryset=_qs),
             )
 
     def available(self, request):
