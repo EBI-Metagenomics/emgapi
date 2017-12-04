@@ -631,7 +631,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
         # 'studies': 'emgapi.serializers.StudySerializer',
         'biome': 'emgapi.serializers.BiomeSerializer',
         'runs': 'emgapi.serializers.RunSerializer',
-        'metadata': 'emgapi.serializers.SampleAnnSerializer',
+        # 'metadata': 'emgapi.serializers.SampleAnnSerializer',
     }
 
     url = serializers.HyperlinkedIdentityField(
@@ -649,21 +649,21 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
 
     longitude = serializers.FloatField()
 
-    # sample_metadata = serializers.ListField()
+    sample_metadata = serializers.ListField()
 
     # relationships
-    metadata = relations.SerializerMethodResourceRelatedField(
-        source='get_metadata',
-        model=emg_models.SampleAnn,
-        many=True,
-        read_only=True,
-        related_link_view_name='emgapi_v1:samples-metadata-list',
-        related_link_url_kwarg='accession',
-        related_link_lookup_field='accession'
-    )
-
-    def get_metadata(self, obj):
-        return None
+    # metadata = relations.SerializerMethodResourceRelatedField(
+    #     source='get_metadata',
+    #     model=emg_models.SampleAnn,
+    #     many=True,
+    #     read_only=True,
+    #     related_link_view_name='emgapi_v1:samples-metadata-list',
+    #     related_link_url_kwarg='accession',
+    #     related_link_lookup_field='accession'
+    # )
+    #
+    # def get_metadata(self, obj):
+    #     return None
 
     biome = serializers.HyperlinkedRelatedField(
         read_only=True,
@@ -684,7 +684,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
     )
 
     def get_studies(self, obj):
-        return obj.studies.available(self.context['request'])
+        return obj.studies.all()
 
     runs = relations.SerializerMethodResourceRelatedField(
         source='get_runs',
@@ -720,7 +720,7 @@ class RetrieveSampleSerializer(SampleSerializer):
         'biome': 'emgapi.serializers.BiomeSerializer',
         # 'studies': 'emgapi.serializers.StudySerializer',
         'runs': 'emgapi.serializers.RunSerializer',
-        'metadata': 'emgapi.serializers.SampleAnnSerializer',
+        # 'metadata': 'emgapi.serializers.SampleAnnSerializer',
     }
 
 
