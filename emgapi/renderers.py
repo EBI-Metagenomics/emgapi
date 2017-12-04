@@ -16,7 +16,6 @@
 
 import csv
 
-from django.http import Http404
 from rest_framework_json_api.renderers import JSONRenderer
 from rest_framework_csv.renderers import CSVRenderer
 from rest_framework_csv.misc import Echo
@@ -37,10 +36,10 @@ class CSVStreamingRenderer(CSVRenderer):
 
         try:
             queryset = data['queryset']
+            serializer = data['serializer']
+            context = data['context']
         except KeyError:
-            raise Http404('CSV is not available on this endpoint')
-        serializer = data['serializer']
-        context = data['context']
+            return None
 
         csv_buffer = Echo()
         csv_writer = csv.writer(csv_buffer)

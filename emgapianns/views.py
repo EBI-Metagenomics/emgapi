@@ -22,25 +22,20 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework import filters, viewsets
-from rest_framework.response import Response
-
-from rest_framework_mongoengine import viewsets as m_viewset
+from rest_framework import filters
 
 from emgapi import serializers as emg_serializers
 from emgapi import models as emg_models
 from emgapi import filters as emg_filters
-from emgapi import mixins as emg_mixins
-
 
 from . import serializers as m_serializers
 from . import models as m_models
 from . import pagination as m_page
-
+from . import viewsets as m_viewsets
 logger = logging.getLogger(__name__)
 
 
-class GoTermViewSet(m_viewset.ReadOnlyModelViewSet):
+class GoTermViewSet(m_viewsets.ReadOnlyModelViewSet):
 
     """
     Provides list of GO terms.
@@ -88,7 +83,7 @@ class GoTermViewSet(m_viewset.ReadOnlyModelViewSet):
             .retrieve(request, *args, **kwargs)
 
 
-class InterproIdentifierViewSet(m_viewset.ReadOnlyModelViewSet):
+class InterproIdentifierViewSet(m_viewsets.ReadOnlyModelViewSet):
 
     """
     Provides list of InterPro identifiers.
@@ -136,8 +131,7 @@ class InterproIdentifierViewSet(m_viewset.ReadOnlyModelViewSet):
             .retrieve(request, *args, **kwargs)
 
 
-class GoTermAnalysisRelationshipViewSet(emg_mixins.ListModelMixin,
-                                        viewsets.GenericViewSet):
+class GoTermAnalysisRelationshipViewSet(m_viewsets.ListReadOnlyModelViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
 
@@ -162,18 +156,6 @@ class GoTermAnalysisRelationshipViewSet(emg_mixins.ListModelMixin,
     lookup_field = 'accession'
 
     def get_queryset(self):
-        return emg_models.AnalysisJob.objects.available(self.request)
-
-    def get_serializer_class(self):
-        return emg_serializers.AnalysisSerializer
-
-    def list(self, request, *args, **kwargs):
-        """
-        Retrieves list of analysis results for the given GO term
-        Example:
-        ---
-        `/annotations/go-terms/GO:009579/analysis`
-        """
         accession = self.kwargs[self.lookup_field]
         try:
             annotation = m_models.GoTerm.objects.get(accession=accession)
@@ -190,20 +172,26 @@ class GoTermAnalysisRelationshipViewSet(emg_mixins.ListModelMixin,
             ) \
             .distinct('job_id')
         logger.info("Found %d analysis" % len(job_ids))
-        queryset = emg_models.AnalysisJob.objects \
+        return emg_models.AnalysisJob.objects \
             .filter(job_id__in=job_ids) \
             .available(self.request)
-        page = self.paginate_queryset(self.filter_queryset(queryset))
-        if page is not None:
-            serializer = self.get_serializer(
-                page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+
+    def get_serializer_class(self):
+        return emg_serializers.AnalysisSerializer
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of analysis results for the given GO term
+        Example:
+        ---
+        `/annotations/go-terms/GO:009579/analysis`
+        """
+        return super(GoTermAnalysisRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
 
 
-class InterproIdentifierAnalysisRelationshipViewSet(emg_mixins.ListModelMixin,
-                                                    viewsets.GenericViewSet):
+class InterproIdentifierAnalysisRelationshipViewSet(  # noqa
+    m_viewsets.ListReadOnlyModelViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
 
@@ -228,18 +216,6 @@ class InterproIdentifierAnalysisRelationshipViewSet(emg_mixins.ListModelMixin,
     lookup_field = 'accession'
 
     def get_queryset(self):
-        return emg_models.AnalysisJob.objects.available(self.request)
-
-    def get_serializer_class(self):
-        return emg_serializers.AnalysisSerializer
-
-    def list(self, request, *args, **kwargs):
-        """
-        Retrieves list of analysis results for the given InterPro identifier
-        Example:
-        ---
-        `/annotations/interpro-identifier/IPR020405/analysis`
-        """
         accession = self.kwargs[self.lookup_field]
         try:
             annotation = m_models.InterproIdentifier.objects \
@@ -254,21 +230,26 @@ class InterproIdentifierAnalysisRelationshipViewSet(emg_mixins.ListModelMixin,
             .filter(interpro_identifiers__interpro_identifier=annotation) \
             .distinct('job_id')
         logger.info("Found %d analysis" % len(job_ids))
-        queryset = emg_models.AnalysisJob.objects \
+        return emg_models.AnalysisJob.objects \
             .filter(job_id__in=job_ids) \
             .available(self.request)
-        page = self.paginate_queryset(self.filter_queryset(queryset))
-        if page is not None:
-            serializer = self.get_serializer(
-                page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+
+    def get_serializer_class(self):
+        return emg_serializers.AnalysisSerializer
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of analysis results for the given InterPro identifier
+        Example:
+        ---
+        `/annotations/interpro-identifier/IPR020405/analysis`
+        """
+        return super(InterproIdentifierAnalysisRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
 
 
-class AnalysisGoTermRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
-                                        emg_mixins.ListModelMixin,
-                                        m_viewset.GenericViewSet):
+class AnalysisGoTermRelationshipViewSet(  # NOQA
+    m_viewsets.MultipleFieldLookupModelViewSet):
 
     serializer_class = m_serializers.GoTermRetriveSerializer
 
@@ -277,7 +258,21 @@ class AnalysisGoTermRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
     lookup_fields = ('accession', 'release_version')
 
     def get_queryset(self):
-        return m_models.GoTerm.objects.all()
+        accession = self.kwargs['accession']
+        release_version = self.kwargs['release_version']
+        job = get_object_or_404(
+            emg_models.AnalysisJob, accession=accession,
+            pipeline__release_version=release_version
+        )
+
+        analysis = None
+        try:
+            analysis = m_models.AnalysisJobGoTerm.objects \
+                .get(analysis_id=str(job.job_id))
+        except m_models.AnalysisJobGoTerm.DoesNotExist:
+            pass
+
+        return getattr(analysis, 'go_terms', [])
 
     def list(self, request, accession, release_version, *args, **kwargs):
         """
@@ -286,40 +281,12 @@ class AnalysisGoTermRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
         ---
         `/runs/ERR1385375/pipelines/3.0/go-terms`
         """
-
-        job = get_object_or_404(
-            emg_models.AnalysisJob, accession=accession,
-            pipeline__release_version=release_version
-        )
-
-        analysis = None
-        try:
-            analysis = m_models.AnalysisJobGoTerm.objects \
-                .get(analysis_id=str(job.job_id))
-        except m_models.AnalysisJobGoTerm.DoesNotExist:
-            pass
-
-        queryset = getattr(analysis, 'go_terms', [])
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(
-                page,
-                many=True,
-                context={'request': request}
-            )
-            return self.get_paginated_response(serializer.data)
-        serializer = self.get_serializer(
-            queryset,
-            many=True,
-            context={'request': request}
-        )
-        return Response(serializer.data)
+        return super(AnalysisGoTermRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
 
 
-class AnalysisGoSlimRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
-                                        emg_mixins.ListModelMixin,
-                                        m_viewset.GenericViewSet):
+class AnalysisGoSlimRelationshipViewSet(  # NOQA
+    m_viewsets.MultipleFieldLookupModelViewSet):
 
     serializer_class = m_serializers.GoTermRetriveSerializer
 
@@ -328,16 +295,8 @@ class AnalysisGoSlimRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
     lookup_fields = ('accession', 'release_version')
 
     def get_queryset(self):
-        return m_models.GoTerm.objects.all()
-
-    def list(self, request, accession, release_version, *args, **kwargs):
-        """
-        Retrieves GO slim for the given run and pipeline version
-        Example:
-        ---
-        `/runs/ERR1385375/pipelines/3.0/go-slim`
-        """
-
+        accession = self.kwargs['accession']
+        release_version = self.kwargs['release_version']
         job = get_object_or_404(
             emg_models.AnalysisJob, accession=accession,
             pipeline__release_version=release_version
@@ -350,27 +309,21 @@ class AnalysisGoSlimRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
         except m_models.AnalysisJobGoTerm.DoesNotExist:
             pass
 
-        queryset = getattr(analysis, 'go_slim', [])
+        return getattr(analysis, 'go_slim', [])
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(
-                page,
-                many=True,
-                context={'request': request}
-            )
-            return self.get_paginated_response(serializer.data)
-        serializer = self.get_serializer(
-            queryset,
-            many=True,
-            context={'request': request}
-        )
-        return Response(serializer.data)
+    def list(self, request, accession, release_version, *args, **kwargs):
+        """
+        Retrieves GO slim for the given run and pipeline version
+        Example:
+        ---
+        `/runs/ERR1385375/pipelines/3.0/go-slim`
+        """
+        return super(AnalysisGoSlimRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
 
 
 class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
-    emg_mixins.MultipleFieldLookupMixin,
-    emg_mixins.ListModelMixin, m_viewset.GenericViewSet):
+    m_viewsets.MultipleFieldLookupModelViewSet):
 
     serializer_class = m_serializers.InterproIdentifierRetriveSerializer
 
@@ -379,16 +332,8 @@ class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
     lookup_fields = ('accession', 'release_version')
 
     def get_queryset(self):
-        return m_models.InterproIdentifier.objects.all()
-
-    def list(self, request, accession, release_version, *args, **kwargs):
-        """
-        Retrieves InterPro identifiers for the given run and pipeline version
-        Example:
-        ---
-        `/runs/ERR1385375/pipelines/3.0/interpro-identifiers`
-        """
-
+        accession = self.kwargs['accession']
+        release_version = self.kwargs['release_version']
         job = get_object_or_404(
             emg_models.AnalysisJob, accession=accession,
             pipeline__release_version=release_version
@@ -401,26 +346,20 @@ class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
         except m_models.AnalysisJobInterproIdentifier.DoesNotExist:
             pass
 
-        queryset = getattr(analysis, 'interpro_identifiers', [])
+        return getattr(analysis, 'interpro_identifiers', [])
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(
-                page,
-                many=True,
-                context={'request': request}
-            )
-            return self.get_paginated_response(serializer.data)
-        serializer = self.get_serializer(
-            queryset,
-            many=True,
-            context={'request': request}
-        )
-        return Response(serializer.data)
+    def list(self, request, accession, release_version, *args, **kwargs):
+        """
+        Retrieves InterPro identifiers for the given run and pipeline version
+        Example:
+        ---
+        `/runs/ERR1385375/pipelines/3.0/interpro-identifiers`
+        """
+        return super(AnalysisInterproIdentifierRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
 
 
-class OrganismViewSet(emg_mixins.ListModelMixin,
-                      m_viewset.GenericViewSet):
+class OrganismViewSet(m_viewsets.ListReadOnlyModelViewSet):
 
     """
     Provides list of Organisms.
@@ -458,8 +397,7 @@ class OrganismViewSet(emg_mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class OrganismTreeViewSet(emg_mixins.ListModelMixin,
-                          m_viewset.GenericViewSet):
+class OrganismTreeViewSet(m_viewsets.ListReadOnlyModelViewSet):
 
     """
     Provides list of Organisms.
@@ -511,9 +449,8 @@ class OrganismTreeViewSet(emg_mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
-                                          emg_mixins.ListModelMixin,
-                                          m_viewset.GenericViewSet):
+class AnalysisOrganismRelationshipViewSet(  # noqa
+    m_viewsets.MultipleFieldLookupModelViewSet):
 
     serializer_class = m_serializers.OrganismRetriveSerializer
 
@@ -562,8 +499,7 @@ class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
 
 
 class AnalysisOrganismSSURelationshipViewSet(  # NOQA
-    emg_mixins.MultipleFieldLookupMixin,
-    emg_mixins.ListModelMixin, m_viewset.GenericViewSet):
+    m_viewsets.MultipleFieldLookupModelViewSet):
 
     serializer_class = m_serializers.OrganismRetriveSerializer
 
@@ -602,8 +538,7 @@ class AnalysisOrganismSSURelationshipViewSet(  # NOQA
 
 
 class AnalysisOrganismLSURelationshipViewSet(  # NOQA
-    emg_mixins.MultipleFieldLookupMixin,
-    emg_mixins.ListModelMixin, m_viewset.GenericViewSet):
+    m_viewsets.MultipleFieldLookupModelViewSet):
 
     serializer_class = m_serializers.OrganismRetriveSerializer
 
@@ -641,8 +576,7 @@ class AnalysisOrganismLSURelationshipViewSet(  # NOQA
             .list(request, *args, **kwargs)
 
 
-class OrganismAnalysisRelationshipViewSet(emg_mixins.ListModelMixin,
-                                          viewsets.GenericViewSet):
+class OrganismAnalysisRelationshipViewSet(m_viewsets.ListReadOnlyModelViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
 
