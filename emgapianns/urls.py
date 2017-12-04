@@ -98,3 +98,19 @@ router.register(
     m_views.AnalysisOrganismRelationshipViewSet,
     base_name='runs-pipelines-taxonomy'
 )
+
+router.register(
+    (r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)/'
+     r'pipelines/(?P<release_version>[0-9\.]+)/'
+     r'taxonomy/ssu'),
+    m_views.AnalysisOrganismSSURelationshipViewSet,
+    base_name='runs-pipelines-taxonomy-ssu'
+)
+
+router.register(
+    (r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)/'
+     r'pipelines/(?P<release_version>[0-9\.]+)/'
+     r'taxonomy/lsu'),
+    m_views.AnalysisOrganismLSURelationshipViewSet,
+    base_name='runs-pipelines-taxonomy-lsu'
+)

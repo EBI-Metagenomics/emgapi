@@ -550,7 +550,7 @@ class AnalysisSerializer(BaseAnalysisSerializer):
         model=m_models.Organism,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi_v1:runs-pipelines-taxonomy-lsu',
+        related_link_view_name='emgapi_v1:runs-pipelines-taxonomy-lsu-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
@@ -563,7 +563,7 @@ class AnalysisSerializer(BaseAnalysisSerializer):
         model=m_models.Organism,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi_v1:runs-pipelines-taxonomy-ssu',
+        related_link_view_name='emgapi_v1:runs-pipelines-taxonomy-ssu-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )

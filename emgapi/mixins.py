@@ -42,7 +42,10 @@ class ListModelMixin(object):
                 'serializer': self.get_serializer_class(),
                 'context': {'request': request},
             }), content_type='text/csv')
-            filename = queryset.model.__name__
+            try:
+                filename = queryset.model.__name__
+            except AttributeError:
+                filename = queryset._name
             response['Content-Disposition'] = \
                 'attachment; filename="{}.csv"'.format(filename)
             return response
