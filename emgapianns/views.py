@@ -22,9 +22,8 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework import filters, mixins, viewsets
+from rest_framework import filters, viewsets
 from rest_framework.response import Response
-from rest_framework.decorators import list_route
 
 from rest_framework_mongoengine import viewsets as m_viewset
 
@@ -137,7 +136,7 @@ class InterproIdentifierViewSet(m_viewset.ReadOnlyModelViewSet):
             .retrieve(request, *args, **kwargs)
 
 
-class GoTermAnalysisRelationshipViewSet(mixins.ListModelMixin,
+class GoTermAnalysisRelationshipViewSet(emg_mixins.ListModelMixin,
                                         viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
@@ -209,7 +208,7 @@ class GoTermAnalysisRelationshipViewSet(mixins.ListModelMixin,
         return Response(serializer.data)
 
 
-class InterproIdentifierAnalysisRelationshipViewSet(mixins.ListModelMixin,
+class InterproIdentifierAnalysisRelationshipViewSet(emg_mixins.ListModelMixin,
                                                     viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
@@ -280,7 +279,7 @@ class InterproIdentifierAnalysisRelationshipViewSet(mixins.ListModelMixin,
 
 
 class AnalysisGoTermRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
-                                        mixins.ListModelMixin,
+                                        emg_mixins.ListModelMixin,
                                         m_viewset.GenericViewSet):
 
     serializer_class = m_serializers.GoTermRetriveSerializer
@@ -331,7 +330,7 @@ class AnalysisGoTermRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
 
 
 class AnalysisGoSlimRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
-                                        mixins.ListModelMixin,
+                                        emg_mixins.ListModelMixin,
                                         m_viewset.GenericViewSet):
 
     serializer_class = m_serializers.GoTermRetriveSerializer
@@ -383,7 +382,7 @@ class AnalysisGoSlimRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
 
 class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
     emg_mixins.MultipleFieldLookupMixin,
-    mixins.ListModelMixin, m_viewset.GenericViewSet):
+    emg_mixins.ListModelMixin, m_viewset.GenericViewSet):
 
     serializer_class = m_serializers.InterproIdentifierRetriveSerializer
 
@@ -432,7 +431,7 @@ class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
         return Response(serializer.data)
 
 
-class OrganismViewSet(mixins.ListModelMixin,
+class OrganismViewSet(emg_mixins.ListModelMixin,
                       m_viewset.GenericViewSet):
 
     """
@@ -471,7 +470,7 @@ class OrganismViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class OrganismTreeViewSet(mixins.ListModelMixin,
+class OrganismTreeViewSet(emg_mixins.ListModelMixin,
                           m_viewset.GenericViewSet):
 
     """
@@ -525,7 +524,7 @@ class OrganismTreeViewSet(mixins.ListModelMixin,
 
 
 class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
-                                          mixins.ListModelMixin,
+                                          emg_mixins.ListModelMixin,
                                           m_viewset.GenericViewSet):
 
     serializer_class = m_serializers.OrganismRetriveSerializer
@@ -545,9 +544,23 @@ class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
     lookup_fields = ('accession', 'release_version')
 
     def get_queryset(self):
-        return m_models.Organism.objects.all()
+        accession = self.kwargs['accession']
+        release_version = self.kwargs['release_version']
+        job = get_object_or_404(
+            emg_models.AnalysisJob, accession=accession,
+            pipeline__release_version=release_version
+        )
 
-    def list(self, request, accession, release_version, *args, **kwargs):
+        analysis = None
+        try:
+            analysis = m_models.AnalysisJobTaxonomy.objects \
+                .get(analysis_id=str(job.job_id))
+        except m_models.AnalysisJobTaxonomy.DoesNotExist:
+            pass
+
+        return getattr(analysis, 'taxonomy', [])
+
+    def list(self, request, *args, **kwargs):
         """
         Retrieves 16SrRNA Taxonomic analysis for the given run and pipeline
         version
@@ -556,6 +569,23 @@ class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
         `/runs/ERR1385375/pipelines/3.0/taxonomy`
         """
 
+        return super(AnalysisOrganismRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class AnalysisOrganismSSURelationshipViewSet(  # NOQA
+    emg_mixins.MultipleFieldLookupMixin,
+    emg_mixins.ListModelMixin, m_viewset.GenericViewSet):
+
+    serializer_class = m_serializers.OrganismRetriveSerializer
+
+    pagination_class = m_page.MaxSetPagination
+
+    lookup_fields = ('accession', 'release_version')
+
+    def get_queryset(self):
+        accession = self.kwargs['accession']
+        release_version = self.kwargs['release_version']
         job = get_object_or_404(
             emg_models.AnalysisJob, accession=accession,
             pipeline__release_version=release_version
@@ -568,28 +598,9 @@ class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
         except m_models.AnalysisJobTaxonomy.DoesNotExist:
             pass
 
-        queryset = getattr(analysis, 'taxonomy', [])
+        return getattr(analysis, 'taxonomy_ssu', [])
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(
-                page,
-                many=True,
-                context={'request': request}
-            )
-            return self.get_paginated_response(serializer.data)
-        serializer = self.get_serializer(
-            queryset,
-            many=True,
-            context={'request': request}
-        )
-        return Response(serializer.data)
-
-    @list_route(
-        methods=['get', ],
-        serializer_class=m_serializers.OrganismRetriveSerializer
-    )
-    def ssu(self, request, accession, release_version, *args, **kwargs):
+    def list(self, request, accession, release_version, *args, **kwargs):
         """
         Retrieves SSU Taxonomic analysis for the given run and pipeline
         version
@@ -598,6 +609,23 @@ class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
         `/runs/ERR1385375/pipelines/3.0/taxonomy/ssu`
         """
 
+        return super(AnalysisOrganismSSURelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class AnalysisOrganismLSURelationshipViewSet(  # NOQA
+    emg_mixins.MultipleFieldLookupMixin,
+    emg_mixins.ListModelMixin, m_viewset.GenericViewSet):
+
+    serializer_class = m_serializers.OrganismRetriveSerializer
+
+    pagination_class = m_page.MaxSetPagination
+
+    lookup_fields = ('accession', 'release_version')
+
+    def get_queryset(self):
+        accession = self.kwargs['accession']
+        release_version = self.kwargs['release_version']
         job = get_object_or_404(
             emg_models.AnalysisJob, accession=accession,
             pipeline__release_version=release_version
@@ -610,28 +638,9 @@ class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
         except m_models.AnalysisJobTaxonomy.DoesNotExist:
             pass
 
-        queryset = getattr(analysis, 'taxonomy_ssu', [])
+        return getattr(analysis, 'taxonomy_lsu', [])
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(
-                page,
-                many=True,
-                context={'request': request}
-            )
-            return self.get_paginated_response(serializer.data)
-        serializer = self.get_serializer(
-            queryset,
-            many=True,
-            context={'request': request}
-        )
-        return Response(serializer.data)
-
-    @list_route(
-        methods=['get', ],
-        serializer_class=m_serializers.OrganismRetriveSerializer
-    )
-    def lsu(self, request, accession, release_version, *args, **kwargs):
+    def list(self, request, accession, release_version, *args, **kwargs):
         """
         Retrieves LSU Taxonomic analysis for the given run and pipeline
         version
@@ -640,37 +649,11 @@ class AnalysisOrganismRelationshipViewSet(emg_mixins.MultipleFieldLookupMixin,
         `/runs/ERR1385375/pipelines/3.0/taxonomy/lsu`
         """
 
-        job = get_object_or_404(
-            emg_models.AnalysisJob, accession=accession,
-            pipeline__release_version=release_version
-        )
-
-        analysis = None
-        try:
-            analysis = m_models.AnalysisJobTaxonomy.objects \
-                .get(analysis_id=str(job.job_id))
-        except m_models.AnalysisJobTaxonomy.DoesNotExist:
-            pass
-
-        queryset = getattr(analysis, 'taxonomy_lsu', [])
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(
-                page,
-                many=True,
-                context={'request': request}
-            )
-            return self.get_paginated_response(serializer.data)
-        serializer = self.get_serializer(
-            queryset,
-            many=True,
-            context={'request': request}
-        )
-        return Response(serializer.data)
+        return super(AnalysisOrganismLSURelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
 
 
-class OrganismAnalysisRelationshipViewSet(mixins.ListModelMixin,
+class OrganismAnalysisRelationshipViewSet(emg_mixins.ListModelMixin,
                                           viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
