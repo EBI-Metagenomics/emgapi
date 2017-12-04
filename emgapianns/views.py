@@ -192,13 +192,7 @@ class GoTermAnalysisRelationshipViewSet(emg_mixins.ListModelMixin,
         logger.info("Found %d analysis" % len(job_ids))
         queryset = emg_models.AnalysisJob.objects \
             .filter(job_id__in=job_ids) \
-            .available(self.request) \
-            .prefetch_related(
-                'sample',
-                'analysis_status',
-                'experiment_type',
-                'pipeline'
-            )
+            .available(self.request)
         page = self.paginate_queryset(self.filter_queryset(queryset))
         if page is not None:
             serializer = self.get_serializer(
@@ -262,13 +256,7 @@ class InterproIdentifierAnalysisRelationshipViewSet(emg_mixins.ListModelMixin,
         logger.info("Found %d analysis" % len(job_ids))
         queryset = emg_models.AnalysisJob.objects \
             .filter(job_id__in=job_ids) \
-            .available(self.request) \
-            .prefetch_related(
-                'sample',
-                'analysis_status',
-                'experiment_type',
-                'pipeline'
-            )
+            .available(self.request)
         page = self.paginate_queryset(self.filter_queryset(queryset))
         if page is not None:
             serializer = self.get_serializer(
