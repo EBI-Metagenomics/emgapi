@@ -72,7 +72,7 @@ class MyDataViewSet(emg_mixins.ListModelMixin,
 
 
 class BiomeViewSet(mixins.RetrieveModelMixin,
-                   mixins.ListModelMixin,
+                   emg_mixins.ListModelMixin,
                    viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.BiomeSerializer
@@ -95,7 +95,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     ordering = ('biome_id',)
 
     lookup_field = 'lineage'
-    lookup_value_regex = '[a-zA-Z0-9\:\-\s\(\)\<\>]+'
+    lookup_value_regex = '[^/]+'
 
     def get_serializer_class(self):
         return super(BiomeViewSet, self).get_serializer_class()
@@ -165,7 +165,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
 
 
 class StudyViewSet(mixins.RetrieveModelMixin,
-                   mixins.ListModelMixin,
+                   emg_mixins.ListModelMixin,
                    emg_viewsets.BaseStudyGenericViewSet):
 
     lookup_field = 'accession'
@@ -307,7 +307,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 
 
 class SampleViewSet(mixins.RetrieveModelMixin,
-                    mixins.ListModelMixin,
+                    emg_mixins.ListModelMixin,
                     emg_viewsets.BaseSampleGenericViewSet):
 
     lookup_field = 'accession'
@@ -380,7 +380,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
 
 
 class RunViewSet(mixins.RetrieveModelMixin,
-                 mixins.ListModelMixin,
+                 emg_mixins.ListModelMixin,
                  emg_viewsets.BaseRunGenericViewSet):
 
     serializer_class = emg_serializers.RunSerializer
@@ -458,8 +458,8 @@ class RunViewSet(mixins.RetrieveModelMixin,
         return super(RunViewSet, self).retrieve(request, *args, **kwargs)
 
 
-class AnalysisResultViewSet(mixins.ListModelMixin,
-                            emg_viewsets.BaseAnalysisRelationshipGenericViewSet):  # noqa
+class AnalysisResultViewSet(emg_mixins.ListModelMixin,
+                            viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
 
@@ -501,7 +501,7 @@ class AnalysisResultViewSet(mixins.ListModelMixin,
 
 
 class AnalysisViewSet(mixins.RetrieveModelMixin,
-                      emg_viewsets.BaseAnalysisRelationshipGenericViewSet):
+                      viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
 
@@ -535,7 +535,7 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
 
 
 class PipelineViewSet(mixins.RetrieveModelMixin,
-                      mixins.ListModelMixin,
+                      emg_mixins.ListModelMixin,
                       viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.PipelineSerializer
@@ -586,7 +586,7 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
         return super(PipelineViewSet, self).list(request, *args, **kwargs)
 
 
-class PipelineToolViewSet(mixins.ListModelMixin,
+class PipelineToolViewSet(emg_mixins.ListModelMixin,
                           viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.PipelineToolSerializer
@@ -636,7 +636,7 @@ class PipelineToolVersionViewSet(mixins.RetrieveModelMixin,
 
 
 class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
-                            mixins.ListModelMixin,
+                            emg_mixins.ListModelMixin,
                             viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.ExperimentTypeSerializer
@@ -677,7 +677,7 @@ class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
 
 
 class PublicationViewSet(mixins.RetrieveModelMixin,
-                         mixins.ListModelMixin,
+                         emg_mixins.ListModelMixin,
                          viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.PublicationSerializer
