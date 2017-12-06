@@ -111,8 +111,6 @@ class StudySampleRelationshipViewSet(emg_mixins.ListModelMixin,
             .available(self.request, prefetch=True) \
             .filter(studies__in=[study])
         _qs = emg_models.Study.objects.available(self.request)
-        # queryset = queryset.prefetch_related(
-        #     Prefetch('studies', queryset=_qs))
         if 'runs' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Run.objects \
                 .available(self.request)
