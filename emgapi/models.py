@@ -419,17 +419,22 @@ class SampleManager(models.Manager):
     def available(self, request, prefetch=False):
         queryset = self.get_queryset().available(request)
         if prefetch:
-            _qs = SampleAnn.objects.all()
             queryset = queryset.extra(
                 {
                     'longitude': "CAST(longitude as DECIMAL(10,5))",
                     'latitude': "CAST(latitude as DECIMAL(10,5))"
                 }
-            )
-            queryset = queryset.prefetch_related(
+            ).prefetch_related(
                 Prefetch('biome', queryset=Biome.objects.all()),
                 Prefetch('studies', queryset=Study.objects.available(request)),
-                Prefetch('metadata', queryset=_qs)
+                Prefetch('metadata', queryset=SampleAnn.objects.all())
+            ).defer(
+                'primary_accession',
+                'is_public',
+                'metadata_received',
+                'sequencedata_received',
+                'sequencedata_archived',
+                'submission_account_id',
             )
         return queryset
 
@@ -829,9 +834,7 @@ class SampleAnnManager(models.Manager):
 
     def get_queryset(self):
         return SampleAnnQuerySet(self.model, using=self._db) \
-            .prefetch_related(
-                Prefetch('var', queryset=VariableNames.objects.all())
-            )
+            .select_related('var')
 
 
 class SampleAnn(models.Model):
