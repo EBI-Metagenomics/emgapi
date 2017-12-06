@@ -684,7 +684,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
     )
 
     def get_studies(self, obj):
-        return obj.studies.all()
+        return obj.studies.available(self.context['request'])
 
     runs = relations.SerializerMethodResourceRelatedField(
         source='get_runs',
@@ -757,7 +757,9 @@ class StudySerializer(ExplicitFieldsModelSerializer,
     )
 
     def get_biomes(self, obj):
-        biomes = obj.samples.values('biome_id').distinct()
+        biomes = obj.samples \
+            .available(self.context['request']) \
+            .values('biome_id').distinct()
         return emg_models.Biome.objects \
             .filter(pk__in=biomes)
 
