@@ -41,6 +41,7 @@ class BaseStudyGenericViewSet(viewsets.GenericViewSet):
     )
 
     ordering_fields = (
+        'study_name',
         'accession',
         'last_update',
         'samples_count',
