@@ -91,6 +91,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         'biome_name',
         'lineage',
         'samples_count',
+        'studies_count',
     )
     ordering = ('biome_id',)
 
@@ -137,7 +138,10 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         """
 
         sql = """
-        SELECT parent.BIOME_ID, COUNT(distinct ss.STUDY_ID) as study_count
+        SELECT
+            parent.BIOME_ID,
+            COUNT(distinct ss.STUDY_ID) as studies_count,
+            COUNT(distinct sample.SAMPLE_ID) as samples_count
         FROM BIOME_HIERARCHY_TREE AS node,
             BIOME_HIERARCHY_TREE AS parent,
             SAMPLE as sample,
@@ -147,18 +151,19 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
             AND sample.SAMPLE_ID = ss.SAMPLE_ID
             AND parent.DEPTH > 1
             AND sample.IS_PUBLIC = 1
+            AND parent.DEPTH = 4
         GROUP BY parent.BIOME_ID
-        ORDER BY 2 DESC
+        ORDER BY 3 DESC
         LIMIT 10;"""
 
         res = emg_models.Biome.objects.raw(sql)
-        biomes = {b.biome_id: b.study_count for b in res}
+        biomes = {b.biome_id: b.studies_count for b in res}
         biomes = OrderedDict(
             sorted(biomes.items(), key=operator.itemgetter(1), reverse=True))
         queryset = emg_models.Biome.objects.filter(
             biome_id__in=list(biomes))
         for q in queryset:
-            q.study_count = biomes[q.biome_id]
+            q.studies_count = biomes[q.biome_id]
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
