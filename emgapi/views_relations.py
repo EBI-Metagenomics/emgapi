@@ -485,7 +485,10 @@ class BiomeTreeViewSet(mixins.ListModelMixin,
     )
 
     ordering_fields = (
+        'biome_name',
         'lineage',
+        'samples_count',
+        'studies_count',
     )
     ordering = ('biome_id',)
 

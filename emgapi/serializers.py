@@ -113,8 +113,6 @@ class BiomeSerializer(ExplicitFieldsModelSerializer,
 
 class Top10BiomeSerializer(BiomeSerializer):
 
-    studies_count = serializers.IntegerField()
-
     class Meta:
         model = emg_models.Biome
         exclude = (
