@@ -192,3 +192,10 @@ mydata_router.register(
     views.MyDataViewSet,
     base_name='mydata'
 )
+
+utils_router = routers.DefaultRouter(trailing_slash=False)
+utils_router.register(
+    r'utils',
+    views.Utils,
+    base_name='csrf'
+)
