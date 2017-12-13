@@ -15,8 +15,6 @@
 # limitations under the License.
 
 import logging
-import operator
-from collections import OrderedDict
 
 from django.conf import settings
 from django.db.models import Q
@@ -137,29 +135,28 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         """
 
         sql = """
-        SELECT parent.BIOME_ID, COUNT(distinct ss.STUDY_ID) as studies_count
+        SELECT
+            parent.BIOME_ID,
+            COUNT(distinct sample.SAMPLE_ID) as samples_count
         FROM BIOME_HIERARCHY_TREE AS node,
             BIOME_HIERARCHY_TREE AS parent,
-            SAMPLE as sample,
-            STUDY_SAMPLE as ss
+            SAMPLE as sample
         WHERE node.lft BETWEEN parent.lft AND parent.rgt
             AND node.BIOME_ID = sample.BIOME_ID
-            AND sample.SAMPLE_ID = ss.SAMPLE_ID
-            AND parent.DEPTH > 1
             AND sample.IS_PUBLIC = 1
+            AND parent.DEPTH > 2
         GROUP BY parent.BIOME_ID
         ORDER BY 2 DESC
-        LIMIT 10;"""
+        LIMIT 10;
+        """
 
         res = emg_models.Biome.objects.raw(sql)
-        biomes = {b.biome_id: b.studies_count for b in res}
-        biomes = OrderedDict(
-            sorted(biomes.items(), key=operator.itemgetter(1), reverse=True))
+        biomes = {b.biome_id: b.samples_count for b in res}
         queryset = emg_models.Biome.objects.filter(
             biome_id__in=list(biomes))
+        queryset = self.filter_queryset(queryset)
         for q in queryset:
-            q.studies_count = biomes[q.biome_id]
-
+            q.samples_count = biomes[q.biome_id]
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
