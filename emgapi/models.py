@@ -33,6 +33,20 @@ from django.db.models import Q
 from django.db.models import Prefetch
 
 
+class Resource(object):
+
+    def __init__(self, **kwargs):
+        for field in ('id', 'resource', 'count'):
+            setattr(self, field, kwargs.get(field, None))
+
+
+class Token(object):
+
+    def __init__(self, **kwargs):
+        for field in ('id', 'token'):
+            setattr(self, field, kwargs.get(field, None))
+
+
 class BaseQuerySet(models.QuerySet):
 
     def available(self, request=None):
