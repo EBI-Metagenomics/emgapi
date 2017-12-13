@@ -18,11 +18,8 @@
 from django.conf.urls import include, url
 from django.conf import settings
 from django.views.generic import RedirectView
-# from django.middleware import csrf
 from django.views.generic.base import TemplateView
 
-# from rest_framework.response import Response
-# from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.schemas import get_schema_view
 from rest_framework.renderers import BaseRenderer, JSONRenderer
@@ -32,71 +29,17 @@ from rest_framework_jwt.views import verify_jwt_token
 
 from emgapi.urls import router as emg_router
 from emgapi.urls import mydata_router
+from emgapi.urls import utils_router
 from emgapianns.urls import mongo_router
 from emgapianns.urls import router as emg_ext_router
 
 from openapi_codec import OpenAPICodec
 
 from . import routers
-
-
-# class ObtainCSRFToken(APIView):
-#
-#     def get(self, request, *args, **kwargs):
-#         token = csrf.get_token(request)
-#         return Response(token)
-#
-#
-# obtain_csrf_token = ObtainCSRFToken.as_view()
-
-
-class Handler500(TemplateView):
-    template_name = "rest_framework/500.html"
-
-    @classmethod
-    def as_error_view(cls):
-        v = cls.as_view()
-
-        def view(request):
-            return v(request).render()
-        return view
+from .views import Handler500
 
 
 handler500 = Handler500.as_error_view()
-
-# merge all routers
-router = routers.DefaultRouter(trailing_slash=False)
-router.extend(emg_router)
-router.extend(emg_ext_router)
-router.extend(mongo_router)
-router.extend(mydata_router)
-
-
-# API authentication routing.
-urlpatterns = [
-
-    # url(r'^admin/', admin.site.urls),
-    url(r'^http-auth/', include('rest_framework.urls',
-                                namespace='rest_framework')),
-
-]
-
-# API URL routing.
-urlpatterns += [
-
-    url(r'^$', RedirectView.as_view(
-        pattern_name='emgapi_v1:api-root', permanent=False)),
-
-    url(r'^v1/', include(router.urls, namespace='emgapi_v1')),
-
-    url(r'^v1/utils/token/obtain', obtain_jwt_token,
-        name='obtain_jwt_token_v1'),
-    url(r'^v1/utils/token/verify', verify_jwt_token,
-        name='verify_jwt_token_v1'),
-
-    url(r'^500$', TemplateView.as_view(template_name='500.html')),
-
-]
 
 
 class OpenAPIRenderer(BaseRenderer):
@@ -115,12 +58,42 @@ schema_view = get_schema_view(
     description=settings.EMG_DESC, renderer_classes=[OpenAPIRenderer]
 )
 
+# merge all routers
+router = routers.DefaultRouter(trailing_slash=False)
+router.extend(emg_router)
+router.extend(emg_ext_router)
+router.extend(mongo_router)
+router.extend(mydata_router)
+router.extend(utils_router)
 
-urlpatterns += [
+
+# API authentication routing.
+urlpatterns = [
+
+    # url(r'^admin/', admin.site.urls),
+    url(r'^http-auth/', include('rest_framework.urls',
+                                namespace='rest_framework')),
 
     url(r'^schema/$', schema_view, name="schema_view"),
 
     url(r'^docs/',
         TemplateView.as_view(template_name='swagger-ui/index.html')),
+
+    url(r'^500/$', TemplateView.as_view(template_name='500.html')),
+
+]
+
+# API URL routing.
+urlpatterns += [
+
+    url(r'^$', RedirectView.as_view(
+        pattern_name='emgapi_v1:api-root', permanent=False)),
+
+    url(r'^v1/', include(router.urls, namespace='emgapi_v1')),
+
+    url(r'^v1/utils/token/obtain', obtain_jwt_token,
+        name='obtain_jwt_token_v1'),
+    url(r'^v1/utils/token/verify', verify_jwt_token,
+        name='verify_jwt_token_v1'),
 
 ]
