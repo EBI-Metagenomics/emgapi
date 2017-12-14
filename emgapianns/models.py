@@ -86,7 +86,7 @@ class AnalysisJobInterproIdentifierAnnotation(BaseAnalysisJobAnnotation):
 class BaseAnalysisJob(mongoengine.Document):
 
     analysis_id = mongoengine.StringField(primary_key=True, required=True,
-                                          max_length=50)
+                                          max_length=100)
     accession = mongoengine.StringField(required=True, max_length=20)
     pipeline_version = mongoengine.StringField(required=True, max_length=5)
     job_id = mongoengine.IntField(required=True)
