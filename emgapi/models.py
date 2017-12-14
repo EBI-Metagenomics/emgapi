@@ -28,9 +28,23 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from django.db.models import Count
+from django.db.models import Count, Case, When, IntegerField
 from django.db.models import Q
 from django.db.models import Prefetch
+
+
+class Resource(object):
+
+    def __init__(self, **kwargs):
+        for field in ('id', 'resource', 'count'):
+            setattr(self, field, kwargs.get(field, None))
+
+
+class Token(object):
+
+    def __init__(self, **kwargs):
+        for field in ('id', 'token'):
+            setattr(self, field, kwargs.get(field, None))
 
 
 class BaseQuerySet(models.QuerySet):
@@ -126,7 +140,11 @@ class PipelineManager(models.Manager):
     def get_queryset(self):
         return PipelineQuerySet(self.model, using=self._db) \
             .annotate(analysis_count=Count('analysis', distinct=True)) \
-            .annotate(samples_count=Count('analysis__sample', distinct=True))
+            .annotate(samples_count=Count(Case(
+                When(analysis__sample__is_public=1, then=1),
+                default=0,
+                output_field=IntegerField()
+            )))
 
 
 class Pipeline(models.Model):
@@ -196,7 +214,11 @@ class BiomeManager(models.Manager):
 
     def get_queryset(self):
         return BiomeQuerySet(self.model, using=self._db) \
-            .annotate(samples_count=Count('samples', distinct=True))
+            .annotate(samples_count=Count(Case(
+                When(samples__is_public=1, then=1),
+                default=0,
+                output_field=IntegerField()
+            )))
 
 
 class Biome(models.Model):
@@ -236,8 +258,16 @@ class PublicationManager(models.Manager):
 
     def get_queryset(self):
         return PublicationQuerySet(self.model, using=self._db) \
-            .annotate(studies_count=Count('studies', distinct=True)) \
-            .annotate(samples_count=Count('studies__samples', distinct=True))
+            .annotate(studies_count=Count(Case(
+                When(studies__is_public=1, then=1),
+                default=0,
+                output_field=IntegerField()
+            ))) \
+            .annotate(samples_count=Count(Case(
+                When(studies__samples__is_public=1, then=1),
+                default=0,
+                output_field=IntegerField()
+            )))
 
 
 class Publication(models.Model):
@@ -315,7 +345,11 @@ class StudyManager(models.Manager):
         # TODO: remove biome when schema updated
         return StudyQuerySet(self.model, using=self._db) \
             .defer('biome') \
-            .annotate(samples_count=Count('samples', distinct=True))
+            .annotate(samples_count=Count(Case(
+                When(samples__is_public=1, then=1),
+                default=0,
+                output_field=IntegerField()
+            )))
 
     def available(self, request):
         return self.get_queryset().available(request)
@@ -548,7 +582,11 @@ class ExperimentTypeManager(models.Manager):
     def get_queryset(self):
         return ExperimentTypeQuerySet(self.model, using=self._db) \
             .annotate(runs_count=Count('runs', distinct=True)) \
-            .annotate(samples_count=Count('runs__sample', distinct=True))
+            .annotate(samples_count=Count(Case(
+                When(runs__sample__is_public=1, then=1),
+                default=0,
+                output_field=IntegerField()
+            )))
 
 
 class ExperimentType(models.Model):
