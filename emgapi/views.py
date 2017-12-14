@@ -15,12 +15,14 @@
 # limitations under the License.
 
 import logging
+import inflection
 
 from django.conf import settings
 from django.db.models import Q
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 from django.http import Http404
+from django.middleware import csrf
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -40,6 +42,47 @@ from . import permissions as emg_perms
 from . import viewsets as emg_viewsets
 
 logger = logging.getLogger(__name__)
+
+
+class Utils(viewsets.GenericViewSet):
+
+    def get_queryset(self):
+        return ()
+
+    @list_route(
+        methods=['get', ],
+        serializer_class=emg_serializers.TokenSerializer
+    )
+    def csrf_token(self, request):
+        """
+        Retrieves csrf token
+        """
+        token = csrf.get_token(request)
+        csrf_token = emg_models.Token(id=token, token=token)
+        serializer = self.get_serializer(csrf_token)
+        return Response(serializer.data)
+
+    @list_route(
+        methods=['get', ],
+        serializer_class=emg_serializers.ResourceSerializer
+    )
+    def resources(self, request):
+        """
+        Retrieves list of resources
+        """
+        stats = list()
+        for m in [
+            emg_models.Study, emg_models.Sample, emg_models.Run,
+            emg_models.AnalysisJob
+        ]:
+            c = m.objects.available(self.request).count()
+            r = emg_models.Resource(
+                id=inflection.pluralize(m._meta.model_name),
+                count=c
+            )
+            stats.append(r)
+        serializer = self.get_serializer(stats, many=True)
+        return Response(serializer.data)
 
 
 class MyDataViewSet(emg_mixins.ListModelMixin,

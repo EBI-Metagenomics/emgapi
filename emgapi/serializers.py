@@ -49,6 +49,28 @@ class ExplicitFieldsModelSerializer(serializers.ModelSerializer):
                 self.fields.pop(field_name)
 
 
+# Serializers
+class ResourceSerializer(serializers.Serializer):
+
+    id = serializers.CharField(read_only=True, max_length=20)
+    count = serializers.IntegerField()
+
+    class Meta:
+        model = emg_models.Resource
+        fields = '__all__'
+
+
+class TokenSerializer(serializers.Serializer):
+
+    id = serializers.CharField(read_only=True)
+    token = serializers.CharField(max_length=50)
+
+    class Meta:
+        model = emg_models.Token
+        fields = '__all__'
+
+
+# Model Serializers
 class BiomeSerializer(ExplicitFieldsModelSerializer,
                       serializers.HyperlinkedModelSerializer):
 
