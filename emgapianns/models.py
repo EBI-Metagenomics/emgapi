@@ -21,9 +21,8 @@ import mongoengine
 
 class BaseAnnotation(mongoengine.DynamicDocument):
 
-    accession = mongoengine.StringField(primary_key=True, required=True,
-                                        max_length=20)
-    description = mongoengine.StringField(required=True, max_length=255)
+    accession = mongoengine.StringField(primary_key=True, required=True)
+    description = mongoengine.StringField(required=True)
 
     meta = {
         'abstract': True,
@@ -32,7 +31,7 @@ class BaseAnnotation(mongoengine.DynamicDocument):
 
 class GoTerm(BaseAnnotation):
 
-    lineage = mongoengine.StringField(required=True, max_length=255)
+    lineage = mongoengine.StringField(required=True)
 
 
 class InterproIdentifier(BaseAnnotation):
@@ -85,10 +84,9 @@ class AnalysisJobInterproIdentifierAnnotation(BaseAnalysisJobAnnotation):
 
 class BaseAnalysisJob(mongoengine.Document):
 
-    analysis_id = mongoengine.StringField(primary_key=True, required=True,
-                                          max_length=100)
-    accession = mongoengine.StringField(required=True, max_length=20)
-    pipeline_version = mongoengine.StringField(required=True, max_length=5)
+    analysis_id = mongoengine.StringField(primary_key=True, required=True)
+    accession = mongoengine.StringField(required=True)
+    pipeline_version = mongoengine.StringField(required=True)
     job_id = mongoengine.IntField(required=True)
 
     meta = {
