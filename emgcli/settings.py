@@ -46,14 +46,16 @@ logger = logging.getLogger(__name__)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-EMG_DIR = os.environ.get('EMG_CONFIG', os.path.join(expanduser("~"), 'emg'))
-EMG_CONF = yamjam(os.path.join(EMG_DIR, 'config.yaml'))
+EMG_CONFIG = os.environ.get(
+    'EMG_CONFIG', os.path.join(expanduser("~"), 'emg', 'config.yaml')
+)
+EMG_CONF = yamjam(EMG_CONFIG)
 
 
 try:
     LOGDIR = EMG_CONF['emg']['log_dir']
 except KeyError:
-    LOGDIR = os.path.join(EMG_DIR, 'log')
+    LOGDIR = os.path.join(expanduser("~"), 'emg', 'log')
 if not os.path.exists(LOGDIR):
     os.makedirs(LOGDIR)
 
@@ -139,7 +141,7 @@ def create_secret_key(var_dir):
 try:
     SECRET_KEY_DIR = EMG_CONF['emg']['secret_key']
 except KeyError:
-    SECRET_KEY_DIR = EMG_DIR
+    SECRET_KEY_DIR = os.path.join(expanduser("~"), 'emg')
 
 try:
     SECRET_KEY
