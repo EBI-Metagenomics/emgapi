@@ -174,7 +174,7 @@ class Pipeline(models.Model):
 
 
 class PipelineReleaseTool(models.Model):
-    pipeline = models.OneToOneField(
+    pipeline = models.ForeignKey(
         Pipeline, db_column='PIPELINE_ID',
         primary_key=True, on_delete=models.CASCADE)
     tool = models.ForeignKey(
@@ -419,7 +419,7 @@ class Study(models.Model):
 
 
 class StudyPublication(models.Model):
-    study = models.OneToOneField(
+    study = models.ForeignKey(
         Study, db_column='STUDY_ID',
         primary_key=True, on_delete=models.CASCADE)
     pub = models.ForeignKey(
@@ -562,7 +562,7 @@ class Sample(models.Model):
 
 
 class SamplePublication(models.Model):
-    sample = models.OneToOneField(
+    sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID',
         on_delete=models.CASCADE, primary_key=True)
     pub = models.ForeignKey(
@@ -876,7 +876,7 @@ class SampleAnnManager(models.Manager):
 
 
 class SampleAnn(models.Model):
-    sample = models.OneToOneField(
+    sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID', primary_key=True,
         related_name="metadata")
     var_val_cv = models.ForeignKey(
