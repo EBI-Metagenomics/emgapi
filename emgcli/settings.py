@@ -481,3 +481,7 @@ import mongoengine
 
 mongodb = EMG_CONF['emg']['mongodb']
 MONGO_CONN = mongoengine.connect(**mongodb)
+
+
+# TODO: fix warnings
+SILENCED_SYSTEM_CHECKS = ["fields.W342"]
