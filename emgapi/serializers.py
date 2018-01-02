@@ -517,7 +517,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
         lookup_field='accession'
     )
 
-    go_terms = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
+    go_terms = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(
         source='get_goterms',
         model=m_models.GoTerm,
         many=True,
@@ -530,7 +530,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     def get_goterms(self, obj):
         return None
 
-    go_slim = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
+    go_slim = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(
         source='get_goslim',
         model=m_models.GoTerm,
         many=True,
@@ -572,7 +572,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
 
 class AnalysisSerializer(BaseAnalysisSerializer):
 
-    taxonomy = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
+    taxonomy = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(
         source='get_taxonomy',
         model=m_models.Organism,
         many=True,
