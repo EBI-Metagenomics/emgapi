@@ -470,7 +470,13 @@ class RunSerializer(ExplicitFieldsModelSerializer,
         )
 
 
-class BaseAnalysisSerializer(RunSerializer):
+class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
+                             serializers.HyperlinkedModelSerializer):
+
+    included_serializers = {
+        'sample': 'emgapi.serializers.SampleSerializer',
+        'study': 'emgapi.serializers.StudySerializer',
+    }
 
     # workaround to provide multiple values in PK
     id = serializers.ReadOnlyField(source="multiple_pk")
@@ -481,20 +487,37 @@ class BaseAnalysisSerializer(RunSerializer):
     )
 
     # attributes
-    pipeline_version = serializers.SerializerMethodField()
+    accession = serializers.SerializerMethodField()
 
-    def get_pipeline_version(self, obj):
-        return obj.pipeline.release_version
+    def get_accession(self, obj):
+        return obj.accession
 
     experiment_type = serializers.SerializerMethodField()
 
     def get_experiment_type(self, obj):
         return obj.experiment_type.experiment_type
 
+    pipeline_version = serializers.SerializerMethodField()
+
+    def get_pipeline_version(self, obj):
+        return obj.pipeline.release_version
+
     analysis_summary = serializers.ListField()
 
     # relationships
-    go_terms = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
+    sample = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emgapi_v1:samples-detail',
+        lookup_field='accession'
+    )
+
+    study = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emgapi_v1:studies-detail',
+        lookup_field='accession'
+    )
+
+    go_terms = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(
         source='get_goterms',
         model=m_models.GoTerm,
         many=True,
@@ -507,7 +530,7 @@ class BaseAnalysisSerializer(RunSerializer):
     def get_goterms(self, obj):
         return None
 
-    go_slim = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
+    go_slim = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(
         source='get_goslim',
         model=m_models.GoTerm,
         many=True,
@@ -543,16 +566,13 @@ class BaseAnalysisSerializer(RunSerializer):
             'run_status_id',
             'job_operator',
             'submit_time',
-            'pipelines',
-            'pipeline',
             'analysis_status',
-            'analysis',
         )
 
 
 class AnalysisSerializer(BaseAnalysisSerializer):
 
-    taxonomy = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
+    taxonomy = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(
         source='get_taxonomy',
         model=m_models.Organism,
         many=True,
