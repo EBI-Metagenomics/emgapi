@@ -487,3 +487,19 @@ MONGO_CONN = mongoengine.connect(**mongodb)
 
 # TODO: fix warnings
 SILENCED_SYSTEM_CHECKS = ["fields.W342"]
+
+try:
+    TOP10BIOMES = EMG_CONF['emg']['ui']['biomes']
+except KeyError:
+    TOP10BIOMES = {
+        85: 'root:Environmental:Aquatic',
+        132: 'root:Environmental:Aquatic:Marine',
+        220: 'root:Environmental:Terrestrial:Soil',
+        353: 'root:Host-associated:Human',
+        356: 'root:Host-associated:Human:Digestive system',
+        401: 'root:Host-associated:Human:Skin',
+        418: 'root:Host-associated:Mammals',
+        466: 'root:Host-associated:Plants',
+        62: 'root:Engineered:Wastewater',
+        31: 'root:Engineered:Food production',
+    }
