@@ -187,19 +187,15 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         WHERE node.lft BETWEEN parent.lft AND parent.rgt
             AND node.BIOME_ID = sample.BIOME_ID
             AND sample.IS_PUBLIC = 1
-            AND parent.DEPTH > 2
+            AND parent.BIOME_ID in %s
         GROUP BY parent.BIOME_ID
-        ORDER BY 2 DESC
+        ORDER BY samples_count DESC
         LIMIT 10;
         """
 
-        res = emg_models.Biome.objects.raw(sql)
-        biomes = {b.biome_id: b.samples_count for b in res}
-        queryset = emg_models.Biome.objects.filter(
-            biome_id__in=list(biomes))
-        queryset = self.filter_queryset(queryset)
-        for q in queryset:
-            q.samples_count = biomes[q.biome_id]
+        queryset = list(
+            emg_models.Biome.objects.raw(
+                sql, [tuple(settings.TOP10BIOMES), ]))
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
