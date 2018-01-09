@@ -498,7 +498,7 @@ except KeyError:
         353: 'root:Host-associated:Human',
         356: 'root:Host-associated:Human:Digestive system',
         401: 'root:Host-associated:Human:Skin',
-        418: 'root:Host-associated:Mammals',
+        421: 'root:Host-associated:Mammals:Digestive system',
         466: 'root:Host-associated:Plants',
         62: 'root:Engineered:Wastewater',
         31: 'root:Engineered:Food production',
