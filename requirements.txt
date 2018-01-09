@@ -21,7 +21,7 @@ ConcurrentLogHandler~=0.9.1
 
 # dependences
 Django~=1.11.1
-djangorestframework==3.7.3
+djangorestframework~=3.7.3
 django-filter~=1.0.3
 # Customized branch
 # djangorestframework-jsonapi~=2.2.0
