@@ -87,7 +87,10 @@ class TestPermissionsAPI(object):
             auth = 'Bearer {}'.format(token)
 
         url = reverse(view)
-        response = apiclient.get(url, HTTP_AUTHORIZATION=auth)
+        if auth is not None:
+            response = apiclient.get(url, HTTP_AUTHORIZATION=auth)
+        else:
+            response = apiclient.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
 
