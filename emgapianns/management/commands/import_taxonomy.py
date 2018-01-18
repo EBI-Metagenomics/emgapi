@@ -22,6 +22,8 @@ ORGANISM_RANK = {
             'species'],
     '4.0': ['super kingdom', 'kingdom', 'phylum', 'class', 'order', 'family',
             'genus', 'species'],
+    '4.1': ['super kingdom', 'kingdom', 'phylum', 'class', 'order', 'family',
+            'genus', 'species'],
 }
 
 
