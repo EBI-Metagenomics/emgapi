@@ -139,6 +139,45 @@ class StudySampleRelationshipViewSet(emg_mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
+class StudyPublicationRelationshipViewSet(emg_mixins.ListModelMixin,
+                                          emg_viewsets.BasePublicationGenericViewSet):  # noqa
+
+    lookup_field = 'pubmed_id'
+    lookup_value_regex = '[0-9\.]+'
+
+    def get_queryset(self):
+        queryset = emg_models.Publication.objects.all()
+        if 'studies' in self.request.GET.get('include', '').split(','):
+            _qs = emg_models.Study.objects \
+                .available(self.request)
+            queryset = queryset.prefetch_related(
+                Prefetch('studies', queryset=_qs))
+        return queryset
+
+    def get_serializer_class(self):
+        return super(StudyPublicationRelationshipViewSet, self) \
+            .get_serializer_class()
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of publications for the given study accession
+        Example:
+        ---
+        `/studies/SRP000183/publications` retrieve linked publications
+
+        `/studies/SRP000183/publications?ordering=published_year`
+        ordered by year
+
+        Search for:
+        ---
+        title, abstract, authors, etc.
+
+        `/studies/SRP000183/publications?search=text`
+        """
+        return super(StudyPublicationRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
 class PipelineSampleRelationshipViewSet(emg_mixins.ListModelMixin,
                                         emg_viewsets.BaseSampleGenericViewSet):  # noqa
 
