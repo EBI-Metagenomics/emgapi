@@ -135,3 +135,33 @@ class BaseAnalysisGenericViewSet(viewsets.GenericViewSet):
         'accession',
     )
     ordering = ('accession',)
+
+
+class BasePublicationGenericViewSet(viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.PublicationSerializer
+
+    filter_class = emg_filters.PublicationFilter
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'pubmed_id',
+        'published_year',
+        'studies_count',
+    )
+
+    ordering = ('-pubmed_id',)
+
+    search_fields = (
+        '@pub_title',
+        '@pub_abstract',
+        'pub_type',
+        'authors',
+        'doi',
+        'isbn',
+    )

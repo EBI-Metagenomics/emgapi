@@ -19,6 +19,7 @@ import logging
 
 from rest_framework_json_api import serializers
 from rest_framework_json_api import relations
+from rest_framework.reverse import reverse
 
 from . import models as emg_models
 from . import relations as emg_relations
@@ -517,60 +518,21 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
         lookup_field='accession'
     )
 
-    go_terms = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(
-        source='get_goterms',
-        model=m_models.GoTerm,
-        many=True,
-        read_only=True,
-        related_link_view_name='emgapi_v1:runs-pipelines-goterms-list',
-        related_link_url_kwarg='accession',
-        related_link_lookup_field='accession'
-    )
+    download = serializers.SerializerMethodField()
 
-    def get_goterms(self, obj):
-        return None
-
-    go_slim = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(
-        source='get_goslim',
-        model=m_models.GoTerm,
-        many=True,
-        read_only=True,
-        related_link_view_name='emgapi_v1:runs-pipelines-goslim-list',
-        related_link_url_kwarg='accession',
-        related_link_lookup_field='accession'
-    )
-
-    def get_goslim(self, obj):
-        return None
-
-    interpro_identifiers = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
-        source='get_interproidentifier',
-        model=m_models.InterproIdentifier,
-        many=True,
-        read_only=True,
-        related_link_view_name='emgapi_v1:runs-pipelines-interpro-list',
-        related_link_url_kwarg='accession',
-        related_link_lookup_field='accession'
-    )
-
-    def get_interproidentifier(self, obj):
-        return None
-
-    class Meta:
-        model = emg_models.AnalysisJob
-        exclude = (
-            're_run_count',
-            'input_file_name',
-            'result_directory',
-            'is_production_run',
-            'run_status_id',
-            'job_operator',
-            'submit_time',
-            'analysis_status',
-        )
-
-
-class AnalysisSerializer(BaseAnalysisSerializer):
+    def get_download(self, obj):
+        from .download import DOWNLOAD_REF
+        download_map = DOWNLOAD_REF[obj.pipeline.release_version]
+        links = {}
+        for value in download_map.values():
+            file_name = "{}_{}.{}".format(
+                obj.input_file_name, value['suffix'], value['ext'])
+            links[value['display']] = reverse(
+                'emgapi_v1:runs-pipelines-download-detail',
+                args=[obj.accession, obj.pipeline.release_version, file_name],
+                request=self.context['request']
+            )
+        return links
 
     taxonomy = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(
         source='get_taxonomy',
@@ -609,6 +571,61 @@ class AnalysisSerializer(BaseAnalysisSerializer):
     )
 
     def get_taxonomy_ssu(self, obj):
+        return None
+
+    class Meta:
+        model = emg_models.AnalysisJob
+        exclude = (
+            're_run_count',
+            'input_file_name',
+            'result_directory',
+            'is_production_run',
+            'run_status_id',
+            'job_operator',
+            'submit_time',
+            'analysis_status',
+        )
+
+
+class AnalysisSerializer(BaseAnalysisSerializer):
+
+    go_terms = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(
+        source='get_goterms',
+        model=m_models.GoTerm,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:runs-pipelines-goterms-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
+    )
+
+    def get_goterms(self, obj):
+        return None
+
+    go_slim = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(
+        source='get_goslim',
+        model=m_models.GoTerm,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:runs-pipelines-goslim-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
+    )
+
+    def get_goslim(self, obj):
+        return None
+
+    interpro_identifiers = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
+        source='get_interproidentifier',
+        model=m_models.InterproIdentifier,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:runs-pipelines-interpro-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
+    )
+
+    def get_interproidentifier(self, obj):
         return None
 
 
