@@ -5,7 +5,7 @@ services:
     image: mysql:5.6
     volumes:
       # - ./mysql:/var/lib/mysql:rw
-      - ../database/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+      - ../schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
       - MYSQL_DATABASE=emg
@@ -19,18 +19,19 @@ services:
       - ../docker/config.yaml:/home/emg/emg/config.yaml:ro
     links:
       - mysql
-      - redis
+      - mongodb
     environment:
       - PYTHONUNBUFFERED=0
 
   nginx:
-    image: nginx:1.10
+    image: nginx:1.12
     links:
       - app
     volumes:
-      - ../nginx/conf.d:/etc/nginx/conf.d
+      - ../nginx/conf.d:/etc/nginx/conf.d:ro
+      - ../results:/results:ro
     ports:
       - "80:80"
 
-  redis:
-    image: redis
+***REMOVED***
+    image: mongo:3.4
