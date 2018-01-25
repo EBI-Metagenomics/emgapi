@@ -82,6 +82,13 @@ router.register(
 )
 
 router.register(
+    r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)'
+    r'/pipelines/(?P<release_version>[0-9\.]+)/download',
+    views.AnalysisDownloadViewSet,
+    base_name='runs-pipelines-download'
+)
+
+router.register(
     r'pipeline-tools/(?P<tool_name>[^/]+)',
     views.PipelineToolVersionViewSet,
     base_name='pipeline-tools-version'
@@ -117,6 +124,12 @@ router.register(
     r'studies/(?P<accession>[a-zA-Z0-9]+)/samples',
     views_relations.StudySampleRelationshipViewSet,
     base_name='studies-samples'
+)
+
+router.register(
+    r'studies/(?P<accession>[a-zA-Z0-9]+)/publications',
+    views_relations.StudyPublicationRelationshipViewSet,
+    base_name='studies-publications'
 )
 
 # router.register(
