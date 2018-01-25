@@ -23,6 +23,7 @@ from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 from django.http import Http404
 from django.middleware import csrf
+from django.http import HttpResponse
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -291,31 +292,6 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 
     @detail_route(
         methods=['get', ],
-        url_name='publications-list',
-        serializer_class=emg_serializers.PublicationSerializer
-    )
-    def publications(self, request, accession=None):
-        """
-        Retrieves list of publications for the given study accession
-        Example:
-        ---
-        `/studies/SRP000183/publications` retrieve linked publications
-        """
-
-        obj = self.get_object()
-        queryset = obj.publications.all()
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(
-                page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(
-            queryset, many=True, context={'request': request})
-        return Response(serializer.data)
-
-    @detail_route(
-        methods=['get', ],
         url_name='biomes-list',
         serializer_class=emg_serializers.BiomeSerializer
     )
@@ -570,6 +546,48 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
         return super(AnalysisViewSet, self).retrieve(request, *args, **kwargs)
 
 
+class AnalysisDownloadViewSet(mixins.RetrieveModelMixin,
+                              viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.AnalysisSerializer
+
+    lookup_field = 'filename'
+    lookup_value_regex = '[^/]+'
+
+    def get_queryset(self):
+        return emg_models.AnalysisJob.objects \
+            .available(self.request) \
+            .filter(accession=self.kwargs['accession'])
+
+    def get_object(self):
+        return get_object_or_404(
+            self.get_queryset(),
+            Q(pipeline__release_version=self.kwargs['release_version']),
+            Q(accession=self.kwargs['accession']) |
+            Q(secondary_accession=self.kwargs['accession'])
+        )
+
+    def get_serializer_class(self):
+        return super(AnalysisViewSet, self).get_serializer_class()
+
+    def retrieve(self, request, *args, **kwargs):
+        obj = self.get_object()
+        response = HttpResponse()
+        response["Content-Disposition"] = \
+            "attachment; filename={0}".format(self.kwargs['filename'])
+        _fname = self.kwargs['filename'].split("_")
+
+        from .download import DOWNLOAD_REF
+        _fmap = DOWNLOAD_REF[obj.pipeline.release_version][_fname[-1]]
+
+        file_name = "{}_{}.{}".format(
+            obj.input_file_name, _fmap['real_suffix'], _fmap['real_ext'])
+
+        response['X-Accel-Redirect'] = \
+            "/results{0}/{1}".format(obj.result_directory, file_name)
+        return response
+
+
 class PipelineViewSet(mixins.RetrieveModelMixin,
                       emg_mixins.ListModelMixin,
                       viewsets.GenericViewSet):
@@ -714,34 +732,7 @@ class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
 
 class PublicationViewSet(mixins.RetrieveModelMixin,
                          emg_mixins.ListModelMixin,
-                         viewsets.GenericViewSet):
-
-    serializer_class = emg_serializers.PublicationSerializer
-
-    filter_class = emg_filters.PublicationFilter
-
-    filter_backends = (
-        DjangoFilterBackend,
-        filters.SearchFilter,
-        filters.OrderingFilter,
-    )
-
-    ordering_fields = (
-        'pubmed_id',
-        'published_year',
-        'studies_count',
-    )
-
-    ordering = ('pubmed_id',)
-
-    search_fields = (
-        '@pub_title',
-        '@pub_abstract',
-        'pub_type',
-        'authors',
-        'doi',
-        'isbn',
-    )
+                         emg_viewsets.BasePublicationGenericViewSet):
 
     lookup_field = 'pubmed_id'
     lookup_value_regex = '[0-9\.]+'
