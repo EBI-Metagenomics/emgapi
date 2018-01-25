@@ -142,11 +142,13 @@ class StudySampleRelationshipViewSet(emg_mixins.ListModelMixin,
 class StudyPublicationRelationshipViewSet(emg_mixins.ListModelMixin,
                                           emg_viewsets.BasePublicationGenericViewSet):  # noqa
 
-    lookup_field = 'pubmed_id'
-    lookup_value_regex = '[0-9\.]+'
+    lookup_field = 'accession'
 
     def get_queryset(self):
-        queryset = emg_models.Publication.objects.all()
+        study = get_object_or_404(
+            emg_models.Study, accession=self.kwargs[self.lookup_field])
+        queryset = emg_models.Publication.objects \
+            .filter(studies__in=[study])
         if 'studies' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Study.objects \
                 .available(self.request)
