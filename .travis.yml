@@ -7,45 +7,28 @@ python:
   - '3.6'
 
 env:
-  - VENV=miniconda
-  - VENV=virtualenv
+  - EMG_CONFIG=$TRAVIS_BUILD_DIR/travis/config.yaml
 
 services:
-  - docker
+  - mysql
   - mongodb
 
 before_install:
-  - pip install "flake8==3.4" pycodestyle pep8-naming
-  - python setup.py sdist
+  - mysql -e 'CREATE DATABASE emg;'
+  - python -V
 
 install:
-  # UnsatisfiableError: The following specifications were found to be in conflict:
-  # - python 3.4*
-  # - urllib3 -> ipaddress -> python 2.7*
-  - if [[ "$VENV" == "miniconda" && "$TRAVIS_PYTHON_VERSION" != "3.4" ]]; then
-      SRCDIR=$(pwd) PYTHON_VERSION=$TRAVIS_PYTHON_VERSION docker/run.sh install;
-    fi
+  - pip install "flake8==3.4" pycodestyle pep8-naming
+  - python setup.py sdist
+  - pip install "git+git://github.com/ola-t/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
 
 before_script:
-  - docker --version
-  # travis by default comes with MySQL 5.5
-  - sudo service mysql stop
-  - docker run --rm --name mysql -p 3306:3306 -e MYSQL_ALLOW_EMPTY_PASSWORD=yes -d mysql:5.6
-  # optional redis
-  # - docker run --rm --name redis -p 6379:6379 -d redis
   - flake8 --version
   - flake8 -v .
-  - mkdir -p ~/emg && cp travis/config.yaml ~/emg/
 
 script:
-  - if [[ "$VENV" == "miniconda" ]]; then
-      SRCDIR=$(pwd) docker/run.sh travis_conda;
-    else
-      SRCDIR=$(pwd) docker/run.sh travis;
-    fi
-
-after_script:
-  - docker stop mysql #redis
+  - pip install -U .
+  - python setup.py test
 
 notifications:
   slack:
