@@ -521,7 +521,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     download = serializers.SerializerMethodField()
 
     def get_download(self, obj):
-        from .download import DOWNLOAD_REF
+        from .utils.download import DOWNLOAD_REF
         download_map = DOWNLOAD_REF[obj.pipeline.release_version]
         links = {}
         for value in download_map.values():
