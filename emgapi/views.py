@@ -576,12 +576,20 @@ class AnalysisDownloadViewSet(mixins.RetrieveModelMixin,
         response = HttpResponse()
         response["Content-Disposition"] = \
             "attachment; filename={0}".format(self.kwargs['filename'])
-        _fname = self.kwargs['filename'].split("_")
+        _fname = self.kwargs['filename'] \
+            .replace(obj.input_file_name, "").strip("_")
+        _fmap = DOWNLOAD_REF[obj.pipeline.release_version][_fname]
 
-        _fmap = DOWNLOAD_REF[obj.pipeline.release_version][_fname[-1]]
-
-        file_name = "{}_{}.{}".format(
-            obj.input_file_name, _fmap['real_suffix'], _fmap['real_ext'])
+        try:
+            file_name = "{}/{}_{}.{}".format(
+                _fmap['subdir'],
+                obj.input_file_name,
+                _fmap['real_suffix'],
+                _fmap['real_ext']
+            )
+        except KeyError:
+            file_name = "{}_{}.{}".format(
+                obj.input_file_name, _fmap['real_suffix'], _fmap['real_ext'])
 
         response['X-Accel-Redirect'] = \
             "/results{0}/{1}".format(obj.result_directory, file_name)
