@@ -572,12 +572,12 @@ class AnalysisDownloadViewSet(mixins.RetrieveModelMixin,
 
     def retrieve(self, request, *args, **kwargs):
         obj = self.get_object()
+        from .utils.download import DOWNLOAD_REF
         response = HttpResponse()
         response["Content-Disposition"] = \
             "attachment; filename={0}".format(self.kwargs['filename'])
         _fname = self.kwargs['filename'].split("_")
 
-        from .download import DOWNLOAD_REF
         _fmap = DOWNLOAD_REF[obj.pipeline.release_version][_fname[-1]]
 
         file_name = "{}_{}.{}".format(
