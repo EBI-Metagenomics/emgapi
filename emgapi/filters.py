@@ -32,24 +32,39 @@ FLOAT_MATCH_REGEX = r"^[0-9 \.\,]+$"
 
 
 def published_year():
-    years = emg_models.Publication.objects \
-        .filter(published_year__isnull=False, published_year__gt=0) \
-        .order_by('published_year') \
-        .values('published_year').distinct()
-    return [(y['published_year'], y['published_year']) for y in years]
+    # TODO: workaround for django.db.utils.ProgrammingError:
+    # (1146, "Table doesn't exist")
+    try:
+        years = emg_models.Publication.objects \
+            .filter(published_year__isnull=False, published_year__gt=0) \
+            .order_by('published_year') \
+            .values('published_year').distinct()
+        return [(y['published_year'], y['published_year']) for y in years]
+    except:
+        return []
 
 
 def metadata_keywords():
-    keywords = emg_models.VariableNames.objects.all() \
-        .order_by('var_name') \
-        .values('var_name').distinct()
-    return [(k['var_name'], k['var_name']) for k in keywords]
+    # TODO: workaround for django.db.utils.ProgrammingError:
+    # (1146, "Table doesn't exist")
+    try:
+        keywords = emg_models.VariableNames.objects.all() \
+            .order_by('var_name') \
+            .values('var_name').distinct()
+        return [(k['var_name'], k['var_name']) for k in keywords]
+    except:
+        return []
 
 
 def pipeline_version():
-    pipelines = emg_models.Pipeline.objects.all() \
-        .order_by('release_version').distinct()
-    return [(p.pk, p.release_version) for p in pipelines]
+    # TODO: workaround for django.db.utils.ProgrammingError:
+    # (1146, "Table doesn't exist")
+    try:
+        pipelines = emg_models.Pipeline.objects.all() \
+            .order_by('release_version').distinct()
+        return [(p.pk, p.release_version) for p in pipelines]
+    except:
+        return []
 
 
 class PublicationFilter(django_filters.FilterSet):
