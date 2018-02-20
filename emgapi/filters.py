@@ -32,8 +32,6 @@ FLOAT_MATCH_REGEX = r"^[0-9 \.\,]+$"
 
 
 def published_year():
-    # TODO: workaround for django.db.utils.ProgrammingError:
-    # (1146, "Table doesn't exist")
     try:
         years = emg_models.Publication.objects \
             .filter(published_year__isnull=False, published_year__gt=0) \
@@ -45,8 +43,6 @@ def published_year():
 
 
 def metadata_keywords():
-    # TODO: workaround for django.db.utils.ProgrammingError:
-    # (1146, "Table doesn't exist")
     try:
         keywords = emg_models.VariableNames.objects.all() \
             .order_by('var_name') \
@@ -57,8 +53,6 @@ def metadata_keywords():
 
 
 def pipeline_version():
-    # TODO: workaround for django.db.utils.ProgrammingError:
-    # (1146, "Table doesn't exist")
     try:
         pipelines = emg_models.Pipeline.objects.all() \
             .order_by('release_version').distinct()
@@ -78,7 +72,7 @@ class PublicationFilter(django_filters.FilterSet):
         label='ISBN', help_text='ISBN')
 
     published_year = filters.ChoiceFilter(
-        choices=published_year(),
+        choices=published_year,
         name='published_year', distinct=True,
         label='Published year', help_text='Published year')
 
@@ -303,7 +297,7 @@ class SampleFilter(django_filters.FilterSet):
         return qs.filter(pk__in=samples)
 
     metadata_key = filters.ChoiceFilter(
-            choices=metadata_keywords(),
+            choices=metadata_keywords,
             method='filter_metadata_key',
             name='metadata_key', distinct=True,
             label='Metadata keyword', help_text='Metadata keyword')
@@ -512,7 +506,7 @@ class RunFilter(django_filters.FilterSet):
             instrument_model__iregex=WORD_MATCH_REGEX.format(value))
 
     metadata_key = filters.ChoiceFilter(
-            choices=metadata_keywords(),
+            choices=metadata_keywords,
             method='filter_metadata_key',
             name='metadata_key', distinct=True,
             label='Metadata keyword', help_text='Metadata keyword')
@@ -594,7 +588,7 @@ class RunFilter(django_filters.FilterSet):
 class AnalysisJobFilter(RunFilter):
 
     pipeline_version = filters.ChoiceFilter(
-        choices=pipeline_version(),
+        choices=pipeline_version,
         name='pipeline', distinct=True,
         label='Pipeline version', help_text='Pipeline version')
 
