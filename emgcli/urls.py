@@ -55,7 +55,8 @@ class OpenAPIRenderer(BaseRenderer):
 
 schema_view = get_schema_view(
     title=settings.EMG_TITLE, url=settings.EMG_URL,
-    description=settings.EMG_DESC, renderer_classes=[OpenAPIRenderer]
+    description=settings.EMG_DESC,
+    renderer_classes=[OpenAPIRenderer]
 )
 
 # merge all routers
