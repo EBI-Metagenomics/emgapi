@@ -1,10 +1,42 @@
 DOWNLOAD_REF = {
     '1.0': {
 
+        # functional result files
+        'InterPro.tsv': {
+            'display': 'InterProMatches',
+            'real_suffix': 'summary', 'real_ext': 'ipr',
+            'suffix': 'InterPro', 'ext': 'tsv'
+        },
+        'GO.csv': {
+            'display': 'CompleteGOAnnotation',
+            'real_suffix': 'summary', 'real_ext': 'go',
+            'suffix': 'GO', 'ext': 'csv'
+        },
+        'GOslim.csv': {
+            'display': 'GOSlimAnnotation',
+            'real_suffix': 'summary', 'real_ext': 'go_slim',
+            'suffix': 'GOslim', 'ext': 'csv'
+        },
+
         # taxonomy result files
-        # 'R_RNA_5S_FASTA': { },
-        # 'R_RNA_16S_FASTA': { },
-        # 'R_RNA_23S_FASTA': { },
+        '5SrRNA.fasta': {
+            'display': 'ReadsEncoding-5s',
+            'subdir': 'sequence-categorisation',
+            'real_suffix': '5S', 'real_ext': 'fasta',
+            'suffix': '5SrRNA', 'ext': 'fasta'
+        },
+        '16SrRNA.fasta': {
+            'display': 'ReadsEncoding-16s',
+            'subdir': 'sequence-categorisation',
+            'real_suffix': '16S', 'real_ext': 'fasta',
+            'suffix': '16SrRNA', 'ext': 'fasta'
+        },
+        '23SrRNA.fasta': {
+            'display': 'ReadsEncoding-23s',
+            'subdir': 'sequence-categorisation',
+            'real_suffix': '23S', 'real_ext': 'fasta',
+            'suffix': '23SrRNA', 'ext': 'fasta'
+        },
         'otu_table.tsv': {
             'display': 'OTUTable',
             'subdir': 'cr_otus',
@@ -24,28 +56,12 @@ DOWNLOAD_REF = {
             'suffix': 'otu_table_json', 'ext': 'biom'
         },
         'pruned.tree': {
-            'display': 'PrunedTree',
+            'display': 'PhylogeneticTree',
             'subdir': 'cr_otus',
             'real_suffix': 'pruned', 'real_ext': 'tree',
             'suffix': 'pruned', 'ext': 'tree'
         },
 
-        # functional result files
-        'InterPro.tsv': {
-            'display': 'InterProMatches',
-            'real_suffix': 'summary', 'real_ext': 'ipr',
-            'suffix': 'InterPro', 'ext': 'tsv'
-        },
-        'GO.csv': {
-            'display': 'CompleteGOAnnotation',
-            'real_suffix': 'summary', 'real_ext': 'go',
-            'suffix': 'GO', 'ext': 'csv'
-        },
-        'GOslim.csv': {
-            'display': 'GOSlimAnnotation',
-            'real_suffix': 'summary', 'real_ext': 'go_slim',
-            'suffix': 'GOslim', 'ext': 'csv'
-        },
     },
     '2.0': {
         # sequence data files
@@ -57,10 +73,42 @@ DOWNLOAD_REF = {
         # 'PREDICTED_CDS_WITHOUT_ANNOTATION': { },
         # 'PREDICTED_ORF_WITHOUT_ANNOTATION': { },
 
+        # functional result files
+        'InterPro.tsv': {
+            'display': 'InterProMatches',
+            'real_suffix': 'summary', 'real_ext': 'ipr',
+            'suffix': 'InterPro', 'ext': 'tsv'
+        },
+        'GO.csv': {
+            'display': 'CompleteGOAnnotation',
+            'real_suffix': 'summary', 'real_ext': 'go',
+            'suffix': 'GO', 'ext': 'csv'
+        },
+        'GOslim.csv': {
+            'display': 'GOSlimAnnotation',
+            'real_suffix': 'summary', 'real_ext': 'go_slim',
+            'suffix': 'GOslim', 'ext': 'csv'
+        },
+
         # taxonomy result files
-        # 'R_RNA_5S_FASTA': { },
-        # 'R_RNA_16S_FASTA': { },
-        # 'R_RNA_23S_FASTA': { },
+        '5SrRNA.fasta': {
+            'display': 'ReadsEncoding-5s',
+            'subdir': 'sequence-categorisation',
+            'real_suffix': '5S', 'real_ext': 'fasta',
+            'suffix': '5SrRNA', 'ext': 'fasta'
+        },
+        '16SrRNA.fasta': {
+            'display': 'ReadsEncoding-16s',
+            'subdir': 'sequence-categorisation',
+            'real_suffix': '16S', 'real_ext': 'fasta',
+            'suffix': '16SrRNA', 'ext': 'fasta'
+        },
+        '23SrRNA.fasta': {
+            'display': 'ReadsEncoding-23s',
+            'subdir': 'sequence-categorisation',
+            'real_suffix': '23S', 'real_ext': 'fasta',
+            'suffix': '23SrRNA', 'ext': 'fasta'
+        },
         'otu_table.tsv': {
             'display': 'OTUTable',
             'subdir': 'cr_otus',
@@ -86,29 +134,45 @@ DOWNLOAD_REF = {
             'suffix': 'pruned', 'ext': 'tree'
         },
 
-        # functional result files
-        'InterPro.tsv': {
-            'display': 'InterProMatches',
-            'real_suffix': 'summary', 'real_ext': 'ipr',
-            'suffix': 'InterPro', 'ext': 'tsv'
-        },
-        'GO.csv': {
-            'display': 'CompleteGOAnnotation',
-            'real_suffix': 'summary', 'real_ext': 'go',
-            'suffix': 'GO', 'ext': 'csv'
-        },
-        'GOslim.csv': {
-            'display': 'GOSlimAnnotation',
-            'real_suffix': 'summary', 'real_ext': 'go_slim',
-            'suffix': 'GOslim', 'ext': 'csv'
-        },
     },
     '3.0': {
 
+        # functional result files
+        'InterPro.tsv': {
+            'display': 'InterProMatches',
+            'real_suffix': 'summary', 'real_ext': 'ipr',
+            'suffix': 'InterPro', 'ext': 'tsv'
+        },
+        'GO.csv': {
+            'display': 'CompleteGOAnnotation',
+            'real_suffix': 'summary', 'real_ext': 'go',
+            'suffix': 'GO', 'ext': 'csv'
+        },
+        'GOslim.csv': {
+            'display': 'GOSlimAnnotation',
+            'real_suffix': 'summary', 'real_ext': 'go_slim',
+            'suffix': 'GOslim', 'ext': 'csv'
+        },
+
         # taxonomy result files
-        # 'R_RNA_5S_FASTA': { },
-        # 'R_RNA_16S_FASTA': { },
-        # 'R_RNA_23S_FASTA': { },
+        '5SrRNA.fasta': {
+            'display': 'ReadsEncoding-5s',
+            'subdir': 'sequence-categorisation',
+            'real_suffix': '5S', 'real_ext': 'fasta',
+            'suffix': '5SrRNA', 'ext': 'fasta'
+        },
+        '16SrRNA.fasta': {
+            'display': 'ReadsEncoding-16s',
+            'subdir': 'sequence-categorisation',
+            'real_suffix': '16S', 'real_ext': 'fasta',
+            'suffix': '16SrRNA', 'ext': 'fasta'
+        },
+        '23SrRNA.fasta': {
+            'display': 'ReadsEncoding-23s',
+            'subdir': 'sequence-categorisation',
+            'real_suffix': '23S', 'real_ext': 'fasta',
+            'suffix': '23SrRNA', 'ext': 'fasta'
+        },
         'otu_table.tsv': {
             'display': 'OTUTable',
             'subdir': 'cr_otus',
@@ -132,32 +196,47 @@ DOWNLOAD_REF = {
             'subdir': 'cr_otus',
             'real_suffix': 'pruned', 'real_ext': 'tree',
             'suffix': 'pruned', 'ext': 'tree'
-        },
-
-        # functional result files
-        'InterPro.tsv': {
-            'display': 'InterProMatches',
-            'real_suffix': 'summary', 'real_ext': 'ipr',
-            'suffix': 'InterPro', 'ext': 'tsv'
-        },
-        'GO.csv': {
-            'display': 'CompleteGOAnnotation',
-            'real_suffix': 'summary', 'real_ext': 'go',
-            'suffix': 'GO', 'ext': 'csv'
-        },
-        'GOslim.csv': {
-            'display': 'GOSlimAnnotation',
-            'real_suffix': 'summary', 'real_ext': 'go_slim',
-            'suffix': 'GOslim', 'ext': 'csv'
         },
 
     },
     '4.0': {
 
+        # functional result files
+        'InterPro.tsv': {
+            'display': 'InterProMatches',
+            'real_suffix': 'summary', 'real_ext': 'ipr',
+            'suffix': 'InterPro', 'ext': 'tsv'
+        },
+        'GO.csv': {
+            'display': 'CompleteGOAnnotation',
+            'real_suffix': 'summary', 'real_ext': 'go',
+            'suffix': 'GO', 'ext': 'csv'
+        },
+        'GOslim.csv': {
+            'display': 'GOSlimAnnotation',
+            'real_suffix': 'summary', 'real_ext': 'go_slim',
+            'suffix': 'GOslim', 'ext': 'csv'
+        },
+
         # taxonomy result files
-        # 'R_RNA_5S_FASTA': { },
-        # 'R_RNA_16S_FASTA': { },
-        # 'R_RNA_23S_FASTA': { },
+        '5SrRNA.fasta': {
+            'display': 'ReadsEncoding-5s',
+            'subdir': 'sequence-categorisation',
+            'real_suffix': '5S', 'real_ext': 'fasta',
+            'suffix': '5SrRNA', 'ext': 'fasta'
+        },
+        '16SrRNA.fasta': {
+            'display': 'ReadsEncoding-16s',
+            'subdir': 'sequence-categorisation',
+            'real_suffix': '16S', 'real_ext': 'fasta',
+            'suffix': '16SrRNA', 'ext': 'fasta'
+        },
+        '23SrRNA.fasta': {
+            'display': 'ReadsEncoding-23s',
+            'subdir': 'sequence-categorisation',
+            'real_suffix': '23S', 'real_ext': 'fasta',
+            'suffix': '23SrRNA', 'ext': 'fasta'
+        },
         'otu_table.tsv': {
             'display': 'OTUTable',
             'subdir': 'cr_otus',
@@ -181,32 +260,47 @@ DOWNLOAD_REF = {
             'subdir': 'cr_otus',
             'real_suffix': 'pruned', 'real_ext': 'tree',
             'suffix': 'pruned', 'ext': 'tree'
-        },
-
-        # functional result files
-        'InterPro.tsv': {
-            'display': 'InterProMatches',
-            'real_suffix': 'summary', 'real_ext': 'ipr',
-            'suffix': 'InterPro', 'ext': 'tsv'
-        },
-        'GO.csv': {
-            'display': 'CompleteGOAnnotation',
-            'real_suffix': 'summary', 'real_ext': 'go',
-            'suffix': 'GO', 'ext': 'csv'
-        },
-        'GOslim.csv': {
-            'display': 'GOSlimAnnotation',
-            'real_suffix': 'summary', 'real_ext': 'go_slim',
-            'suffix': 'GOslim', 'ext': 'csv'
         },
 
     },
     '4.1': {
 
+        # functional result files
+        'InterPro.tsv': {
+            'display': 'InterProMatches',
+            'real_suffix': 'summary', 'real_ext': 'ipr',
+            'suffix': 'InterPro', 'ext': 'tsv'
+        },
+        'GO.csv': {
+            'display': 'CompleteGOAnnotation',
+            'real_suffix': 'summary', 'real_ext': 'go',
+            'suffix': 'GO', 'ext': 'csv'
+        },
+        'GOslim.csv': {
+            'display': 'GOSlimAnnotation',
+            'real_suffix': 'summary', 'real_ext': 'go_slim',
+            'suffix': 'GOslim', 'ext': 'csv'
+        },
+
         # taxonomy result files
-        # 'R_RNA_5S_FASTA': { },
-        # 'R_RNA_16S_FASTA': { },
-        # 'R_RNA_23S_FASTA': { },
+        '5SrRNA.fasta': {
+            'display': 'ReadsEncoding-5s',
+            'subdir': 'sequence-categorisation',
+            'real_suffix': '5S', 'real_ext': 'fasta',
+            'suffix': '5SrRNA', 'ext': 'fasta'
+        },
+        '16SrRNA.fasta': {
+            'display': 'ReadsEncoding-16s',
+            'subdir': 'sequence-categorisation',
+            'real_suffix': '16S', 'real_ext': 'fasta',
+            'suffix': '16SrRNA', 'ext': 'fasta'
+        },
+        '23SrRNA.fasta': {
+            'display': 'ReadsEncoding-23s',
+            'subdir': 'sequence-categorisation',
+            'real_suffix': '23S', 'real_ext': 'fasta',
+            'suffix': '23SrRNA', 'ext': 'fasta'
+        },
         'otu_table.tsv': {
             'display': 'OTUTable',
             'subdir': 'cr_otus',
@@ -230,23 +324,6 @@ DOWNLOAD_REF = {
             'subdir': 'cr_otus',
             'real_suffix': 'pruned', 'real_ext': 'tree',
             'suffix': 'pruned', 'ext': 'tree'
-        },
-
-        # functional result files
-        'InterPro.tsv': {
-            'display': 'InterProMatches',
-            'real_suffix': 'summary', 'real_ext': 'ipr',
-            'suffix': 'InterPro', 'ext': 'tsv'
-        },
-        'GO.csv': {
-            'display': 'CompleteGOAnnotation',
-            'real_suffix': 'summary', 'real_ext': 'go',
-            'suffix': 'GO', 'ext': 'csv'
-        },
-        'GOslim.csv': {
-            'display': 'GOSlimAnnotation',
-            'real_suffix': 'summary', 'real_ext': 'go_slim',
-            'suffix': 'GOslim', 'ext': 'csv'
         },
 
     },
