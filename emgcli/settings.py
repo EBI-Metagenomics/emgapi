@@ -503,3 +503,8 @@ except KeyError:
         62: 'root:Engineered:Wastewater',
         31: 'root:Engineered:Food production',
     }
+
+try:
+    RESULTS_DIR = EMG_CONF['emg']['results_dir']
+except KeyError:
+    RESULTS_DIR = os.path.join(expanduser("~"), 'results')

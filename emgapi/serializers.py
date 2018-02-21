@@ -51,6 +51,7 @@ class ExplicitFieldsModelSerializer(serializers.ModelSerializer):
 
 
 # Serializers
+
 class ResourceSerializer(serializers.Serializer):
 
     id = serializers.CharField(read_only=True, max_length=20)
