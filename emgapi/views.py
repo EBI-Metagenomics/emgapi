@@ -580,16 +580,19 @@ class AnalysisDownloadViewSet(mixins.RetrieveModelMixin,
             .replace(obj.input_file_name, "").strip("_")
         _fmap = DOWNLOAD_REF[obj.pipeline.release_version][_fname]
 
-        try:
+        if 'subdir' in _fmap:
             file_name = "{}/{}_{}.{}".format(
                 _fmap['subdir'],
                 obj.input_file_name,
                 _fmap['real_suffix'],
                 _fmap['real_ext']
             )
-        except KeyError:
+        else:
             file_name = "{}_{}.{}".format(
-                obj.input_file_name, _fmap['real_suffix'], _fmap['real_ext'])
+                obj.input_file_name,
+                _fmap['real_suffix'],
+                _fmap['real_ext']
+            )
 
         response['X-Accel-Redirect'] = \
             "/results{0}/{1}".format(obj.result_directory, file_name)
