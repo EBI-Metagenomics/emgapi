@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import logging
 import inflection
 
@@ -549,7 +550,12 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
     @detail_route(methods=['get'],
                   renderer_classes=(renderers.StaticHTMLRenderer,))
     def krona(self, request, **kwargs):
-        import os
+        """
+        Retrieves krona chart for the given accession and pipeline version
+        Example:
+        ---
+        `/runs/ERR1385375/pipelines/3.0/krona`
+        """
         obj = self.get_object()
         krona = os.path.abspath(os.path.join(
             settings.RESULTS_DIR,
@@ -559,6 +565,7 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
         )
         with open(krona, "r") as k:
             return Response(k.read())
+        raise Http404('No chrona chart.')
 
     @detail_route(methods=['get'],
                   url_name='krona',
@@ -566,9 +573,11 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
                   renderer_classes=(renderers.StaticHTMLRenderer,))
     def krona_lsu_ssu(self, request, subdir=None, **kwargs):
         """
-        A view that returns krona chart.
+        Retrieves krona chart for the given accession and pipeline version
+        Example:
+        ---
+        `/runs/GCA_900216095/pipelines/4.0/krona/lsu`
         """
-        import os
         obj = self.get_object()
         krona = os.path.abspath(os.path.join(
             settings.RESULTS_DIR,
@@ -579,6 +588,7 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
         )
         with open(krona, "r") as k:
             return Response(k.read())
+        raise Http404('No chrona chart.')
 
 
 class AnalysisDownloadViewSet(mixins.RetrieveModelMixin,
