@@ -548,26 +548,37 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
 
     @detail_route(methods=['get'],
                   renderer_classes=(renderers.StaticHTMLRenderer,))
-    def krona(self, request, *args, **kwargs):
+    def krona(self, request, **kwargs):
+        import os
+        obj = self.get_object()
+        krona = os.path.abspath(os.path.join(
+            settings.RESULTS_DIR,
+            obj.result_directory,
+            'taxonomy-summary',
+            'krona.html')
+        )
+        with open(krona, "r") as k:
+            return Response(k.read())
+
+    @detail_route(methods=['get'],
+                  url_name='krona',
+                  url_path='krona(?:/(?P<subdir>lsu|ssu))',
+                  renderer_classes=(renderers.StaticHTMLRenderer,))
+    def krona_lsu_ssu(self, request, subdir=None, **kwargs):
         """
         A view that returns krona chart.
         """
-        from distutils.version import StrictVersion
         import os
         obj = self.get_object()
-        if StrictVersion(obj.pipeline.release_version) < StrictVersion("4.0"):
-            krona = os.path.abspath(os.path.join(
-                settings.RESULTS_DIR,
-                obj.result_directory,
-                'taxonomy-summary',
-                'krona.html')
-            )
-            with open(krona, "r") as k:
-                return Response(k.read())
-        else:
-            raise Http404(
-                ('No krona chart for this pipeline version.')
-            )
+        krona = os.path.abspath(os.path.join(
+            settings.RESULTS_DIR,
+            obj.result_directory,
+            'taxonomy-summary',
+            subdir.upper(),
+            'krona.html')
+        )
+        with open(krona, "r") as k:
+            return Response(k.read())
 
 
 class AnalysisDownloadViewSet(mixins.RetrieveModelMixin,
