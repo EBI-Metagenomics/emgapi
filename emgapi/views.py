@@ -569,7 +569,7 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
 
     @detail_route(methods=['get'],
                   url_name='krona',
-                  url_path='krona(?:/(?P<subdir>lsu|ssu))',
+                  url_path='krona/(?P<subdir>lsu|ssu)',
                   renderer_classes=(renderers.StaticHTMLRenderer,))
     def krona_lsu_ssu(self, request, subdir=None, **kwargs):
         """
