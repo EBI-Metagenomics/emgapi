@@ -34,6 +34,7 @@ from rest_framework import viewsets, mixins
 from rest_framework.decorators import detail_route, list_route
 # from rest_framework import authentication
 from rest_framework import permissions
+from rest_framework import renderers
 
 from . import models as emg_models
 from . import serializers as emg_serializers
@@ -544,6 +545,29 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
         `/runs/ERR1385375/pipelines/3.0`
         """
         return super(AnalysisViewSet, self).retrieve(request, *args, **kwargs)
+
+    @detail_route(methods=['get'],
+                  renderer_classes=(renderers.StaticHTMLRenderer,))
+    def krona(self, request, *args, **kwargs):
+        """
+        A view that returns krona chart.
+        """
+        from distutils.version import StrictVersion
+        import os
+        obj = self.get_object()
+        if StrictVersion(obj.pipeline.release_version) < StrictVersion("4.0"):
+            krona = os.path.abspath(os.path.join(
+                settings.RESULTS_DIR,
+                obj.result_directory,
+                'taxonomy-summary',
+                'krona.html')
+            )
+            with open(krona, "r") as k:
+                return Response(k.read())
+        else:
+            raise Http404(
+                ('No krona chart for this pipeline version.')
+            )
 
 
 class AnalysisDownloadViewSet(mixins.RetrieveModelMixin,
