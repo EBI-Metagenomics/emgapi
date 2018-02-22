@@ -25,6 +25,7 @@ from django.shortcuts import get_object_or_404
 from django.http import Http404
 from django.middleware import csrf
 from django.http import HttpResponse
+from django.views.decorators.clickjacking import xframe_options_exempt
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -547,6 +548,7 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
         """
         return super(AnalysisViewSet, self).retrieve(request, *args, **kwargs)
 
+    @xframe_options_exempt
     @detail_route(methods=['get'],
                   renderer_classes=(renderers.StaticHTMLRenderer,))
     def krona(self, request, **kwargs):
