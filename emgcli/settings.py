@@ -386,7 +386,7 @@ except KeyError:
     warnings.warn("ALLOWED_HOSTS not configured using wildecard",
                   RuntimeWarning)
 
-X_FRAME_OPTIONS = 'DENY'
+X_FRAME_OPTIONS = 'SAMEORIGIN'
 SECURE_BROWSER_XSS_FILTER = True
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
