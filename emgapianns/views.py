@@ -260,9 +260,11 @@ class AnalysisGoTermRelationshipViewSet(  # NOQA
     def get_queryset(self):
         accession = self.kwargs['accession']
         release_version = self.kwargs['release_version']
+        qs = emg_models.AnalysisJob.objects.exclude(
+            experiment_type__experiment_type='amplicon')
         job = get_object_or_404(
-            emg_models.AnalysisJob, accession=accession,
-            pipeline__release_version=release_version
+            qs, accession=accession,
+            pipeline__release_version=release_version,
         )
 
         analysis = None
@@ -297,9 +299,11 @@ class AnalysisGoSlimRelationshipViewSet(  # NOQA
     def get_queryset(self):
         accession = self.kwargs['accession']
         release_version = self.kwargs['release_version']
+        qs = emg_models.AnalysisJob.objects.exclude(
+            experiment_type__experiment_type='amplicon')
         job = get_object_or_404(
-            emg_models.AnalysisJob, accession=accession,
-            pipeline__release_version=release_version
+            qs, accession=accession,
+            pipeline__release_version=release_version,
         )
 
         analysis = None
@@ -334,9 +338,11 @@ class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
     def get_queryset(self):
         accession = self.kwargs['accession']
         release_version = self.kwargs['release_version']
+        qs = emg_models.AnalysisJob.objects.exclude(
+            experiment_type__experiment_type='amplicon')
         job = get_object_or_404(
-            emg_models.AnalysisJob, accession=accession,
-            pipeline__release_version=release_version
+            qs, accession=accession,
+            pipeline__release_version=release_version,
         )
 
         analysis = None
