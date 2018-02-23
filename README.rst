@@ -20,14 +20,6 @@ Create configuration file in `~/path/to/config.yaml <docker/config.yaml>`_.
 Install
 -------
 
-Install Miniconda::
-
-    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
-    bash Miniconda3-latest-Linux-x86_64.sh
-
-    export PATH=~/miniconda/bin:$PATH
-
-
 Install application::
 
     pip install "git+git://github.com/ola-t/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
