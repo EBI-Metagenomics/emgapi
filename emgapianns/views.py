@@ -260,17 +260,19 @@ class AnalysisGoTermRelationshipViewSet(  # NOQA
     def get_queryset(self):
         accession = self.kwargs['accession']
         release_version = self.kwargs['release_version']
-        qs = emg_models.AnalysisJob.objects.exclude(
-            experiment_type__experiment_type='amplicon')
-        job = get_object_or_404(
-            qs, accession=accession,
-            pipeline__release_version=release_version,
-        )
+        job = emg_models.AnalysisJob.objects \
+            .filter(
+                accession=accession,
+                pipeline__release_version=release_version
+            ) \
+            .exclude(experiment_type__experiment_type='amplicon') \
+            .first()
 
         analysis = None
         try:
-            analysis = m_models.AnalysisJobGoTerm.objects \
-                .get(analysis_id=str(job.job_id))
+            if job is not None:
+                analysis = m_models.AnalysisJobGoTerm.objects \
+                    .get(analysis_id=str(job.job_id))
         except m_models.AnalysisJobGoTerm.DoesNotExist:
             pass
 
@@ -299,17 +301,19 @@ class AnalysisGoSlimRelationshipViewSet(  # NOQA
     def get_queryset(self):
         accession = self.kwargs['accession']
         release_version = self.kwargs['release_version']
-        qs = emg_models.AnalysisJob.objects.exclude(
-            experiment_type__experiment_type='amplicon')
-        job = get_object_or_404(
-            qs, accession=accession,
-            pipeline__release_version=release_version,
-        )
+        job = emg_models.AnalysisJob.objects \
+            .filter(
+                accession=accession,
+                pipeline__release_version=release_version
+            ) \
+            .exclude(experiment_type__experiment_type='amplicon') \
+            .first()
 
         analysis = None
         try:
-            analysis = m_models.AnalysisJobGoTerm.objects \
-                .get(analysis_id=str(job.job_id))
+            if job is not None:
+                analysis = m_models.AnalysisJobGoTerm.objects \
+                    .get(analysis_id=str(job.job_id))
         except m_models.AnalysisJobGoTerm.DoesNotExist:
             pass
 
@@ -338,17 +342,19 @@ class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
     def get_queryset(self):
         accession = self.kwargs['accession']
         release_version = self.kwargs['release_version']
-        qs = emg_models.AnalysisJob.objects.exclude(
-            experiment_type__experiment_type='amplicon')
-        job = get_object_or_404(
-            qs, accession=accession,
-            pipeline__release_version=release_version,
-        )
+        job = emg_models.AnalysisJob.objects \
+            .filter(
+                accession=accession,
+                pipeline__release_version=release_version
+            ) \
+            .exclude(experiment_type__experiment_type='amplicon') \
+            .first()
 
         analysis = None
         try:
-            analysis = m_models.AnalysisJobInterproIdentifier.objects \
-                .get(analysis_id=str(job.job_id))
+            if job is not None:
+                analysis = m_models.AnalysisJobInterproIdentifier.objects \
+                    .get(analysis_id=str(job.job_id))
         except m_models.AnalysisJobInterproIdentifier.DoesNotExist:
             pass
 
