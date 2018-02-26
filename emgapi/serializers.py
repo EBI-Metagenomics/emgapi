@@ -19,7 +19,7 @@ import logging
 
 from rest_framework_json_api import serializers
 from rest_framework_json_api import relations
-from rest_framework.reverse import reverse
+# from rest_framework.reverse import reverse
 
 from . import models as emg_models
 from . import relations as emg_relations
@@ -519,21 +519,25 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
         lookup_field='accession'
     )
 
-    download = serializers.SerializerMethodField()
-
-    def get_download(self, obj):
-        from .utils.download import DOWNLOAD_REF
-        download_map = DOWNLOAD_REF[obj.pipeline.release_version]
-        links = {}
-        for value in download_map.values():
-            file_name = "{}_{}.{}".format(
-                obj.input_file_name, value['suffix'], value['ext'])
-            links[value['display']] = reverse(
-                'emgapi_v1:runs-pipelines-download-detail',
-                args=[obj.accession, obj.pipeline.release_version, file_name],
-                request=self.context['request']
-            )
-        return links
+    # download = serializers.SerializerMethodField()
+    #
+    # def get_download(self, obj):
+    #     from .utils.download import DOWNLOAD_REF
+    #     download_map = DOWNLOAD_REF[obj.pipeline.release_version]
+    #     links = {}
+    #     for value in download_map.values():
+    #         file_name = "{}_{}.{}".format(
+    #             obj.input_file_name, value['suffix'], value['ext'])
+    #         links[value['display']] = reverse(
+    #             'emgapi_v1:runs-pipelines-download-detail',
+    #             args=[
+    #                 obj.accession,
+    #                 obj.pipeline.release_version,
+    #                 file_name
+    #             ],
+    #             request=self.context['request']
+    #         )
+    #     return links
 
     taxonomy = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(
         source='get_taxonomy',
@@ -846,6 +850,30 @@ class StudySerializer(ExplicitFieldsModelSerializer,
 
     def get_samples(self, obj):
         return None
+
+    # download = serializers.SerializerMethodField()
+    #
+    # def get_download(self, obj):
+    #     from .utils.download import SUMMARY_REF
+    #     pipelines = emg_models.AnalysisJob.objects \
+    #         .filter(study__accession=obj.accession) \
+    #         .values('pipeline__release_version').distinct()
+    #     links = {}
+    #     for pipeline in pipelines:
+    #         download_map = SUMMARY_REF[pipeline['pipeline__release_version']]
+    #         for value in download_map.values():
+    #             file_name = "{}_{}.{}".format(
+    #                 obj.accession, value['suffix'], value['ext'])
+    #             links[value['display']] = reverse(
+    #                 'emgapi_v1:studies-download-detail',
+    #                 args=[
+    #                     obj.accession,
+    #                     pipeline['pipeline__release_version'],
+    #                     file_name
+    #                 ],
+    #                 request=self.context['request']
+    #             )
+    #     return links
 
     # counters
     samples_count = serializers.IntegerField()
