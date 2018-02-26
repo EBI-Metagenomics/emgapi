@@ -321,6 +321,38 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         return Response(serializer.data)
 
 
+class StudiesDownloadViewSet(mixins.RetrieveModelMixin,
+                             viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.StudySerializer
+
+    lookup_field = 'filename'
+    lookup_value_regex = '[^/]+'
+
+    def get_queryset(self):
+        return emg_models.Study.objects.available(self.request)
+
+    def get_object(self):
+        return get_object_or_404(
+            self.get_queryset(),
+            Q(accession=self.kwargs['accession']) |
+            Q(project_id=self.kwargs['accession'])
+        )
+
+    def get_serializer_class(self):
+        return super(StudiesDownloadViewSet, self).get_serializer_class()
+
+    def retrieve(self, request, *args, **kwargs):
+        obj = self.get_object()
+        response = HttpResponse()
+        response["Content-Disposition"] = \
+            "attachment; filename={0}".format(self.kwargs['filename'])
+        file_name = self.kwargs['filename']
+        response['X-Accel-Redirect'] = \
+            "/results{0}/{1}".format(obj.result_directory, file_name)
+        return response
+
+
 class SampleViewSet(mixins.RetrieveModelMixin,
                     emg_mixins.ListModelMixin,
                     emg_viewsets.BaseSampleGenericViewSet):
@@ -619,41 +651,10 @@ class AnalysisDownloadViewSet(mixins.RetrieveModelMixin,
 
     def retrieve(self, request, *args, **kwargs):
         obj = self.get_object()
-        from .utils.download import DOWNLOAD_REF
         response = HttpResponse()
         response["Content-Disposition"] = \
             "attachment; filename={0}".format(self.kwargs['filename'])
-        _fname = self.kwargs['filename'] \
-            .replace(obj.input_file_name, "").strip("_")
-        _fmap = DOWNLOAD_REF[obj.pipeline.release_version][_fname]
-
-        if 'subdir' in _fmap:
-            if _fmap['real_name']:
-                file_name = "{}/{}_{}.{}".format(
-                    _fmap['subdir'],
-                    obj.input_file_name,
-                    _fmap['real_suffix'],
-                    _fmap['real_ext']
-                )
-            else:
-                file_name = "{}/{}.{}".format(
-                    _fmap['subdir'],
-                    _fmap['real_suffix'],
-                    _fmap['real_ext']
-                )
-        else:
-            if _fmap['real_name']:
-                file_name = "{}_{}.{}".format(
-                    obj.input_file_name,
-                    _fmap['real_suffix'],
-                    _fmap['real_ext']
-                )
-            else:
-                file_name = "{}.{}".format(
-                    _fmap['real_suffix'],
-                    _fmap['real_ext']
-                )
-
+        file_name = self.kwargs['filename']
         response['X-Accel-Redirect'] = \
             "/results{0}/{1}".format(obj.result_directory, file_name)
         return response
