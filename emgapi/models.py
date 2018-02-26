@@ -148,7 +148,7 @@ class PipelineManager(models.Manager):
 
 
 class Pipeline(models.Model):
-    pipeline_id = models.AutoField(
+    pipeline_id = models.SmallIntegerField(
         db_column='PIPELINE_ID', primary_key=True)
     description = models.TextField(
         db_column='DESCRIPTION', blank=True, null=True)
@@ -326,6 +326,80 @@ class Publication(models.Model):
         return self.pubmed_id
 
 
+class DownloadGroupType(models.Model):
+    group_id = models.AutoField(
+        db_column='GROUP_ID', primary_key=True,)
+    group_type = models.CharField(
+        db_column='GROUP_TYPE', max_length=30)
+
+    class Meta:
+        db_table = 'DOWNLOAD_GROUP_TYPE'
+
+    def __str__(self):
+        return self.group_type
+
+
+class FileFormat(models.Model):
+    format_id = models.AutoField(
+        db_column='FORMAT_ID', primary_key=True,)
+    format_name = models.CharField(
+        db_column='FORMAT_NAME', max_length=30)
+    format_extention = models.CharField(
+        db_column='FORMAT_EXTENTION', max_length=30)
+
+    class Meta:
+        db_table = 'FILE_FORMAT'
+
+    def __str__(self):
+        return self.format_name
+
+
+class BaseDownload(models.Model):
+    parent_id = models.ForeignKey(
+        'self', db_column='PARENT_DOWNLOAD_ID', related_name='parent',
+        blank=True, null=True)
+    group_type = models.ForeignKey(
+        'DownloadGroupType', db_column='GROUP_ID',
+        on_delete=models.CASCADE, blank=True, null=True)
+    subdir = models.CharField(
+        db_column='SUBDIR', max_length=255)
+    realname = models.CharField(
+        db_column='REAL_NAME', max_length=255)
+    alias = models.CharField(
+        db_column='ALIAS', max_length=255)
+    description = models.TextField(
+        db_column='DESCRIPTION')
+    file_format = models.ForeignKey(
+        'FileFormat', db_column='FORMAT_ID',
+        on_delete=models.CASCADE, blank=True, null=True)
+    pipeline = models.ForeignKey(
+        'Pipeline', db_column='PIPELINE_ID',
+        on_delete=models.CASCADE, blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+
+class AnalysisJobDownload(BaseDownload):
+    job = models.ForeignKey(
+        'AnalysisJob', db_column='JOB_ID', related_name='analysis_download',
+        on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'ANALYSIS_JOB_DOWNLOAD'
+        unique_together = (('realname', 'alias'),)
+
+
+class StudyDownload(BaseDownload):
+    study = models.ForeignKey(
+        'Study', db_column='STUDY_ID', related_name='study_download',
+        on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'STUDY_DOWNLOAD'
+        unique_together = (('realname', 'alias'),)
+
+
 class StudyQuerySet(BaseQuerySet):
 
     def mydata(self, request):
@@ -349,7 +423,13 @@ class StudyManager(models.Manager):
                 When(samples__is_public=1, then=1),
                 default=0,
                 output_field=IntegerField()
-            )))
+            ))) \
+            .prefetch_related(
+                Prefetch(
+                    'study_download',
+                    queryset=StudyDownload.objects.all()
+                ),
+            )
 
     def available(self, request):
         return self.get_queryset().available(request)
@@ -406,6 +486,10 @@ class Study(models.Model):
 
     samples = models.ManyToManyField(
         'Sample', through='StudySample', related_name='studies', blank=True)
+
+    @property
+    def download(self):
+        return [v.real_name for v in self.study_download.all()]
 
     objects = StudyManager()
 
@@ -689,6 +773,12 @@ class AnalysisJobManager(models.Manager):
             ) \
             .prefetch_related(
                 Prefetch('analysis_metadata', queryset=_qs),
+            )\
+            .prefetch_related(
+                Prefetch(
+                    'analysis_download',
+                    queryset=AnalysisJobDownload.objects.all()
+                ),
             )
 
     def available(self, request):
@@ -760,6 +850,10 @@ class AnalysisJob(models.Model):
                 'value': v.var_val_ucv
             } for v in self.analysis_metadata.all()
         ]
+
+    @property
+    def download(self):
+        return [v.real_name for v in self.analysis_download.all()]
 
     objects = AnalysisJobManager()
 
