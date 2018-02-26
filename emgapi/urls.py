@@ -89,6 +89,13 @@ router.register(
 )
 
 router.register(
+    r'studies/(?P<accession>[a-zA-Z0-9]+)'
+    r'/pipeline/(?P<release_version>[0-9\.]+)/download',
+    views.StudiesDownloadViewSet,
+    base_name='studies-download'
+)
+
+router.register(
     r'pipeline-tools/(?P<tool_name>[^/]+)',
     views.PipelineToolVersionViewSet,
     base_name='pipeline-tools-version'
