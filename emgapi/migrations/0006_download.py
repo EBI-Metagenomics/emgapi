@@ -14,6 +14,7 @@ def create_group_types(apps, schema_editor):
         "Taxonomic analysis",
         "Taxonomic analysis SSU rRNA",
         "Taxonomic analysis LSU rRNA",
+        "Statistics",
     )
     _groups = list()
     for group_type in group_types:
@@ -21,6 +22,28 @@ def create_group_types(apps, schema_editor):
             DownloadGroupType(group_type=group_type)
         )
     DownloadGroupType.objects.bulk_create(_groups)
+
+
+def create_fileformats(apps, schema_editor):
+    FileFormat = apps.get_model("emgapi", "FileFormat")
+    file_formats = (
+        ("TSV", "tsv"),
+        ("CSV", "csv"),
+        ("FASTA", "fasta"),
+        ("Biom", "biom"),
+        ("HDF5 Biom", "biom"),
+        ("JSON Biom", "biom"),
+        ("Newick format", "tree"),
+    )
+    _formats = list()
+    for file_format in file_formats:
+        _formats.append(
+            FileFormat(
+                format_name=file_format[0],
+                format_extention=file_format[1]
+            )
+        )
+    FileFormat.objects.bulk_create(_formats)
 
 
 class Migration(migrations.Migration):
@@ -147,4 +170,5 @@ class Migration(migrations.Migration):
             unique_together=set([('realname', 'alias')]),
         ),
         migrations.RunPython(create_group_types),
+        migrations.RunPython(create_fileformats),
     ]
