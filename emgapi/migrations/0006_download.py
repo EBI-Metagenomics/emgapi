@@ -6,6 +6,23 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
+def create_group_types(apps, schema_editor):
+    DownloadGroupType = apps.get_model("emgapi", "DownloadGroupType")
+    group_types = (
+        "Sequence data",
+        "Functional analysis",
+        "Taxonomic analysis",
+        "Taxonomic analysis SSU rRNA",
+        "Taxonomic analysis LSU rRNA",
+    )
+    _groups = list()
+    for group_type in group_types:
+        _groups.append(
+            DownloadGroupType(group_type=group_type)
+        )
+    DownloadGroupType.objects.bulk_create(_groups)
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -129,4 +146,5 @@ class Migration(migrations.Migration):
             name='analysisjobdownload',
             unique_together=set([('realname', 'alias')]),
         ),
+        migrations.RunPython(create_group_types),
     ]
