@@ -324,19 +324,21 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 class StudiesDownloadViewSet(mixins.RetrieveModelMixin,
                              viewsets.GenericViewSet):
 
-    serializer_class = emg_serializers.StudySerializer
+    serializer_class = emg_serializers.StudyDownloadSerializer
 
-    lookup_field = 'filename'
+    lookup_field = 'alias'
     lookup_value_regex = '[^/]+'
 
     def get_queryset(self):
-        return emg_models.Study.objects.available(self.request)
+        return emg_models.StudyDownload.objects.available(self.request)
 
     def get_object(self):
         return get_object_or_404(
             self.get_queryset(),
-            Q(accession=self.kwargs['accession']) |
-            Q(project_id=self.kwargs['accession'])
+            Q(alias=self.kwargs['alias']),
+            Q(pipeline__release_version=self.kwargs['release_version']),
+            Q(study__accession=self.kwargs['accession']) |
+            Q(study__project_id=self.kwargs['accession'])
         )
 
     def get_serializer_class(self):
@@ -346,10 +348,11 @@ class StudiesDownloadViewSet(mixins.RetrieveModelMixin,
         obj = self.get_object()
         response = HttpResponse()
         response["Content-Disposition"] = \
-            "attachment; filename={0}".format(self.kwargs['filename'])
-        file_name = self.kwargs['filename']
+            "attachment; filename={0}".format(self.kwargs['alias'])
         response['X-Accel-Redirect'] = \
-            "/results{0}/{1}".format(obj.result_directory, file_name)
+            "/results{0}/{1}/{2}".format(
+                obj.study.result_directory, obj.subdir, obj.realname
+            )
         return response
 
 
@@ -628,35 +631,35 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
 class AnalysisDownloadViewSet(mixins.RetrieveModelMixin,
                               viewsets.GenericViewSet):
 
-    serializer_class = emg_serializers.AnalysisSerializer
+    serializer_class = emg_serializers.AnalysisJobDownloadSerializer
 
     lookup_field = 'filename'
     lookup_value_regex = '[^/]+'
 
     def get_queryset(self):
-        return emg_models.AnalysisJob.objects \
-            .available(self.request) \
-            .filter(accession=self.kwargs['accession'])
+        return emg_models.AnalysisJobDownload.objects.available(self.request)
 
     def get_object(self):
         return get_object_or_404(
             self.get_queryset(),
+            Q(alias=self.kwargs['alias']),
             Q(pipeline__release_version=self.kwargs['release_version']),
-            Q(accession=self.kwargs['accession']) |
-            Q(secondary_accession=self.kwargs['accession'])
+            Q(study__accession=self.kwargs['accession']) |
+            Q(study__project_id=self.kwargs['accession'])
         )
 
     def get_serializer_class(self):
-        return super(AnalysisViewSet, self).get_serializer_class()
+        return super(AnalysisDownloadViewSet, self).get_serializer_class()
 
     def retrieve(self, request, *args, **kwargs):
         obj = self.get_object()
         response = HttpResponse()
         response["Content-Disposition"] = \
-            "attachment; filename={0}".format(self.kwargs['filename'])
-        file_name = self.kwargs['filename']
+            "attachment; filename={0}".format(self.kwargs['alias'])
         response['X-Accel-Redirect'] = \
-            "/results{0}/{1}".format(obj.result_directory, file_name)
+            "/results{0}/{1}/{2}".format(
+                obj.study.result_directory, obj.subdir, obj.realname
+            )
         return response
 
 

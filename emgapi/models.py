@@ -54,6 +54,9 @@ class BaseQuerySet(models.QuerySet):
             'StudyQuerySet': {
                 'all': [Q(is_public=1), ],
             },
+            'StudyDownloadQuerySet': {
+                'all': [Q(study__is_public=1), ],
+            },
             'SampleQuerySet': {
                 'all': [Q(is_public=1), ],
             },
@@ -69,12 +72,20 @@ class BaseQuerySet(models.QuerySet):
                     Q(analysis_status_id=3) | Q(analysis_status_id=6)
                 ],
             },
+            'AnalysisJobDownloadQuerySet': {
+                'all': [
+                    Q(job__run_status_id=4),
+                    Q(job__analysis_status_id=3) | Q(job__analysis_status_id=6)
+                ],
+            },
         }
 
         if request is not None and request.user.is_authenticated():
             _username = request.user.username
             _query_filters['StudyQuerySet']['authenticated'] = \
                 [Q(submission_account_id=_username) | Q(is_public=1)]
+            _query_filters['StudyDownloadQuerySet']['authenticated'] = \
+                [Q(submission_account_id=_username) | Q(study__is_public=1)]
             _query_filters['SampleQuerySet']['authenticated'] = \
                 [Q(submission_account_id=_username) | Q(is_public=1)]
             _query_filters['RunQuerySet']['authenticated'] = \
@@ -83,6 +94,10 @@ class BaseQuerySet(models.QuerySet):
             _query_filters['AnalysisJobQuerySet']['authenticated'] = \
                 [Q(study__submission_account_id=_username, run_status_id=2) |
                  Q(run_status_id=4)]
+            _query_filters['AnalysisJobDownloadQuerySet']['authenticated'] = \
+                [Q(job__study__submission_account_id=_username,
+                   job__run_status_id=2) |
+                 Q(job__run_status_id=4)]
 
         q = list()
         try:
@@ -380,20 +395,50 @@ class BaseDownload(models.Model):
         abstract = True
 
 
+class AnalysisJobDownloadQuerySet(BaseQuerySet):
+    pass
+
+
+class AnalysisJobDownloadManager(models.Manager):
+
+    def get_queryset(self):
+        return AnalysisJobDownloadQuerySet(self.model, using=self._db)
+
+    def available(self, request):
+        return self.get_queryset().available(request)
+
+
 class AnalysisJobDownload(BaseDownload):
     job = models.ForeignKey(
         'AnalysisJob', db_column='JOB_ID', related_name='analysis_download',
         on_delete=models.CASCADE)
+
+    objects = AnalysisJobDownloadManager()
 
     class Meta:
         db_table = 'ANALYSIS_JOB_DOWNLOAD'
         unique_together = (('realname', 'alias'),)
 
 
+class StudyDownloadQuerySet(BaseQuerySet):
+    pass
+
+
+class StudyDownloadManager(models.Manager):
+
+    def get_queryset(self):
+        return StudyDownloadQuerySet(self.model, using=self._db)
+
+    def available(self, request):
+        return self.get_queryset().available(request)
+
+
 class StudyDownload(BaseDownload):
     study = models.ForeignKey(
         'Study', db_column='STUDY_ID', related_name='study_download',
         on_delete=models.CASCADE)
+
+    objects = StudyDownloadManager()
 
     class Meta:
         db_table = 'STUDY_DOWNLOAD'
@@ -487,9 +532,9 @@ class Study(models.Model):
     samples = models.ManyToManyField(
         'Sample', through='StudySample', related_name='studies', blank=True)
 
-    @property
-    def download(self):
-        return [v.real_name for v in self.study_download.all()]
+    # @property
+    # def download(self):
+    #     return self.study_download.all()
 
     objects = StudyManager()
 
@@ -853,7 +898,7 @@ class AnalysisJob(models.Model):
 
     @property
     def download(self):
-        return [v.real_name for v in self.analysis_download.all()]
+        return self.analysis_download.all()
 
     objects = AnalysisJobManager()
 

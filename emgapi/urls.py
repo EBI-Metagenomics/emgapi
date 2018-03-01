@@ -92,7 +92,7 @@ router.register(
     r'studies/(?P<accession>[a-zA-Z0-9]+)'
     r'/pipeline/(?P<release_version>[0-9\.]+)/download',
     views.StudiesDownloadViewSet,
-    base_name='studies-download'
+    base_name='studydownload'
 )
 
 router.register(
