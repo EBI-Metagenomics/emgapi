@@ -19,7 +19,7 @@ import logging
 
 from rest_framework_json_api import serializers
 from rest_framework_json_api import relations
-# from rest_framework.reverse import reverse
+from rest_framework.reverse import reverse
 
 from . import models as emg_models
 from . import relations as emg_relations
@@ -73,6 +73,7 @@ class TokenSerializer(serializers.Serializer):
 
 
 # Model Serializers
+
 class BiomeSerializer(ExplicitFieldsModelSerializer,
                       serializers.HyperlinkedModelSerializer):
 
@@ -519,7 +520,22 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
         lookup_field='accession'
     )
 
-    download = serializers.ListField()
+    download = serializers.SerializerMethodField()
+
+    def get_download(self, obj):
+        downloads = obj.analysis_download.all()
+        links = {}
+        for d in downloads:
+            links[d.description] = reverse(
+                'emgapi_v1:runs-pipelines-download-detail',
+                args=[
+                    d.job.accession,
+                    d.pipeline.release_version,
+                    d.alias,
+                ],
+                request=self.context['request']
+            )
+        return links
 
     taxonomy = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(
         source='get_taxonomy',
@@ -769,6 +785,19 @@ class RetrieveSampleSerializer(SampleSerializer):
 
 
 # Study serializer
+# class StudyDownloadSerializer(serializers.HyperlinkedModelSerializer):
+#
+#     id = serializers.ReadOnlyField(source="alias")
+#     url = emg_fields.DownloadHyperlinkedIdentityField(
+#         view_name='studydownload-detail')
+#
+#     class Meta:
+#         model = emg_models.StudyDownload
+#         fields = (
+#             'id',
+#             'url',
+#             'alias',
+#         )
 
 class StudySerializer(ExplicitFieldsModelSerializer,
                       serializers.HyperlinkedModelSerializer):
@@ -833,7 +862,22 @@ class StudySerializer(ExplicitFieldsModelSerializer,
     def get_samples(self, obj):
         return None
 
-    download = serializers.ListField()
+    download = serializers.SerializerMethodField()
+
+    def get_download(self, obj):
+        downloads = obj.study_download.all()
+        links = {}
+        for d in downloads:
+            links[d.description] = reverse(
+                'emgapi_v1:studydownload-detail',
+                args=[
+                    d.study.accession,
+                    d.pipeline.release_version,
+                    d.alias,
+                ],
+                request=self.context['request']
+            )
+        return links
 
     # counters
     samples_count = serializers.IntegerField()
