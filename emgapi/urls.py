@@ -83,6 +83,13 @@ router.register(
 
 router.register(
     r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)'
+    r'/pipelines/(?P<release_version>[0-9\.]+)/krona',
+    views.KronaViewSet,
+    base_name='runs-pipelines-krona'
+)
+
+router.register(
+    r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)'
     r'/pipelines/(?P<release_version>[0-9\.]+)/download',
     views.AnalysisDownloadViewSet,
     base_name='runs-pipelines-download'
@@ -206,7 +213,6 @@ router.register(
 )
 
 mydata_router = routers.DefaultRouter(trailing_slash=False)
-
 mydata_router.register(
     r'mydata',
     views.MyDataViewSet,
@@ -216,6 +222,6 @@ mydata_router.register(
 utils_router = routers.DefaultRouter(trailing_slash=False)
 utils_router.register(
     r'utils',
-    views.Utils,
+    views.UtilsViewSet,
     base_name='csrf'
 )
