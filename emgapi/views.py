@@ -48,7 +48,9 @@ from . import viewsets as emg_viewsets
 logger = logging.getLogger(__name__)
 
 
-class Utils(viewsets.GenericViewSet):
+class UtilsViewSet(viewsets.GenericViewSet):
+
+    schema = None
 
     def get_queryset(self):
         return ()
@@ -581,10 +583,19 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
         """
         return super(AnalysisViewSet, self).retrieve(request, *args, **kwargs)
 
+
+class KronaViewSet(emg_mixins.ListModelMixin,
+                   AnalysisViewSet):
+
+    schema = None
+
+    renderer_classes = (renderers.StaticHTMLRenderer,)
+
+    lookup_field = 'subdir'
+    lookup_value_regex = 'lsu|ssu'
+
     @xframe_options_exempt
-    @detail_route(methods=['get'],
-                  renderer_classes=(renderers.StaticHTMLRenderer,))
-    def krona(self, request, **kwargs):
+    def list(self, request, **kwargs):
         """
         Retrieves krona chart for the given accession and pipeline version
         Example:
@@ -604,11 +615,7 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
         raise Http404('No chrona chart.')
 
     @xframe_options_exempt
-    @detail_route(methods=['get'],
-                  url_name='krona',
-                  url_path='krona/(?P<subdir>lsu|ssu)',
-                  renderer_classes=(renderers.StaticHTMLRenderer,))
-    def krona_lsu_ssu(self, request, subdir=None, **kwargs):
+    def get(self, request, subdir=None, **kwargs):
         """
         Retrieves krona chart for the given accession and pipeline version
         Example:
