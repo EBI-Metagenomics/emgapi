@@ -526,7 +526,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
         downloads = obj.analysis_download.all()
         links = {}
         for d in downloads:
-            links[d.description] = reverse(
+            links[d.description.description_label] = reverse(
                 'emgapi_v1:runs-pipelines-download-detail',
                 args=[
                     d.job.accession,
@@ -868,7 +868,7 @@ class StudySerializer(ExplicitFieldsModelSerializer,
         downloads = obj.study_download.all()
         links = {}
         for d in downloads:
-            links[d.description] = reverse(
+            links[d.description.description_label] = reverse(
                 'emgapi_v1:studydownload-detail',
                 args=[
                     d.study.accession,
