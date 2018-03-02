@@ -351,12 +351,12 @@ class DownloadGroupType(models.Model):
         db_table = 'DOWNLOAD_GROUP_TYPE'
 
     def __str__(self):
-        return self.group_type
+        return self.group_label
 
 
 class FileFormat(models.Model):
     format_id = models.AutoField(
-        db_column='FORMAT_ID', primary_key=True,)
+        db_column='FORMAT_ID', primary_key=True)
     format_name = models.CharField(
         db_column='FORMAT_NAME', max_length=30)
     format_extention = models.CharField(
@@ -369,21 +369,51 @@ class FileFormat(models.Model):
         return self.format_name
 
 
+class DownloadSubdir(models.Model):
+    subdir_id = models.AutoField(
+        db_column='SUBDIR_ID', primary_key=True)
+    subdir = models.CharField(
+        db_column='SUBDIR', max_length=100)
+
+    class Meta:
+        db_table = 'DOWNLOAD_SUBDIR'
+
+    def __str__(self):
+        return self.subdir
+
+
+class DownloadDescriptionLabel(models.Model):
+    description_id = models.AutoField(
+        db_column='DESCRIPTION_ID', primary_key=True)
+    description = models.CharField(
+        db_column='DESCRIPTION', max_length=255)
+    description_label = models.CharField(
+        db_column='DESCRIPTION_LABEL', max_length=50)
+
+    class Meta:
+        db_table = 'DOWNLOAD_DESCRIPTION_LABEL'
+
+    def __str__(self):
+        return self.description_label
+
+
 class BaseDownload(models.Model):
     parent_id = models.ForeignKey(
         'self', db_column='PARENT_DOWNLOAD_ID', related_name='parent',
         blank=True, null=True)
-    group_type = models.ForeignKey(
-        'DownloadGroupType', db_column='GROUP_ID',
-        on_delete=models.CASCADE, blank=True, null=True)
-    subdir = models.CharField(
-        db_column='SUBDIR', max_length=255)
     realname = models.CharField(
         db_column='REAL_NAME', max_length=255)
     alias = models.CharField(
         db_column='ALIAS', max_length=255)
-    description = models.TextField(
-        db_column='DESCRIPTION')
+    group_type = models.ForeignKey(
+        'DownloadGroupType', db_column='GROUP_ID',
+        on_delete=models.CASCADE, blank=True, null=True)
+    subdir = models.ForeignKey(
+        'DownloadSubdir', db_column='SUBDIR_ID',
+        on_delete=models.CASCADE, blank=True, null=True)
+    description = models.ForeignKey(
+        'DownloadDescriptionLabel', db_column='DESCRIPTION_ID',
+        on_delete=models.CASCADE, blank=True, null=True)
     file_format = models.ForeignKey(
         'FileFormat', db_column='FORMAT_ID',
         on_delete=models.CASCADE, blank=True, null=True)
