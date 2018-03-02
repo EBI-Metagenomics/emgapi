@@ -598,10 +598,12 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
             'taxonomy-summary',
             'krona.html')
         )
-        with open(krona, "r") as k:
-            return Response(k.read())
+        if os.path.isfile(krona):
+            with open(krona, "r") as k:
+                return Response(k.read())
         raise Http404('No chrona chart.')
 
+    @xframe_options_exempt
     @detail_route(methods=['get'],
                   url_name='krona',
                   url_path='krona/(?P<subdir>lsu|ssu)',
@@ -621,8 +623,9 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
             subdir.upper(),
             'krona.html')
         )
-        with open(krona, "r") as k:
-            return Response(k.read())
+        if os.path.isfile(krona):
+            with open(krona, "r") as k:
+                return Response(k.read())
         raise Http404('No chrona chart.')
 
 
