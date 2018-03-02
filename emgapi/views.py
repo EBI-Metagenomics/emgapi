@@ -324,8 +324,6 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 class StudiesDownloadViewSet(mixins.RetrieveModelMixin,
                              viewsets.GenericViewSet):
 
-    serializer_class = emg_serializers.StudyDownloadSerializer
-
     lookup_field = 'alias'
     lookup_value_regex = '[^/]+'
 
@@ -630,8 +628,6 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
 
 class AnalysisDownloadViewSet(mixins.RetrieveModelMixin,
                               viewsets.GenericViewSet):
-
-    serializer_class = emg_serializers.AnalysisJobDownloadSerializer
 
     lookup_field = 'filename'
     lookup_value_regex = '[^/]+'
