@@ -27,23 +27,112 @@ def create_group_types(apps, schema_editor):
 def create_fileformats(apps, schema_editor):
     FileFormat = apps.get_model("emgapi", "FileFormat")
     file_formats = (
-        ("TSV", "tsv"),
-        ("CSV", "csv"),
-        ("FASTA", "fasta"),
-        ("Biom", "biom"),
-        ("HDF5 Biom", "biom"),
-        ("JSON Biom", "biom"),
-        ("Newick format", "tree"),
+        ("TSV", "tsv", True),
+        ("TSV", "tsv", False),
+        ("CSV", "csv", False),
+        ("FASTA", "fasta", True),
+        ("FASTA", "fasta", False),
+        ("Biom", "biom", False),
+        ("HDF5 Biom", "biom", False),
+        ("JSON Biom", "biom", False),
+        ("Newick format", "tree", False),
     )
     _formats = list()
     for file_format in file_formats:
         _formats.append(
             FileFormat(
                 format_name=file_format[0],
-                format_extention=file_format[1]
+                format_extension=file_format[1],
+                compression=file_format[2],
             )
         )
     FileFormat.objects.bulk_create(_formats)
+
+
+def create_subdirs(apps, schema_editor):
+    DownloadSubdir = apps.get_model("emgapi", "DownloadSubdir")
+    subdirs = (
+        "version_1.0/project-summary",
+        "version_2.0/project-summary",
+        "version_3.0/project-summary",
+        "version_4.0/project-summary",
+        "version_4.1/project-summary",
+        "sequence-categorisation",
+        "otus",
+        "cr_otus",
+        "taxonomy-summary",
+        "qc-statistics",
+        "charts",
+        "RNA-selector",
+    )
+    _subdirs = list()
+    for subdir in subdirs:
+        _subdirs.append(
+            DownloadSubdir(
+                subdir=subdir
+            )
+        )
+    DownloadSubdir.objects.bulk_create(_subdirs)
+
+
+def create_download_description(apps, schema_editor):
+    DownloadDescriptionLabel = apps.get_model("emgapi", "DownloadDescriptionLabel")
+    downloads = (
+        ("Processed nucleotide reads.", "Processed nucleotide reads",),
+        ("Processed nucleotide reads.", "Processed nucleotide reads",),
+        ("Processed nucleotide reads (since pipeline version 2.0).",
+         "Processed nucleotide readsProcessed nucleotide reads.",),
+        ("All reads that have predicted CDS.", "Processed reads with pCDS",),
+        ("All reads with an interproscan match.",
+         "Processed reads with annotation",),
+        ("All reads with a predicted CDS but no interproscan match.",
+         "Processed reads without annotation",),
+        ("All predicted CDS.", "Predicted CDS",),
+        ("Predicted coding sequences with InterPro match (FASTA).",
+         "Predicted CDS with annotation",),
+        ("Predicted CDS without annotation.",
+         "Predicted CDS without annotation",),
+        ("Predicted open reading frames without annotation (FASTA).",
+         "Predicted ORF without annotation",),
+        ("All reads encoding 5S rRNA.", "Reads encoding 5S rRNA",),
+        ("All reads encoding 16S rRNA.", "Reads encoding 16S rRNA",),
+        ("All reads encoding 23S rRNA.", "Reads encoding 23S rRNA",),
+        ("OTUs and taxonomic assignments.",
+         "OTUs, reads and taxonomic assignments",),
+        ("Phylogenetic tree (Newick format).", "Phylogenetic tree",),
+        ("All reads encoding SSU rRNA.", "Reads encoding SSU rRNA",),
+        ("OTUs and taxonomic assignments for SSU rRNA.",
+         "OTUs, reads and taxonomic assignments for SSU rRNA",),
+        ("All reads encoding LSU rRNA.", "Reads encoding LSU rRNA",),
+        ("OTUs and taxonomic assignments for LSU rRNA.",
+         "OTUs, reads and taxonomic assignments for LSU rRNA",),
+        ("InterPro matches (TSV).", "InterPro matches",),
+        ("Complete GO annotation.", "Complete GO annotation",),
+        ("GO slim annotation.", "GO slim annotation",),
+        ("tRNAs predicted using HMMER tools.", "Predicted tRNAs",),
+        ("Phylum level taxonomies (TSV).", "Phylum level taxonomies",),
+        ("Taxonomic assignments (TSV).", "Taxonomic assignments",),
+        ("Taxonomic diversity metrics (TSV).", "Taxonomic diversity metrics",),
+        ("Taxonomic diversity metrics SSU rRNA (TSV).",
+         "Taxonomic diversity metrics SSU",),
+        ("Taxonomic diversity metrics LSU rRNA (TSV).",
+         "Taxonomic diversity metrics LSU",),
+        ("Phylum level taxonomies SSU (TSV).", "Phylum level taxonomies SSU",),
+        ("Phylum level taxonomies LSU (TSV).", "Phylum level taxonomies LSU",),
+        ("Taxonomic assignments SSU (TSV).", "Taxonomic assignments SSU",),
+        ("Taxonomic assignments LSU (TSV).", "Taxonomic assignments LSU",),
+    )
+    _downloads = list()
+    for d in downloads:
+        _downloads.append(
+            DownloadDescriptionLabel(
+                description=d[0],
+                description_label=d[1]
+            )
+        )
+    DownloadDescriptionLabel.objects.bulk_create(_downloads)
+
+
 
 
 class Migration(migrations.Migration):
@@ -101,7 +190,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('description_id', models.AutoField(db_column='DESCRIPTION_ID', primary_key=True, serialize=False)),
                 ('description', models.CharField(db_column='DESCRIPTION', max_length=255)),
-                ('description_label', models.CharField(db_column='DESCRIPTION_LABEL', max_length=50)),
+                ('description_label', models.CharField(db_column='DESCRIPTION_LABEL', max_length=100)),
             ],
             options={
                 'db_table': 'DOWNLOAD_DESCRIPTION_LABEL',
@@ -132,7 +221,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('format_id', models.AutoField(db_column='FORMAT_ID', primary_key=True, serialize=False)),
                 ('format_name', models.CharField(db_column='FORMAT_NAME', max_length=30)),
-                ('format_extention', models.CharField(db_column='FORMAT_EXTENTION', max_length=30)),
+                ('format_extension', models.CharField(db_column='FORMAT_EXTENSION', max_length=30)),
+                ('compression', models.BooleanField(db_column='COMPRESSION', default=False)),
             ],
             options={
                 'db_table': 'FILE_FORMAT',
@@ -214,4 +304,6 @@ class Migration(migrations.Migration):
         ),
         migrations.RunPython(create_group_types),
         migrations.RunPython(create_fileformats),
+        migrations.RunPython(create_subdirs),
+        migrations.RunPython(create_download_description),
     ]
