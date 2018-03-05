@@ -359,8 +359,10 @@ class FileFormat(models.Model):
         db_column='FORMAT_ID', primary_key=True)
     format_name = models.CharField(
         db_column='FORMAT_NAME', max_length=30)
-    format_extention = models.CharField(
-        db_column='FORMAT_EXTENTION', max_length=30)
+    format_extension = models.CharField(
+        db_column='FORMAT_EXTENSION', max_length=30)
+    compression = models.BooleanField(
+        db_column='COMPRESSION', default=True)
 
     class Meta:
         db_table = 'FILE_FORMAT'
@@ -388,7 +390,7 @@ class DownloadDescriptionLabel(models.Model):
     description = models.CharField(
         db_column='DESCRIPTION', max_length=255)
     description_label = models.CharField(
-        db_column='DESCRIPTION_LABEL', max_length=50)
+        db_column='DESCRIPTION_LABEL', max_length=100)
 
     class Meta:
         db_table = 'DOWNLOAD_DESCRIPTION_LABEL'
