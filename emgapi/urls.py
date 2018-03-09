@@ -90,14 +90,28 @@ router.register(
 
 router.register(
     r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)'
+    r'/pipelines/(?P<release_version>[0-9\.]+)/downloads',
+    views.AnalysisResultDownloadsViewSet,
+    base_name='analysisdownload'
+)
+
+router.register(
+    r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)'
     r'/pipelines/(?P<release_version>[0-9\.]+)/download',
-    views.AnalysisDownloadViewSet,
-    base_name='runs-pipelines-download'
+    views.AnalysisResultDownloadViewSet,
+    base_name='analysisdownload'
+)
+
+
+router.register(
+    r'studies/(?P<accession>[a-zA-Z0-9]+)/downloads',
+    views.StudiesDownloadsViewSet,
+    base_name='studydownload'
 )
 
 router.register(
     r'studies/(?P<accession>[a-zA-Z0-9]+)'
-    r'/pipeline/(?P<release_version>[0-9\.]+)/download',
+    r'/pipeline/(?P<release_version>[0-9\.]+)/file',
     views.StudiesDownloadViewSet,
     base_name='studydownload'
 )
