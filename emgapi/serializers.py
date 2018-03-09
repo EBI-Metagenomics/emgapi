@@ -19,7 +19,6 @@ import logging
 
 from rest_framework_json_api import serializers
 from rest_framework_json_api import relations
-from rest_framework.reverse import reverse
 
 from . import models as emg_models
 from . import relations as emg_relations
@@ -473,6 +472,102 @@ class RunSerializer(ExplicitFieldsModelSerializer,
         )
 
 
+# Download serializer
+class BaseDownloadSerializer(ExplicitFieldsModelSerializer,
+                             serializers.HyperlinkedModelSerializer):
+
+    id = serializers.ReadOnlyField(source="alias")
+
+    url = emg_fields.DownloadHyperlinkedIdentityField(
+        view_name='emgapi_v1:studydownload-detail',
+        lookup_field='alias',
+    )
+
+    description = serializers.SerializerMethodField()
+
+    def get_description(self, obj):
+        return {
+            'label': obj.description.description_label,
+            'description': obj.description.description
+        }
+
+    group_type = serializers.SerializerMethodField()
+
+    def get_group_type(self, obj):
+        return obj.group_type.group_type
+
+    file_format = serializers.SerializerMethodField()
+
+    def get_file_format(self, obj):
+        return {
+            'name': obj.file_format.format_name,
+            'extension': obj.file_format.format_extension,
+            'compression': obj.file_format.compression,
+        }
+
+    pipeline = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emgapi_v1:pipelines-detail',
+        lookup_field='release_version'
+    )
+
+    class Meta:
+        model = emg_models.StudyDownload
+        fields = (
+            'id',
+            'url',
+            'alias',
+            'file_format',
+            'description',
+            'group_type',
+            'pipeline',
+        )
+
+
+class StudyDownloadSerializer(BaseDownloadSerializer):
+
+    study = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emgapi_v1:studies-detail',
+        lookup_field='accession'
+    )
+
+    class Meta:
+        model = emg_models.StudyDownload
+        fields = (
+            'id',
+            'url',
+            'alias',
+            'file_format',
+            'description',
+            'group_type',
+            'pipeline',
+            'study',
+        )
+
+
+class AnalysisJobDownloadSerializer(BaseDownloadSerializer):
+
+    analysis = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emgapi_v1:runs-pipelines-detail',
+        lookup_field='accession'
+    )
+
+    class Meta:
+        model = emg_models.AnalysisJobDownload
+        fields = (
+            'id',
+            'url',
+            'alias',
+            'file_format',
+            'description',
+            'group_type',
+            'pipeline',
+            'analysis',
+        )
+
+
 class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
                              serializers.HyperlinkedModelSerializer):
 
@@ -520,22 +615,23 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
         lookup_field='accession'
     )
 
-    download = serializers.SerializerMethodField()
+    downloads = emg_relations.DownloadSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_downloads',
+        model=emg_models.AnalysisJobDownload,
+        related_link_view_name='emgapi_v1:analysisdownload-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+        related_link_self_view_name='emgapi_v1:analysisdownload-detail',
+        related_link_self_lookup_field='alias',
+        related_link_self_lookup_fields=(
+            'accession', 'release_version', 'alias'
+        )
+    )
 
-    def get_download(self, obj):
-        downloads = obj.analysis_download.all()
-        links = {}
-        for d in downloads:
-            links[d.description.description_label] = reverse(
-                'emgapi_v1:runs-pipelines-download-detail',
-                args=[
-                    d.job.accession,
-                    d.pipeline.release_version,
-                    d.alias,
-                ],
-                request=self.context['request']
-            )
-        return links
+    def get_downloads(self, obj):
+        return obj.downloads
 
     taxonomy = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(
         source='get_taxonomy',
@@ -785,20 +881,6 @@ class RetrieveSampleSerializer(SampleSerializer):
 
 
 # Study serializer
-# class StudyDownloadSerializer(serializers.HyperlinkedModelSerializer):
-#
-#     id = serializers.ReadOnlyField(source="alias")
-#     url = emg_fields.DownloadHyperlinkedIdentityField(
-#         view_name='studydownload-detail')
-#
-#     class Meta:
-#         model = emg_models.StudyDownload
-#         fields = (
-#             'id',
-#             'url',
-#             'alias',
-#         )
-
 class StudySerializer(ExplicitFieldsModelSerializer,
                       serializers.HyperlinkedModelSerializer):
 
@@ -862,23 +944,6 @@ class StudySerializer(ExplicitFieldsModelSerializer,
     def get_samples(self, obj):
         return None
 
-    download = serializers.SerializerMethodField()
-
-    def get_download(self, obj):
-        downloads = obj.study_download.all()
-        links = {}
-        for d in downloads:
-            links[d.description.description_label] = reverse(
-                'emgapi_v1:studydownload-detail',
-                args=[
-                    d.study.accession,
-                    d.pipeline.release_version,
-                    d.alias,
-                ],
-                request=self.context['request']
-            )
-        return links
-
     # counters
     samples_count = serializers.IntegerField()
 
@@ -906,3 +971,21 @@ class RetrieveStudySerializer(StudySerializer):
         'samples': 'emgapi.serializers.SampleSerializer',
         'biomes': 'emgapi.serializers.BiomeSerializer',
     }
+
+    downloads = emg_relations.DownloadSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_downloads',
+        model=emg_models.StudyDownload,
+        related_link_view_name='emgapi_v1:studydownload-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+        related_link_self_view_name='emgapi_v1:studydownload-detail',
+        related_link_self_lookup_field='alias',
+        related_link_self_lookup_fields=(
+            'accession', 'release_version', 'alias'
+        )
+    )
+
+    def get_downloads(self, obj):
+        return obj.downloads
