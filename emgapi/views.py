@@ -323,14 +323,58 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         return Response(serializer.data)
 
 
-class StudiesDownloadViewSet(mixins.RetrieveModelMixin,
-                             viewsets.GenericViewSet):
+class StudiesDownloadsViewSet(emg_mixins.ListModelMixin,
+                              viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.StudyDownloadSerializer
 
     lookup_field = 'alias'
     lookup_value_regex = '[^/]+'
 
     def get_queryset(self):
-        return emg_models.StudyDownload.objects.available(self.request)
+        return emg_models.StudyDownload.objects.available(self.request) \
+            .filter(
+                Q(study__accession=self.kwargs['accession']) |
+                Q(study__project_id=self.kwargs['accession'])
+            )
+
+    def get_object(self):
+        return get_object_or_404(
+            self.get_queryset(),
+            Q(alias=self.kwargs['alias']),
+            Q(pipeline__release_version=self.kwargs['release_version']),
+            Q(study__accession=self.kwargs['accession']) |
+            Q(study__project_id=self.kwargs['accession'])
+        )
+
+    def get_serializer_class(self):
+        return super(StudiesDownloadsViewSet, self).get_serializer_class()
+
+    def list(self, request, accession, *args, **kwargs):
+        """
+        Retrieves GO terms for the given run and pipeline version
+        Example:
+        ---
+        `/runs/ERR1385375/pipelines/3.0/go-terms`
+        """
+        return super(StudiesDownloadsViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class StudiesDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
+                             mixins.RetrieveModelMixin,
+                             viewsets.GenericViewSet):
+
+    lookup_field = 'alias'
+    lookup_value_regex = '[^/]+'
+    lookup_fields = ('accession', 'release_version', 'alias')
+
+    def get_queryset(self):
+        return emg_models.StudyDownload.objects.available(self.request) \
+            .filter(
+                Q(study__accession=self.kwargs['accession']) |
+                Q(study__project_id=self.kwargs['accession'])
+            )
 
     def get_object(self):
         return get_object_or_404(
@@ -344,11 +388,12 @@ class StudiesDownloadViewSet(mixins.RetrieveModelMixin,
     def get_serializer_class(self):
         return super(StudiesDownloadViewSet, self).get_serializer_class()
 
-    def retrieve(self, request, *args, **kwargs):
+    def retrieve(self, request, accession, release_version, alias,
+                 *args, **kwargs):
         obj = self.get_object()
         response = HttpResponse()
         response["Content-Disposition"] = \
-            "attachment; filename={0}".format(self.kwargs['alias'])
+            "attachment; filename={0}".format(alias)
         response['X-Accel-Redirect'] = \
             "/results{0}/{1}/{2}".format(
                 obj.study.result_directory, obj.subdir, obj.realname
@@ -561,7 +606,11 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
     def get_queryset(self):
         return emg_models.AnalysisJob.objects \
             .available(self.request) \
-            .filter(accession=self.kwargs['accession'])
+            .filter(
+                Q(pipeline__release_version=self.kwargs['release_version']),
+                Q(accession=self.kwargs['accession']) |
+                Q(secondary_accession=self.kwargs['accession'])
+            )
 
     def get_object(self):
         return get_object_or_404(
@@ -636,35 +685,80 @@ class KronaViewSet(emg_mixins.ListModelMixin,
         raise Http404('No chrona chart.')
 
 
-class AnalysisDownloadViewSet(mixins.RetrieveModelMixin,
-                              viewsets.GenericViewSet):
+class AnalysisResultDownloadsViewSet(emg_mixins.ListModelMixin,
+                                     viewsets.GenericViewSet):
 
-    lookup_field = 'filename'
+    serializer_class = emg_serializers.AnalysisJobDownloadSerializer
+
+    lookup_field = 'alias'
     lookup_value_regex = '[^/]+'
 
     def get_queryset(self):
-        return emg_models.AnalysisJobDownload.objects.available(self.request)
+        return emg_models.AnalysisJobDownload.objects.available(self.request) \
+            .filter(
+                Q(job__accession=self.kwargs['accession'])
+            )
 
     def get_object(self):
         return get_object_or_404(
             self.get_queryset(),
             Q(alias=self.kwargs['alias']),
             Q(pipeline__release_version=self.kwargs['release_version']),
-            Q(study__accession=self.kwargs['accession']) |
-            Q(study__project_id=self.kwargs['accession'])
+            Q(job__accession=self.kwargs['accession'])
         )
 
     def get_serializer_class(self):
-        return super(AnalysisDownloadViewSet, self).get_serializer_class()
+        return super(AnalysisResultDownloadsViewSet, self) \
+            .get_serializer_class()
 
-    def retrieve(self, request, *args, **kwargs):
+    def list(self, request, accession, release_version, *args, **kwargs):
+        """
+        Retrieves GO terms for the given run and pipeline version
+        Example:
+        ---
+        `/runs/ERR1385375/pipelines/3.0/download`
+        """
+        return super(AnalysisResultDownloadsViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class AnalysisResultDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
+                                    mixins.RetrieveModelMixin,
+                                    viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.AnalysisJobDownloadSerializer
+
+    lookup_field = 'alias'
+    lookup_value_regex = '[^/]+'
+    lookup_fields = ('accession', 'release_version', 'alias')
+
+    def get_queryset(self):
+        return emg_models.AnalysisJobDownload.objects.available(self.request) \
+            .filter(
+                Q(job__accession=self.kwargs['accession'])
+            )
+
+    def get_object(self):
+        return get_object_or_404(
+            self.get_queryset(),
+            Q(alias=self.kwargs['alias']),
+            Q(pipeline__release_version=self.kwargs['release_version']),
+            Q(job__accession=self.kwargs['accession'])
+        )
+
+    def get_serializer_class(self):
+        return super(AnalysisResultDownloadViewSet, self) \
+            .get_serializer_class()
+
+    def retrieve(self, request, accession, release_version, alias,
+                 *args, **kwargs):
         obj = self.get_object()
         response = HttpResponse()
         response["Content-Disposition"] = \
-            "attachment; filename={0}".format(self.kwargs['alias'])
+            "attachment; filename={0}".format(alias)
         response['X-Accel-Redirect'] = \
             "/results{0}/{1}/{2}".format(
-                obj.study.result_directory, obj.subdir, obj.realname
+                obj.job.result_directory, obj.subdir, obj.realname
             )
         return response
 
