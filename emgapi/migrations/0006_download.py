@@ -133,8 +133,6 @@ def create_download_description(apps, schema_editor):
     DownloadDescriptionLabel.objects.bulk_create(_downloads)
 
 
-
-
 class Migration(migrations.Migration):
 
     dependencies = [

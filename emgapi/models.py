@@ -423,6 +423,10 @@ class BaseDownload(models.Model):
         'Pipeline', db_column='PIPELINE_ID',
         on_delete=models.CASCADE, blank=True, null=True)
 
+    @property
+    def release_version(self):
+        return self.pipeline.release_version
+
     class Meta:
         abstract = True
 
@@ -469,6 +473,10 @@ class StudyDownload(BaseDownload):
     study = models.ForeignKey(
         'Study', db_column='STUDY_ID', related_name='study_download',
         on_delete=models.CASCADE)
+
+    @property
+    def accession(self):
+        return self.study.accession
 
     objects = StudyDownloadManager()
 
@@ -564,9 +572,13 @@ class Study(models.Model):
     samples = models.ManyToManyField(
         'Sample', through='StudySample', related_name='studies', blank=True)
 
-    # @property
-    # def download(self):
-    #     return self.study_download.all()
+    @property
+    def downloads(self):
+        return self.study_download.all()
+
+    @property
+    def pipelines(self):
+        return [download.pipeline for download in self.study_download.all()]
 
     objects = StudyManager()
 
@@ -929,7 +941,7 @@ class AnalysisJob(models.Model):
         ]
 
     @property
-    def download(self):
+    def downloads(self):
         return self.analysis_download.all()
 
     objects = AnalysisJobManager()
