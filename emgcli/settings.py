@@ -174,6 +174,7 @@ INSTALLED_APPS = [
     'django_filters',
     # apps
     'emgapi',
+    'emgena',
     'emgapianns',
 
 ]

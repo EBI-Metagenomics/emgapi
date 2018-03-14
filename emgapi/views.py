@@ -45,6 +45,9 @@ from . import mixins as emg_mixins
 from . import permissions as emg_perms
 from . import viewsets as emg_viewsets
 
+from emgena import models as ena_models
+from emgena import serializers as ena_serializers
+
 logger = logging.getLogger(__name__)
 
 
@@ -88,6 +91,22 @@ class UtilsViewSet(viewsets.GenericViewSet):
             )
             stats.append(r)
         serializer = self.get_serializer(stats, many=True)
+        return Response(serializer.data)
+
+    @list_route(
+        methods=['get', ],
+        serializer_class=ena_serializers.SubmitterSerializer,
+        permission_classes=[permissions.IsAuthenticated, emg_perms.IsSelf]
+    )
+    def myaccounts(self, request, pk=None):
+        submitter = ena_models.Submitter.objects.using('ena') \
+            .filter(
+                submission_account__submission_account__iexact=self
+                .request.user.username
+            ) \
+            .select_related('submission_account')
+
+        serializer = self.get_serializer(submitter, many=True)
         return Response(serializer.data)
 
 
