@@ -352,10 +352,10 @@ class StudiesDownloadsViewSet(emg_mixins.ListModelMixin,
 
     def list(self, request, accession, *args, **kwargs):
         """
-        Retrieves GO terms for the given run and pipeline version
+        Retrieves list of static summary files
         Example:
         ---
-        `/runs/ERR1385375/pipelines/3.0/go-terms`
+        `/studies/ERP009004/downloads`
         """
         return super(StudiesDownloadsViewSet, self) \
             .list(request, *args, **kwargs)
@@ -390,6 +390,13 @@ class StudiesDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
 
     def retrieve(self, request, accession, release_version, alias,
                  *args, **kwargs):
+        """
+        Retrieves static summary file
+        Example:
+        ---
+        `/studies/ERP009703/pipelines/4.0/file/
+        ERP009703_taxonomy_abundances_LSU_v4.0.tsv`
+        """
         obj = self.get_object()
         response = HttpResponse()
         response["Content-Disposition"] = \
@@ -713,10 +720,10 @@ class AnalysisResultDownloadsViewSet(emg_mixins.ListModelMixin,
 
     def list(self, request, accession, release_version, *args, **kwargs):
         """
-        Retrieves GO terms for the given run and pipeline version
+        Retrieves list of static summary files
         Example:
         ---
-        `/runs/ERR1385375/pipelines/3.0/download`
+        `/runs/ERR1385375/pipelines/3.0/downloads`
         """
         return super(AnalysisResultDownloadsViewSet, self) \
             .list(request, *args, **kwargs)
@@ -752,6 +759,13 @@ class AnalysisResultDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
 
     def retrieve(self, request, accession, release_version, alias,
                  *args, **kwargs):
+        """
+        Retrieves static summary file
+        Example:
+        ---
+        `/runs/ERR1385375/pipelines/3.0/file/
+        ERP009703_taxonomy_abundances_LSU_v4.0.tsv`
+        """
         obj = self.get_object()
         response = HttpResponse()
         response["Content-Disposition"] = \

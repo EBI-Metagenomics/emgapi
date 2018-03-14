@@ -97,7 +97,7 @@ router.register(
 
 router.register(
     r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)'
-    r'/pipelines/(?P<release_version>[0-9\.]+)/download',
+    r'/pipelines/(?P<release_version>[0-9\.]+)/file',
     views.AnalysisResultDownloadViewSet,
     base_name='analysisdownload'
 )
@@ -111,7 +111,7 @@ router.register(
 
 router.register(
     r'studies/(?P<accession>[a-zA-Z0-9]+)'
-    r'/pipeline/(?P<release_version>[0-9\.]+)/file',
+    r'/pipelines/(?P<release_version>[0-9\.]+)/file',
     views.StudiesDownloadViewSet,
     base_name='studydownload'
 )
