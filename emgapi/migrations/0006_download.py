@@ -59,6 +59,7 @@ def create_subdirs(apps, schema_editor):
         "version_4.1/project-summary",
         "sequence-categorisation",
         "otus",
+        "otus/rdp_assigned_taxonomy",
         "cr_otus",
         "taxonomy-summary",
         "qc-statistics",
