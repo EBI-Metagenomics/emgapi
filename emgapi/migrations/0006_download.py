@@ -295,11 +295,11 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='studydownload',
-            unique_together=set([('realname', 'alias')]),
+            unique_together=set([('realname', 'alias', 'pipeline')]),
         ),
         migrations.AlterUniqueTogether(
             name='analysisjobdownload',
-            unique_together=set([('realname', 'alias')]),
+            unique_together=set([('realname', 'alias', 'pipeline')]),
         ),
         migrations.RunPython(create_group_types),
         migrations.RunPython(create_fileformats),
