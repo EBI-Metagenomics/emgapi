@@ -990,3 +990,22 @@ class RetrieveStudySerializer(StudySerializer):
 
     def get_downloads(self, obj):
         return obj.downloads
+
+    # studies = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+    #     many=True,
+    #     read_only=True,
+    #     source='get_studies',
+    #     model=emg_models.Study,
+    #     related_link_view_name='emgapi_v1:studies-studies-list',
+    #     related_link_url_kwarg='accession',
+    #     related_link_lookup_field='accession',
+    #     related_link_self_view_name='emgapi_v1:studies-detail',
+    #     related_link_self_lookup_field='accession'
+    # )
+    #
+    # def get_studies(self, obj):
+    #     return emg_models.Study.objects \
+    #         .filter(
+    #             samples__in=obj.samples.available(
+    #                 self.context['request'])
+    #         ).available(self.context['request'])

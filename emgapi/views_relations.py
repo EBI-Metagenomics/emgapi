@@ -99,6 +99,34 @@ class PublicationStudyRelationshipViewSet(emg_mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
+# class StudyStudyRelationshipViewSet(emg_mixins.ListModelMixin,
+#                                     emg_viewsets.BaseStudyGenericViewSet):
+#
+#     lookup_field = 'accession'
+#
+#     def get_queryset(self):
+#         study = get_object_or_404(
+#             emg_models.Study, accession=self.kwargs[self.lookup_field])
+#         return emg_models.Study.objects \
+#             .filter(
+#                 samples__in=study.samples.available(
+#                     self.request)
+#             ).available(self.request)
+#
+#
+#     def list(self, request, *args, **kwargs):
+#         """
+#         Retrieves list of studies for the given study accession
+#         sharing the same set of samples
+#         Example:
+#         ---
+#         `/studies/SRP001634/studies` retrieve linked studies
+#
+#         """
+#         return super(StudyStudyRelationshipViewSet, self) \
+#             .list(request, *args, **kwargs)
+
+
 class StudySampleRelationshipViewSet(emg_mixins.ListModelMixin,
                                      emg_viewsets.BaseSampleGenericViewSet):
 
