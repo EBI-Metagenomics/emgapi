@@ -70,33 +70,33 @@ router.register(
 )
 
 router.register(
-    r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)/analysis',
+    r'runs/(?P<accession>[^/]+)/analysis',
     views.AnalysisResultViewSet,
     base_name='runs-pipelines'
 )
 
 router.register(
-    r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)/pipelines',
+    r'runs/(?P<accession>[^/]+)/pipelines',
     views.AnalysisViewSet,
     base_name='runs-pipelines'
 )
 
 router.register(
-    r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)'
+    r'runs/(?P<accession>[^/]+)'
     r'/pipelines/(?P<release_version>[0-9\.]+)/krona',
     views.KronaViewSet,
     base_name='runs-pipelines-krona'
 )
 
 router.register(
-    r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)'
+    r'runs/(?P<accession>[^/]+)'
     r'/pipelines/(?P<release_version>[0-9\.]+)/downloads',
     views.AnalysisResultDownloadsViewSet,
     base_name='analysisdownload'
 )
 
 router.register(
-    r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)'
+    r'runs/(?P<accession>[^/]+)'
     r'/pipelines/(?P<release_version>[0-9\.]+)/file',
     views.AnalysisResultDownloadViewSet,
     base_name='analysisdownload'
@@ -104,13 +104,13 @@ router.register(
 
 
 router.register(
-    r'studies/(?P<accession>[a-zA-Z0-9]+)/downloads',
+    r'studies/(?P<accession>[^/]+)/downloads',
     views.StudiesDownloadsViewSet,
     base_name='studydownload'
 )
 
 router.register(
-    r'studies/(?P<accession>[a-zA-Z0-9]+)'
+    r'studies/(?P<accession>[^/]+)'
     r'/pipelines/(?P<release_version>[0-9\.]+)/file',
     views.StudiesDownloadViewSet,
     base_name='studydownload'
@@ -155,13 +155,13 @@ router.register(
 # )
 
 router.register(
-    r'studies/(?P<accession>[a-zA-Z0-9]+)/samples',
+    r'studies/(?P<accession>[^/]+)/samples',
     views_relations.StudySampleRelationshipViewSet,
     base_name='studies-samples'
 )
 
 router.register(
-    r'studies/(?P<accession>[a-zA-Z0-9]+)/publications',
+    r'studies/(?P<accession>[^/]+)/publications',
     views_relations.StudyPublicationRelationshipViewSet,
     base_name='studies-publications'
 )
@@ -191,7 +191,7 @@ router.register(
 )
 
 router.register(
-    r'experiment-types/(?P<experiment_type>[a-zA-Z0-9]+)/samples',
+    r'experiment-types/(?P<experiment_type>[^/]+)/samples',
     views_relations.ExperimentTypeSampleRelationshipViewSet,
     base_name='experiment-types-samples'
 )
@@ -203,31 +203,31 @@ router.register(
 )
 
 router.register(
-    r'samples/(?P<accession>[a-zA-Z0-9\-\_]+)/runs',
+    r'samples/(?P<accession>[^/]+)/runs',
     views_relations.SampleRunRelationshipViewSet,
     base_name='samples-runs'
 )
 
 router.register(
-    r'experiment-types/(?P<experiment_type>[a-zA-Z0-9]+)/runs',
+    r'experiment-types/(?P<experiment_type>[^/]+)/runs',
     views_relations.ExperimentTypeRunRelationshipViewSet,
     base_name='experiment-types-runs'
 )
 
 router.register(
-    r'experiment-types/(?P<experiment_type>[a-zA-Z0-9]+)/analysis',
+    r'experiment-types/(?P<experiment_type>[^/]+)/analysis',
     views_relations.ExperimentTypeAnalysisRelationshipViewSet,
     base_name='experiment-types-analysis'
 )
 
 router.register(
-    r'samples/(?P<accession>[a-zA-Z0-9\-\_]+)/studies',
+    r'samples/(?P<accession>[^/]+)/studies',
     views_relations.SampleStudiesRelationshipViewSet,
     base_name='samples-studies'
 )
 
 router.register(
-    r'samples/(?P<accession>[a-zA-Z0-9\-\_]+)/metadata',
+    r'samples/(?P<accession>[^/]+)/metadata',
     views_relations.SampleMetadataRelationshipViewSet,
     base_name='samples-metadata'
 )
