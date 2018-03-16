@@ -45,7 +45,6 @@ class BaseStudyGenericViewSet(viewsets.GenericViewSet):
         'accession',
         'last_update',
         'samples_count',
-        'runs_count',
     )
 
     ordering = ('-last_update',)
