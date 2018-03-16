@@ -453,7 +453,7 @@ class AnalysisJobDownload(BaseDownload):
 
     class Meta:
         db_table = 'ANALYSIS_JOB_DOWNLOAD'
-        unique_together = (('realname', 'alias'),)
+        unique_together = (('realname', 'alias', 'pipeline'),)
 
 
 class StudyDownloadQuerySet(BaseQuerySet):
@@ -482,7 +482,7 @@ class StudyDownload(BaseDownload):
 
     class Meta:
         db_table = 'STUDY_DOWNLOAD'
-        unique_together = (('realname', 'alias'),)
+        unique_together = (('realname', 'alias', 'pipeline'),)
 
 
 class StudyQuerySet(BaseQuerySet):
