@@ -230,7 +230,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
                    emg_viewsets.BaseStudyGenericViewSet):
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9]+'
+    lookup_value_regex = '[^/]+'
 
     def get_queryset(self):
         queryset = emg_models.Study.objects.available(self.request)
@@ -432,7 +432,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
                     emg_viewsets.BaseSampleGenericViewSet):
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9\-\_]+'
+    lookup_value_regex = '[^/]+'
 
     def get_queryset(self):
         queryset = emg_models.Sample.objects \
@@ -529,7 +529,7 @@ class RunViewSet(mixins.RetrieveModelMixin,
     )
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9_\-\,\s]+'
+    lookup_value_regex = '[^/]+'
 
     def get_queryset(self):
         queryset = emg_models.Run.objects.available(self.request)
@@ -598,7 +598,7 @@ class AnalysisResultViewSet(emg_mixins.ListModelMixin,
     ordering = ('-accession',)
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9_\-\,\s]+'
+    lookup_value_regex = '[^/]+'
 
     def get_serializer_class(self):
         return super(AnalysisResultViewSet, self).get_serializer_class()
@@ -874,7 +874,7 @@ class PipelineToolVersionViewSet(mixins.RetrieveModelMixin,
     queryset = emg_models.PipelineTool.objects.all()
 
     lookup_field = 'version'
-    lookup_value_regex = '[a-zA-Z0-9\-\.]+'
+    lookup_value_regex = '[^/]+'
 
     def get_serializer_class(self):
         return super(PipelineToolVersionViewSet, self).get_serializer_class()
@@ -916,7 +916,7 @@ class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
     ordering = ('experiment_type',)
 
     lookup_field = 'experiment_type'
-    lookup_value_regex = '[a-zA-Z]+'
+    lookup_value_regex = '[^/]+'
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
