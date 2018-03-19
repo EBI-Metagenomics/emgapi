@@ -922,6 +922,19 @@ class StudySerializer(ExplicitFieldsModelSerializer,
     def get_publications(self, obj):
         return None
 
+    downloads = relations.SerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_downloads',
+        model=emg_models.StudyDownload,
+        related_link_view_name='emgapi_v1:studydownload-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+    )
+
+    def get_downloads(self, obj):
+        return None
+
     samples = relations.SerializerMethodResourceRelatedField(
         source='get_samples',
         model=emg_models.Sample,
@@ -962,19 +975,6 @@ class RetrieveStudySerializer(StudySerializer):
         'samples': 'emgapi.serializers.SampleSerializer',
         'biomes': 'emgapi.serializers.BiomeSerializer',
     }
-
-    downloads = relations.SerializerMethodResourceRelatedField(
-        many=True,
-        read_only=True,
-        source='get_downloads',
-        model=emg_models.StudyDownload,
-        related_link_view_name='emgapi_v1:studydownload-list',
-        related_link_url_kwarg='accession',
-        related_link_lookup_field='accession',
-    )
-
-    def get_downloads(self, obj):
-        return None
 
     # studies = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
     #     many=True,
