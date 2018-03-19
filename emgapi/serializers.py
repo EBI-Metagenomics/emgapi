@@ -521,11 +521,11 @@ class StudyDownloadSerializer(BaseDownloadSerializer):
         lookup_field='alias',
     )
 
-    study = serializers.HyperlinkedRelatedField(
-        read_only=True,
-        view_name='emgapi_v1:studies-detail',
-        lookup_field='accession'
-    )
+    # study = serializers.HyperlinkedRelatedField(
+    #     read_only=True,
+    #     view_name='emgapi_v1:studies-detail',
+    #     lookup_field='accession'
+    # )
 
     class Meta:
         model = emg_models.StudyDownload
@@ -537,7 +537,7 @@ class StudyDownloadSerializer(BaseDownloadSerializer):
             'description',
             'group_type',
             'pipeline',
-            'study',
+            # 'study',
         )
 
 
@@ -548,12 +548,12 @@ class AnalysisJobDownloadSerializer(BaseDownloadSerializer):
         lookup_field='alias',
     )
 
-    analysis = emg_fields.AnalysisJobHyperlinkedRelatedField(
-        source='job',
-        read_only=True,
-        view_name='emgapi_v1:runs-pipelines-detail',
-        lookup_field='accession'
-    )
+    # analysis = emg_fields.AnalysisJobHyperlinkedRelatedField(
+    #     source='job',
+    #     read_only=True,
+    #     view_name='emgapi_v1:runs-pipelines-detail',
+    #     lookup_field='accession'
+    # )
 
     class Meta:
         model = emg_models.AnalysisJobDownload
@@ -565,7 +565,7 @@ class AnalysisJobDownloadSerializer(BaseDownloadSerializer):
             'description',
             'group_type',
             'pipeline',
-            'analysis',
+            # 'analysis',
         )
 
 
