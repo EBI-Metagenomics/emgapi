@@ -182,6 +182,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'ANALYSIS_JOB_DOWNLOAD',
+                'ordering': ('pipeline', 'group_type', 'alias', 'pipeline'),
             },
         ),
         migrations.CreateModel(
@@ -240,6 +241,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'STUDY_DOWNLOAD',
+                'ordering': ('pipeline', 'group_type', 'alias', 'pipeline')
             },
         ),
 
