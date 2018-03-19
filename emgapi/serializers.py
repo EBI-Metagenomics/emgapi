@@ -482,24 +482,30 @@ class BaseDownloadSerializer(ExplicitFieldsModelSerializer,
     description = serializers.SerializerMethodField()
 
     def get_description(self, obj):
-        return {
-            'label': obj.description.description_label,
-            'description': obj.description.description
-        }
+        if obj.description is not None:
+            return {
+                'label': obj.description.description_label,
+                'description': obj.description.description
+            }
+        return None
 
     group_type = serializers.SerializerMethodField()
 
     def get_group_type(self, obj):
-        return obj.group_type.group_type
+        if obj.group_type is not None:
+            return obj.group_type.group_type
+        return None
 
     file_format = serializers.SerializerMethodField()
 
     def get_file_format(self, obj):
-        return {
-            'name': obj.file_format.format_name,
-            'extension': obj.file_format.format_extension,
-            'compression': obj.file_format.compression,
-        }
+        if obj.file_format is not None:
+            return {
+                'name': obj.file_format.format_name,
+                'extension': obj.file_format.format_extension,
+                'compression': obj.file_format.compression,
+            }
+        return None
 
     pipeline = serializers.HyperlinkedRelatedField(
         read_only=True,
