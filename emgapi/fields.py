@@ -25,16 +25,17 @@ class DownloadHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
         if obj.pk is None:
             return None
 
-        return self.reverse(
-            view_name,
-            kwargs={
-                'accession': obj.study.accession,
-                'release_version': obj.pipeline.release_version,
-                'alias': obj.alias,
-            },
-            request=request,
-            format=format,
-        )
+        try:
+            parent = obj.study
+        except:
+            parent = obj.job
+        kwargs = {
+            'accession': parent.accession,
+            'release_version': obj.pipeline.release_version,
+            'alias': obj.alias,
+        }
+        return reverse(
+            view_name, kwargs=kwargs, request=request, format=format)
 
 
 class IdentifierField(serializers.Field):
@@ -58,6 +59,17 @@ class PipelineToolHyperlinkedField(serializers.HyperlinkedIdentityField):
 
 
 class AnalysisJobHyperlinkedField(serializers.HyperlinkedIdentityField):
+
+    def get_url(self, obj, view_name, request, format):
+        kwargs = {
+            'accession': obj.accession,
+            'release_version': obj.pipeline.release_version
+        }
+        return reverse(
+            view_name, kwargs=kwargs, request=request, format=format)
+
+
+class AnalysisJobHyperlinkedRelatedField(serializers.HyperlinkedRelatedField):
 
     def get_url(self, obj, view_name, request, format):
         kwargs = {

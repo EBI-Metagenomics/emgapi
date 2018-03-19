@@ -449,11 +449,16 @@ class AnalysisJobDownload(BaseDownload):
         'AnalysisJob', db_column='JOB_ID', related_name='analysis_download',
         on_delete=models.CASCADE)
 
+    @property
+    def accession(self):
+        return self.job.accession
+
     objects = AnalysisJobDownloadManager()
 
     class Meta:
         db_table = 'ANALYSIS_JOB_DOWNLOAD'
         unique_together = (('realname', 'alias', 'pipeline'),)
+        ordering = ('pipeline', 'group_type', 'alias', 'pipeline',)
 
 
 class StudyDownloadQuerySet(BaseQuerySet):
@@ -483,6 +488,7 @@ class StudyDownload(BaseDownload):
     class Meta:
         db_table = 'STUDY_DOWNLOAD'
         unique_together = (('realname', 'alias', 'pipeline'),)
+        ordering = ('pipeline', 'group_type', 'alias', 'pipeline',)
 
 
 class StudyQuerySet(BaseQuerySet):
@@ -930,6 +936,10 @@ class AnalysisJob(models.Model):
     instrument_model = models.CharField(
         db_column='INSTRUMENT_MODEL', max_length=50,
         blank=True, null=True)
+
+    @property
+    def release_version(self):
+        return self.pipeline.release_version
 
     @property
     def analysis_summary(self):
