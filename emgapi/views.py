@@ -420,10 +420,16 @@ class StudiesDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
         response = HttpResponse()
         response["Content-Disposition"] = \
             "attachment; filename={0}".format(alias)
-        response['X-Accel-Redirect'] = \
-            "/results{0}/{1}/{2}".format(
-                obj.study.result_directory, obj.subdir, obj.realname
-            )
+        if obj.subdir is not None:
+            response['X-Accel-Redirect'] = \
+                "/results{0}/{1}/{2}".format(
+                    obj.study.result_directory, obj.subdir, obj.realname
+                )
+        else:
+            response['X-Accel-Redirect'] = \
+                "/results{0}/{1}".format(
+                    obj.study.result_directory, obj.realname
+                )
         return response
 
 
@@ -791,10 +797,16 @@ class AnalysisResultDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
         response = HttpResponse()
         response["Content-Disposition"] = \
             "attachment; filename={0}".format(alias)
-        response['X-Accel-Redirect'] = \
-            "/results{0}/{1}/{2}".format(
-                obj.job.result_directory, obj.subdir, obj.realname
-            )
+        if obj.subdir is not None:
+            response['X-Accel-Redirect'] = \
+                "/results{0}/{1}/{2}".format(
+                    obj.job.result_directory, obj.subdir, obj.realname
+                )
+        else:
+            response['X-Accel-Redirect'] = \
+                "/results{0}/{1}".format(
+                    obj.job.result_directory, obj.realname
+                )
         return response
 
 
