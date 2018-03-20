@@ -458,7 +458,7 @@ class AnalysisJobDownload(BaseDownload):
     class Meta:
         db_table = 'ANALYSIS_JOB_DOWNLOAD'
         unique_together = (('realname', 'alias', 'pipeline'),)
-        ordering = ('pipeline', 'group_type', 'alias', 'pipeline',)
+        ordering = ('pipeline', 'group_type', 'alias',)
 
 
 class StudyDownloadQuerySet(BaseQuerySet):
@@ -488,7 +488,7 @@ class StudyDownload(BaseDownload):
     class Meta:
         db_table = 'STUDY_DOWNLOAD'
         unique_together = (('realname', 'alias', 'pipeline'),)
-        ordering = ('pipeline', 'group_type', 'alias', 'pipeline',)
+        ordering = ('pipeline', 'group_type', 'alias',)
 
 
 class StudyQuerySet(BaseQuerySet):
