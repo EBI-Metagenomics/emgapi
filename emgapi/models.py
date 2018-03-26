@@ -341,19 +341,6 @@ class Publication(models.Model):
         return self.pubmed_id
 
 
-class DownloadDataType(models.Model):
-    data_type_id = models.AutoField(
-        db_column='DATA_TYPE_ID', primary_key=True,)
-    data_type = models.CharField(
-        db_column='DATA_TYPE', max_length=100)
-
-    class Meta:
-        db_table = 'DOWNLOAD_DATA_TYPE'
-
-    def __str__(self):
-        return self.data_type
-
-
 class DownloadGroupType(models.Model):
     group_id = models.AutoField(
         db_column='GROUP_ID', primary_key=True,)
@@ -434,9 +421,6 @@ class BaseDownload(models.Model):
         on_delete=models.CASCADE, blank=True, null=True)
     pipeline = models.ForeignKey(
         'Pipeline', db_column='PIPELINE_ID',
-        on_delete=models.CASCADE, blank=True, null=True)
-    data_type = models.ForeignKey(
-        'DownloadDataType', db_column='DATA_TYPE_ID',
         on_delete=models.CASCADE, blank=True, null=True)
 
     @property
