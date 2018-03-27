@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import logging
 import inflection
 
@@ -23,6 +24,8 @@ from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 from django.http import Http404
 from django.middleware import csrf
+from django.http import HttpResponse
+from django.views.decorators.clickjacking import xframe_options_exempt
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -33,6 +36,7 @@ from rest_framework import viewsets, mixins
 from rest_framework.decorators import detail_route, list_route
 # from rest_framework import authentication
 from rest_framework import permissions
+from rest_framework import renderers
 
 from . import models as emg_models
 from . import serializers as emg_serializers
@@ -41,10 +45,15 @@ from . import mixins as emg_mixins
 from . import permissions as emg_perms
 from . import viewsets as emg_viewsets
 
+from emgena import models as ena_models
+from emgena import serializers as ena_serializers
+
 logger = logging.getLogger(__name__)
 
 
-class Utils(viewsets.GenericViewSet):
+class UtilsViewSet(viewsets.GenericViewSet):
+
+    schema = None
 
     def get_queryset(self):
         return ()
@@ -82,6 +91,22 @@ class Utils(viewsets.GenericViewSet):
             )
             stats.append(r)
         serializer = self.get_serializer(stats, many=True)
+        return Response(serializer.data)
+
+    @list_route(
+        methods=['get', ],
+        serializer_class=ena_serializers.SubmitterSerializer,
+        permission_classes=[permissions.IsAuthenticated, emg_perms.IsSelf]
+    )
+    def myaccounts(self, request, pk=None):
+        submitter = ena_models.Submitter.objects.using('ena') \
+            .filter(
+                submission_account__submission_account__iexact=self
+                .request.user.username
+            ) \
+            .select_related('submission_account')
+
+        serializer = self.get_serializer(submitter, many=True)
         return Response(serializer.data)
 
 
@@ -205,7 +230,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
                    emg_viewsets.BaseStudyGenericViewSet):
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9]+'
+    lookup_value_regex = '[^/]+'
 
     def get_queryset(self):
         queryset = emg_models.Study.objects.available(self.request)
@@ -291,31 +316,6 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 
     @detail_route(
         methods=['get', ],
-        url_name='publications-list',
-        serializer_class=emg_serializers.PublicationSerializer
-    )
-    def publications(self, request, accession=None):
-        """
-        Retrieves list of publications for the given study accession
-        Example:
-        ---
-        `/studies/SRP000183/publications` retrieve linked publications
-        """
-
-        obj = self.get_object()
-        queryset = obj.publications.all()
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(
-                page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(
-            queryset, many=True, context={'request': request})
-        return Response(serializer.data)
-
-    @detail_route(
-        methods=['get', ],
         url_name='biomes-list',
         serializer_class=emg_serializers.BiomeSerializer
     )
@@ -342,12 +342,103 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         return Response(serializer.data)
 
 
+class StudiesDownloadsViewSet(emg_mixins.ListModelMixin,
+                              viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.StudyDownloadSerializer
+
+    lookup_field = 'alias'
+    lookup_value_regex = '[^/]+'
+
+    def get_queryset(self):
+        return emg_models.StudyDownload.objects.available(self.request) \
+            .filter(
+                Q(study__accession=self.kwargs['accession']) |
+                Q(study__project_id=self.kwargs['accession'])
+            )
+
+    def get_object(self):
+        return get_object_or_404(
+            self.get_queryset(),
+            Q(alias=self.kwargs['alias']),
+            Q(pipeline__release_version=self.kwargs['release_version']),
+            Q(study__accession=self.kwargs['accession']) |
+            Q(study__project_id=self.kwargs['accession'])
+        )
+
+    def get_serializer_class(self):
+        return super(StudiesDownloadsViewSet, self).get_serializer_class()
+
+    def list(self, request, accession, *args, **kwargs):
+        """
+        Retrieves list of static summary files
+        Example:
+        ---
+        `/studies/ERP009004/downloads`
+        """
+        return super(StudiesDownloadsViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class StudiesDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
+                             mixins.RetrieveModelMixin,
+                             viewsets.GenericViewSet):
+
+    lookup_field = 'alias'
+    lookup_value_regex = '[^/]+'
+    lookup_fields = ('accession', 'release_version', 'alias')
+
+    def get_queryset(self):
+        return emg_models.StudyDownload.objects.available(self.request) \
+            .filter(
+                Q(study__accession=self.kwargs['accession']) |
+                Q(study__project_id=self.kwargs['accession'])
+            )
+
+    def get_object(self):
+        return get_object_or_404(
+            self.get_queryset(),
+            Q(alias=self.kwargs['alias']),
+            Q(pipeline__release_version=self.kwargs['release_version']),
+            Q(study__accession=self.kwargs['accession']) |
+            Q(study__project_id=self.kwargs['accession'])
+        )
+
+    def get_serializer_class(self):
+        return super(StudiesDownloadViewSet, self).get_serializer_class()
+
+    def retrieve(self, request, accession, release_version, alias,
+                 *args, **kwargs):
+        """
+        Retrieves static summary file
+        Example:
+        ---
+        `/studies/ERP009703/pipelines/4.0/file/
+        ERP009703_taxonomy_abundances_LSU_v4.0.tsv`
+        """
+        obj = self.get_object()
+        response = HttpResponse()
+        response["Content-Disposition"] = \
+            "attachment; filename={0}".format(alias)
+        if obj.subdir is not None:
+            response['X-Accel-Redirect'] = \
+                "/results{0}/{1}/{2}".format(
+                    obj.study.result_directory, obj.subdir, obj.realname
+                )
+        else:
+            response['X-Accel-Redirect'] = \
+                "/results{0}/{1}".format(
+                    obj.study.result_directory, obj.realname
+                )
+        return response
+
+
 class SampleViewSet(mixins.RetrieveModelMixin,
                     emg_mixins.ListModelMixin,
                     emg_viewsets.BaseSampleGenericViewSet):
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9\-\_]+'
+    lookup_value_regex = '[^/]+'
 
     def get_queryset(self):
         queryset = emg_models.Sample.objects \
@@ -444,7 +535,7 @@ class RunViewSet(mixins.RetrieveModelMixin,
     )
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9_\-\,\s]+'
+    lookup_value_regex = '[^/]+'
 
     def get_queryset(self):
         queryset = emg_models.Run.objects.available(self.request)
@@ -513,7 +604,7 @@ class AnalysisResultViewSet(emg_mixins.ListModelMixin,
     ordering = ('-accession',)
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9_\-\,\s]+'
+    lookup_value_regex = '[^/]+'
 
     def get_serializer_class(self):
         return super(AnalysisResultViewSet, self).get_serializer_class()
@@ -547,7 +638,11 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
     def get_queryset(self):
         return emg_models.AnalysisJob.objects \
             .available(self.request) \
-            .filter(accession=self.kwargs['accession'])
+            .filter(
+                Q(pipeline__release_version=self.kwargs['release_version']),
+                Q(accession=self.kwargs['accession']) |
+                Q(secondary_accession=self.kwargs['accession'])
+            )
 
     def get_object(self):
         return get_object_or_404(
@@ -568,6 +663,151 @@ class AnalysisViewSet(mixins.RetrieveModelMixin,
         `/runs/ERR1385375/pipelines/3.0`
         """
         return super(AnalysisViewSet, self).retrieve(request, *args, **kwargs)
+
+
+class KronaViewSet(emg_mixins.ListModelMixin,
+                   AnalysisViewSet):
+
+    schema = None
+
+    renderer_classes = (renderers.StaticHTMLRenderer,)
+
+    lookup_field = 'subdir'
+    lookup_value_regex = 'lsu|ssu'
+
+    @xframe_options_exempt
+    def list(self, request, **kwargs):
+        """
+        Retrieves krona chart for the given accession and pipeline version
+        Example:
+        ---
+        `/runs/ERR1385375/pipelines/3.0/krona`
+        """
+        obj = self.get_object()
+        krona = os.path.abspath(os.path.join(
+            settings.RESULTS_DIR,
+            obj.result_directory,
+            'taxonomy-summary',
+            'krona.html')
+        )
+        logger.info(krona)
+        if os.path.isfile(krona):
+            with open(krona, "r") as k:
+                return Response(k.read())
+        raise Http404('No chrona chart.')
+
+    @xframe_options_exempt
+    def retrieve(self, request, subdir=None, **kwargs):
+        """
+        Retrieves krona chart for the given accession and pipeline version
+        Example:
+        ---
+        `/runs/GCA_900216095/pipelines/4.0/krona/lsu`
+        """
+        obj = self.get_object()
+        krona = os.path.abspath(os.path.join(
+            settings.RESULTS_DIR,
+            obj.result_directory,
+            'taxonomy-summary',
+            subdir.upper(),
+            'krona.html')
+        )
+        logger.info(krona)
+        if os.path.isfile(krona):
+            with open(krona, "r") as k:
+                return Response(k.read())
+        raise Http404('No chrona chart.')
+
+
+class AnalysisResultDownloadsViewSet(emg_mixins.ListModelMixin,
+                                     viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.AnalysisJobDownloadSerializer
+
+    lookup_field = 'alias'
+    lookup_value_regex = '[^/]+'
+
+    def get_queryset(self):
+        return emg_models.AnalysisJobDownload.objects.available(self.request) \
+            .filter(
+                Q(job__accession=self.kwargs['accession'])
+            )
+
+    def get_object(self):
+        return get_object_or_404(
+            self.get_queryset(),
+            Q(alias=self.kwargs['alias']),
+            Q(pipeline__release_version=self.kwargs['release_version']),
+            Q(job__accession=self.kwargs['accession'])
+        )
+
+    def get_serializer_class(self):
+        return super(AnalysisResultDownloadsViewSet, self) \
+            .get_serializer_class()
+
+    def list(self, request, accession, release_version, *args, **kwargs):
+        """
+        Retrieves list of static summary files
+        Example:
+        ---
+        `/runs/ERR1385375/pipelines/3.0/downloads`
+        """
+        return super(AnalysisResultDownloadsViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class AnalysisResultDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
+                                    mixins.RetrieveModelMixin,
+                                    viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.AnalysisJobDownloadSerializer
+
+    lookup_field = 'alias'
+    lookup_value_regex = '[^/]+'
+    lookup_fields = ('accession', 'release_version', 'alias')
+
+    def get_queryset(self):
+        return emg_models.AnalysisJobDownload.objects.available(self.request) \
+            .filter(
+                Q(job__accession=self.kwargs['accession'])
+            )
+
+    def get_object(self):
+        return get_object_or_404(
+            self.get_queryset(),
+            Q(alias=self.kwargs['alias']),
+            Q(pipeline__release_version=self.kwargs['release_version']),
+            Q(job__accession=self.kwargs['accession'])
+        )
+
+    def get_serializer_class(self):
+        return super(AnalysisResultDownloadViewSet, self) \
+            .get_serializer_class()
+
+    def retrieve(self, request, accession, release_version, alias,
+                 *args, **kwargs):
+        """
+        Retrieves static summary file
+        Example:
+        ---
+        `/runs/ERR1385375/pipelines/3.0/file/
+        ERP009703_taxonomy_abundances_LSU_v4.0.tsv`
+        """
+        obj = self.get_object()
+        response = HttpResponse()
+        response["Content-Disposition"] = \
+            "attachment; filename={0}".format(alias)
+        if obj.subdir is not None:
+            response['X-Accel-Redirect'] = \
+                "/results{0}/{1}/{2}".format(
+                    obj.job.result_directory, obj.subdir, obj.realname
+                )
+        else:
+            response['X-Accel-Redirect'] = \
+                "/results{0}/{1}".format(
+                    obj.job.result_directory, obj.realname
+                )
+        return response
 
 
 class PipelineViewSet(mixins.RetrieveModelMixin,
@@ -648,7 +888,7 @@ class PipelineToolVersionViewSet(mixins.RetrieveModelMixin,
     queryset = emg_models.PipelineTool.objects.all()
 
     lookup_field = 'version'
-    lookup_value_regex = '[a-zA-Z0-9\-\.]+'
+    lookup_value_regex = '[^/]+'
 
     def get_serializer_class(self):
         return super(PipelineToolVersionViewSet, self).get_serializer_class()
@@ -690,7 +930,7 @@ class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
     ordering = ('experiment_type',)
 
     lookup_field = 'experiment_type'
-    lookup_value_regex = '[a-zA-Z]+'
+    lookup_value_regex = '[^/]+'
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -714,34 +954,7 @@ class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
 
 class PublicationViewSet(mixins.RetrieveModelMixin,
                          emg_mixins.ListModelMixin,
-                         viewsets.GenericViewSet):
-
-    serializer_class = emg_serializers.PublicationSerializer
-
-    filter_class = emg_filters.PublicationFilter
-
-    filter_backends = (
-        DjangoFilterBackend,
-        filters.SearchFilter,
-        filters.OrderingFilter,
-    )
-
-    ordering_fields = (
-        'pubmed_id',
-        'published_year',
-        'studies_count',
-    )
-
-    ordering = ('pubmed_id',)
-
-    search_fields = (
-        '@pub_title',
-        '@pub_abstract',
-        'pub_type',
-        'authors',
-        'doi',
-        'isbn',
-    )
+                         emg_viewsets.BasePublicationGenericViewSet):
 
     lookup_field = 'pubmed_id'
     lookup_value_regex = '[0-9\.]+'

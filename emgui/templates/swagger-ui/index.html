@@ -1,8 +1,11 @@
+{% load staticfiles %}
+{% load i18n %}
+
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>EBI metagenomics API: archiving, analysis and integration of metagenomics data. EMBL-EBI</title>
+  <title>Microbial Communities Portal - Submit, analyse, discover and compare data</title>
   <meta name="description" content="EMBL-EBI" /><!-- Describe what this page is about -->
   <meta name="keywords" content="bioinformatics, europe, institute" /><!-- A few keywords that relate to the content of THIS PAGE (not the whol project) -->
   <meta name="author" content="EMBL-EBI" /><!-- Your [project-name] here -->
@@ -21,8 +24,8 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:creator" content="@EBImetagenomics">
   <meta name="twitter:site" content="@EBImetagenomics">
-  <meta name="twitter:title" content="EBI Metagenomics API Documentation">
-  <meta name="twitter:description" content="EBI metagenomics is a freely available hub for the analysis and exploration of metagenomic, metatranscriptomic, amplicon and assembly data.">
+  <meta name="twitter:title" content="Microbial Communities Portal ">
+  <meta name="twitter:description" content="Microbial Communities Portal is a freely available hub for the analysis and exploration of metagenomic, metatranscriptomic, amplicon and assembly data.">
   <meta name="twitter:image:src" content="https://avatars1.githubusercontent.com/u/32897658?s=200&v=4">
   <meta name="twitter:image:width" content="280">
   <meta name="twitter:image:height" content="150">
@@ -44,20 +47,20 @@
   <meta name="msapplication-TileColor" content="#2b5797" /> <!-- MS Icons -->
   <meta name="msapplication-TileImage" content="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/mstile-144x144.png" />
 
-  <!-- Custom EMG CSS files -->
-  {% include "swagger-ui/include/swagger_css.html" %}
-  <!-- End of Custom EMG CSS files -->
-
   <!-- CSS: implied media=all -->
   <!-- CSS concatenated and minified via ant build script-->
-  <link rel="stylesheet" href="//www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/libraries/foundation-6/css/foundation.css" type="text/css" media="all" />
-  <link rel="stylesheet" href="//www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/css/ebi-global.css" type="text/css" media="all" />
-  <link rel="stylesheet" href="//www.ebi.ac.uk/web_guidelines/EBI-Icon-fonts/v1.1/fonts.css" type="text/css" media="all" />
+  <link rel="stylesheet" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/libraries/foundation-6/css/foundation.css" type="text/css" media="all" />
+  <link rel="stylesheet" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/css/ebi-global.css" type="text/css" media="all" />
+  <link rel="stylesheet" href="https://www.ebi.ac.uk/web_guidelines/EBI-Icon-fonts/v1.1/fonts.css" type="text/css" media="all" />
 
   <!-- Use this CSS file for any custom styling -->
   <!--
     <link rel="stylesheet" href="css/custom.css" type="text/css" media="all" />
   -->
+
+  <!-- Custom EMG CSS files -->
+  {% include "swagger-ui/include/swagger_css.html" %}
+  <!-- End of Custom EMG CSS files -->
 
   <!-- If you have a custom header image or colour -->
   <!--
@@ -67,7 +70,7 @@
 
     <!-- you can replace this with theme-[projectname].css. See http://www.ebi.ac.uk/web/style/colour for details of how to do this -->
   <!-- also inform ES so we can host your colour palette file -->
-  <link rel="stylesheet" href="//www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/css/theme-embl-petrol.css" type="text/css" media="all" />
+  <link rel="stylesheet" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/css/theme-embl-petrol.css" type="text/css" media="all" />
 
   <!-- for production the above can be replaced with -->
   <!--
@@ -78,11 +81,11 @@
 
 
   <!-- All JavaScript at the bottom, except for Modernizr -->
-  <script src="//www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/libraries/modernizr/modernizr.custom.49274.js"></script>
+  <script src="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/libraries/modernizr/modernizr.custom.49274.js"></script>
 
 </head>
 
-<body class="level2 swagger-section"><!-- add any of your classes or IDs -->
+<body class="level2"><!-- add any of your classes or IDs -->
   <div id="skip-to">
     <ul>
       <li><a href="#content">Skip to main content</a></li>
@@ -105,8 +108,8 @@
               <ul id="global-nav" class="menu">
                 <!-- set active class as appropriate -->
                 <li id="home-mobile" class=""><a href="//www.ebi.ac.uk"></a></li>
-                <li id="home"><a href="//www.ebi.ac.uk"><i class="icon icon-generic" data-icon="H"></i> EMBL-EBI</a></li>
-                <li id="services"class="active"><a href="//www.ebi.ac.uk/services"><i class="icon icon-generic" data-icon="("></i> Services</a></li>
+                <li id="home" class="active"><a href="//www.ebi.ac.uk"><i class="icon icon-generic" data-icon="H"></i> EMBL-EBI</a></li>
+                <li id="services"><a href="//www.ebi.ac.uk/services"><i class="icon icon-generic" data-icon="("></i> Services</a></li>
                 <li id="research"><a href="//www.ebi.ac.uk/research"><i class="icon icon-generic" data-icon=")"></i> Research</a></li>
                 <li id="training"><a href="//www.ebi.ac.uk/training"><i class="icon icon-generic" data-icon="t"></i> Training</a></li>
                 <li id="about"><a href="//www.ebi.ac.uk/about"><i class="icon icon-generic" data-icon="i"></i> About us</a></li>
@@ -142,43 +145,24 @@
           <!-- local-title -->
           <div class="columns medium-12" id="local-title">
             {% include "swagger-ui/include/header.html" %}
+
           </div>
           <!-- /local-title -->
 
-          <!-- EBI SEARCH <div class="column medium-5">
-            <form id="ebi_search" action="/ebisearch/search.ebi">
-              <fieldset>
-                <div class="input-group margin-bottom-none margin-top-large">
-                  <input id="query" class="input-group-field" title="EB-eye Search" tabindex="1" type="text" name="query" value="" size="35" maxlength="2048" placeholder="Search service" />
-                  <div class="input-group-button">
-                    <input id="search_submit" class="button icon icon-functional" tabindex="2" type="submit" name="submit1" value="1" />
-                    <input id="allebi" type="hidden" name="db" value="allebi" checked="checked" />
-                    <input type="hidden" name="requestFrom" value="ebi_index" />
-                  </div>
-                </div>
-              </fieldset>
-              <p id="example" class="small">
-                Examples: <a class="" href="/ebisearch/search.ebi?db=allebi&amp;requestFrom=ebi_index&amp;query=blast">blast</a>, <a class="" href="/ebisearch/search.ebi?db=allebi&amp;query=keratin&amp;requestFrom=ebi_index">keratin</a>, <a class="" href="/ebisearch/search.ebi?db=allebi&amp;query=bfl1&amp;requestFrom=ebi_index">bfl1</a>
-                <a class="float-right" href="#"><span class="icon icon-generic" data-icon="("></span> advanced search</a>
-              </p>
-            </form>
-
-          </div> END OF EBI SEARCH-->
-
-
           <!-- local-nav -->
-          <nav >
-            <ul class="dropdown menu float-left" data-description="navigational">
-              <li class=""><a href="/metagenomics">Home</a></li>
-              <li><a data-open="modal-download" href="/metagenomics/api/">API Browser</a></li>
-              <li class="active"><a data-open="modal-download" href="/metagenomics/api/docs/">API Documentation</a></li>
-              <li><a href="/support/metagenomics">Support<i class="icon icon-generic" data-icon="x"></i></a></li>
-            </ul>
-            <ul class="dropdown menu float-right" data-description="tasks">
-              <li class="">
-                {% include "rest_framework/include/login.html" %}
-              </li>
-            </ul>
+          <nav>
+              <ul id="local-nav" class="dropdown menu float-left" data-description="navigational" data-dropdown-menu="unlqrb-dropdown-menu" role="menubar">
+                  <li id="overview-nav" role="menuitem"><a href="/metagenomics">Home</a></li>
+                  <li id="api-nav" role="menuitem"><a href="/metagenomics/api/">API</a></li>
+                  <li id="api-nav" role="menuitem" class="active"><a href="/metagenomics/api/docs/">API Documentation</a></li>
+                  <li id="about-nav" role="menuitem"><a href="/metagenomics/about">About</a></li>
+                  <li id="help-nav" role="menuitem"><a href="/metagenomics/help">Help</a></li>
+              </ul>
+              <ul class="dropdown menu float-right" data-description="tasks">
+                <li class="">
+                  {% include "rest_framework/include/login.html" %}
+                </li>
+              </ul>
           </nav>
 
           <!-- /local-nav -->
@@ -199,21 +183,23 @@
         <!-- Your menu structure should make a breadcrumb redundant, but if a breadcrump is needed uncomment the below -->
         <nav aria-label="You are here:" role="navigation">
           <ul class="breadcrumbs">
-            <li><a href="https://www.ebi.ac.uk/metagenomics">EBI Metagenomics</a></li>
-            <li><a href="../">API</a></li>
+            <li><a href="/metagenomics">MCP</a></li>
+            <li><a href="../">API Browser</a></li>
             <li>
-              <span class="show-for-sr">Current: </span>Documentation
+              <span class="show-for-sr">Current: </span>API Documentation
             </li>
           </ul>
         </nav>
 
-        <div id="main-content-area" class="row">
+          <div id="main-content-area" class="row">
             <section>
-              <!-- Custom EMG API Swagger documentation -->
+              {% block content %}
+              <!-- Custom MCP API browser documentation -->
               {% include "swagger-ui/include/swagger_doc.html" %}
-              <!-- End of Custom EMG API Swagger documentation -->
+              <!-- End of Custom MCP API browser documentation -->
+              {% endblock %}
             </section>
-        </div>
+          </div>
 
       </section>
       <!-- End suggested layout containers -->
@@ -249,32 +235,31 @@
 
   <!-- JavaScript -->
 
-  <!-- Custom EMG JavaScript files -->
-  {% include "swagger-ui/include/swagger_js.html" %}
-  <!-- End of Custom EMG JavaScript files -->
-
   <!-- Grab Google CDN's jQuery, with a protocol relative URL; fall back to local if offline -->
   <!--
   <script>window.jQuery || document.write('<script src="../js/libs/jquery-1.10.2.min.js"><\/script>')</script>
   -->
-  <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script> -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
   <!-- Your custom JavaScript file scan go here... change names accordingly -->
   <!--
   <script defer="defer" src="//www.ebi.ac.uk/web_guidelines/js/plugins.js"></script>
   <script defer="defer" src="//www.ebi.ac.uk/web_guidelines/js/script.js"></script>
   -->
-  <script defer="defer" src="//www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/js/cookiebanner.js"></script>
-  <script defer="defer" src="//www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/js/foot.js"></script>
-  <script defer="defer" src="//www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/js/script.js"></script>
+  <script defer="defer" src="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/js/cookiebanner.js"></script>
+  <script defer="defer" src="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/js/foot.js"></script>
+  <script defer="defer" src="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/js/script.js"></script>
 
   <!-- The Foundation theme JavaScript -->
-  <!-- <script src="//www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/libraries/foundation-6/js/foundation.js"></script>
-  <script src="//www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/js/foundationExtendEBI.js"></script>
+  <script src="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/libraries/foundation-6/js/foundation.js"></script>
+  <script src="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/js/foundationExtendEBI.js"></script>
   <script type="text/JavaScript">$(document).foundation();</script>
-  <script type="text/JavaScript">$(document).foundationExtendEBI();</script> -->
+  <script type="text/JavaScript">$(document).foundationExtendEBI();</script>
 <!--
    -->
 
+  <!-- Custom EMG JavaScript files -->
+  {% include "swagger-ui/include/swagger_js.html" %}
+  <!-- End of Custom EMG JavaScript files -->
 
   <!-- Google Analytics details... -->
   <!-- Change UA-XXXXX-X to be your site's ID -->
