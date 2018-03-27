@@ -18,6 +18,26 @@ from rest_framework import serializers
 from rest_framework.reverse import reverse
 
 
+class DownloadHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
+
+    def get_url(self, obj, view_name, request, format):
+        # Unsaved objects will not yet have a valid URL.
+        if obj.pk is None:
+            return None
+
+        try:
+            parent = obj.study
+        except:
+            parent = obj.job
+        kwargs = {
+            'accession': parent.accession,
+            'release_version': obj.pipeline.release_version,
+            'alias': obj.alias,
+        }
+        return reverse(
+            view_name, kwargs=kwargs, request=request, format=format)
+
+
 class IdentifierField(serializers.Field):
 
     def get_attribute(self, obj):
@@ -39,6 +59,17 @@ class PipelineToolHyperlinkedField(serializers.HyperlinkedIdentityField):
 
 
 class AnalysisJobHyperlinkedField(serializers.HyperlinkedIdentityField):
+
+    def get_url(self, obj, view_name, request, format):
+        kwargs = {
+            'accession': obj.accession,
+            'release_version': obj.pipeline.release_version
+        }
+        return reverse(
+            view_name, kwargs=kwargs, request=request, format=format)
+
+
+class AnalysisJobHyperlinkedRelatedField(serializers.HyperlinkedRelatedField):
 
     def get_url(self, obj, view_name, request, format):
         kwargs = {
