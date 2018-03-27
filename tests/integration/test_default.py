@@ -98,7 +98,7 @@ class TestDefaultAPI(object):
             ('Sample', 'samples', 'emgapi_v1:samples', [],
              ['biome', 'studies', 'runs', 'metadata']),
             ('Study', 'studies', 'emgapi_v1:studies', [],
-             ['biomes', 'publications', 'samples']),
+             ['biomes', 'publications', 'samples', 'downloads']),
             ('PipelineTool', 'pipeline-tools', 'emgapi_v1:pipeline-tools', [],
              ['pipelines']),
         ]
