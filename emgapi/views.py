@@ -240,6 +240,11 @@ class StudyViewSet(mixins.RetrieveModelMixin,
             queryset = queryset.prefetch_related(
                 Prefetch('samples', queryset=_qs)
             )
+        if 'downloads' in self.request.GET.get('include', '').split(','):
+            _qs = emg_models.StudyDownload.objects.all()
+            queryset = queryset.prefetch_related(
+                Prefetch('study_download', queryset=_qs)
+            )
         return queryset
 
     def get_object(self):
