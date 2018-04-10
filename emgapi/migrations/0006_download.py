@@ -80,9 +80,6 @@ def create_download_description(apps, schema_editor):
     DownloadDescriptionLabel = apps.get_model("emgapi", "DownloadDescriptionLabel")
     downloads = (
         ("Processed nucleotide reads", "Processed nucleotide reads",),
-        ("Processed nucleotide reads", "Processed nucleotide reads",),
-        ("Processed nucleotide reads (since pipeline version 2.0)",
-         "Processed nucleotide readsProcessed nucleotide reads",),
         ("All reads that have predicted CDS", "Processed reads with pCDS",),
         ("All reads with an interproscan match",
          "Processed reads with annotation",),
