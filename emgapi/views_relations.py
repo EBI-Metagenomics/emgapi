@@ -99,6 +99,46 @@ class PublicationStudyRelationshipViewSet(emg_mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
+class StudyGeoCoordinateRelationshipViewSet(mixins.ListModelMixin,
+                                            viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.SampleGeoCoordinateSerializer
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'longitude',
+        'latitude',
+    )
+
+    ordering = ('longitude',)
+
+    lookup_field = 'accession'
+
+    def get_queryset(self):
+        study = get_object_or_404(
+            emg_models.Study, accession=self.kwargs[self.lookup_field])
+        queryset = emg_models.SampleGeoCoordinate.objects \
+            .available(self.request) \
+            .filter(studies=study.study_id) \
+            .values('lon_lat_pk', 'longitude', 'latitude') \
+            .distinct()
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of geo coordinates for the given study accession
+        Example:
+        ---
+        `/studies/ERP001736/geocoordinates` retrieve geo coordinates
+        """
+
+        return super(StudyGeoCoordinateRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
 # class StudyStudyRelationshipViewSet(emg_mixins.ListModelMixin,
 #                                     emg_viewsets.BaseStudyGenericViewSet):
 #
