@@ -877,12 +877,32 @@ class RetrieveSampleSerializer(SampleSerializer):
     }
 
 
+class SampleGeoCoordinateSerializer(ExplicitFieldsModelSerializer,
+                                    serializers.HyperlinkedModelSerializer):
+
+    # workaround to provide multiple values in PK
+    id = serializers.ReadOnlyField(source="lon_lat_pk")
+
+    latitude = serializers.FloatField()
+    longitude = serializers.FloatField()
+
+    class Meta:
+        model = emg_models.SampleGeoCoordinate
+        fields = (
+            'id',
+            # 'url',
+            'longitude',
+            'latitude',
+        )
+
+
 # Study serializer
 class StudySerializer(ExplicitFieldsModelSerializer,
                       serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
         'biomes': 'emgapi.serializers.BiomeSerializer',
+        'downloads': 'emgapi.serializers.StudyDownloadSerializer',
     }
 
     url = serializers.HyperlinkedIdentityField(
@@ -954,6 +974,19 @@ class StudySerializer(ExplicitFieldsModelSerializer,
     def get_samples(self, obj):
         return None
 
+    geocoordinates = relations.SerializerMethodResourceRelatedField(
+        source='get_geocoordinates',
+        model=emg_models.SampleGeoCoordinate,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:studies-geoloc-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+    )
+
+    def get_geocoordinates(self, obj):
+        return None
+
     # counters
     samples_count = serializers.IntegerField()
 
@@ -980,6 +1013,7 @@ class RetrieveStudySerializer(StudySerializer):
         'publications': 'emgapi.serializers.PublicationSerializer',
         'samples': 'emgapi.serializers.SampleSerializer',
         'biomes': 'emgapi.serializers.BiomeSerializer',
+        'downloads': 'emgapi.serializers.StudyDownloadSerializer',
     }
 
     # studies = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(

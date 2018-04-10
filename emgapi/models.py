@@ -28,7 +28,9 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from django.db.models import Sum, Count, Case, When, IntegerField
+from django.db.models import Sum, Count, Case, When
+from django.db.models import CharField, IntegerField, Value
+from django.db.models.functions import Concat, Cast
 from django.db.models import Q
 from django.db.models import Prefetch
 
@@ -468,7 +470,15 @@ class StudyDownloadQuerySet(BaseQuerySet):
 class StudyDownloadManager(models.Manager):
 
     def get_queryset(self):
-        return StudyDownloadQuerySet(self.model, using=self._db)
+        return StudyDownloadQuerySet(self.model, using=self._db) \
+            .select_related(
+                'group_type',
+                'subdir',
+                'file_format',
+                'description',
+                'pipeline',
+                'study',
+            )
 
     def available(self, request):
         return self.get_queryset().available(request)
@@ -514,13 +524,7 @@ class StudyManager(models.Manager):
                 When(samples__is_public=1, then=1),
                 default=0,
                 output_field=IntegerField()
-            ))) \
-            .prefetch_related(
-                Prefetch(
-                    'study_download',
-                    queryset=StudyDownload.objects.all()
-                ),
-            )
+            )))
 
     def available(self, request):
         return self.get_queryset().available(request)
@@ -632,12 +636,7 @@ class SampleManager(models.Manager):
     def available(self, request, prefetch=False):
         queryset = self.get_queryset().available(request)
         if prefetch:
-            queryset = queryset.extra(
-                {
-                    'longitude': "CAST(longitude as DECIMAL(10,5))",
-                    'latitude': "CAST(latitude as DECIMAL(10,5))"
-                }
-            ).prefetch_related(
+            queryset = queryset.prefetch_related(
                 Prefetch('biome', queryset=Biome.objects.all()),
                 Prefetch('studies', queryset=Study.objects.available(request)),
                 Prefetch('metadata', queryset=SampleAnn.objects.all())
@@ -738,6 +737,35 @@ class Sample(models.Model):
 
     def __str__(self):
         return self.accession
+
+
+class SampleGeoCoordinateQuerySet(BaseQuerySet):
+    pass
+
+
+class SampleGeoCoordinateManager(models.Manager):
+
+    def get_queryset(self):
+        return SampleGeoCoordinateQuerySet(self.model, using=self._db) \
+            .annotate(lon_lat_pk=Concat(
+                Cast('longitude', CharField()), Value(','),
+                Cast('latitude', CharField())
+            ))
+
+    def available(self, request):
+        queryset = self.get_queryset().available(request)
+        return queryset
+
+
+class SampleGeoCoordinate(Sample):
+
+    objects = SampleGeoCoordinateManager()
+
+    class Meta:
+        proxy = True
+
+    def __str__(self):
+        return self.latitude, self.longitude
 
 
 class SamplePublication(models.Model):
