@@ -34,7 +34,6 @@ from rest_framework.response import Response
 from rest_framework import filters
 from rest_framework import viewsets, mixins
 from rest_framework.decorators import detail_route, list_route
-# from rest_framework import authentication
 from rest_framework import permissions
 from rest_framework import renderers
 
@@ -835,8 +834,6 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
     )
 
     ordering = ('release_version',)
-
-    # search_fields = ()
 
     lookup_field = 'release_version'
     lookup_value_regex = '[0-9.]+'
