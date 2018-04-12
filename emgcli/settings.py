@@ -162,10 +162,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     # 'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
-    # UI
-    'emgui',
     # CORS
     'corsheaders',
+    # UI
+    'emgui',
     # rest framework
     'rest_framework',
     # 'rest_framework.authtoken',
@@ -181,12 +181,12 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    # Simplified static file serving.
-    # https://warehouse.python.org/project/whitenoise/
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     # Django CORS middleware
     'corsheaders.middleware.CorsMiddleware',
+    # Simplified static file serving.
+    # https://warehouse.python.org/project/whitenoise/
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     # ETAGS support
     'django.middleware.http.ConditionalGetMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -380,12 +380,6 @@ STATICFILES_FINDERS = (
 )
 
 # Security
-try:
-    ALLOWED_HOSTS = EMG_CONF['emg']['allowed_host']
-except KeyError:
-    ALLOWED_HOSTS = ["*"]
-    warnings.warn("ALLOWED_HOSTS not configured using wildecard",
-                  RuntimeWarning)
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 SECURE_BROWSER_XSS_FILTER = True
@@ -394,13 +388,21 @@ SESSION_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_URLS_REGEX = r'^%s/.*$' % FORCE_SCRIPT_NAME
+try:
+    ALLOWED_HOSTS = EMG_CONF['emg']['allowed_host']
+    CORS_ORIGIN_WHITELIST = ALLOWED_HOSTS
+    logger.info("ALLOWED_HOSTS %r" % CORS_ORIGIN_WHITELIST)
+except KeyError:
+    warnings.warn("ALLOWED_HOSTS not configured using wildecard",
+                  RuntimeWarning)
+
+CORS_ORIGIN_ALLOW_ALL = False
+# CORS_URLS_REGEX = r'^%s/.*$' % FORCE_SCRIPT_NAME
 # CORS_URLS_ALLOW_ALL_REGEX = ()
 CORS_ALLOW_METHODS = (
     'GET',
     'HEAD',
-    'OPTIONS'
+    'OPTIONS',
 )
 
 JWT_AUTH = {
