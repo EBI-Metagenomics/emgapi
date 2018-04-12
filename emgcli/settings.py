@@ -393,7 +393,6 @@ try:
     CORS_ORIGIN_WHITELIST = ALLOWED_HOSTS
     logger.info("ALLOWED_HOSTS %r" % CORS_ORIGIN_WHITELIST)
 except KeyError:
-    ALLOWED_HOSTS = ["*",]
     warnings.warn("ALLOWED_HOSTS not configured using wildecard",
                   RuntimeWarning)
 
