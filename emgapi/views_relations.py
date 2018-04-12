@@ -154,7 +154,7 @@ class StudyStudyRelationshipViewSet(emg_mixins.ListModelMixin,
             .filter(sample_id__in=samples) \
             .values("study_id")
         queryset = emg_models.Study.objects.filter(study_id__in=studies) \
-            .available(self.context['request']).distinct()
+            .available(self.request).distinct()
         return queryset
 
     def list(self, request, *args, **kwargs):
