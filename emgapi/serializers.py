@@ -1029,8 +1029,12 @@ class RetrieveStudySerializer(StudySerializer):
     )
 
     def get_studies(self, obj):
-        return emg_models.Study.objects \
-            .filter(
-                samples__in=obj.samples.available(
-                    self.context['request'])
-            ).available(self.context['request'])
+        samples = emg_models.StudySample.objects \
+            .filter(study_id=obj.study_id) \
+            .values("sample_id")
+        studies = emg_models.StudySample.objects \
+            .filter(sample_id__in=samples) \
+            .values("study_id")
+        queryset = emg_models.Study.objects.filter(study_id__in=studies) \
+            .available(self.context['request']).distinct()
+        return queryset
