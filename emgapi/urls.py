@@ -154,11 +154,11 @@ router.register(
     base_name='studies-geoloc'
 )
 
-# router.register(
-#     r'studies/(?P<accession>[a-zA-Z0-9]+)/studies',
-#     views_relations.StudyStudyRelationshipViewSet,
-#     base_name='studies-studies'
-# )
+router.register(
+    r'studies/(?P<accession>[a-zA-Z0-9]+)/studies',
+    views_relations.StudyStudyRelationshipViewSet,
+    base_name='studies-studies'
+)
 
 router.register(
     r'studies/(?P<accession>[^/]+)/samples',
