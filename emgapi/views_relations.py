@@ -22,7 +22,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import viewsets, mixins
 from rest_framework import filters
-from rest_framework.response import Response
 
 from . import models as emg_models
 from . import serializers as emg_serializers
@@ -148,22 +147,15 @@ class StudyStudyRelationshipViewSet(emg_mixins.ListModelMixin,
     def get_queryset(self):
         study = get_object_or_404(
             emg_models.Study, accession=self.kwargs[self.lookup_field])
-        sql = """
-            select  ss.STUDY_ID
-            from STUDY_SAMPLE ss
-            where ss.SAMPLE_ID in
-            (
-                select sa.SAMPLE_ID
-                from STUDY_SAMPLE sa
-                join STUDY s on (s.STUDY_ID=sa.STUDY_ID)
-                WHERE sa.STUDY_ID = %s
-            )
-        """
-        queryset = list(
-            emg_models.Study.objects.raw(
-                sql, [study.study_id, ])).available(self.request)
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        samples = emg_models.StudySample.objects \
+            .filter(study_id=study.study_id) \
+            .values("sample_id")
+        studies = emg_models.StudySample.objects \
+            .filter(sample_id__in=samples) \
+            .values("study_id")
+        queryset = emg_models.Study.objects.filter(study_id__in=studies) \
+            .available(self.context['request']).distinct()
+        return queryset
 
     def list(self, request, *args, **kwargs):
         """
