@@ -17,6 +17,7 @@ import logging
 
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -151,8 +152,10 @@ class StudyStudyRelationshipViewSet(emg_mixins.ListModelMixin,
             .filter(study_id=study.study_id) \
             .values("sample_id")
         studies = emg_models.StudySample.objects \
-            .filter(sample_id__in=samples) \
-            .values("study_id")
+            .filter(
+                Q(sample_id__in=samples),
+                ~Q(study_id=study.study_id)
+            ).values("study_id")
         queryset = emg_models.Study.objects.filter(study_id__in=studies) \
             .available(self.request).distinct()
         return queryset
