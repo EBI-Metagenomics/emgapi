@@ -61,7 +61,7 @@ class Command(EMGBaseCommand):
                         reader = csv.reader(csvfile, delimiter='\t')
                         self.load_organism_from_summary_file(
                             reader, obj, 'taxonomy')
-            elif obj.pipeline.release_version in ('4.0',):
+            elif obj.pipeline.release_version in ('4.0', '4.1', ):
                 name = "%s_SSU.fasta.mseq.txt" % (obj.input_file_name)
                 _f = os.path.join(res, 'SSU', name)
                 if os.path.exists(_f):
