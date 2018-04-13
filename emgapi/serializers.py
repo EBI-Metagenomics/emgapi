@@ -17,6 +17,8 @@
 
 import logging
 
+from django.db.models import Q
+
 from rest_framework_json_api import serializers
 from rest_framework_json_api import relations
 
@@ -1033,8 +1035,10 @@ class RetrieveStudySerializer(StudySerializer):
             .filter(study_id=obj.study_id) \
             .values("sample_id")
         studies = emg_models.StudySample.objects \
-            .filter(sample_id__in=samples) \
-            .values("study_id")
+            .filter(
+                Q(sample_id__in=samples),
+                ~Q(study_id=obj.study_id)
+            ).values("study_id")
         queryset = emg_models.Study.objects.filter(study_id__in=studies) \
             .available(self.context['request']).distinct()
         return queryset
