@@ -17,6 +17,7 @@
 # from django.contrib import admin
 from django.conf.urls import include, url
 from django.conf import settings
+from django.contrib.auth import views
 from django.views.generic import RedirectView
 from django.views.generic.base import TemplateView
 
@@ -67,13 +68,20 @@ router.extend(mongo_router)
 router.extend(mydata_router)
 router.extend(utils_router)
 
-
-# API authentication routing.
 urlpatterns = [
+    url(r'^http-auth/login_form$',
+        views.LoginView.as_view(
+            template_name='rest_framework/login_form.html'),
+        {}),
 
-    # url(r'^admin/', admin.site.urls),
     url(r'^http-auth/', include('rest_framework.urls',
                                 namespace='rest_framework')),
+]
+
+# API authentication routing.
+urlpatterns += [
+
+    # url(r'^admin/', admin.site.urls),
 
     url(r'^schema/$', schema_view, name="schema_view"),
 
