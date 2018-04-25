@@ -350,10 +350,12 @@ except:
     EMG_DEFAULT_LIMIT = 20
 
 # Authentication backends
-AUTHENTICATION_BACKENDS = (
-    'emgapi.backends.EMGBackend',
-)
-
+try:
+    AUTHENTICATION_BACKENDS = EMG_CONF['emg']['auth_backends']
+except:
+    AUTHENTICATION_BACKENDS = (
+        'emgapi.backends.EMGBackend',
+    )
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
