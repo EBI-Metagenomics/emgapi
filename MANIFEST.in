@@ -1,6 +1,7 @@
 include README.rst
 include LICENSE
 include requirements.txt
+recursive-include tests *
 recursive-include emgcli *
 recursive-include emgapi *
 recursive-include emgapianns *
