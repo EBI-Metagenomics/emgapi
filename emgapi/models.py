@@ -87,7 +87,8 @@ class BaseQuerySet(models.QuerySet):
             _query_filters['StudyQuerySet']['authenticated'] = \
                 [Q(submission_account_id=_username) | Q(is_public=1)]
             _query_filters['StudyDownloadQuerySet']['authenticated'] = \
-                [Q(submission_account_id=_username) | Q(study__is_public=1)]
+                [Q(study__submission_account_id=_username) |
+                 Q(study__is_public=1)]
             _query_filters['SampleQuerySet']['authenticated'] = \
                 [Q(submission_account_id=_username) | Q(is_public=1)]
             _query_filters['RunQuerySet']['authenticated'] = \
