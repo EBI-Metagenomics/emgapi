@@ -388,15 +388,15 @@ except KeyError:
     secure_cookies = True
 
 try:
-    proxy_ssl_header = EMG_CONF['emg']['proxy_ssl_header']
+    secure_proxy_ssl_header = EMG_CONF['emg']['secure_proxy_ssl_header']
 except KeyError:
-    proxy_ssl_header = None
+    secure_proxy_ssl_header = None
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 SECURE_BROWSER_XSS_FILTER = True
 CSRF_COOKIE_SECURE = secure_cookies
 SESSION_COOKIE_SECURE = secure_cookies
-SECURE_PROXY_SSL_HEADER = proxy_ssl_header
+SECURE_PROXY_SSL_HEADER = secure_proxy_ssl_header
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
 try:
