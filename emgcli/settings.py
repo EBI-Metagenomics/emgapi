@@ -382,11 +382,15 @@ STATICFILES_FINDERS = (
 )
 
 # Security
+try:
+    secure_cookies = EMG_CONF['emg']['secure_cookies']
+except KeyError:
+    secure_cookies = True
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 SECURE_BROWSER_XSS_FILTER = True
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = secure_cookies
+SESSION_COOKIE_SECURE = secure_cookies
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
