@@ -65,7 +65,6 @@ class BaseQuerySet(models.QuerySet):
             'RunQuerySet': {
                 'all': [
                     Q(run_status_id=4),
-                    Q(analysis_status_id=3) | Q(analysis_status_id=6)
                 ],
             },
             'AnalysisJobQuerySet': {
@@ -798,7 +797,7 @@ class ExperimentTypeManager(models.Manager):
 
 
 class ExperimentType(models.Model):
-    experiment_type_id = models.AutoField(
+    experiment_type_id = models.SmallIntegerField(
         db_column='EXPERIMENT_TYPE_ID', primary_key=True,)
     experiment_type = models.CharField(
         db_column='EXPERIMENT_TYPE', max_length=30,
@@ -822,7 +821,6 @@ class RunManager(models.Manager):
     def get_queryset(self):
         return RunQuerySet(self.model, using=self._db) \
             .select_related(
-                'analysis_status',
                 'experiment_type',
             )
 
@@ -842,26 +840,25 @@ class RunManager(models.Manager):
 
 
 class Run(models.Model):
+    # run_id = models.BigAutoField(
+    #     db_column='RUN_ID', primary_key=True)
     accession = models.CharField(
-        db_column='EXTERNAL_RUN_IDS', max_length=100, primary_key=True)
+        db_column='EXTERNAL_RUN_IDS', max_length=100, blank=True, null=True)
     secondary_accession = models.CharField(
-        db_column='SECONDARY_ACCESSION', max_length=100)
+        db_column='SECONDARY_ACCESSION', max_length=100, blank=True, null=True)
     run_status_id = models.IntegerField(
         db_column='RUN_STATUS_ID', blank=True, null=True)
     sample = models.ForeignKey(
-        Sample, db_column='SAMPLE_ID', related_name='runs',
+        'Sample', db_column='SAMPLE_ID', related_name='runs',
         on_delete=models.CASCADE, blank=True, null=True)
     study = models.ForeignKey(
-        Study, db_column='STUDY_ID', related_name='runs',
+        'Study', db_column='STUDY_ID', related_name='runs',
         on_delete=models.CASCADE, blank=True, null=True)
-    analysis_status = models.ForeignKey(
-        AnalysisStatus, db_column='ANALYSIS_STATUS_ID',
-        on_delete=models.CASCADE)
     # TODO: not consistant, schema changes may be needed
     experiment_type = models.ForeignKey(
         ExperimentType, db_column='EXPERIMENT_TYPE_ID',
         related_name='runs',
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE, blank=True, null=True)
     instrument_platform = models.CharField(
         db_column='INSTRUMENT_PLATFORM', max_length=50,
         blank=True, null=True)
@@ -872,8 +869,7 @@ class Run(models.Model):
     objects = RunManager()
 
     class Meta:
-        managed = False
-        db_table = 'ANALYSIS_JOB'
+        db_table = 'RUN'
         ordering = ('accession',)
 
     def __str__(self):
