@@ -840,10 +840,10 @@ class RunManager(models.Manager):
 
 
 class Run(models.Model):
-    # run_id = models.BigAutoField(
-    #     db_column='RUN_ID', primary_key=True)
+    run_id = models.BigAutoField(
+        db_column='RUN_ID', primary_key=True)
     accession = models.CharField(
-        db_column='EXTERNAL_RUN_IDS', max_length=100, blank=True, null=True)
+        db_column='EXTERNAL_RUN_IDS', max_length=80, blank=True, null=True)
     secondary_accession = models.CharField(
         db_column='SECONDARY_ACCESSION', max_length=100, blank=True, null=True)
     run_status_id = models.IntegerField(
@@ -871,6 +871,7 @@ class Run(models.Model):
     class Meta:
         db_table = 'RUN'
         ordering = ('accession',)
+        unique_together = (('run_id', 'accession'),)
 
     def __str__(self):
         return self.accession
@@ -941,6 +942,9 @@ class AnalysisJob(models.Model):
         db_column='INPUT_FILE_NAME', max_length=50)
     result_directory = models.CharField(
         db_column='RESULT_DIRECTORY', max_length=100)
+    run = models.ForeignKey(
+        Run, db_column='RUN_ID', related_name='analysis',
+        on_delete=models.CASCADE, blank=True, null=True)
     sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID', related_name='analysis',
         on_delete=models.CASCADE, blank=True, null=True)
