@@ -23,13 +23,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Run',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('accession', models.CharField(blank=True, db_column='EXTERNAL_RUN_IDS', max_length=100, null=True)),
+                ('run_id', models.BigAutoField(db_column='RUN_ID', primary_key=True, serialize=False)),
+                ('accession', models.CharField(blank=True, db_column='EXTERNAL_RUN_IDS', max_length=80, null=True)),
                 ('secondary_accession', models.CharField(blank=True, db_column='SECONDARY_ACCESSION', max_length=100, null=True)),
                 ('run_status_id', models.IntegerField(blank=True, db_column='RUN_STATUS_ID', null=True)),
-                ('sample', models.ForeignKey(blank=True, db_column='SAMPLE_ID', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='runs', to='emgapi.Sample')),
-                ('study', models.ForeignKey(blank=True, db_column='STUDY_ID', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='runs', to='emgapi.Study')),
-                ('experiment_type', models.ForeignKey(blank=True, db_column='EXPERIMENT_TYPE_ID', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='runs', to='emgapi.ExperimentType')),
                 ('instrument_platform', models.CharField(blank=True, db_column='INSTRUMENT_PLATFORM', max_length=50, null=True)),
                 ('instrument_model', models.CharField(blank=True, db_column='INSTRUMENT_MODEL', max_length=50, null=True)),
             ],
@@ -38,6 +35,32 @@ class Migration(migrations.Migration):
             },
         ),
 
+        migrations.AddField(
+            model_name='run',
+            name='sample',
+            field=models.ForeignKey(blank=True, db_column='SAMPLE_ID', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='runs', to='emgapi.Sample'),
+        ),
+        migrations.AddField(
+            model_name='run',
+            name='study',
+            field=models.ForeignKey(blank=True, db_column='STUDY_ID', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='runs', to='emgapi.Study'),
+        ),
+        migrations.AddField(
+            model_name='run',
+            name='experiment_type',
+            field=models.ForeignKey(blank=True, db_column='EXPERIMENT_TYPE_ID', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='runs', to='emgapi.ExperimentType'),
+        ),
+
+        migrations.AddField(
+            model_name='analysisjob',
+            name='run',
+            field=models.ForeignKey(blank=True, db_column='RUN_ID', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='analysis', to='emgapi.Run'),
+        ),
+
+        migrations.AlterUniqueTogether(
+            name='run',
+            unique_together=set([('run_id', 'accession')]),
+        ),
         migrations.AlterModelOptions(
             name='analysisjobdownload',
             options={'ordering': ('pipeline', 'group_type', 'alias')},
@@ -55,10 +78,28 @@ class Migration(migrations.Migration):
             """INSERT INTO RUN (EXTERNAL_RUN_IDS, SECONDARY_ACCESSION,
                 RUN_STATUS_ID, SAMPLE_ID, STUDY_ID, EXPERIMENT_TYPE_ID,
                 INSTRUMENT_PLATFORM, INSTRUMENT_MODEL)
-            SELECT EXTERNAL_RUN_IDS, SECONDARY_ACCESSION,
-                RUN_STATUS_ID, SAMPLE_ID, STUDY_ID, EXPERIMENT_TYPE_ID,
-                INSTRUMENT_PLATFORM, INSTRUMENT_MODEL
-            FROM ANALYSIS_JOB ORDER BY JOB_ID ASC"""
+                SELECT distinct EXTERNAL_RUN_IDS, SECONDARY_ACCESSION,
+                    RUN_STATUS_ID, SAMPLE_ID, STUDY_ID, EXPERIMENT_TYPE_ID,
+                    group_concat(
+                        INSTRUMENT_PLATFORM
+                        ORDER BY INSTRUMENT_PLATFORM
+                        SEPARATOR ','
+                    ) as INSTRUMENT_PLATFORM,
+                    group_concat(
+                        INSTRUMENT_MODEL
+                        ORDER BY INSTRUMENT_MODEL
+                        SEPARATOR ','
+                    ) as INSTRUMENT_MODEL
+                    FROM ANALYSIS_JOB
+                    WHERE EXPERIMENT_TYPE_ID not in (4)
+                    GROUP BY EXTERNAL_RUN_IDS
+            """
+        ),
+        migrations.RunSQL(
+            """UPDATE ANALYSIS_JOB as AJ
+                JOIN RUN as R ON (AJ.EXTERNAL_RUN_IDS=R.EXTERNAL_RUN_IDS)
+                SET AJ.RUN_ID=R.RUN_ID
+            """
         )
 
     ]
