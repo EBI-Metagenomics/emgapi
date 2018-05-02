@@ -891,14 +891,19 @@ class SampleGeoCoordinateSerializer(ExplicitFieldsModelSerializer,
 
     latitude = serializers.FloatField()
     longitude = serializers.FloatField()
+    count = serializers.CharField()
+    sample_accessions = serializers.CharField()
 
     class Meta:
         model = emg_models.SampleGeoCoordinate
+        unique_together = (('latitude', 'longitude'),)
         fields = (
             'id',
             # 'url',
             'longitude',
             'latitude',
+            'count',
+            'sample_accessions'
         )
 
 
