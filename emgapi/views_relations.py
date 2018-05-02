@@ -15,7 +15,7 @@
 
 import logging
 
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Count, CharField, Aggregate
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
@@ -100,6 +100,18 @@ class PublicationStudyRelationshipViewSet(emg_mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
+class Concat(Aggregate):
+    function = 'GROUP_CONCAT'
+    template = '%(function)s(%(distinct)s%(expressions)s)'
+
+    def __init__(self, expression, distinct=False, **extra):
+        super(Concat, self).__init__(
+            expression,
+            distinct='DISTINCT ' if distinct else '',
+            output_field=CharField(),
+            **extra)
+
+
 class StudyGeoCoordinateRelationshipViewSet(mixins.ListModelMixin,
                                             viewsets.GenericViewSet):
 
@@ -125,7 +137,9 @@ class StudyGeoCoordinateRelationshipViewSet(mixins.ListModelMixin,
             .available(self.request) \
             .filter(studies=study.study_id) \
             .values('lon_lat_pk', 'longitude', 'latitude') \
-            .distinct()
+            .annotate(
+                count=Count('lon_lat_pk'),
+                sample_accessions=Concat('accession'))
         return queryset
 
     def list(self, request, *args, **kwargs):
