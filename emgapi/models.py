@@ -34,6 +34,8 @@ from django.db.models.functions import Concat, Cast
 from django.db.models import Q
 from django.db.models import Prefetch
 
+from django.utils.timezone import now
+
 
 class Resource(object):
 
@@ -860,10 +862,10 @@ class Run(models.Model):
         related_name='runs',
         on_delete=models.CASCADE, blank=True, null=True)
     instrument_platform = models.CharField(
-        db_column='INSTRUMENT_PLATFORM', max_length=50,
+        db_column='INSTRUMENT_PLATFORM', max_length=100,
         blank=True, null=True)
     instrument_model = models.CharField(
-        db_column='INSTRUMENT_MODEL', max_length=50,
+        db_column='INSTRUMENT_MODEL', max_length=100,
         blank=True, null=True)
 
     objects = RunManager()
@@ -871,7 +873,10 @@ class Run(models.Model):
     class Meta:
         db_table = 'RUN'
         ordering = ('accession',)
-        unique_together = (('run_id', 'accession'),)
+        unique_together = (
+            ('run_id', 'accession'),
+            ('accession', 'secondary_accession')
+        )
 
     def __str__(self):
         return self.accession
@@ -925,12 +930,12 @@ class AnalysisJob(models.Model):
     secondary_accession = models.CharField(
         db_column='SECONDARY_ACCESSION', max_length=100)
     job_operator = models.CharField(
-        db_column='JOB_OPERATOR', max_length=15)
+        db_column='JOB_OPERATOR', max_length=15, blank=True, null=True)
     pipeline = models.ForeignKey(
-        Pipeline, db_column='PIPELINE_ID',
+        Pipeline, db_column='PIPELINE_ID', blank=True, null=True,
         related_name='analysis', on_delete=models.CASCADE)
     submit_time = models.DateTimeField(
-        db_column='SUBMIT_TIME')
+        db_column='SUBMIT_TIME', default=now, blank=True)
     complete_time = models.DateTimeField(
         db_column='COMPLETE_TIME', blank=True, null=True)
     analysis_status = models.ForeignKey(
