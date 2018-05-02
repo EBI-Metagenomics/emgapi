@@ -4,6 +4,24 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 import django.db.models.deletion
+from django.utils.timezone import now
+
+
+def populate_runs(apps, schema_editor):
+    # Too slow
+    # migrations.RunSQL(
+    #     """UPDATE ANALYSIS_JOB t1
+    #         SET RUN_ID = (
+    #             SELECT t2.RUN_ID FROM RUN t2
+    #             WHERE t1.EXTERNAL_RUN_IDS=t2.EXTERNAL_RUN_IDS
+    #     """
+    # ),
+    AnalysisJob = apps.get_model("emgapi", "AnalysisJob")
+    Run = apps.get_model("emgapi", "Run")
+
+    for aj in AnalysisJob.objects.all():
+        aj.run = Run.objects.get(accession=aj.accession)
+        aj.save()
 
 
 class Migration(migrations.Migration):
@@ -19,6 +37,21 @@ class Migration(migrations.Migration):
             name='experiment_type_id',
             field=models.SmallIntegerField(db_column='EXPERIMENT_TYPE_ID', primary_key=True, serialize=False),
         ),
+        migrations.AlterField(
+            model_name='analysisjob',
+            name='job_operator',
+            field=models.CharField(db_column='JOB_OPERATOR', blank=True, null=True, max_length=15),
+        ),
+        migrations.AlterField(
+            model_name='analysisjob',
+            name='pipeline',
+            field=models.ForeignKey(blank=True, db_column='PIPELINE_ID', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='analysis', to='emgapi.Pipeline'),
+        ),
+        migrations.AlterField(
+            model_name='analysisjob',
+            name='submit_time',
+            field=models.DateTimeField(default=now, blank=True, db_column='SUBMIT_TIME'),
+        ),
 
         migrations.CreateModel(
             name='Run',
@@ -27,8 +60,8 @@ class Migration(migrations.Migration):
                 ('accession', models.CharField(blank=True, db_column='EXTERNAL_RUN_IDS', max_length=80, null=True)),
                 ('secondary_accession', models.CharField(blank=True, db_column='SECONDARY_ACCESSION', max_length=100, null=True)),
                 ('run_status_id', models.IntegerField(blank=True, db_column='RUN_STATUS_ID', null=True)),
-                ('instrument_platform', models.CharField(blank=True, db_column='INSTRUMENT_PLATFORM', max_length=50, null=True)),
-                ('instrument_model', models.CharField(blank=True, db_column='INSTRUMENT_MODEL', max_length=50, null=True)),
+                ('instrument_platform', models.CharField(blank=True, db_column='INSTRUMENT_PLATFORM', max_length=100, null=True)),
+                ('instrument_model', models.CharField(blank=True, db_column='INSTRUMENT_MODEL', max_length=100, null=True)),
             ],
             options={
                 'db_table': 'RUN',
@@ -59,7 +92,7 @@ class Migration(migrations.Migration):
 
         migrations.AlterUniqueTogether(
             name='run',
-            unique_together=set([('run_id', 'accession')]),
+            unique_together=set([('run_id', 'accession'), ('accession', 'secondary_accession')]),
         ),
         migrations.AlterModelOptions(
             name='analysisjobdownload',
@@ -91,15 +124,9 @@ class Migration(migrations.Migration):
                         SEPARATOR ','
                     ) as INSTRUMENT_MODEL
                     FROM ANALYSIS_JOB
-                    WHERE EXPERIMENT_TYPE_ID not in (4)
                     GROUP BY EXTERNAL_RUN_IDS
             """
         ),
-        migrations.RunSQL(
-            """UPDATE ANALYSIS_JOB as AJ
-                JOIN RUN as R ON (AJ.EXTERNAL_RUN_IDS=R.EXTERNAL_RUN_IDS)
-                SET AJ.RUN_ID=R.RUN_ID
-            """
-        )
+        migrations.RunPython(populate_runs),
 
     ]
