@@ -126,7 +126,7 @@ class StudyGeoCoordinateRelationshipViewSet(mixins.ListModelMixin,
             .filter(studies=study.study_id) \
             .values('lon_lat_pk', 'longitude', 'latitude') \
             .annotate(
-                count=Count('lon_lat_pk'))
+                samples_count=Count('lon_lat_pk'))
         return queryset
 
     def list(self, request, *args, **kwargs):
