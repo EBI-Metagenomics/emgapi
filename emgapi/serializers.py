@@ -720,6 +720,12 @@ class AnalysisSerializer(BaseAnalysisSerializer):
     def get_interproidentifier(self, obj):
         return None
 
+    run = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emgapi_v1:runs-detail',
+        lookup_field='accession'
+    )
+
 
 # Sample serializer
 
