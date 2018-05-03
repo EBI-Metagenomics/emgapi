@@ -130,11 +130,21 @@ class TestDefaultAPI(object):
                                  pk=pk, biome=_biome, is_public=1)
                 _st = mommy.make('emgapi.Study', pk=pk, biome=_biome,
                                  is_public=1, samples=[_sm])
+                mommy.make('emgapi.Run', pk=pk, run_status_id=4,
+                           study=_st, sample=_sm)
+            elif _model in ('AnalysisJob',):
+                _biome = mommy.make('emgapi.Biome', pk=pk)
+                _sm = mommy.make('emgapi.Sample',
+                                 pk=pk, biome=_biome, is_public=1)
+                _st = mommy.make('emgapi.Study', pk=pk, biome=_biome,
+                                 is_public=1, samples=[_sm])
+                _r = mommy.make('emgapi.Run', pk=pk, run_status_id=4,
+                                study=_st, sample=_sm)
                 _as = mommy.make('emgapi.AnalysisStatus', pk=3)
                 _p = mommy.make('emgapi.Pipeline', pk=1, release_version="1.0")
                 mommy.make('emgapi.AnalysisJob', pk=pk, pipeline=_p,
                            analysis_status=_as, run_status_id=4,
-                           study=_st, sample=_sm)
+                           study=_st, sample=_sm, run=_r)
             elif _model in ('PipelineTool',):
                 _p = mommy.make('emgapi.Pipeline', pk=pk,
                                 release_version="1.0")
