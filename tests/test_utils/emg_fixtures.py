@@ -241,38 +241,55 @@ def runs(study, samples, analysis_status, pipeline, experiment_type):
     jobs = []
     for s in samples:
         pk = s.sample_id
-        jobs.append(
-            emg_models.AnalysisJob(
-                sample=s,
-                study=study,
-                accession="ABC_{:0>3}".format(pk),
-                secondary_accession="DEF_{:0>3}".format(pk),
-                run_status_id=4,
-                experiment_type=experiment_type,
-                pipeline=pipeline,
-                analysis_status=analysis_status,
-                input_file_name="ABC_FASTQ",
-                result_directory="path/version_1.0/ABC_FASTQ",
-                submit_time="1970-01-01 00:00:00",
-            )
+        run = emg_models.Run.objects.create(
+            sample=s,
+            study=study,
+            accession="ABC_{:0>3}".format(pk),
+            secondary_accession="DEF_{:0>3}".format(pk),
+            run_status_id=4,
+            experiment_type=experiment_type,
         )
+        _aj = emg_models.AnalysisJob(
+            sample=s,
+            study=study,
+            run=run,
+            accession="ABC_{:0>3}".format(pk),
+            secondary_accession="DEF_{:0>3}".format(pk),
+            run_status_id=4,
+            experiment_type=experiment_type,
+            pipeline=pipeline,
+            analysis_status=analysis_status,
+            input_file_name="ABC_FASTQ",
+            result_directory="path/version_1.0/ABC_FASTQ",
+            submit_time="1970-01-01 00:00:00",
+        )
+        jobs.append(_aj)
     return emg_models.AnalysisJob.objects.bulk_create(jobs)
 
 
 @pytest.fixture
 def run(study, sample, analysis_status, pipeline, experiment_type):
+    run = emg_models.Run.objects.create(
+            run_id=1234,
+            accession="ABC01234",
+            sample=sample,
+            study=study,
+            run_status_id=4,
+            experiment_type=experiment_type
+        )
     return emg_models.AnalysisJob.objects.create(
         job_id=1234,
         accession="ABC01234",
         sample=sample,
         study=study,
+        run=run,
         run_status_id=4,
         experiment_type=experiment_type,
         pipeline=pipeline,
         analysis_status=analysis_status,
         input_file_name="ABC_FASTQ",
         result_directory="path/version_1.0/ABC_FASTQ",
-        submit_time="1970-01-01 00:00:00",
+        submit_time="1970-01-01 00:00:00"
     )
 
 
@@ -320,11 +337,20 @@ def run_multiple_analysis(study, sample, analysis_status, experiment_type):
 @pytest.fixture
 def run_emptyresults(study, sample, analysis_status, pipeline,
                      experiment_type):
+    run = emg_models.Run.objects.create(
+        run_id=1234,
+        accession="EMPTY_ABC01234",
+        sample=sample,
+        study=study,
+        run_status_id=4,
+        experiment_type=experiment_type
+    )
     return emg_models.AnalysisJob.objects.create(
         job_id=1234,
         accession="EMPTY_ABC01234",
         sample=sample,
         study=study,
+        run=run,
         run_status_id=4,
         experiment_type=experiment_type,
         pipeline=pipeline,
@@ -337,18 +363,27 @@ def run_emptyresults(study, sample, analysis_status, pipeline,
 
 @pytest.fixture
 def run_with_sample(study, sample, analysis_status, pipeline, experiment_type):
+    run = emg_models.Run.objects.create(
+            run_id=1234,
+            accession="ABC01234",
+            run_status_id=4,
+            sample=sample,
+            study=study,
+            experiment_type=experiment_type,
+        )
     return emg_models.AnalysisJob.objects.create(
         job_id=1234,
         accession="ABC01234",
         run_status_id=4,
         sample=sample,
         study=study,
+        run=run,
         experiment_type=experiment_type,
         pipeline=pipeline,
         analysis_status=analysis_status,
         input_file_name="ABC_FASTQ",
         result_directory="path/version_1.0/ABC_FASTQ",
-        submit_time="1970-01-01 00:00:00",
+        submit_time="1970-01-01 00:00:00"
     )
 
 
