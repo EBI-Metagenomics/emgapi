@@ -420,7 +420,9 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     experiment_type = serializers.SerializerMethodField()
 
     def get_experiment_type(self, obj):
-        return obj.experiment_type.experiment_type
+        if obj.experiment_type is not None:
+            return obj.experiment_type.experiment_type
+        return None
 
     # relationships
     sample = serializers.HyperlinkedRelatedField(
@@ -590,7 +592,9 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     experiment_type = serializers.SerializerMethodField()
 
     def get_experiment_type(self, obj):
-        return obj.experiment_type.experiment_type
+        if obj.experiment_type is not None:
+            return obj.experiment_type.experiment_type
+        return None
 
     pipeline_version = serializers.SerializerMethodField()
 
