@@ -4,7 +4,7 @@
 import logging
 
 from django.core.management.base import BaseCommand
-
+from django.db.models import Q
 from emgapi import models as emg_models
 
 logger = logging.getLogger(__name__)
@@ -17,8 +17,21 @@ class EMGBaseCommand(BaseCommand):
     accession = None
 
     def add_arguments(self, parser):
-        parser.add_argument('accession', type=str)
-        parser.add_argument('rootpath', type=str, default='')
+        parser.add_argument(
+            'accession',
+            action='store',
+            type=str,
+        )
+        parser.add_argument(
+            'rootpath',
+            action='store',
+            type=str,
+        )
+        parser.add_argument(
+            '--pipeline',
+            action='store_true',
+            dest='pipeline',
+        )
 
     def handle(self, *args, **options):
         logger.info("CLI %r" % options)
@@ -27,15 +40,21 @@ class EMGBaseCommand(BaseCommand):
 
     def find_accession(self, options):
         self.accession = options.get('accession', None)
+        self.pipeline = options.get('pipeline', None)
+
         if self.accession:
-            self.obj_list = emg_models.AnalysisJob.objects \
-                .filter(study__accession=self.accession).all()
-            if len(self.obj_list) < 1:
-                self.obj_list = emg_models.AnalysisJob.objects \
-                    .filter(sample__accession=self.accession).all()
-            if len(self.obj_list) < 1:
-                self.obj_list = emg_models.AnalysisJob.objects \
-                    .filter(accession=self.accession).all()
+            queryset = emg_models.AnalysisJob.objects \
+                .filter(
+                    Q(study__accession=self.accession) |
+                    Q(sample__accession=self.accession) |
+                    Q(accession=self.accession)
+                )
+            if self.pipeline:
+                queryset = queryset.filter(
+                    Q(pipeline__release_version=self.pipeline)
+                )
+            logger.info("QUERY %r" % queryset.query)
+            self.obj_list = queryset.all()
             if len(self.obj_list) < 1:
                 logger.error(
                     "No runs %s, SKIPPING!" % self.accession)
