@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from decimal import Decimal
+
 from django import forms
 from django.db.models import Q
 from django.db.models import FloatField
@@ -359,9 +361,7 @@ class SampleFilter(django_filters.FilterSet):
         help_text='Latitude greater/equal then value')
 
     def filter_latitude_gte(self, qs, name, value):
-        return qs.annotate(
-            latitude_cast=Cast('latitude', FloatField())) \
-            .filter(latitude_cast__gte=float(value))
+        return qs.filter(latitude__gte=Decimal(str(value)))
 
     latitude_lte = django_filters.NumberFilter(
         method='filter_latitude_lte', distinct=True,
@@ -369,9 +369,7 @@ class SampleFilter(django_filters.FilterSet):
         help_text='Latitude less/equal then value')
 
     def filter_latitude_lte(self, qs, name, value):
-        return qs.annotate(
-            latitude_cast=Cast('latitude', FloatField())) \
-            .filter(latitude_cast__lte=float(value))
+        return qs.filter(latitude__lte=Decimal(str(value)))
 
     longitude_gte = django_filters.NumberFilter(
         method='filter_longitude_gte', distinct=True,
@@ -379,9 +377,7 @@ class SampleFilter(django_filters.FilterSet):
         help_text='Longitude greater/equal then value')
 
     def filter_longitude_gte(self, qs, name, value):
-        return qs.annotate(
-            longitude_cast=Cast('longitude', FloatField())) \
-            .filter(longitude_cast__gte=float(value))
+        return qs.filter(longitude__gte=Decimal(str(value)))
 
     longitude_lte = django_filters.NumberFilter(
         method='filter_longitude_lte', distinct=True,
@@ -389,9 +385,7 @@ class SampleFilter(django_filters.FilterSet):
         help_text='Longitude less/equal then value')
 
     def filter_longitude_lte(self, qs, name, value):
-        return qs.annotate(
-            longitude_cast=Cast('longitude', FloatField())) \
-            .filter(longitude_cast__lte=float(value))
+        return qs.filter(longitude__lte=Decimal(str(value)))
 
     study_accession = django_filters.CharFilter(
         method='filter_study_accession', distinct=True,
