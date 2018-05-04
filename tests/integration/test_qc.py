@@ -65,12 +65,86 @@ class TestCLI(object):
         ]
         assert rsp['data']['attributes']['analysis-summary'] == expected
 
+    @pytest.mark.parametrize(
+        'results',
+        ({
+            'pipeline': '1.0',
+            'expected': [
+                {
+                    'key': 'Submitted nucleotide sequences',
+                    'value': '12345'
+                },
+                {
+                    'key': ('Nucleotide sequences after format-specific '
+                            'filtering'),
+                    'value': '12345'
+                },
+                {
+                    'key': 'Predicted CDS',
+                    'value': '12345'
+                },
+                {
+                    'key': 'Predicted CDS with InterProScan match',
+                    'value': '12345'
+                },
+                {
+                    'key': 'Total InterProScan matches',
+                    'value': '12345678'
+                }
+            ]
+        }, {
+            'pipeline': '4.0',
+            'expected': [
+                {
+                    'key': 'Submitted nucleotide sequences',
+                    'value': '54321'
+                },
+                {
+                    'key': ('Nucleotide sequences after format-specific '
+                            'filtering'),
+                    'value': '54321'
+                },
+                {
+                    'key': 'Predicted CDS',
+                    'value': '54321'
+                },
+                {
+                    'key': 'Predicted CDS with InterProScan match',
+                    'value': '54321'
+                },
+                {
+                    'key': 'Total InterProScan matches',
+                    'value': '87654321'
+                }
+            ]
+        })
+    )
+    def test_qc_multiple_pipelines(self, client, run_multiple_analysis,
+                                   results):
+        call_command('import_qc', 'ABC01234',
+                     os.path.dirname(os.path.abspath(__file__)),
+                     pipeline='1.0')
+        call_command('import_qc', 'ABC01234',
+                     os.path.dirname(os.path.abspath(__file__)),
+                     pipeline='4.0')
+
+        url = reverse("emgapi_v1:runs-pipelines-detail",
+                      args=["ABC01234", results['pipeline']])
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        rsp = response.json()
+        assert len(rsp['data']['attributes']['analysis-summary']) == 5
+
+        expected = results['expected']
+        assert rsp['data']['attributes']['analysis-summary'] == expected
+
     def test_empty_qc(self, client, run_emptyresults):
         job = run_emptyresults.accession
         version = run_emptyresults.pipeline.release_version
         assert job == 'EMPTY_ABC01234'
         call_command('import_qc', job,
-                     os.path.dirname(os.path.abspath(__file__)))
+                     os.path.dirname(os.path.abspath(__file__)),
+                     pipeline=version)
 
         url = reverse("emgapi_v1:runs-pipelines-detail",
                       args=[job, version])
