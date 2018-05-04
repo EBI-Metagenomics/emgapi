@@ -24,7 +24,7 @@ __all__ = ['apiclient', 'api_version', 'biome', 'studies',
            'samples', 'study', 'study_private', 'sample', 'sample_private',
            'analysis_status', 'pipeline', 'pipelines', 'experiment_type',
            'runs', 'run', 'run_emptyresults', 'run_with_sample',
-           'analysis_results']
+           'analysis_results', 'run_multiple_analysis']
 
 
 @pytest.fixture()
@@ -274,6 +274,47 @@ def run(study, sample, analysis_status, pipeline, experiment_type):
         result_directory="path/version_1.0/ABC_FASTQ",
         submit_time="1970-01-01 00:00:00",
     )
+
+
+@pytest.fixture
+def run_multiple_analysis(study, sample, analysis_status, experiment_type):
+    pipeline = emg_models.Pipeline.objects.create(
+        pk=1,
+        release_version="1.0",
+        release_date="1970-01-01",
+    )
+    pipeline4 = emg_models.Pipeline.objects.create(
+        pk=4,
+        release_version="4.0",
+        release_date="1970-01-01",
+    )
+    _run1 = emg_models.AnalysisJob.objects.create(
+            job_id=1234,
+            accession="ABC01234",
+            sample=sample,
+            study=study,
+            run_status_id=4,
+            experiment_type=experiment_type,
+            pipeline=pipeline,
+            analysis_status=analysis_status,
+            input_file_name="ABC_FASTQ",
+            result_directory="path/version_1.0/ABC_FASTQ",
+            submit_time="1970-01-01 00:00:00",
+        )
+    _run4 = emg_models.AnalysisJob.objects.create(
+            job_id=5678,
+            accession="ABC01234",
+            sample=sample,
+            study=study,
+            run_status_id=4,
+            experiment_type=experiment_type,
+            pipeline=pipeline4,
+            analysis_status=analysis_status,
+            input_file_name="ABC_FASTQ",
+            result_directory="path/version_4.0/ABC_FASTQ",
+            submit_time="1970-01-01 00:00:00",
+        )
+    return (_run1, _run4)
 
 
 @pytest.fixture
