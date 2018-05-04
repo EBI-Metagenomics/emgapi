@@ -53,7 +53,6 @@ class EMGBaseCommand(BaseCommand):
                 queryset = queryset.filter(
                     Q(pipeline__release_version=self.pipeline)
                 )
-            logger.info("QUERY %r" % queryset.query)
             self.obj_list = queryset.all()
             if len(self.obj_list) < 1:
                 logger.error(
