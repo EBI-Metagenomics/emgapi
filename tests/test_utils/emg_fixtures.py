@@ -56,7 +56,7 @@ def studies(biome):
             emg_models.Study(
                 biome=biome,
                 study_id=pk,
-                accession="SRP0{:0>3}".format(pk),
+                secondary_accession="SRP0{:0>3}".format(pk),
                 centre_name="Centre Name",
                 is_public=1,
                 public_release_date=None,
@@ -105,7 +105,7 @@ def study(biome):
     return emg_models.Study.objects.create(
         biome=biome,
         study_id=1234,
-        accession="SRP01234",
+        secondary_accession="SRP01234",
         centre_name="Centre Name",
         is_public=1,
         public_release_date=None,
@@ -126,7 +126,7 @@ def study_private(biome):
     return emg_models.Study.objects.create(
         biome=biome,
         study_id=222,
-        accession="SRP00000",
+        secondary_accession="SRP00000",
         centre_name="Centre Name",
         is_public=0,
         public_release_date=None,

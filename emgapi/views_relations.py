@@ -120,7 +120,9 @@ class StudyGeoCoordinateRelationshipViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         study = get_object_or_404(
-            emg_models.Study, accession=self.kwargs[self.lookup_field])
+            emg_models.Study,
+            *emg_viewsets.study_accession_query(self.kwargs['accession'])
+        )
         queryset = emg_models.SampleGeoCoordinate.objects \
             .available(self.request) \
             .filter(studies=study.study_id) \
@@ -181,7 +183,9 @@ class StudySampleRelationshipViewSet(emg_mixins.ListModelMixin,
 
     def get_queryset(self):
         study = get_object_or_404(
-            emg_models.Study, accession=self.kwargs[self.lookup_field])
+            emg_models.Study,
+            *emg_viewsets.study_accession_query(self.kwargs['accession'])
+        )
         queryset = emg_models.Sample.objects \
             .available(self.request, prefetch=True) \
             .filter(studies__in=[study])
@@ -221,7 +225,9 @@ class StudyPublicationRelationshipViewSet(emg_mixins.ListModelMixin,
 
     def get_queryset(self):
         study = get_object_or_404(
-            emg_models.Study, accession=self.kwargs[self.lookup_field])
+            emg_models.Study,
+            *emg_viewsets.study_accession_query(self.kwargs['accession'])
+        )
         queryset = emg_models.Publication.objects \
             .filter(studies__in=[study])
         if 'studies' in self.request.GET.get('include', '').split(','):

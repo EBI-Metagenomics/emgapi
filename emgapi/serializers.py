@@ -575,15 +575,16 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
         'study': 'emgapi.serializers.StudySerializer',
     }
 
-    # workaround to provide multiple values in PK
-    id = serializers.ReadOnlyField(source="multiple_pk")
-
     url = emg_fields.AnalysisJobHyperlinkedField(
         view_name='emgapi_v1:runs-pipelines-detail',
         lookup_field='accession'
     )
 
     # attributes
+
+    # workaround to provide multiple values in PK
+    id = serializers.ReadOnlyField(source="multiple_pk")
+
     accession = serializers.SerializerMethodField()
 
     def get_accession(self, obj):
@@ -918,6 +919,11 @@ class StudySerializer(ExplicitFieldsModelSerializer,
         view_name='emgapi_v1:studies-detail',
         lookup_field='accession',
     )
+
+    accession = serializers.SerializerMethodField()
+
+    def get_accession(self, obj):
+        return obj.accession
 
     bioproject = serializers.SerializerMethodField()
 

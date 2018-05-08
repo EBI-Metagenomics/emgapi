@@ -39,8 +39,9 @@ class TestExamples(object):
 
         api_base = '%s/%s/' % (live_server.url, api_version)
         with Session(api_base) as s:
-            study = s.get('studies', 'SRP0025').resource
-            assert study.accession == 'SRP0025'
+            study = s.get('studies', 'MGYS00000025').resource
+            assert study.accession == 'MGYS00000025'
+            assert study.secondary_accession == 'SRP0025'
             # list samples
             sample_list = study.samples
             assert len(sample_list) == 1
