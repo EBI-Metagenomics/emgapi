@@ -29,7 +29,7 @@ from test_utils.emg_fixtures import *  # noqa
 class TestStudyAPI(object):
 
     def test_details(self, client, study):
-        url = reverse("emgapi_v1:studies-detail", args=["SRP01234"])
+        url = reverse("emgapi_v1:studies-detail", args=["MGYS00001234"])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -37,10 +37,11 @@ class TestStudyAPI(object):
         # Data
         assert len(rsp) == 1
         assert rsp['data']['type'] == "studies"
-        assert rsp['data']['id'] == "SRP01234"
+        assert rsp['data']['id'] == "MGYS00001234"
         _attr = rsp['data']['attributes']
-        assert(len(_attr) == 9)
-        assert _attr['accession'] == "SRP01234"
+        assert(len(_attr) == 10)
+        assert _attr['accession'] == "MGYS00001234"
+        assert _attr['secondary-accession'] == "SRP01234"
         assert _attr['centre-name'] == "Centre Name"
         assert not _attr['public-release-date']
         assert _attr['study-abstract'] == "abcdefghijklmnoprstuvwyz"
@@ -65,5 +66,5 @@ class TestStudyAPI(object):
 
         d = rsp['data'][0]
         assert d['type'] == "studies"
-        assert d['id'] == "SRP01234"
-        assert d['attributes']['accession'] == "SRP01234"
+        assert d['id'] == "MGYS00001234"
+        assert d['attributes']['accession'] == "MGYS00001234"

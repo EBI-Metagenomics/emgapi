@@ -539,9 +539,17 @@ class StudyManager(models.Manager):
 
 
 class Study(models.Model):
+
+    def __init__(self, *args, **kwargs):
+        super(Study, self).__init__(*args, **kwargs)
+        setattr(self, 'accession', kwargs.get('accession', self._custom_pk()))
+
+    def _custom_pk(self):
+        return "MGYS{pk:0>{fill}}".format(pk=self.study_id, fill=8)
+
     study_id = models.AutoField(
         db_column='STUDY_ID', primary_key=True)
-    accession = models.CharField(
+    secondary_accession = models.CharField(
         db_column='EXT_STUDY_ID', max_length=20, unique=True)
     centre_name = models.CharField(
         db_column='CENTRE_NAME', max_length=255, blank=True, null=True)
@@ -596,11 +604,11 @@ class Study(models.Model):
 
     class Meta:
         db_table = 'STUDY'
-        unique_together = (('study_id', 'accession'),)
-        ordering = ('accession',)
+        unique_together = (('study_id', 'secondary_accession'),)
+        ordering = ('study_id',)
 
     def __str__(self):
-        return self.accession
+        return self._custom_pk()
 
 
 class StudyPublication(models.Model):
@@ -923,6 +931,7 @@ class AnalysisJobManager(models.Manager):
 
 
 class AnalysisJob(models.Model):
+
     job_id = models.BigAutoField(
         db_column='JOB_ID', primary_key=True)
     accession = models.CharField(
