@@ -249,8 +249,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     def get_object(self):
         return get_object_or_404(
             self.get_queryset(),
-            Q(accession=self.kwargs['accession']) |
-            Q(project_id=self.kwargs['accession'])
+            *emg_viewsets.study_accession_query(self.kwargs['accession'])
         )
 
     def get_serializer_class(self):

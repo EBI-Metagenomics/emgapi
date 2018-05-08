@@ -35,43 +35,49 @@ class TestPermissionsAPI(object):
                             lineage="root:foo", pk=123)
 
         # Webin-000 public
-        mommy.make("emgapi.Study", pk=111, accession="SRP0111", is_public=1,
-                   submission_account_id='Webin-000', biome=_biome)
-        mommy.make("emgapi.Study", pk=112, accession="SRP0112", is_public=1,
-                   submission_account_id='Webin-000', biome=_biome)
+        mommy.make("emgapi.Study", pk=111, secondary_accession="SRP0111",
+                   is_public=1, submission_account_id='Webin-000',
+                   biome=_biome)
+        mommy.make("emgapi.Study", pk=112, secondary_accession="SRP0112",
+                   is_public=1, submission_account_id='Webin-000',
+                   biome=_biome)
         # Webin-000 private
-        mommy.make("emgapi.Study", pk=113, accession="SRP0113", is_public=0,
-                   submission_account_id='Webin-000', biome=_biome)
+        mommy.make("emgapi.Study", pk=113, secondary_accession="SRP0113",
+                   is_public=0, submission_account_id='Webin-000',
+                   biome=_biome)
 
         # Webin-111 public
-        mommy.make("emgapi.Study", pk=114, accession="SRP0114", is_public=1,
-                   submission_account_id='Webin-111', biome=_biome)
+        mommy.make("emgapi.Study", pk=114, secondary_accession="SRP0114",
+                   is_public=1, submission_account_id='Webin-111',
+                   biome=_biome)
         # Webin-111 private
-        mommy.make("emgapi.Study", pk=115, accession="SRP0115", is_public=0,
-                   submission_account_id='Webin-111', biome=_biome)
+        mommy.make("emgapi.Study", pk=115, secondary_accession="SRP0115",
+                   is_public=0, submission_account_id='Webin-111',
+                   biome=_biome)
 
         # unknown public
-        mommy.make("emgapi.Study", pk=120, accession="SRP0120", is_public=1,
-                   submission_account_id=None, biome=_biome)
+        mommy.make("emgapi.Study", pk=120, secondary_accession="SRP0120",
+                   is_public=1, submission_account_id=None, biome=_biome)
         # unknown private
-        mommy.make("emgapi.Study", pk=121, accession="SRP0121", is_public=0,
-                   submission_account_id=None, biome=_biome)
+        mommy.make("emgapi.Study", pk=121, secondary_accession="SRP0121",
+                   is_public=0, submission_account_id=None, biome=_biome)
 
     @pytest.mark.parametrize(
         'view, username, count, ids, bad_ids',
         [
             # private
             ('emgapi_v1:studies-list', 'Webin-111', 5,
-             ['SRP0111', 'SRP0112', 'SRP0114', 'SRP0115', 'SRP0120'],
-             ['SRP0113', 'SRP0121']),
+             ['MGYS00000111', 'MGYS00000112', 'MGYS00000114', 'MGYS00000115',
+              'MGYS00000120'],
+             ['MGYS00000113', 'MGYS00000121']),
             # mydata
             ('emgapi_v1:mydata-list', 'Webin-111', 2,
-             ['SRP0114', 'SRP0115'],
+             ['MGYS00000114', 'MGYS00000115'],
              []),
             # public
             ('emgapi_v1:studies-list', None, 4,
-             ['SRP0111', 'SRP0112', 'SRP0114', 'SRP0120'],
-             ['SRP0113', 'SRP0115', 'SRP0121']),
+             ['MGYS00000111', 'MGYS00000112', 'MGYS00000114', 'MGYS00000120'],
+             ['MGYS00000113', 'MGYS00000115', 'MGYS00000121']),
         ]
     )
     def test_list(self, apiclient, view, username, count, ids, bad_ids):
@@ -121,19 +127,22 @@ class TestPermissionsAPI(object):
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
 
-        assert rsp['data']['id'] == 'SRP0113'
+        assert rsp['data']['id'] == 'MGYS00000113'
 
-        url = reverse("emgapi_v1:studies-detail", args=['SRP0115'])
+        url = reverse("emgapi_v1:studies-detail", args=['MGYS00000115'])
         response = apiclient.get(
             url, HTTP_AUTHORIZATION='Bearer {}'.format(token))
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-        url = reverse("emgapi_v1:studies-detail", args=['SRP0121'])
+        url = reverse("emgapi_v1:studies-detail", args=['MGYS00000121'])
         response = apiclient.get(
             url, HTTP_AUTHORIZATION='Bearer {}'.format(token))
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    @pytest.mark.parametrize('accession', ['SRP0113', 'SRP0115', 'SRP0121'])
+    @pytest.mark.parametrize('accession', [
+            'MGYS00000113', 'MGYS00000115', 'MGYS00000121',
+            'SRP0113', 'SRP0115', 'SRP0121'
+        ])
     def test_not_found(self, apiclient, accession):
         url = reverse("emgapi_v1:studies-detail", args=[accession])
         response = apiclient.get(url)
