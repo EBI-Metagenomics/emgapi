@@ -66,7 +66,7 @@ class TestBiomeAPI(APITestCase):
         self.data['study'] = mommy.make(
             'emgapi.Study',
             pk=1,
-            accession="SPR0001",
+            secondary_accession="SPR0001",
             is_public=1,
             # add root until Biome is dropped from Study
             biome=emg_models.Biome.objects.get(lineage='root'),
