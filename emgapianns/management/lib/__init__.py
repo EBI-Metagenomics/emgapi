@@ -29,8 +29,8 @@ class EMGBaseCommand(BaseCommand):
         )
         parser.add_argument(
             '--pipeline',
-            action='store_true',
-            dest='pipeline',
+            action='store',
+            dest='pipeline'
         )
 
     def handle(self, *args, **options):
