@@ -56,5 +56,4 @@ class Command(EMGBaseCommand):
                     job=job, var=var, var_val_ucv=row[1]
                 )
                 anns.append(job_ann)
-        logger.info(
-            "Total %d Annotations for Run: %s" % (len(anns), job))
+        logger.info("Total %d Annotations for Run: %s" % (len(anns), job))
