@@ -17,7 +17,6 @@
 from decimal import Decimal
 
 from django import forms
-from django.db.models import Q
 from django.db.models import FloatField
 from django.db.models.functions import Cast
 from django.utils.datastructures import MultiValueDict
@@ -28,6 +27,8 @@ from django_filters import filters
 from django_filters import widgets
 
 from . import models as emg_models
+from . import utils as emg_utils
+
 
 WORD_MATCH_REGEX = r"{0}"
 FLOAT_MATCH_REGEX = r"^[0-9 \.\,]+$"
@@ -158,13 +159,11 @@ class StudyFilter(django_filters.FilterSet):
 
     accession = django_filters.CharFilter(
         method='filter_study_accession', distinct=True,
-        label='Accession',
-        help_text='Study or BioProject accession')
+        label='Study, ENA or BioProject accession',
+        help_text='Study, ENA or BioProject accession')
 
     def filter_study_accession(self, qs, name, value):
-        return qs.filter(
-            Q(accession=value) | Q(project_id=value)
-        )
+        return qs.filter(*emg_utils.study_accession_query(value))
 
     centre_name = django_filters.CharFilter(
         method='filter_centre_name', distinct=True,
@@ -389,13 +388,11 @@ class SampleFilter(django_filters.FilterSet):
 
     study_accession = django_filters.CharFilter(
         method='filter_study_accession', distinct=True,
-        label='Accession',
-        help_text='Study or BioProject accession')
+        label='Study, ENA or BioProject accession',
+        help_text='Study, ENA or BioProject accession')
 
     def filter_study_accession(self, qs, name, value):
-        return qs.filter(
-            Q(studies__accession=value) | Q(studies__project_id=value)
-        )
+        return qs.filter(*emg_utils.sample_study_accession_query(value))
 
     # include
     include = django_filters.CharFilter(
@@ -548,11 +545,11 @@ class RunFilter(django_filters.FilterSet):
 
     study_accession = django_filters.CharFilter(
         method='filter_study_accession', distinct=True,
-        label='Study accession',
-        help_text='Study accession')
+        label='Study, ENA or BioProject accession',
+        help_text='Study, ENA or BioProject accession')
 
     def filter_study_accession(self, qs, name, value):
-        return qs.filter(study__accession=value)
+        return qs.filter(*emg_utils.run_study_accession_query(value))
 
     # include
     include = django_filters.CharFilter(
