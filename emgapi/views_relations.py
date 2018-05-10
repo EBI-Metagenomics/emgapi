@@ -29,6 +29,7 @@ from . import serializers as emg_serializers
 from . import filters as emg_filters
 from . import viewsets as emg_viewsets
 from . import mixins as emg_mixins
+from . import utils as emg_utils
 
 logger = logging.getLogger(__name__)
 
@@ -121,7 +122,7 @@ class StudyGeoCoordinateRelationshipViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         study = get_object_or_404(
             emg_models.Study,
-            *emg_viewsets.study_accession_query(self.kwargs['accession'])
+            *emg_utils.study_accession_query(self.kwargs['accession'])
         )
         queryset = emg_models.SampleGeoCoordinate.objects \
             .available(self.request) \
@@ -184,7 +185,7 @@ class StudySampleRelationshipViewSet(emg_mixins.ListModelMixin,
     def get_queryset(self):
         study = get_object_or_404(
             emg_models.Study,
-            *emg_viewsets.study_accession_query(self.kwargs['accession'])
+            *emg_utils.study_accession_query(self.kwargs['accession'])
         )
         queryset = emg_models.Sample.objects \
             .available(self.request, prefetch=True) \
@@ -226,7 +227,7 @@ class StudyPublicationRelationshipViewSet(emg_mixins.ListModelMixin,
     def get_queryset(self):
         study = get_object_or_404(
             emg_models.Study,
-            *emg_viewsets.study_accession_query(self.kwargs['accession'])
+            *emg_utils.study_accession_query(self.kwargs['accession'])
         )
         queryset = emg_models.Publication.objects \
             .filter(studies__in=[study])

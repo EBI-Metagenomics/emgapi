@@ -164,16 +164,3 @@ class BasePublicationGenericViewSet(viewsets.GenericViewSet):
         'doi',
         'isbn',
     )
-
-
-def study_accession_query(accession):
-    from django.db.models import Q
-    query = list()
-    try:
-        query.append(Q(pk=int(accession.lstrip('MGYS'))))
-    except ValueError:
-        query.append(
-            Q(secondary_accession=accession) |
-            Q(project_id=accession)
-        )
-    return query
