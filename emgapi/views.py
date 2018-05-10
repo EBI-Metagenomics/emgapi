@@ -43,6 +43,7 @@ from . import filters as emg_filters
 from . import mixins as emg_mixins
 from . import permissions as emg_perms
 from . import viewsets as emg_viewsets
+from . import utils as emg_utils
 
 from emgena import models as ena_models
 from emgena import serializers as ena_serializers
@@ -249,7 +250,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     def get_object(self):
         return get_object_or_404(
             self.get_queryset(),
-            *emg_viewsets.study_accession_query(self.kwargs['accession'])
+            *emg_utils.study_accession_query(self.kwargs['accession'])
         )
 
     def get_serializer_class(self):
@@ -356,8 +357,7 @@ class StudiesDownloadsViewSet(emg_mixins.ListModelMixin,
     def get_queryset(self):
         return emg_models.StudyDownload.objects.available(self.request) \
             .filter(
-                Q(study__accession=self.kwargs['accession']) |
-                Q(study__project_id=self.kwargs['accession'])
+                *emg_utils.run_study_accession_query(self.kwargs['accession'])
             )
 
     def get_object(self):
