@@ -10,3 +10,4 @@ mock_services
 mongomock
 
 jsonapi-client; python_version == '3.6'
+pytest-cov
