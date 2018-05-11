@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='analysisjob',
             name='submit_time',
-            field=models.DateTimeField(default=now, blank=True, db_column='SUBMIT_TIME'),
+            field=models.DateTimeField(blank=True, db_column='SUBMIT_TIME', null=True),
         ),
 
         migrations.CreateModel(

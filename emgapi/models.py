@@ -34,8 +34,6 @@ from django.db.models.functions import Concat, Cast
 from django.db.models import Q
 from django.db.models import Prefetch
 
-from django.utils.timezone import now
-
 
 class Resource(object):
 
@@ -944,7 +942,7 @@ class AnalysisJob(models.Model):
         Pipeline, db_column='PIPELINE_ID', blank=True, null=True,
         related_name='analysis', on_delete=models.CASCADE)
     submit_time = models.DateTimeField(
-        db_column='SUBMIT_TIME', default=now, blank=True)
+        db_column='SUBMIT_TIME', blank=True, null=True)
     complete_time = models.DateTimeField(
         db_column='COMPLETE_TIME', blank=True, null=True)
     analysis_status = models.ForeignKey(
