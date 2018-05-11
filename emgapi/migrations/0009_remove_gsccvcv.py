@@ -12,10 +12,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterUniqueTogether(
-            name='gsccvcv',
-            unique_together=set([]),
-        ),
+        # migrations.AlterUniqueTogether(
+        #     name='gsccvcv',
+        #     unique_together=set([]),
+        # ),
         migrations.RemoveField(
             model_name='gsccvcv',
             name='var_name',
