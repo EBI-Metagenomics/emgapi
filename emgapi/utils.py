@@ -44,7 +44,7 @@ def sample_study_accession_query(accession):
     return query
 
 
-def run_study_accession_query(accession):
+def related_study_accession_query(accession):
     query = list()
     try:
         query.append(Q(study__pk=int(accession.lstrip('MGYS'))))
