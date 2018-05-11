@@ -151,7 +151,10 @@ class StudyStudyRelationshipViewSet(emg_mixins.ListModelMixin,
 
     def get_queryset(self):
         study = get_object_or_404(
-            emg_models.Study, accession=self.kwargs[self.lookup_field])
+            emg_models.Study,
+            *emg_utils.study_accession_query(
+                self.kwargs['accession'])
+        )
         samples = emg_models.StudySample.objects \
             .filter(study_id=study.study_id) \
             .values("sample_id")
