@@ -1085,21 +1085,6 @@ class VariableNames(models.Model):
         return self.var_name
 
 
-class GscCvCv(models.Model):
-    var_name = models.ForeignKey(
-        'VariableNames', db_column='VAR_NAME',
-        blank=True, null=True)
-    var_val_cv = models.CharField(
-        db_column='VAR_VAL_CV', primary_key=True, max_length=60)
-
-    class Meta:
-        db_table = 'GSC_CV_CV'
-        unique_together = (('var_name', 'var_val_cv'),)
-
-    def __str__(self):
-        return "%s %s" % (self.var_name, self.var_val_cv)
-
-
 class SampleAnnQuerySet(BaseQuerySet):
     pass
 
@@ -1115,9 +1100,6 @@ class SampleAnn(models.Model):
     sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID', primary_key=True,
         related_name="metadata")
-    var_val_cv = models.ForeignKey(
-        GscCvCv, db_column='VAR_VAL_CV',
-        blank=True, null=True)
     units = models.CharField(
         db_column='UNITS', max_length=25, blank=True, null=True)
     var = models.ForeignKey(
