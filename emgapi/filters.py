@@ -549,7 +549,7 @@ class RunFilter(django_filters.FilterSet):
         help_text='Study, ENA or BioProject accession')
 
     def filter_study_accession(self, qs, name, value):
-        return qs.filter(*emg_utils.run_study_accession_query(value))
+        return qs.filter(*emg_utils.related_study_accession_query(value))
 
     # include
     include = django_filters.CharFilter(

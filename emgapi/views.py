@@ -357,7 +357,8 @@ class StudiesDownloadsViewSet(emg_mixins.ListModelMixin,
     def get_queryset(self):
         return emg_models.StudyDownload.objects.available(self.request) \
             .filter(
-                *emg_utils.run_study_accession_query(self.kwargs['accession'])
+                *emg_utils.related_study_accession_query(
+                    self.kwargs['accession'])
             )
 
     def get_object(self):
@@ -365,8 +366,6 @@ class StudiesDownloadsViewSet(emg_mixins.ListModelMixin,
             self.get_queryset(),
             Q(alias=self.kwargs['alias']),
             Q(pipeline__release_version=self.kwargs['release_version']),
-            Q(study__accession=self.kwargs['accession']) |
-            Q(study__project_id=self.kwargs['accession'])
         )
 
     def get_serializer_class(self):
@@ -394,17 +393,15 @@ class StudiesDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
     def get_queryset(self):
         return emg_models.StudyDownload.objects.available(self.request) \
             .filter(
-                Q(study__accession=self.kwargs['accession']) |
-                Q(study__project_id=self.kwargs['accession'])
+                *emg_utils.related_study_accession_query(
+                    self.kwargs['accession'])
             )
 
     def get_object(self):
         return get_object_or_404(
             self.get_queryset(),
             Q(alias=self.kwargs['alias']),
-            Q(pipeline__release_version=self.kwargs['release_version']),
-            Q(study__accession=self.kwargs['accession']) |
-            Q(study__project_id=self.kwargs['accession'])
+            Q(pipeline__release_version=self.kwargs['release_version'])
         )
 
     def get_serializer_class(self):
