@@ -467,7 +467,7 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     class Meta:
         model = emg_models.Run
         exclude = (
-            'run_status_id',
+            'status_id',
         )
 
 
@@ -987,6 +987,19 @@ class StudySerializer(ExplicitFieldsModelSerializer,
     )
 
     def get_samples(self, obj):
+        return None
+
+    analysis = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_analysis',
+        model=emg_models.AnalysisJob,
+        related_link_view_name='emgapi_v1:studies-analysis-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+    )
+
+    def get_analysis(self, obj):
         return None
 
     geocoordinates = relations.SerializerMethodResourceRelatedField(

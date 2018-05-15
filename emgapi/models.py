@@ -64,18 +64,18 @@ class BaseQuerySet(models.QuerySet):
             },
             'RunQuerySet': {
                 'all': [
-                    Q(run_status_id=4),
+                    Q(status_id=4),
                 ],
             },
             'AnalysisJobQuerySet': {
                 'all': [
-                    Q(run_status_id=4),
+                    Q(run__status_id=4),
                     Q(analysis_status_id=3) | Q(analysis_status_id=6)
                 ],
             },
             'AnalysisJobDownloadQuerySet': {
                 'all': [
-                    Q(job__run_status_id=4),
+                    Q(job__run__status_id=4),
                     Q(job__analysis_status_id=3) | Q(job__analysis_status_id=6)
                 ],
             },
@@ -91,15 +91,15 @@ class BaseQuerySet(models.QuerySet):
             _query_filters['SampleQuerySet']['authenticated'] = \
                 [Q(submission_account_id=_username) | Q(is_public=1)]
             _query_filters['RunQuerySet']['authenticated'] = \
-                [Q(study__submission_account_id=_username, run_status_id=2) |
-                 Q(run_status_id=4)]
+                [Q(study__submission_account_id=_username, status_id=2) |
+                 Q(status_id=4)]
             _query_filters['AnalysisJobQuerySet']['authenticated'] = \
-                [Q(study__submission_account_id=_username, run_status_id=2) |
-                 Q(run_status_id=4)]
+                [Q(study__submission_account_id=_username, run__status_id=2) |
+                 Q(run__status_id=4)]
             _query_filters['AnalysisJobDownloadQuerySet']['authenticated'] = \
                 [Q(job__study__submission_account_id=_username,
-                   job__run_status_id=2) |
-                 Q(job__run_status_id=4)]
+                   job__run__status_id=2) |
+                 Q(job__run__status_id=4)]
 
         q = list()
         try:
@@ -820,6 +820,20 @@ class ExperimentType(models.Model):
         return self.experiment_type
 
 
+class Status(models.Model):
+    status_id = models.SmallIntegerField(
+        db_column='STATUS_ID', primary_key=True)
+    status = models.CharField(
+        db_column='STATUS', max_length=25)
+
+    class Meta:
+        db_table = 'STATUS'
+        ordering = ('status_id',)
+
+    def __str__(self):
+        return self.status
+
+
 class RunQuerySet(BaseQuerySet):
     pass
 
@@ -843,7 +857,7 @@ class RunManager(models.Manager):
                     'sample',
                     queryset=Sample.objects.available(
                         request)
-                )
+                ),
             )
 
 
@@ -854,8 +868,9 @@ class Run(models.Model):
         db_column='EXTERNAL_RUN_IDS', max_length=80, blank=True, null=True)
     secondary_accession = models.CharField(
         db_column='SECONDARY_ACCESSION', max_length=100, blank=True, null=True)
-    run_status_id = models.IntegerField(
-        db_column='RUN_STATUS_ID', blank=True, null=True)
+    status_id = models.ForeignKey(
+        'Status', db_column='STATUS_ID', related_name='runs',
+        on_delete=models.CASCADE, default=2)
     sample = models.ForeignKey(
         'Sample', db_column='SAMPLE_ID', related_name='runs',
         on_delete=models.CASCADE, blank=True, null=True)
@@ -923,6 +938,11 @@ class AnalysisJobManager(models.Manager):
                 Prefetch(
                     'sample',
                     queryset=Sample.objects.available(
+                        request)
+                ),
+                Prefetch(
+                    'run',
+                    queryset=Run.objects.available(
                         request)
                 )
             )
