@@ -4,7 +4,29 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 import django.db.models.deletion
-from django.utils.timezone import now
+
+
+def populate_status(apps, schema_editor):
+    Status = apps.get_model("emgapi", "Status")
+    st = (
+        (1, "draft"),
+        (2, "private"),
+        (3, "cancelled"),
+        (4, "public"),
+        (5, "suppressed"),
+        (6, "killed"),
+        (7, "temporary_suppressed"),
+        (8, "temporary_killed"),
+    )
+    _statuses = list()
+    for s in st:
+        _statuses.append(
+            Status(
+                status_id=s[0],
+                status=s[1],
+            )
+        )
+    Status.objects.bulk_create(_statuses)
 
 
 def populate_runs(apps, schema_editor):
@@ -54,12 +76,25 @@ class Migration(migrations.Migration):
         ),
 
         migrations.CreateModel(
+            name='Status',
+            fields=[
+                ('status_id', models.SmallIntegerField(db_column='STATUS_ID', primary_key=True, serialize=False)),
+                ('status', models.CharField(db_column='STATUS', max_length=25)),
+            ],
+            options={
+                'db_table': 'STATUS',
+                'ordering': ('status_id',),
+            },
+        ),
+
+        migrations.RunPython(populate_status),
+
+        migrations.CreateModel(
             name='Run',
             fields=[
                 ('run_id', models.BigAutoField(db_column='RUN_ID', primary_key=True, serialize=False)),
                 ('accession', models.CharField(blank=True, db_column='EXTERNAL_RUN_IDS', max_length=80, null=True)),
                 ('secondary_accession', models.CharField(blank=True, db_column='SECONDARY_ACCESSION', max_length=100, null=True)),
-                ('run_status_id', models.IntegerField(blank=True, db_column='RUN_STATUS_ID', null=True)),
                 ('instrument_platform', models.CharField(blank=True, db_column='INSTRUMENT_PLATFORM', max_length=100, null=True)),
                 ('instrument_model', models.CharField(blank=True, db_column='INSTRUMENT_MODEL', max_length=100, null=True)),
             ],
@@ -68,6 +103,11 @@ class Migration(migrations.Migration):
             },
         ),
 
+        migrations.AddField(
+            model_name='run',
+            name='status_id',
+            field=models.ForeignKey(db_column='STATUS_ID', on_delete=django.db.models.deletion.CASCADE, related_name='runs', to='emgapi.Status', default=2),
+        ),
         migrations.AddField(
             model_name='run',
             name='sample',
@@ -109,7 +149,7 @@ class Migration(migrations.Migration):
 
         migrations.RunSQL(
             """INSERT INTO RUN (EXTERNAL_RUN_IDS, SECONDARY_ACCESSION,
-                RUN_STATUS_ID, SAMPLE_ID, STUDY_ID, EXPERIMENT_TYPE_ID,
+                STATUS_ID, SAMPLE_ID, STUDY_ID, EXPERIMENT_TYPE_ID,
                 INSTRUMENT_PLATFORM, INSTRUMENT_MODEL)
                 SELECT distinct EXTERNAL_RUN_IDS, SECONDARY_ACCESSION,
                     RUN_STATUS_ID, SAMPLE_ID, STUDY_ID, EXPERIMENT_TYPE_ID,
