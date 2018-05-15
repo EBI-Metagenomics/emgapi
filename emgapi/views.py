@@ -627,6 +627,50 @@ class AnalysisResultViewSet(emg_mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
+class StudyAnalysisResultViewSet(emg_mixins.ListModelMixin,
+                                 viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.AnalysisSerializer
+
+    filter_class = emg_filters.AnalysisJobFilter
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'accession',
+    )
+
+    ordering = ('-accession',)
+
+    lookup_field = 'accession'
+    lookup_value_regex = '[^/]+'
+
+    def get_serializer_class(self):
+        return super(StudyAnalysisResultViewSet, self).get_serializer_class()
+
+    def get_queryset(self):
+        queryset = emg_models.AnalysisJob.objects \
+            .available(self.request) \
+            .filter(
+                *emg_utils.related_study_accession_query(
+                    self.kwargs['accession'])
+            )
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves analysis result for the given accession
+        Example:
+        ---
+        `/studies/MGYS00000410/analysis`
+        """
+        return super(StudyAnalysisResultViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
 class AnalysisViewSet(mixins.RetrieveModelMixin,
                       viewsets.GenericViewSet):
 
