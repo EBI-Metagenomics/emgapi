@@ -727,6 +727,10 @@ class Sample(models.Model):
         on_delete=models.CASCADE)
 
     @property
+    def biosample(self):
+        return self.primary_accession
+
+    @property
     def sample_metadata(self):
         return [
             {
