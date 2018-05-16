@@ -110,8 +110,7 @@ class TestAnnotations(object):
 
     def test_empty(self, client, run_emptyresults):
         job = run_emptyresults.accession
-        version = run_emptyresults.pipeline.release_version
-        assert job == 'EMPTY_ABC01234'
+        assert job == 'MGYA00001234'
 
         call_command('import_summary', job,
                      os.path.dirname(os.path.abspath(__file__)),
@@ -123,24 +122,24 @@ class TestAnnotations(object):
                      os.path.dirname(os.path.abspath(__file__)),
                      suffix='.ipr')
 
-        url = reverse("emgapi_v1:runs-pipelines-goslim-list",
-                      args=[job, version])
+        url = reverse("emgapi_v1:analysis-goslim-list",
+                      args=[job])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
 
         assert len(rsp['data']) == 0
 
-        url = reverse("emgapi_v1:runs-pipelines-goterms-list",
-                      args=[job, version])
+        url = reverse("emgapi_v1:analysis-goterms-list",
+                      args=[job])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
 
         assert len(rsp['data']) == 0
 
-        url = reverse("emgapi_v1:runs-pipelines-interpro-list",
-                      args=[job, version])
+        url = reverse("emgapi_v1:analysis-interpro-list",
+                      args=[job])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -185,16 +184,19 @@ class TestAnnotations(object):
         job = analysis_results[version].accession
         call_command('import_summary', job,
                      os.path.dirname(os.path.abspath(__file__)),
+                     pipeline=version,
                      suffix='.go_slim')
         call_command('import_summary', job,
                      os.path.dirname(os.path.abspath(__file__)),
+                     pipeline=version,
                      suffix='.go')
         call_command('import_summary', job,
                      os.path.dirname(os.path.abspath(__file__)),
+                     pipeline=version,
                      suffix='.ipr')
 
-        url = reverse("emgapi_v1:runs-pipelines-goslim-list",
-                      args=[job, version])
+        url = reverse("emgapi_v1:analysis-goslim-list",
+                      args=[job])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -208,8 +210,8 @@ class TestAnnotations(object):
         }
         assert ids == expected
 
-        url = reverse("emgapi_v1:runs-pipelines-goterms-list",
-                      args=[job, version])
+        url = reverse("emgapi_v1:analysis-goterms-list",
+                      args=[job])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -223,8 +225,8 @@ class TestAnnotations(object):
         }
         assert ids == expected
 
-        url = reverse("emgapi_v1:runs-pipelines-interpro-list",
-                      args=[job, version])
+        url = reverse("emgapi_v1:analysis-interpro-list",
+                      args=[job])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()

@@ -953,12 +953,15 @@ class AnalysisJobManager(models.Manager):
 
 class AnalysisJob(models.Model):
 
+    def __init__(self, *args, **kwargs):
+        super(AnalysisJob, self).__init__(*args, **kwargs)
+        setattr(self, 'accession', kwargs.get('accession', self._custom_pk()))
+
+    def _custom_pk(self):
+        return "MGYA{pk:0>{fill}}".format(pk=self.job_id, fill=8)
+
     job_id = models.BigAutoField(
         db_column='JOB_ID', primary_key=True)
-    accession = models.CharField(
-        db_column='EXTERNAL_RUN_IDS', max_length=100)
-    secondary_accession = models.CharField(
-        db_column='SECONDARY_ACCESSION', max_length=100)
     job_operator = models.CharField(
         db_column='JOB_OPERATOR', max_length=15, blank=True, null=True)
     pipeline = models.ForeignKey(
@@ -1022,14 +1025,10 @@ class AnalysisJob(models.Model):
 
     class Meta:
         db_table = 'ANALYSIS_JOB'
-        unique_together = (('job_id', 'accession'), ('pipeline', 'accession'),)
-        ordering = ('accession',)
+        ordering = ('job_id',)
 
     def __str__(self):
         return self.accession
-
-    def multiple_pk(self):
-        return "%s/%s" % (self.accession, self.pipeline.release_version)
 
 
 class StudyErrorType(models.Model):

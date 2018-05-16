@@ -44,10 +44,10 @@ class TestRunAPI(APITestCase):
 
         _as = mommy.make('emgapi.AnalysisStatus', pk=3)
         _p = mommy.make('emgapi.Pipeline', pk=1, release_version="1.0")
-        mommy.make("emgapi.AnalysisJob", pk=123, accession="123",
+        mommy.make("emgapi.AnalysisJob", pk=123,
                    pipeline=_p, analysis_status=_as, run_status_id=4,
                    study=st, sample=_s2)
-        mommy.make("emgapi.AnalysisJob", pk=456, accession="456",
+        mommy.make("emgapi.AnalysisJob", pk=456,
                    pipeline=_p, run_status_id=2,
                    study=st, sample=_s2)
 
