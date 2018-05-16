@@ -70,16 +70,11 @@ router.register(
 )
 
 router.register(
-    r'runs/(?P<accession>[^/]+)/analysis',
-    views.AnalysisResultViewSet,
-    base_name='runs-pipelines'
+    r'pipeline-tools/(?P<tool_name>[^/]+)',
+    views.PipelineToolVersionViewSet,
+    base_name='pipeline-tools-version'
 )
 
-router.register(
-    r'studies/(?P<accession>[^/]+)/analysis',
-    views.StudyAnalysisResultViewSet,
-    base_name='studies-analysis'
-)
 
 router.register(
     r'runs/(?P<accession>[^/]+)/pipelines',
@@ -108,28 +103,33 @@ router.register(
     base_name='analysisdownload'
 )
 
-
 router.register(
     r'studies/(?P<accession>[^/]+)/downloads',
     views.StudiesDownloadsViewSet,
     base_name='studydownload'
 )
 
+
+# relationship views
+router.register(
+    r'runs/(?P<accession>[^/]+)/analysis',
+    views_relations.AnalysisResultViewSet,
+    base_name='runs-pipelines'
+)
+
+router.register(
+    r'studies/(?P<accession>[^/]+)/analysis',
+    views_relations.StudyAnalysisResultViewSet,
+    base_name='studies-analysis'
+)
+
 router.register(
     r'studies/(?P<accession>[^/]+)'
     r'/pipelines/(?P<release_version>[0-9\.]+)/file',
-    views.StudiesDownloadViewSet,
+    views_relations.StudiesDownloadViewSet,
     base_name='studydownload'
 )
 
-router.register(
-    r'pipeline-tools/(?P<tool_name>[^/]+)',
-    views.PipelineToolVersionViewSet,
-    base_name='pipeline-tools-version'
-)
-
-
-# relationship views
 router.register(
     r'biomes/(?P<lineage>[^/]+)/children',
     views_relations.BiomeTreeViewSet,
