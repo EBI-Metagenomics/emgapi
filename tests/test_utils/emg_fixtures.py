@@ -263,8 +263,6 @@ def runs(study, samples, run_status, analysis_status, pipeline,
             sample=s,
             study=study,
             run=run,
-            accession="ABC_{:0>3}".format(pk),
-            secondary_accession="DEF_{:0>3}".format(pk),
             run_status_id=4,
             experiment_type=experiment_type,
             pipeline=pipeline,
@@ -279,7 +277,7 @@ def runs(study, samples, run_status, analysis_status, pipeline,
 
 @pytest.fixture
 def run(study, sample, run_status, analysis_status, pipeline, experiment_type):
-    run = emg_models.Run.objects.create(
+    run, created = emg_models.Run.objects.get_or_create(
             run_id=1234,
             accession="ABC01234",
             sample=sample,
@@ -287,9 +285,8 @@ def run(study, sample, run_status, analysis_status, pipeline, experiment_type):
             status_id=run_status,
             experiment_type=experiment_type
         )
-    return emg_models.AnalysisJob.objects.create(
+    analysis = emg_models.AnalysisJob.objects.create(  # NOQA
         job_id=1234,
-        accession="ABC01234",
         sample=sample,
         study=study,
         run=run,
@@ -301,6 +298,7 @@ def run(study, sample, run_status, analysis_status, pipeline, experiment_type):
         result_directory="path/version_1.0/ABC_FASTQ",
         submit_time="1970-01-01 00:00:00"
     )
+    return run
 
 
 @pytest.fixture
@@ -326,7 +324,6 @@ def run_multiple_analysis(study, sample, run_status, analysis_status,
         )
     _anl1 = emg_models.AnalysisJob.objects.create(
             job_id=1234,
-            accession="ABC01234",
             sample=sample,
             study=study,
             run=run,
@@ -340,7 +337,6 @@ def run_multiple_analysis(study, sample, run_status, analysis_status,
         )
     _anl4 = emg_models.AnalysisJob.objects.create(
             job_id=5678,
-            accession="ABC01234",
             sample=sample,
             study=study,
             run=run,
@@ -360,7 +356,7 @@ def run_emptyresults(study, sample, run_status, analysis_status, pipeline,
                      experiment_type):
     run = emg_models.Run.objects.create(
         run_id=1234,
-        accession="EMPTY_ABC01234",
+        accession="ABC01234",
         sample=sample,
         study=study,
         status_id=run_status,
@@ -368,7 +364,6 @@ def run_emptyresults(study, sample, run_status, analysis_status, pipeline,
     )
     return emg_models.AnalysisJob.objects.create(
         job_id=1234,
-        accession="EMPTY_ABC01234",
         sample=sample,
         study=study,
         run=run,
@@ -395,7 +390,6 @@ def run_with_sample(study, sample, run_status, analysis_status, pipeline,
         )
     return emg_models.AnalysisJob.objects.create(
         job_id=1234,
-        accession="ABC01234",
         sample=sample,
         study=study,
         run=run,
@@ -410,15 +404,24 @@ def run_with_sample(study, sample, run_status, analysis_status, pipeline,
 
 
 @pytest.fixture
-def analysis_results(study, sample, analysis_status, experiment_type,
-                     pipelines):
+def analysis_results(study, sample, run_status, analysis_status,
+                     experiment_type, pipelines):
+    run = emg_models.Run.objects.create(
+        run_id=1234,
+        accession="ABC01234",
+        status_id=run_status,
+        sample=sample,
+        study=study,
+        experiment_type=experiment_type,
+    )
     res = dict()
     for pipe in pipelines:
         v = "%s.0" % pipe.pk
         res[v] = emg_models.AnalysisJob.objects.create(
-            accession="ABC01234",
+            job_id=pipe.pk,
             study=study,
             sample=sample,
+            run=run,
             run_status_id=4,
             experiment_type=experiment_type,
             pipeline=pipe,
