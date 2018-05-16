@@ -646,9 +646,10 @@ class StudyAnalysisResultViewSet(emg_mixins.ListModelMixin,
 
     ordering_fields = (
         'accession',
+        'pipeline',
     )
 
-    ordering = ('-accession',)
+    ordering = ('-accession', 'pipeline')
 
     lookup_field = 'accession'
     lookup_value_regex = '[^/]+'
