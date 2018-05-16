@@ -43,9 +43,6 @@ class GoTermSerializer(m_serializers.DocumentSerializer,
     )
 
     def get_analysis(self, obj):
-        # TODO: provide counter instead of paginating relationship
-        # workaround https://github.com/django-json-api
-        # /django-rest-framework-json-api/issues/178
         return None
 
     class Meta:
@@ -72,9 +69,6 @@ class InterproIdentifierSerializer(m_serializers.DocumentSerializer,
     )
 
     def get_analysis(self, obj):
-        # TODO: provide counter instead of paginating relationship
-        # workaround https://github.com/django-json-api
-        # /django-rest-framework-json-api/issues/178
         return None
 
     class Meta:
@@ -101,9 +95,6 @@ class GoTermRetriveSerializer(m_serializers.DynamicDocumentSerializer,
     )
 
     def get_analysis(self, obj):
-        # TODO: provide counter instead of paginating relationship
-        # workaround https://github.com/django-json-api
-        # /django-rest-framework-json-api/issues/178
         return None
 
     count = serializers.IntegerField(required=False)
@@ -133,9 +124,6 @@ class InterproIdentifierRetriveSerializer(  # NOQA
     )
 
     def get_analysis(self, obj):
-        # TODO: provide counter instead of paginating relationship
-        # workaround https://github.com/django-json-api
-        # /django-rest-framework-json-api/issues/178
         return None
 
     count = serializers.IntegerField(required=False)
@@ -178,9 +166,6 @@ class OrganismSerializer(m_serializers.DynamicDocumentSerializer,
     )
 
     def get_analysis(self, obj):
-        # TODO: provide counter instead of paginating relationship
-        # workaround https://github.com/django-json-api
-        # /django-rest-framework-json-api/issues/178
         return None
 
     class Meta:
