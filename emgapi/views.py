@@ -240,6 +240,11 @@ class StudyViewSet(mixins.RetrieveModelMixin,
             queryset = queryset.prefetch_related(
                 Prefetch('samples', queryset=_qs)
             )
+        if 'analysis' in self.request.GET.get('include', '').split(','):
+            _qs = emg_models.AnalysisJob.objects.available(self.request)
+            queryset = queryset.prefetch_related(
+                Prefetch('analysis', queryset=_qs)
+            )
         if 'downloads' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.StudyDownload.objects.all()
             queryset = queryset.prefetch_related(
@@ -444,13 +449,13 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         queryset = emg_models.Sample.objects \
             .available(self.request, prefetch=True)
         if 'runs' in self.request.GET.get('include', '').split(','):
-            _qs = emg_models.Run.objects \
-                .available(self.request) \
-                .select_related(
-                    'analysis_status', 'experiment_type'
-                )
+            _qs = emg_models.Run.objects.available(self.request)
             queryset = queryset.prefetch_related(
                 Prefetch('runs', queryset=_qs))
+        if 'analysis' in self.request.GET.get('include', '').split(','):
+            _qs = emg_models.AnalysisJob.objects.available(self.request)
+            queryset = queryset.prefetch_related(
+                Prefetch('analysis', queryset=_qs))
         return queryset
 
     def get_object(self):
