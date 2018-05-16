@@ -791,7 +791,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
         # 'studies': 'emgapi.serializers.StudySerializer',
         'biome': 'emgapi.serializers.BiomeSerializer',
         'runs': 'emgapi.serializers.RunSerializer',
-        # 'metadata': 'emgapi.serializers.SampleAnnSerializer',
+        'analysis': 'emgapi.serializers.AnalysisSerializer',
     }
 
     url = serializers.HyperlinkedIdentityField(
@@ -800,10 +800,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
     )
 
     # attributes
-    biosample = serializers.SerializerMethodField()
-
-    def get_biosample(self, obj):
-        return obj.primary_accession
+    biosample = serializers.CharField()
 
     latitude = serializers.FloatField()
 
@@ -880,7 +877,7 @@ class RetrieveSampleSerializer(SampleSerializer):
         'biome': 'emgapi.serializers.BiomeSerializer',
         # 'studies': 'emgapi.serializers.StudySerializer',
         'runs': 'emgapi.serializers.RunSerializer',
-        # 'metadata': 'emgapi.serializers.SampleAnnSerializer',
+        'analysis': 'emgapi.serializers.AnalysisSerializer',
     }
 
 
@@ -1040,6 +1037,7 @@ class RetrieveStudySerializer(StudySerializer):
     included_serializers = {
         'publications': 'emgapi.serializers.PublicationSerializer',
         'samples': 'emgapi.serializers.SampleSerializer',
+        'analysis': 'emgapi.serializers.AnalysisSerializer',
         'biomes': 'emgapi.serializers.BiomeSerializer',
         'downloads': 'emgapi.serializers.StudyDownloadSerializer',
     }
