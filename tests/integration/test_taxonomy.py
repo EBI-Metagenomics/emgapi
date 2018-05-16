@@ -78,14 +78,13 @@ class TestTaxonomy(object):
 
     def test_empty(self, client, run_emptyresults):
         job = run_emptyresults.accession
-        version = run_emptyresults.pipeline.release_version
-        assert job == 'EMPTY_ABC01234'
+        assert job == 'MGYA00001234'
 
         call_command('import_taxonomy', job,
                      os.path.dirname(os.path.abspath(__file__)))
 
-        url = reverse("emgapi_v1:runs-pipelines-taxonomy-list",
-                      args=[job, version])
+        url = reverse("emgapi_v1:analysis-taxonomy-list",
+                      args=[job])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -93,11 +92,12 @@ class TestTaxonomy(object):
         assert len(rsp['data']) == 0
 
     def test_relations(self, client, run):
+        job = run.analysis.all()[0]
         call_command('import_taxonomy', run.accession,
                      os.path.dirname(os.path.abspath(__file__)))
 
-        url = reverse("emgapi_v1:runs-pipelines-taxonomy-list",
-                      args=[run.accession, run.pipeline.release_version])
+        url = reverse("emgapi_v1:analysis-taxonomy-list",
+                      args=[job.accession])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()

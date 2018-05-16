@@ -330,11 +330,11 @@ class StudyAnalysisResultViewSet(emg_mixins.ListModelMixin,
     )
 
     ordering_fields = (
-        'accession',
         'pipeline',
+        # 'accession',
     )
 
-    ordering = ('-accession', 'pipeline')
+    ordering = ('-pipeline',)
 
     lookup_field = 'accession'
     lookup_value_regex = '[^/]+'
@@ -362,8 +362,8 @@ class StudyAnalysisResultViewSet(emg_mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class AnalysisResultViewSet(emg_mixins.ListModelMixin,
-                            viewsets.GenericViewSet):
+class RunAnalysisViewSet(emg_mixins.ListModelMixin,
+                         viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
 
@@ -375,22 +375,25 @@ class AnalysisResultViewSet(emg_mixins.ListModelMixin,
     )
 
     ordering_fields = (
-        'accession',
+        'pipeline',
+        # 'accession',
     )
 
-    ordering = ('-accession',)
+    ordering = ('-pipeline', )
 
     lookup_field = 'accession'
     lookup_value_regex = '[^/]+'
 
     def get_serializer_class(self):
-        return super(AnalysisResultViewSet, self).get_serializer_class()
+        return super(RunAnalysisViewSet, self).get_serializer_class()
 
     def get_queryset(self):
-        accession = self.kwargs['accession']
+        run = get_object_or_404(
+            emg_models.Run,
+            accession=self.kwargs['accession'])
         queryset = emg_models.AnalysisJob.objects \
             .available(self.request) \
-            .filter(accession=accession)
+            .filter(run=run)
         return queryset
 
     def list(self, request, *args, **kwargs):
@@ -400,7 +403,7 @@ class AnalysisResultViewSet(emg_mixins.ListModelMixin,
         ---
         `/runs/ERR1385375/analysis`
         """
-        return super(AnalysisResultViewSet, self) \
+        return super(RunAnalysisViewSet, self) \
             .list(request, *args, **kwargs)
 
 
