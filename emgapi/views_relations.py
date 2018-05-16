@@ -15,6 +15,7 @@
 
 import logging
 
+from django.http import HttpResponse
 from django.db.models import Prefetch, Count
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
@@ -262,6 +263,144 @@ class StudyPublicationRelationshipViewSet(emg_mixins.ListModelMixin,
         `/studies/SRP000183/publications?search=text`
         """
         return super(StudyPublicationRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class StudiesDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
+                             mixins.RetrieveModelMixin,
+                             viewsets.GenericViewSet):
+
+    lookup_field = 'alias'
+    lookup_value_regex = '[^/]+'
+    lookup_fields = ('accession', 'release_version', 'alias')
+
+    def get_queryset(self):
+        return emg_models.StudyDownload.objects.available(self.request) \
+            .filter(
+                *emg_utils.related_study_accession_query(
+                    self.kwargs['accession'])
+            )
+
+    def get_object(self):
+        return get_object_or_404(
+            self.get_queryset(),
+            Q(alias=self.kwargs['alias']),
+            Q(pipeline__release_version=self.kwargs['release_version'])
+        )
+
+    def get_serializer_class(self):
+        return super(StudiesDownloadViewSet, self).get_serializer_class()
+
+    def retrieve(self, request, accession, release_version, alias,
+                 *args, **kwargs):
+        """
+        Retrieves static summary file
+        Example:
+        ---
+        `/studies/ERP009703/pipelines/4.0/file/
+        ERP009703_taxonomy_abundances_LSU_v4.0.tsv`
+        """
+        obj = self.get_object()
+        response = HttpResponse()
+        response["Content-Disposition"] = \
+            "attachment; filename={0}".format(alias)
+        if obj.subdir is not None:
+            response['X-Accel-Redirect'] = \
+                "/results{0}/{1}/{2}".format(
+                    obj.study.result_directory, obj.subdir, obj.realname
+                )
+        else:
+            response['X-Accel-Redirect'] = \
+                "/results{0}/{1}".format(
+                    obj.study.result_directory, obj.realname
+                )
+        return response
+
+
+class StudyAnalysisResultViewSet(emg_mixins.ListModelMixin,
+                                 viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.AnalysisSerializer
+
+    filter_class = emg_filters.AnalysisJobFilter
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'accession',
+        'pipeline',
+    )
+
+    ordering = ('-accession', 'pipeline')
+
+    lookup_field = 'accession'
+    lookup_value_regex = '[^/]+'
+
+    def get_serializer_class(self):
+        return super(StudyAnalysisResultViewSet, self).get_serializer_class()
+
+    def get_queryset(self):
+        queryset = emg_models.AnalysisJob.objects \
+            .available(self.request) \
+            .filter(
+                *emg_utils.related_study_accession_query(
+                    self.kwargs['accession'])
+            )
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves analysis result for the given accession
+        Example:
+        ---
+        `/studies/MGYS00000410/analysis`
+        """
+        return super(StudyAnalysisResultViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class AnalysisResultViewSet(emg_mixins.ListModelMixin,
+                            viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.AnalysisSerializer
+
+    filter_class = emg_filters.AnalysisJobFilter
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'accession',
+    )
+
+    ordering = ('-accession',)
+
+    lookup_field = 'accession'
+    lookup_value_regex = '[^/]+'
+
+    def get_serializer_class(self):
+        return super(AnalysisResultViewSet, self).get_serializer_class()
+
+    def get_queryset(self):
+        accession = self.kwargs['accession']
+        queryset = emg_models.AnalysisJob.objects \
+            .available(self.request) \
+            .filter(accession=accession)
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves analysis result for the given accession
+        Example:
+        ---
+        `/runs/ERR1385375/analysis`
+        """
+        return super(AnalysisResultViewSet, self) \
             .list(request, *args, **kwargs)
 
 
