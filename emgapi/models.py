@@ -649,7 +649,6 @@ class SampleManager(models.Manager):
                 Prefetch('studies', queryset=Study.objects.available(request)),
                 Prefetch('metadata', queryset=SampleAnn.objects.all())
             ).defer(
-                'primary_accession',
                 'is_public',
                 'metadata_received',
                 'sequencedata_received',
