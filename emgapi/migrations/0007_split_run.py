@@ -42,7 +42,7 @@ def populate_runs(apps, schema_editor):
     Run = apps.get_model("emgapi", "Run")
 
     for aj in AnalysisJob.objects.all():
-        aj.run = Run.objects.get(accession=aj.accession)
+        aj.run = Run.objects.get(accession=aj.external_run_ids)
         aj.save()
 
 
@@ -59,6 +59,23 @@ class Migration(migrations.Migration):
             name='experiment_type_id',
             field=models.SmallIntegerField(db_column='EXPERIMENT_TYPE_ID', primary_key=True, serialize=False),
         ),
+
+        migrations.RenameField(
+            model_name='analysisjob',
+            old_name='accession',
+            new_name='external_run_ids',
+        ),
+        migrations.AlterField(
+            model_name='analysisjob',
+            name='external_run_ids',
+            field=models.CharField(blank=True, db_column='EXTERNAL_RUN_IDS', max_length=100, null=True),
+        ),
+        migrations.AlterField(
+            model_name='analysisjob',
+            name='secondary_accession',
+            field=models.CharField(blank=True, db_column='SECONDARY_ACCESSION', max_length=100, null=True),
+        ),
+
         migrations.AlterField(
             model_name='analysisjob',
             name='job_operator',
@@ -73,6 +90,10 @@ class Migration(migrations.Migration):
             model_name='analysisjob',
             name='submit_time',
             field=models.DateTimeField(blank=True, db_column='SUBMIT_TIME', null=True),
+        ),
+        migrations.AlterModelOptions(
+            name='analysisjob',
+            options={'ordering': ('job_id',)},
         ),
 
         migrations.CreateModel(
@@ -93,7 +114,7 @@ class Migration(migrations.Migration):
             name='Run',
             fields=[
                 ('run_id', models.BigAutoField(db_column='RUN_ID', primary_key=True, serialize=False)),
-                ('accession', models.CharField(blank=True, db_column='EXTERNAL_RUN_IDS', max_length=80, null=True)),
+                ('accession', models.CharField(blank=True, db_column='ACCESSION', max_length=80, null=True)),
                 ('secondary_accession', models.CharField(blank=True, db_column='SECONDARY_ACCESSION', max_length=100, null=True)),
                 ('instrument_platform', models.CharField(blank=True, db_column='INSTRUMENT_PLATFORM', max_length=100, null=True)),
                 ('instrument_model', models.CharField(blank=True, db_column='INSTRUMENT_MODEL', max_length=100, null=True)),
@@ -148,7 +169,7 @@ class Migration(migrations.Migration):
         ),
 
         migrations.RunSQL(
-            """INSERT INTO RUN (EXTERNAL_RUN_IDS, SECONDARY_ACCESSION,
+            """INSERT INTO RUN (ACCESSION, SECONDARY_ACCESSION,
                 STATUS_ID, SAMPLE_ID, STUDY_ID, EXPERIMENT_TYPE_ID,
                 INSTRUMENT_PLATFORM, INSTRUMENT_MODEL)
                 SELECT distinct EXTERNAL_RUN_IDS, SECONDARY_ACCESSION,
