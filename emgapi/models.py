@@ -858,7 +858,7 @@ class Run(models.Model):
     run_id = models.BigAutoField(
         db_column='RUN_ID', primary_key=True)
     accession = models.CharField(
-        db_column='EXTERNAL_RUN_IDS', max_length=80, blank=True, null=True)
+        db_column='ACCESSION', max_length=80, blank=True, null=True)
     secondary_accession = models.CharField(
         db_column='SECONDARY_ACCESSION', max_length=100, blank=True, null=True)
     status_id = models.ForeignKey(
@@ -945,15 +945,22 @@ class AnalysisJob(models.Model):
 
     def __init__(self, *args, **kwargs):
         super(AnalysisJob, self).__init__(*args, **kwargs)
-        if self.job_id is not None:
-            setattr(self, 'accession',
-                    kwargs.get('accession', self._custom_pk()))
+        setattr(self, 'accession',
+                kwargs.get('accession', self._custom_pk()))
 
     def _custom_pk(self):
-        return "MGYA{pk:0>{fill}}".format(pk=self.job_id, fill=8)
+        if self.job_id is not None:
+            return "MGYA{pk:0>{fill}}".format(pk=self.job_id, fill=8)
+        return None
 
     job_id = models.BigAutoField(
         db_column='JOB_ID', primary_key=True)
+    external_run_ids = models.CharField(
+        db_column='EXTERNAL_RUN_IDS', max_length=100,
+        blank=True, null=True)
+    secondary_accession = models.CharField(
+        db_column='SECONDARY_ACCESSION', max_length=100,
+        blank=True, null=True)
     job_operator = models.CharField(
         db_column='JOB_OPERATOR', max_length=15, blank=True, null=True)
     pipeline = models.ForeignKey(
