@@ -471,17 +471,11 @@ class RunViewSet(mixins.RetrieveModelMixin,
         return queryset
 
     def get_object(self):
-        queryset = self.get_queryset() \
-            .filter(
-                Q(accession=self.kwargs['accession']) |
-                Q(secondary_accession=self.kwargs['accession'])
-            )
-        if queryset is None:
-            raise Http404(
-                ('No %s matches the given query.' %
-                 emg_models.Run._meta.object_name)
-            )
-        return queryset
+        return get_object_or_404(
+            self.get_queryset(),
+            Q(accession=self.kwargs['accession']) |
+            Q(secondary_accession=self.kwargs['accession'])
+        )
 
     def get_serializer_class(self):
         return super(RunViewSet, self).get_serializer_class()
