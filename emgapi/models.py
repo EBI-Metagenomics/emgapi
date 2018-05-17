@@ -844,23 +844,13 @@ class RunQuerySet(BaseQuerySet):
 class RunManager(models.Manager):
 
     def get_queryset(self):
-        return RunQuerySet(self.model, using=self._db) \
-            .select_related(
-                'experiment_type',
-            )
+        return RunQuerySet(self.model, using=self._db)
 
     def available(self, request):
         return self.get_queryset().available(request) \
-            .prefetch_related(
-                Prefetch(
-                    'study',
-                    queryset=Study.objects.available(request)
-                ),
-                Prefetch(
-                    'sample',
-                    queryset=Sample.objects.available(
-                        request)
-                ),
+            .select_related(
+                'experiment_type',
+                'study', 'sample'
             )
 
 
