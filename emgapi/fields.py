@@ -26,14 +26,15 @@ class DownloadHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
             return None
 
         try:
-            parent = obj.study
+            kwargs = {
+                'accession': obj.study.accession,
+                'release_version': obj.study.pipeline.release_version,
+            }
         except:
-            parent = obj.job
-        kwargs = {
-            'accession': parent.accession,
-            'release_version': obj.pipeline.release_version,
-            'alias': obj.alias,
-        }
+            kwargs = {
+                'accession': obj.job.accession,
+            }
+        kwargs['alias'] = obj.alias
         return reverse(
             view_name, kwargs=kwargs, request=request, format=format)
 
