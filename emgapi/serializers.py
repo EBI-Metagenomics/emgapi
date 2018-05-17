@@ -514,7 +514,7 @@ class BaseDownloadSerializer(ExplicitFieldsModelSerializer,
 
 class StudyDownloadSerializer(BaseDownloadSerializer):
 
-    url = serializers.HyperlinkedIdentityField(
+    url = emg_fields.DownloadHyperlinkedIdentityField(
         view_name='emgapi_v1:studydownload-detail',
         lookup_field='alias',
     )
