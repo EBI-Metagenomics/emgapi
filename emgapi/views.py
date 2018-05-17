@@ -656,10 +656,7 @@ class AnalysisResultDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
     lookup_fields = ('accession', 'alias')
 
     def get_queryset(self):
-        return emg_models.AnalysisJobDownload.objects.available(self.request) \
-            .filter(
-                Q(job__pk=int(self.kwargs['accession'].lstrip('MGYA'))),
-            )
+        return emg_models.AnalysisJobDownload.objects.available(self.request)
 
     def get_object(self):
         return get_object_or_404(
@@ -672,8 +669,7 @@ class AnalysisResultDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
         return super(AnalysisResultDownloadViewSet, self) \
             .get_serializer_class()
 
-    def retrieve(self, request, accession, release_version, alias,
-                 *args, **kwargs):
+    def retrieve(self, request, accession, alias, *args, **kwargs):
         """
         Retrieves static summary file
         Example:
