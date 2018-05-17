@@ -99,7 +99,6 @@ router.register(
     base_name='analysisdownload'
 )
 
-
 router.register(
     r'studies/(?P<accession>[^/]+)/downloads',
     views.StudiesDownloadsViewSet,

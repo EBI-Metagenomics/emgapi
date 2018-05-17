@@ -554,10 +554,7 @@ class KronaViewSet(emg_mixins.ListModelMixin,
 
     def get_queryset(self):
         return emg_models.AnalysisJob.objects \
-            .available(self.request) \
-            .filter(
-                Q(pk=int(self.kwargs['accession'].lstrip('MGYA')))
-            )
+            .available(self.request)
 
     def get_object(self):
         return get_object_or_404(
@@ -637,7 +634,7 @@ class AnalysisResultDownloadsViewSet(emg_mixins.ListModelMixin,
         return super(AnalysisResultDownloadsViewSet, self) \
             .get_serializer_class()
 
-    def list(self, request, accession, release_version, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves list of static summary files
         Example:
