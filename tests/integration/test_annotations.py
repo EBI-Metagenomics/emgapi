@@ -181,22 +181,23 @@ class TestAnnotations(object):
     )
     def test_relations(self, client, analysis_results, pipeline_version):
         version = pipeline_version['version']
-        job = analysis_results[version].accession
-        call_command('import_summary', job,
+        run = analysis_results[version].run
+        job = analysis_results[version]
+        call_command('import_summary', run.accession,
                      os.path.dirname(os.path.abspath(__file__)),
                      pipeline=version,
                      suffix='.go_slim')
-        call_command('import_summary', job,
+        call_command('import_summary', run.accession,
                      os.path.dirname(os.path.abspath(__file__)),
                      pipeline=version,
                      suffix='.go')
-        call_command('import_summary', job,
+        call_command('import_summary', run.accession,
                      os.path.dirname(os.path.abspath(__file__)),
                      pipeline=version,
                      suffix='.ipr')
 
         url = reverse("emgapi_v1:analysis-goslim-list",
-                      args=[job])
+                      args=[job.accession])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -211,7 +212,7 @@ class TestAnnotations(object):
         assert ids == expected
 
         url = reverse("emgapi_v1:analysis-goterms-list",
-                      args=[job])
+                      args=[job.accession])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -226,7 +227,7 @@ class TestAnnotations(object):
         assert ids == expected
 
         url = reverse("emgapi_v1:analysis-interpro-list",
-                      args=[job])
+                      args=[job.accession])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()

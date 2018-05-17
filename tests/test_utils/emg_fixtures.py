@@ -251,7 +251,7 @@ def runs(study, samples, run_status, analysis_status, pipeline,
     jobs = []
     for s in samples:
         pk = s.sample_id
-        run = emg_models.Run.objects.create(
+        run, created = emg_models.Run.objects.get_or_create(
             sample=s,
             study=study,
             accession="ABC_{:0>3}".format(pk),

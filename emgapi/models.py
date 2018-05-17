@@ -945,7 +945,9 @@ class AnalysisJob(models.Model):
 
     def __init__(self, *args, **kwargs):
         super(AnalysisJob, self).__init__(*args, **kwargs)
-        setattr(self, 'accession', kwargs.get('accession', self._custom_pk()))
+        if self.job_id is not None:
+            setattr(self, 'accession',
+                    kwargs.get('accession', self._custom_pk()))
 
     def _custom_pk(self):
         return "MGYA{pk:0>{fill}}".format(pk=self.job_id, fill=8)
