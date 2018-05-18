@@ -43,6 +43,8 @@ from . import mixins as emg_mixins
 from . import permissions as emg_perms
 from . import viewsets as emg_viewsets
 from . import utils as emg_utils
+from . import renderers as emg_renderers
+
 
 from emgena import models as ena_models
 from emgena import serializers as ena_serializers
@@ -537,6 +539,63 @@ class AnalysisJobViewSet(mixins.RetrieveModelMixin,
         """
         return super(AnalysisJobViewSet, self) \
             .list(request, *args, **kwargs)
+
+
+class AnalysisQCChartViewSet(emg_mixins.ListModelMixin,
+                             viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.AnalysisSerializer
+
+    schema = None
+
+    renderer_classes = (emg_renderers.TSVRenderer,)
+
+    lookup_field = 'chart'
+    lookup_value_regex = 'gc-distribution|nucleotide-distribution|seq-length'
+
+    def get_queryset(self):
+        return emg_models.AnalysisJob.objects \
+            .available(self.request)
+
+    def get_object(self):
+        return get_object_or_404(
+            self.get_queryset(),
+            Q(pk=int(self.kwargs['accession'].lstrip('MGYA')))
+        )
+
+    def retrieve(self, request, chart=None, **kwargs):
+        """
+        Retrieves krona chart for the given accession and pipeline version
+        Example:
+        ---
+        `/analysis/ERR1385375/gc-distribution`
+        """
+        mapping = {
+            "gc-distribution": "GC-distribution.out",
+            "nucleotide-distribution": "nucleotide-distribution.out",
+            "seq-length": "seq-length.out",
+        }
+
+        def build_path(name):
+            fp = os.path.abspath(os.path.join(
+                settings.RESULTS_DIR,
+                obj.result_directory,
+                'qc-statistics', name)
+            )
+            logger.info(fp)
+            if not os.path.isfile(fp):
+                return build_path("{name}.sub-set".format(name=name))
+            return fp
+
+        obj = self.get_object()
+        filepath = build_path(mapping[chart])
+
+        logger.info(filepath)
+
+        if os.path.isfile(filepath):
+            with open(filepath, "r") as f:
+                return Response(f.read())
+        raise Http404('No results available.')
 
 
 class KronaViewSet(emg_mixins.ListModelMixin,
