@@ -567,8 +567,8 @@ class AnalysisJobDownloadSerializer(BaseDownloadSerializer):
         )
 
 
-class AnalysisSerializer(ExplicitFieldsModelSerializer,
-                         serializers.HyperlinkedModelSerializer):
+class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
+                             serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
         'sample': 'emgapi.serializers.SampleSerializer',
@@ -601,11 +601,6 @@ class AnalysisSerializer(ExplicitFieldsModelSerializer,
     analysis_summary = serializers.ListField()
 
     # relationships
-    run = serializers.HyperlinkedRelatedField(
-        read_only=True,
-        view_name='emgapi_v1:runs-detail',
-        lookup_field='accession'
-    )
 
     sample = serializers.HyperlinkedRelatedField(
         read_only=True,
@@ -723,6 +718,15 @@ class AnalysisSerializer(ExplicitFieldsModelSerializer,
             'analysis_status',
             'pipeline',
         )
+
+
+class AnalysisSerializer(BaseAnalysisSerializer):
+
+    run = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emgapi_v1:runs-detail',
+        lookup_field='accession'
+    )
 
 
 # Sample serializer
