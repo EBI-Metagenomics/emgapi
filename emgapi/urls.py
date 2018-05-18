@@ -82,6 +82,12 @@ router.register(
 )
 
 router.register(
+    r'analysis/(?P<accession>[^/]+)',
+    views.AnalysisQCChartViewSet,
+    base_name='analysis-qcchart'
+)
+
+router.register(
     r'analysis/(?P<accession>[^/]+)/krona',
     views.KronaViewSet,
     base_name='analysis-krona'
