@@ -799,7 +799,11 @@ class ExperimentTypeManager(models.Manager):
 
     def get_queryset(self):
         return ExperimentTypeQuerySet(self.model, using=self._db) \
-            .annotate(runs_count=Count('runs', distinct=True)) \
+            .annotate(runs_count=Sum(Case(
+                When(runs__status_id=4, then=1),
+                default=0,
+                output_field=IntegerField()
+            ))) \
             .annotate(samples_count=Sum(Case(
                 When(runs__sample__is_public=1, then=1),
                 default=0,
@@ -913,12 +917,6 @@ class AnalysisJobManager(models.Manager):
             ) \
             .prefetch_related(
                 Prefetch('analysis_metadata', queryset=_qs),
-            )\
-            .prefetch_related(
-                Prefetch(
-                    'analysis_download',
-                    queryset=AnalysisJobDownload.objects.all()
-                ),
             )
 
     def available(self, request):

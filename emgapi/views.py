@@ -467,8 +467,7 @@ class RunViewSet(mixins.RetrieveModelMixin,
     lookup_value_regex = '[^/]+'
 
     def get_queryset(self):
-        queryset = emg_models.Run.objects.available(self.request)
-        return queryset
+        return emg_models.Run.objects.available(self.request)
 
     def get_object(self):
         return get_object_or_404(
