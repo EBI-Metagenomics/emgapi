@@ -21,20 +21,22 @@ from rest_framework.reverse import reverse
 class DownloadHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
 
     def get_url(self, obj, view_name, request, format):
-        # Unsaved objects will not yet have a valid URL.
         if obj.pk is None:
             return None
 
         try:
+            # if study
             kwargs = {
                 'accession': obj.study.accession,
-                'release_version': obj.study.pipeline.release_version,
+                'release_version': obj.pipeline.release_version,
             }
         except:
+            # if analysis
             kwargs = {
                 'accession': obj.job.accession,
             }
         kwargs['alias'] = obj.alias
+
         return reverse(
             view_name, kwargs=kwargs, request=request, format=format)
 
