@@ -520,10 +520,11 @@ class AnalysisJobViewSet(mixins.RetrieveModelMixin,
         return super(AnalysisJobViewSet, self).get_serializer_class()
 
     def get_object(self):
-        return get_object_or_404(
-            self.get_queryset(),
-            Q(pk=int(self.kwargs['accession'].lstrip('MGYA')))
-        )
+        try:
+            pk = int(self.kwargs['accession'].lstrip('MGYA'))
+        except ValueError:
+            raise Http404()
+        return get_object_or_404(self.get_queryset(), Q(pk=pk))
 
     def get_queryset(self):
         queryset = emg_models.AnalysisJob.objects \
@@ -558,10 +559,11 @@ class AnalysisQCChartViewSet(emg_mixins.ListModelMixin,
             .available(self.request)
 
     def get_object(self):
-        return get_object_or_404(
-            self.get_queryset(),
-            Q(pk=int(self.kwargs['accession'].lstrip('MGYA')))
-        )
+        try:
+            pk = int(self.kwargs['accession'].lstrip('MGYA'))
+        except ValueError:
+            raise Http404()
+        return get_object_or_404(self.get_queryset(), Q(pk=pk))
 
     def retrieve(self, request, chart=None, **kwargs):
         """
@@ -615,10 +617,11 @@ class KronaViewSet(emg_mixins.ListModelMixin,
             .available(self.request)
 
     def get_object(self):
-        return get_object_or_404(
-            self.get_queryset(),
-            Q(pk=int(self.kwargs['accession'].lstrip('MGYA')))
-        )
+        try:
+            pk = int(self.kwargs['accession'].lstrip('MGYA'))
+        except ValueError:
+            raise Http404()
+        return get_object_or_404(self.get_queryset(), Q(pk=pk))
 
     def get_serializer_class(self):
         return super(KronaViewSet, self).get_serializer_class()
@@ -676,16 +679,20 @@ class AnalysisResultDownloadsViewSet(emg_mixins.ListModelMixin,
     lookup_value_regex = '[^/]+'
 
     def get_queryset(self):
+        try:
+            pk = int(self.kwargs['accession'].lstrip('MGYA'))
+        except ValueError:
+            raise Http404()
         return emg_models.AnalysisJobDownload.objects.available(self.request) \
-            .filter(
-                Q(job__pk=int(self.kwargs['accession'].lstrip('MGYA'))),
-            )
+            .filter(job__pk=pk)
 
     def get_object(self):
+        try:
+            pk = int(self.kwargs['accession'].lstrip('MGYA'))
+        except ValueError:
+            raise Http404()
         return get_object_or_404(
-            self.get_queryset(),
-            Q(alias=self.kwargs['alias']),
-            Q(job__pk=int(self.kwargs['accession'].lstrip('MGYA'))),
+            self.get_queryset(), Q(alias=self.kwargs['alias']), Q(job__pk=pk)
         )
 
     def get_serializer_class(self):
@@ -717,10 +724,12 @@ class AnalysisResultDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
         return emg_models.AnalysisJobDownload.objects.available(self.request)
 
     def get_object(self):
+        try:
+            pk = int(self.kwargs['accession'].lstrip('MGYA'))
+        except ValueError:
+            raise Http404()
         return get_object_or_404(
-            self.get_queryset(),
-            Q(alias=self.kwargs['alias']),
-            Q(job__pk=int(self.kwargs['accession'].lstrip('MGYA'))),
+            self.get_queryset(), Q(alias=self.kwargs['alias']), Q(job__pk=pk)
         )
 
     def get_serializer_class(self):
