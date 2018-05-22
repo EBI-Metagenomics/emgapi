@@ -16,6 +16,7 @@
 
 import csv
 
+from rest_framework import renderers
 from rest_framework_json_api.renderers import JSONRenderer
 from rest_framework_csv.renderers import CSVRenderer
 from rest_framework_csv.misc import Echo
@@ -54,3 +55,12 @@ class CSVStreamingRenderer(CSVRenderer):
             yield csv_writer.writerow([
                 elem for elem in ordered
             ])
+
+
+class TSVRenderer(renderers.BaseRenderer):
+    media_type = 'text/tsv'
+    format = 'tsv'
+    charset = 'iso-8859-1'
+
+    def render(self, data, media_type=None, renderer_context=None):
+        return data.encode(self.charset)
