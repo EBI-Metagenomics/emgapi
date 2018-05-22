@@ -41,6 +41,7 @@ class TestDefaultAPI(object):
             "studies": "%s/studies" % host,
             "samples": "%s/samples" % host,
             "runs": "%s/runs" % host,
+            "analysis": "%s/analysis" % host,
             "pipelines": "%s/pipelines" % host,
             "experiment-types": "%s/experiment-types" % host,
             "publications": "%s/publications" % host,
@@ -62,6 +63,7 @@ class TestDefaultAPI(object):
             'emgapi_v1:publications',
             'emgapi_v1:samples',
             'emgapi_v1:runs',
+            'emgapi_v1:analysis',
             'emgapi_v1:studies',
             'emgapi_v1:pipeline-tools',
             'emgapi_v1:goterms',
@@ -99,14 +101,14 @@ class TestDefaultAPI(object):
              ['biome', 'studies', 'runs', 'metadata']),
             ('Study', 'studies', 'emgapi_v1:studies', [],
              ['biomes', 'publications', 'samples', 'downloads',
-              'geocoordinates']),
+              'geocoordinates', 'analysis']),
             ('PipelineTool', 'pipeline-tools', 'emgapi_v1:pipeline-tools', [],
              ['pipelines']),
         ]
     )
     @pytest.mark.django_db
     def test_list(self, client, _model, _camelcase, _view, _view_args,
-                  relations, api_version):
+                  relations, api_version, run_status):
         model_name = "emgapi.%s" % _model
         view_name = "%s-list" % _view
 
@@ -130,11 +132,21 @@ class TestDefaultAPI(object):
                                  pk=pk, biome=_biome, is_public=1)
                 _st = mommy.make('emgapi.Study', pk=pk, biome=_biome,
                                  is_public=1, samples=[_sm])
+                mommy.make('emgapi.Run', pk=pk, status_id=run_status,
+                           study=_st, sample=_sm)
+            elif _model in ('AnalysisJob',):
+                _biome = mommy.make('emgapi.Biome', pk=pk)
+                _sm = mommy.make('emgapi.Sample',
+                                 pk=pk, biome=_biome, is_public=1)
+                _st = mommy.make('emgapi.Study', pk=pk, biome=_biome,
+                                 is_public=1, samples=[_sm])
+                _r = mommy.make('emgapi.Run', pk=pk, status_id=run_status,
+                                study=_st, sample=_sm)
                 _as = mommy.make('emgapi.AnalysisStatus', pk=3)
                 _p = mommy.make('emgapi.Pipeline', pk=1, release_version="1.0")
                 mommy.make('emgapi.AnalysisJob', pk=pk, pipeline=_p,
                            analysis_status=_as, run_status_id=4,
-                           study=_st, sample=_sm)
+                           study=_st, sample=_sm, run=_r)
             elif _model in ('PipelineTool',):
                 _p = mommy.make('emgapi.Pipeline', pk=pk,
                                 release_version="1.0")

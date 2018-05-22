@@ -39,10 +39,12 @@ from rest_framework import renderers
 
 from . import models as emg_models
 from . import serializers as emg_serializers
-from . import filters as emg_filters
 from . import mixins as emg_mixins
 from . import permissions as emg_perms
 from . import viewsets as emg_viewsets
+from . import utils as emg_utils
+from . import renderers as emg_renderers
+
 
 from emgena import models as ena_models
 from emgena import serializers as ena_serializers
@@ -239,6 +241,11 @@ class StudyViewSet(mixins.RetrieveModelMixin,
             queryset = queryset.prefetch_related(
                 Prefetch('samples', queryset=_qs)
             )
+        if 'analysis' in self.request.GET.get('include', '').split(','):
+            _qs = emg_models.AnalysisJob.objects.available(self.request)
+            queryset = queryset.prefetch_related(
+                Prefetch('analysis', queryset=_qs)
+            )
         if 'downloads' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.StudyDownload.objects.all()
             queryset = queryset.prefetch_related(
@@ -249,8 +256,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
     def get_object(self):
         return get_object_or_404(
             self.get_queryset(),
-            Q(accession=self.kwargs['accession']) |
-            Q(project_id=self.kwargs['accession'])
+            *emg_utils.study_accession_query(self.kwargs['accession'])
         )
 
     def get_serializer_class(self):
@@ -357,8 +363,8 @@ class StudiesDownloadsViewSet(emg_mixins.ListModelMixin,
     def get_queryset(self):
         return emg_models.StudyDownload.objects.available(self.request) \
             .filter(
-                Q(study__accession=self.kwargs['accession']) |
-                Q(study__project_id=self.kwargs['accession'])
+                *emg_utils.related_study_accession_query(
+                    self.kwargs['accession'])
             )
 
     def get_object(self):
@@ -366,8 +372,6 @@ class StudiesDownloadsViewSet(emg_mixins.ListModelMixin,
             self.get_queryset(),
             Q(alias=self.kwargs['alias']),
             Q(pipeline__release_version=self.kwargs['release_version']),
-            Q(study__accession=self.kwargs['accession']) |
-            Q(study__project_id=self.kwargs['accession'])
         )
 
     def get_serializer_class(self):
@@ -384,59 +388,6 @@ class StudiesDownloadsViewSet(emg_mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class StudiesDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
-                             mixins.RetrieveModelMixin,
-                             viewsets.GenericViewSet):
-
-    lookup_field = 'alias'
-    lookup_value_regex = '[^/]+'
-    lookup_fields = ('accession', 'release_version', 'alias')
-
-    def get_queryset(self):
-        return emg_models.StudyDownload.objects.available(self.request) \
-            .filter(
-                Q(study__accession=self.kwargs['accession']) |
-                Q(study__project_id=self.kwargs['accession'])
-            )
-
-    def get_object(self):
-        return get_object_or_404(
-            self.get_queryset(),
-            Q(alias=self.kwargs['alias']),
-            Q(pipeline__release_version=self.kwargs['release_version']),
-            Q(study__accession=self.kwargs['accession']) |
-            Q(study__project_id=self.kwargs['accession'])
-        )
-
-    def get_serializer_class(self):
-        return super(StudiesDownloadViewSet, self).get_serializer_class()
-
-    def retrieve(self, request, accession, release_version, alias,
-                 *args, **kwargs):
-        """
-        Retrieves static summary file
-        Example:
-        ---
-        `/studies/ERP009703/pipelines/4.0/file/
-        ERP009703_taxonomy_abundances_LSU_v4.0.tsv`
-        """
-        obj = self.get_object()
-        response = HttpResponse()
-        response["Content-Disposition"] = \
-            "attachment; filename={0}".format(alias)
-        if obj.subdir is not None:
-            response['X-Accel-Redirect'] = \
-                "/results{0}/{1}/{2}".format(
-                    obj.study.result_directory, obj.subdir, obj.realname
-                )
-        else:
-            response['X-Accel-Redirect'] = \
-                "/results{0}/{1}".format(
-                    obj.study.result_directory, obj.realname
-                )
-        return response
-
-
 class SampleViewSet(mixins.RetrieveModelMixin,
                     emg_mixins.ListModelMixin,
                     emg_viewsets.BaseSampleGenericViewSet):
@@ -448,13 +399,13 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         queryset = emg_models.Sample.objects \
             .available(self.request, prefetch=True)
         if 'runs' in self.request.GET.get('include', '').split(','):
-            _qs = emg_models.Run.objects \
-                .available(self.request) \
-                .select_related(
-                    'analysis_status', 'experiment_type'
-                )
+            _qs = emg_models.Run.objects.available(self.request)
             queryset = queryset.prefetch_related(
                 Prefetch('runs', queryset=_qs))
+        if 'analysis' in self.request.GET.get('include', '').split(','):
+            _qs = emg_models.AnalysisJob.objects.available(self.request)
+            queryset = queryset.prefetch_related(
+                Prefetch('analysis', queryset=_qs))
         return queryset
 
     def get_object(self):
@@ -514,49 +465,18 @@ class RunViewSet(mixins.RetrieveModelMixin,
                  emg_mixins.ListModelMixin,
                  emg_viewsets.BaseRunGenericViewSet):
 
-    serializer_class = emg_serializers.RunSerializer
-
-    filter_class = emg_filters.RunFilter
-
-    filter_backends = (
-        DjangoFilterBackend,
-        filters.SearchFilter,
-        filters.OrderingFilter,
-    )
-
-    ordering_fields = (
-        'accession',
-    )
-
-    ordering = ('-accession',)
-
-    search_fields = (
-        'accession',
-        'secondary_accession',
-        'instrument_platform',
-        'instrument_model',
-        '@sample__metadata__var_val_ucv',
-    )
-
     lookup_field = 'accession'
     lookup_value_regex = '[^/]+'
 
     def get_queryset(self):
-        queryset = emg_models.Run.objects.available(self.request)
-        return queryset
+        return emg_models.Run.objects.available(self.request)
 
     def get_object(self):
-        queryset = self.get_queryset() \
-            .filter(
-                Q(accession=self.kwargs['accession']) |
-                Q(secondary_accession=self.kwargs['accession'])
-            ).distinct().last()
-        if queryset is None:
-            raise Http404(
-                ('No %s matches the given query.' %
-                 emg_models.Run._meta.object_name)
-            )
-        return queryset
+        return get_object_or_404(
+            self.get_queryset(),
+            Q(accession=self.kwargs['accession']) |
+            Q(secondary_accession=self.kwargs['accession'])
+        )
 
     def get_serializer_class(self):
         return super(RunViewSet, self).get_serializer_class()
@@ -589,35 +509,26 @@ class RunViewSet(mixins.RetrieveModelMixin,
         return super(RunViewSet, self).retrieve(request, *args, **kwargs)
 
 
-class AnalysisResultViewSet(emg_mixins.ListModelMixin,
-                            viewsets.GenericViewSet):
-
-    serializer_class = emg_serializers.AnalysisSerializer
-
-    filter_class = emg_filters.AnalysisJobFilter
-
-    filter_backends = (
-        DjangoFilterBackend,
-        filters.OrderingFilter,
-    )
-
-    ordering_fields = (
-        'accession',
-    )
-
-    ordering = ('-accession',)
+class AnalysisJobViewSet(mixins.RetrieveModelMixin,
+                         emg_mixins.ListModelMixin,
+                         emg_viewsets.BaseAnalysisGenericViewSet):
 
     lookup_field = 'accession'
     lookup_value_regex = '[^/]+'
 
     def get_serializer_class(self):
-        return super(AnalysisResultViewSet, self).get_serializer_class()
+        return super(AnalysisJobViewSet, self).get_serializer_class()
+
+    def get_object(self):
+        try:
+            pk = int(self.kwargs['accession'].lstrip('MGYA'))
+        except ValueError:
+            raise Http404()
+        return get_object_or_404(self.get_queryset(), Q(pk=pk))
 
     def get_queryset(self):
-        accession = self.kwargs['accession']
         queryset = emg_models.AnalysisJob.objects \
-            .available(self.request) \
-            .filter(accession=accession)
+            .available(self.request)
         return queryset
 
     def list(self, request, *args, **kwargs):
@@ -627,50 +538,76 @@ class AnalysisResultViewSet(emg_mixins.ListModelMixin,
         ---
         `/runs/ERR1385375/analysis`
         """
-        return super(AnalysisResultViewSet, self) \
+        return super(AnalysisJobViewSet, self) \
             .list(request, *args, **kwargs)
 
 
-class AnalysisViewSet(mixins.RetrieveModelMixin,
-                      viewsets.GenericViewSet):
+class AnalysisQCChartViewSet(emg_mixins.ListModelMixin,
+                             viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
 
-    lookup_field = 'release_version'
-    lookup_value_regex = '[0-9.]+'
+    schema = None
+
+    renderer_classes = (emg_renderers.TSVRenderer,)
+
+    lookup_field = 'chart'
+    lookup_value_regex = (
+        'gc-distribution|'
+        'nucleotide-distribution|'
+        'seq-length|'
+        'summary'
+    )
 
     def get_queryset(self):
         return emg_models.AnalysisJob.objects \
-            .available(self.request) \
-            .filter(
-                Q(pipeline__release_version=self.kwargs['release_version']),
-                Q(accession=self.kwargs['accession']) |
-                Q(secondary_accession=self.kwargs['accession'])
-            )
+            .available(self.request)
 
     def get_object(self):
-        return get_object_or_404(
-            self.get_queryset(),
-            Q(pipeline__release_version=self.kwargs['release_version']),
-            Q(accession=self.kwargs['accession']) |
-            Q(secondary_accession=self.kwargs['accession'])
-        )
+        try:
+            pk = int(self.kwargs['accession'].lstrip('MGYA'))
+        except ValueError:
+            raise Http404()
+        return get_object_or_404(self.get_queryset(), Q(pk=pk))
 
-    def get_serializer_class(self):
-        return super(AnalysisViewSet, self).get_serializer_class()
+    def _build_path(self, name):
+        return os.path.abspath(os.path.join(
+            settings.RESULTS_DIR,
+            self.get_object().result_directory,
+            'qc-statistics', name))
 
-    def retrieve(self, request, *args, **kwargs):
+    def retrieve(self, request, chart=None, **kwargs):
         """
-        Retrieves analysis result for the given accession and pipeline version
+        Retrieves krona chart for the given accession and pipeline version
         Example:
         ---
-        `/runs/ERR1385375/pipelines/3.0`
+        `/analysis/MGYA00109028/gc-distribution`
         """
-        return super(AnalysisViewSet, self).retrieve(request, *args, **kwargs)
+        mapping = {
+            "gc-distribution": "GC-distribution",
+            "nucleotide-distribution": "nucleotide-distribution",
+            "seq-length": "seq-length",
+            "summary": "summary",
+        }
+        filepath = self._build_path(
+            "{name}.out".format(name=mapping[chart]))
+        if not os.path.isfile(filepath):
+            filepath = self._build_path(
+                "{name}.out.full".format(name=mapping[chart]))
+            if not os.path.isfile(filepath):
+                filepath = self._build_path(
+                    "{name}.out.sub-set".format(name=mapping[chart]))
+        if os.path.isfile(filepath):
+            logger.info("Path %r" % filepath)
+            with open(filepath, "r") as f:
+                return Response(f.read())
+        raise Http404()
 
 
 class KronaViewSet(emg_mixins.ListModelMixin,
-                   AnalysisViewSet):
+                   viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.AnalysisSerializer
 
     schema = None
 
@@ -678,6 +615,20 @@ class KronaViewSet(emg_mixins.ListModelMixin,
 
     lookup_field = 'subdir'
     lookup_value_regex = 'lsu|ssu'
+
+    def get_queryset(self):
+        return emg_models.AnalysisJob.objects \
+            .available(self.request)
+
+    def get_object(self):
+        try:
+            pk = int(self.kwargs['accession'].lstrip('MGYA'))
+        except ValueError:
+            raise Http404()
+        return get_object_or_404(self.get_queryset(), Q(pk=pk))
+
+    def get_serializer_class(self):
+        return super(KronaViewSet, self).get_serializer_class()
 
     @xframe_options_exempt
     def list(self, request, **kwargs):
@@ -732,25 +683,27 @@ class AnalysisResultDownloadsViewSet(emg_mixins.ListModelMixin,
     lookup_value_regex = '[^/]+'
 
     def get_queryset(self):
+        try:
+            pk = int(self.kwargs['accession'].lstrip('MGYA'))
+        except ValueError:
+            raise Http404()
         return emg_models.AnalysisJobDownload.objects.available(self.request) \
-            .filter(
-                Q(job__accession=self.kwargs['accession']),
-                Q(pipeline__release_version=self.kwargs['release_version']),
-            )
+            .filter(job__pk=pk)
 
     def get_object(self):
+        try:
+            pk = int(self.kwargs['accession'].lstrip('MGYA'))
+        except ValueError:
+            raise Http404()
         return get_object_or_404(
-            self.get_queryset(),
-            Q(alias=self.kwargs['alias']),
-            Q(pipeline__release_version=self.kwargs['release_version']),
-            Q(job__accession=self.kwargs['accession'])
+            self.get_queryset(), Q(alias=self.kwargs['alias']), Q(job__pk=pk)
         )
 
     def get_serializer_class(self):
         return super(AnalysisResultDownloadsViewSet, self) \
             .get_serializer_class()
 
-    def list(self, request, accession, release_version, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves list of static summary files
         Example:
@@ -769,34 +722,30 @@ class AnalysisResultDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
 
     lookup_field = 'alias'
     lookup_value_regex = '[^/]+'
-    lookup_fields = ('accession', 'release_version', 'alias')
+    lookup_fields = ('accession', 'alias')
 
     def get_queryset(self):
-        return emg_models.AnalysisJobDownload.objects.available(self.request) \
-            .filter(
-                Q(job__accession=self.kwargs['accession']),
-                Q(pipeline__release_version=self.kwargs['release_version']),
-            )
+        return emg_models.AnalysisJobDownload.objects.available(self.request)
 
     def get_object(self):
+        try:
+            pk = int(self.kwargs['accession'].lstrip('MGYA'))
+        except ValueError:
+            raise Http404()
         return get_object_or_404(
-            self.get_queryset(),
-            Q(alias=self.kwargs['alias']),
-            Q(pipeline__release_version=self.kwargs['release_version']),
-            Q(job__accession=self.kwargs['accession'])
+            self.get_queryset(), Q(alias=self.kwargs['alias']), Q(job__pk=pk)
         )
 
     def get_serializer_class(self):
         return super(AnalysisResultDownloadViewSet, self) \
             .get_serializer_class()
 
-    def retrieve(self, request, accession, release_version, alias,
-                 *args, **kwargs):
+    def retrieve(self, request, accession, alias, *args, **kwargs):
         """
         Retrieves static summary file
         Example:
         ---
-        `/runs/ERR1385375/pipelines/3.0/file/
+        `/analysis/ERR1385375/file/
         ERP009703_taxonomy_abundances_LSU_v4.0.tsv`
         """
         obj = self.get_object()

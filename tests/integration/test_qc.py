@@ -34,8 +34,8 @@ class TestCLI(object):
         call_command('import_qc', 'ABC01234',
                      os.path.dirname(os.path.abspath(__file__)))
 
-        url = reverse("emgapi_v1:runs-pipelines-detail",
-                      args=["ABC01234", "1.0"])
+        url = reverse("emgapi_v1:analysis-detail",
+                      args=["MGYA00001234"])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -69,6 +69,7 @@ class TestCLI(object):
         'results',
         ({
             'pipeline': '1.0',
+            'accession': 'MGYA00001234',
             'expected': [
                 {
                     'key': 'Submitted nucleotide sequences',
@@ -94,6 +95,7 @@ class TestCLI(object):
             ]
         }, {
             'pipeline': '4.0',
+            'accession': 'MGYA00005678',
             'expected': [
                 {
                     'key': 'Submitted nucleotide sequences',
@@ -128,8 +130,8 @@ class TestCLI(object):
                      os.path.dirname(os.path.abspath(__file__)),
                      pipeline='4.0')
 
-        url = reverse("emgapi_v1:runs-pipelines-detail",
-                      args=["ABC01234", results['pipeline']])
+        url = reverse("emgapi_v1:analysis-detail",
+                      args=[results['accession']])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -139,15 +141,16 @@ class TestCLI(object):
         assert rsp['data']['attributes']['analysis-summary'] == expected
 
     def test_empty_qc(self, client, run_emptyresults):
+        run = run_emptyresults.run.accession
         job = run_emptyresults.accession
         version = run_emptyresults.pipeline.release_version
-        assert job == 'EMPTY_ABC01234'
+        assert run == 'ABC01234'
         call_command('import_qc', job,
                      os.path.dirname(os.path.abspath(__file__)),
                      pipeline=version)
 
-        url = reverse("emgapi_v1:runs-pipelines-detail",
-                      args=[job, version])
+        url = reverse("emgapi_v1:analysis-detail",
+                      args=[job])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()

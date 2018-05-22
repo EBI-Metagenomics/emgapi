@@ -417,15 +417,12 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     )
 
     # attributes
-    accession = serializers.SerializerMethodField()
-
-    def get_accession(self, obj):
-        return obj.accession
-
     experiment_type = serializers.SerializerMethodField()
 
     def get_experiment_type(self, obj):
-        return obj.experiment_type.experiment_type
+        if obj.experiment_type is not None:
+            return obj.experiment_type.experiment_type
+        return None
 
     # relationships
     sample = serializers.HyperlinkedRelatedField(
@@ -452,14 +449,14 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     def get_pipelines(self, obj):
         # TODO: push that to queryset
         return emg_models.Pipeline.objects \
-            .filter(analysis__accession=obj.accession)
+            .filter(analysis__run=obj)
 
     analysis = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
         many=True,
         read_only=True,
         source='get_analysis',
         model=emg_models.AnalysisJob,
-        related_link_view_name='emgapi_v1:runs-pipelines-list',
+        related_link_view_name='emgapi_v1:runs-analysis-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession',
     )
@@ -470,8 +467,7 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     class Meta:
         model = emg_models.Run
         exclude = (
-            'analysis_status',
-            'run_status_id',
+            'status_id',
         )
 
 
@@ -553,7 +549,7 @@ class AnalysisJobDownloadSerializer(BaseDownloadSerializer):
     # analysis = emg_fields.AnalysisJobHyperlinkedRelatedField(
     #     source='job',
     #     read_only=True,
-    #     view_name='emgapi_v1:runs-pipelines-detail',
+    #     view_name='emgapi_v1:analysis-detail',
     #     lookup_field='accession'
     # )
 
@@ -579,11 +575,8 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
         'study': 'emgapi.serializers.StudySerializer',
     }
 
-    # workaround to provide multiple values in PK
-    id = serializers.ReadOnlyField(source="multiple_pk")
-
-    url = emg_fields.AnalysisJobHyperlinkedField(
-        view_name='emgapi_v1:runs-pipelines-detail',
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi_v1:analysis-detail',
         lookup_field='accession'
     )
 
@@ -596,7 +589,9 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     experiment_type = serializers.SerializerMethodField()
 
     def get_experiment_type(self, obj):
-        return obj.experiment_type.experiment_type
+        if obj.experiment_type is not None:
+            return obj.experiment_type.experiment_type
+        return None
 
     pipeline_version = serializers.SerializerMethodField()
 
@@ -606,6 +601,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     analysis_summary = serializers.ListField()
 
     # relationships
+
     sample = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name='emgapi_v1:samples-detail',
@@ -618,7 +614,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
         lookup_field='accession'
     )
 
-    downloads = emg_relations.DownloadSerializerMethodResourceRelatedField(
+    downloads = relations.SerializerMethodResourceRelatedField(
         many=True,
         read_only=True,
         source='get_downloads',
@@ -631,12 +627,12 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     def get_downloads(self, obj):
         return None
 
-    taxonomy = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(
+    taxonomy = relations.SerializerMethodResourceRelatedField(
         source='get_taxonomy',
         model=m_models.Organism,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi_v1:runs-pipelines-taxonomy-list',
+        related_link_view_name='emgapi_v1:analysis-taxonomy-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
@@ -644,12 +640,12 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     def get_taxonomy(self, obj):
         return None
 
-    taxonomy_lsu = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
+    taxonomy_lsu = relations.SerializerMethodResourceRelatedField(
         source='get_taxonomy_lsu',
         model=m_models.Organism,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi_v1:runs-pipelines-taxonomy-lsu-list',
+        related_link_view_name='emgapi_v1:analysis-taxonomy-lsu-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
@@ -657,17 +653,56 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     def get_taxonomy_lsu(self, obj):
         return None
 
-    taxonomy_ssu = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
+    taxonomy_ssu = relations.SerializerMethodResourceRelatedField(
         source='get_taxonomy_ssu',
         model=m_models.Organism,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi_v1:runs-pipelines-taxonomy-ssu-list',
+        related_link_view_name='emgapi_v1:analysis-taxonomy-ssu-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
 
     def get_taxonomy_ssu(self, obj):
+        return None
+
+    go_terms = relations.SerializerMethodResourceRelatedField(
+        source='get_goterms',
+        model=m_models.GoTerm,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:analysis-goterms-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
+    )
+
+    def get_goterms(self, obj):
+        return None
+
+    go_slim = relations.SerializerMethodResourceRelatedField(
+        source='get_goslim',
+        model=m_models.GoTerm,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:analysis-goslim-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
+    )
+
+    def get_goslim(self, obj):
+        return None
+
+    interpro_identifiers = relations.SerializerMethodResourceRelatedField(  # NOQA
+        source='get_interproidentifier',
+        model=m_models.InterproIdentifier,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:analysis-interpro-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
+    )
+
+    def get_interproidentifier(self, obj):
         return None
 
     class Meta:
@@ -687,44 +722,11 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
 
 class AnalysisSerializer(BaseAnalysisSerializer):
 
-    go_terms = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(
-        source='get_goterms',
-        model=m_models.GoTerm,
-        many=True,
+    run = serializers.HyperlinkedRelatedField(
         read_only=True,
-        related_link_view_name='emgapi_v1:runs-pipelines-goterms-list',
-        related_link_url_kwarg='accession',
-        related_link_lookup_field='accession'
+        view_name='emgapi_v1:runs-detail',
+        lookup_field='accession'
     )
-
-    def get_goterms(self, obj):
-        return None
-
-    go_slim = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(
-        source='get_goslim',
-        model=m_models.GoTerm,
-        many=True,
-        read_only=True,
-        related_link_view_name='emgapi_v1:runs-pipelines-goslim-list',
-        related_link_url_kwarg='accession',
-        related_link_lookup_field='accession'
-    )
-
-    def get_goslim(self, obj):
-        return None
-
-    interpro_identifiers = emg_relations.AnalysisJobSerializerMethodResourceRelatedField(  # NOQA
-        source='get_interproidentifier',
-        model=m_models.InterproIdentifier,
-        many=True,
-        read_only=True,
-        related_link_view_name='emgapi_v1:runs-pipelines-interpro-list',
-        related_link_url_kwarg='accession',
-        related_link_lookup_field='accession'
-    )
-
-    def get_interproidentifier(self, obj):
-        return None
 
 
 # Sample serializer
@@ -786,7 +788,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
         # 'studies': 'emgapi.serializers.StudySerializer',
         'biome': 'emgapi.serializers.BiomeSerializer',
         'runs': 'emgapi.serializers.RunSerializer',
-        # 'metadata': 'emgapi.serializers.SampleAnnSerializer',
+        'analysis': 'emgapi.serializers.AnalysisSerializer',
     }
 
     url = serializers.HyperlinkedIdentityField(
@@ -795,10 +797,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
     )
 
     # attributes
-    biosample = serializers.SerializerMethodField()
-
-    def get_biosample(self, obj):
-        return obj.primary_accession
+    biosample = serializers.CharField()
 
     latitude = serializers.FloatField()
 
@@ -875,7 +874,7 @@ class RetrieveSampleSerializer(SampleSerializer):
         'biome': 'emgapi.serializers.BiomeSerializer',
         # 'studies': 'emgapi.serializers.StudySerializer',
         'runs': 'emgapi.serializers.RunSerializer',
-        # 'metadata': 'emgapi.serializers.SampleAnnSerializer',
+        'analysis': 'emgapi.serializers.AnalysisSerializer',
     }
 
 
@@ -887,14 +886,17 @@ class SampleGeoCoordinateSerializer(ExplicitFieldsModelSerializer,
 
     latitude = serializers.FloatField()
     longitude = serializers.FloatField()
+    samples_count = serializers.IntegerField()
 
     class Meta:
         model = emg_models.SampleGeoCoordinate
+        unique_together = (('latitude', 'longitude'),)
         fields = (
             'id',
             # 'url',
             'longitude',
             'latitude',
+            'samples_count'
         )
 
 
@@ -911,6 +913,11 @@ class StudySerializer(ExplicitFieldsModelSerializer,
         view_name='emgapi_v1:studies-detail',
         lookup_field='accession',
     )
+
+    accession = serializers.SerializerMethodField()
+
+    def get_accession(self, obj):
+        return obj.accession
 
     bioproject = serializers.SerializerMethodField()
 
@@ -976,6 +983,19 @@ class StudySerializer(ExplicitFieldsModelSerializer,
     def get_samples(self, obj):
         return None
 
+    analysis = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_analysis',
+        model=emg_models.AnalysisJob,
+        related_link_view_name='emgapi_v1:studies-analysis-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+    )
+
+    def get_analysis(self, obj):
+        return None
+
     geocoordinates = relations.SerializerMethodResourceRelatedField(
         source='get_geocoordinates',
         model=emg_models.SampleGeoCoordinate,
@@ -1014,6 +1034,7 @@ class RetrieveStudySerializer(StudySerializer):
     included_serializers = {
         'publications': 'emgapi.serializers.PublicationSerializer',
         'samples': 'emgapi.serializers.SampleSerializer',
+        'analysis': 'emgapi.serializers.AnalysisSerializer',
         'biomes': 'emgapi.serializers.BiomeSerializer',
         'downloads': 'emgapi.serializers.StudyDownloadSerializer',
     }

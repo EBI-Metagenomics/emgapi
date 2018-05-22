@@ -64,19 +64,18 @@ class BaseQuerySet(models.QuerySet):
             },
             'RunQuerySet': {
                 'all': [
-                    Q(run_status_id=4),
-                    Q(analysis_status_id=3) | Q(analysis_status_id=6)
+                    Q(status_id=4),
                 ],
             },
             'AnalysisJobQuerySet': {
                 'all': [
-                    Q(run_status_id=4),
+                    Q(run__status_id=4),
                     Q(analysis_status_id=3) | Q(analysis_status_id=6)
                 ],
             },
             'AnalysisJobDownloadQuerySet': {
                 'all': [
-                    Q(job__run_status_id=4),
+                    Q(job__run__status_id=4),
                     Q(job__analysis_status_id=3) | Q(job__analysis_status_id=6)
                 ],
             },
@@ -92,15 +91,15 @@ class BaseQuerySet(models.QuerySet):
             _query_filters['SampleQuerySet']['authenticated'] = \
                 [Q(submission_account_id=_username) | Q(is_public=1)]
             _query_filters['RunQuerySet']['authenticated'] = \
-                [Q(study__submission_account_id=_username, run_status_id=2) |
-                 Q(run_status_id=4)]
+                [Q(study__submission_account_id=_username, status_id=2) |
+                 Q(status_id=4)]
             _query_filters['AnalysisJobQuerySet']['authenticated'] = \
-                [Q(study__submission_account_id=_username, run_status_id=2) |
-                 Q(run_status_id=4)]
+                [Q(study__submission_account_id=_username, run__status_id=2) |
+                 Q(run__status_id=4)]
             _query_filters['AnalysisJobDownloadQuerySet']['authenticated'] = \
                 [Q(job__study__submission_account_id=_username,
-                   job__run_status_id=2) |
-                 Q(job__run_status_id=4)]
+                   job__run__status_id=2) |
+                 Q(job__run__status_id=4)]
 
         q = list()
         try:
@@ -538,9 +537,17 @@ class StudyManager(models.Manager):
 
 
 class Study(models.Model):
+
+    def __init__(self, *args, **kwargs):
+        super(Study, self).__init__(*args, **kwargs)
+        setattr(self, 'accession', kwargs.get('accession', self._custom_pk()))
+
+    def _custom_pk(self):
+        return "MGYS{pk:0>{fill}}".format(pk=self.study_id, fill=8)
+
     study_id = models.AutoField(
         db_column='STUDY_ID', primary_key=True)
-    accession = models.CharField(
+    secondary_accession = models.CharField(
         db_column='EXT_STUDY_ID', max_length=20, unique=True)
     centre_name = models.CharField(
         db_column='CENTRE_NAME', max_length=255, blank=True, null=True)
@@ -595,11 +602,11 @@ class Study(models.Model):
 
     class Meta:
         db_table = 'STUDY'
-        unique_together = (('study_id', 'accession'),)
-        ordering = ('accession',)
+        unique_together = (('study_id', 'secondary_accession'),)
+        ordering = ('study_id',)
 
     def __str__(self):
-        return self.accession
+        return self._custom_pk()
 
 
 class StudyPublication(models.Model):
@@ -642,7 +649,6 @@ class SampleManager(models.Manager):
                 Prefetch('studies', queryset=Study.objects.available(request)),
                 Prefetch('metadata', queryset=SampleAnn.objects.all())
             ).defer(
-                'primary_accession',
                 'is_public',
                 'metadata_received',
                 'sequencedata_received',
@@ -720,6 +726,10 @@ class Sample(models.Model):
         on_delete=models.CASCADE)
 
     @property
+    def biosample(self):
+        return self.primary_accession
+
+    @property
     def sample_metadata(self):
         return [
             {
@@ -789,7 +799,11 @@ class ExperimentTypeManager(models.Manager):
 
     def get_queryset(self):
         return ExperimentTypeQuerySet(self.model, using=self._db) \
-            .annotate(runs_count=Count('runs', distinct=True)) \
+            .annotate(runs_count=Sum(Case(
+                When(runs__status_id=4, then=1),
+                default=0,
+                output_field=IntegerField()
+            ))) \
             .annotate(samples_count=Sum(Case(
                 When(runs__sample__is_public=1, then=1),
                 default=0,
@@ -798,7 +812,7 @@ class ExperimentTypeManager(models.Manager):
 
 
 class ExperimentType(models.Model):
-    experiment_type_id = models.AutoField(
+    experiment_type_id = models.SmallIntegerField(
         db_column='EXPERIMENT_TYPE_ID', primary_key=True,)
     experiment_type = models.CharField(
         db_column='EXPERIMENT_TYPE', max_length=30,
@@ -813,6 +827,20 @@ class ExperimentType(models.Model):
         return self.experiment_type
 
 
+class Status(models.Model):
+    status_id = models.SmallIntegerField(
+        db_column='STATUS_ID', primary_key=True)
+    status = models.CharField(
+        db_column='STATUS', max_length=25)
+
+    class Meta:
+        db_table = 'STATUS'
+        ordering = ('status_id',)
+
+    def __str__(self):
+        return self.status
+
+
 class RunQuerySet(BaseQuerySet):
     pass
 
@@ -820,61 +848,53 @@ class RunQuerySet(BaseQuerySet):
 class RunManager(models.Manager):
 
     def get_queryset(self):
-        return RunQuerySet(self.model, using=self._db) \
-            .select_related(
-                'analysis_status',
-                'experiment_type',
-            )
+        return RunQuerySet(self.model, using=self._db)
 
     def available(self, request):
         return self.get_queryset().available(request) \
-            .prefetch_related(
-                Prefetch(
-                    'study',
-                    queryset=Study.objects.available(request)
-                ),
-                Prefetch(
-                    'sample',
-                    queryset=Sample.objects.available(
-                        request)
-                )
+            .select_related(
+                'experiment_type',
+                'study', 'sample'
             )
 
 
 class Run(models.Model):
+    run_id = models.BigAutoField(
+        db_column='RUN_ID', primary_key=True)
     accession = models.CharField(
-        db_column='EXTERNAL_RUN_IDS', max_length=100, primary_key=True)
+        db_column='ACCESSION', max_length=80, blank=True, null=True)
     secondary_accession = models.CharField(
-        db_column='SECONDARY_ACCESSION', max_length=100)
-    run_status_id = models.IntegerField(
-        db_column='RUN_STATUS_ID', blank=True, null=True)
+        db_column='SECONDARY_ACCESSION', max_length=100, blank=True, null=True)
+    status_id = models.ForeignKey(
+        'Status', db_column='STATUS_ID', related_name='runs',
+        on_delete=models.CASCADE, default=2)
     sample = models.ForeignKey(
-        Sample, db_column='SAMPLE_ID', related_name='runs',
+        'Sample', db_column='SAMPLE_ID', related_name='runs',
         on_delete=models.CASCADE, blank=True, null=True)
     study = models.ForeignKey(
-        Study, db_column='STUDY_ID', related_name='runs',
+        'Study', db_column='STUDY_ID', related_name='runs',
         on_delete=models.CASCADE, blank=True, null=True)
-    analysis_status = models.ForeignKey(
-        AnalysisStatus, db_column='ANALYSIS_STATUS_ID',
-        on_delete=models.CASCADE)
     # TODO: not consistant, schema changes may be needed
     experiment_type = models.ForeignKey(
         ExperimentType, db_column='EXPERIMENT_TYPE_ID',
         related_name='runs',
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE, blank=True, null=True)
     instrument_platform = models.CharField(
-        db_column='INSTRUMENT_PLATFORM', max_length=50,
+        db_column='INSTRUMENT_PLATFORM', max_length=100,
         blank=True, null=True)
     instrument_model = models.CharField(
-        db_column='INSTRUMENT_MODEL', max_length=50,
+        db_column='INSTRUMENT_MODEL', max_length=100,
         blank=True, null=True)
 
     objects = RunManager()
 
     class Meta:
-        managed = False
-        db_table = 'ANALYSIS_JOB'
+        db_table = 'RUN'
         ordering = ('accession',)
+        unique_together = (
+            ('run_id', 'accession'),
+            ('accession', 'secondary_accession')
+        )
 
     def __str__(self):
         return self.accession
@@ -897,12 +917,6 @@ class AnalysisJobManager(models.Manager):
             ) \
             .prefetch_related(
                 Prefetch('analysis_metadata', queryset=_qs),
-            )\
-            .prefetch_related(
-                Prefetch(
-                    'analysis_download',
-                    queryset=AnalysisJobDownload.objects.all()
-                ),
             )
 
     def available(self, request):
@@ -916,24 +930,42 @@ class AnalysisJobManager(models.Manager):
                     'sample',
                     queryset=Sample.objects.available(
                         request)
+                ),
+                Prefetch(
+                    'run',
+                    queryset=Run.objects.available(
+                        request)
                 )
             )
 
 
 class AnalysisJob(models.Model):
+
+    def __init__(self, *args, **kwargs):
+        super(AnalysisJob, self).__init__(*args, **kwargs)
+        setattr(self, 'accession',
+                kwargs.get('accession', self._custom_pk()))
+
+    def _custom_pk(self):
+        if self.job_id is not None:
+            return "MGYA{pk:0>{fill}}".format(pk=self.job_id, fill=8)
+        return None
+
     job_id = models.BigAutoField(
         db_column='JOB_ID', primary_key=True)
-    accession = models.CharField(
-        db_column='EXTERNAL_RUN_IDS', max_length=100)
+    external_run_ids = models.CharField(
+        db_column='EXTERNAL_RUN_IDS', max_length=100,
+        blank=True, null=True)
     secondary_accession = models.CharField(
-        db_column='SECONDARY_ACCESSION', max_length=100)
+        db_column='SECONDARY_ACCESSION', max_length=100,
+        blank=True, null=True)
     job_operator = models.CharField(
-        db_column='JOB_OPERATOR', max_length=15)
+        db_column='JOB_OPERATOR', max_length=15, blank=True, null=True)
     pipeline = models.ForeignKey(
-        Pipeline, db_column='PIPELINE_ID',
+        Pipeline, db_column='PIPELINE_ID', blank=True, null=True,
         related_name='analysis', on_delete=models.CASCADE)
     submit_time = models.DateTimeField(
-        db_column='SUBMIT_TIME')
+        db_column='SUBMIT_TIME', blank=True, null=True)
     complete_time = models.DateTimeField(
         db_column='COMPLETE_TIME', blank=True, null=True)
     analysis_status = models.ForeignKey(
@@ -945,6 +977,9 @@ class AnalysisJob(models.Model):
         db_column='INPUT_FILE_NAME', max_length=50)
     result_directory = models.CharField(
         db_column='RESULT_DIRECTORY', max_length=100)
+    run = models.ForeignKey(
+        Run, db_column='RUN_ID', related_name='analysis',
+        on_delete=models.CASCADE, blank=True, null=True)
     sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID', related_name='analysis',
         on_delete=models.CASCADE, blank=True, null=True)
@@ -987,14 +1022,10 @@ class AnalysisJob(models.Model):
 
     class Meta:
         db_table = 'ANALYSIS_JOB'
-        unique_together = (('job_id', 'accession'), ('pipeline', 'accession'),)
-        ordering = ('accession',)
+        ordering = ('job_id',)
 
     def __str__(self):
         return self.accession
-
-    def multiple_pk(self):
-        return "%s/%s" % (self.accession, self.pipeline.release_version)
 
 
 class StudyErrorType(models.Model):
@@ -1071,21 +1102,6 @@ class VariableNames(models.Model):
         return self.var_name
 
 
-class GscCvCv(models.Model):
-    var_name = models.ForeignKey(
-        'VariableNames', db_column='VAR_NAME',
-        blank=True, null=True)
-    var_val_cv = models.CharField(
-        db_column='VAR_VAL_CV', primary_key=True, max_length=60)
-
-    class Meta:
-        db_table = 'GSC_CV_CV'
-        unique_together = (('var_name', 'var_val_cv'),)
-
-    def __str__(self):
-        return "%s %s" % (self.var_name, self.var_val_cv)
-
-
 class SampleAnnQuerySet(BaseQuerySet):
     pass
 
@@ -1101,9 +1117,6 @@ class SampleAnn(models.Model):
     sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID', primary_key=True,
         related_name="metadata")
-    var_val_cv = models.ForeignKey(
-        GscCvCv, db_column='VAR_VAL_CV',
-        blank=True, null=True)
     units = models.CharField(
         db_column='UNITS', max_length=25, blank=True, null=True)
     var = models.ForeignKey(
