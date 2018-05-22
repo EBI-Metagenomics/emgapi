@@ -552,7 +552,12 @@ class AnalysisQCChartViewSet(emg_mixins.ListModelMixin,
     renderer_classes = (emg_renderers.TSVRenderer,)
 
     lookup_field = 'chart'
-    lookup_value_regex = 'gc-distribution|nucleotide-distribution|seq-length'
+    lookup_value_regex = (
+        'gc-distribution'
+        '|nucleotide-distribution'
+        '|seq-length'
+        '|summary'
+    )
 
     def get_queryset(self):
         return emg_models.AnalysisJob.objects \
@@ -576,6 +581,7 @@ class AnalysisQCChartViewSet(emg_mixins.ListModelMixin,
             "gc-distribution": "GC-distribution.out",
             "nucleotide-distribution": "nucleotide-distribution.out",
             "seq-length": "seq-length.out",
+            "summary": "summary.out",
         }
 
         def build_path(name):
