@@ -521,3 +521,9 @@ try:
     RESULTS_DIR = EMG_CONF['emg']['results_dir']
 except KeyError:
     RESULTS_DIR = os.path.join(expanduser("~"), 'results')
+
+
+try:
+    RT = EMG_CONF['emg']['rt']
+except KeyError:
+    warnings.warn("RT not configured.", RuntimeWarning)
