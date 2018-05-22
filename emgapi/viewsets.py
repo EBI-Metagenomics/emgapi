@@ -131,9 +131,10 @@ class BaseAnalysisGenericViewSet(viewsets.GenericViewSet):
     )
 
     ordering_fields = (
-        'accession',
+        'pipeline'
+        # 'accession',
     )
-    ordering = ('accession',)
+    ordering = ('-pipeline')
 
 
 class BasePublicationGenericViewSet(viewsets.GenericViewSet):

@@ -68,49 +68,37 @@ mongo_router.register(
 router = routers.DefaultRouter(trailing_slash=False)
 
 router.register(
-    (r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)/'
-     r'pipelines/(?P<release_version>[0-9\.]+)/'
-     r'go-terms'),
+    r'analysis/(?P<accession>[^/]+)/go-terms',
     m_views.AnalysisGoTermRelationshipViewSet,
-    base_name='runs-pipelines-goterms'
+    base_name='analysis-goterms'
 )
 
 router.register(
-    (r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)/'
-     r'pipelines/(?P<release_version>[0-9\.]+)/'
-     r'go-slim'),
+    r'analysis/(?P<accession>[^/]+)/go-slim',
     m_views.AnalysisGoSlimRelationshipViewSet,
-    base_name='runs-pipelines-goslim'
+    base_name='analysis-goslim'
 )
 
 router.register(
-    (r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)/'
-     r'pipelines/(?P<release_version>[0-9\.]+)/'
-     r'interpro-identifiers'),
+    r'analysis/(?P<accession>[^/]+)/interpro-identifiers',
     m_views.AnalysisInterproIdentifierRelationshipViewSet,
-    base_name='runs-pipelines-interpro'
+    base_name='analysis-interpro'
 )
 
 router.register(
-    (r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)/'
-     r'pipelines/(?P<release_version>[0-9\.]+)/'
-     r'taxonomy'),
+    r'analysis/(?P<accession>[^/]+)/taxonomy',
     m_views.AnalysisOrganismRelationshipViewSet,
-    base_name='runs-pipelines-taxonomy'
+    base_name='analysis-taxonomy'
 )
 
 router.register(
-    (r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)/'
-     r'pipelines/(?P<release_version>[0-9\.]+)/'
-     r'taxonomy/ssu'),
+    r'analysis/(?P<accession>[^/]+)/taxonomy/ssu',
     m_views.AnalysisOrganismSSURelationshipViewSet,
-    base_name='runs-pipelines-taxonomy-ssu'
+    base_name='analysis-taxonomy-ssu'
 )
 
 router.register(
-    (r'runs/(?P<accession>[a-zA-Z0-9_\-\,\s]+)/'
-     r'pipelines/(?P<release_version>[0-9\.]+)/'
-     r'taxonomy/lsu'),
+    r'analysis/(?P<accession>[^/]+)/taxonomy/lsu',
     m_views.AnalysisOrganismLSURelationshipViewSet,
-    base_name='runs-pipelines-taxonomy-lsu'
+    base_name='analysis-taxonomy-lsu'
 )

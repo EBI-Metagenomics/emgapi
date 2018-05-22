@@ -16,7 +16,8 @@
 
 import logging
 
-from mongoengine.queryset.visitor import Q
+from django.db.models import Q
+from mongoengine.queryset.visitor import Q as M_Q
 
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -167,8 +168,8 @@ class GoTermAnalysisRelationshipViewSet(m_viewsets.ListReadOnlyModelViewSet):
         logger.info("get accession %s" % annotation.accession)
         job_ids = m_models.AnalysisJobGoTerm.objects \
             .filter(
-                Q(go_slim__go_term=annotation) |
-                Q(go_terms__go_term=annotation)
+                M_Q(go_slim__go_term=annotation) |
+                M_Q(go_terms__go_term=annotation)
             ) \
             .distinct('job_id')
         logger.info("Found %d analysis" % len(job_ids))
@@ -190,7 +191,7 @@ class GoTermAnalysisRelationshipViewSet(m_viewsets.ListReadOnlyModelViewSet):
             .list(request, *args, **kwargs)
 
 
-class InterproIdentifierAnalysisRelationshipViewSet(  # noqa
+class InterproIdentifierAnalysisRelationshipViewSet(  # NOQA
     m_viewsets.ListReadOnlyModelViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
@@ -249,21 +250,18 @@ class InterproIdentifierAnalysisRelationshipViewSet(  # noqa
 
 
 class AnalysisGoTermRelationshipViewSet(  # NOQA
-    m_viewsets.MultipleFieldLookupModelViewSet):
+    m_viewsets.ListReadOnlyModelViewSet):
 
     serializer_class = m_serializers.GoTermRetriveSerializer
 
     pagination_class = m_page.MaxSetPagination
 
-    lookup_fields = ('accession', 'release_version')
+    lookup_field = 'accession'
 
     def get_queryset(self):
-        accession = self.kwargs['accession']
-        release_version = self.kwargs['release_version']
         job = emg_models.AnalysisJob.objects \
             .filter(
-                accession=accession,
-                pipeline__release_version=release_version
+                Q(pk=int(self.kwargs['accession'].lstrip('MGYA')))
             ) \
             .exclude(experiment_type__experiment_type='amplicon') \
             .first()
@@ -278,7 +276,7 @@ class AnalysisGoTermRelationshipViewSet(  # NOQA
 
         return getattr(analysis, 'go_terms', [])
 
-    def list(self, request, accession, release_version, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves GO terms for the given run and pipeline version
         Example:
@@ -290,21 +288,18 @@ class AnalysisGoTermRelationshipViewSet(  # NOQA
 
 
 class AnalysisGoSlimRelationshipViewSet(  # NOQA
-    m_viewsets.MultipleFieldLookupModelViewSet):
+    m_viewsets.ListReadOnlyModelViewSet):
 
     serializer_class = m_serializers.GoTermRetriveSerializer
 
     pagination_class = m_page.MaxSetPagination
 
-    lookup_fields = ('accession', 'release_version')
+    lookup_field = 'accession'
 
     def get_queryset(self):
-        accession = self.kwargs['accession']
-        release_version = self.kwargs['release_version']
         job = emg_models.AnalysisJob.objects \
             .filter(
-                accession=accession,
-                pipeline__release_version=release_version
+                Q(pk=int(self.kwargs['accession'].lstrip('MGYA')))
             ) \
             .exclude(experiment_type__experiment_type='amplicon') \
             .first()
@@ -319,7 +314,7 @@ class AnalysisGoSlimRelationshipViewSet(  # NOQA
 
         return getattr(analysis, 'go_slim', [])
 
-    def list(self, request, accession, release_version, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves GO slim for the given run and pipeline version
         Example:
@@ -331,21 +326,18 @@ class AnalysisGoSlimRelationshipViewSet(  # NOQA
 
 
 class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
-    m_viewsets.MultipleFieldLookupModelViewSet):
+    m_viewsets.ListReadOnlyModelViewSet):
 
     serializer_class = m_serializers.InterproIdentifierRetriveSerializer
 
     pagination_class = m_page.MaxSetPagination
 
-    lookup_fields = ('accession', 'release_version')
+    lookup_field = 'accession'
 
     def get_queryset(self):
-        accession = self.kwargs['accession']
-        release_version = self.kwargs['release_version']
         job = emg_models.AnalysisJob.objects \
             .filter(
-                accession=accession,
-                pipeline__release_version=release_version
+                Q(pk=int(self.kwargs['accession'].lstrip('MGYA')))
             ) \
             .exclude(experiment_type__experiment_type='amplicon') \
             .first()
@@ -360,7 +352,7 @@ class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
 
         return getattr(analysis, 'interpro_identifiers', [])
 
-    def list(self, request, accession, release_version, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves InterPro identifiers for the given run and pipeline version
         Example:
@@ -439,7 +431,7 @@ class OrganismTreeViewSet(m_viewsets.ListReadOnlyModelViewSet):
         if len(organism) == 0:
             raise Http404(("Attribute error '%s'." % self.lookup_field))
         queryset = m_models.Organism.objects \
-            .filter(Q(ancestors__in=organism) | Q(name__in=organism))
+            .filter(M_Q(ancestors__in=organism) | M_Q(name__in=organism))
         return queryset
 
     def get_serializer_class(self):
@@ -461,8 +453,8 @@ class OrganismTreeViewSet(m_viewsets.ListReadOnlyModelViewSet):
             .list(request, *args, **kwargs)
 
 
-class AnalysisOrganismRelationshipViewSet(  # noqa
-    m_viewsets.MultipleFieldLookupModelViewSet):
+class AnalysisOrganismRelationshipViewSet(  # NOQA
+    m_viewsets.ListReadOnlyModelViewSet):
 
     serializer_class = m_serializers.OrganismRetriveSerializer
 
@@ -478,14 +470,12 @@ class AnalysisOrganismRelationshipViewSet(  # noqa
         'lineage',
     )
 
-    lookup_fields = ('accession', 'release_version')
+    lookup_field = 'accession'
 
     def get_queryset(self):
-        accession = self.kwargs['accession']
-        release_version = self.kwargs['release_version']
         job = get_object_or_404(
-            emg_models.AnalysisJob, accession=accession,
-            pipeline__release_version=release_version
+            emg_models.AnalysisJob,
+            Q(pk=int(self.kwargs['accession'].lstrip('MGYA')))
         )
 
         analysis = None
@@ -511,20 +501,18 @@ class AnalysisOrganismRelationshipViewSet(  # noqa
 
 
 class AnalysisOrganismSSURelationshipViewSet(  # NOQA
-    m_viewsets.MultipleFieldLookupModelViewSet):
+    m_viewsets.ListReadOnlyModelViewSet):
 
     serializer_class = m_serializers.OrganismRetriveSerializer
 
     pagination_class = m_page.MaxSetPagination
 
-    lookup_fields = ('accession', 'release_version')
+    lookup_field = 'accession'
 
     def get_queryset(self):
-        accession = self.kwargs['accession']
-        release_version = self.kwargs['release_version']
         job = get_object_or_404(
-            emg_models.AnalysisJob, accession=accession,
-            pipeline__release_version=release_version
+            emg_models.AnalysisJob,
+            Q(pk=int(self.kwargs['accession'].lstrip('MGYA')))
         )
 
         analysis = None
@@ -536,7 +524,7 @@ class AnalysisOrganismSSURelationshipViewSet(  # NOQA
 
         return getattr(analysis, 'taxonomy_ssu', [])
 
-    def list(self, request, accession, release_version, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves SSU Taxonomic analysis for the given run and pipeline
         version
@@ -550,20 +538,18 @@ class AnalysisOrganismSSURelationshipViewSet(  # NOQA
 
 
 class AnalysisOrganismLSURelationshipViewSet(  # NOQA
-    m_viewsets.MultipleFieldLookupModelViewSet):
+    m_viewsets.ListReadOnlyModelViewSet):
 
     serializer_class = m_serializers.OrganismRetriveSerializer
 
     pagination_class = m_page.MaxSetPagination
 
-    lookup_fields = ('accession', 'release_version')
+    lookup_field = 'accession'
 
     def get_queryset(self):
-        accession = self.kwargs['accession']
-        release_version = self.kwargs['release_version']
         job = get_object_or_404(
-            emg_models.AnalysisJob, accession=accession,
-            pipeline__release_version=release_version
+            emg_models.AnalysisJob,
+            Q(pk=int(self.kwargs['accession'].lstrip('MGYA')))
         )
 
         analysis = None
@@ -575,7 +561,7 @@ class AnalysisOrganismLSURelationshipViewSet(  # NOQA
 
         return getattr(analysis, 'taxonomy_lsu', [])
 
-    def list(self, request, accession, release_version, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         """
         Retrieves LSU Taxonomic analysis for the given run and pipeline
         version
@@ -620,9 +606,9 @@ class OrganismAnalysisRelationshipViewSet(m_viewsets.ListReadOnlyModelViewSet):
             raise Http404(("Attribute error '%s'." % self.lookup_field))
         job_ids = m_models.AnalysisJobTaxonomy.objects \
             .filter(
-                Q(taxonomy__organism__in=organism) |
-                Q(taxonomy_lsu__organism__in=organism) |
-                Q(taxonomy_ssu__organism__in=organism)
+                M_Q(taxonomy__organism__in=organism) |
+                M_Q(taxonomy_lsu__organism__in=organism) |
+                M_Q(taxonomy_ssu__organism__in=organism)
             ).distinct('job_id')
         logger.info("Found %d analysis" % len(job_ids))
         return emg_models.AnalysisJob.objects \

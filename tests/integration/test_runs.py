@@ -30,18 +30,24 @@ from emgapi.models import Run  # noqa
 class TestRunAPI(APITestCase):
 
     def test_public(self):
+        _status = mommy.make('emgapi.Status', pk=4)
         st = mommy.make("emgapi.Study", pk=123, is_public=1)
         _s1 = mommy.make("emgapi.Sample", pk=123, accession="123", is_public=1)
         _s2 = mommy.make("emgapi.Sample", pk=456, accession="456", is_public=0)
         mommy.make("emgapi.StudySample", study=st, sample=_s1)
         mommy.make("emgapi.StudySample", study=st, sample=_s2)
 
+        mommy.make("emgapi.Run", pk=123, accession="123", status_id=_status,
+                   study=st, sample=_s2)
+        mommy.make("emgapi.Run", pk=456, accession="456", status_id=_status,
+                   study=st, sample=_s2)
+
         _as = mommy.make('emgapi.AnalysisStatus', pk=3)
         _p = mommy.make('emgapi.Pipeline', pk=1, release_version="1.0")
-        mommy.make("emgapi.AnalysisJob", pk=123, accession="123",
+        mommy.make("emgapi.AnalysisJob", pk=123,
                    pipeline=_p, analysis_status=_as, run_status_id=4,
                    study=st, sample=_s2)
-        mommy.make("emgapi.AnalysisJob", pk=456, accession="456",
+        mommy.make("emgapi.AnalysisJob", pk=456,
                    pipeline=_p, run_status_id=2,
                    study=st, sample=_s2)
 
