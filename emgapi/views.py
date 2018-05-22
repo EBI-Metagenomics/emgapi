@@ -553,10 +553,10 @@ class AnalysisQCChartViewSet(emg_mixins.ListModelMixin,
 
     lookup_field = 'chart'
     lookup_value_regex = (
-        'gc-distribution'
-        '|nucleotide-distribution'
-        '|seq-length'
-        '|summary'
+        'gc-distribution|'
+        'nucleotide-distribution|'
+        'seq-length|'
+        'summary'
     )
 
     def get_queryset(self):
@@ -570,40 +570,38 @@ class AnalysisQCChartViewSet(emg_mixins.ListModelMixin,
             raise Http404()
         return get_object_or_404(self.get_queryset(), Q(pk=pk))
 
+    def _build_path(self, name):
+        return os.path.abspath(os.path.join(
+            settings.RESULTS_DIR,
+            self.get_object().result_directory,
+            'qc-statistics', name))
+
     def retrieve(self, request, chart=None, **kwargs):
         """
         Retrieves krona chart for the given accession and pipeline version
         Example:
         ---
-        `/analysis/ERR1385375/gc-distribution`
+        `/analysis/MGYA00109028/gc-distribution`
         """
         mapping = {
-            "gc-distribution": "GC-distribution.out",
-            "nucleotide-distribution": "nucleotide-distribution.out",
-            "seq-length": "seq-length.out",
-            "summary": "summary.out",
+            "gc-distribution": "GC-distribution",
+            "nucleotide-distribution": "nucleotide-distribution",
+            "seq-length": "seq-length",
+            "summary": "summary",
         }
-
-        def build_path(name):
-            fp = os.path.abspath(os.path.join(
-                settings.RESULTS_DIR,
-                obj.result_directory,
-                'qc-statistics', name)
-            )
-            logger.info(fp)
-            if not os.path.isfile(fp):
-                return build_path("{name}.sub-set".format(name=name))
-            return fp
-
-        obj = self.get_object()
-        filepath = build_path(mapping[chart])
-
-        logger.info(filepath)
-
+        filepath = self._build_path(
+            "{name}.out".format(name=mapping[chart]))
+        if not os.path.isfile(filepath):
+            filepath = self._build_path(
+                "{name}.out.full".format(name=mapping[chart]))
+            if not os.path.isfile(filepath):
+                filepath = self._build_path(
+                    "{name}.out.sub-set".format(name=mapping[chart]))
         if os.path.isfile(filepath):
+            logger.info("Path %r" % filepath)
             with open(filepath, "r") as f:
                 return Response(f.read())
-        raise Http404('No results available.')
+        raise Http404()
 
 
 class KronaViewSet(emg_mixins.ListModelMixin,
