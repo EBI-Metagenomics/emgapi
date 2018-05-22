@@ -17,6 +17,8 @@
 
 import logging
 
+from django.conf import settings
+
 from rest_framework_json_api import serializers
 
 from . import models as ena_models
@@ -35,4 +37,46 @@ class SubmitterSerializer(serializers.Serializer):
 
     class Meta:
         model = ena_models.Submitter
+        fields = '__all__'
+
+
+class NotifySerializer(serializers.Serializer):
+
+    email = serializers.CharField(max_length=200)
+    title = serializers.CharField(max_length=100)
+    content = serializers.CharField(max_length=500)
+
+    def create(self, validated_data):
+        import requests
+        n = ena_models.Notify(**validated_data)
+
+        ticket = {
+            "id": "ticket/new",
+            "Queue": settings.RT['queue'],
+            "Requestor": n.email,
+            "Priority": "4",
+            "Subject": n.title,
+            "Text": n.content
+        }
+
+        content = [
+            "{key}: {value}".format(
+                key=key, value=value) for key, value in ticket.items()
+        ]
+
+        payload = {
+            'user': settings.RT['user'],
+            'pass': settings.RT['pass'],
+            'content': "\n".join(content),
+        }
+
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+
+        r = requests.post(settings.RT['url'], data=payload, headers=headers)
+        return r.status_code
+
+    class Meta:
+        model = ena_models.Notify
         fields = '__all__'

@@ -36,6 +36,7 @@ from rest_framework import viewsets, mixins
 from rest_framework.decorators import detail_route, list_route
 from rest_framework import permissions
 from rest_framework import renderers
+from rest_framework import status
 
 from . import models as emg_models
 from . import serializers as emg_serializers
@@ -45,6 +46,8 @@ from . import viewsets as emg_viewsets
 from . import utils as emg_utils
 from . import renderers as emg_renderers
 
+
+from django.views.decorators.csrf import csrf_exempt
 
 from emgena import models as ena_models
 from emgena import serializers as ena_serializers
@@ -108,6 +111,26 @@ class UtilsViewSet(viewsets.GenericViewSet):
             .select_related('submission_account')
 
         serializer = self.get_serializer(submitter, many=True)
+        return Response(serializer.data)
+
+    @csrf_exempt
+    @list_route(
+        methods=['get', 'post', ],
+        serializer_class=ena_serializers.NotifySerializer,
+    )
+    def notify(self, request, pk=None):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                status_code = serializer.save()
+                if status_code == 200:
+                    return Response("Created", status=status.HTTP_201_CREATED)
+            except:
+                pass
+            return Response(
+                "Request cannot be processed.",
+                status=status.HTTP_409_CONFLICT
+            )
         return Response(serializer.data)
 
 
