@@ -717,6 +717,8 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
             'submit_time',
             'analysis_status',
             'pipeline',
+            'external-run-ids',
+            'secondary-accession',
         )
 
 
