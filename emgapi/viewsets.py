@@ -131,7 +131,7 @@ class BaseAnalysisGenericViewSet(viewsets.GenericViewSet):
     )
 
     ordering_fields = (
-        'pipeline'
+        'pipeline',
         # 'accession',
     )
     ordering = ('-pipeline',)
