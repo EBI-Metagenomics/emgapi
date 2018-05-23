@@ -134,7 +134,7 @@ class BaseAnalysisGenericViewSet(viewsets.GenericViewSet):
         'pipeline'
         # 'accession',
     )
-    ordering = ('-pipeline')
+    ordering = ('-pipeline',)
 
 
 class BasePublicationGenericViewSet(viewsets.GenericViewSet):
