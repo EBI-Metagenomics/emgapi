@@ -41,8 +41,8 @@ class BaseStudyGenericViewSet(viewsets.GenericViewSet):
     )
 
     ordering_fields = (
+        ('study_id', 'accession'),
         'study_name',
-        'accession',
         'last_update',
         'samples_count',
     )
@@ -131,8 +131,8 @@ class BaseAnalysisGenericViewSet(viewsets.GenericViewSet):
     )
 
     ordering_fields = (
+        ('job_id', 'accession'),
         'pipeline',
-        # 'accession',
     )
     ordering = ('-pipeline',)
 
