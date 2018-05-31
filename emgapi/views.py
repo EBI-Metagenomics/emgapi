@@ -150,7 +150,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     )
 
     search_fields = (
-        'biome_name',
+        '@biome_name',
         'lineage',
     )
 
