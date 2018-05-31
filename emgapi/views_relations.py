@@ -749,7 +749,13 @@ class BiomeTreeViewSet(mixins.ListModelMixin,
 
     filter_backends = (
         DjangoFilterBackend,
+        filters.SearchFilter,
         filters.OrderingFilter,
+    )
+
+    search_fields = (
+        '@biome_name',
+        'lineage',
     )
 
     ordering_fields = (
