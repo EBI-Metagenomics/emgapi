@@ -2,6 +2,20 @@
 /* The navbar is fixed at >= 980px wide, so add padding to the body to prevent
 content running up underneath it. */
 
+
+
+div#local-masthead {
+  background-image: url(/static/ui/images/embl-ebi-background-4.jpg) !important;
+  background-color: #000 !important;
+  background-repeat: no-repeat;
+  background-position: 100% 100%;
+  background-size: 115%;
+}
+
+.header-logo {
+    height: 80px;
+}
+
 .resource-description, .response-info {
   margin-bottom: 2em;
 }

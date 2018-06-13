@@ -18,7 +18,7 @@ from rest_framework import routers
 
 
 class ApiBrowserView(routers.APIRootView):
-    """EBI Metagenomics API provides programmatic access to the data for cross-database complex queries. For more details review the documentation."""  # noqa
+    """MGnify API provides programmatic access to the data for cross-database complex queries. For more details review the documentation."""  # noqa
     pass
 
 
