@@ -5,7 +5,7 @@ content running up underneath it. */
 
 
 div#local-masthead {
-  background-image: url(/static/ui/images/embl-ebi-background-4.jpg) !important;
+  background-image: url(/metagenomics/api/static/ui/images/embl-ebi-background-4.jpg) !important;
   background-color: #000 !important;
   background-repeat: no-repeat;
   background-position: 100% 100%;
