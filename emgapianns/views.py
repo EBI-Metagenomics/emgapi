@@ -185,7 +185,7 @@ class GoTermAnalysisRelationshipViewSet(m_viewsets.ListReadOnlyModelViewSet):
         Retrieves list of analysis results for the given GO term
         Example:
         ---
-        `/annotations/go-terms/GO:009579/analysis`
+        `/annotations/go-terms/GO:009579/analyses`
         """
         return super(GoTermAnalysisRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
@@ -243,7 +243,7 @@ class InterproIdentifierAnalysisRelationshipViewSet(  # NOQA
         Retrieves list of analysis results for the given InterPro identifier
         Example:
         ---
-        `/annotations/interpro-identifier/IPR020405/analysis`
+        `/annotations/interpro-identifier/IPR020405/analyses`
         """
         return super(InterproIdentifierAnalysisRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
@@ -278,10 +278,10 @@ class AnalysisGoTermRelationshipViewSet(  # NOQA
 
     def list(self, request, *args, **kwargs):
         """
-        Retrieves GO terms for the given run and pipeline version
+        Retrieves GO terms for the given accession
         Example:
         ---
-        `/runs/ERR1385375/pipelines/3.0/go-terms`
+        `/analyses/MGYA00102827/go-terms`
         """
         return super(AnalysisGoTermRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
@@ -316,10 +316,10 @@ class AnalysisGoSlimRelationshipViewSet(  # NOQA
 
     def list(self, request, *args, **kwargs):
         """
-        Retrieves GO slim for the given run and pipeline version
+        Retrieves GO slim for the given accession
         Example:
         ---
-        `/runs/ERR1385375/pipelines/3.0/go-slim`
+        `/analyses/MGYA00102827/go-slim`
         """
         return super(AnalysisGoSlimRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
@@ -354,10 +354,10 @@ class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
 
     def list(self, request, *args, **kwargs):
         """
-        Retrieves InterPro identifiers for the given run and pipeline version
+        Retrieves InterPro identifiers for the given accession
         Example:
         ---
-        `/runs/ERR1385375/pipelines/3.0/interpro-identifiers`
+        `/analyses/MGYA00102827/interpro-identifiers`
         """
         return super(AnalysisInterproIdentifierRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
@@ -489,11 +489,10 @@ class AnalysisOrganismRelationshipViewSet(  # NOQA
 
     def list(self, request, *args, **kwargs):
         """
-        Retrieves 16SrRNA Taxonomic analysis for the given run and pipeline
-        version
+        Retrieves 16SrRNA Taxonomic analysis for the given accession
         Example:
         ---
-        `/runs/ERR1385375/pipelines/3.0/taxonomy`
+        `/analyses/MGYA00102827/taxonomy`
         """
 
         return super(AnalysisOrganismRelationshipViewSet, self) \
@@ -526,11 +525,10 @@ class AnalysisOrganismSSURelationshipViewSet(  # NOQA
 
     def list(self, request, *args, **kwargs):
         """
-        Retrieves SSU Taxonomic analysis for the given run and pipeline
-        version
+        Retrieves SSU Taxonomic analysis for the given accession
         Example:
         ---
-        `/runs/ERR1385375/pipelines/3.0/taxonomy/ssu`
+        `/analyses/MGYA00102827/taxonomy/ssu`
         """
 
         return super(AnalysisOrganismSSURelationshipViewSet, self) \
@@ -563,11 +561,10 @@ class AnalysisOrganismLSURelationshipViewSet(  # NOQA
 
     def list(self, request, *args, **kwargs):
         """
-        Retrieves LSU Taxonomic analysis for the given run and pipeline
-        version
+        Retrieves LSU Taxonomic analysis for the given accession
         Example:
         ---
-        `/runs/ERR1385375/pipelines/3.0/taxonomy/lsu`
+        `/analyses/MGYA00102827/taxonomy/lsu`
         """
 
         return super(AnalysisOrganismLSURelationshipViewSet, self) \
