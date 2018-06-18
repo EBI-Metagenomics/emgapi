@@ -69,9 +69,9 @@ class TestExamples(object):
         api_base = '%s/%s/' % (live_server.url, api_version)
         with Session(api_base) as s:
             run = s.get('runs', 'ABC01234').resource
-            for analysis in run.analysis:
+            for analyses in run.analyses:
                 go_terms = []
-                for go in analysis.go_slim:
+                for go in analyses.go_slim:
                     go_terms.append(go.accession)
                 expected = ['GO:0030246', 'GO:0046906', 'GO:0043167']
                 assert go_terms == expected

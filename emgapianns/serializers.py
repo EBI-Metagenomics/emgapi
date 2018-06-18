@@ -37,7 +37,7 @@ class GoTermSerializer(m_serializers.DocumentSerializer,
         model=emg_models.AnalysisJob,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi_v1:goterms-analysis-list',
+        related_link_view_name='emgapi_v1:goterms-analyses-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
@@ -63,7 +63,7 @@ class InterproIdentifierSerializer(m_serializers.DocumentSerializer,
         model=emg_models.AnalysisJob,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi_v1:interproidentifier-analysis-list',
+        related_link_view_name='emgapi_v1:interproidentifier-analyses-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
@@ -84,17 +84,17 @@ class GoTermRetriveSerializer(m_serializers.DynamicDocumentSerializer,
         lookup_field='accession',
     )
 
-    analysis = relations.SerializerMethodResourceRelatedField(
-        source='get_analysis',
+    analyses = relations.SerializerMethodResourceRelatedField(
+        source='get_analyses',
         model=emg_models.AnalysisJob,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi_v1:goterms-analysis-list',
+        related_link_view_name='emgapi_v1:goterms-analyses-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
 
-    def get_analysis(self, obj):
+    def get_analyses(self, obj):
         return None
 
     count = serializers.IntegerField(required=False)
@@ -113,17 +113,17 @@ class InterproIdentifierRetriveSerializer(  # NOQA
         lookup_field='accession',
     )
 
-    analysis = relations.SerializerMethodResourceRelatedField(
-        source='get_analysis',
+    analyses = relations.SerializerMethodResourceRelatedField(
+        source='get_analyses',
         model=emg_models.AnalysisJob,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi_v1:interproidentifier-analysis-list',
+        related_link_view_name='emgapi_v1:interproidentifier-analyses-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
 
-    def get_analysis(self, obj):
+    def get_analyses(self, obj):
         return None
 
     count = serializers.IntegerField(required=False)
@@ -155,17 +155,17 @@ class OrganismSerializer(m_serializers.DynamicDocumentSerializer,
     # def get_children(self, obj):
     #     return None
 
-    analysis = relations.SerializerMethodResourceRelatedField(
-        source='get_analysis',
+    analyses = relations.SerializerMethodResourceRelatedField(
+        source='get_analyses',
         model=emg_models.AnalysisJob,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi_v1:organisms-analysis-list',
+        related_link_view_name='emgapi_v1:organisms-analyses-list',
         related_link_url_kwarg='lineage',
         related_link_lookup_field='lineage'
     )
 
-    def get_analysis(self, obj):
+    def get_analyses(self, obj):
         return None
 
     class Meta:

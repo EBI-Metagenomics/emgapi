@@ -481,7 +481,7 @@ except KeyError:
 try:
     EMG_TITLE = EMG_CONF['emg']['documentation']['title']
 except KeyError:
-    EMG_TITLE = 'EBI Metagenomics API'
+    EMG_TITLE = 'MGnify API'
 try:
     EMG_URL = EMG_CONF['emg']['documentation']['url']
 except KeyError:
@@ -489,7 +489,7 @@ except KeyError:
 try:
     EMG_DESC = EMG_CONF['emg']['documentation']['description']
 except KeyError:
-    EMG_DESC = 'EBI Metagenomics API'
+    EMG_DESC = 'MGnify API'
 
 # MongoDB
 import mongoengine

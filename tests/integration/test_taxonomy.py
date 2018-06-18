@@ -92,7 +92,7 @@ class TestTaxonomy(object):
         assert len(rsp['data']) == 0
 
     def test_relations(self, client, run):
-        job = run.analysis.all()[0]
+        job = run.analyses.all()[0]
         call_command('import_taxonomy', run.accession,
                      os.path.dirname(os.path.abspath(__file__)))
 
