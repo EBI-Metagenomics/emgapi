@@ -233,8 +233,23 @@ class QueryArrayWidget(widgets.BaseCSVWidget, forms.TextInput):
 
 class SampleFilter(django_filters.FilterSet):
 
+    accession = filters.ModelMultipleChoiceFilter(
+        queryset=emg_models.Sample.objects,
+        to_field_name='accession',
+        method='filter_accession',
+        distinct=True,
+        label='Sample accession',
+        help_text='Sample accession',
+        widget=QueryArrayWidget
+    )
+
+    def filter_accession(self, qs, name, values):
+        if values:
+            qs = qs.available(self.request).filter(accession__in=values)
+        return qs
+
     experiment_type = filters.ModelMultipleChoiceFilter(
-        queryset=emg_models.ExperimentType.objects.all(),
+        queryset=emg_models.ExperimentType.objects,
         to_field_name='experiment_type',
         method='filter_experiment_type',
         distinct=True,
@@ -244,11 +259,11 @@ class SampleFilter(django_filters.FilterSet):
     )
 
     def filter_experiment_type(self, qs, name, values):
-        analysis = emg_models.AnalysisJob.objects \
+        analyses = emg_models.AnalysisJob.objects \
             .filter(experiment_type__in=values) \
             .values('sample')
-        if len(analysis) > 0:
-            qs = qs.filter(pk__in=analysis)
+        if len(analyses) > 0:
+            qs = qs.filter(pk__in=analyses)
         return qs
 
     biome_name = django_filters.CharFilter(
@@ -434,7 +449,7 @@ class SampleFilter(django_filters.FilterSet):
 class RunFilter(django_filters.FilterSet):
 
     experiment_type = filters.ModelMultipleChoiceFilter(
-        queryset=emg_models.ExperimentType.objects.all(),
+        queryset=emg_models.ExperimentType.objects,
         to_field_name='experiment_type',
         name='experiment_type__experiment_type',
         distinct=True,
