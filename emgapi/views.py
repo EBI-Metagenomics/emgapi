@@ -533,13 +533,23 @@ class AnalysisJobViewSet(mixins.RetrieveModelMixin,
 
     def list(self, request, *args, **kwargs):
         """
-        Retrieves analysis result for the given accession
+        Retrieves analysis results for the given accession
         Example:
         ---
-        `/analyses/MGYA00102827`
+        `/analyses`
         """
         return super(AnalysisJobViewSet, self) \
             .list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves analysis result for the given accession
+        Example:
+        ---
+        `/analyses/MGYA00135572`
+        """
+        return super(AnalysisJobViewSet, self) \
+            .retrieve(request, *args, **kwargs)
 
 
 class AnalysisQCChartViewSet(emg_mixins.ListModelMixin,
@@ -746,7 +756,7 @@ class AnalysisResultDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
         Example:
         ---
         `/analyses/MGYA00102827/file/
-        ERP009703_taxonomy_abundances_LSU_v4.0.tsv`
+        ERR1701760_MERGED_FASTQ_otu_table_hdf5.biom`
         """
         obj = self.get_object()
         response = HttpResponse()
