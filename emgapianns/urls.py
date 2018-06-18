@@ -35,15 +35,15 @@ mongo_router.register(
 )
 
 mongo_router.register(
-    r'annotations/go-terms/(?P<accession>[a-zA-Z0-9\:]+)/analysis',
+    r'annotations/go-terms/(?P<accession>[a-zA-Z0-9\:]+)/analyses',
     m_views.GoTermAnalysisRelationshipViewSet,
-    base_name='goterms-analysis'
+    base_name='goterms-analyses'
 )
 
 mongo_router.register(
-    r'annotations/interpro-identifiers/(?P<accession>[a-zA-Z0-9\:]+)/analysis',
+    r'annotations/interpro-identifiers/(?P<accession>[a-zA-Z0-9\:]+)/analyses',
     m_views.InterproIdentifierAnalysisRelationshipViewSet,
-    base_name='interproidentifier-analysis'
+    base_name='interproidentifier-analyses'
 )
 
 mongo_router.register(
@@ -60,45 +60,45 @@ mongo_router.register(
 
 mongo_router.register(
     (r'annotations/organisms/(?P<lineage>[^/]+)/'
-     r'analysis'),
+     r'analyses'),
     m_views.OrganismAnalysisRelationshipViewSet,
-    base_name='organisms-analysis'
+    base_name='organisms-analyses'
 )
 
 router = routers.DefaultRouter(trailing_slash=False)
 
 router.register(
-    r'analysis/(?P<accession>[^/]+)/go-terms',
+    r'analyses/(?P<accession>[^/]+)/go-terms',
     m_views.AnalysisGoTermRelationshipViewSet,
     base_name='analysis-goterms'
 )
 
 router.register(
-    r'analysis/(?P<accession>[^/]+)/go-slim',
+    r'analyses/(?P<accession>[^/]+)/go-slim',
     m_views.AnalysisGoSlimRelationshipViewSet,
     base_name='analysis-goslim'
 )
 
 router.register(
-    r'analysis/(?P<accession>[^/]+)/interpro-identifiers',
+    r'analyses/(?P<accession>[^/]+)/interpro-identifiers',
     m_views.AnalysisInterproIdentifierRelationshipViewSet,
     base_name='analysis-interpro'
 )
 
 router.register(
-    r'analysis/(?P<accession>[^/]+)/taxonomy',
+    r'analyses/(?P<accession>[^/]+)/taxonomy',
     m_views.AnalysisOrganismRelationshipViewSet,
     base_name='analysis-taxonomy'
 )
 
 router.register(
-    r'analysis/(?P<accession>[^/]+)/taxonomy/ssu',
+    r'analyses/(?P<accession>[^/]+)/taxonomy/ssu',
     m_views.AnalysisOrganismSSURelationshipViewSet,
     base_name='analysis-taxonomy-ssu'
 )
 
 router.register(
-    r'analysis/(?P<accession>[^/]+)/taxonomy/lsu',
+    r'analyses/(?P<accession>[^/]+)/taxonomy/lsu',
     m_views.AnalysisOrganismLSURelationshipViewSet,
     base_name='analysis-taxonomy-lsu'
 )
