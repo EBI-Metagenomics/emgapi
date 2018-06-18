@@ -297,8 +297,8 @@ class StudiesDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
         Retrieves static summary file
         Example:
         ---
-        `/studies/ERP009703/pipelines/4.0/file/
-        ERP009703_taxonomy_abundances_LSU_v4.0.tsv`
+        `/studies/MGYS00000410/pipelines/2.0/file/
+        ERP001736_taxonomy_abundances_v2.0.tsv`
         """
         obj = self.get_object()
         response = HttpResponse()

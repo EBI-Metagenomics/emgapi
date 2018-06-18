@@ -34,7 +34,7 @@ class TestCLI(object):
         call_command('import_qc', 'ABC01234',
                      os.path.dirname(os.path.abspath(__file__)))
 
-        url = reverse("emgapi_v1:analysis-detail",
+        url = reverse("emgapi_v1:analyses-detail",
                       args=["MGYA00001234"])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -130,7 +130,7 @@ class TestCLI(object):
                      os.path.dirname(os.path.abspath(__file__)),
                      pipeline='4.0')
 
-        url = reverse("emgapi_v1:analysis-detail",
+        url = reverse("emgapi_v1:analyses-detail",
                       args=[results['accession']])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -149,7 +149,7 @@ class TestCLI(object):
                      os.path.dirname(os.path.abspath(__file__)),
                      pipeline=version)
 
-        url = reverse("emgapi_v1:analysis-detail",
+        url = reverse("emgapi_v1:analyses-detail",
                       args=[job])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
