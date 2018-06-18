@@ -536,7 +536,7 @@ class AnalysisJobViewSet(mixins.RetrieveModelMixin,
         Retrieves analysis result for the given accession
         Example:
         ---
-        `/runs/ERR1385375/analysis`
+        `/analyses/MGYA00102827`
         """
         return super(AnalysisJobViewSet, self) \
             .list(request, *args, **kwargs)
@@ -581,7 +581,7 @@ class AnalysisQCChartViewSet(emg_mixins.ListModelMixin,
         Retrieves krona chart for the given accession and pipeline version
         Example:
         ---
-        `/analysis/MGYA00109028/gc-distribution`
+        `/analyses/MGYA00102827/gc-distribution`
         """
         mapping = {
             "gc-distribution": "GC-distribution",
@@ -636,7 +636,7 @@ class KronaViewSet(emg_mixins.ListModelMixin,
         Retrieves krona chart for the given accession and pipeline version
         Example:
         ---
-        `/runs/ERR1385375/pipelines/3.0/krona`
+        `/analyses/MGYA00102827/krona`
         """
         obj = self.get_object()
         krona = os.path.abspath(os.path.join(
@@ -708,7 +708,7 @@ class AnalysisResultDownloadsViewSet(emg_mixins.ListModelMixin,
         Retrieves list of static summary files
         Example:
         ---
-        `/runs/ERR1385375/pipelines/3.0/downloads`
+        `/analyses/MGYA00102827/downloads`
         """
         return super(AnalysisResultDownloadsViewSet, self) \
             .list(request, *args, **kwargs)
@@ -745,7 +745,7 @@ class AnalysisResultDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
         Retrieves static summary file
         Example:
         ---
-        `/analysis/ERR1385375/file/
+        `/analyses/MGYA00102827/file/
         ERP009703_taxonomy_abundances_LSU_v4.0.tsv`
         """
         obj = self.get_object()

@@ -46,9 +46,9 @@ router.register(
 )
 
 router.register(
-    r'analysis',
+    r'analyses',
     views.AnalysisJobViewSet,
-    base_name='analysis'
+    base_name='analyses'
 )
 
 router.register(
@@ -82,25 +82,25 @@ router.register(
 )
 
 router.register(
-    r'analysis/(?P<accession>[^/]+)',
+    r'analyses/(?P<accession>[^/]+)',
     views.AnalysisQCChartViewSet,
     base_name='analysis-qcchart'
 )
 
 router.register(
-    r'analysis/(?P<accession>[^/]+)/krona',
+    r'analyses/(?P<accession>[^/]+)/krona',
     views.KronaViewSet,
     base_name='analysis-krona'
 )
 
 router.register(
-    r'analysis/(?P<accession>[^/]+)/downloads',
+    r'analyses/(?P<accession>[^/]+)/downloads',
     views.AnalysisResultDownloadsViewSet,
     base_name='analysisdownload'
 )
 
 router.register(
-    r'analysis/(?P<accession>[^/]+)/file',
+    r'analyses/(?P<accession>[^/]+)/file',
     views.AnalysisResultDownloadViewSet,
     base_name='analysisdownload'
 )
@@ -114,15 +114,15 @@ router.register(
 
 # relationship views
 router.register(
-    r'studies/(?P<accession>[^/]+)/analysis',
+    r'studies/(?P<accession>[^/]+)/analyses',
     views_relations.StudyAnalysisResultViewSet,
-    base_name='studies-analysis'
+    base_name='studies-analyses'
 )
 
 router.register(
-    r'runs/(?P<accession>[^/]+)/analysis',
+    r'runs/(?P<accession>[^/]+)/analyses',
     views_relations.RunAnalysisViewSet,
-    base_name='runs-analysis'
+    base_name='runs-analyses'
 )
 
 router.register(
@@ -193,9 +193,9 @@ router.register(
 )
 
 router.register(
-    r'pipelines/(?P<release_version>[0-9\.]+)/analysis',
+    r'pipelines/(?P<release_version>[0-9\.]+)/analyses',
     views_relations.PipelineAnalysisRelationshipViewSet,
-    base_name='pipelines-analysis'
+    base_name='pipelines-analyses'
 )
 
 router.register(
@@ -229,9 +229,9 @@ router.register(
 )
 
 router.register(
-    r'experiment-types/(?P<experiment_type>[^/]+)/analysis',
+    r'experiment-types/(?P<experiment_type>[^/]+)/analyses',
     views_relations.ExperimentTypeAnalysisRelationshipViewSet,
-    base_name='experiment-types-analysis'
+    base_name='experiment-types-analyses'
 )
 
 router.register(

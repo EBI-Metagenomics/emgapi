@@ -156,9 +156,9 @@ class PipelineManager(models.Manager):
 
     def get_queryset(self):
         return PipelineQuerySet(self.model, using=self._db) \
-            .annotate(analysis_count=Count('analysis', distinct=True)) \
+            .annotate(analyses_count=Count('analyses', distinct=True)) \
             .annotate(samples_count=Sum(Case(
-                When(analysis__sample__is_public=1, then=1),
+                When(analyses__sample__is_public=1, then=1),
                 default=0,
                 output_field=IntegerField()
             )))
@@ -963,7 +963,7 @@ class AnalysisJob(models.Model):
         db_column='JOB_OPERATOR', max_length=15, blank=True, null=True)
     pipeline = models.ForeignKey(
         Pipeline, db_column='PIPELINE_ID', blank=True, null=True,
-        related_name='analysis', on_delete=models.CASCADE)
+        related_name='analyses', on_delete=models.CASCADE)
     submit_time = models.DateTimeField(
         db_column='SUBMIT_TIME', blank=True, null=True)
     complete_time = models.DateTimeField(
@@ -978,19 +978,19 @@ class AnalysisJob(models.Model):
     result_directory = models.CharField(
         db_column='RESULT_DIRECTORY', max_length=100)
     run = models.ForeignKey(
-        Run, db_column='RUN_ID', related_name='analysis',
+        Run, db_column='RUN_ID', related_name='analyses',
         on_delete=models.CASCADE, blank=True, null=True)
     sample = models.ForeignKey(
-        Sample, db_column='SAMPLE_ID', related_name='analysis',
+        Sample, db_column='SAMPLE_ID', related_name='analyses',
         on_delete=models.CASCADE, blank=True, null=True)
     study = models.ForeignKey(
-        Study, db_column='STUDY_ID', related_name='analysis',
+        Study, db_column='STUDY_ID', related_name='analyses',
         on_delete=models.CASCADE, blank=True, null=True)
     is_production_run = models.TextField(
         db_column='IS_PRODUCTION_RUN', blank=True, null=True)
     experiment_type = models.ForeignKey(
         ExperimentType, db_column='EXPERIMENT_TYPE_ID',
-        related_name='analysis',
+        related_name='analyses',
         on_delete=models.CASCADE)
     run_status_id = models.IntegerField(
         db_column='RUN_STATUS_ID', blank=True, null=True)
