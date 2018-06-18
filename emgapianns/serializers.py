@@ -37,7 +37,7 @@ class GoTermSerializer(m_serializers.DocumentSerializer,
         model=emg_models.AnalysisJob,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi_v1:goterms-analysis-list',
+        related_link_view_name='emgapi_v1:goterms-analyses-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession'
     )
