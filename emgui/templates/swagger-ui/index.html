@@ -5,7 +5,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>EBI metagenomics API: archiving, analysis and integration of metagenomics data. EMBL-EBI</title>
+  <title>MGnify API: archiving, analysis and integration of metagenomics data. EMBL-EBI</title>
   <meta name="description" content="EMBL-EBI" /><!-- Describe what this page is about -->
   <meta name="keywords" content="bioinformatics, europe, institute" /><!-- A few keywords that relate to the content of THIS PAGE (not the whol project) -->
   <meta name="author" content="EMBL-EBI" /><!-- Your [project-name] here -->
@@ -24,8 +24,8 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:creator" content="@EBImetagenomics">
   <meta name="twitter:site" content="@EBImetagenomics">
-  <meta name="twitter:title" content="EBI Metagenomics API">
-  <meta name="twitter:description" content="EBI metagenomics is a freely available hub for the analysis and exploration of metagenomic, metatranscriptomic, amplicon and assembly data.">
+  <meta name="twitter:title" content="MGnify API">
+  <meta name="twitter:description" content="MGnify is a freely available hub for the analysis and exploration of metagenomic, metatranscriptomic, amplicon and assembly data.">
   <meta name="twitter:image:src" content="https://avatars1.githubusercontent.com/u/32897658?s=200&v=4">
   <meta name="twitter:image:width" content="280">
   <meta name="twitter:image:height" content="150">
@@ -144,19 +144,18 @@
 
           <!-- local-title -->
           <div class="columns medium-12" id="local-title">
-            {% include "swagger-ui/include/header.html" %}
-
+              {% include "swagger-ui/include/header.html" %}
           </div>
           <!-- /local-title -->
 
           <!-- local-nav -->
           <nav>
               <ul id="local-nav" class="dropdown menu float-left" data-description="navigational" data-dropdown-menu="unlqrb-dropdown-menu" role="menubar">
-                  <li id="overview-nav" role="menuitem"><a href="/metagenomics">Home</a></li>
+                  <li id="overview-nav" role="menuitem"><a href="/metagenomics/beta/">Home</a></li>
                   <li id="api-nav" role="menuitem"><a href="/metagenomics/api/">API</a></li>
                   <li id="api-nav" role="menuitem" class="active"><a href="/metagenomics/api/docs/">API Documentation</a></li>
-                  <li id="about-nav" role="menuitem"><a href="/metagenomics/about">About</a></li>
-                  <li id="help-nav" role="menuitem"><a href="/metagenomics/help">Help</a></li>
+                  <li id="about-nav" role="menuitem"><a href="/metagenomics/beta/about">About</a></li>
+                  <li id="help-nav" role="menuitem"><a href="/metagenomics/beta/help">Help</a></li>
               </ul>
               <ul class="dropdown menu float-right" data-description="tasks">
                 <li class="">
@@ -183,7 +182,7 @@
         <!-- Your menu structure should make a breadcrumb redundant, but if a breadcrump is needed uncomment the below -->
         <nav aria-label="You are here:" role="navigation">
           <ul class="breadcrumbs">
-            <li><a href="/metagenomics">EBI Metagenomics</a></li>
+            <li><a href="/metagenomics">Home</a></li>
             <li><a href="../">API Browser</a></li>
             <li>
               <span class="show-for-sr">Current: </span>API Documentation
@@ -209,13 +208,9 @@
 
     <footer>
       <!-- Optional local footer (insert citation / project-specific copyright / etc here -->
-<!--
-      <div id="local-footer">
-        <div class="row">
-          <span class="reference">How to reference this page: ...</span>
-        </div>
-      </div>
- -->
+      {% block elixir %}
+      {% include "rest_framework/include/elixir.html" %}
+      {% endblock %}
       <!-- End optional local footer -->
 
       <div id="global-footer">

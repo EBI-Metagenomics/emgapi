@@ -297,8 +297,9 @@ class StudiesDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
         Retrieves static summary file
         Example:
         ---
-        `/studies/ERP009703/pipelines/4.0/file/
-        ERP009703_taxonomy_abundances_LSU_v4.0.tsv`
+        `
+        /studies/MGYS00000410/pipelines/2.0/file/
+        ERP001736_taxonomy_abundances_v2.0.tsv`
         """
         obj = self.get_object()
         response = HttpResponse()
@@ -356,7 +357,7 @@ class StudyAnalysisResultViewSet(emg_mixins.ListModelMixin,
         Retrieves analysis result for the given accession
         Example:
         ---
-        `/studies/MGYS00000410/analysis`
+        `/studies/MGYS00000410/analyses`
         """
         return super(StudyAnalysisResultViewSet, self) \
             .list(request, *args, **kwargs)
@@ -401,7 +402,7 @@ class RunAnalysisViewSet(emg_mixins.ListModelMixin,
         Retrieves analysis result for the given accession
         Example:
         ---
-        `/runs/ERR1385375/analysis`
+        `/runs/ERR1385375/analyses`
         """
         return super(RunAnalysisViewSet, self) \
             .list(request, *args, **kwargs)
@@ -465,7 +466,7 @@ class PipelineAnalysisRelationshipViewSet(emg_mixins.ListModelMixin,
         Retrieves list of analysis results for the given pipeline version
         Example:
         ---
-        `/pipeline/4.0/analysis` retrieve linked analysis
+        `/pipeline/4.0/analyses` retrieve linked analysis
 
         """
         return super(PipelineAnalysisRelationshipViewSet, self) \
@@ -501,7 +502,7 @@ class ExperimentTypeAnalysisRelationshipViewSet(  # noqa
         Retrieves list of samples for the given experiment type
         Example:
         ---
-        `/experiments/metagenomic/analysis` retrieve linked analysis
+        `/experiments/metagenomic/analyses` retrieve linked analysis
 
         """
         return super(ExperimentTypeAnalysisRelationshipViewSet, self) \
