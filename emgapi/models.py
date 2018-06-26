@@ -106,7 +106,8 @@ class BaseQuerySet(models.QuerySet):
             _instance = _query_filters[self.__class__.__name__]
             if isinstance(self, self.__class__):
                 if request is not None and request.user.is_authenticated():
-                    q.extend(_instance['authenticated'])
+                    if not request.user.is_superuser:
+                        q.extend(_instance['authenticated'])
                 else:
                     q.extend(_instance['all'])
             return self.distinct().filter(*q)
