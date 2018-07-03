@@ -424,6 +424,7 @@ class SampleFilter(django_filters.FilterSet):
     class Meta:
         model = emg_models.Sample
         fields = (
+            'accession',
             'experiment_type',
             'biome_name',
             'lineage',
@@ -596,13 +597,18 @@ class RunFilter(django_filters.FilterSet):
         model = emg_models.Run
         fields = (
             'accession',
+            'experiment_type',
             'biome_name',
             'lineage',
-            'experiment_type',
+            'species',
             'instrument_platform',
             'instrument_model',
-            'species',
+            'metadata_key',
+            'metadata_value_gte',
+            'metadata_value_lte',
+            'metadata_value',
             'sample_accession',
+            'study_accession',
             'include',
         )
 
