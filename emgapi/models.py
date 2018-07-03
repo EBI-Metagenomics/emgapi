@@ -28,8 +28,8 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from django.db.models import Sum, Count, Case, When
-from django.db.models import CharField, IntegerField, Value
+from django.db.models import Count
+from django.db.models import CharField, Value
 from django.db.models.functions import Concat, Cast
 from django.db.models import Q
 from django.db.models import Prefetch
@@ -106,7 +106,8 @@ class BaseQuerySet(models.QuerySet):
             _instance = _query_filters[self.__class__.__name__]
             if isinstance(self, self.__class__):
                 if request is not None and request.user.is_authenticated():
-                    q.extend(_instance['authenticated'])
+                    if not request.user.is_superuser:
+                        q.extend(_instance['authenticated'])
                 else:
                     q.extend(_instance['all'])
             return self.distinct().filter(*q)
@@ -156,12 +157,20 @@ class PipelineManager(models.Manager):
 
     def get_queryset(self):
         return PipelineQuerySet(self.model, using=self._db) \
-            .annotate(analyses_count=Count('analyses', distinct=True)) \
-            .annotate(samples_count=Sum(Case(
-                When(analyses__sample__is_public=1, then=1),
-                default=0,
-                output_field=IntegerField()
-            )))
+            .annotate(
+                analyses_count=Count(
+                    'analyses', filter=(
+                        Q(analyses__analysis_status_id=3) |
+                        Q(analyses__analysis_status_id=6)
+                    ), distinct=True)
+            ) \
+            .annotate(
+                samples_count=Count(
+                    'analyses__sample', filter=(
+                        Q(analyses__analysis_status_id=3) |
+                        Q(analyses__analysis_status_id=6)
+                    ), distinct=True)
+            )
 
 
 class Pipeline(models.Model):
@@ -231,11 +240,7 @@ class BiomeManager(models.Manager):
 
     def get_queryset(self):
         return BiomeQuerySet(self.model, using=self._db) \
-            .annotate(samples_count=Sum(Case(
-                When(samples__is_public=1, then=1),
-                default=0,
-                output_field=IntegerField()
-            )))
+            .annotate(samples_count=Count('samples', distinct=True))
 
 
 class Biome(models.Model):
@@ -275,16 +280,8 @@ class PublicationManager(models.Manager):
 
     def get_queryset(self):
         return PublicationQuerySet(self.model, using=self._db) \
-            .annotate(studies_count=Sum(Case(
-                When(studies__is_public=1, then=1),
-                default=0,
-                output_field=IntegerField()
-            ))) \
-            .annotate(samples_count=Sum(Case(
-                When(studies__samples__is_public=1, then=1),
-                default=0,
-                output_field=IntegerField()
-            )))
+            .annotate(studies_count=Count('studies', distinct=True)) \
+            .annotate(samples_count=Count('studies__samples', distinct=True))
 
 
 class Publication(models.Model):
@@ -520,11 +517,7 @@ class StudyManager(models.Manager):
         # TODO: remove biome when schema updated
         return StudyQuerySet(self.model, using=self._db) \
             .defer('biome') \
-            .annotate(samples_count=Sum(Case(
-                When(samples__is_public=1, then=1),
-                default=0,
-                output_field=IntegerField()
-            )))
+            .annotate(samples_count=Count('samples'))
 
     def available(self, request):
         return self.get_queryset().available(request)
@@ -799,16 +792,14 @@ class ExperimentTypeManager(models.Manager):
 
     def get_queryset(self):
         return ExperimentTypeQuerySet(self.model, using=self._db) \
-            .annotate(runs_count=Sum(Case(
-                When(runs__status_id=4, then=1),
-                default=0,
-                output_field=IntegerField()
-            ))) \
-            .annotate(samples_count=Sum(Case(
-                When(runs__sample__is_public=1, then=1),
-                default=0,
-                output_field=IntegerField()
-            )))
+            .annotate(
+                samples_count=Count(
+                    'runs__sample', filter=Q(runs__status_id=4), distinct=True)
+            ) \
+            .annotate(
+                runs_count=Count(
+                    'runs', filter=Q(runs__status_id=4), distinct=True)
+            )
 
 
 class ExperimentType(models.Model):

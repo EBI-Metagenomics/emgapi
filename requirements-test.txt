@@ -3,7 +3,7 @@
 # run pip install -r requirements-test
 
 pytest
-pytest-django
+pytest-django~=3.2.1
 
 model_mommy
 mock_services

@@ -424,6 +424,7 @@ class SampleFilter(django_filters.FilterSet):
     class Meta:
         model = emg_models.Sample
         fields = (
+            'accession',
             'experiment_type',
             'biome_name',
             'lineage',
@@ -447,6 +448,21 @@ class SampleFilter(django_filters.FilterSet):
 
 
 class RunFilter(django_filters.FilterSet):
+
+    accession = filters.ModelMultipleChoiceFilter(
+        queryset=emg_models.Run.objects,
+        to_field_name='accession',
+        method='filter_accession',
+        distinct=True,
+        label='Run accession',
+        help_text='Run accession',
+        widget=QueryArrayWidget
+    )
+
+    def filter_accession(self, qs, name, values):
+        if values:
+            qs = qs.available(self.request).filter(accession__in=values)
+        return qs
 
     experiment_type = filters.ModelMultipleChoiceFilter(
         queryset=emg_models.ExperimentType.objects,
@@ -580,13 +596,19 @@ class RunFilter(django_filters.FilterSet):
     class Meta:
         model = emg_models.Run
         fields = (
+            'accession',
+            'experiment_type',
             'biome_name',
             'lineage',
-            'experiment_type',
+            'species',
             'instrument_platform',
             'instrument_model',
-            'species',
+            'metadata_key',
+            'metadata_value_gte',
+            'metadata_value_lte',
+            'metadata_value',
             'sample_accession',
+            'study_accession',
             'include',
         )
 
