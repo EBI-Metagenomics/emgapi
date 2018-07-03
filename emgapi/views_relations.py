@@ -419,7 +419,7 @@ class PipelineSampleRelationshipViewSet(emg_mixins.ListModelMixin,
             release_version=self.kwargs[self.lookup_field])
         queryset = emg_models.Sample.objects \
             .available(self.request, prefetch=True) \
-            .filter(analysis__pipeline=pipeline)
+            .filter(analyses__pipeline=pipeline)
         if 'runs' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Run.objects.available(self.request)
             queryset = queryset.prefetch_related(
