@@ -120,6 +120,27 @@ class MyDataViewSet(emg_mixins.ListModelMixin,
         emg_perms.IsSelf,
     )
 
+    filter_backends = (
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        ('study_id', 'accession'),
+        'study_name',
+        'last_update',
+        'samples_count',
+    )
+
+    ordering = ('-last_update',)
+
+    search_fields = (
+        '@study_name',
+        '@study_abstract',
+        'centre_name',
+        'project_id',
+    )
+
     def get_queryset(self):
         queryset = emg_models.Study.objects \
             .mydata(self.request)
