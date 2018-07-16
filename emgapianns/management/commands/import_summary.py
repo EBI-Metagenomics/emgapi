@@ -62,6 +62,10 @@ class Command(EMGBaseCommand):
         run.job_id = obj.job_id
         new_anns = []
         anns = []
+        if self.suffix == '.go':
+            run.go_terms = []
+        if self.suffix == '.go_slim':
+            run.go_slim = []
         for row in reader:
             try:
                 row[0].lower().startswith('go:')
@@ -100,6 +104,10 @@ class Command(EMGBaseCommand):
                 m_models.GoTerm.objects.insert(new_anns)
                 logger.info(
                     "Created %d new GoTerm Annotations" % len(new_anns))
+            if len(run.go_slim) > 0:
+                logger.info("Go slim %d" % len(run.go_slim))
+            if len(run.go_terms) > 0:
+                logger.info("Go terms %d" % len(run.go_terms))
             run.save()
             logger.info("Saved Run %r" % run)
 
@@ -114,6 +122,7 @@ class Command(EMGBaseCommand):
         version = obj.pipeline.release_version
         run.pipeline_version = version
         run.job_id = obj.job_id
+        run.interpro_identifiers = []
         new_anns = []
         anns = []
         for row in reader:
@@ -148,5 +157,8 @@ class Command(EMGBaseCommand):
                 m_models.InterproIdentifier.objects.insert(new_anns)
                 logger.info(
                     "Created %d new IPR Annotations" % len(new_anns))
+            if len(run.interpro_identifiers) > 0:
+                logger.info(
+                    "Interpro identifiers %d" % len(run.interpro_identifiers))
             run.save()
             logger.info("Saved Run %r" % run)

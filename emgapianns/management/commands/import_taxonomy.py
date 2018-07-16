@@ -95,9 +95,9 @@ class Command(EMGBaseCommand):
         version = obj.pipeline.release_version
         run.pipeline_version = version
         run.job_id = obj.job_id
-
         new_orgs = list()
         orgs = []
+        setattr(run, tax, list())
         for row in reader:
             if len(row) < 1:
                 continue
