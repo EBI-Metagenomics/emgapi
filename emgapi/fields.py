@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import urllib
+
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
@@ -79,5 +81,18 @@ class AnalysisJobHyperlinkedRelatedField(serializers.HyperlinkedRelatedField):
             'accession': obj.accession,
             'release_version': obj.pipeline.release_version
         }
+        return reverse(
+            view_name, kwargs=kwargs, request=request, format=format)
+
+
+class OrganismHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
+
+    def get_url(self, obj, view_name, request, format):
+        if hasattr(obj, 'pk') and obj.pk in (None, ''):
+            return None
+
+        lookup_value = urllib.parse.quote_plus(
+            getattr(obj, self.lookup_field), safe='')
+        kwargs = {self.lookup_url_kwarg: lookup_value}
         return reverse(
             view_name, kwargs=kwargs, request=request, format=format)

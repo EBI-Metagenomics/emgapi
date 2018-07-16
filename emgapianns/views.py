@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import logging
+import urllib
 
 from django.db.models import Q
 from mongoengine.queryset.visitor import Q as M_Q
@@ -33,6 +34,8 @@ from . import serializers as m_serializers
 from . import models as m_models
 from . import pagination as m_page
 from . import viewsets as m_viewsets
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -382,7 +385,7 @@ class OrganismViewSet(m_viewsets.ListReadOnlyModelViewSet):
     )
 
     lookup_field = 'lineage'
-    lookup_value_regex = '[^/]+'
+    lookup_value_regex = '.*'
 
     def get_queryset(self):
         return m_models.Organism.objects.all()
@@ -424,7 +427,8 @@ class OrganismTreeViewSet(m_viewsets.ListReadOnlyModelViewSet):
     lookup_value_regex = '[^/]+'
 
     def get_queryset(self):
-        lineage = self.kwargs.get('lineage', None).strip()
+        lineage = urllib.parse.unquote(
+            self.kwargs.get('lineage', None).strip())
         organism = m_models.Organism.objects \
             .filter(lineage=lineage) \
             .only('name').distinct('name')
