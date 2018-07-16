@@ -20,6 +20,7 @@ from rest_framework_json_api import relations
 from rest_framework_mongoengine import serializers as m_serializers
 
 from emgapi import models as emg_models
+from emgapi import fields as emg_fields
 
 from . import models as m_models
 
@@ -136,7 +137,7 @@ class InterproIdentifierRetriveSerializer(  # NOQA
 class OrganismSerializer(m_serializers.DynamicDocumentSerializer,
                          serializers.HyperlinkedModelSerializer):
 
-    url = serializers.HyperlinkedIdentityField(
+    url = emg_fields.OrganismHyperlinkedIdentityField(
         view_name='emgapi_v1:organisms-children-list',
         lookup_field='lineage',
     )
