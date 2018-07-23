@@ -781,6 +781,7 @@ class AnalysisResultDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
         """
         obj = self.get_object()
         response = HttpResponse()
+        response['Content-Type'] = 'application/octet-stream'
         response["Content-Disposition"] = \
             "attachment; filename={0}".format(alias)
         if obj.subdir is not None:
