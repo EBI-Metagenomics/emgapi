@@ -18,6 +18,7 @@
 import logging
 
 from django.conf import settings
+from django.core.mail import send_mail
 
 from rest_framework_json_api import serializers
 
@@ -40,11 +41,26 @@ class SubmitterSerializer(serializers.Serializer):
         fields = '__all__'
 
 
+class EmailSerializer(serializers.Serializer):
+
+    from_email = serializers.EmailField(required=True)
+    subject = serializers.CharField(required=True)
+    message = serializers.CharField(required=True)
+
+    def create(self, validated_data):
+        validated_data['recipient_list'] = settings.EMAIL_HELPDESK
+        send_mail(**validated_data)
+
+    class Meta:
+        model = ena_models.Notify
+        fields = '__all__'
+
+
 class NotifySerializer(serializers.Serializer):
 
-    email = serializers.CharField(max_length=200)
-    title = serializers.CharField(max_length=100)
-    content = serializers.CharField(max_length=500)
+    from_email = serializers.EmailField(max_length=200, required=True)
+    subject = serializers.CharField(max_length=100, required=True)
+    message = serializers.CharField(max_length=500, required=True)
 
     def create(self, validated_data):
         import requests
@@ -53,10 +69,10 @@ class NotifySerializer(serializers.Serializer):
         ticket = {
             "id": "ticket/new",
             "Queue": settings.RT['queue'],
-            "Requestor": n.email,
+            "Requestor": n.from_email,
             "Priority": "4",
-            "Subject": n.title,
-            "Text": n.content
+            "Subject": n.subject,
+            "Text": n.message
         }
 
         content = [
