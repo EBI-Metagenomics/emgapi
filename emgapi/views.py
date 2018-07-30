@@ -117,6 +117,7 @@ class UtilsViewSet(viewsets.GenericViewSet):
     @list_route(
         methods=['get', 'post', ],
         serializer_class=ena_serializers.NotifySerializer,
+        permission_classes=[permissions.AllowAny]
     )
     def notify(self, request, pk=None):
         serializer = self.get_serializer(data=request.data)
