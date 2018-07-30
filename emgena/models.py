@@ -84,5 +84,5 @@ class SubmitterContact(models.Model):
 class Notify(object):
 
     def __init__(self, **kwargs):
-        for field in ('id', 'email', 'content', 'title'):
+        for field in ('id', 'from_email', 'message', 'subject'):
             setattr(self, field, kwargs.get(field, None))

@@ -26,6 +26,7 @@ from django.http import Http404
 from django.middleware import csrf
 from django.http import HttpResponse
 from django.views.decorators.clickjacking import xframe_options_exempt
+# from django.views.decorators.csrf import csrf_exempt
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -46,8 +47,6 @@ from . import viewsets as emg_viewsets
 from . import utils as emg_utils
 from . import renderers as emg_renderers
 
-
-from django.views.decorators.csrf import csrf_exempt
 
 from emgena import models as ena_models
 from emgena import serializers as ena_serializers
@@ -113,7 +112,7 @@ class UtilsViewSet(viewsets.GenericViewSet):
         serializer = self.get_serializer(submitter, many=True)
         return Response(serializer.data)
 
-    @csrf_exempt
+    # @csrf_exempt
     @list_route(
         methods=['get', 'post', ],
         serializer_class=ena_serializers.NotifySerializer,
@@ -132,7 +131,20 @@ class UtilsViewSet(viewsets.GenericViewSet):
                 "Request cannot be processed.",
                 status=status.HTTP_409_CONFLICT
             )
-        return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # @csrf_exempt
+    @list_route(
+        methods=['get', 'post', ],
+        serializer_class=ena_serializers.EmailSerializer,
+        permission_classes=[permissions.AllowAny]
+    )
+    def sendemail(self, request, pk=None):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class MyDataViewSet(emg_mixins.ListModelMixin,
