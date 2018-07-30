@@ -450,6 +450,13 @@ except KeyError:
         RuntimeWarning
     )
 
+try:
+    EMAIL_HELPDESK = EMG_CONF['emg']['email']['helpdesk']
+except KeyError:
+    warnings.warn(
+        "Helpdesk notificationnot provided", RuntimeWarning
+    )
+
 # SLACK
 try:
     SLACK_TOKEN = EMG_CONF['emg']['slack']['token']
@@ -521,9 +528,3 @@ try:
     RESULTS_DIR = EMG_CONF['emg']['results_dir']
 except KeyError:
     RESULTS_DIR = os.path.join(expanduser("~"), 'results')
-
-
-try:
-    RT = EMG_CONF['emg']['rt']
-except KeyError:
-    warnings.warn("RT not configured.", RuntimeWarning)
