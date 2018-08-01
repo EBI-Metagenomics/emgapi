@@ -52,8 +52,10 @@ class BaseStudyGenericViewSet(viewsets.GenericViewSet):
     search_fields = (
         '@study_name',
         '@study_abstract',
-        'centre_name',
+        'study_id',
+        'secondary_accession',
         'project_id',
+        'centre_name',
     )
 
 
@@ -115,6 +117,7 @@ class BaseRunGenericViewSet(viewsets.GenericViewSet):
         'secondary_accession',
         'instrument_platform',
         'instrument_model',
+        'experiment_type__experiment_type',
         '@sample__metadata__var_val_ucv',
     )
 
@@ -127,14 +130,29 @@ class BaseAnalysisGenericViewSet(viewsets.GenericViewSet):
 
     filter_backends = (
         DjangoFilterBackend,
+        filters.SearchFilter,
         filters.OrderingFilter,
     )
 
     ordering_fields = (
         ('job_id', 'accession'),
         'pipeline',
+        'run__accession',
+        'sample__accession',
+        'pipeline__release_version',
+        'experiment_type__experiment_type',
     )
     ordering = ('-pipeline',)
+
+    search_fields = (
+        'job_id',
+        'instrument_platform',
+        'instrument_model',
+        'run__accession',
+        'sample__accession',
+        'pipeline__release_version',
+        'experiment_type__experiment_type',
+    )
 
 
 class BasePublicationGenericViewSet(viewsets.GenericViewSet):
