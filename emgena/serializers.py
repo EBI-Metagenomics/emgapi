@@ -48,7 +48,7 @@ class EmailSerializer(serializers.Serializer):
     message = serializers.CharField(required=True)
 
     def create(self, validated_data):
-        validated_data['recipient_list'] = settings.EMAIL_HELPDESK
+        validated_data['recipient_list'] = (settings.EMAIL_HELPDESK,)
         send_mail(**validated_data)
 
     class Meta:
