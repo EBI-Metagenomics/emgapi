@@ -26,7 +26,7 @@ from django.http import Http404
 from django.middleware import csrf
 from django.http import HttpResponse
 from django.views.decorators.clickjacking import xframe_options_exempt
-# from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_protect
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -112,7 +112,7 @@ class UtilsViewSet(viewsets.GenericViewSet):
         serializer = self.get_serializer(submitter, many=True)
         return Response(serializer.data)
 
-    # @csrf_exempt
+    @csrf_protect
     @list_route(
         methods=['get', 'post', ],
         serializer_class=ena_serializers.NotifySerializer,
@@ -135,7 +135,7 @@ class UtilsViewSet(viewsets.GenericViewSet):
             )
         return Response(serializer.errors)
 
-    # @csrf_exempt
+    @csrf_protect
     @list_route(
         methods=['get', 'post', ],
         serializer_class=ena_serializers.EmailSerializer,
