@@ -125,13 +125,15 @@ class UtilsViewSet(viewsets.GenericViewSet):
                 status_code = serializer.save()
                 if status_code == 200:
                     return Response("Created", status=status.HTTP_201_CREATED)
-            except:
-                pass
+            except Exception as e:
+                logging.error(e, exc_info=True)
+                return Response(
+                    serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             return Response(
                 "Request cannot be processed.",
                 status=status.HTTP_409_CONFLICT
             )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors)
 
     # @csrf_exempt
     @list_route(
@@ -142,9 +144,15 @@ class UtilsViewSet(viewsets.GenericViewSet):
     def sendemail(self, request, pk=None):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                serializer.save()
+                return Response(
+                    serializer.data, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                logging.error(e, exc_info=True)
+                return Response(
+                    serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors)
 
 
 class MyDataViewSet(emg_mixins.ListModelMixin,
