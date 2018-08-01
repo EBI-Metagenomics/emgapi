@@ -432,7 +432,7 @@ except KeyError:
 # EMAIL
 try:
     EMAIL_HOST = EMG_CONF['emg']['email']['host']
-    EMAIL_PORT = EMG_CONF['emg']['email']['post']
+    EMAIL_PORT = EMG_CONF['emg']['email']['port']
     EMAIL_SUBJECT_PREFIX = EMG_CONF['emg']['email']['subject']
     MIDDLEWARE += ('django.middleware.common.BrokenLinkEmailsMiddleware',)
 
@@ -456,6 +456,11 @@ except KeyError:
     warnings.warn(
         "Helpdesk notificationnot provided", RuntimeWarning
     )
+
+try:
+    RT = EMG_CONF['emg']['rt']
+except KeyError:
+    warnings.warn("RT not configured.", RuntimeWarning)
 
 # SLACK
 try:
