@@ -2,6 +2,9 @@
 # install and create a virtual environment
 # run pip install -r requirements-test
 
+## bug https://github.com/aio-libs/multidict/issues/274
+multidict==4.4.0a0
+
 pytest
 pytest-django~=3.2.1
 
