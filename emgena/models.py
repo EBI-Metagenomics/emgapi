@@ -79,3 +79,10 @@ class SubmitterContact(models.Model):
 
     def __str__(self):
         return self.submission_account
+
+
+class Notify(object):
+
+    def __init__(self, **kwargs):
+        for field in ('id', 'from_email', 'message', 'subject'):
+            setattr(self, field, kwargs.get(field, None))

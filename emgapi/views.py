@@ -26,6 +26,7 @@ from django.http import Http404
 from django.middleware import csrf
 from django.http import HttpResponse
 from django.views.decorators.clickjacking import xframe_options_exempt
+from django.views.decorators.csrf import csrf_protect
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -36,6 +37,7 @@ from rest_framework import viewsets, mixins
 from rest_framework.decorators import detail_route, list_route
 from rest_framework import permissions
 from rest_framework import renderers
+from rest_framework import status
 
 from . import models as emg_models
 from . import serializers as emg_serializers
@@ -109,6 +111,48 @@ class UtilsViewSet(viewsets.GenericViewSet):
 
         serializer = self.get_serializer(submitter, many=True)
         return Response(serializer.data)
+
+    @csrf_protect
+    @list_route(
+        methods=['get', 'post', ],
+        serializer_class=ena_serializers.NotifySerializer,
+        permission_classes=[permissions.AllowAny]
+    )
+    def notify(self, request, pk=None):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                status_code = serializer.save()
+                if status_code == 200:
+                    return Response("Created", status=status.HTTP_201_CREATED)
+            except Exception as e:
+                logging.error(e, exc_info=True)
+                return Response(
+                    serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                "Request cannot be processed.",
+                status=status.HTTP_409_CONFLICT
+            )
+        return Response(serializer.errors)
+
+    @csrf_protect
+    @list_route(
+        methods=['get', 'post', ],
+        serializer_class=ena_serializers.EmailSerializer,
+        permission_classes=[permissions.AllowAny]
+    )
+    def sendemail(self, request, pk=None):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                serializer.save()
+                return Response(
+                    serializer.data, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                logging.error(e, exc_info=True)
+                return Response(
+                    serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors)
 
 
 class MyDataViewSet(emg_mixins.ListModelMixin,
@@ -781,6 +825,7 @@ class AnalysisResultDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
         """
         obj = self.get_object()
         response = HttpResponse()
+        response['Content-Type'] = 'application/octet-stream'
         response["Content-Disposition"] = \
             "attachment; filename={0}".format(alias)
         if obj.subdir is not None:
