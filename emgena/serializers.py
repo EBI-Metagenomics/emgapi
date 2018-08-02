@@ -17,6 +17,9 @@
 
 import logging
 
+from django.conf import settings
+from django.core.mail import send_mail
+
 from rest_framework_json_api import serializers
 
 from . import models as ena_models
@@ -35,4 +38,61 @@ class SubmitterSerializer(serializers.Serializer):
 
     class Meta:
         model = ena_models.Submitter
+        fields = '__all__'
+
+
+class EmailSerializer(serializers.Serializer):
+
+    from_email = serializers.EmailField(required=True)
+    subject = serializers.CharField(required=True)
+    message = serializers.CharField(required=True)
+
+    def create(self, validated_data):
+        validated_data['recipient_list'] = (settings.EMAIL_HELPDESK,)
+        send_mail(**validated_data)
+
+    class Meta:
+        model = ena_models.Notify
+        fields = '__all__'
+
+
+class NotifySerializer(serializers.Serializer):
+
+    from_email = serializers.EmailField(max_length=200, required=True)
+    subject = serializers.CharField(max_length=100, required=True)
+    message = serializers.CharField(max_length=500, required=True)
+
+    def create(self, validated_data):
+        import requests
+        n = ena_models.Notify(**validated_data)
+
+        ticket = {
+            "id": "ticket/new",
+            "Queue": settings.RT['queue'],
+            "Requestor": n.from_email,
+            "Priority": "4",
+            "Subject": n.subject,
+            "Text": n.message
+        }
+
+        content = [
+            "{key}: {value}".format(
+                key=key, value=value) for key, value in ticket.items()
+        ]
+
+        payload = {
+            'user': settings.RT['user'],
+            'pass': settings.RT['pass'],
+            'content': "\n".join(content),
+        }
+
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+
+        r = requests.post(settings.RT['url'], data=payload, headers=headers)
+        return r.status_code
+
+    class Meta:
+        model = ena_models.Notify
         fields = '__all__'
