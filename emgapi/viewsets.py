@@ -182,4 +182,6 @@ class BasePublicationGenericViewSet(viewsets.GenericViewSet):
         'authors',
         'doi',
         'isbn',
+        'pubmed_id',
+        'published_year',
     )
