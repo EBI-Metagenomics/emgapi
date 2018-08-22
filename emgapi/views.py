@@ -116,7 +116,7 @@ class UtilsViewSet(viewsets.GenericViewSet):
     @list_route(
         methods=['get', 'post', ],
         serializer_class=ena_serializers.NotifySerializer,
-        permission_classes=[permissions.AllowAny]
+        permission_classes=[permissions.IsAuthenticated, emg_perms.IsSelf]
     )
     def notify(self, request, pk=None):
         serializer = self.get_serializer(data=request.data)
@@ -139,7 +139,7 @@ class UtilsViewSet(viewsets.GenericViewSet):
     @list_route(
         methods=['get', 'post', ],
         serializer_class=ena_serializers.EmailSerializer,
-        permission_classes=[permissions.AllowAny]
+        permission_classes=[permissions.IsAuthenticated, emg_perms.IsSelf]
     )
     def sendemail(self, request, pk=None):
         serializer = self.get_serializer(data=request.data)
