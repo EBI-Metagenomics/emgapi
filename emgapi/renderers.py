@@ -24,7 +24,12 @@ from rest_framework_csv.misc import Echo
 
 class DefaultJSONRenderer(JSONRenderer):
     media_type = 'application/json'
-    format = 'application/json'
+    format = 'json'
+
+
+class JSONLDRenderer(renderers.JSONRenderer):
+    media_type = 'application/ld+json'
+    format = 'ldjson'
 
 
 class CSVStreamingRenderer(CSVRenderer):
