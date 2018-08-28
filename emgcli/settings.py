@@ -305,6 +305,7 @@ REST_FRAMEWORK = {
         'rest_framework_json_api.renderers.JSONRenderer',
         'emgapi.renderers.DefaultJSONRenderer',
         # 'rest_framework.renderers.JSONRenderer',
+        'emgapi.renderers.JSONLDRenderer',
         # 'rest_framework_xml.renderers.XMLRenderer',
         # 'rest_framework_yaml.renderers.YAMLRenderer',
         'emgapi.renderers.CSVStreamingRenderer',
