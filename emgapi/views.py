@@ -322,6 +322,9 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         )
 
     def get_serializer_class(self):
+        f = self.request.GET.get('format', None)
+        if f in ('ldjson',):
+            return emg_serializers.LDStudySerializer
         if self.action == 'retrieve':
             return emg_serializers.RetrieveStudySerializer
         return super(StudyViewSet, self).get_serializer_class()
@@ -579,6 +582,9 @@ class AnalysisJobViewSet(mixins.RetrieveModelMixin,
     lookup_value_regex = '[^/]+'
 
     def get_serializer_class(self):
+        f = self.request.GET.get('format', None)
+        if f in ('ldjson',):
+            return emg_serializers.LDAnalysisSerializer
         return super(AnalysisJobViewSet, self).get_serializer_class()
 
     def get_object(self):
