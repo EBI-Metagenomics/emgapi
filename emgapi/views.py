@@ -131,7 +131,7 @@ class UtilsViewSet(viewsets.GenericViewSet):
                 "Request cannot be processed.",
                 status=status.HTTP_409_CONFLICT
             )
-        return Response(serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @list_route(
         methods=['get', 'post', ],
@@ -149,7 +149,7 @@ class UtilsViewSet(viewsets.GenericViewSet):
                 logging.error(e, exc_info=True)
                 return Response(
                     serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class MyDataViewSet(emg_mixins.ListModelMixin,
