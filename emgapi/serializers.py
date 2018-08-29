@@ -17,7 +17,11 @@
 
 import logging
 
+from collections import OrderedDict
+
 from django.db.models import Q
+
+from rest_framework import serializers as drf_serializers
 
 from rest_framework_json_api import serializers
 from rest_framework_json_api import relations
@@ -1065,3 +1069,111 @@ class RetrieveStudySerializer(StudySerializer):
         queryset = emg_models.Study.objects.filter(study_id__in=studies) \
             .available(self.context['request']).distinct()
         return queryset
+
+
+class LDStudySerializer(drf_serializers.ModelSerializer):
+
+    identifier = serializers.SerializerMethodField()
+
+    def get_identifier(self, obj):
+        return obj.accession
+
+    alternateName = serializers.SerializerMethodField()
+
+    def get_alternateName(self, obj):  # noqa
+        return obj.secondary_accession
+
+    dateModified = serializers.SerializerMethodField()
+
+    def get_dateModified(self, obj):  # noqa
+        return obj.last_update
+
+    name = serializers.SerializerMethodField()
+
+    def get_name(self, obj):
+        return obj.study_name
+
+    description = serializers.SerializerMethodField()
+
+    def get_description(self, obj):
+        return obj.study_abstract
+
+    url = drf_serializers.HyperlinkedIdentityField(
+        view_name='emgapi_v1:studies-detail',
+        lookup_field='accession',
+    )
+
+    def to_representation(self, instance):
+        data = super(LDStudySerializer, self).to_representation(instance)
+        return OrderedDict([
+            ("@context", "http://schema.org"),
+            ("@type", "DataCatalog"),
+        ] + list(OrderedDict(data).items()))
+
+    class Meta:
+        model = emg_models.Study
+        fields = (
+            'identifier',
+            'url',
+            'alternateName',
+            'name',
+            'description',
+            'dateModified',
+        )
+
+
+class LDAnalysisSerializer(drf_serializers.ModelSerializer):
+
+    identifier = serializers.SerializerMethodField()
+
+    def get_identifier(self, obj):
+        return obj.accession
+
+    dateModified = serializers.SerializerMethodField()
+
+    def get_dateModified(self, obj):  # noqa
+        return obj.complete_time
+
+    name = serializers.SerializerMethodField()
+
+    def get_name(self, obj):
+        return obj.external_run_ids
+
+    keywords = serializers.SerializerMethodField()
+
+    def get_keywords(self, obj):
+        _keywords = [
+            obj.instrument_platform,
+            obj.instrument_model
+        ]
+        return _keywords
+
+    measurementTechnique = serializers.SerializerMethodField()
+
+    def get_measurementTechnique(self, obj):  # noqa
+        if obj.experiment_type is not None:
+            return obj.experiment_type.experiment_type
+        return None
+
+    url = drf_serializers.HyperlinkedIdentityField(
+        view_name='emgapi_v1:analyses-detail',
+        lookup_field='accession'
+    )
+
+    def to_representation(self, instance):
+        data = super(LDAnalysisSerializer, self).to_representation(instance)
+        return OrderedDict([
+            ("@context", "http://schema.org"),
+            ("@type", "Dataset"),
+        ] + list(OrderedDict(data).items()))
+
+    class Meta:
+        model = emg_models.AnalysisJob
+        fields = (
+            'identifier',
+            'url',
+            'name',
+            'measurementTechnique',
+            'keywords',
+            'dateModified',
+        )
