@@ -131,7 +131,7 @@ class UtilsViewSet(viewsets.GenericViewSet):
                 "Request cannot be processed.",
                 status=status.HTTP_409_CONFLICT
             )
-        return Response(serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @list_route(
         methods=['get', 'post', ],
@@ -149,7 +149,7 @@ class UtilsViewSet(viewsets.GenericViewSet):
                 logging.error(e, exc_info=True)
                 return Response(
                     serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class MyDataViewSet(emg_mixins.ListModelMixin,
@@ -322,6 +322,9 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         )
 
     def get_serializer_class(self):
+        f = self.request.GET.get('format', None)
+        if f in ('ldjson',):
+            return emg_serializers.LDStudySerializer
         if self.action == 'retrieve':
             return emg_serializers.RetrieveStudySerializer
         return super(StudyViewSet, self).get_serializer_class()
@@ -579,6 +582,9 @@ class AnalysisJobViewSet(mixins.RetrieveModelMixin,
     lookup_value_regex = '[^/]+'
 
     def get_serializer_class(self):
+        f = self.request.GET.get('format', None)
+        if f in ('ldjson',):
+            return emg_serializers.LDAnalysisSerializer
         return super(AnalysisJobViewSet, self).get_serializer_class()
 
     def get_object(self):
