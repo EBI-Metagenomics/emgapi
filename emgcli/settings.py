@@ -99,21 +99,34 @@ LOGGING = {
             'filters': ['require_debug_true'],
             'formatter': 'default',
         },
+        'notify': {
+            'level': 'DEBUG',
+            'class': LOGGING_CLASS,
+            'filename': os.path.join(LOGDIR, 'notify.log').replace('\\', '/'),
+            'maxBytes': 1024*1024*10,
+            'backupCount': 50,
+            'formatter': 'default',
+        },
     },
     'loggers': {
+        'emgena': { 
+            'handlers': ['notify'],
+            'level': 'INFO',
+            'propagate': False
+        },
         'django.request': {  # Stop SQL debug from logging to main logger
             'handlers': ['default'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': False
         },
         'django': {
             'handlers': ['null'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': True
         },
         '': {
             'handlers': ['default'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': True
         }
     }
