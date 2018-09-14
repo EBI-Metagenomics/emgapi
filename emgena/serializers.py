@@ -49,6 +49,7 @@ class EmailSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         validated_data['recipient_list'] = (settings.EMAIL_HELPDESK,)
+        logger.info("Email %r" % validated_data)
         send_mail(**validated_data)
 
     class Meta:
@@ -59,8 +60,8 @@ class EmailSerializer(serializers.Serializer):
 class NotifySerializer(serializers.Serializer):
 
     from_email = serializers.EmailField(max_length=200, required=True)
-    subject = serializers.CharField(max_length=100, required=True)
-    message = serializers.CharField(max_length=500, required=True)
+    subject = serializers.CharField(max_length=500, required=True)
+    message = serializers.CharField(max_length=1000, required=True)
 
     def create(self, validated_data):
         import requests
@@ -72,8 +73,9 @@ class NotifySerializer(serializers.Serializer):
             "Requestor": n.from_email,
             "Priority": "4",
             "Subject": n.subject,
-            "Text": n.message
+            "Text": n.message.replace("\n", ';')
         }
+        logger.info("Ticket %r" % ticket)
 
         content = [
             "{key}: {value}".format(
