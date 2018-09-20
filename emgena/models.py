@@ -54,7 +54,7 @@ class Submitter(models.Model):
     class Meta:
         managed = False
         db_table = 'SUBMISSION_ACCOUNT'
-        app_label = 'ena'
+        app_label = 'emgena'
 
     def __str__(self):
         return self.submission_account
@@ -73,7 +73,7 @@ class SubmitterContact(models.Model):
     class Meta:
         managed = False
         db_table = 'SUBMISSION_CONTACT'
-        app_label = 'ena'
+        app_label = 'emgena'
         unique_together = ('submission_account', 'email_address',)
         ordering = ('submission_account',)
 
@@ -86,3 +86,26 @@ class Notify(object):
     def __init__(self, **kwargs):
         for field in ('id', 'from_email', 'message', 'subject'):
             setattr(self, field, kwargs.get(field, None))
+
+
+# helpers
+
+class AssemblyMapping(models.Model):
+    submission_account = models.CharField(
+        db_column='SUBMISSION_ACCOUNT_ID', primary_key=True, max_length=15)
+    accession = models.CharField(
+        db_column='ASSEMBLY_ID', max_length=30)
+    legacy_accession = models.CharField(
+        db_column='GC_ID', max_length=30)
+    wgs_accession = models.CharField(
+        db_column='WGS_ACC', max_length=30)
+
+    class Meta:
+        managed = False
+        db_table = 'GCS_ASSEMBLY'
+        app_label = 'emgena'
+        unique_together = ('accession', 'legacy_accession',)
+        ordering = ('accession',)
+
+    def __str__(self):
+        return self.submission_account
