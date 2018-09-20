@@ -891,6 +891,60 @@ class Run(models.Model):
         return self.accession
 
 
+class AssemblyQuerySet(BaseQuerySet):
+    pass
+
+
+class AssemblyManager(models.Manager):
+
+    def get_queryset(self):
+        return AssemblyQuerySet(self.model, using=self._db)
+
+    def available(self, request):
+        return self.get_queryset().available(request) \
+            .select_related(
+                'experiment_type',
+                'study', 'sample'
+            )
+
+
+class Assembly(models.Model):
+    assembly_id = models.BigAutoField(
+        db_column='ASSEMBLY_ID', primary_key=True)
+    accession = models.CharField(
+        db_column='ACCESSION', max_length=80, blank=True, null=True)
+    wgs_accession = models.CharField(
+        db_column='WGS_ACCESSION', max_length=100, blank=True, null=True)
+    legacy_accession = models.CharField(
+        db_column='LEGACY_ACCESSION', max_length=100, blank=True, null=True)
+    status_id = models.ForeignKey(
+        'Status', db_column='STATUS_ID', related_name='assemblies',
+        on_delete=models.CASCADE, default=2)
+    sample = models.ForeignKey(
+        'Sample', db_column='SAMPLE_ID', related_name='assemblies',
+        on_delete=models.CASCADE, blank=True, null=True)
+    study = models.ForeignKey(
+        'Study', db_column='STUDY_ID', related_name='assemblies',
+        on_delete=models.CASCADE, blank=True, null=True)
+    experiment_type = models.ForeignKey(
+        ExperimentType, db_column='EXPERIMENT_TYPE_ID',
+        related_name='assemblies',
+        on_delete=models.CASCADE, blank=True, null=True)
+
+    objects = AssemblyManager()
+
+    class Meta:
+        db_table = 'ASSEMBLY'
+        ordering = ('accession',)
+        unique_together = (
+            ('assembly_id', 'accession'),
+            ('accession', 'wgs_accession', 'legacy_accession')
+        )
+
+    def __str__(self):
+        return self.accession
+
+
 class AnalysisJobQuerySet(BaseQuerySet):
     pass
 
@@ -970,6 +1024,9 @@ class AnalysisJob(models.Model):
         db_column='RESULT_DIRECTORY', max_length=100)
     run = models.ForeignKey(
         Run, db_column='RUN_ID', related_name='analyses',
+        on_delete=models.CASCADE, blank=True, null=True)
+    assembly = models.ForeignKey(
+        Assembly, db_column='ASSEMBLY_ID', related_name='analyses',
         on_delete=models.CASCADE, blank=True, null=True)
     sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID', related_name='analyses',

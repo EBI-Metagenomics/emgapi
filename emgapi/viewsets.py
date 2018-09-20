@@ -122,6 +122,32 @@ class BaseRunGenericViewSet(viewsets.GenericViewSet):
     )
 
 
+class BaseAssemblyGenericViewSet(viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.AssemblySerializer
+
+    filter_class = emg_filters.AssemblyFilter
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'accession',
+    )
+
+    ordering = ('-accession',)
+
+    search_fields = (
+        'accession',
+        'wgs_accession',
+        'legacy_accession',
+        '@sample__metadata__var_val_ucv',
+    )
+
+
 class BaseAnalysisGenericViewSet(viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
