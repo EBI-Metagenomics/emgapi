@@ -475,6 +475,74 @@ class RunSerializer(ExplicitFieldsModelSerializer,
         )
 
 
+class AssemblySerializer(ExplicitFieldsModelSerializer,
+                         serializers.HyperlinkedModelSerializer):
+
+    included_serializers = {
+        'sample': 'emgapi.serializers.SampleSerializer',
+        'study': 'emgapi.serializers.StudySerializer',
+    }
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi_v1:assemblies-detail',
+        lookup_field='accession'
+    )
+
+    # attributes
+    experiment_type = serializers.SerializerMethodField()
+
+    def get_experiment_type(self, obj):
+        if obj.experiment_type is not None:
+            return obj.experiment_type.experiment_type
+        return None
+
+    # relationships
+    sample = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emgapi_v1:samples-detail',
+        lookup_field='accession'
+    )
+
+    study = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emgapi_v1:studies-detail',
+        lookup_field='accession'
+    )
+
+    pipelines = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_pipelines',
+        model=emg_models.Pipeline,
+        related_link_self_view_name='emgapi_v1:pipelines-detail',
+        related_link_self_lookup_field='release_version'
+    )
+
+    def get_pipelines(self, obj):
+        # TODO: push that to queryset
+        return emg_models.Pipeline.objects \
+            .filter(analyses__assembly=obj)
+
+    # analyses = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+    #     many=True,
+    #     read_only=True,
+    #     source='get_analyses',
+    #     model=emg_models.AnalysisJob,
+    #     related_link_view_name='emgapi_v1:assemblies-analyses-list',
+    #     related_link_url_kwarg='accession',
+    #     related_link_lookup_field='accession',
+    # )
+    #
+    # def get_analyses(self, obj):
+    #     return None
+
+    class Meta:
+        model = emg_models.Assembly
+        exclude = (
+            'status_id',
+        )
+
+
 # Download serializer
 class BaseDownloadSerializer(ExplicitFieldsModelSerializer,
                              serializers.HyperlinkedModelSerializer):
