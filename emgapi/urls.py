@@ -46,6 +46,12 @@ router.register(
 )
 
 router.register(
+    r'assemblies',
+    views.AssemblyViewSet,
+    base_name='assemblies'
+)
+
+router.register(
     r'analyses',
     views.AnalysisJobViewSet,
     base_name='analyses'
