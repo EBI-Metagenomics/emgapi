@@ -520,21 +520,21 @@ class AssemblySerializer(ExplicitFieldsModelSerializer,
 
     def get_pipelines(self, obj):
         # TODO: push that to queryset
-        return emg_models.Pipeline.objects \
-            .filter(analyses__assembly=obj)
+        pipelines = obj.analyses.values('pipeline_id').distinct()
+        return emg_models.Pipeline.objects.filter(pk__in=pipelines)
 
-    # analyses = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
-    #     many=True,
-    #     read_only=True,
-    #     source='get_analyses',
-    #     model=emg_models.AnalysisJob,
-    #     related_link_view_name='emgapi_v1:assemblies-analyses-list',
-    #     related_link_url_kwarg='accession',
-    #     related_link_lookup_field='accession',
-    # )
-    #
-    # def get_analyses(self, obj):
-    #     return None
+    analyses = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_analyses',
+        model=emg_models.AnalysisJob,
+        related_link_view_name='emgapi_v1:assemblies-analyses-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+    )
+
+    def get_analyses(self, obj):
+        return None
 
     class Meta:
         model = emg_models.Assembly
