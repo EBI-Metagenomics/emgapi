@@ -802,6 +802,12 @@ class AnalysisSerializer(BaseAnalysisSerializer):
         lookup_field='accession'
     )
 
+    assembly = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emgapi_v1:assemblies-detail',
+        lookup_field='accession'
+    )
+
 
 # Sample serializer
 
