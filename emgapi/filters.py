@@ -17,6 +17,7 @@
 from decimal import Decimal
 
 from django import forms
+from django.db.models import Q
 from django.db.models import FloatField
 from django.db.models.functions import Cast
 from django.utils.datastructures import MultiValueDict
@@ -639,14 +640,18 @@ class AssemblyFilter(django_filters.FilterSet):
         to_field_name='accession',
         method='filter_accession',
         distinct=True,
-        label='Run accession',
-        help_text='Run accession',
+        label='Assembly accession',
+        help_text='Assembly accession',
         widget=QueryArrayWidget
     )
 
     def filter_accession(self, qs, name, values):
         if values:
-            qs = qs.available(self.request).filter(accession__in=values)
+            qs = qs.available(self.request).filter(
+                Q(accession__in=values) |
+                Q(wgs_accession__in=values) |
+                Q(legacy_accession__in=values)
+            )
         return qs
 
     biome_name = django_filters.CharFilter(
