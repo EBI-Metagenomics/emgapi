@@ -67,15 +67,20 @@ class BaseQuerySet(models.QuerySet):
                     Q(status_id=4),
                 ],
             },
+            'AssemblyQuerySet': {
+                'all': [
+                    Q(status_id=4),
+                ],
+            },
             'AnalysisJobQuerySet': {
                 'all': [
-                    Q(run__status_id=4),
+                    Q(run__status_id=4) | Q(assembly__status_id=4),
                     Q(analysis_status_id=3) | Q(analysis_status_id=6)
                 ],
             },
             'AnalysisJobDownloadQuerySet': {
                 'all': [
-                    Q(job__run__status_id=4),
+                    Q(job__run__status_id=4) | Q(job__assembly__status_id=4),
                     Q(job__analysis_status_id=3) | Q(job__analysis_status_id=6)
                 ],
             },
@@ -93,13 +98,21 @@ class BaseQuerySet(models.QuerySet):
             _query_filters['RunQuerySet']['authenticated'] = \
                 [Q(study__submission_account_id=_username, status_id=2) |
                  Q(status_id=4)]
+            _query_filters['AssemblyQuerySet']['authenticated'] = \
+                [Q(studies__submission_account_id=_username, status_id=2) |
+                 Q(status_id=4)]
             _query_filters['AnalysisJobQuerySet']['authenticated'] = \
-                [Q(study__submission_account_id=_username, run__status_id=2) |
-                 Q(run__status_id=4)]
+                [Q(study__submission_account_id=_username,
+                   run__status_id=2) |
+                 Q(study__submission_account_id=_username,
+                   assembly__status_id=2) |
+                 Q(run__status_id=4) | Q(assembly__status_id=4)]
             _query_filters['AnalysisJobDownloadQuerySet']['authenticated'] = \
                 [Q(job__study__submission_account_id=_username,
                    job__run__status_id=2) |
-                 Q(job__run__status_id=4)]
+                 Q(job__study__submission_account_id=_username,
+                   job__assembly__status_id=2) |
+                 Q(job__run__status_id=4) | Q(job__assembly__status_id=4)]
 
         q = list()
         try:
