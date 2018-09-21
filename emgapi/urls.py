@@ -132,6 +132,12 @@ router.register(
 )
 
 router.register(
+    r'assemblies/(?P<accession>[^/]+)/analyses',
+    views_relations.AssemblyAnalysisViewSet,
+    base_name='assemblies-analyses'
+)
+
+router.register(
     r'studies/(?P<accession>[^/]+)'
     r'/pipelines/(?P<release_version>[0-9\.]+)/file',
     views_relations.StudiesDownloadViewSet,
