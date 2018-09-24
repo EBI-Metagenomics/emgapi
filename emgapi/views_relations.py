@@ -878,11 +878,10 @@ class RunAssemblyViewSet(emg_mixins.ListModelMixin,
     )
 
     ordering_fields = (
-        'pipeline',
-        # 'accession',
+        'accession',
     )
 
-    ordering = ('-pipeline', )
+    ordering = ('-accession', )
 
     lookup_field = 'accession'
     lookup_value_regex = '[^/]+'
