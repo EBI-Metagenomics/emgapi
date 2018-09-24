@@ -534,7 +534,12 @@ class RunViewSet(mixins.RetrieveModelMixin,
     lookup_value_regex = '[^/]+'
 
     def get_queryset(self):
-        return emg_models.Run.objects.available(self.request)
+        queryset = emg_models.Run.objects.available(self.request)
+        if 'assemblies' in self.request.GET.get('include', '').split(','):
+            _qs = emg_models.Assembly.objects.available(self.request)
+            queryset = queryset.prefetch_related(
+                Prefetch('assemblies', queryset=_qs))
+        return queryset
 
     def get_object(self):
         return get_object_or_404(
