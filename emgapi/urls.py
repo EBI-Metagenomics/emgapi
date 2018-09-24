@@ -132,6 +132,12 @@ router.register(
 )
 
 router.register(
+    r'runs/(?P<accession>[^/]+)/assemblies',
+    views_relations.RunAssemblyViewSet,
+    base_name='runs-assemblies'
+)
+
+router.register(
     r'assemblies/(?P<accession>[^/]+)/analyses',
     views_relations.AssemblyAnalysisViewSet,
     base_name='assemblies-analyses'

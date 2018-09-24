@@ -95,6 +95,8 @@ class AssemblyMapping(models.Model):
         db_column='SUBMISSION_ACCOUNT_ID', primary_key=True, max_length=15)
     accession = models.CharField(
         db_column='ASSEMBLY_ID', max_length=30)
+    name = models.CharField(
+        db_column='NAME', max_length=30)
     legacy_accession = models.CharField(
         db_column='GC_ID', max_length=30)
     wgs_accession = models.CharField(
@@ -108,4 +110,4 @@ class AssemblyMapping(models.Model):
         ordering = ('accession',)
 
     def __str__(self):
-        return self.submission_account
+        return self.accession

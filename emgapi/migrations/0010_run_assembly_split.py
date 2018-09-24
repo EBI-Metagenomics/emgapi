@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 import django.db.models.deletion
+from django.db.models import Q
 
 
 def populate_assemblies(apps, schema_editor):
@@ -17,16 +18,35 @@ def populate_assemblies(apps, schema_editor):
     # total = Run.objects.filter(experiment_type=experiment_type).count()
     for run in Run.objects.filter(experiment_type=experiment_type):
         #print(run.accession)
+        run_origin = None
+        if run.secondary_accession.startswith("ERR"):
+            try:
+                run_origin = Run.objects.get(accession=run.accession)
+            except Run.DoesNotExist:
+                pass
+            print("secondary_accession", run.secondary_accession, run_origin.accession)
+
         try:
             _assembly = AssemblyMapping.objects.using('ena_pro') \
-                .get(legacy_accession=run.accession)
+                .get(
+                    Q(legacy_accession=run.accession) |
+                    Q(accession=run.accession) |
+                    Q(legacy_accession=run.secondary_accession) |
+                    Q(accession=run.secondary_accession)
+                )
+            try:
+                run_origin = Run.objects.get(accession=_assembly.name)
+            except Run.DoesNotExist:
+                run_origin = None
+            print("secondary_accession_assembly", run.accession, run.secondary_accession, run_origin, _assembly.name)
+
         except AssemblyMapping.DoesNotExist:
             a = Assembly.objects.create(
                 accession=run.accession,
                 legacy_accession=run.secondary_accession,
                 status_id=run.status_id,
                 sample=run.sample,
-                study=run.study,
+                run=run_origin,
                 experiment_type=experiment_type,
             )
         except AssemblyMapping.MultipleObjectsReturned:
@@ -35,7 +55,6 @@ def populate_assemblies(apps, schema_editor):
                 legacy_accession=run.secondary_accession,
                 status_id=run.status_id,
                 sample=run.sample,
-                study=run.study,
                 experiment_type=experiment_type,
             )
         else:
@@ -45,17 +64,15 @@ def populate_assemblies(apps, schema_editor):
                 wgs_accession=_assembly.wgs_accession,
                 status_id=run.status_id,
                 sample=run.sample,
-                study=run.study,
+                run=run_origin,
                 experiment_type=experiment_type,
             )
         for aj in AnalysisJob.objects.filter(run=run):
             aj.run = None
             aj.assembly = a
             aj.save()
-        if aj.external_run_ids == run.accession:
-            run.delete()
-        else:
-            print(aj.accesion, run.accession)
+        run.delete()
+        print(aj.job_id, run.accession)
 
 # def delete_duplicated(apps, schema_editor):
 #     Run = apps.get_model("emgapi", "Run")
@@ -103,8 +120,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='assembly',
-            name='study',
-            field=models.ForeignKey(blank=True, db_column='STUDY_ID', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='assemblies', to='emgapi.Study'),
+            name='run',
+            field=models.ForeignKey(blank=True, db_column='RUN_ID', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='assemblies', to='emgapi.Run'),
         ),
         migrations.AlterUniqueTogether(
             name='assembly',
