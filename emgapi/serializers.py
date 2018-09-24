@@ -441,6 +441,18 @@ class RunSerializer(ExplicitFieldsModelSerializer,
         lookup_field='accession'
     )
 
+    assemblies = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_assemblies',
+        model=emg_models.Assembly,
+        related_link_self_view_name='emgapi_v1:assemblies-detail',
+        related_link_self_lookup_field='accession'
+    )
+
+    def get_assemblies(self, obj):
+        return obj.assemblies.all()
+
     pipelines = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
         many=True,
         read_only=True,
@@ -480,7 +492,7 @@ class AssemblySerializer(ExplicitFieldsModelSerializer,
 
     included_serializers = {
         'sample': 'emgapi.serializers.SampleSerializer',
-        'study': 'emgapi.serializers.StudySerializer',
+        'run': 'emgapi.serializers.RunSerializer',
     }
 
     url = serializers.HyperlinkedIdentityField(
@@ -497,15 +509,15 @@ class AssemblySerializer(ExplicitFieldsModelSerializer,
         return None
 
     # relationships
-    sample = serializers.HyperlinkedRelatedField(
+    run = serializers.HyperlinkedRelatedField(
         read_only=True,
-        view_name='emgapi_v1:samples-detail',
+        view_name='emgapi_v1:runs-detail',
         lookup_field='accession'
     )
 
-    study = serializers.HyperlinkedRelatedField(
+    sample = serializers.HyperlinkedRelatedField(
         read_only=True,
-        view_name='emgapi_v1:studies-detail',
+        view_name='emgapi_v1:samples-detail',
         lookup_field='accession'
     )
 
