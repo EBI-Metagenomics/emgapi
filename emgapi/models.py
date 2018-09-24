@@ -917,7 +917,7 @@ class AssemblyManager(models.Manager):
         return self.get_queryset().available(request) \
             .select_related(
                 'experiment_type',
-                'study', 'sample'
+                'run', 'sample'
             )
 
 
@@ -933,11 +933,11 @@ class Assembly(models.Model):
     status_id = models.ForeignKey(
         'Status', db_column='STATUS_ID', related_name='assemblies',
         on_delete=models.CASCADE, default=2)
+    run = models.ForeignKey(
+        'Run', db_column='RUN_ID', related_name='assemblies',
+        on_delete=models.CASCADE, blank=True, null=True)
     sample = models.ForeignKey(
         'Sample', db_column='SAMPLE_ID', related_name='assemblies',
-        on_delete=models.CASCADE, blank=True, null=True)
-    study = models.ForeignKey(
-        'Study', db_column='STUDY_ID', related_name='assemblies',
         on_delete=models.CASCADE, blank=True, null=True)
     experiment_type = models.ForeignKey(
         ExperimentType, db_column='EXPERIMENT_TYPE_ID',
