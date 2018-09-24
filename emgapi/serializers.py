@@ -446,6 +446,9 @@ class RunSerializer(ExplicitFieldsModelSerializer,
         read_only=True,
         source='get_assemblies',
         model=emg_models.Assembly,
+        related_link_view_name='emgapi_v1:runs-assemblies-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
         related_link_self_view_name='emgapi_v1:assemblies-detail',
         related_link_self_lookup_field='accession'
     )
@@ -521,20 +524,6 @@ class AssemblySerializer(ExplicitFieldsModelSerializer,
         lookup_field='accession'
     )
 
-    pipelines = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
-        many=True,
-        read_only=True,
-        source='get_pipelines',
-        model=emg_models.Pipeline,
-        related_link_self_view_name='emgapi_v1:pipelines-detail',
-        related_link_self_lookup_field='release_version'
-    )
-
-    def get_pipelines(self, obj):
-        # TODO: push that to queryset
-        pipelines = obj.analyses.values('pipeline_id').distinct()
-        return emg_models.Pipeline.objects.filter(pk__in=pipelines)
-
     analyses = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
         many=True,
         read_only=True,
@@ -553,6 +542,23 @@ class AssemblySerializer(ExplicitFieldsModelSerializer,
         exclude = (
             'status_id',
         )
+
+
+class RetrieveAssemblySerializer(AssemblySerializer):
+
+    pipelines = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_pipelines',
+        model=emg_models.Pipeline,
+        related_link_self_view_name='emgapi_v1:pipelines-detail',
+        related_link_self_lookup_field='release_version'
+    )
+
+    def get_pipelines(self, obj):
+        # TODO: push that to queryset
+        pipelines = obj.analyses.values('pipeline_id').distinct()
+        return emg_models.Pipeline.objects.filter(pk__in=pipelines)
 
 
 # Download serializer
