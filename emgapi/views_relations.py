@@ -865,6 +865,51 @@ class SampleMetadataRelationshipViewSet(mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
+class RunAssemblyViewSet(emg_mixins.ListModelMixin,
+                         viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.AssemblySerializer
+
+    filter_class = emg_filters.AssemblyFilter
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'pipeline',
+        # 'accession',
+    )
+
+    ordering = ('-pipeline', )
+
+    lookup_field = 'accession'
+    lookup_value_regex = '[^/]+'
+
+    def get_serializer_class(self):
+        return super(RunAssemblyViewSet, self).get_serializer_class()
+
+    def get_queryset(self):
+        run = get_object_or_404(
+            emg_models.Run,
+            accession=self.kwargs['accession'])
+        queryset = emg_models.Assembly.objects \
+            .available(self.request) \
+            .filter(run=run)
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves analysis result for the given accession
+        Example:
+        ---
+        `/runs/ERR1385375/assemblies`
+        """
+        return super(RunAssemblyViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
 class AssemblyAnalysisViewSet(emg_mixins.ListModelMixin,
                               viewsets.GenericViewSet):
 
