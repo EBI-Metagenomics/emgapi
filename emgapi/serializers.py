@@ -413,6 +413,7 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     included_serializers = {
         'sample': 'emgapi.serializers.SampleSerializer',
         'study': 'emgapi.serializers.StudySerializer',
+        'assemblies': 'emgapi.serializers.AssemblySerializer',
     }
 
     url = serializers.HyperlinkedIdentityField(
@@ -494,7 +495,6 @@ class AssemblySerializer(ExplicitFieldsModelSerializer,
                          serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
-        'sample': 'emgapi.serializers.SampleSerializer',
         'run': 'emgapi.serializers.RunSerializer',
     }
 
