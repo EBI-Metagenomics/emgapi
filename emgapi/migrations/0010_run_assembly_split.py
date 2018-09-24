@@ -71,7 +71,8 @@ def populate_assemblies(apps, schema_editor):
             aj.run = None
             aj.assembly = a
             aj.save()
-        run.delete()
+        if AnalysisJob.objects.filter(run=run).count() > 0:
+            run.delete()
         print(aj.job_id, run.accession)
 
 # def delete_duplicated(apps, schema_editor):

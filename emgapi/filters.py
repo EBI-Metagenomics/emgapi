@@ -736,14 +736,6 @@ class AssemblyFilter(django_filters.FilterSet):
     def filter_sample_accession(self, qs, name, value):
         return qs.filter(sample__accession=value)
 
-    study_accession = django_filters.CharFilter(
-        method='filter_study_accession', distinct=True,
-        label='Study, ENA or BioProject accession',
-        help_text='Study, ENA or BioProject accession')
-
-    def filter_study_accession(self, qs, name, value):
-        return qs.filter(*emg_utils.related_study_accession_query(value))
-
     # include
     include = django_filters.CharFilter(
         method='filter_include', distinct=True,
@@ -767,6 +759,5 @@ class AssemblyFilter(django_filters.FilterSet):
             'metadata_value_lte',
             'metadata_value',
             'sample_accession',
-            'study_accession',
             'include',
         )
