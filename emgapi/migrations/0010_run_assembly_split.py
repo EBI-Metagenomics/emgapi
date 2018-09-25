@@ -10,6 +10,8 @@ from django.db.models import Q
 def populate_assemblies(apps, schema_editor):
     Run = apps.get_model("emgapi", "Run")
     Assembly = apps.get_model("emgapi", "Assembly")
+    AssemblyRun = apps.get_model("emgapi", "AssemblyRun")
+    AssemblySample = apps.get_model("emgapi", "AssemblySample")
     AnalysisJob = apps.get_model("emgapi", "AnalysisJob")
     ExperimentType = apps.get_model("emgapi", "ExperimentType")
     experiment_type = ExperimentType.objects.get(experiment_type="assembly")
@@ -17,14 +19,12 @@ def populate_assemblies(apps, schema_editor):
 
     # total = Run.objects.filter(experiment_type=experiment_type).count()
     for run in Run.objects.filter(experiment_type=experiment_type):
-        #print(run.accession)
         run_origin = None
         if run.secondary_accession.startswith("ERR"):
             try:
                 run_origin = Run.objects.get(accession=run.accession)
             except Run.DoesNotExist:
                 pass
-            print("secondary_accession", run.secondary_accession, run_origin.accession)
 
         try:
             _assembly = AssemblyMapping.objects.using('ena_pro') \
@@ -38,24 +38,33 @@ def populate_assemblies(apps, schema_editor):
                 run_origin = Run.objects.get(accession=_assembly.name)
             except Run.DoesNotExist:
                 run_origin = None
-            print("secondary_accession_assembly", run.accession, run.secondary_accession, run_origin, _assembly.name)
 
         except AssemblyMapping.DoesNotExist:
             a = Assembly.objects.create(
                 accession=run.accession,
                 legacy_accession=run.secondary_accession,
                 status_id=run.status_id,
-                sample=run.sample,
-                run=run_origin,
                 experiment_type=experiment_type,
+            )
+            if run_origin is not None:
+                AssemblyRun.objects.create(
+                    assembly=a,
+                    run=run_origin
+                )
+            AssemblySample.objects.create(
+                assembly=a,
+                sample=run.sample
             )
         except AssemblyMapping.MultipleObjectsReturned:
             a = Assembly.objects.create(
                 accession=run.accession,
                 legacy_accession=run.secondary_accession,
                 status_id=run.status_id,
-                sample=run.sample,
                 experiment_type=experiment_type,
+            )
+            AssemblySample.objects.create(
+                assembly=a,
+                sample=run.sample
             )
         else:
             a = Assembly.objects.create(
@@ -63,9 +72,16 @@ def populate_assemblies(apps, schema_editor):
                 legacy_accession=_assembly.legacy_accession,
                 wgs_accession=_assembly.wgs_accession,
                 status_id=run.status_id,
-                sample=run.sample,
-                run=run_origin,
                 experiment_type=experiment_type,
+            )
+            if run_origin is not None:
+                AssemblyRun.objects.create(
+                    assembly=a,
+                    run=run_origin
+                )
+            AssemblySample.objects.create(
+                assembly=a,
+                sample=run.sample
             )
         for aj in AnalysisJob.objects.filter(run=run):
             aj.run = None
@@ -73,7 +89,6 @@ def populate_assemblies(apps, schema_editor):
             aj.save()
         if AnalysisJob.objects.filter(run=run).count() > 0:
             run.delete()
-        print(aj.job_id, run.accession)
 
 # def delete_duplicated(apps, schema_editor):
 #     Run = apps.get_model("emgapi", "Run")
@@ -104,6 +119,29 @@ class Migration(migrations.Migration):
                 'ordering': ('accession',),
             },
         ),
+        migrations.CreateModel(
+            name='AssemblyRun',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('assembly', models.ForeignKey(db_column='ASSEMBLY_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.Assembly')),
+                ('run', models.ForeignKey(db_column='RUN_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.Run')),
+            ],
+            options={
+                'db_table': 'ASSEMBLY_RUN',
+            },
+        ),
+        migrations.CreateModel(
+            name='AssemblySample',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('assembly', models.ForeignKey(db_column='ASSEMBLY_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.Assembly')),
+                ('sample', models.ForeignKey(db_column='SAMPLE_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.Sample')),
+            ],
+            options={
+                'db_table': 'ASSEMBLY_SAMPLE',
+            },
+        ),
+
         migrations.AddField(
             model_name='assembly',
             name='experiment_type',
@@ -111,18 +149,27 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='assembly',
-            name='sample',
-            field=models.ForeignKey(blank=True, db_column='SAMPLE_ID', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='assemblies', to='emgapi.Sample'),
+            name='runs',
+            field=models.ManyToManyField(blank=True, related_name='assemblies', through='emgapi.AssemblyRun', to='emgapi.Run'),
+        ),
+        migrations.AddField(
+            model_name='assembly',
+            name='samples',
+            field=models.ManyToManyField(blank=True, related_name='assemblies', through='emgapi.AssemblySample', to='emgapi.Sample'),
         ),
         migrations.AddField(
             model_name='assembly',
             name='status_id',
             field=models.ForeignKey(db_column='STATUS_ID', default=2, on_delete=django.db.models.deletion.CASCADE, related_name='assemblies', to='emgapi.Status'),
         ),
-        migrations.AddField(
-            model_name='assembly',
-            name='run',
-            field=models.ForeignKey(blank=True, db_column='RUN_ID', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='assemblies', to='emgapi.Run'),
+
+        migrations.AlterUniqueTogether(
+            name='assemblysample',
+            unique_together=set([('assembly', 'sample')]),
+        ),
+        migrations.AlterUniqueTogether(
+            name='assemblyrun',
+            unique_together=set([('assembly', 'run')]),
         ),
         migrations.AlterUniqueTogether(
             name='assembly',
