@@ -455,7 +455,7 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     )
 
     def get_assemblies(self, obj):
-        return obj.assemblies.all()
+        return obj.assemblies.available(self.context['request'])
 
     pipelines = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
         many=True,
@@ -512,17 +512,29 @@ class AssemblySerializer(ExplicitFieldsModelSerializer,
         return None
 
     # relationships
-    run = serializers.HyperlinkedRelatedField(
+    runs = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
         read_only=True,
-        view_name='emgapi_v1:runs-detail',
-        lookup_field='accession'
+        source='get_runs',
+        model=emg_models.Run,
+        related_link_self_view_name='emgapi_v1:runs-detail',
+        related_link_self_lookup_field='accession'
     )
 
-    sample = serializers.HyperlinkedRelatedField(
+    def get_runs(self, obj):
+        return obj.runs.available(self.context['request'])
+
+    samples = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
         read_only=True,
-        view_name='emgapi_v1:samples-detail',
-        lookup_field='accession'
+        source='get_samples',
+        model=emg_models.Sample,
+        related_link_self_view_name='emgapi_v1:samples-detail',
+        related_link_self_lookup_field='accession'
     )
+
+    def get_samples(self, obj):
+        return obj.samples.available(self.context['request'])
 
     analyses = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
         many=True,

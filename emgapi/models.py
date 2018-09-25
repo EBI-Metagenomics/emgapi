@@ -917,7 +917,6 @@ class AssemblyManager(models.Manager):
         return self.get_queryset().available(request) \
             .select_related(
                 'experiment_type',
-                'run', 'sample'
             )
 
 
@@ -933,16 +932,16 @@ class Assembly(models.Model):
     status_id = models.ForeignKey(
         'Status', db_column='STATUS_ID', related_name='assemblies',
         on_delete=models.CASCADE, default=2)
-    run = models.ForeignKey(
-        'Run', db_column='RUN_ID', related_name='assemblies',
-        on_delete=models.CASCADE, blank=True, null=True)
-    sample = models.ForeignKey(
-        'Sample', db_column='SAMPLE_ID', related_name='assemblies',
-        on_delete=models.CASCADE, blank=True, null=True)
     experiment_type = models.ForeignKey(
         ExperimentType, db_column='EXPERIMENT_TYPE_ID',
         related_name='assemblies',
         on_delete=models.CASCADE, blank=True, null=True)
+
+    runs = models.ManyToManyField(
+        'Run', through='AssemblyRun', related_name='assemblies', blank=True)
+    samples = models.ManyToManyField(
+        'Sample', through='AssemblySample', related_name='assemblies',
+        blank=True)
 
     objects = AssemblyManager()
 
@@ -956,6 +955,28 @@ class Assembly(models.Model):
 
     def __str__(self):
         return self.accession
+
+
+class AssemblyRun(models.Model):
+    assembly = models.ForeignKey(
+        'Assembly', db_column='ASSEMBLY_ID', on_delete=models.CASCADE)
+    run = models.ForeignKey(
+        'Run', db_column='RUN_ID', on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'ASSEMBLY_RUN'
+        unique_together = (('assembly', 'run'),)
+
+
+class AssemblySample(models.Model):
+    assembly = models.ForeignKey(
+        'Assembly', db_column='ASSEMBLY_ID', on_delete=models.CASCADE)
+    sample = models.ForeignKey(
+        'Sample', db_column='SAMPLE_ID', on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'ASSEMBLY_SAMPLE'
+        unique_together = (('assembly', 'sample'),)
 
 
 class AnalysisJobQuerySet(BaseQuerySet):
