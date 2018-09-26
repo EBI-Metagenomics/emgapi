@@ -99,6 +99,8 @@ class AssemblyMapping(models.Model):
         db_column='NAME', max_length=30)
     legacy_accession = models.CharField(
         db_column='GC_ID', max_length=30)
+    legacy_version = models.CharField(
+        db_column='GC_VERSION', max_length=30)
     wgs_accession = models.CharField(
         db_column='WGS_ACC', max_length=30)
 
