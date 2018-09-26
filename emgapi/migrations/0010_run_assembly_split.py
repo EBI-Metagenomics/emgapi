@@ -26,20 +26,22 @@ def populate_assemblies(apps, schema_editor):
             except Run.DoesNotExist:
                 pass
 
-        try:
-            _assembly = AssemblyMapping.objects.using('ena_pro') \
-                .get(
-                    Q(legacy_accession=run.accession) |
-                    Q(accession=run.accession) |
-                    Q(legacy_accession=run.secondary_accession) |
-                    Q(accession=run.secondary_accession)
-                )
-            try:
-                run_origin = Run.objects.get(accession=_assembly.name)
-            except Run.DoesNotExist:
-                run_origin = None
+        _assembly = AssemblyMapping.objects.using('ena_pro') \
+            .filter(
+                Q(legacy_accession=run.accession) |
+                Q(accession=run.accession) |
+                Q(legacy_accession=run.secondary_accession) |
+                Q(accession=run.secondary_accession)
+            ).order_by('-legacy_version').first()
 
-        except AssemblyMapping.DoesNotExist:
+        try:
+            run_origin = Run.objects.get(accession=_assembly.name)
+        except Run.DoesNotExist:
+            run_origin = None
+        except AttributeError:
+            run_origin = None
+
+        if _assembly is None:
             a = Assembly.objects.create(
                 accession=run.accession,
                 legacy_accession=run.secondary_accession,
@@ -51,17 +53,6 @@ def populate_assemblies(apps, schema_editor):
                     assembly=a,
                     run=run_origin
                 )
-            AssemblySample.objects.create(
-                assembly=a,
-                sample=run.sample
-            )
-        except AssemblyMapping.MultipleObjectsReturned:
-            a = Assembly.objects.create(
-                accession=run.accession,
-                legacy_accession=run.secondary_accession,
-                status_id=run.status_id,
-                experiment_type=experiment_type,
-            )
             AssemblySample.objects.create(
                 assembly=a,
                 sample=run.sample
@@ -176,11 +167,11 @@ class Migration(migrations.Migration):
             unique_together=set([('accession', 'wgs_accession', 'legacy_accession'), ('assembly_id', 'accession')]),
         ),
 
-        migrations.AddField(
-            model_name='analysisjob',
-            name='assembly',
-            field=models.ForeignKey(blank=True, db_column='ASSEMBLY_ID', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='analyses', to='emgapi.Assembly'),
-        ),
+        # migrations.AddField(
+        #     model_name='analysisjob',
+        #     name='assembly',
+        #     field=models.ForeignKey(blank=True, db_column='ASSEMBLY_ID', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='analyses', to='emgapi.Assembly'),
+        # ),
 
         migrations.RunPython(populate_assemblies),
         #migrations.RunPython(delete_duplicated),
