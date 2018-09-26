@@ -78,7 +78,7 @@ def populate_assemblies(apps, schema_editor):
             aj.run = None
             aj.assembly = a
             aj.save()
-        if AnalysisJob.objects.filter(run=run).count() > 0:
+        if AnalysisJob.objects.filter(run=run).count() < 1:
             run.delete()
 
 # def delete_duplicated(apps, schema_editor):
@@ -167,11 +167,11 @@ class Migration(migrations.Migration):
             unique_together=set([('accession', 'wgs_accession', 'legacy_accession'), ('assembly_id', 'accession')]),
         ),
 
-        # migrations.AddField(
-        #     model_name='analysisjob',
-        #     name='assembly',
-        #     field=models.ForeignKey(blank=True, db_column='ASSEMBLY_ID', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='analyses', to='emgapi.Assembly'),
-        # ),
+        migrations.AddField(
+            model_name='analysisjob',
+            name='assembly',
+            field=models.ForeignKey(blank=True, db_column='ASSEMBLY_ID', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='analyses', to='emgapi.Assembly'),
+        ),
 
         migrations.RunPython(populate_assemblies),
         #migrations.RunPython(delete_duplicated),
