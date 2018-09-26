@@ -734,7 +734,15 @@ class AssemblyFilter(django_filters.FilterSet):
         help_text='Sample accession')
 
     def filter_sample_accession(self, qs, name, value):
-        return qs.filter(sample__accession=value)
+        return qs.filter(samples__accession=value)
+
+    run_accession = django_filters.CharFilter(
+        method='filter_run_accession', distinct=True,
+        label='Run accession',
+        help_text='Run accession')
+
+    def filter_runs_accession(self, qs, name, value):
+        return qs.filter(runs__accession=value)
 
     # include
     include = django_filters.CharFilter(
