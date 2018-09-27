@@ -17,6 +17,7 @@
 from decimal import Decimal
 
 from django import forms
+from django.db.models import Q
 from django.db.models import FloatField
 from django.db.models.functions import Cast
 from django.utils.datastructures import MultiValueDict
@@ -629,4 +630,142 @@ class AnalysisJobFilter(RunFilter):
             'species',
             'sample_accession',
             'pipeline_version'
+        )
+
+
+class AssemblyFilter(django_filters.FilterSet):
+
+    accession = filters.ModelMultipleChoiceFilter(
+        queryset=emg_models.Run.objects,
+        to_field_name='accession',
+        method='filter_accession',
+        distinct=True,
+        label='Assembly accession',
+        help_text='Assembly accession',
+        widget=QueryArrayWidget
+    )
+
+    def filter_accession(self, qs, name, values):
+        if values:
+            qs = qs.available(self.request).filter(
+                Q(accession__in=values) |
+                Q(wgs_accession__in=values) |
+                Q(legacy_accession__in=values)
+            )
+        return qs
+
+    biome_name = django_filters.CharFilter(
+        method='filter_biome_name', distinct=True,
+        label='Biome name',
+        help_text='Biome name')
+
+    def filter_biome_name(self, qs, name, value):
+        return qs.filter(
+            sample__lineage__iregex=WORD_MATCH_REGEX.format(value))
+
+    lineage = filters.ModelChoiceFilter(
+        queryset=emg_models.Biome.objects.all(),
+        method='filter_lineage', distinct=True,
+        to_field_name='lineage',
+        label='Biome lineage',
+        help_text='Biome lineage')
+
+    def filter_lineage(self, qs, name, value):
+        try:
+            b = emg_models.Biome.objects.get(lineage=value)
+            qs = qs.filter(
+                sample__biome__lft__gte=b.lft,
+                sample__biome__rgt__lte=b.rgt)
+        except emg_models.Biome.DoesNotExist:
+            pass
+        return qs
+
+    species = django_filters.CharFilter(
+        method='filter_species', distinct=True,
+        label='Species',
+        help_text='Species')
+
+    def filter_species(self, qs, name, value):
+        return qs.filter(
+            sample__species__iregex=WORD_MATCH_REGEX.format(value))
+
+    metadata_key = filters.ChoiceFilter(
+            choices=metadata_keywords,
+            method='filter_metadata_key',
+            name='metadata_key', distinct=True,
+            label='Metadata keyword', help_text='Metadata keyword')
+
+    def filter_metadata_key(self, qs, name, value):
+        m = emg_models.VariableNames.objects.filter(var_name=value)
+        return qs.filter(sample__metadata__var__in=m)
+
+    metadata_value_gte = django_filters.NumberFilter(
+        method='filter_metadata_value_gte', distinct=True,
+        label='Metadata greater/equal then value',
+        help_text='Metadata greater/equal then value')
+
+    def filter_metadata_value_gte(self, qs, name, value):
+        return qs.annotate(
+            float_value=Cast('sample__metadata__var_val_ucv', FloatField())) \
+            .filter(float_value__gte=float(value))
+
+    metadata_value_lte = django_filters.NumberFilter(
+        method='filter_metadata_value_lte', distinct=True,
+        label='Metadata less/equal then value',
+        help_text='Metadata less/equal then value')
+
+    def filter_metadata_value_lte(self, qs, name, value):
+        return qs.annotate(
+            float_value=Cast('sample__metadata__var_val_ucv', FloatField())) \
+            .filter(float_value__lte=float(value))
+
+    metadata_value = django_filters.CharFilter(
+        method='filter_metadata_value', distinct=True,
+        label='Metadata value',
+        help_text='Metadata exact value')
+
+    def filter_metadata_value(self, qs, name, value):
+        return qs.filter(
+            sample__metadata__var_val_ucv=value)
+
+    sample_accession = django_filters.CharFilter(
+        method='filter_sample_accession', distinct=True,
+        label='Sample accession',
+        help_text='Sample accession')
+
+    def filter_sample_accession(self, qs, name, value):
+        return qs.filter(samples__accession=value)
+
+    run_accession = django_filters.CharFilter(
+        method='filter_run_accession', distinct=True,
+        label='Run accession',
+        help_text='Run accession')
+
+    def filter_runs_accession(self, qs, name, value):
+        return qs.filter(runs__accession=value)
+
+    # include
+    include = django_filters.CharFilter(
+        method='filter_include', distinct=True,
+        label='Include',
+        help_text=(
+            'Include related sample in the same response.')
+        )
+
+    def filter_include(self, qs, name, value):
+        return qs
+
+    class Meta:
+        model = emg_models.Assembly
+        fields = (
+            'accession',
+            'biome_name',
+            'lineage',
+            'species',
+            'metadata_key',
+            'metadata_value_gte',
+            'metadata_value_lte',
+            'metadata_value',
+            'sample_accession',
+            'include',
         )

@@ -67,15 +67,20 @@ class BaseQuerySet(models.QuerySet):
                     Q(status_id=4),
                 ],
             },
+            'AssemblyQuerySet': {
+                'all': [
+                    Q(status_id=4),
+                ],
+            },
             'AnalysisJobQuerySet': {
                 'all': [
-                    Q(run__status_id=4),
+                    Q(run__status_id=4) | Q(assembly__status_id=4),
                     Q(analysis_status_id=3) | Q(analysis_status_id=6)
                 ],
             },
             'AnalysisJobDownloadQuerySet': {
                 'all': [
-                    Q(job__run__status_id=4),
+                    Q(job__run__status_id=4) | Q(job__assembly__status_id=4),
                     Q(job__analysis_status_id=3) | Q(job__analysis_status_id=6)
                 ],
             },
@@ -93,13 +98,21 @@ class BaseQuerySet(models.QuerySet):
             _query_filters['RunQuerySet']['authenticated'] = \
                 [Q(study__submission_account_id=_username, status_id=2) |
                  Q(status_id=4)]
+            _query_filters['AssemblyQuerySet']['authenticated'] = \
+                [Q(studies__submission_account_id=_username, status_id=2) |
+                 Q(status_id=4)]
             _query_filters['AnalysisJobQuerySet']['authenticated'] = \
-                [Q(study__submission_account_id=_username, run__status_id=2) |
-                 Q(run__status_id=4)]
+                [Q(study__submission_account_id=_username,
+                   run__status_id=2) |
+                 Q(study__submission_account_id=_username,
+                   assembly__status_id=2) |
+                 Q(run__status_id=4) | Q(assembly__status_id=4)]
             _query_filters['AnalysisJobDownloadQuerySet']['authenticated'] = \
                 [Q(job__study__submission_account_id=_username,
                    job__run__status_id=2) |
-                 Q(job__run__status_id=4)]
+                 Q(job__study__submission_account_id=_username,
+                   job__assembly__status_id=2) |
+                 Q(job__run__status_id=4) | Q(job__assembly__status_id=4)]
 
         q = list()
         try:
@@ -891,6 +904,81 @@ class Run(models.Model):
         return self.accession
 
 
+class AssemblyQuerySet(BaseQuerySet):
+    pass
+
+
+class AssemblyManager(models.Manager):
+
+    def get_queryset(self):
+        return AssemblyQuerySet(self.model, using=self._db)
+
+    def available(self, request):
+        return self.get_queryset().available(request) \
+            .select_related(
+                'experiment_type',
+            )
+
+
+class Assembly(models.Model):
+    assembly_id = models.BigAutoField(
+        db_column='ASSEMBLY_ID', primary_key=True)
+    accession = models.CharField(
+        db_column='ACCESSION', max_length=80, blank=True, null=True)
+    wgs_accession = models.CharField(
+        db_column='WGS_ACCESSION', max_length=100, blank=True, null=True)
+    legacy_accession = models.CharField(
+        db_column='LEGACY_ACCESSION', max_length=100, blank=True, null=True)
+    status_id = models.ForeignKey(
+        'Status', db_column='STATUS_ID', related_name='assemblies',
+        on_delete=models.CASCADE, default=2)
+    experiment_type = models.ForeignKey(
+        ExperimentType, db_column='EXPERIMENT_TYPE_ID',
+        related_name='assemblies',
+        on_delete=models.CASCADE, blank=True, null=True)
+
+    runs = models.ManyToManyField(
+        'Run', through='AssemblyRun', related_name='assemblies', blank=True)
+    samples = models.ManyToManyField(
+        'Sample', through='AssemblySample', related_name='assemblies',
+        blank=True)
+
+    objects = AssemblyManager()
+
+    class Meta:
+        db_table = 'ASSEMBLY'
+        ordering = ('accession',)
+        unique_together = (
+            ('assembly_id', 'accession'),
+            ('accession', 'wgs_accession', 'legacy_accession')
+        )
+
+    def __str__(self):
+        return self.accession
+
+
+class AssemblyRun(models.Model):
+    assembly = models.ForeignKey(
+        'Assembly', db_column='ASSEMBLY_ID', on_delete=models.CASCADE)
+    run = models.ForeignKey(
+        'Run', db_column='RUN_ID', on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'ASSEMBLY_RUN'
+        unique_together = (('assembly', 'run'),)
+
+
+class AssemblySample(models.Model):
+    assembly = models.ForeignKey(
+        'Assembly', db_column='ASSEMBLY_ID', on_delete=models.CASCADE)
+    sample = models.ForeignKey(
+        'Sample', db_column='SAMPLE_ID', on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'ASSEMBLY_SAMPLE'
+        unique_together = (('assembly', 'sample'),)
+
+
 class AnalysisJobQuerySet(BaseQuerySet):
     pass
 
@@ -970,6 +1058,9 @@ class AnalysisJob(models.Model):
         db_column='RESULT_DIRECTORY', max_length=100)
     run = models.ForeignKey(
         Run, db_column='RUN_ID', related_name='analyses',
+        on_delete=models.CASCADE, blank=True, null=True)
+    assembly = models.ForeignKey(
+        Assembly, db_column='ASSEMBLY_ID', related_name='analyses',
         on_delete=models.CASCADE, blank=True, null=True)
     sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID', related_name='analyses',

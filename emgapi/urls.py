@@ -46,6 +46,12 @@ router.register(
 )
 
 router.register(
+    r'assemblies',
+    views.AssemblyViewSet,
+    base_name='assemblies'
+)
+
+router.register(
     r'analyses',
     views.AnalysisJobViewSet,
     base_name='analyses'
@@ -123,6 +129,18 @@ router.register(
     r'runs/(?P<accession>[^/]+)/analyses',
     views_relations.RunAnalysisViewSet,
     base_name='runs-analyses'
+)
+
+router.register(
+    r'runs/(?P<accession>[^/]+)/assemblies',
+    views_relations.RunAssemblyViewSet,
+    base_name='runs-assemblies'
+)
+
+router.register(
+    r'assemblies/(?P<accession>[^/]+)/analyses',
+    views_relations.AssemblyAnalysisViewSet,
+    base_name='assemblies-analyses'
 )
 
 router.register(
