@@ -546,6 +546,20 @@ class AssemblySerializer(ExplicitFieldsModelSerializer,
         related_link_lookup_field='accession',
     )
 
+    pipelines = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_pipelines',
+        model=emg_models.Pipeline,
+        related_link_self_view_name='emgapi_v1:pipelines-detail',
+        related_link_self_lookup_field='release_version'
+    )
+
+    def get_pipelines(self, obj):
+        # TODO: push that to queryset
+        return emg_models.Pipeline.objects \
+            .filter(analyses__assembly=obj)
+
     def get_analyses(self, obj):
         return None
 
