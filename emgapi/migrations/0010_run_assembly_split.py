@@ -57,6 +57,13 @@ def populate_assemblies(apps, schema_editor):
                 assembly=a,
                 sample=run.sample
             )
+            _runs = Run.objects.filter(sample=run.sample) \
+                .exclude(experiment_type=experiment_type)
+            for r in _runs:
+                AssemblyRun.objects.create(
+                    assembly=a,
+                    run=r
+                )
         else:
             a = Assembly.objects.create(
                 accession=_assembly.accession,
