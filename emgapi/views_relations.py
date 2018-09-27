@@ -895,7 +895,7 @@ class RunAssemblyViewSet(emg_mixins.ListModelMixin,
             accession=self.kwargs['accession'])
         queryset = emg_models.Assembly.objects \
             .available(self.request) \
-            .filter(run=run)
+            .filter(runs__in=[run])
         return queryset
 
     def list(self, request, *args, **kwargs):
