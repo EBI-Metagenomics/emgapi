@@ -1142,7 +1142,6 @@ class StudySerializer(ExplicitFieldsModelSerializer,
             # TODO: remove biome when schema updated
             'biome',
             'project_id',
-            'is_public',
             'experimental_factor',
             'submission_account_id',
             'result_directory',
