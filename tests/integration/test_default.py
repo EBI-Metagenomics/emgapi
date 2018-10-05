@@ -42,6 +42,7 @@ class TestDefaultAPI(object):
             "samples": "%s/samples" % host,
             "runs": "%s/runs" % host,
             "analyses": "%s/analyses" % host,
+            "assemblies": "%s/assemblies" % host,
             "pipelines": "%s/pipelines" % host,
             "experiment-types": "%s/experiment-types" % host,
             "publications": "%s/publications" % host,

@@ -14,7 +14,10 @@ def populate_assemblies(apps, schema_editor):
     AssemblySample = apps.get_model("emgapi", "AssemblySample")
     AnalysisJob = apps.get_model("emgapi", "AnalysisJob")
     ExperimentType = apps.get_model("emgapi", "ExperimentType")
-    experiment_type = ExperimentType.objects.get(experiment_type="assembly")
+    try:
+        experiment_type = ExperimentType.objects.get(experiment_type="assembly")
+    except ExperimentType.DoesNotExist:
+        return
     AssemblyMapping = apps.get_model("emgena", "AssemblyMapping")
 
     # total = Run.objects.filter(experiment_type=experiment_type).count()
@@ -88,17 +91,8 @@ def populate_assemblies(apps, schema_editor):
         if AnalysisJob.objects.filter(run=run).count() < 1:
             run.delete()
 
-# def delete_duplicated(apps, schema_editor):
-#     Run = apps.get_model("emgapi", "Run")
-#     ExperimentType = apps.get_model("emgapi", "ExperimentType")
-#     experiment_type = ExperimentType.objects.get(experiment_type="assembly")
-#
-#     for run in Run.objects.filter(experiment_type=experiment_type):
-#         run.delete()
-
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('emgapi', '0009_remove_gsccvcv'),
     ]
@@ -181,6 +175,5 @@ class Migration(migrations.Migration):
         ),
 
         migrations.RunPython(populate_assemblies),
-        #migrations.RunPython(delete_duplicated),
 
     ]
