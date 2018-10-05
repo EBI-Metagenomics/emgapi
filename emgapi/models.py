@@ -559,8 +559,8 @@ class Study(models.Model):
         db_column='CENTRE_NAME', max_length=255, blank=True, null=True)
     experimental_factor = models.CharField(
         db_column='EXPERIMENTAL_FACTOR', max_length=255, blank=True, null=True)
-    is_public = models.IntegerField(
-        db_column='IS_PUBLIC', blank=True, null=True)
+    is_public = models.BooleanField(
+        db_column='IS_PUBLIC', default=False)
     public_release_date = models.DateField(
         db_column='PUBLIC_RELEASE_DATE', blank=True, null=True)
     study_abstract = models.TextField(
