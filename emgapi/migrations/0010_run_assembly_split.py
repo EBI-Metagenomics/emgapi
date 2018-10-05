@@ -28,11 +28,11 @@ def populate_assemblies(apps, schema_editor):
 
         _assembly = AssemblyMapping.objects.using('ena_pro') \
             .filter(
-            Q(legacy_accession=run.accession) |
-            Q(accession=run.accession) |
-            Q(legacy_accession=run.secondary_accession) |
-            Q(accession=run.secondary_accession)
-        ).order_by('-legacy_version').first()
+                Q(legacy_accession=run.accession) |
+                Q(accession=run.accession) |
+                Q(legacy_accession=run.secondary_accession) |
+                Q(accession=run.secondary_accession)
+            ).order_by('-legacy_version').first()
 
         try:
             run_origin = Run.objects.get(accession=_assembly.name)
