@@ -89,15 +89,6 @@ def populate_assemblies(apps, schema_editor):
             run.delete()
 
 
-# def delete_duplicated(apps, schema_editor):
-#     Run = apps.get_model("emgapi", "Run")
-#     ExperimentType = apps.get_model("emgapi", "ExperimentType")
-#     experiment_type = ExperimentType.objects.get(experiment_type="assembly")
-#
-#     for run in Run.objects.filter(experiment_type=experiment_type):
-#         run.delete()
-
-
 def add_experiment_types(apps, schema_editor):
     experiment_types = ['metatranscriptomic', 'metagenomic', 'amplicon', 'assembly', 'metabarcoding', 'unknown']
     Experiment_type = apps.get_model('emgapi', 'ExperimentType')
@@ -202,6 +193,5 @@ class Migration(migrations.Migration):
         ),
 
         migrations.RunPython(populate_assemblies),
-        # migrations.RunPython(delete_duplicated),
 
     ]
