@@ -101,8 +101,8 @@ def populate_assemblies(apps, schema_editor):
 def add_experiment_types(apps, schema_editor):
     experiment_types = ['metatranscriptomic', 'metagenomic', 'amplicon', 'assembly', 'metabarcoding', 'unknown']
     Experiment_type = apps.get_model('emgapi', 'ExperimentType')
-    for t in experiment_types:
-        e = Experiment_type(experiment_type=t)
+    for i, t in enumerate(experiment_types):
+        e = Experiment_type(experiment_type_id=i + 1, experiment_type=t)
         e.save()
 
 
