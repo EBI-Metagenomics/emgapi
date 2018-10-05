@@ -14,7 +14,10 @@ def populate_assemblies(apps, schema_editor):
     AssemblySample = apps.get_model("emgapi", "AssemblySample")
     AnalysisJob = apps.get_model("emgapi", "AnalysisJob")
     ExperimentType = apps.get_model("emgapi", "ExperimentType")
-    experiment_type = ExperimentType.objects.get(experiment_type="assembly")
+    try:
+        experiment_type = ExperimentType.objects.get(experiment_type="assembly")
+    except ExperimentType.DoesNotExist:
+        return
     AssemblyMapping = apps.get_model("emgena", "AssemblyMapping")
 
     # total = Run.objects.filter(experiment_type=experiment_type).count()
@@ -89,29 +92,19 @@ def populate_assemblies(apps, schema_editor):
             run.delete()
 
 
-def add_experiment_types(apps, schema_editor):
-    experiment_types = ['metatranscriptomic', 'metagenomic', 'amplicon', 'assembly', 'metabarcoding', 'unknown']
-    Experiment_type = apps.get_model('emgapi', 'ExperimentType')
-    for i, t in enumerate(experiment_types):
-        e = Experiment_type(experiment_type_id=i + 1, experiment_type=t)
-        e.save()
-
-
 class Migration(migrations.Migration):
     dependencies = [
         ('emgapi', '0009_remove_gsccvcv'),
     ]
 
     operations = [
-        migrations.RunPython(add_experiment_types),
         migrations.CreateModel(
             name='Assembly',
             fields=[
                 ('assembly_id', models.BigAutoField(db_column='ASSEMBLY_ID', primary_key=True, serialize=False)),
                 ('accession', models.CharField(blank=True, db_column='ACCESSION', max_length=80, null=True)),
                 ('wgs_accession', models.CharField(blank=True, db_column='WGS_ACCESSION', max_length=100, null=True)),
-                ('legacy_accession',
-                 models.CharField(blank=True, db_column='LEGACY_ACCESSION', max_length=100, null=True)),
+                ('legacy_accession', models.CharField(blank=True, db_column='LEGACY_ACCESSION', max_length=100, null=True)),
             ],
             options={
                 'db_table': 'ASSEMBLY',
@@ -122,10 +115,8 @@ class Migration(migrations.Migration):
             name='AssemblyRun',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('assembly', models.ForeignKey(db_column='ASSEMBLY_ID', on_delete=django.db.models.deletion.CASCADE,
-                                               to='emgapi.Assembly')),
-                ('run',
-                 models.ForeignKey(db_column='RUN_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.Run')),
+                ('assembly', models.ForeignKey(db_column='ASSEMBLY_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.Assembly')),
+                ('run', models.ForeignKey(db_column='RUN_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.Run')),
             ],
             options={
                 'db_table': 'ASSEMBLY_RUN',
@@ -135,10 +126,8 @@ class Migration(migrations.Migration):
             name='AssemblySample',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('assembly', models.ForeignKey(db_column='ASSEMBLY_ID', on_delete=django.db.models.deletion.CASCADE,
-                                               to='emgapi.Assembly')),
-                ('sample', models.ForeignKey(db_column='SAMPLE_ID', on_delete=django.db.models.deletion.CASCADE,
-                                             to='emgapi.Sample')),
+                ('assembly', models.ForeignKey(db_column='ASSEMBLY_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.Assembly')),
+                ('sample', models.ForeignKey(db_column='SAMPLE_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.Sample')),
             ],
             options={
                 'db_table': 'ASSEMBLY_SAMPLE',
@@ -148,27 +137,22 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assembly',
             name='experiment_type',
-            field=models.ForeignKey(blank=True, db_column='EXPERIMENT_TYPE_ID', null=True,
-                                    on_delete=django.db.models.deletion.CASCADE, related_name='assemblies',
-                                    to='emgapi.ExperimentType'),
+            field=models.ForeignKey(blank=True, db_column='EXPERIMENT_TYPE_ID', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='assemblies', to='emgapi.ExperimentType'),
         ),
         migrations.AddField(
             model_name='assembly',
             name='runs',
-            field=models.ManyToManyField(blank=True, related_name='assemblies', through='emgapi.AssemblyRun',
-                                         to='emgapi.Run'),
+            field=models.ManyToManyField(blank=True, related_name='assemblies', through='emgapi.AssemblyRun', to='emgapi.Run'),
         ),
         migrations.AddField(
             model_name='assembly',
             name='samples',
-            field=models.ManyToManyField(blank=True, related_name='assemblies', through='emgapi.AssemblySample',
-                                         to='emgapi.Sample'),
+            field=models.ManyToManyField(blank=True, related_name='assemblies', through='emgapi.AssemblySample', to='emgapi.Sample'),
         ),
         migrations.AddField(
             model_name='assembly',
             name='status_id',
-            field=models.ForeignKey(db_column='STATUS_ID', default=2, on_delete=django.db.models.deletion.CASCADE,
-                                    related_name='assemblies', to='emgapi.Status'),
+            field=models.ForeignKey(db_column='STATUS_ID', default=2, on_delete=django.db.models.deletion.CASCADE, related_name='assemblies', to='emgapi.Status'),
         ),
 
         migrations.AlterUniqueTogether(
@@ -187,9 +171,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='analysisjob',
             name='assembly',
-            field=models.ForeignKey(blank=True, db_column='ASSEMBLY_ID', null=True,
-                                    on_delete=django.db.models.deletion.CASCADE, related_name='analyses',
-                                    to='emgapi.Assembly'),
+            field=models.ForeignKey(blank=True, db_column='ASSEMBLY_ID', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='analyses', to='emgapi.Assembly'),
         ),
 
         migrations.RunPython(populate_assemblies),
