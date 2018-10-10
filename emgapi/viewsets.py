@@ -144,7 +144,7 @@ class BaseAssemblyGenericViewSet(viewsets.GenericViewSet):
         'accession',
         'wgs_accession',
         'legacy_accession',
-        '@sample__metadata__var_val_ucv',
+        '@samples__metadata__var_val_ucv',
     )
 
 
