@@ -621,7 +621,7 @@ class AssemblyViewSet(mixins.RetrieveModelMixin,
         Retrieves run for the given accession
         Example:
         ---
-        `/assembly/SRR062157`
+        `/assembly/ERZ477576`
         """
         return super(AssemblyViewSet, self).retrieve(request, *args, **kwargs)
 
