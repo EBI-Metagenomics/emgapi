@@ -97,7 +97,10 @@ class TestDefaultAPI(object):
             ('Publication', 'publications', 'emgapi_v1:publications', [],
              ['studies', 'samples']),
             ('Run', 'runs', 'emgapi_v1:runs', [],
-             ['pipelines', 'analyses', 'experiment-type', 'sample', 'study']),
+             ['pipelines', 'analyses', 'experiment-type', 'sample', 'study',
+              'assemblies']),
+            ('Assembly', 'assemblies', 'emgapi_v1:assemblies', [],
+             ['pipelines', 'analyses', 'runs', 'samples']),
             ('Sample', 'samples', 'emgapi_v1:samples', [],
              ['biome', 'studies', 'runs', 'metadata']),
             ('Study', 'studies', 'emgapi_v1:studies', [],
@@ -105,6 +108,10 @@ class TestDefaultAPI(object):
               'geocoordinates', 'analyses']),
             ('PipelineTool', 'pipeline-tools', 'emgapi_v1:pipeline-tools', [],
              ['pipelines']),
+            ('AnalysisJob', 'analysis-jobs', 'emgapi_v1:analyses', [],
+             ['go-terms', 'go-slim', 'interpro-identifiers', 'sample',
+              'study', 'run', 'assembly', 'downloads', 'taxonomy-ssu',
+              'taxonomy-lsu', 'taxonomy']),
         ]
     )
     @pytest.mark.django_db
@@ -135,6 +142,16 @@ class TestDefaultAPI(object):
                                  is_public=1, samples=[_sm])
                 mommy.make('emgapi.Run', pk=pk, status_id=run_status,
                            study=_st, sample=_sm)
+            elif _model in ('Assembly',):
+                _biome = mommy.make('emgapi.Biome', pk=pk)
+                _sm = mommy.make('emgapi.Sample',
+                                 pk=pk, biome=_biome, is_public=1)
+                _st = mommy.make('emgapi.Study', pk=pk, biome=_biome,
+                                 is_public=1, samples=[_sm])
+                _r = mommy.make('emgapi.Run', pk=pk, status_id=run_status,
+                                study=_st, sample=_sm)
+                mommy.make('emgapi.Assembly', pk=pk, status_id=run_status,
+                           runs=[_r])
             elif _model in ('AnalysisJob',):
                 _biome = mommy.make('emgapi.Biome', pk=pk)
                 _sm = mommy.make('emgapi.Sample',
