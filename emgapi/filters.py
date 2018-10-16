@@ -616,6 +616,14 @@ class RunFilter(django_filters.FilterSet):
 
 class AnalysisJobFilter(RunFilter):
 
+    accession = django_filters.CharFilter(
+        method='filter_analysisjob_accession', distinct=True,
+        label='Analyses job accession',
+        help_text='Analyses job accession')
+
+    def filter_analysisjob_accession(self, qs, name, value):
+        return qs.filter(*emg_utils.analysisjob_accession_query(value))
+
     pipeline_version = filters.ChoiceFilter(
         choices=pipeline_version,
         name='pipeline', distinct=True,
@@ -636,7 +644,7 @@ class AnalysisJobFilter(RunFilter):
 class AssemblyFilter(django_filters.FilterSet):
 
     accession = filters.ModelMultipleChoiceFilter(
-        queryset=emg_models.Run.objects,
+        queryset=emg_models.Assembly.objects,
         to_field_name='accession',
         method='filter_accession',
         distinct=True,
