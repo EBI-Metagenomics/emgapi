@@ -69,11 +69,11 @@ router.extend(mongo_router)
 router.extend(mydata_router)
 router.extend(utils_router)
 
-customLoginView = views.LoginView
-customLoginView.form_class = CustomAuthenticationForm
+custom_login_view = views.LoginView
+custom_login_view.form_class = CustomAuthenticationForm
 
 urlpatterns = [
-    url(r'^http-auth/login_form$', customLoginView.as_view(
+    url(r'^http-auth/login_form$', custom_login_view.as_view(
         template_name='rest_framework/login_form.html'), {}),
 
     url(r'^http-auth/', include('rest_framework.urls',
