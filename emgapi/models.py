@@ -457,6 +457,7 @@ class AnalysisJobDownloadManager(models.Manager):
 
 
 class AnalysisJobDownload(BaseDownload):
+
     job = models.ForeignKey(
         'AnalysisJob', db_column='JOB_ID', related_name='analysis_download',
         on_delete=models.CASCADE)
