@@ -54,3 +54,12 @@ def related_study_accession_query(accession):
             Q(study__project_id=accession)
         )
     return query
+
+
+def analysisjob_accession_query(accession):
+    query = list()
+    try:
+        query.append(Q(pk=int(accession.lstrip('MGYA'))))
+    except ValueError:
+        pass
+    return query
