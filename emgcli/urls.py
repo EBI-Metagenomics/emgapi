@@ -38,6 +38,7 @@ from openapi_codec import OpenAPICodec
 
 from . import routers
 from .views import Handler500
+from emgui.forms import CustomAuthenticationForm
 
 
 handler500 = Handler500.as_error_view()
@@ -68,11 +69,12 @@ router.extend(mongo_router)
 router.extend(mydata_router)
 router.extend(utils_router)
 
+custom_login_view = views.LoginView
+custom_login_view.form_class = CustomAuthenticationForm
+
 urlpatterns = [
-    url(r'^http-auth/login_form$',
-        views.LoginView.as_view(
-            template_name='rest_framework/login_form.html'),
-        {}),
+    url(r'^http-auth/login_form$', custom_login_view.as_view(
+        template_name='rest_framework/login_form.html'), {}),
 
     url(r'^http-auth/', include('rest_framework.urls',
                                 namespace='rest_framework')),
