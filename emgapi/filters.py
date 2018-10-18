@@ -68,16 +68,16 @@ def pipeline_version():
 class PublicationFilter(django_filters.FilterSet):
 
     doi = django_filters.CharFilter(
-        name='doi', distinct=True,
+        field_name='doi', distinct=True,
         label='DOI', help_text='DOI')
 
     isbn = django_filters.CharFilter(
-        name='isbn', distinct=True,
+        field_name='isbn', distinct=True,
         label='ISBN', help_text='ISBN')
 
     published_year = filters.ChoiceFilter(
         choices=published_year,
-        name='published_year', distinct=True,
+        field_name='published_year', distinct=True,
         label='Published year', help_text='Published year')
 
     # include
@@ -102,11 +102,12 @@ class PublicationFilter(django_filters.FilterSet):
 class BiomeFilter(django_filters.FilterSet):
 
     depth_gte = filters.NumberFilter(
-        name='depth', lookup_expr='gte',
+        field_name='depth', lookup_expr='gte',
         label='Depth, greater/equal then',
         help_text='Biome depth, greater/equal then')
+
     depth_lte = filters.NumberFilter(
-        name='depth', lookup_expr='lte',
+        field_name='depth', lookup_expr='lte',
         label='Depth, less/equal then',
         help_text='Biome depth, less/equal then')
 
@@ -316,7 +317,7 @@ class SampleFilter(django_filters.FilterSet):
     metadata_key = filters.ChoiceFilter(
             choices=metadata_keywords,
             method='filter_metadata_key',
-            name='metadata_key', distinct=True,
+            field_name='metadata_key', distinct=True,
             label='Metadata keyword', help_text='Metadata keyword')
 
     def filter_metadata_key(self, qs, name, value):
@@ -468,7 +469,7 @@ class RunFilter(django_filters.FilterSet):
     experiment_type = filters.ModelMultipleChoiceFilter(
         queryset=emg_models.ExperimentType.objects,
         to_field_name='experiment_type',
-        name='experiment_type__experiment_type',
+        field_name='experiment_type__experiment_type',
         distinct=True,
         label='Experiment type',
         help_text='Experiment type',
@@ -531,7 +532,7 @@ class RunFilter(django_filters.FilterSet):
     metadata_key = filters.ChoiceFilter(
             choices=metadata_keywords,
             method='filter_metadata_key',
-            name='metadata_key', distinct=True,
+            field_name='metadata_key', distinct=True,
             label='Metadata keyword', help_text='Metadata keyword')
 
     def filter_metadata_key(self, qs, name, value):
@@ -626,7 +627,7 @@ class AnalysisJobFilter(RunFilter):
 
     pipeline_version = filters.ChoiceFilter(
         choices=pipeline_version,
-        name='pipeline', distinct=True,
+        field_name='pipeline', distinct=True,
         label='Pipeline version', help_text='Pipeline version')
 
     class Meta:
@@ -700,7 +701,7 @@ class AssemblyFilter(django_filters.FilterSet):
     metadata_key = filters.ChoiceFilter(
             choices=metadata_keywords,
             method='filter_metadata_key',
-            name='metadata_key', distinct=True,
+            field_name='metadata_key', distinct=True,
             label='Metadata keyword', help_text='Metadata keyword')
 
     def filter_metadata_key(self, qs, name, value):
