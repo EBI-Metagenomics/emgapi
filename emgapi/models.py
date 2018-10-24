@@ -99,7 +99,8 @@ class BaseQuerySet(models.QuerySet):
                 [Q(study__submission_account_id=_username, status_id=2) |
                  Q(status_id=4)]
             _query_filters['AssemblyQuerySet']['authenticated'] = \
-                [Q(samples__studies__submission_account_id=_username, status_id=2) |
+                [Q(samples__studies__submission_account_id=_username,
+                   status_id=2) |
                  Q(status_id=4)]
             _query_filters['AnalysisJobQuerySet']['authenticated'] = \
                 [Q(study__submission_account_id=_username,
