@@ -39,7 +39,7 @@ class TestStudyAPI(object):
         assert rsp['data']['type'] == "studies"
         assert rsp['data']['id'] == "MGYS00001234"
         _attr = rsp['data']['attributes']
-        assert(len(_attr) == 10)
+        assert(len(_attr) == 11)
         assert _attr['accession'] == "MGYS00001234"
         assert _attr['secondary-accession'] == "SRP01234"
         assert _attr['centre-name'] == "Centre Name"
@@ -49,6 +49,7 @@ class TestStudyAPI(object):
         assert _attr['data-origination'] == "HARVESTED"
         assert _attr['last-update'] == "1970-01-01T00:00:00"
         assert _attr['bioproject'] == "PRJDB1234"
+        assert _attr['is-public'] == 1
 
     def test_public(self, client, study, study_private):
         url = reverse("emgapi_v1:studies-list")
