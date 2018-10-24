@@ -413,6 +413,7 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     included_serializers = {
         'sample': 'emgapi.serializers.SampleSerializer',
         'study': 'emgapi.serializers.StudySerializer',
+        'assemblies': 'emgapi.serializers.AssemblySerializer',
     }
 
     url = serializers.HyperlinkedIdentityField(
@@ -440,6 +441,21 @@ class RunSerializer(ExplicitFieldsModelSerializer,
         view_name='emgapi_v1:studies-detail',
         lookup_field='accession'
     )
+
+    assemblies = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_assemblies',
+        model=emg_models.Assembly,
+        related_link_view_name='emgapi_v1:runs-assemblies-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+        related_link_self_view_name='emgapi_v1:assemblies-detail',
+        related_link_self_lookup_field='accession'
+    )
+
+    def get_assemblies(self, obj):
+        return obj.assemblies.available(self.context['request'])
 
     pipelines = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
         many=True,
@@ -473,6 +489,102 @@ class RunSerializer(ExplicitFieldsModelSerializer,
         exclude = (
             'status_id',
         )
+
+
+class AssemblySerializer(ExplicitFieldsModelSerializer,
+                         serializers.HyperlinkedModelSerializer):
+
+    included_serializers = {
+        'run': 'emgapi.serializers.RunSerializer',
+    }
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi_v1:assemblies-detail',
+        lookup_field='accession'
+    )
+
+    # attributes
+    experiment_type = serializers.SerializerMethodField()
+
+    def get_experiment_type(self, obj):
+        if obj.experiment_type is not None:
+            return obj.experiment_type.experiment_type
+        return None
+
+    # relationships
+    runs = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_runs',
+        model=emg_models.Run,
+        related_link_self_view_name='emgapi_v1:runs-detail',
+        related_link_self_lookup_field='accession'
+    )
+
+    def get_runs(self, obj):
+        return obj.runs.available(self.context['request'])
+
+    samples = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_samples',
+        model=emg_models.Sample,
+        related_link_self_view_name='emgapi_v1:samples-detail',
+        related_link_self_lookup_field='accession'
+    )
+
+    def get_samples(self, obj):
+        return obj.samples.available(self.context['request'])
+
+    analyses = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_analyses',
+        model=emg_models.AnalysisJob,
+        related_link_view_name='emgapi_v1:assemblies-analyses-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+    )
+
+    pipelines = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_pipelines',
+        model=emg_models.Pipeline,
+        related_link_self_view_name='emgapi_v1:pipelines-detail',
+        related_link_self_lookup_field='release_version'
+    )
+
+    def get_pipelines(self, obj):
+        # TODO: push that to queryset
+        return emg_models.Pipeline.objects \
+            .filter(analyses__assembly=obj)
+
+    def get_analyses(self, obj):
+        return None
+
+    class Meta:
+        model = emg_models.Assembly
+        exclude = (
+            'status_id',
+        )
+
+
+class RetrieveAssemblySerializer(AssemblySerializer):
+
+    pipelines = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_pipelines',
+        model=emg_models.Pipeline,
+        related_link_self_view_name='emgapi_v1:pipelines-detail',
+        related_link_self_lookup_field='release_version'
+    )
+
+    def get_pipelines(self, obj):
+        # TODO: push that to queryset
+        pipelines = obj.analyses.values('pipeline_id').distinct()
+        return emg_models.Pipeline.objects.filter(pk__in=pipelines)
 
 
 # Download serializer
@@ -731,6 +843,12 @@ class AnalysisSerializer(BaseAnalysisSerializer):
     run = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name='emgapi_v1:runs-detail',
+        lookup_field='accession'
+    )
+
+    assembly = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emgapi_v1:assemblies-detail',
         lookup_field='accession'
     )
 
@@ -1024,7 +1142,6 @@ class StudySerializer(ExplicitFieldsModelSerializer,
             # TODO: remove biome when schema updated
             'biome',
             'project_id',
-            'is_public',
             'experimental_factor',
             'submission_account_id',
             'result_directory',

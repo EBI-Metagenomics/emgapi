@@ -101,7 +101,7 @@ class UtilsViewSet(viewsets.GenericViewSet):
         permission_classes=[permissions.IsAuthenticated, emg_perms.IsSelf]
     )
     def myaccounts(self, request, pk=None):
-        submitter = ena_models.Submitter.objects.using('ena') \
+        submitter = ena_models.Submitter.objects.using('era_pro') \
             .filter(
                 submission_account__submission_account__iexact=self
                 .request.user.username
@@ -534,7 +534,12 @@ class RunViewSet(mixins.RetrieveModelMixin,
     lookup_value_regex = '[^/]+'
 
     def get_queryset(self):
-        return emg_models.Run.objects.available(self.request)
+        queryset = emg_models.Run.objects.available(self.request)
+        if 'assemblies' in self.request.GET.get('include', '').split(','):
+            _qs = emg_models.Assembly.objects.available(self.request)
+            queryset = queryset.prefetch_related(
+                Prefetch('assemblies', queryset=_qs))
+        return queryset
 
     def get_object(self):
         return get_object_or_404(
@@ -572,6 +577,53 @@ class RunViewSet(mixins.RetrieveModelMixin,
         `/runs/SRR062157`
         """
         return super(RunViewSet, self).retrieve(request, *args, **kwargs)
+
+
+class AssemblyViewSet(mixins.RetrieveModelMixin,
+                      emg_mixins.ListModelMixin,
+                      emg_viewsets.BaseAssemblyGenericViewSet):
+
+    lookup_field = 'accession'
+    lookup_value_regex = '[^/]+'
+
+    def get_queryset(self):
+        return emg_models.Assembly.objects.available(self.request)
+
+    def get_object(self):
+        return get_object_or_404(
+            self.get_queryset(),
+            Q(accession=self.kwargs['accession']) |
+            Q(wgs_accession=self.kwargs['accession']) |
+            Q(legacy_accession=self.kwargs['accession'])
+        )
+
+    def get_serializer_class(self):
+        return super(AssemblyViewSet, self).get_serializer_class()
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of runs
+        Example:
+        ---
+        `/assembly`
+
+        `/assembly?fields[assembly]=accession` retrieve only
+        selected fileds
+
+        Filter by:
+        ---
+        `/assembly?biome=root:Environmental:Aquatic:Marine`
+        """
+        return super(AssemblyViewSet, self).list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves run for the given accession
+        Example:
+        ---
+        `/assembly/ERZ477576`
+        """
+        return super(AssemblyViewSet, self).retrieve(request, *args, **kwargs)
 
 
 class AnalysisJobViewSet(mixins.RetrieveModelMixin,
