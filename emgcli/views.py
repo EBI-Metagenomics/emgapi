@@ -27,3 +27,13 @@ class Handler500(TemplateView):
         def view(request):
             return v(request).render()
         return view
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        return super(TemplateView, self) \
+            .render_to_response(context, status=500)
+
+    def post(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        return super(TemplateView, self) \
+            .render_to_response(context, status=500)
