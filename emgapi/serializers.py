@@ -852,6 +852,28 @@ class AnalysisSerializer(BaseAnalysisSerializer):
         lookup_field='accession'
     )
 
+    analysis_status = serializers.SerializerMethodField()
+
+    def get_analysis_status(self, obj):
+        if obj.analysis_status is not None:
+            return obj.analysis_status.analysis_status
+        return None
+
+    class Meta:
+        model = emg_models.AnalysisJob
+        exclude = (
+            're_run_count',
+            'input_file_name',
+            'result_directory',
+            'is_production_run',
+            'run_status_id',
+            'job_operator',
+            'submit_time',
+            'pipeline',
+            'external_run_ids',
+            'secondary_accession',
+        )
+
 
 # Sample serializer
 

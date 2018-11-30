@@ -29,15 +29,13 @@ class EMGBackend(object):
 
     def authenticate(self, request, username=None, password=None):
         ena_auth_url = self._get_backend_settings()
-        req = requests.post(
-            ena_auth_url,
-            json={
-                'authRealms': ['SRA'],
-                'rememberMe': False,
-                'username': username,
-                'password': password,
-            }
-        )
+        data = {
+            'authRealms': ['SRA'],
+            'rememberMe': False,
+            'username': username,
+            'password': password,
+        }
+        req = requests.post(ena_auth_url, json=data)
         resp = req.json()
         if req.status_code == 200:
             if resp.get('authenticated', False):
