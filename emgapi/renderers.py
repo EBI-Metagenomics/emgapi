@@ -17,6 +17,7 @@
 import csv
 
 from rest_framework import renderers
+from rest_framework.compat import six
 from rest_framework_json_api.renderers import JSONRenderer
 from rest_framework_csv.renderers import CSVRenderer
 from rest_framework_csv.misc import Echo
@@ -62,10 +63,12 @@ class CSVStreamingRenderer(CSVRenderer):
             ])
 
 
-class TSVRenderer(renderers.BaseRenderer):
+class TSVRenderer(CSVRenderer):
     media_type = 'text/tsv'
     format = 'tsv'
     charset = 'iso-8859-1'
 
     def render(self, data, media_type=None, renderer_context=None):
-        return data.encode(self.charset)
+        if isinstance(data, six.text_type):
+            return data.encode(self.charset)
+        return ''
