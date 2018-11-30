@@ -672,7 +672,7 @@ class AnalysisJobViewSet(mixins.RetrieveModelMixin,
             .retrieve(request, *args, **kwargs)
 
 
-class AnalysisQCChartViewSet(emg_mixins.ListModelMixin,
+class AnalysisQCChartViewSet(mixins.RetrieveModelMixin,
                              viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
@@ -706,7 +706,7 @@ class AnalysisQCChartViewSet(emg_mixins.ListModelMixin,
             self.get_object().result_directory,
             'qc-statistics', name))
 
-    def retrieve(self, request, chart=None, **kwargs):
+    def retrieve(self, request, chart=None, *args, **kwargs):
         """
         Retrieves krona chart for the given accession and pipeline version
         Example:
@@ -719,8 +719,9 @@ class AnalysisQCChartViewSet(emg_mixins.ListModelMixin,
             "seq-length": "seq-length",
             "summary": "summary",
         }
+
         filepath = self._build_path(
-            "{name}.out".format(name=mapping[chart]))
+                "{name}.out".format(name=mapping[chart]))
         if not os.path.isfile(filepath):
             filepath = self._build_path(
                 "{name}.out.full".format(name=mapping[chart]))
