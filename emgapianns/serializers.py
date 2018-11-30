@@ -15,11 +15,11 @@
 # limitations under the License.
 
 from rest_framework_json_api import serializers
-from rest_framework_json_api import relations
+# from rest_framework_json_api import relations
 
 from rest_framework_mongoengine import serializers as m_serializers
 
-from emgapi import models as emg_models
+# from emgapi import models as emg_models
 from emgapi import fields as emg_fields
 
 from . import models as m_models
@@ -33,15 +33,15 @@ class GoTermSerializer(m_serializers.DocumentSerializer,
         lookup_field='accession',
     )
 
-    analysis = relations.SerializerMethodResourceRelatedField(
-        source='get_analysis',
-        model=emg_models.AnalysisJob,
-        many=True,
-        read_only=True,
-        related_link_view_name='emgapi_v1:goterms-analyses-list',
-        related_link_url_kwarg='accession',
-        related_link_lookup_field='accession'
-    )
+    # analysis = relations.SerializerMethodResourceRelatedField(
+    #     source='get_analysis',
+    #     model=emg_models.AnalysisJob,
+    #     many=True,
+    #     read_only=True,
+    #     related_link_view_name='emgapi_v1:goterms-analyses-list',
+    #     related_link_url_kwarg='accession',
+    #     related_link_lookup_field='accession'
+    # )
 
     def get_analysis(self, obj):
         return None
@@ -59,15 +59,15 @@ class InterproIdentifierSerializer(m_serializers.DocumentSerializer,
         lookup_field='accession',
     )
 
-    analysis = relations.SerializerMethodResourceRelatedField(
-        source='get_analysis',
-        model=emg_models.AnalysisJob,
-        many=True,
-        read_only=True,
-        related_link_view_name='emgapi_v1:interproidentifier-analyses-list',
-        related_link_url_kwarg='accession',
-        related_link_lookup_field='accession'
-    )
+    # analysis = relations.SerializerMethodResourceRelatedField(
+    #     source='get_analysis',
+    #     model=emg_models.AnalysisJob,
+    #     many=True,
+    #     read_only=True,
+    #     related_link_view_name='emgapi_v1:interproidentifier-analyses-list',
+    #     related_link_url_kwarg='accession',
+    #     related_link_lookup_field='accession'
+    # )
 
     def get_analysis(self, obj):
         return None
@@ -85,15 +85,15 @@ class GoTermRetriveSerializer(m_serializers.DynamicDocumentSerializer,
         lookup_field='accession',
     )
 
-    analyses = relations.SerializerMethodResourceRelatedField(
-        source='get_analyses',
-        model=emg_models.AnalysisJob,
-        many=True,
-        read_only=True,
-        related_link_view_name='emgapi_v1:goterms-analyses-list',
-        related_link_url_kwarg='accession',
-        related_link_lookup_field='accession'
-    )
+    # analyses = relations.SerializerMethodResourceRelatedField(
+    #     source='get_analyses',
+    #     model=emg_models.AnalysisJob,
+    #     many=True,
+    #     read_only=True,
+    #     related_link_view_name='emgapi_v1:goterms-analyses-list',
+    #     related_link_url_kwarg='accession',
+    #     related_link_lookup_field='accession'
+    # )
 
     def get_analyses(self, obj):
         return None
@@ -114,15 +114,15 @@ class InterproIdentifierRetriveSerializer(  # NOQA
         lookup_field='accession',
     )
 
-    analyses = relations.SerializerMethodResourceRelatedField(
-        source='get_analyses',
-        model=emg_models.AnalysisJob,
-        many=True,
-        read_only=True,
-        related_link_view_name='emgapi_v1:interproidentifier-analyses-list',
-        related_link_url_kwarg='accession',
-        related_link_lookup_field='accession'
-    )
+    # analyses = relations.SerializerMethodResourceRelatedField(
+    #     source='get_analyses',
+    #     model=emg_models.AnalysisJob,
+    #     many=True,
+    #     read_only=True,
+    #     related_link_view_name='emgapi_v1:interproidentifier-analyses-list',
+    #     related_link_url_kwarg='accession',
+    #     related_link_lookup_field='accession'
+    # )
 
     def get_analyses(self, obj):
         return None
@@ -156,15 +156,15 @@ class OrganismSerializer(m_serializers.DynamicDocumentSerializer,
     # def get_children(self, obj):
     #     return None
 
-    analyses = relations.SerializerMethodResourceRelatedField(
-        source='get_analyses',
-        model=emg_models.AnalysisJob,
-        many=True,
-        read_only=True,
-        related_link_view_name='emgapi_v1:organisms-analyses-list',
-        related_link_url_kwarg='lineage',
-        related_link_lookup_field='lineage'
-    )
+    # analyses = relations.SerializerMethodResourceRelatedField(
+    #     source='get_analyses',
+    #     model=emg_models.AnalysisJob,
+    #     many=True,
+    #     read_only=True,
+    #     related_link_view_name='emgapi_v1:organisms-analyses-list',
+    #     related_link_url_kwarg='lineage',
+    #     related_link_lookup_field='lineage'
+    # )
 
     def get_analyses(self, obj):
         return None
