@@ -483,7 +483,7 @@ class RunFilter(django_filters.FilterSet):
 
     def filter_biome_name(self, qs, name, value):
         return qs.filter(
-            sample__lineage__iregex=WORD_MATCH_REGEX.format(value))
+            sample__biome__lineage__iregex=WORD_MATCH_REGEX.format(value))
 
     lineage = filters.ModelChoiceFilter(
         queryset=emg_models.Biome.objects.all(),
