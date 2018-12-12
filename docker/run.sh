@@ -13,7 +13,7 @@ virtualenv -p /usr/bin/python3 $venvDir --system-site-packages
 # $HOME/venv/bin/pip install -U "django-redis>=4.4"
 
 echo "Installing EMG API..."
-  $venvDir/bin/pip install -U  "git+git://github.com/olatarkowska/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
+  $venvDir/bin/pip install -U  "git+git://github.com/EBI-Metagenomics/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
 $venvDir/bin/pip install -U $srcDir
 
 echo "DB startup..."
