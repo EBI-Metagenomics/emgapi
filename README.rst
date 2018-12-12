@@ -22,7 +22,7 @@ Install
 
 Install application::
 
-    pip install "git+git://github.com/ola-t/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
+    pip install "git+git://github.com/EBI-Metagenomics/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
     pip install https://github.com/EBI-Metagenomics/emgapi/archive/$latestTag.tar.gz
 
 
