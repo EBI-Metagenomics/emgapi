@@ -5,8 +5,8 @@
 ## bug https://github.com/aio-libs/multidict/issues/274
 multidict==4.4.0a0
 
-pytest~=3.10.1
-pytest-django~=3.2.1
+pytest==4.1.1
+pytest-django==3.4.3
 
 model_mommy
 mock_services
