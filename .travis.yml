@@ -27,6 +27,7 @@ before_script:
 
 script:
   - pip install -U .
+  - pip freeze
   - python setup.py test
 
 notifications:
