@@ -69,8 +69,7 @@ class TestDefaultAPI(object):
             'emgapi_v1:pipeline-tools',
             'emgapi_v1:goterms',
             'emgapi_v1:interproidentifier',
-            'emgapi_v1:organisms',
-            pytest.mark.xfail('viewdoesnotexist', raises=NoReverseMatch),
+            'emgapi_v1:organisms'
         ]
     )
     @pytest.mark.django_db
@@ -83,6 +82,12 @@ class TestDefaultAPI(object):
         assert rsp['meta']['pagination']['page'] == 1
         assert rsp['meta']['pagination']['pages'] == 1
         assert rsp['meta']['pagination']['count'] == 0
+
+    @pytest.mark.django_db
+    def test_invalid_view_should_raise_exception(self):
+        view_name = 'viewdoesnotexist'
+        with pytest.raises(NoReverseMatch):
+            reverse(view_name)
 
     @pytest.mark.parametrize(
         '_model, _camelcase, _view, _view_args, relations',
