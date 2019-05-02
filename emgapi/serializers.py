@@ -1217,17 +1217,17 @@ class LDStudySerializer(drf_serializers.ModelSerializer):
     def get_identifier(self, obj):
         return obj.accession
 
-    alternateName = serializers.SerializerMethodField()
+    alternateName = serializers.SerializerMethodField() # noqa
 
     def get_alternateName(self, obj):  # noqa
         return obj.secondary_accession
 
-    dateModified = serializers.SerializerMethodField()
+    dateModified = serializers.SerializerMethodField() # noqa
 
     def get_dateModified(self, obj):  # noqa
         return obj.last_update
 
-    name = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField() # noqa
 
     def get_name(self, obj):
         return obj.study_name
@@ -1268,7 +1268,7 @@ class LDAnalysisSerializer(drf_serializers.ModelSerializer):
     def get_identifier(self, obj):
         return obj.accession
 
-    dateModified = serializers.SerializerMethodField()
+    dateModified = serializers.SerializerMethodField() # noqa
 
     def get_dateModified(self, obj):  # noqa
         return obj.complete_time
@@ -1287,7 +1287,7 @@ class LDAnalysisSerializer(drf_serializers.ModelSerializer):
         ]
         return _keywords
 
-    measurementTechnique = serializers.SerializerMethodField()
+    measurementTechnique = serializers.SerializerMethodField() # noqa
 
     def get_measurementTechnique(self, obj):  # noqa
         if obj.experiment_type is not None:
