@@ -1322,13 +1322,72 @@ class CogCountSerializer(ExplicitFieldsModelSerializer):
     name = serializers.CharField(source='cog_name')
 
     class Meta:
-        model = emg_models.CogCounts
+        model = emg_models.GenomeCogCounts
         fields = ('name', 'count')
 
 
+class IprMatchSerializer(ExplicitFieldsModelSerializer):
+    ipr_accession = serializers.CharField()
+
+    class Meta:
+        model = emg_models.GenomeIprCount
+        fields = ('ipr_accession', 'count')
+
+
+class KeggMatchSerializer(ExplicitFieldsModelSerializer):
+    brite_id = serializers.CharField()
+    brite_name = serializers.CharField()
+    # parent = serializers.HyperlinkedIdentityField()
+
+    class Meta:
+        model = emg_models.GenomeKeggCounts
+        fields = ('brite_id', 'brite_name', 'count')
+
+
 class GenomeSerializer(ExplicitFieldsModelSerializer):
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi_v1:studies-detail',
+        lookup_field='accession',
+    )
+    kegg_matches = relations.SerializerMethodResourceRelatedField(
+        source='get_kegg_matches',
+        model=emg_models.KeggEntry,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:genome-kegg-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+    )
+
+    def get_kegg_matches(self, obj):
+        return None
+
+    cog_matches = relations.SerializerMethodResourceRelatedField(
+        source='get_cog_matches',
+        model=emg_models.GenomeCogCounts,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:genome-cog-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+    )
+
+    def get_cog_matches(self, obj):
+        return None
+
+    ipr_matches = relations.SerializerMethodResourceRelatedField(
+        source='get_ipr_matches',
+        model=emg_models.GenomeIprCount,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:genome-ipr-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+    )
+
+    def get_ipr_matches(self, obj):
+        return None
+
     class Meta:
         model = emg_models.Genome
-        exclude = (
-            'cogs',
-        )
+        fields = '__all__'

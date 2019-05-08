@@ -434,6 +434,12 @@ class BaseDownload(models.Model):
     file_format = models.ForeignKey(
         'FileFormat', db_column='FORMAT_ID',
         on_delete=models.CASCADE, blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+
+class BaseAnnotationPipelineDownload(BaseDownload):
     pipeline = models.ForeignKey(
         'Pipeline', db_column='PIPELINE_ID',
         on_delete=models.CASCADE, blank=True, null=True)
@@ -459,7 +465,7 @@ class AnalysisJobDownloadManager(models.Manager):
         return self.get_queryset().available(request)
 
 
-class AnalysisJobDownload(BaseDownload):
+class AnalysisJobDownload(BaseAnnotationPipelineDownload):
 
     job = models.ForeignKey(
         'AnalysisJob', db_column='JOB_ID', related_name='analysis_download',
@@ -498,7 +504,7 @@ class StudyDownloadManager(models.Manager):
         return self.get_queryset().available(request)
 
 
-class StudyDownload(BaseDownload):
+class StudyDownload(BaseAnnotationPipelineDownload):
     study = models.ForeignKey(
         'Study', db_column='STUDY_ID', related_name='study_download',
         on_delete=models.CASCADE)
@@ -1279,11 +1285,11 @@ class CogCatManager(models.Manager):
 
 
 class CogCat(models.Model):
-    objects = CogCatManager()
     class Meta:
         db_table = 'COG'
-    name = models.CharField(db_column='NAME', max_length=80)
+    name = models.CharField(db_column='NAME', max_length=80, unique=True)
 
+    objects = CogCatManager()
 
 class Genome(models.Model):
     class Meta:
@@ -1316,13 +1322,20 @@ class Genome(models.Model):
     first_created = models.DateTimeField(
         db_column='FIRST_CREATED', auto_now_add=True)
 
-    cogs = models.ManyToManyField('CogCat', through='CogCounts')
+    cog_matches = models.ManyToManyField('CogCat',
+                                         through='emgapi.GenomeCogCounts')
+    ipr_matches = models.ManyToManyField('IprEntry',
+                                         through='emgapi.GenomeIprCount')
+    kegg_matches = models.ManyToManyField('KeggEntry',
+                                          through='emgapi.GenomeKeggCounts')
 
     def __str__(self):
         return self.accession
 
+
 class CogCountQuerySet(BaseQuerySet):
     pass
+
 
 class CogCountManager(models.Manager):
     def get_queryset(self):
@@ -1332,9 +1345,10 @@ class CogCountManager(models.Manager):
         return self.get_queryset().available(request)
 
 
-class CogCounts(models.Model):
+class GenomeCogCounts(models.Model):
     class Meta:
         db_table = 'GENOME_COG_COUNTS'
+        unique_together = ('genome', 'cog')
     genome = models.ForeignKey(Genome, db_column='GENOME_ID', on_delete=models.CASCADE)
     cog = models.ForeignKey(CogCat, db_column='COG_ID', on_delete=models.DO_NOTHING)
     count = models.IntegerField(db_column='COUNT')
@@ -1342,31 +1356,104 @@ class CogCounts(models.Model):
     objects = CogCountManager()
 
 
-class KeggBrite(models.Model):
+class KeggEntry(models.Model):
     class Meta:
         db_table = 'KEGG_BRITE_ENTRIES'
-    kegg_brite_id = models.IntegerField(db_column='BRITE_ID')
-    kegg_brite_name = models.CharField(db_column='NAME', max_length=80)
-    kegg_brite_parent = models.ForeignKey("self", db_column='PARENT', null=True)
+    brite_id = models.CharField(db_column='BRITE_ID', max_length=5, unique=True)
+    brite_name = models.CharField(db_column='NAME', max_length=80)
+    parent = models.ForeignKey("self", db_column='PARENT', null=True)
 
 
-class KeggCounts(models.Model):
+class GenomeKeggCountQuerySet(BaseQuerySet):
+    pass
+
+
+class GenomeKeggCountManager(models.Manager):
+    def get_queryset(self):
+        return GenomeKeggCountQuerySet(self.model, using=self._db)
+
+    def available(self, request):
+        return self.get_queryset().available(request)
+
+
+class GenomeKeggCounts(models.Model):
     class Meta:
         db_table = 'GENOME_KEGG_COUNTS'
+        unique_together = ('genome', 'kegg_entry')
     genome = models.ForeignKey(Genome, db_column='GENOME_ID', on_delete=models.CASCADE)
-    kegg = models.ForeignKey(KeggBrite, db_column='KEGG_ID', on_delete=models.DO_NOTHING)
+    kegg_entry = models.ForeignKey(KeggEntry, db_column='KEGG_ID', on_delete=models.DO_NOTHING)
     count = models.IntegerField(db_column='COUNT')
+
+    objects = GenomeKeggCountManager()
 
 
 class IprEntry(models.Model):
     class Meta:
         db_table = 'IPR_ENTRIES'
-    accession = models.CharField(db_column='ACCESSION', max_length=80)
+    accession = models.CharField(db_column='ACCESSION', max_length=80, unique=True)
 
 
-class GenomeIprs(models.Model):
+class GenomeIprCountQuerySet(BaseQuerySet):
+    pass
+
+
+class GenomeIprCountManager(models.Manager):
+    def get_queryset(self):
+        return GenomeIprCountQuerySet(self.model, using=self._db)
+
+    def available(self, request):
+        return self.get_queryset().available(request)
+
+
+class GenomeIprCount(models.Model):
     class Meta:
         db_table = 'GENOME_IRP_ENTRIES'
-    genome = models.ForeignKey(Genome, db_column='GENOME_ID', on_delete=models.CASCADE)
-    ipr_entry = models.ForeignKey(IprEntry, db_column='IPR_ID', on_delete=models.DO_NOTHING)
-    rank = models.IntegerField(db_column='COUNT')
+        unique_together = ('genome', 'ipr_entry')
+
+    genome = models.ForeignKey(Genome, db_column='GENOME_ID',
+                               on_delete=models.CASCADE)
+    ipr_entry = models.ForeignKey(IprEntry, db_column='IPR_ID',
+                                  on_delete=models.DO_NOTHING)
+    count = models.IntegerField(db_column='COUNT')
+
+    objects = GenomeIprCountManager()
+
+
+class GenomeDownloadQuerySet(BaseQuerySet):
+    pass
+
+
+class GenomeDownloadManager(models.Manager):
+
+    def get_queryset(self):
+        return GenomeDownloadQuerySet(self.model, using=self._db) \
+            .select_related(
+                'group_type',
+                'subdir',
+                'file_format',
+                'description',
+                'pipeline',
+                'study',
+            )
+
+    def available(self, request):
+        return self.get_queryset().available(request)
+
+
+class GenomeDownload(BaseDownload):
+    genome = models.ForeignKey(
+        'Genome', db_column='GENOME_ID', related_name='genome_download',
+        on_delete=models.CASCADE)
+    release_version = models.CharField(
+        db_column='VERSION', max_length=30, blank=True, null=True)
+
+    @property
+    def accession(self):
+        return self.genome.accession
+
+    objects = GenomeDownloadManager()
+
+    class Meta:
+        db_table = 'GENOME_DOWNLOAD'
+        unique_together = (('realname', 'alias', 'release_version'),)
+        ordering = ('release_version', 'group_type', 'alias',)

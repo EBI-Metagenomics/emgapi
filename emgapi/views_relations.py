@@ -986,7 +986,7 @@ class GenomeCogsRelationshipsViewSet(emg_mixins.ListModelMixin,
             emg_models.Genome,
             Q(accession=self.kwargs['accession'])
         )
-        queryset = emg_models.CogCounts.objects \
+        queryset = emg_models.GenomeCogCounts.objects \
             .available(self.request) \
             .filter(genome=genome) \
             .annotate(cog_name=F('cog__name'))
@@ -1000,4 +1000,94 @@ class GenomeCogsRelationshipsViewSet(emg_mixins.ListModelMixin,
         `/assemblies/ERZ1385375/analyses`
         """
         return super(GenomeCogsRelationshipsViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class GenomeIprRelationshipsViewSet(emg_mixins.ListModelMixin,
+                              viewsets.GenericViewSet):
+    serializer_class = emg_serializers.IprMatchSerializer
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'count',
+        'name'
+    )
+
+    ordering = ['-count']
+
+    lookup_field = 'accession'
+    lookup_value_regex = '[^/]+'
+
+    def get_serializer_class(self):
+        return super(GenomeIprRelationshipsViewSet, self) \
+            .get_serializer_class()
+
+    def get_queryset(self):
+        genome = get_object_or_404(
+            emg_models.Genome,
+            Q(accession=self.kwargs['accession'])
+        )
+        queryset = emg_models.GenomeIprCount.objects \
+            .available(self.request) \
+            .filter(genome=genome) \
+            .annotate(ipr_accession=F('ipr_entry__accession'))
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves analysis result for the given accession
+        Example:
+        ---
+        `/assemblies/ERZ1385375/analyses`
+        """
+        return super(GenomeIprRelationshipsViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class GenomeKeggRelationshipsViewSet(emg_mixins.ListModelMixin,
+                              viewsets.GenericViewSet):
+    serializer_class = emg_serializers.KeggMatchSerializer
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'count',
+        'name'
+    )
+
+    ordering = ['-count']
+
+    lookup_field = 'accession'
+    lookup_value_regex = '[^/]+'
+
+    def get_serializer_class(self):
+        return super(GenomeKeggRelationshipsViewSet, self) \
+            .get_serializer_class()
+
+    def get_queryset(self):
+        genome = get_object_or_404(
+            emg_models.Genome,
+            Q(accession=self.kwargs['accession'])
+        )
+        queryset = emg_models.GenomeKeggCounts.objects \
+            .available(self.request) \
+            .filter(genome=genome) \
+            .annotate(brite_id=F('kegg_entry__brite_id'),
+                      brite_name=F('kegg_entry__brite_name'),
+                      parent=F('kegg_entry__parent'))
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves analysis result for the given accession
+        Example:
+        ---
+        `/assemblies/ERZ1385375/analyses`
+        """
+        return super(GenomeKeggRelationshipsViewSet, self) \
             .list(request, *args, **kwargs)

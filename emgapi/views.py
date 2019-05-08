@@ -1100,13 +1100,7 @@ class GenomeViewSet(mixins.RetrieveModelMixin,
         return super(GenomeViewSet, self).get_serializer_class()
 
     def get_queryset(self):
-        queryset = emg_models.Genome.objects.all()
-        if 'cogs' in self.request.GET.get('include', '').split(','):
-            _qs = emg_models.CogCounts.objects.available(self.request)
-            queryset = queryset.prefetch_related(
-                Prefetch('cogs', queryset=_qs))
-            print('Including')
-        return queryset
+        return emg_models.Genome.objects.all()
 
     def list(self, request, *args, **kwargs):
         """

@@ -288,5 +288,17 @@ router.register(
 router.register(
     r'genomes/(?P<accession>[^/]+)/cogs',
     views_relations.GenomeCogsRelationshipsViewSet,
-    base_name='genome-cogs'
+    base_name='genome-cog'
+)
+
+router.register(
+    r'genomes/(?P<accession>[^/]+)/ipr',
+    views_relations.GenomeIprRelationshipsViewSet,
+    base_name='genome-ipr'
+)
+
+router.register(
+    r'genomes/(?P<accession>[^/]+)/kegg',
+    views_relations.GenomeKeggRelationshipsViewSet,
+    base_name='genome-kegg'
 )
