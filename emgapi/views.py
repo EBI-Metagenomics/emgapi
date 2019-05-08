@@ -1086,3 +1086,42 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         `/publications?search=text`
         """
         return super(PublicationViewSet, self).list(request, *args, **kwargs)
+
+
+class GenomeViewSet(mixins.RetrieveModelMixin,
+                    emg_mixins.ListModelMixin,
+                    viewsets.GenericViewSet):
+    serializer_class = emg_serializers.GenomeSerializer
+
+    lookup_field = 'accession'
+    lookup_value_regex = '[^/]+'
+
+    def get_serializer_class(self):
+        return super(GenomeViewSet, self).get_serializer_class()
+
+    def get_queryset(self):
+        queryset = emg_models.Genome.objects.all()
+        if 'cogs' in self.request.GET.get('include', '').split(','):
+            _qs = emg_models.CogCounts.objects.available(self.request)
+            queryset = queryset.prefetch_related(
+                Prefetch('cogs', queryset=_qs))
+            print('Including')
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves top level Biome nodes
+        Example:
+        ---
+        `/biomes`
+        """
+        return super(GenomeViewSet, self).list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves children for the given lineage
+        Example:
+        ---
+        `/biomes/root:Environmental:Aquatic:Freshwater`
+        """
+        return super(GenomeViewSet, self).retrieve(request, *args, **kwargs)

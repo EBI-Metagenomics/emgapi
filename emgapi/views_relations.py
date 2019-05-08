@@ -16,7 +16,7 @@
 import logging
 
 from django.http import HttpResponse
-from django.db.models import Prefetch, Count
+from django.db.models import Prefetch, Count, F
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
@@ -955,4 +955,49 @@ class AssemblyAnalysisViewSet(emg_mixins.ListModelMixin,
         `/assemblies/ERZ1385375/analyses`
         """
         return super(AssemblyAnalysisViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class GenomeCogsRelationshipsViewSet(emg_mixins.ListModelMixin,
+                              viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.CogCountSerializer
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'count',
+        'name'
+    )
+
+    ordering = ['-count']
+
+    lookup_field = 'accession'
+    lookup_value_regex = '[^/]+'
+
+    def get_serializer_class(self):
+        return super(GenomeCogsRelationshipsViewSet, self) \
+            .get_serializer_class()
+
+    def get_queryset(self):
+        genome = get_object_or_404(
+            emg_models.Genome,
+            Q(accession=self.kwargs['accession'])
+        )
+        queryset = emg_models.CogCounts.objects \
+            .available(self.request) \
+            .filter(genome=genome) \
+            .annotate(cog_name=F('cog__name'))
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves analysis result for the given accession
+        Example:
+        ---
+        `/assemblies/ERZ1385375/analyses`
+        """
+        return super(GenomeCogsRelationshipsViewSet, self) \
             .list(request, *args, **kwargs)

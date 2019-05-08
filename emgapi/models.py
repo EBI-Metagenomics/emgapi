@@ -27,6 +27,8 @@
 
 from __future__ import unicode_literals
 
+from enum import Enum
+
 from django.db import models
 from django.db.models import Count
 from django.db.models import CharField, Value
@@ -1257,3 +1259,114 @@ class AnalysisJobAnn(models.Model):
 
     def multiple_pk(self):
         return "%s/%s" % (self.var.var_name, self.var_val_ucv)
+
+
+class GenomeTypes(Enum):
+    ISOLATE = 'isolate'
+    MAG = 'mag'
+
+
+class CogCatQuerySet(BaseQuerySet):
+    pass
+
+
+class CogCatManager(models.Manager):
+    def get_queryset(self):
+        return CogCatQuerySet(self.model, using=self._db)
+
+    def available(self, request):
+        return self.get_queryset().available(request)
+
+
+class CogCat(models.Model):
+    objects = CogCatManager()
+    class Meta:
+        db_table = 'COG'
+    name = models.CharField(db_column='NAME', max_length=80)
+
+
+class Genome(models.Model):
+    class Meta:
+        db_table = 'GENOME'
+
+    accession = models.CharField(
+        db_column='GENOME_ACCESSION', max_length=40, unique=True)
+    length = models.IntegerField(db_column='LENGTH')
+    num_contigs = models.IntegerField(db_column='N_CONTIGS')
+    n_50 = models.IntegerField(db_column='N50')
+    gc_content = models.FloatField(db_column='GC_CONTENT')
+    type = models.CharField(db_column='TYPE', choices=[(tag, tag.value) for tag in GenomeTypes], max_length=80)
+    completeness = models.FloatField(db_column='COMPLETENESS')
+    contamination = models.FloatField(db_column='CONTAMINATION')
+    rna_5s = models.FloatField(db_column='RNA_5S')
+    rna_16s = models.FloatField(db_column='RNA_16S')
+    rna_23s = models.FloatField(db_column='RNA_23S')
+    trnas = models.FloatField(db_column='T_RNA')
+
+    num_genomes = models.IntegerField(db_column='NUM_GENOMES')
+    num_proteins = models.IntegerField(db_column='NUM_PROTEINS')
+    pangenome_size = models.IntegerField(db_column='PANGENOME_SIZE')
+    core_prop = models.FloatField(db_column='CORE_PROP')
+    accessory_prop = models.FloatField(db_column='ACCESSORY_PROP')
+    eggnog_prop = models.FloatField(db_column='EGGNOG_PROP')
+    ipr_prop = models.FloatField(db_column='IPR_PROP')
+
+    last_update = models.DateTimeField(
+        db_column='LAST_UPDATE', auto_now=True)
+    first_created = models.DateTimeField(
+        db_column='FIRST_CREATED', auto_now_add=True)
+
+    cogs = models.ManyToManyField('CogCat', through='CogCounts')
+
+    def __str__(self):
+        return self.accession
+
+class CogCountQuerySet(BaseQuerySet):
+    pass
+
+class CogCountManager(models.Manager):
+    def get_queryset(self):
+        return CogCountQuerySet(self.model, using=self._db)
+
+    def available(self, request):
+        return self.get_queryset().available(request)
+
+
+class CogCounts(models.Model):
+    class Meta:
+        db_table = 'GENOME_COG_COUNTS'
+    genome = models.ForeignKey(Genome, db_column='GENOME_ID', on_delete=models.CASCADE)
+    cog = models.ForeignKey(CogCat, db_column='COG_ID', on_delete=models.DO_NOTHING)
+    count = models.IntegerField(db_column='COUNT')
+
+    objects = CogCountManager()
+
+
+class KeggBrite(models.Model):
+    class Meta:
+        db_table = 'KEGG_BRITE_ENTRIES'
+    kegg_brite_id = models.IntegerField(db_column='BRITE_ID')
+    kegg_brite_name = models.CharField(db_column='NAME', max_length=80)
+    kegg_brite_parent = models.ForeignKey("self", db_column='PARENT', null=True)
+
+
+class KeggCounts(models.Model):
+    class Meta:
+        db_table = 'GENOME_KEGG_COUNTS'
+    genome = models.ForeignKey(Genome, db_column='GENOME_ID', on_delete=models.CASCADE)
+    kegg = models.ForeignKey(KeggBrite, db_column='KEGG_ID', on_delete=models.DO_NOTHING)
+    count = models.IntegerField(db_column='COUNT')
+
+
+class IprEntry(models.Model):
+    class Meta:
+        db_table = 'IPR_ENTRIES'
+    accession = models.CharField(db_column='ACCESSION', max_length=80)
+
+
+class GenomeIprs(models.Model):
+    class Meta:
+        db_table = 'GENOME_IRP_ENTRIES'
+    genome = models.ForeignKey(Genome, db_column='GENOME_ID', on_delete=models.CASCADE)
+    ipr_entry = models.ForeignKey(IprEntry, db_column='IPR_ID', on_delete=models.DO_NOTHING)
+    rank = models.IntegerField(db_column='COUNT')

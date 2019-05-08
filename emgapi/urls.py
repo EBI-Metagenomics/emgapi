@@ -277,3 +277,16 @@ utils_router.register(
     views.UtilsViewSet,
     base_name='csrf'
 )
+
+
+router.register(
+    r'genomes',
+    views.GenomeViewSet,
+    base_name='genomes'
+)
+
+router.register(
+    r'genomes/(?P<accession>[^/]+)/cogs',
+    views_relations.GenomeCogsRelationshipsViewSet,
+    base_name='genome-cogs'
+)

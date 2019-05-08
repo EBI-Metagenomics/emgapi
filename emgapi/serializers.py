@@ -1316,3 +1316,19 @@ class LDAnalysisSerializer(drf_serializers.ModelSerializer):
             'keywords',
             'dateModified',
         )
+
+
+class CogCountSerializer(ExplicitFieldsModelSerializer):
+    name = serializers.CharField(source='cog_name')
+
+    class Meta:
+        model = emg_models.CogCounts
+        fields = ('name', 'count')
+
+
+class GenomeSerializer(ExplicitFieldsModelSerializer):
+    class Meta:
+        model = emg_models.Genome
+        exclude = (
+            'cogs',
+        )
