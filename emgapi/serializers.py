@@ -621,6 +621,8 @@ class BaseDownloadSerializer(ExplicitFieldsModelSerializer,
             }
         return None
 
+
+class BasePipelineDownloadSerializer(BaseDownloadSerializer):
     pipeline = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name='emgapi_v1:pipelines-detail',
@@ -628,7 +630,7 @@ class BaseDownloadSerializer(ExplicitFieldsModelSerializer,
     )
 
 
-class StudyDownloadSerializer(BaseDownloadSerializer):
+class StudyDownloadSerializer(BasePipelineDownloadSerializer):
 
     url = emg_fields.DownloadHyperlinkedIdentityField(
         view_name='emgapi_v1:studydownload-detail',
@@ -655,7 +657,7 @@ class StudyDownloadSerializer(BaseDownloadSerializer):
         )
 
 
-class AnalysisJobDownloadSerializer(BaseDownloadSerializer):
+class AnalysisJobDownloadSerializer(BasePipelineDownloadSerializer):
 
     url = emg_fields.DownloadHyperlinkedIdentityField(
         view_name='emgapi_v1:analysisdownload-detail',
@@ -1346,9 +1348,23 @@ class KeggMatchSerializer(ExplicitFieldsModelSerializer):
 
 class GenomeSerializer(ExplicitFieldsModelSerializer):
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi_v1:studies-detail',
+        view_name='emgapi_v1:genomes-detail',
         lookup_field='accession',
     )
+
+    downloads = relations.SerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_downloads',
+        model=emg_models.GenomeDownload,
+        related_link_view_name='emgapi_v1:genome-download-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+    )
+
+    def get_downloads(self, obj):
+        return None
+
     kegg_matches = relations.SerializerMethodResourceRelatedField(
         source='get_kegg_matches',
         model=emg_models.KeggEntry,
@@ -1391,3 +1407,22 @@ class GenomeSerializer(ExplicitFieldsModelSerializer):
     class Meta:
         model = emg_models.Genome
         fields = '__all__'
+
+
+class GenomeDownloadSerializer(BaseDownloadSerializer):
+    url = emg_fields.DownloadHyperlinkedIdentityField(
+        view_name='emgapi_v1:genome-download-detail',
+        lookup_field='alias',
+    )
+
+    class Meta:
+        model = emg_models.GenomeDownload
+        fields = (
+            'id',
+            'url',
+            'alias',
+            'file_format',
+            'description',
+            'group_type',
+            'release_version',
+        )

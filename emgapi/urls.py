@@ -302,3 +302,9 @@ router.register(
     views_relations.GenomeKeggRelationshipsViewSet,
     base_name='genome-kegg'
 )
+
+router.register(
+    r'genomes/(?P<accession>[^/]+)/downloads',
+    views.GenomeDownloadViewSet2,
+    base_name='genome-download'
+)

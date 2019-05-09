@@ -1328,6 +1328,8 @@ class Genome(models.Model):
                                          through='emgapi.GenomeIprCount')
     kegg_matches = models.ManyToManyField('KeggEntry',
                                           through='emgapi.GenomeKeggCounts')
+    result_directory = models.CharField(
+        db_column='RESULT_DIRECTORY', max_length=100, blank=True, null=True)
 
     def __str__(self):
         return self.accession
@@ -1424,16 +1426,13 @@ class GenomeDownloadQuerySet(BaseQuerySet):
 
 
 class GenomeDownloadManager(models.Manager):
-
     def get_queryset(self):
         return GenomeDownloadQuerySet(self.model, using=self._db) \
             .select_related(
                 'group_type',
                 'subdir',
                 'file_format',
-                'description',
-                'pipeline',
-                'study',
+                'description'
             )
 
     def available(self, request):
@@ -1442,7 +1441,7 @@ class GenomeDownloadManager(models.Manager):
 
 class GenomeDownload(BaseDownload):
     genome = models.ForeignKey(
-        'Genome', db_column='GENOME_ID', related_name='genome_download',
+        'Genome', db_column='GENOME_ID',
         on_delete=models.CASCADE)
     release_version = models.CharField(
         db_column='VERSION', max_length=30, blank=True, null=True)

@@ -1103,19 +1103,104 @@ class GenomeViewSet(mixins.RetrieveModelMixin,
         return emg_models.Genome.objects.all()
 
     def list(self, request, *args, **kwargs):
+        return super(GenomeViewSet, self).list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        return super(GenomeViewSet, self).retrieve(request, *args, **kwargs)
+
+
+class GenomeDownloadViewSet(emg_mixins.ListModelMixin,
+                            viewsets.GenericViewSet):
+    serializer_class = emg_serializers.GenomeDownloadSerializer
+
+    lookup_field = 'alias'
+    lookup_value_regex = '[^/]+'
+
+    def get_queryset(self):
+        return emg_models.GenomeDownload.objects.available(self.request) \
+            .filter(genome__accession=self.kwargs['accession'])
+
+    def get_object(self):
+        try:
+            pk = int(self.kwargs['accession'])
+        except ValueError:
+            raise Http404()
+        return get_object_or_404(
+            self.get_queryset(), Q(alias=self.kwargs['alias']), Q(genome__pk=pk)
+        )
+
+    def get_serializer_class(self):
+        return super(GenomeDownloadViewSet, self).get_serializer_class()
+
+    def list(self, request, accession, *args, **kwargs):
+        return super(GenomeDownloadViewSet, self) \
+            .list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        return super(GenomeDownloadViewSet, self)\
+            .retrieve(request, *args, **kwargs)
+
+class GenomeDownloadViewSet2(emg_mixins.ListModelMixin,
+                             viewsets.GenericViewSet):
+    serializer_class = emg_serializers.GenomeDownloadSerializer
+
+    lookup_field = 'alias'
+    lookup_value_regex = '[^/]+'
+
+    def get_queryset(self):
+        try:
+            accession = self.kwargs['accession']
+        except ValueError:
+            raise Http404()
+        return emg_models.GenomeDownload.objects.available(self.request) \
+            .filter(genome__accession=accession)
+
+    def get_object(self):
+        try:
+            accession = self.kwargs['accession']
+        except ValueError:
+            raise Http404()
+        return get_object_or_404(
+            self.get_queryset(), Q(alias=self.kwargs['alias'])
+        )
+
+    def get_serializer_class(self):
+        return super(GenomeDownloadViewSet2, self) \
+            .get_serializer_class()
+
+    def list(self, request, *args, **kwargs):
         """
-        Retrieves top level Biome nodes
+        Retrieves list of static summary files
         Example:
         ---
         `/biomes`
         """
-        return super(GenomeViewSet, self).list(request, *args, **kwargs)
+        return super(GenomeDownloadViewSet2, self) \
+            .list(request, *args, **kwargs)
 
-    def retrieve(self, request, *args, **kwargs):
+    def retrieve(self, request, accession, alias,
+                 *args, **kwargs):
         """
-        Retrieves children for the given lineage
+        Retrieves static summary file
         Example:
         ---
-        `/biomes/root:Environmental:Aquatic:Freshwater`
+        `
+        /studies/MGYS00000410/pipelines/2.0/file/
+        ERP001736_taxonomy_abundances_v2.0.tsv`
         """
-        return super(GenomeViewSet, self).retrieve(request, *args, **kwargs)
+        obj = self.get_object()
+        response = HttpResponse()
+        response['Content-Type'] = 'application/octet-stream'
+        response["Content-Disposition"] = \
+            "attachment; filename={0}".format(alias)
+        if obj.subdir is not None:
+            response['X-Accel-Redirect'] = \
+                "/results{0}/{1}/{2}".format(
+                    obj.genome.result_directory, obj.subdir, obj.realname
+                )
+        else:
+            response['X-Accel-Redirect'] = \
+                "/results{0}/{1}".format(
+                    obj.genome.result_directory, obj.realname
+                )
+        return response

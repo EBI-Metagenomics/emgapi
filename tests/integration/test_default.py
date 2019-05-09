@@ -52,6 +52,7 @@ class TestDefaultAPI(object):
                 "%s/annotations/interpro-identifiers" % host,
             "annotations/organisms": "%s/annotations/organisms" % host,
             "mydata": "%s/mydata" % host,
+            "genomes": "%s/genomes" % host,
         }
         assert rsp['data'] == expected
 
@@ -69,7 +70,8 @@ class TestDefaultAPI(object):
             'emgapi_v1:pipeline-tools',
             'emgapi_v1:goterms',
             'emgapi_v1:interproidentifier',
-            'emgapi_v1:organisms'
+            'emgapi_v1:organisms',
+            'emgapi_v1:genomes'
         ]
     )
     @pytest.mark.django_db
