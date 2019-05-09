@@ -1117,37 +1117,6 @@ class GenomeDownloadViewSet(emg_mixins.ListModelMixin,
     lookup_value_regex = '[^/]+'
 
     def get_queryset(self):
-        return emg_models.GenomeDownload.objects.available(self.request) \
-            .filter(genome__accession=self.kwargs['accession'])
-
-    def get_object(self):
-        try:
-            pk = int(self.kwargs['accession'])
-        except ValueError:
-            raise Http404()
-        return get_object_or_404(
-            self.get_queryset(), Q(alias=self.kwargs['alias']), Q(genome__pk=pk)
-        )
-
-    def get_serializer_class(self):
-        return super(GenomeDownloadViewSet, self).get_serializer_class()
-
-    def list(self, request, accession, *args, **kwargs):
-        return super(GenomeDownloadViewSet, self) \
-            .list(request, *args, **kwargs)
-
-    def retrieve(self, request, *args, **kwargs):
-        return super(GenomeDownloadViewSet, self)\
-            .retrieve(request, *args, **kwargs)
-
-class GenomeDownloadViewSet2(emg_mixins.ListModelMixin,
-                             viewsets.GenericViewSet):
-    serializer_class = emg_serializers.GenomeDownloadSerializer
-
-    lookup_field = 'alias'
-    lookup_value_regex = '[^/]+'
-
-    def get_queryset(self):
         try:
             accession = self.kwargs['accession']
         except ValueError:
@@ -1156,16 +1125,12 @@ class GenomeDownloadViewSet2(emg_mixins.ListModelMixin,
             .filter(genome__accession=accession)
 
     def get_object(self):
-        try:
-            accession = self.kwargs['accession']
-        except ValueError:
-            raise Http404()
         return get_object_or_404(
             self.get_queryset(), Q(alias=self.kwargs['alias'])
         )
 
     def get_serializer_class(self):
-        return super(GenomeDownloadViewSet2, self) \
+        return super(GenomeDownloadViewSet, self) \
             .get_serializer_class()
 
     def list(self, request, *args, **kwargs):
@@ -1175,7 +1140,7 @@ class GenomeDownloadViewSet2(emg_mixins.ListModelMixin,
         ---
         `/biomes`
         """
-        return super(GenomeDownloadViewSet2, self) \
+        return super(GenomeDownloadViewSet, self) \
             .list(request, *args, **kwargs)
 
     def retrieve(self, request, accession, alias,

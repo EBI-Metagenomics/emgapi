@@ -959,8 +959,7 @@ class AssemblyAnalysisViewSet(emg_mixins.ListModelMixin,
 
 
 class GenomeCogsRelationshipsViewSet(emg_mixins.ListModelMixin,
-                              viewsets.GenericViewSet):
-
+                                     viewsets.GenericViewSet):
     serializer_class = emg_serializers.CogCountSerializer
 
     filter_backends = (
@@ -1004,7 +1003,7 @@ class GenomeCogsRelationshipsViewSet(emg_mixins.ListModelMixin,
 
 
 class GenomeIprRelationshipsViewSet(emg_mixins.ListModelMixin,
-                              viewsets.GenericViewSet):
+                                    viewsets.GenericViewSet):
     serializer_class = emg_serializers.IprMatchSerializer
 
     filter_backends = (
@@ -1048,7 +1047,7 @@ class GenomeIprRelationshipsViewSet(emg_mixins.ListModelMixin,
 
 
 class GenomeKeggRelationshipsViewSet(emg_mixins.ListModelMixin,
-                              viewsets.GenericViewSet):
+                                     viewsets.GenericViewSet):
     serializer_class = emg_serializers.KeggMatchSerializer
 
     filter_backends = (

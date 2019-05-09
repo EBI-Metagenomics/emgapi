@@ -20,8 +20,8 @@ def sanity_check_result_dirs(dirs):
             if len(EXPECTED_FILES.difference(fs)):
                 missing_files = ", ".join(EXPECTED_FILES.difference(fs))
                 raise ValueError(
-                    'Files missing from directory {}: {}'.format(d,
-                                                                 missing_files))
+                    'Files missing in directory {}: {}'.format(d,
+                                                               missing_files))
 
             for f in fs:
                 f_path = os.path.join(d, f)

@@ -1,4 +1,3 @@
-import csv
 import logging
 import os
 
@@ -8,7 +7,8 @@ from django.db import IntegrityError
 
 from emgapi import models as emg_models
 from ..lib.genome_util import sanity_check_result_dirs, load_genome_stats, \
-    load_ipr_stats, load_kegg_stats, load_cog_stats, find_results, get_result_path
+    load_ipr_stats, load_kegg_stats, load_cog_stats, find_results, \
+    get_result_path
 
 logger = logging.getLogger(__name__)
 
@@ -147,11 +147,16 @@ class Command(BaseCommand):
     def upload_files(self, genome):
         self.upload_file(genome, 'Genome CDS', 'fasta', 'genome_cds.fa')
         self.upload_file(genome, 'Genome SEQ', 'fasta', 'genome_seq.fa')
-        self.upload_file(genome, 'Protein sequence (full)', 'fasta', 'pan_genome_cds.fa')
-        self.upload_file(genome, 'Protein sequence (accessory)', 'fasta', 'accessory_genome_cds.fa')
-        self.upload_file(genome, 'Protein sequence (core)', 'fasta', 'core_genome_cds.fa')
-        self.upload_file(genome, 'Raw output of eggNOG-mapper', 'tab', 'eggnog_raw.tab')
-        self.upload_file(genome, 'Raw output of InterProScan', 'tab', 'ipr_raw.tab')
+        self.upload_file(genome, 'Protein sequence (full)', 'fasta',
+                         'pan_genome_cds.fa')
+        self.upload_file(genome, 'Protein sequence (accessory)', 'fasta',
+                         'accessory_genome_cds.fa')
+        self.upload_file(genome, 'Protein sequence (core)', 'fasta',
+                         'core_genome_cds.fa')
+        self.upload_file(genome, 'Raw output of eggNOG-mapper', 'tab',
+                         'eggnog_raw.tab')
+        self.upload_file(genome, 'Raw output of InterProScan', 'tab',
+                         'ipr_raw.tab')
 
     def upload_file(self, genome, desc_label, file_format, filename):
         desc = self.download_descriptions \
@@ -170,7 +175,8 @@ class Command(BaseCommand):
                                       file_format=fmt,
                                       realname=name,
                                       alias=name,
-                                      release_version=self.release_version).save()
+                                      release_version=self.release_version)\
+                .save()
         except IntegrityError:
             logger.warning(
                 '{} was already uploaded for genome'.format(name,

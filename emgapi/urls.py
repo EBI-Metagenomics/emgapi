@@ -305,6 +305,6 @@ router.register(
 
 router.register(
     r'genomes/(?P<accession>[^/]+)/downloads',
-    views.GenomeDownloadViewSet2,
+    views.GenomeDownloadViewSet,
     base_name='genome-download'
 )

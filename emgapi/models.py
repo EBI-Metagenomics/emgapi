@@ -1291,6 +1291,7 @@ class CogCat(models.Model):
 
     objects = CogCatManager()
 
+
 class Genome(models.Model):
     class Meta:
         db_table = 'GENOME'
@@ -1301,7 +1302,9 @@ class Genome(models.Model):
     num_contigs = models.IntegerField(db_column='N_CONTIGS')
     n_50 = models.IntegerField(db_column='N50')
     gc_content = models.FloatField(db_column='GC_CONTENT')
-    type = models.CharField(db_column='TYPE', choices=[(tag, tag.value) for tag in GenomeTypes], max_length=80)
+    type = models.CharField(db_column='TYPE',
+                            choices=[(tag, tag.value) for tag in GenomeTypes],
+                            max_length=80)
     completeness = models.FloatField(db_column='COMPLETENESS')
     contamination = models.FloatField(db_column='CONTAMINATION')
     rna_5s = models.FloatField(db_column='RNA_5S')
@@ -1351,8 +1354,10 @@ class GenomeCogCounts(models.Model):
     class Meta:
         db_table = 'GENOME_COG_COUNTS'
         unique_together = ('genome', 'cog')
-    genome = models.ForeignKey(Genome, db_column='GENOME_ID', on_delete=models.CASCADE)
-    cog = models.ForeignKey(CogCat, db_column='COG_ID', on_delete=models.DO_NOTHING)
+    genome = models.ForeignKey(Genome, db_column='GENOME_ID',
+                               on_delete=models.CASCADE)
+    cog = models.ForeignKey(CogCat, db_column='COG_ID',
+                            on_delete=models.DO_NOTHING)
     count = models.IntegerField(db_column='COUNT')
 
     objects = CogCountManager()
@@ -1361,7 +1366,8 @@ class GenomeCogCounts(models.Model):
 class KeggEntry(models.Model):
     class Meta:
         db_table = 'KEGG_BRITE_ENTRIES'
-    brite_id = models.CharField(db_column='BRITE_ID', max_length=5, unique=True)
+    brite_id = models.CharField(db_column='BRITE_ID', max_length=5,
+                                unique=True)
     brite_name = models.CharField(db_column='NAME', max_length=80)
     parent = models.ForeignKey("self", db_column='PARENT', null=True)
 
@@ -1382,8 +1388,10 @@ class GenomeKeggCounts(models.Model):
     class Meta:
         db_table = 'GENOME_KEGG_COUNTS'
         unique_together = ('genome', 'kegg_entry')
-    genome = models.ForeignKey(Genome, db_column='GENOME_ID', on_delete=models.CASCADE)
-    kegg_entry = models.ForeignKey(KeggEntry, db_column='KEGG_ID', on_delete=models.DO_NOTHING)
+    genome = models.ForeignKey(Genome, db_column='GENOME_ID',
+                               on_delete=models.CASCADE)
+    kegg_entry = models.ForeignKey(KeggEntry, db_column='KEGG_ID',
+                                   on_delete=models.DO_NOTHING)
     count = models.IntegerField(db_column='COUNT')
 
     objects = GenomeKeggCountManager()
@@ -1392,7 +1400,8 @@ class GenomeKeggCounts(models.Model):
 class IprEntry(models.Model):
     class Meta:
         db_table = 'IPR_ENTRIES'
-    accession = models.CharField(db_column='ACCESSION', max_length=80, unique=True)
+    accession = models.CharField(db_column='ACCESSION', max_length=80,
+                                 unique=True)
 
 
 class GenomeIprCountQuerySet(BaseQuerySet):
