@@ -1406,7 +1406,7 @@ class GenomeSerializer(ExplicitFieldsModelSerializer):
 
     class Meta:
         model = emg_models.Genome
-        fields = '__all__'
+        exclude = ('result_directory',)
 
 
 class GenomeDownloadSerializer(BaseDownloadSerializer):

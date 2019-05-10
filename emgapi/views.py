@@ -1096,6 +1096,28 @@ class GenomeViewSet(mixins.RetrieveModelMixin,
     lookup_field = 'accession'
     lookup_value_regex = '[^/]+'
 
+    filter_backends = (
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'accession',
+        'length',
+        'num_contigs',
+        'completeness',
+        'contamination',
+        'num_genomes',
+        'num_proteins',
+        'last_update',
+    )
+
+    ordering = ('-accession',)
+
+    search_fields = (
+        'accession',
+    )
+
     def get_serializer_class(self):
         return super(GenomeViewSet, self).get_serializer_class()
 
