@@ -6,9 +6,8 @@ from django.core.management import BaseCommand
 from django.db import IntegrityError
 
 from emgapi import models as emg_models
-from ..lib.genome_util import sanity_check_result_dirs, load_genome_stats, \
-    load_ipr_stats, load_kegg_stats, load_cog_stats, find_results, \
-    get_result_path
+from ..lib.genome_util import sanity_check_result_dirs, find_results, \
+    get_result_path, read_csv_w_headers, read_json
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +36,7 @@ class Command(BaseCommand):
         release_dir = os.path.join(self.rootpath, self.release_version)
 
         results = find_results(release_dir)
+        logging.debug('Found {} genome dirs to upload'.format(len(results)))
 
         sanity_check_result_dirs(results)
 
@@ -44,6 +44,7 @@ class Command(BaseCommand):
             self.upload_dir(d)
 
     def upload_dir(self, d):
+        logger.debug('Uploading dir: {}'.format(d))
         genome = self.create_genome(d)
         self.upload_cog_counts(genome, d)
         self.upload_ipr_counts(genome, d)
@@ -51,7 +52,7 @@ class Command(BaseCommand):
         self.upload_files(genome)
 
     def create_genome(self, genome_dir):
-        gs = load_genome_stats(os.path.join(genome_dir, 'genome_stats.tab'))
+        gs = read_json(os.path.join(genome_dir, 'genome_stats.json'))
         g = emg_models.Genome(**gs)
         g.result_directory = get_result_path(genome_dir)
         try:
@@ -63,7 +64,7 @@ class Command(BaseCommand):
         return g
 
     def upload_cog_counts(self, genome, d):
-        cog_counts = load_cog_stats(os.path.join(d, 'cog_counts.tab'))
+        cog_counts = read_csv_w_headers(os.path.join(d, 'cog_counts.csv'))
         for cc in cog_counts:
             self.upload_cog_count(genome, cc)
         logger.info('Loaded COG for {}'.format(genome.accession))
@@ -90,7 +91,7 @@ class Command(BaseCommand):
         return cog
 
     def upload_ipr_counts(self, genome, d):
-        ipr_matches = load_ipr_stats(os.path.join(d, 'ipr_top10.tab'))
+        ipr_matches = read_csv_w_headers(os.path.join(d, 'ipr_top10.csv'))
         for ipr_match in ipr_matches:
             self.upload_ipr_count(genome, ipr_match)
         logger.info('Loaded IPR for {}'.format(genome.accession))
@@ -118,7 +119,7 @@ class Command(BaseCommand):
         return ipr
 
     def upload_kegg_counts(self, genome, d):
-        kegg_matches = load_kegg_stats(os.path.join(d, 'kegg_counts.tab'))
+        kegg_matches = read_csv_w_headers(os.path.join(d, 'kegg_counts.csv'))
         for kegg_match in kegg_matches:
             self.upload_kegg_match(genome, kegg_match)
         logger.info('Loaded KEGG for {}'.format(genome.accession))
@@ -135,7 +136,7 @@ class Command(BaseCommand):
         return kegg
 
     def upload_kegg_match(self, genome, kegg_match):
-        kegg_id = kegg_match['kegg_id']
+        kegg_id = kegg_match['kegg_brite']
         kegg = self.get_kegg_entry(kegg_id)
         try:
             emg_models.GenomeKeggCounts(genome=genome, kegg_entry=kegg,

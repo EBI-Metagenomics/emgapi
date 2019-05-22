@@ -2,13 +2,14 @@ import os
 import glob
 import logging
 import sys
-
+import json
+import csv
 logger = logging.getLogger(__name__)
 
-EXPECTED_FILES = {'accessory_genome_cds.fa', 'cog_counts.tab',
-                  'core_genome_cds.fa', 'eggnog_raw.tab', 'eggnog_top10.tab',
-                  'genome_cds.fa', 'genome_seq.fa', 'genome_stats.tab',
-                  'ipr_raw.tab', 'ipr_top10.tab', 'kegg_counts.tab',
+EXPECTED_FILES = {'accessory_genome_cds.fa', 'cog_counts.csv',
+                  'core_genome_cds.fa', 'eggnog_raw.tab', 'eggnog_top10.csv',
+                  'genome_cds.fa', 'genome_seq.fa', 'genome_stats.json',
+                  'ipr_raw.tab', 'ipr_top10.csv', 'kegg_counts.csv',
                   'pan_genome_cds.fa'}
 
 
@@ -48,40 +49,17 @@ GENOME_STATS_HEADERS = ['accession', 'length', 'num_contigs', 'n_50',
                         'eggnog_prop', 'ipr_prop']
 
 
-def load_genome_stats(fs):
+def read_json(fs):
     with open(fs) as f:
-        l = f.read().strip().split('\t')
-    return dict(zip(GENOME_STATS_HEADERS, l))
+        return json.load(f)
 
 
-COG_HEADERS = ['accession', 'name', 'count']
-
-
-def load_cog_stats(fs):
+def read_csv_w_headers(fs):
     with open(fs) as f:
-        lines = [l.strip().split('\t') for l in f.readlines()]
-    cog_counts = [dict(zip(COG_HEADERS, l)) for l in lines]
-    return cog_counts
-
-
-IPR_HEADERS = ['accession', 'rank', 'ipr_accession', 'count']
-
-
-def load_ipr_stats(fs):
-    with open(fs) as f:
-        lines = [l.strip().split('\t') for l in f.readlines()]
-    ipr_matches = [dict(zip(IPR_HEADERS, l)) for l in lines]
-    return ipr_matches
-
-
-KEGG_HEADERS = ['accession', 'kegg_id', 'count']
-
-
-def load_kegg_stats(fs):
-    with open(fs) as f:
-        lines = [l.strip().split('\t') for l in f.readlines()]
-    kegg_matches = [dict(zip(KEGG_HEADERS, l)) for l in lines]
-    return kegg_matches
+        reader = csv.reader(f, skipinitialspace=True)
+        header = next(reader)
+        data = [dict(zip(header, row)) for row in reader]
+        return data
 
 
 def validate_genome_dir(d):
@@ -90,27 +68,6 @@ def validate_genome_dir(d):
         missing_files = ", ".join(EXPECTED_FILES.difference(fs))
         raise ValueError(
             'Files are missing from directory {}: {}'.format(d, missing_files))
-
-
-# def read_kegg_orthology():
-#     with open(KEGG_ORTHOLOGY) as f:
-#         kegg = json.load(f)
-#     entries = {}
-#
-#     def find_nodes(node, parent_id=None, depth=0):
-#         match = re.findall('^([^K]\d+) ([^[]*)', node['name'])
-#         if len(match) > 0:
-#             node_id, node_name = match[0]
-#             if node_id not in entries:
-#                 entries[node_id] = [node_name, parent_id]
-#
-#             children = node.get('children') or []
-#             for child in children:
-#                 find_nodes(child, parent_id=node_id, depth=depth + 1)
-#
-#     for child_node in kegg['children']:
-#         find_nodes(child_node)
-#     return entries
 
 
 def find_results(release_dir):
