@@ -1106,6 +1106,8 @@ class AnalysisJob(models.Model):
 
     class Meta:
         db_table = 'ANALYSIS_JOB'
+        unique_together = (('job_id', 'external_run_ids'),
+                           ('pipeline', 'external_run_ids'),)
         ordering = ('job_id',)
 
     def __str__(self):
