@@ -49,6 +49,7 @@ class Command(BaseCommand):
         self.upload_cog_counts(genome, d)
         self.upload_ipr_counts(genome, d)
         self.upload_kegg_counts(genome, d)
+        self.upload_eggnog_counts(genome, d)
         self.upload_files(genome)
 
     def create_genome(self, genome_dir):
@@ -90,8 +91,9 @@ class Command(BaseCommand):
             cog_cache[c_name] = cog
         return cog
 
-    def upload_ipr_counts(self, genome, d):
-        ipr_matches = read_csv_w_headers(os.path.join(d, 'ipr_top10.csv'))
+    def upload_ipr_counts(self, genome, results_dir):
+        ipr_matches = read_csv_w_headers(
+            os.path.join(results_dir, 'ipr_top10.csv'))
         for ipr_match in ipr_matches:
             self.upload_ipr_count(genome, ipr_match)
         logger.info('Loaded IPR for {}'.format(genome.accession))
@@ -118,8 +120,9 @@ class Command(BaseCommand):
             ipr_cache[ipr_accession] = ipr
         return ipr
 
-    def upload_kegg_counts(self, genome, d):
-        kegg_matches = read_csv_w_headers(os.path.join(d, 'kegg_counts.csv'))
+    def upload_kegg_counts(self, genome, results_dir):
+        kegg_matches = read_csv_w_headers(
+            os.path.join(results_dir, 'kegg_counts.csv'))
         for kegg_match in kegg_matches:
             self.upload_kegg_match(genome, kegg_match)
         logger.info('Loaded KEGG for {}'.format(genome.accession))
@@ -144,6 +147,40 @@ class Command(BaseCommand):
         except IntegrityError:
             logger.warning('Kegg entry for {} already exists'.format(
                 genome.accession))
+
+    def upload_eggnog_counts(self, genome, results_dir):
+        eggnog_matches = read_csv_w_headers(
+            os.path.join(results_dir, 'eggnog_top10.csv'))
+        for eggnog_match in eggnog_matches:
+            self.upload_eggnog_match(genome, eggnog_match)
+        logger.info('Loaded EggNog for {}'.format(genome.accession))
+
+    def get_eggnog_entry(self, eggnog_organism, eggnog_host,
+                         eggnog_description):
+        try:
+            eggnog = emg_models.EggNogEntry.objects.get(
+                organism=eggnog_organism,
+                host=eggnog_host,
+                description=eggnog_description)
+        except ObjectDoesNotExist:
+            eggnog = emg_models.EggNogEntry(organism=eggnog_organism,
+                                            host=eggnog_host,
+                                            description=eggnog_description)
+            eggnog.save()
+        return eggnog
+
+    def upload_eggnog_match(self, genome, eggnog_match):
+        org = eggnog_match['eggnog_organism']
+        host = eggnog_match['eggnog_host']
+        description = eggnog_match['eggnog_desc']
+        kegg = self.get_eggnog_entry(org, host, description)
+        try:
+            emg_models.GenomeEggNogCounts(genome=genome, eggnog=kegg,
+                                          count=eggnog_match['count']).save()
+        except IntegrityError:
+            logger.warning(
+                'Eggnog entry for {}, {}, {}, {} already exists'.format(
+                    genome.accession, org, host, description))
 
     def upload_files(self, genome):
         self.upload_file(genome, 'Genome CDS', 'fasta', 'genome_cds.fa')
@@ -176,7 +213,7 @@ class Command(BaseCommand):
                                       file_format=fmt,
                                       realname=name,
                                       alias=name,
-                                      release_version=self.release_version)\
+                                      release_version=self.release_version) \
                 .save()
         except IntegrityError:
             logger.warning(

@@ -1339,11 +1339,20 @@ class IprMatchSerializer(ExplicitFieldsModelSerializer):
 class KeggMatchSerializer(ExplicitFieldsModelSerializer):
     brite_id = serializers.CharField()
     brite_name = serializers.CharField()
-    # parent = serializers.HyperlinkedIdentityField()
 
     class Meta:
         model = emg_models.GenomeKeggCounts
         fields = ('brite_id', 'brite_name', 'count')
+
+
+class EggNogMatchSerializer(ExplicitFieldsModelSerializer):
+    host = serializers.CharField()
+    organism = serializers.CharField()
+    description = serializers.CharField()
+
+    class Meta:
+        model = emg_models.GenomeEggNogCounts
+        fields = ('host', 'organism', 'description', 'count',)
 
 
 class GenomeSerializer(ExplicitFieldsModelSerializer):
@@ -1376,6 +1385,19 @@ class GenomeSerializer(ExplicitFieldsModelSerializer):
     )
 
     def get_kegg_matches(self, obj):
+        return None
+
+    eggnog_matches = relations.SerializerMethodResourceRelatedField(
+        source='get_eggnog_matches',
+        model=emg_models.GenomeEggNogCounts,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:genome-eggnog-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+    )
+
+    def get_eggnog_matches(self, obj):
         return None
 
     cog_matches = relations.SerializerMethodResourceRelatedField(

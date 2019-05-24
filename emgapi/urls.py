@@ -286,6 +286,12 @@ router.register(
 )
 
 router.register(
+    r'genomes/(?P<accession>[^/]+)/eggnog',
+    views_relations.GenomeEggNogRelationshipsViewSet,
+    base_name='genome-eggnog'
+)
+
+router.register(
     r'genomes/(?P<accession>[^/]+)/cogs',
     views_relations.GenomeCogsRelationshipsViewSet,
     base_name='genome-cog'

@@ -1090,3 +1090,49 @@ class GenomeKeggRelationshipsViewSet(emg_mixins.ListModelMixin,
         """
         return super(GenomeKeggRelationshipsViewSet, self) \
             .list(request, *args, **kwargs)
+
+
+class GenomeEggNogRelationshipsViewSet(emg_mixins.ListModelMixin,
+                                       viewsets.GenericViewSet):
+    serializer_class = emg_serializers.EggNogMatchSerializer
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'count',
+    )
+
+    ordering = ['-count']
+
+    lookup_field = 'accession'
+    lookup_value_regex = '[^/]+'
+
+    def get_serializer_class(self):
+        return super(GenomeEggNogRelationshipsViewSet, self) \
+            .get_serializer_class()
+
+    def get_queryset(self):
+        genome = get_object_or_404(
+            emg_models.Genome,
+            Q(accession=self.kwargs['accession'])
+        )
+        queryset = emg_models.GenomeEggNogCounts.objects \
+            .available(self.request) \
+            .filter(genome=genome) \
+            .annotate(host=F('eggnog__host'),
+                      organism=F('eggnog__organism'),
+                      description=F('eggnog__description')
+                      )
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves analysis result for the given accession
+        Example:
+        ---
+        `/assemblies/ERZ1385375/analyses`
+        """
+        return super(GenomeEggNogRelationshipsViewSet, self) \
+            .list(request, *args, **kwargs)

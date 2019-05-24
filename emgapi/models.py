@@ -38,21 +38,18 @@ from django.db.models import Prefetch
 
 
 class Resource(object):
-
     def __init__(self, **kwargs):
         for field in ('id', 'resource', 'count'):
             setattr(self, field, kwargs.get(field, None))
 
 
 class Token(object):
-
     def __init__(self, **kwargs):
         for field in ('id', 'token'):
             setattr(self, field, kwargs.get(field, None))
 
 
 class BaseQuerySet(models.QuerySet):
-
     def available(self, request=None):
         _query_filters = {
             'StudyQuerySet': {
@@ -170,23 +167,22 @@ class PipelineQuerySet(BaseQuerySet):
 
 
 class PipelineManager(models.Manager):
-
     def get_queryset(self):
         return PipelineQuerySet(self.model, using=self._db) \
             .annotate(
-                analyses_count=Count(
-                    'analyses', filter=(
-                        Q(analyses__analysis_status_id=3) |
-                        Q(analyses__analysis_status_id=6)
-                    ), distinct=True)
-            ) \
+            analyses_count=Count(
+                'analyses', filter=(
+                    Q(analyses__analysis_status_id=3) |
+                    Q(analyses__analysis_status_id=6)
+                ), distinct=True)
+        ) \
             .annotate(
-                samples_count=Count(
-                    'analyses__sample', filter=(
-                        Q(analyses__analysis_status_id=3) |
-                        Q(analyses__analysis_status_id=6)
-                    ), distinct=True)
-            )
+            samples_count=Count(
+                'analyses__sample', filter=(
+                    Q(analyses__analysis_status_id=3) |
+                    Q(analyses__analysis_status_id=6)
+                ), distinct=True)
+        )
 
 
 class Pipeline(models.Model):
@@ -253,7 +249,6 @@ class BiomeQuerySet(models.QuerySet):
 
 
 class BiomeManager(models.Manager):
-
     def get_queryset(self):
         return BiomeQuerySet(self.model, using=self._db) \
             .annotate(samples_count=Count('samples', distinct=True))
@@ -293,7 +288,6 @@ class PublicationQuerySet(BaseQuerySet):
 
 
 class PublicationManager(models.Manager):
-
     def get_queryset(self):
         return PublicationQuerySet(self.model, using=self._db) \
             .annotate(studies_count=Count('studies', distinct=True)) \
@@ -319,7 +313,7 @@ class Publication(models.Model):
         db_column='ISSUE', max_length=55, blank=True, null=True,
         help_text='Publication issue')
     medline_journal = models.CharField(
-        db_column='MEDLINE_JOURNAL', max_length=255, blank=True, null=True,)
+        db_column='MEDLINE_JOURNAL', max_length=255, blank=True, null=True, )
     pub_abstract = models.TextField(
         db_column='PUB_ABSTRACT', blank=True, null=True,
         help_text='Publication abstract')
@@ -358,7 +352,7 @@ class Publication(models.Model):
 
 class DownloadGroupType(models.Model):
     group_id = models.AutoField(
-        db_column='GROUP_ID', primary_key=True,)
+        db_column='GROUP_ID', primary_key=True, )
     group_type = models.CharField(
         db_column='GROUP_TYPE', max_length=30)
 
@@ -457,7 +451,6 @@ class AnalysisJobDownloadQuerySet(BaseQuerySet):
 
 
 class AnalysisJobDownloadManager(models.Manager):
-
     def get_queryset(self):
         return AnalysisJobDownloadQuerySet(self.model, using=self._db)
 
@@ -466,7 +459,6 @@ class AnalysisJobDownloadManager(models.Manager):
 
 
 class AnalysisJobDownload(BaseAnnotationPipelineDownload):
-
     job = models.ForeignKey(
         'AnalysisJob', db_column='JOB_ID', related_name='analysis_download',
         on_delete=models.CASCADE)
@@ -488,17 +480,16 @@ class StudyDownloadQuerySet(BaseQuerySet):
 
 
 class StudyDownloadManager(models.Manager):
-
     def get_queryset(self):
         return StudyDownloadQuerySet(self.model, using=self._db) \
             .select_related(
-                'group_type',
-                'subdir',
-                'file_format',
-                'description',
-                'pipeline',
-                'study',
-            )
+            'group_type',
+            'subdir',
+            'file_format',
+            'description',
+            'pipeline',
+            'study',
+        )
 
     def available(self, request):
         return self.get_queryset().available(request)
@@ -522,7 +513,6 @@ class StudyDownload(BaseAnnotationPipelineDownload):
 
 
 class StudyQuerySet(BaseQuerySet):
-
     def mydata(self, request):
         if request.user.is_authenticated():
             _username = request.user.username
@@ -535,7 +525,6 @@ class StudyQuerySet(BaseQuerySet):
 
 
 class StudyManager(models.Manager):
-
     def get_queryset(self):
         # TODO: remove biome when schema updated
         return StudyQuerySet(self.model, using=self._db) \
@@ -553,7 +542,6 @@ class StudyManager(models.Manager):
 
 
 class Study(models.Model):
-
     def __init__(self, *args, **kwargs):
         super(Study, self).__init__(*args, **kwargs)
         setattr(self, 'accession', kwargs.get('accession', self._custom_pk()))
@@ -653,7 +641,6 @@ class SampleQuerySet(BaseQuerySet):
 
 
 class SampleManager(models.Manager):
-
     def get_queryset(self):
         return SampleQuerySet(self.model, using=self._db)
 
@@ -771,13 +758,12 @@ class SampleGeoCoordinateQuerySet(BaseQuerySet):
 
 
 class SampleGeoCoordinateManager(models.Manager):
-
     def get_queryset(self):
         return SampleGeoCoordinateQuerySet(self.model, using=self._db) \
             .annotate(lon_lat_pk=Concat(
-                Cast('longitude', CharField()), Value(','),
-                Cast('latitude', CharField())
-            ))
+            Cast('longitude', CharField()), Value(','),
+            Cast('latitude', CharField())
+        ))
 
     def available(self, request):
         queryset = self.get_queryset().available(request)
@@ -785,7 +771,6 @@ class SampleGeoCoordinateManager(models.Manager):
 
 
 class SampleGeoCoordinate(Sample):
-
     objects = SampleGeoCoordinateManager()
 
     class Meta:
@@ -812,22 +797,21 @@ class ExperimentTypeQuerySet(BaseQuerySet):
 
 
 class ExperimentTypeManager(models.Manager):
-
     def get_queryset(self):
         return ExperimentTypeQuerySet(self.model, using=self._db) \
             .annotate(
-                samples_count=Count(
-                    'runs__sample', filter=Q(runs__status_id=4), distinct=True)
-            ) \
+            samples_count=Count(
+                'runs__sample', filter=Q(runs__status_id=4), distinct=True)
+        ) \
             .annotate(
-                runs_count=Count(
-                    'runs', filter=Q(runs__status_id=4), distinct=True)
-            )
+            runs_count=Count(
+                'runs', filter=Q(runs__status_id=4), distinct=True)
+        )
 
 
 class ExperimentType(models.Model):
     experiment_type_id = models.SmallIntegerField(
-        db_column='EXPERIMENT_TYPE_ID', primary_key=True,)
+        db_column='EXPERIMENT_TYPE_ID', primary_key=True, )
     experiment_type = models.CharField(
         db_column='EXPERIMENT_TYPE', max_length=30,
         help_text="Experiment type, e.g. metagenomic")
@@ -860,16 +844,15 @@ class RunQuerySet(BaseQuerySet):
 
 
 class RunManager(models.Manager):
-
     def get_queryset(self):
         return RunQuerySet(self.model, using=self._db)
 
     def available(self, request):
         return self.get_queryset().available(request) \
             .select_related(
-                'experiment_type',
-                'study', 'sample'
-            )
+            'experiment_type',
+            'study', 'sample'
+        )
 
 
 class Run(models.Model):
@@ -919,15 +902,14 @@ class AssemblyQuerySet(BaseQuerySet):
 
 
 class AssemblyManager(models.Manager):
-
     def get_queryset(self):
         return AssemblyQuerySet(self.model, using=self._db)
 
     def available(self, request):
         return self.get_queryset().available(request) \
             .select_related(
-                'experiment_type',
-            )
+            'experiment_type',
+        )
 
 
 class Assembly(models.Model):
@@ -994,42 +976,40 @@ class AnalysisJobQuerySet(BaseQuerySet):
 
 
 class AnalysisJobManager(models.Manager):
-
     def get_queryset(self):
         _qs = AnalysisJobAnn.objects.all() \
             .select_related('var')
         return AnalysisJobQuerySet(self.model, using=self._db) \
             .select_related(
-                'pipeline',
-                'analysis_status',
-                'experiment_type',
-            ) \
+            'pipeline',
+            'analysis_status',
+            'experiment_type',
+        ) \
             .prefetch_related(
-                Prefetch('analysis_metadata', queryset=_qs),
-            )
+            Prefetch('analysis_metadata', queryset=_qs),
+        )
 
     def available(self, request):
         return self.get_queryset().available(request) \
             .prefetch_related(
-                Prefetch(
-                    'study',
-                    queryset=Study.objects.available(request)
-                ),
-                Prefetch(
-                    'sample',
-                    queryset=Sample.objects.available(
-                        request)
-                ),
-                Prefetch(
-                    'run',
-                    queryset=Run.objects.available(
-                        request)
-                )
+            Prefetch(
+                'study',
+                queryset=Study.objects.available(request)
+            ),
+            Prefetch(
+                'sample',
+                queryset=Sample.objects.available(
+                    request)
+            ),
+            Prefetch(
+                'run',
+                queryset=Run.objects.available(
+                    request)
             )
+        )
 
 
 class AnalysisJob(models.Model):
-
     def __init__(self, *args, **kwargs):
         super(AnalysisJob, self).__init__(*args, **kwargs)
         setattr(self, 'accession',
@@ -1201,7 +1181,6 @@ class SampleAnnQuerySet(BaseQuerySet):
 
 
 class SampleAnnManager(models.Manager):
-
     def get_queryset(self):
         return SampleAnnQuerySet(self.model, using=self._db) \
             .select_related('var')
@@ -1287,6 +1266,7 @@ class CogCatManager(models.Manager):
 class CogCat(models.Model):
     class Meta:
         db_table = 'COG'
+
     name = models.CharField(db_column='NAME', max_length=80, unique=True)
 
     objects = CogCatManager()
@@ -1354,6 +1334,7 @@ class GenomeCogCounts(models.Model):
     class Meta:
         db_table = 'GENOME_COG_COUNTS'
         unique_together = ('genome', 'cog')
+
     genome = models.ForeignKey(Genome, db_column='GENOME_ID',
                                on_delete=models.CASCADE)
     cog = models.ForeignKey(CogCat, db_column='COG_ID',
@@ -1366,6 +1347,7 @@ class GenomeCogCounts(models.Model):
 class KeggEntry(models.Model):
     class Meta:
         db_table = 'KEGG_BRITE_ENTRIES'
+
     brite_id = models.CharField(db_column='BRITE_ID', max_length=5,
                                 unique=True)
     brite_name = models.CharField(db_column='NAME', max_length=80)
@@ -1388,6 +1370,7 @@ class GenomeKeggCounts(models.Model):
     class Meta:
         db_table = 'GENOME_KEGG_COUNTS'
         unique_together = ('genome', 'kegg_entry')
+
     genome = models.ForeignKey(Genome, db_column='GENOME_ID',
                                on_delete=models.CASCADE)
     kegg_entry = models.ForeignKey(KeggEntry, db_column='KEGG_ID',
@@ -1397,9 +1380,49 @@ class GenomeKeggCounts(models.Model):
     objects = GenomeKeggCountManager()
 
 
+class EggNogEntry(models.Model):
+    class Meta:
+        db_table = 'EGGNOG_ENTRIES'
+        unique_together = ('host', 'organism', 'description')
+
+    host = models.CharField(db_column='HOST', max_length=80,
+                            db_index=True)
+    organism = models.CharField(db_column='ORGANISM', max_length=80,
+                                db_index=True)
+    description = models.CharField(db_column='DESCRIPTION', max_length=150,
+                                   db_index=True)
+
+
+class GenomeEggNogCountQuerySet(BaseQuerySet):
+    pass
+
+
+class GenomeEggNogCountManager(models.Manager):
+    def get_queryset(self):
+        return GenomeEggNogCountQuerySet(self.model, using=self._db)
+
+    def available(self, request):
+        return self.get_queryset().available(request)
+
+
+class GenomeEggNogCounts(models.Model):
+    class Meta:
+        db_table = 'GENOME_EGGNOG_COUNTS'
+        unique_together = ('genome', 'eggnog')
+
+    genome = models.ForeignKey(Genome, db_column='GENOME_ID',
+                               on_delete=models.CASCADE)
+    eggnog = models.ForeignKey(EggNogEntry, db_column='EGGNOG_ID',
+                               on_delete=models.DO_NOTHING)
+    count = models.IntegerField(db_column='COUNT')
+
+    objects = GenomeKeggCountManager()
+
+
 class IprEntry(models.Model):
     class Meta:
         db_table = 'IPR_ENTRIES'
+
     accession = models.CharField(db_column='ACCESSION', max_length=80,
                                  unique=True)
 
@@ -1438,11 +1461,11 @@ class GenomeDownloadManager(models.Manager):
     def get_queryset(self):
         return GenomeDownloadQuerySet(self.model, using=self._db) \
             .select_related(
-                'group_type',
-                'subdir',
-                'file_format',
-                'description'
-            )
+            'group_type',
+            'subdir',
+            'file_format',
+            'description'
+        )
 
     def available(self, request):
         return self.get_queryset().available(request)
