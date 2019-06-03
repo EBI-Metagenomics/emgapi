@@ -30,18 +30,22 @@ class Command(BaseCommand):
         parser.add_argument('release_version', action='store', type=str, )
 
     def handle(self, *args, **options):
-        self.rootpath = options.get('rootpath')
-        self.release_version = options.get('release_version')
+        self.rootpath = options.get('rootpath').strip()
+        self.release_version = options.get('release_version').strip()
         logger.info("CLI %r" % options)
         release_dir = os.path.join(self.rootpath, self.release_version)
 
         results = find_results(release_dir)
         logging.debug('Found {} genome dirs to upload'.format(len(results)))
-
         sanity_check_result_dirs(results)
-
+        self.clean_db()
         for d in results:
             self.upload_dir(d)
+
+    @staticmethod
+    def clean_db():
+        logger.info("Wiping existing objects from database...")
+        emg_models.Genome.objects.all().delete()
 
     def upload_dir(self, d):
         logger.debug('Uploading dir: {}'.format(d))
@@ -52,7 +56,8 @@ class Command(BaseCommand):
         self.upload_eggnog_counts(genome, d)
         self.upload_files(genome)
 
-    def create_genome(self, genome_dir):
+    @staticmethod
+    def create_genome(genome_dir):
         gs = read_json(os.path.join(genome_dir, 'genome_stats.json'))
         g = emg_models.Genome(**gs)
         g.result_directory = get_result_path(genome_dir)
@@ -80,7 +85,8 @@ class Command(BaseCommand):
             logger.warning('Cog entry for {} already exists'.format(
                 genome.accession))
 
-    def get_cog_cat(self, c_name):
+    @staticmethod
+    def get_cog_cat(c_name):
         cog = cog_cache.get(c_name)
         if not cog:
             try:
@@ -109,7 +115,8 @@ class Command(BaseCommand):
             logger.warning('IPR entry for {} already exists'.format(
                 genome.accession))
 
-    def get_ipr_entry(self, ipr_accession):
+    @staticmethod
+    def get_ipr_entry(ipr_accession):
         ipr = ipr_cache.get(ipr_accession)
         if not ipr:
             try:
@@ -127,7 +134,8 @@ class Command(BaseCommand):
             self.upload_kegg_match(genome, kegg_match)
         logger.info('Loaded KEGG for {}'.format(genome.accession))
 
-    def get_kegg_entry(self, kegg_id):
+    @staticmethod
+    def get_kegg_entry(kegg_id):
         kegg = kegg_cache.get(kegg_id)
         if not kegg:
             try:
@@ -155,7 +163,8 @@ class Command(BaseCommand):
             self.upload_eggnog_match(genome, eggnog_match)
         logger.info('Loaded EggNog for {}'.format(genome.accession))
 
-    def get_eggnog_entry(self, eggnog_organism, eggnog_host,
+    @staticmethod
+    def get_eggnog_entry(eggnog_organism, eggnog_host,
                          eggnog_description):
         try:
             eggnog = emg_models.EggNogEntry.objects.get(

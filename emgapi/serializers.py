@@ -1322,10 +1322,11 @@ class LDAnalysisSerializer(drf_serializers.ModelSerializer):
 
 class CogCountSerializer(ExplicitFieldsModelSerializer):
     name = serializers.CharField(source='cog_name')
+    description = serializers.CharField(source='cog_desc')
 
     class Meta:
         model = emg_models.GenomeCogCounts
-        fields = ('name', 'count')
+        fields = ('name', 'description', 'count')
 
 
 class IprMatchSerializer(ExplicitFieldsModelSerializer):

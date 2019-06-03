@@ -37,7 +37,6 @@ logger = logging.getLogger(__name__)
 
 class BiomeStudyRelationshipViewSet(emg_mixins.ListModelMixin,
                                     emg_viewsets.BaseStudyGenericViewSet):
-
     lookup_field = 'lineage'
 
     def get_queryset(self):
@@ -46,9 +45,9 @@ class BiomeStudyRelationshipViewSet(emg_mixins.ListModelMixin,
         queryset = emg_models.Study.objects \
             .available(self.request) \
             .filter(
-                samples__biome__lft__gte=obj.lft,
-                samples__biome__rgt__lte=obj.rgt,
-                samples__biome__depth__gte=obj.depth)
+            samples__biome__lft__gte=obj.lft,
+            samples__biome__rgt__lte=obj.rgt,
+            samples__biome__depth__gte=obj.depth)
         if 'samples' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Sample.objects \
                 .available(self.request, prefetch=True)
@@ -104,7 +103,6 @@ class PublicationStudyRelationshipViewSet(emg_mixins.ListModelMixin,
 
 class StudyGeoCoordinateRelationshipViewSet(mixins.ListModelMixin,
                                             viewsets.GenericViewSet):
-
     serializer_class = emg_serializers.SampleGeoCoordinateSerializer
 
     filter_backends = (
@@ -130,7 +128,7 @@ class StudyGeoCoordinateRelationshipViewSet(mixins.ListModelMixin,
             .filter(studies=study.study_id) \
             .values('lon_lat_pk', 'longitude', 'latitude') \
             .annotate(
-                samples_count=Count('lon_lat_pk'))
+            samples_count=Count('lon_lat_pk'))
         return queryset
 
     def list(self, request, *args, **kwargs):
@@ -147,7 +145,6 @@ class StudyGeoCoordinateRelationshipViewSet(mixins.ListModelMixin,
 
 class StudyStudyRelationshipViewSet(emg_mixins.ListModelMixin,
                                     emg_viewsets.BaseStudyGenericViewSet):
-
     lookup_field = 'accession'
 
     def get_queryset(self):
@@ -161,9 +158,9 @@ class StudyStudyRelationshipViewSet(emg_mixins.ListModelMixin,
             .values("sample_id")
         studies = emg_models.StudySample.objects \
             .filter(
-                Q(sample_id__in=samples),
-                ~Q(study_id=study.study_id)
-            ).values("study_id")
+            Q(sample_id__in=samples),
+            ~Q(study_id=study.study_id)
+        ).values("study_id")
         queryset = emg_models.Study.objects.filter(study_id__in=studies) \
             .available(self.request).distinct()
         return queryset
@@ -183,7 +180,6 @@ class StudyStudyRelationshipViewSet(emg_mixins.ListModelMixin,
 
 class StudySampleRelationshipViewSet(emg_mixins.ListModelMixin,
                                      emg_viewsets.BaseSampleGenericViewSet):
-
     lookup_field = 'accession'
 
     def get_queryset(self):
@@ -269,7 +265,6 @@ class StudyPublicationRelationshipViewSet(emg_mixins.ListModelMixin,
 class StudiesDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
                              mixins.RetrieveModelMixin,
                              viewsets.GenericViewSet):
-
     lookup_field = 'alias'
     lookup_value_regex = '[^/]+'
     lookup_fields = ('accession', 'release_version', 'alias')
@@ -277,9 +272,9 @@ class StudiesDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
     def get_queryset(self):
         return emg_models.StudyDownload.objects.available(self.request) \
             .filter(
-                *emg_utils.related_study_accession_query(
-                    self.kwargs['accession'])
-            )
+            *emg_utils.related_study_accession_query(
+                self.kwargs['accession'])
+        )
 
     def get_object(self):
         return get_object_or_404(
@@ -321,7 +316,6 @@ class StudiesDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
 
 class StudyAnalysisResultViewSet(emg_mixins.ListModelMixin,
                                  viewsets.GenericViewSet):
-
     serializer_class = emg_serializers.AnalysisSerializer
 
     filter_class = emg_filters.AnalysisJobFilter
@@ -348,9 +342,9 @@ class StudyAnalysisResultViewSet(emg_mixins.ListModelMixin,
         queryset = emg_models.AnalysisJob.objects \
             .available(self.request) \
             .filter(
-                *emg_utils.related_study_accession_query(
-                    self.kwargs['accession'])
-            )
+            *emg_utils.related_study_accession_query(
+                self.kwargs['accession'])
+        )
         return queryset
 
     def list(self, request, *args, **kwargs):
@@ -366,7 +360,6 @@ class StudyAnalysisResultViewSet(emg_mixins.ListModelMixin,
 
 class RunAnalysisViewSet(emg_mixins.ListModelMixin,
                          viewsets.GenericViewSet):
-
     serializer_class = emg_serializers.AnalysisSerializer
 
     filter_class = emg_filters.AnalysisJobFilter
@@ -381,7 +374,7 @@ class RunAnalysisViewSet(emg_mixins.ListModelMixin,
         # 'accession',
     )
 
-    ordering = ('-pipeline', )
+    ordering = ('-pipeline',)
 
     lookup_field = 'accession'
     lookup_value_regex = '[^/]+'
@@ -449,7 +442,7 @@ class PipelineSampleRelationshipViewSet(emg_mixins.ListModelMixin,
 
 
 class PipelineAnalysisRelationshipViewSet(emg_mixins.ListModelMixin,
-                                      emg_viewsets.BaseAnalysisGenericViewSet):  # noqa
+                                          emg_viewsets.BaseAnalysisGenericViewSet):  # noqa
 
     lookup_field = 'release_version'
 
@@ -477,7 +470,6 @@ class PipelineAnalysisRelationshipViewSet(emg_mixins.ListModelMixin,
 class ExperimentTypeAnalysisRelationshipViewSet(  # noqa
     emg_mixins.ListModelMixin,
     emg_viewsets.BaseAnalysisGenericViewSet):
-
     lookup_field = 'experiment_type'
 
     def get_queryset(self):
@@ -538,7 +530,7 @@ class ExperimentTypeAnalysisRelationshipViewSet(  # noqa
 
 
 class ExperimentTypeSampleRelationshipViewSet(emg_mixins.ListModelMixin,
-                                          emg_viewsets.BaseSampleGenericViewSet):  # noqa
+                                              emg_viewsets.BaseSampleGenericViewSet):  # noqa
 
     lookup_field = 'experiment_type'
 
@@ -580,7 +572,6 @@ class ExperimentTypeSampleRelationshipViewSet(emg_mixins.ListModelMixin,
 
 class BiomeSampleRelationshipViewSet(emg_mixins.ListModelMixin,
                                      emg_viewsets.BaseSampleGenericViewSet):
-
     lookup_field = 'lineage'
 
     def get_queryset(self):
@@ -589,8 +580,8 @@ class BiomeSampleRelationshipViewSet(emg_mixins.ListModelMixin,
         queryset = emg_models.Sample.objects \
             .available(self.request, prefetch=True) \
             .filter(
-                biome__lft__gte=obj.lft, biome__rgt__lte=obj.rgt,
-                biome__depth__gte=obj.depth)
+            biome__lft__gte=obj.lft, biome__rgt__lte=obj.rgt,
+            biome__depth__gte=obj.depth)
         if 'runs' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Run.objects.available(self.request)
             queryset = queryset.prefetch_related(
@@ -621,7 +612,7 @@ class BiomeSampleRelationshipViewSet(emg_mixins.ListModelMixin,
 
 
 class PublicationSampleRelationshipViewSet(emg_mixins.ListModelMixin,
-                                        emg_viewsets.BaseSampleGenericViewSet):  # noqa
+                                           emg_viewsets.BaseSampleGenericViewSet):  # noqa
 
     lookup_field = 'pubmed_id'
 
@@ -683,7 +674,6 @@ class ExperimentTypeRunRelationshipViewSet(emg_mixins.ListModelMixin,
 
 class SampleRunRelationshipViewSet(emg_mixins.ListModelMixin,
                                    emg_viewsets.BaseRunGenericViewSet):
-
     lookup_field = 'accession'
 
     def get_queryset(self):
@@ -714,7 +704,6 @@ class SampleRunRelationshipViewSet(emg_mixins.ListModelMixin,
 
 class SampleStudiesRelationshipViewSet(emg_mixins.ListModelMixin,
                                        emg_viewsets.BaseStudyGenericViewSet):
-
     lookup_field = 'accession'
 
     def get_queryset(self):
@@ -743,7 +732,6 @@ class SampleStudiesRelationshipViewSet(emg_mixins.ListModelMixin,
 
 class BiomeTreeViewSet(mixins.ListModelMixin,
                        viewsets.GenericViewSet):
-
     serializer_class = emg_serializers.BiomeSerializer
     queryset = emg_models.Biome.objects.filter(depth=1)
 
@@ -839,7 +827,6 @@ class PipelinePipelineToolRelationshipViewSet(mixins.ListModelMixin,
 
 class SampleMetadataRelationshipViewSet(mixins.ListModelMixin,
                                         viewsets.GenericViewSet):
-
     serializer_class = emg_serializers.SampleAnnSerializer
 
     lookup_field = 'accession'
@@ -850,9 +837,9 @@ class SampleMetadataRelationshipViewSet(mixins.ListModelMixin,
         return emg_models.SampleAnn.objects \
             .filter(sample__accession=accession) \
             .prefetch_related(Prefetch(
-                'sample',
-                queryset=emg_models.Sample.objects.available(self.request)
-            )) \
+            'sample',
+            queryset=emg_models.Sample.objects.available(self.request)
+        )) \
             .order_by('var')
 
     def list(self, request, *args, **kwargs):
@@ -868,7 +855,6 @@ class SampleMetadataRelationshipViewSet(mixins.ListModelMixin,
 
 class RunAssemblyViewSet(emg_mixins.ListModelMixin,
                          viewsets.GenericViewSet):
-
     serializer_class = emg_serializers.AssemblySerializer
 
     filter_class = emg_filters.AssemblyFilter
@@ -882,7 +868,7 @@ class RunAssemblyViewSet(emg_mixins.ListModelMixin,
         'accession',
     )
 
-    ordering = ('-accession', )
+    ordering = ('-accession',)
 
     lookup_field = 'accession'
     lookup_value_regex = '[^/]+'
@@ -912,7 +898,6 @@ class RunAssemblyViewSet(emg_mixins.ListModelMixin,
 
 class AssemblyAnalysisViewSet(emg_mixins.ListModelMixin,
                               viewsets.GenericViewSet):
-
     serializer_class = emg_serializers.AnalysisSerializer
 
     filter_class = emg_filters.AnalysisJobFilter
@@ -927,7 +912,7 @@ class AssemblyAnalysisViewSet(emg_mixins.ListModelMixin,
         # 'accession',
     )
 
-    ordering = ('-pipeline', )
+    ordering = ('-pipeline',)
 
     lookup_field = 'accession'
     lookup_value_regex = '[^/]+'
@@ -968,7 +953,8 @@ class GenomeCogsRelationshipsViewSet(emg_mixins.ListModelMixin,
 
     ordering_fields = (
         'count',
-        'name'
+        'name',
+        'description'
     )
 
     ordering = ['-count']
@@ -988,7 +974,8 @@ class GenomeCogsRelationshipsViewSet(emg_mixins.ListModelMixin,
         queryset = emg_models.GenomeCogCounts.objects \
             .available(self.request) \
             .filter(genome=genome) \
-            .annotate(cog_name=F('cog__name'))
+            .annotate(cog_name=F('cog__name'),
+                      cog_desc=F('cog__description'))
         return queryset
 
     def list(self, request, *args, **kwargs):

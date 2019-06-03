@@ -1268,7 +1268,7 @@ class CogCat(models.Model):
         db_table = 'COG'
 
     name = models.CharField(db_column='NAME', max_length=80, unique=True)
-
+    description = models.CharField(db_column='DESCRIPTION', max_length=80)
     objects = CogCatManager()
 
 
