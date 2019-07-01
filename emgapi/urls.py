@@ -314,3 +314,25 @@ router.register(
     views.GenomeDownloadViewSet,
     base_name='genome-download'
 )
+
+router.register(
+    r'genomes/(?P<accession>[^/]+)/releases',
+    views_relations.GenomeReleasesViewSet,
+    base_name='genome-releases'
+)
+router.register(
+    r'release',
+    views.ReleaseViewSet,
+    base_name='release'
+)
+router.register(
+    r'release/(?P<release_version>[^/]+)/genomes',
+    views_relations.ReleaseGenomesViewSet,
+    base_name='release-genomes'
+)
+
+router.register(
+    r'release/(?P<release_version>[^/]+)/downloads',
+    views.ReleaseDownloadViewSet,
+    base_name='release-download'
+)

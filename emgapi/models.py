@@ -30,7 +30,7 @@ from __future__ import unicode_literals
 from enum import Enum
 
 from django.db import models
-from django.db.models import Count
+from django.db.models import Count, F
 from django.db.models import CharField, Value
 from django.db.models.functions import Concat, Cast
 from django.db.models import Q
@@ -1314,8 +1314,54 @@ class Genome(models.Model):
     result_directory = models.CharField(
         db_column='RESULT_DIRECTORY', max_length=100, blank=True, null=True)
 
+    releases = models.ManyToManyField(
+        'Release', through='ReleaseGenomes', related_name='releases')
+
     def __str__(self):
         return self.accession
+
+
+class ReleaseQuerySet(BaseQuerySet):
+    pass
+
+
+class ReleaseManager(models.Manager):
+    def get_queryset(self):
+        return ReleaseQuerySet(self.model, using=self._db).annotate(
+            genome_count=Count('genomes'))
+
+    def available(self, request):
+        return self.get_queryset().available(request)
+
+
+class Release(models.Model):
+    class Meta:
+        db_table = 'RELEASE'
+
+    objects = ReleaseManager()
+
+    release_version = models.CharField(
+        db_column='RELEASE_VERSION', max_length=20)
+    last_update = models.DateTimeField(
+        db_column='LAST_UPDATE', auto_now=True)
+    first_created = models.DateTimeField(
+        db_column='FIRST_CREATED', auto_now_add=True)
+
+    genomes = models.ManyToManyField(
+        Genome, through='ReleaseGenomes', related_name='genomes')
+    result_directory = models.CharField(
+        db_column='RESULT_DIRECTORY', max_length=100)
+
+
+class ReleaseGenomes(models.Model):
+    class Meta:
+        db_table = 'RELEASE_GENOMES'
+        unique_together = ('release', 'genome')
+
+    release = models.ForeignKey(Release, db_column='RELEASE_ID',
+                                on_delete=models.CASCADE)
+    genome = models.ForeignKey(Genome, db_column='GENOME_ID',
+                               on_delete=models.CASCADE)
 
 
 class CogCountQuerySet(BaseQuerySet):
@@ -1475,8 +1521,6 @@ class GenomeDownload(BaseDownload):
     genome = models.ForeignKey(
         'Genome', db_column='GENOME_ID',
         on_delete=models.CASCADE)
-    release_version = models.CharField(
-        db_column='VERSION', max_length=30, blank=True, null=True)
 
     @property
     def accession(self):
@@ -1486,5 +1530,40 @@ class GenomeDownload(BaseDownload):
 
     class Meta:
         db_table = 'GENOME_DOWNLOAD'
-        unique_together = (('realname', 'alias', 'release_version'),)
-        ordering = ('release_version', 'group_type', 'alias',)
+        unique_together = (('realname', 'alias'),)
+        ordering = ('group_type', 'alias')
+
+
+class ReleaseDownloadQuerySet(BaseQuerySet):
+    pass
+
+
+class ReleaseDownloadManager(models.Manager):
+    def get_queryset(self):
+        return ReleaseDownloadQuerySet(self.model, using=self._db) \
+            .select_related(
+            'group_type',
+            'subdir',
+            'file_format',
+            'description'
+        )
+
+    def available(self, request):
+        return self.get_queryset().available(request)
+
+
+class ReleaseDownload(BaseDownload):
+    release = models.ForeignKey('Release',
+                                db_column='RELEASE_ID',
+                                on_delete=models.CASCADE)
+
+    @property
+    def accession(self):
+        return self.release.release_version
+
+    objects = ReleaseDownloadManager()
+
+    class Meta:
+        db_table = 'RELEASE_DOWNLOAD'
+        unique_together = (('realname', 'alias'),)
+        ordering = ('group_type', 'alias')

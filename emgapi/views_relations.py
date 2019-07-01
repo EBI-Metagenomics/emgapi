@@ -1123,3 +1123,44 @@ class GenomeEggNogRelationshipsViewSet(emg_mixins.ListModelMixin,
         """
         return super(GenomeEggNogRelationshipsViewSet, self) \
             .list(request, *args, **kwargs)
+
+
+class ReleaseGenomesViewSet(emg_mixins.ListModelMixin,
+                            emg_viewsets.BaseGenomeGenericViewSet):  # noqa
+
+    lookup_field = 'release_version'
+
+    def get_queryset(self):
+        genome_version = self.kwargs[self.lookup_field]
+        if genome_version == 'latest':
+            genome_release = emg_models.Release.objects\
+                .order_by('release_version').last()
+        else:
+            genome_release = get_object_or_404(
+                emg_models.Release,
+                release_version=self.kwargs[self.lookup_field])
+
+        queryset = emg_models.Genome.objects \
+            .filter(releasegenomes__release=genome_release)
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        return super(ReleaseGenomesViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class GenomeReleasesViewSet(emg_mixins.ListModelMixin,
+                            viewsets.GenericViewSet):
+    lookup_field = 'accession'
+
+    serializer_class = emg_serializers.ReleaseSerializer
+
+    def get_queryset(self):
+        genome = get_object_or_404(
+            emg_models.Genome,
+            accession=self.kwargs[self.lookup_field])
+        return genome.releases.all()
+
+    def list(self, request, *args, **kwargs):
+        return super(GenomeReleasesViewSet, self) \
+            .list(request, *args, **kwargs)

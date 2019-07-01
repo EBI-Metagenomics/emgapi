@@ -1109,7 +1109,7 @@ class GenomeViewSet(mixins.RetrieveModelMixin,
         'contamination',
         'num_genomes',
         'num_proteins',
-        'last_update',
+        'last_update'
     )
 
     ordering = ('-accession',)
@@ -1167,6 +1167,88 @@ class GenomeDownloadViewSet(emg_mixins.ListModelMixin,
 
     def retrieve(self, request, accession, alias,
                  *args, **kwargs):
+        obj = self.get_object()
+        response = HttpResponse()
+        response['Content-Type'] = 'application/octet-stream'
+        response["Content-Disposition"] = \
+            "attachment; filename={0}".format(alias)
+        if obj.subdir is not None:
+            response['X-Accel-Redirect'] = \
+                "/results{0}/{1}/{2}".format(
+                    obj.genome.result_directory, obj.subdir, obj.realname
+                )
+        else:
+            response['X-Accel-Redirect'] = \
+                "/results{0}/{1}".format(
+                    obj.genome.result_directory, obj.realname
+                )
+        print(response.__dict__)
+        return response
+
+
+class ReleaseViewSet(mixins.RetrieveModelMixin,
+                     emg_mixins.ListModelMixin,
+                     viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.ReleaseSerializer
+    queryset = emg_models.Release.objects.all()
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'release_version',
+        'genomes_count'
+    )
+
+    ordering = ('release_version',)
+
+    lookup_field = 'release_version'
+    lookup_value_regex = '[0-9.]+'
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return emg_serializers.ReleaseSerializer
+        return super(ReleaseViewSet, self).get_serializer_class()
+
+    def retrieve(self, request, *args, **kwargs):
+        return super(ReleaseViewSet, self).retrieve(request, *args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        return super(ReleaseViewSet, self).list(request, *args, **kwargs)
+
+
+class ReleaseDownloadViewSet(emg_mixins.ListModelMixin,
+                            viewsets.GenericViewSet):
+    serializer_class = emg_serializers.ReleaseDownloadSerializer
+
+    lookup_field = 'alias'
+    lookup_value_regex = '[^/]+'
+
+    def get_queryset(self):
+        try:
+            release_version = self.kwargs['release_version']
+        except ValueError:
+            raise Http404()
+        return emg_models.ReleaseDownload.objects.available(self.request) \
+            .filter(release__release_version=release_version)
+
+    def get_object(self):
+        return get_object_or_404(
+            self.get_queryset(), Q(alias=self.kwargs['alias'])
+        )
+
+    def get_serializer_class(self):
+        return super(ReleaseDownloadViewSet, self) \
+            .get_serializer_class()
+
+    def list(self, request, *args, **kwargs):
+        return super(ReleaseDownloadViewSet, self) \
+            .list(request, *args, **kwargs)
+
+    def retrieve(self, request, release_version, alias,
+                 *args, **kwargs):
         """
         Retrieves static summary file
         Example:
@@ -1183,11 +1265,12 @@ class GenomeDownloadViewSet(emg_mixins.ListModelMixin,
         if obj.subdir is not None:
             response['X-Accel-Redirect'] = \
                 "/results{0}/{1}/{2}".format(
-                    obj.genome.result_directory, obj.subdir, obj.realname
+                    obj.release.result_directory, obj.subdir, obj.realname
                 )
         else:
             response['X-Accel-Redirect'] = \
                 "/results{0}/{1}".format(
-                    obj.genome.result_directory, obj.realname
+                    obj.release.result_directory, obj.realname
                 )
+        print(alias)
         return response
