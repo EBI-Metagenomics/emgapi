@@ -37,6 +37,8 @@ class Command(BaseCommand):
 
         raw_metadata = self.get_raw_metadata()
 
+        self.sanity_check_dir(raw_metadata)
+
         study_accession = raw_metadata['secondary_study_accession']
 
         study = self.get_or_create_study(study_accession)
@@ -64,6 +66,9 @@ class Command(BaseCommand):
         # TODO if assembly is linked to run create RunAssembly object
 
         self.load_api_files(raw_accession, self.rootpath)
+
+    def sanity_check_dir(self):
+        pass
 
     def get_accession(self):
         pass
