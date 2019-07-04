@@ -169,6 +169,12 @@ router.register(
 )
 
 router.register(
+    r'biomes/(?P<lineage>[^/]+)/genomes',
+    views_relations.BiomeGenomeRelationshipViewSet,
+    base_name='biomes-genomes'
+)
+
+router.register(
     r'publications/(?P<pubmed_id>[0-9\.]+)/studies',
     views_relations.PublicationStudyRelationshipViewSet,
     base_name='publications-studies'
@@ -286,27 +292,27 @@ router.register(
 )
 
 router.register(
-    r'genomes/(?P<accession>[^/]+)/eggnog',
-    views_relations.GenomeEggNogRelationshipsViewSet,
-    base_name='genome-eggnog'
-)
-
-router.register(
     r'genomes/(?P<accession>[^/]+)/cogs',
     views_relations.GenomeCogsRelationshipsViewSet,
     base_name='genome-cog'
 )
 
 router.register(
-    r'genomes/(?P<accession>[^/]+)/ipr',
-    views_relations.GenomeIprRelationshipsViewSet,
-    base_name='genome-ipr'
+    r'genomes/(?P<accession>[^/]+)/kegg-class',
+    views_relations.GenomeKeggClassRelationshipsViewSet,
+    base_name='genome-kegg-class'
 )
 
 router.register(
-    r'genomes/(?P<accession>[^/]+)/kegg',
-    views_relations.GenomeKeggRelationshipsViewSet,
-    base_name='genome-kegg'
+    r'genomes/(?P<accession>[^/]+)/kegg-module',
+    views_relations.GenomeKeggModuleRelationshipsViewSet,
+    base_name='genome-kegg-module'
+)
+
+router.register(
+    r'genomes/(?P<accession>[^/]+)/kegg-class',
+    views_relations.GenomeKeggClassRelationshipsViewSet,
+    base_name='genome-kegg-class'
 )
 
 router.register(

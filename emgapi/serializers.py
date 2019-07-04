@@ -133,6 +133,17 @@ class BiomeSerializer(ExplicitFieldsModelSerializer,
     # counters
     samples_count = serializers.IntegerField()
 
+    genomes = relations.SerializerMethodResourceRelatedField(
+        source='get_genomes',
+        model=emg_models.Genome,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:biomes-genomes-list',
+        related_link_url_kwarg='lineage',
+        related_link_lookup_field='lineage',
+    )
+    def get_genomes(self, obj):
+        return None
     class Meta:
         model = emg_models.Biome
         exclude = (
@@ -1326,34 +1337,25 @@ class CogCountSerializer(ExplicitFieldsModelSerializer):
 
     class Meta:
         model = emg_models.GenomeCogCounts
-        fields = ('name', 'description', 'count')
+        fields = ('name', 'description', 'genome_count', 'pangenome_count')
 
 
-class IprMatchSerializer(ExplicitFieldsModelSerializer):
-    ipr_accession = serializers.CharField()
-
-    class Meta:
-        model = emg_models.GenomeIprCount
-        fields = ('ipr_accession', 'count')
-
-
-class KeggMatchSerializer(ExplicitFieldsModelSerializer):
-    brite_id = serializers.CharField()
-    brite_name = serializers.CharField()
+class KeggClassMatchSerializer(ExplicitFieldsModelSerializer):
+    class_id = serializers.CharField()
+    name = serializers.CharField()
 
     class Meta:
-        model = emg_models.GenomeKeggCounts
-        fields = ('brite_id', 'brite_name', 'count')
+        model = emg_models.GenomeKeggClassCounts
+        fields = ('class_id', 'name', 'count')
 
 
-class EggNogMatchSerializer(ExplicitFieldsModelSerializer):
-    host = serializers.CharField()
-    organism = serializers.CharField()
+class KeggModuleMatchSerializer(ExplicitFieldsModelSerializer):
+    name = serializers.CharField()
     description = serializers.CharField()
 
     class Meta:
-        model = emg_models.GenomeEggNogCounts
-        fields = ('host', 'organism', 'description', 'count',)
+        model = emg_models.GenomeKeggModuleCounts
+        fields = ('name', 'description', 'count')
 
 
 class GenomeSerializer(ExplicitFieldsModelSerializer):
@@ -1378,35 +1380,35 @@ class GenomeSerializer(ExplicitFieldsModelSerializer):
     def get_downloads(self, obj):
         return None
 
-    kegg_matches = relations.SerializerMethodResourceRelatedField(
-        source='get_kegg_matches',
-        model=emg_models.KeggEntry,
+    kegg_class_matches = relations.SerializerMethodResourceRelatedField(
+        source='get_kegg_class_matches',
+        model=emg_models.KeggClass,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi_v1:genome-kegg-list',
+        related_link_view_name='emgapi_v1:genome-kegg-class-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession',
     )
 
-    def get_kegg_matches(self, obj):
+    def get_kegg_class_matches(self, obj):
         return None
 
-    eggnog_matches = relations.SerializerMethodResourceRelatedField(
-        source='get_eggnog_matches',
-        model=emg_models.GenomeEggNogCounts,
+    kegg_modules_matches = relations.SerializerMethodResourceRelatedField(
+        source='get_kegg_module_matches',
+        model=emg_models.KeggModule,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi_v1:genome-eggnog-list',
+        related_link_view_name='emgapi_v1:genome-kegg-module-list',
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession',
     )
 
-    def get_eggnog_matches(self, obj):
+    def get_kegg_module_matches(self, obj):
         return None
 
     cog_matches = relations.SerializerMethodResourceRelatedField(
         source='get_cog_matches',
-        model=emg_models.GenomeCogCounts,
+        model=emg_models.CogCat,
         many=True,
         read_only=True,
         related_link_view_name='emgapi_v1:genome-cog-list',
@@ -1415,19 +1417,6 @@ class GenomeSerializer(ExplicitFieldsModelSerializer):
     )
 
     def get_cog_matches(self, obj):
-        return None
-
-    ipr_matches = relations.SerializerMethodResourceRelatedField(
-        source='get_ipr_matches',
-        model=emg_models.GenomeIprCount,
-        many=True,
-        read_only=True,
-        related_link_view_name='emgapi_v1:genome-ipr-list',
-        related_link_url_kwarg='accession',
-        related_link_lookup_field='accession',
-    )
-
-    def get_ipr_matches(self, obj):
         return None
 
     # relationships
@@ -1443,9 +1432,24 @@ class GenomeSerializer(ExplicitFieldsModelSerializer):
     def get_releases(self, obj):
         return obj.releases.all()
 
+    biome = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emgapi_v1:biomes-detail',
+        lookup_field='lineage',
+    )
+
+    geographic_range = serializers.ListField()
+
+    geographic_origin = serializers.CharField()
+
     class Meta:
         model = emg_models.Genome
-        exclude = ('result_directory',)
+        exclude = ('result_directory',
+                   'kegg_classes',
+                   'kegg_modules',
+                   'genome_set',
+                   'pangenome_geographic_range',
+                   'geo_origin')
 
 
 class GenomeDownloadSerializer(BaseDownloadSerializer):

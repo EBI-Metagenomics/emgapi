@@ -4,7 +4,7 @@ from django.core.management import BaseCommand
 from django.db import IntegrityError
 
 from emgapi import models as emg_models
-from emgapianns.management.lib.genome_util import read_csv_w_headers
+from emgapianns.management.lib.genome_util import read_tsv_w_headers
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ class Command(BaseCommand):
             self.save_cog_entry(cog_letter, cog_desc)
 
     def read_cog_file(self, cog_file):
-        return read_csv_w_headers(cog_file)
+        return read_tsv_w_headers(cog_file)
 
     def save_cog_entry(self, cog_letter, cog_desc):
         try:
