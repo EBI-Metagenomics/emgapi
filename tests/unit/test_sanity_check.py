@@ -1,7 +1,4 @@
 import pytest
-import django
-
-django.setup()
 from emgapianns.management.lib import sanity_check  # noqa: E402
 
 
