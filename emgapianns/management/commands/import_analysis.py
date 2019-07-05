@@ -53,7 +53,7 @@ class Importer:
 
         existing_result_dir = [d.replace(self.prod_dir, '') for d in glob.glob(prod_study_dir)]
         if existing_result_dir:
-            logging.info(f'Found prod dirs: {existing_result_dir}')
+            logging.info('Found prod dirs: {}'.format(existing_result_dir))
 
         if len(existing_result_dir) == 0:
             logging.info('No existing result dirs found')
