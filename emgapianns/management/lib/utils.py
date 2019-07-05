@@ -17,6 +17,9 @@ import glob
 import logging
 import os
 import re
+import sys
+
+from emgapianns.management.commands.import_analysis_model import Run, Assembly, ExperimentType
 
 
 def is_run_accession(accession):
@@ -52,3 +55,64 @@ def retrieve_existing_result_dir(rootpath, accession):
         dir = sorted(existing_result_dir, reverse=True)[0]
         dir = dir.strip('/')
         return dir
+
+
+def parse_run_metadata(raw_metadata):
+    """
+        Parses metadata attributes out of ENA's API response.
+    :param raw_metadata: dict
+    :return:
+    """
+    try:
+        study_accession = raw_metadata['secondary_study_accession']
+        sample_accession = raw_metadata['secondary_sample_accession']
+        run_accession = raw_metadata['run_accession']
+        library_strategy = raw_metadata['library_strategy']
+        # Convert string to Enum
+        experiment_type = ExperimentType[library_strategy]
+        return Run(study_accession, sample_accession, run_accession, experiment_type), experiment_type
+    except KeyError as err:
+        print("Could NOT retrieve all run metadata need from ENA's API: {0}".format(err))
+        raise
+    except:
+        print("Unexpected error:", sys.exc_info()[0])
+        raise
+
+
+def parse_assembly_metadata(raw_metadata):
+    """
+        Parses metadata attributes out of ENA's API response.
+    :param raw_metadata: dict
+    :return:
+    """
+    try:
+        study_accession = raw_metadata['secondary_study_accession']
+        sample_accession = raw_metadata['secondary_sample_accession']
+        run_accession = raw_metadata['analysis_alias']
+        analysis_accession = raw_metadata['analysis_accession']
+        return Assembly(study_accession, sample_accession, run_accession, analysis_accession), ExperimentType.ASSEMBLY
+    except KeyError as err:
+        print("Could NOT retrieve all run metadata need from ENA's API: {0}".format(err))
+        raise
+    except:
+        print("Unexpected error:", sys.exc_info()[0])
+        raise
+
+
+class AccessionNotRecognised(Exception):
+    """Raised when the input value is too large"""
+    pass
+
+
+def is_assembly(accession):
+    """
+        Returns True if assembly accession and FALSE if run accession.
+    :param accession:
+    :return:
+    """
+    if is_assembly_accession(accession):
+        return True
+    elif is_run_accession(accession):
+        return False
+    else:
+        raise AccessionNotRecognised
