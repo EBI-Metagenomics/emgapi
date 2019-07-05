@@ -1,7 +1,8 @@
 import pytest
 import django
+
 django.setup()
-from emgapianns.management.lib import sanity_check # noqa: E402
+from emgapianns.management.lib import sanity_check  # noqa: E402
 
 
 def write_file(path, content):
