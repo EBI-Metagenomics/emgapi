@@ -1,13 +1,18 @@
 import logging
 import os
-from glob import glob
+
 from django.core.management import BaseCommand
+from ena_portal_api import ena_handler
+
+from emgapianns.management.lib import utils
 
 logger = logging.getLogger(__name__)
 
 cog_cache = {}
 ipr_cache = {}
 kegg_cache = {}
+
+ena = ena_handler.EnaApiHandler()
 
 """
     Cl call:
@@ -27,51 +32,31 @@ class Importer:
         self.existence_check()
 
     def existence_check(self):
+        """
+            Check if result folder does exit on the production file system.
+        :return:
+        """
         if not os.path.exists(self.rootpath):
             raise FileNotFoundError('Results dir {} does not exist'.format(self.rootpath))
 
-    def sanity_check_dir(self):
+    def sanity_check_dir(self, library_strategy):
         """
             Step 1: Search run/assembly result folder
-            Step 2: Perform sanity check_all on result folder
+            Step 2: Perform sanity check on result folder
+        :type library_strategy: Possible values are AMPLICON, WGS, RNA-Seq, ASSEMBLY
         :return:
         """
         # Step 1
-        self.retrieve_existing_result_dir()
+        utils.retrieve_existing_result_dir(self.rootpath, self.accession)
 
         pass
-
-    def retrieve_existing_result_dir(self):
-        """
-            Search file system for existing result folder
-            TODO: Write unit test
-        :param accession:
-        :return:
-        """
-        dest_pattern = ['2*', '*', self.accession]
-        prod_study_dir = os.path.join(self.rootpath, *dest_pattern)
-
-        existing_result_dir = [d.replace(self.prod_dir, '') for d in glob.glob(prod_study_dir)]
-        if existing_result_dir:
-            logging.info('Found prod dirs: {}'.format(existing_result_dir))
-
-        if len(existing_result_dir) == 0:
-            logging.info('No existing result dirs found')
-            return None
-        else:
-            # Return latest dir (sorted by year/month descending)
-            dir = sorted(existing_result_dir, reverse=True)[0]
-            dir = dir.strip('/')
-            return dir
-
-    def get_accession(self):
-        pass
-        # TODO get accession from directory path
 
     def get_raw_metadata(self):
-        pass
-        # TODO get metadata of raw data
-        # TODO MAIN WORKFLOW
+        """
+            Retrieves metadata from the ENA for the given run or assembly accession.
+        :return:
+        """
+        return ena.get_run(run_accession=self.accession)
 
     def get_or_create_study(self, study_accession):
         pass
