@@ -1,11 +1,7 @@
 import logging
 import os
-import sys
-
+from glob import glob
 from django.core.management import BaseCommand
-
-from emgapi import models as emg_models
-import emgapianns.management.commands.utils as utils
 
 logger = logging.getLogger(__name__)
 
@@ -17,11 +13,9 @@ kegg_cache = {}
     Cl call:
         emgcli import_analysis <primary_accession> /home/maxim/
     Draft
-    
     Inputs:
         - Accessions: Study, Sample and (run or assembly)
         - Path to the result directory
-        
 """
 
 
@@ -39,7 +33,7 @@ class Importer:
     def sanity_check_dir(self):
         """
             Step 1: Search run/assembly result folder
-            Step 2: Perform sanity check on result folder
+            Step 2: Perform sanity check_all on result folder
         :return:
         """
         # Step 1
