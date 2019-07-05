@@ -16,21 +16,24 @@
 from enum import Enum
 
 
-class Run(object):
-
-    def __init__(self, study_accession, sample_accession, run_accession, experiment_type):
+class Analysis(object):
+    def __init__(self, study_accession, sample_accession, run_accession):
         self.study_accession = study_accession
         self.sample_accession = sample_accession
         self.run_accession = run_accession
+
+
+class Run(Analysis):
+
+    def __init__(self, study_accession, sample_accession, run_accession, experiment_type):
+        super().__init__(study_accession, sample_accession, run_accession)
         self.experiment_type = experiment_type
 
 
-class Assembly(object):
+class Assembly(Analysis):
 
     def __init__(self, study_accession, sample_accession, run_accession, analysis_accession):
-        self.study_accession = study_accession
-        self.sample_accession = sample_accession
-        self.run_accession = run_accession
+        super().__init__(study_accession, sample_accession, run_accession)
         self.analysis_accession = analysis_accession
 
 
