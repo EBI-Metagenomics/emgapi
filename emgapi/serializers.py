@@ -1346,7 +1346,7 @@ class KeggClassMatchSerializer(ExplicitFieldsModelSerializer):
 
     class Meta:
         model = emg_models.GenomeKeggClassCounts
-        fields = ('class_id', 'name', 'count')
+        fields = ('class_id', 'name', 'genome_count', 'pangenome_count')
 
 
 class KeggModuleMatchSerializer(ExplicitFieldsModelSerializer):
@@ -1355,7 +1355,7 @@ class KeggModuleMatchSerializer(ExplicitFieldsModelSerializer):
 
     class Meta:
         model = emg_models.GenomeKeggModuleCounts
-        fields = ('name', 'description', 'count')
+        fields = ('name', 'description', 'genome_count', 'pangenome_count')
 
 
 class GenomeSerializer(ExplicitFieldsModelSerializer):

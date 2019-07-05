@@ -1469,7 +1469,7 @@ class KeggModule(models.Model):
 
     name = models.CharField(db_column='MODULE_NAME', max_length=10,
                                    unique=True)
-    description = models.CharField(db_column='DESCRIPTION', max_length=80)
+    description = models.CharField(db_column='DESCRIPTION', max_length=200)
 
 
 class GenomeKeggModuleCounts(models.Model):

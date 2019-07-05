@@ -15,18 +15,19 @@ class Command(BaseCommand):
     kegg_cache = {}
 
     database = None
+
     def __init__(self):
         super().__init__()
 
     def add_arguments(self, parser):
-        parser.add_argument('kegg_ontology_file', action='store', type=str, )
+        parser.add_argument('kegg_class_ontology_file', action='store', type=str, )
         parser.add_argument('--database', action='store', type=str,
                             default='default')
 
     def handle(self, *args, **options):
         self.database = options['database']
         logger.info("CLI %r" % options)
-        entries = self.read_kegg_orthology(options['kegg_ontology_file'])
+        entries = self.read_kegg_orthology(options['kegg_class_ontology_file'])
 
         for kegg_id, kegg_data in entries.items():
             self.save_kegg_entry(kegg_id, kegg_data)
@@ -54,16 +55,9 @@ class Command(BaseCommand):
     def save_kegg_entry(self, kegg_id, data):
         name, parent_id = data
         parent = self.kegg_cache.get(parent_id)
-        try:
-            entry = emg_models.KeggEntry(brite_id=kegg_id,
-                                         brite_name=name,
-                                         parent=parent)
-            entry.save(using=self.database)
-        except IntegrityError:
-            entry = emg_models.KeggEntry.objects.using(self.database) \
-                .get(brite_id=kegg_id)
-            entry.brite_name = name
-            entry.parent = parent
-            entry.save(using=self.database)
-
+        defs = {
+            'name': name,
+            'parent': parent
+        }
+        entry, _ = emg_models.KeggClass.objects.using(self.database).update_or_create(class_id=kegg_id, defaults=defs)
         self.kegg_cache[kegg_id] = entry

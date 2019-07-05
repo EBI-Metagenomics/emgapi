@@ -1025,11 +1025,13 @@ class GenomeKeggClassRelationshipsViewSet(emg_mixins.ListModelMixin,
     )
 
     ordering_fields = (
-        'count',
-        'name'
+        'class_id',
+        'name',
+        'genome_count',
+        'pangenome_count'
     )
 
-    ordering = ['-count']
+    ordering = ['-genome_count']
 
     lookup_field = 'accession'
     lookup_value_regex = '[^/]+'
@@ -1074,11 +1076,13 @@ class GenomeKeggModuleRelationshipsViewSet(emg_mixins.ListModelMixin,
     )
 
     ordering_fields = (
-        'count',
-        'name'
+        'class_id',
+        'name',
+        'genome_count',
+        'pangenome_count'
     )
 
-    ordering = ['-count']
+    ordering = ['-genome_count']
 
     lookup_field = 'accession'
     lookup_value_regex = '[^/]+'

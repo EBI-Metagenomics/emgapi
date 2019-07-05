@@ -170,9 +170,17 @@ def read_json(fs):
         return json.load(f)
 
 
+def read_csv_w_headers(fs):
+    return read_sep_f(fs, ',')
+
+
 def read_tsv_w_headers(fs):
+    return read_sep_f(fs, '\t')
+
+
+def read_sep_f(fs, sep=None):
     with open(fs) as f:
-        reader = csv.reader(f, skipinitialspace=True, delimiter='\t')
+        reader = csv.reader(f, skipinitialspace=True, delimiter=sep)
         header = next(reader)
         data = [dict(zip(header, row)) for row in reader]
         return data
