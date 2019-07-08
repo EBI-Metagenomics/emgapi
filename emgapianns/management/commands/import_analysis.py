@@ -1,3 +1,18 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# Copyright 2019 EMBL - European Bioinformatics Institute
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import logging
 import os
 
@@ -136,15 +151,15 @@ class Command(BaseCommand):
         logger.info("Identified assembly accession: {0}".format(is_assembly))
 
         if is_assembly:
-            assembly, experiment_type = utils.parse_assembly_metadata(
+            analysis = utils.parse_assembly_metadata(
                 ena.get_assembly(assembly_name=importer.get_accession()))
             pass
         else:  # Run accession detected
-            run, experiment_type = utils.parse_run_metadata(ena.get_run(run_accession=importer.get_accession()))
+            analysis = utils.parse_run_metadata(ena.get_run(run_accession=importer.get_accession()))
 
-        importer.sanity_check_dir(experiment_type)
+        importer.sanity_check_dir(analysis.get_experiment_type())
 
-        study = importer.get_or_create_study(study_accession)
+        importer.get_or_create_study(analysis.get_study_accession())
         #
         # publication = self.get_or_create_publication()
         # self.link_study_publication(study, publication)
