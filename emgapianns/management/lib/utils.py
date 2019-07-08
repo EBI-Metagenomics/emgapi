@@ -68,9 +68,8 @@ def parse_run_metadata(raw_metadata):
         sample_accession = raw_metadata['secondary_sample_accession']
         run_accession = raw_metadata['run_accession']
         library_strategy = raw_metadata['library_strategy']
-        # Convert string to Enum
-        experiment_type = ExperimentType[library_strategy]
-        return Run(study_accession, sample_accession, run_accession, experiment_type), experiment_type
+        # Convert library_strategy string to ExperimentType Enum
+        return Run(study_accession, sample_accession, run_accession, ExperimentType[library_strategy])
     except KeyError as err:
         print("Could NOT retrieve all run metadata need from ENA's API: {0}".format(err))
         raise
@@ -90,7 +89,7 @@ def parse_assembly_metadata(raw_metadata):
         sample_accession = raw_metadata['secondary_sample_accession']
         run_accession = raw_metadata['analysis_alias']
         analysis_accession = raw_metadata['analysis_accession']
-        return Assembly(study_accession, sample_accession, run_accession, analysis_accession), ExperimentType.ASSEMBLY
+        return Assembly(study_accession, sample_accession, run_accession, analysis_accession)
     except KeyError as err:
         print("Could NOT retrieve all run metadata need from ENA's API: {0}".format(err))
         raise
