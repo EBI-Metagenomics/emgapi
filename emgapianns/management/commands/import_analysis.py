@@ -20,6 +20,7 @@ from django.core.management import BaseCommand
 from ena_portal_api import ena_handler
 
 from emgapianns.management.lib import utils
+from emgapianns.management.lib.sanity_check import run_sanity_check
 
 logger = logging.getLogger(__name__)
 
@@ -65,18 +66,6 @@ class Importer:
         if not os.path.exists(self._rootpath):
             raise FileNotFoundError('Results dir {} does not exist'.format(self._rootpath))
 
-    def sanity_check_dir(self, experiment_type):
-        """
-            Step 1: Search run/assembly result folder
-            Step 2: Perform sanity check on result folder
-        :type experiment_type: Possible values are AMPLICON, WGS, RNA-Seq, ASSEMBLY
-        :return:
-        """
-        # Step 1
-        utils.retrieve_existing_result_dir(self._rootpath, self.get_accession())
-
-        pass
-
     def get_raw_metadata(self):
         """
             Retrieves metadata from the ENA for the given run or assembly accession.
@@ -117,6 +106,19 @@ class Importer:
     def get_or_create_analysis(self, raw_metadata):
         pass
 
+    def retrieve_metadata(self):
+        is_assembly = utils.is_assembly(self._accession)
+        logger.info("Identified assembly accession: {0}".format(is_assembly))
+
+        if is_assembly:
+            analysis = utils.parse_assembly_metadata(ena.get_assembly(assembly_name=self._accession))
+        else:  # Run accession detected
+            analysis = utils.parse_run_metadata(ena.get_run(run_accession=self._accession))
+        return analysis
+
+    def retrieve_existing_result_dir(self):
+        return utils.retrieve_existing_result_dir(self._rootpath, self._accession)
+
 
 class Command(BaseCommand):
     help = 'Imports new objects into EMG.'
@@ -147,17 +149,11 @@ class Command(BaseCommand):
 
         logger.info("CLI %r" % options)
 
-        is_assembly = utils.is_assembly(importer.get_accession())
-        logger.info("Identified assembly accession: {0}".format(is_assembly))
+        analysis = importer.retrieve_metadata()
 
-        if is_assembly:
-            analysis = utils.parse_assembly_metadata(
-                ena.get_assembly(assembly_name=importer.get_accession()))
-            pass
-        else:  # Run accession detected
-            analysis = utils.parse_run_metadata(ena.get_run(run_accession=importer.get_accession()))
+        result_dir = importer.retrieve_existing_result_dir()
 
-        importer.sanity_check_dir(analysis.get_experiment_type())
+        run_sanity_check(result_dir, None, analysis.get_experiment_type())
 
         importer.get_or_create_study(analysis.get_study_accession())
         #
