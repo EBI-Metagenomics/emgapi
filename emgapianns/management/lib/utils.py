@@ -20,6 +20,7 @@ import re
 import sys
 
 from emgapianns.management.commands.import_analysis_model import Run, Assembly, ExperimentType
+from emgapianns.management.lib.uploader_exceptions import AccessionNotRecognised
 
 
 def is_run_accession(accession):
@@ -96,11 +97,6 @@ def parse_assembly_metadata(raw_metadata):
     except:
         print("Unexpected error:", sys.exc_info()[0])
         raise
-
-
-class AccessionNotRecognised(Exception):
-    """Raised when the input value is too large"""
-    pass
 
 
 def is_assembly(accession):
