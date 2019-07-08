@@ -110,6 +110,7 @@ class BasicSanityCheck:
 
     def __init__(self, d, prefix):
         self.dir = d
+        # TODO: The prefix could be retrieve from the absolute path of the result directory
         self.prefix = prefix
         if hasattr(self, 'extra_files'):
             self.result_files.union(getattr(self, 'extra_files'))
@@ -173,12 +174,20 @@ class WgsSanityCheck(BasicSanityCheck):
     extra_files = {}
 
 
-def run_sanity_check(d, job_prefix, lib_strategy):
+def run_sanity_check(result_dir, job_prefix, lib_strategy):
+    """
+
+    :param result_dir: Absolute path to the result directory
+    :param job_prefix: TODO: Obsolete? This could be pull out of the directory name, which can be retrieve from
+    :param lib_strategy: Possible values are AMPLICON, WGS, RNA-Seq, ASSEMBLY or OTHER.
+    :return:
+    """
     lib_cls = {
         'AMPLICON': AmpliconSanityCheck,
         'WGS': WgsSanityCheck,
         'ASSEMBLY': WgsSanityCheck,
+        'RNA-Seq': WgsSanityCheck,
         'OTHER': WgsSanityCheck
     }
     cls = lib_cls[lib_strategy]
-    return cls(d, job_prefix).check_all()
+    return cls(result_dir, job_prefix).check_all()
