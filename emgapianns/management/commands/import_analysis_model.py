@@ -17,23 +17,29 @@ from enum import Enum
 
 
 class Analysis(object):
-    def __init__(self, study_accession, sample_accession, run_accession):
-        self.study_accession = study_accession
-        self.sample_accession = sample_accession
-        self.run_accession = run_accession
+    def __init__(self, study_accession, sample_accession, run_accession, experiment_type):
+        self._study_accession = study_accession
+        self._sample_accession = sample_accession
+        self._run_accession = run_accession
+        self._experiment_type = experiment_type
+
+    def get_experiment_type(self):
+        return self._experiment_type
+
+    def get_study_accession(self):
+        return self._study_accession
 
 
 class Run(Analysis):
 
     def __init__(self, study_accession, sample_accession, run_accession, experiment_type):
-        super().__init__(study_accession, sample_accession, run_accession)
-        self.experiment_type = experiment_type
+        super().__init__(study_accession, sample_accession, run_accession, experiment_type)
 
 
 class Assembly(Analysis):
 
     def __init__(self, study_accession, sample_accession, run_accession, analysis_accession):
-        super().__init__(study_accession, sample_accession, run_accession)
+        super().__init__(study_accession, sample_accession, run_accession, ExperimentType.ASSEMBLY)
         self.analysis_accession = analysis_accession
 
 
