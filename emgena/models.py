@@ -113,3 +113,23 @@ class AssemblyMapping(models.Model):
 
     def __str__(self):
         return self.accession
+
+
+class RunStudy(models.Model):
+    study_id = models.CharField(db_column='STUDY_ID', primary_key=True, max_length=15)
+    study_status = models.CharField(db_column='STUDY_STATUS', max_length=50)
+    first_created = models.DateTimeField(db_column='FIRST_CREATED')
+    submission_account_id = models.CharField(db_column='SUBMISSION_ACCOUNT_ID', max_length=15)
+    pubmed_id = models.TextField(db_column='PUBMED_ID')
+
+    @property
+    def get_study_id(self):
+        return self.study_id
+
+    class Meta:
+        managed = False
+        db_table = 'V_MGP_RUN_STUDY'
+        app_label = 'emgena'
+
+    def __str__(self):
+        return self.study_id
