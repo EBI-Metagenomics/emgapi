@@ -7,6 +7,26 @@ import django.db.models.deletion
 import emgapi.models
 
 
+subdirs = (
+    'genome',
+    'pan-genome'
+)
+
+def add_subdirs(apps, schema_editor):
+    DownloadSubdir = apps.get_model("emgapi", "DownloadSubdir")
+    _subdirs = list()
+    for d in subdirs:
+        _subdirs.append(
+            DownloadSubdir(subdir=d)
+        )
+        DownloadSubdir.objects.bulk_create(_subdirs)
+
+
+def remove_subdirs(apps, schema_editor):
+    DownloadSubdir = apps.get_model("emgapi", "DownloadSubdir")
+    DownloadSubdir.objects.filter(subdir__in=subdirs).delete()
+
+
 group_types = (
     "Genome analysis",
     "Pan-Genome analysis",
@@ -120,7 +140,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Genome',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(db_column='GENOME_ID', auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('accession', models.CharField(db_column='GENOME_ACCESSION', max_length=40, unique=True)),
                 ('ena_genome_accession', models.CharField(db_column='ENA_GENOME_ACCESSION', max_length=20, null=True, unique=True)),
                 ('ena_sample_accession', models.CharField(db_column='ENA_SAMPLE_ACCESSION', max_length=20, null=True)),
@@ -400,4 +420,5 @@ class Migration(migrations.Migration):
                              reverse_code=remove_file_formats),
         migrations.RunPython(add_download_description,
                              reverse_code=remove_download_description),
+        migrations.RunPython(add_subdirs, reverse_code=remove_subdirs)
     ]

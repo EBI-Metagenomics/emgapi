@@ -196,6 +196,6 @@ def find_release_files(release_dir):
     return list(filter(os.path.isfile, listdir))
 
 
-def get_result_path(genome_dir):
-    sub_path = os.path.normpath(genome_dir).split(os.sep)[-1:]
+def get_result_path(result_dir):
+    sub_path = os.path.normpath(result_dir).split(os.sep)[-1:]
     return os.path.sep + os.path.join(*sub_path)

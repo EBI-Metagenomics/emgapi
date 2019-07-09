@@ -1294,6 +1294,8 @@ class Genome(models.Model):
     class Meta:
         db_table = 'GENOME'
 
+    genome_id = models.AutoField(
+        db_column='GENOME_ID', primary_key=True)
     accession = models.CharField(db_column='GENOME_ACCESSION', max_length=40, unique=True)
 
     ena_genome_accession = models.CharField(db_column='ENA_GENOME_ACCESSION', max_length=20, unique=True, null=True)

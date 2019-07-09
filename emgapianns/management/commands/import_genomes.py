@@ -39,8 +39,8 @@ class Command(BaseCommand):
         version = options['version'].strip()
         release_dir = os.path.join(self.rootpath, version)
 
-        self.release_obj = self.get_release(version, release_dir)
         self.database = options['database']
+        self.release_obj = self.get_release(version, release_dir)
 
         logger.info("CLI %r" % options)
 
@@ -59,9 +59,10 @@ class Command(BaseCommand):
 
     def get_release(self, version, result_dir):
         base_result_dir = get_result_path(result_dir)
-        return emg_models.Release.objects.using(
-            self.database).get_or_create(version=version,
-                                         result_directory=base_result_dir)[0]
+        return emg_models.Release.objects \
+            .using(self.database) \
+            .get_or_create(version=version,
+                           result_directory=base_result_dir)[0]
 
     def upload_dir(self, d):
         logger.info('Uploading dir: {}'.format(d))
@@ -79,13 +80,11 @@ class Command(BaseCommand):
         except IntegrityError:
             pass
 
-    @staticmethod
-    def get_gold_biome(lineage):
-        return emg_models.Biome.objects.get(lineage=lineage)
+    def get_gold_biome(self, lineage):
+        return emg_models.Biome.objects.using(self.database).get(lineage=lineage)
 
-    @staticmethod
-    def get_or_create_genome_set(setname):
-        return emg_models.GenomeSet.objects.get_or_create(name=setname)[0]
+    def get_or_create_genome_set(self, setname):
+        return emg_models.GenomeSet.objects.using(self.database).get_or_create(name=setname)[0]
 
     def prepare_genome_data(self, genome_dir):
         d = read_json(os.path.join(genome_dir, 'genome.json'))
@@ -102,7 +101,7 @@ class Command(BaseCommand):
 
     def get_geo_location(self, location):
         return emg_models.GeographicLocation \
-            .objects.get_or_create(name=location)[0]
+            .objects.using(self.database).get_or_create(name=location)[0]
 
     def attach_geo_location(self, genome, location):
         genome.pangenome_geographic_range.add(self.get_geo_location(location))
@@ -112,12 +111,12 @@ class Command(BaseCommand):
         geo_locations = data['geographic_range']
         del data['geographic_range']
 
-        data['result_directory'] = get_result_path(genome_dir)
+        data['result_directory'] = '/genomes/{}'.format(self.release_obj.version) + get_result_path(genome_dir)
 
-        g, created = emg_models.Genome.objects.update_or_create(
+        g, created = emg_models.Genome.objects.using(self.database).update_or_create(
             accession=data['accession'],
             defaults=data)
-        g.save()
+        g.save(using=self.database)
 
         [self.attach_geo_location(g, l) for l in geo_locations]
 
@@ -147,6 +146,7 @@ class Command(BaseCommand):
         defaults = {'genome_count': 0, 'pangenome_count': 0}
 
         count, created = emg_models.GenomeCogCounts.objects \
+            .using(self.database) \
             .get_or_create(genome=genome,
                            cog=cog,
                            defaults=defaults)
@@ -190,6 +190,7 @@ class Command(BaseCommand):
         defaults = {'genome_count': 0, 'pangenome_count': 0}
 
         count, created = emg_models.GenomeKeggClassCounts.objects \
+            .using(self.database) \
             .get_or_create(genome=genome,
                            kegg_class=kegg_class,
                            defaults=defaults)
@@ -231,6 +232,7 @@ class Command(BaseCommand):
         defaults = {'genome_count': 0, 'pangenome_count': 0}
 
         count, created = emg_models.GenomeKeggModuleCounts.objects \
+            .using(self.database) \
             .get_or_create(genome=genome,
                            kegg_module=kegg_module,
                            defaults=defaults)
@@ -244,56 +246,63 @@ class Command(BaseCommand):
 
     def upload_genome_files(self, genome):
         logger.info('Uploading genome files...')
-        self.upload_genome_file(genome, 'Genome CDS', 'fasta',
-                                genome.accession + '.fa', 'Genome analysis')
+        self.upload_genome_file(genome, 'Genome CDS', 'fasta', genome.accession + '.fa', 'Genome analysis', 'genome')
         self.upload_genome_file(genome, 'Genome Assembly', 'fasta',
-                                genome.accession + '.fna', 'Genome analysis')
+                                genome.accession + '.fna', 'Genome analysis', 'genome')
         self.upload_genome_file(genome, 'EggNOG annotation results', 'tsv',
-                                genome.accession + '_eggNOG.tsv', 'Genome analysis')
+                                genome.accession + '_eggNOG.tsv', 'Genome analysis', 'genome')
         self.upload_genome_file(genome, 'InterProScan annotation results', 'tsv',
-                                genome.accession + '_InterProScan.tsv', 'Genome analysis')
+                                genome.accession + '_InterProScan.tsv', 'Genome analysis', 'genome')
 
         self.upload_genome_file(genome, 'Accessory genes', 'fasta',
-                                'accessory_genes.faa', 'Pan-Genome analysis')
+                                'accessory_genes.faa', 'Pan-Genome analysis', 'pan-genome')
         self.upload_genome_file(genome, 'Core genes', 'fasta',
-                                'core_genes.faa', 'Pan-Genome analysis')
+                                'core_genes.faa', 'Pan-Genome analysis', 'pan-genome')
         self.upload_genome_file(genome, 'Core & Accessory genes', 'fasta',
-                                'pan-genome.faa', 'Pan-Genome analysis')
+                                'pan-genome.faa', 'Pan-Genome analysis', 'pan-genome')
         self.upload_genome_file(genome,
                                 'EggNOG annotation results', 'tsv',
-                                'pan-genome_eggNOG.tsv', 'Pan-Genome analysis')
+                                'pan-genome_eggNOG.tsv', 'Pan-Genome analysis', 'pan-genome')
         self.upload_genome_file(genome,
                                 'InterProScan annotation results',
-                                'tsv', 'pan-genome_InterProScan.tsv', 'Pan-Genome analysis')
+                                'tsv', 'pan-genome_InterProScan.tsv', 'Pan-Genome analysis', 'pan-genome')
         self.upload_genome_file(genome,
                                 'Gene Presence / Absence matrix',
-                                'tsv', 'genes_presence-absence.tsv', 'Pan-Genome analysis')
+                                'tsv', 'genes_presence-absence.tsv', 'Pan-Genome analysis', 'pan-genome')
 
-    def prepare_file_upload(self, obj, desc_label, file_format, filename, group_name):
+    def prepare_file_upload(self, obj, desc_label, file_format, filename, group_name, subdir_name=None):
         desc = emg_models.DownloadDescriptionLabel \
             .objects.using(self.database) \
             .filter(description_label=desc_label) \
             .first()
+        obj.description = desc
 
         fmt = emg_models.FileFormat \
             .objects.using(self.database) \
             .filter(format_extension=file_format, compression=False) \
             .first()
+        obj.file_format = fmt
 
         name = os.path.basename(filename)
+        obj.alias = name
+        obj.realname = name
+
         group = emg_models.DownloadGroupType \
             .objects.using(self.database) \
             .filter(group_type=group_name) \
             .first()
-        obj.description = desc
-        obj.file_format = fmt
-        obj.realname = name
         obj.group_type = group
-        obj.alias = name
 
-    def upload_genome_file(self, genome, desc_label, file_format, filename, group_type):
+        if subdir_name:
+            subdir = emg_models.DownloadSubdir \
+                .objects.using(self.database) \
+                .filter(subdir=subdir_name) \
+                .first()
+            obj.subdir = subdir
+
+    def upload_genome_file(self, genome, desc_label, file_format, filename, group_type, subdir):
         obj = emg_models.GenomeDownload(genome=genome)
-        self.prepare_file_upload(obj, desc_label, file_format, filename, group_type)
+        self.prepare_file_upload(obj, desc_label, file_format, filename, group_type, subdir)
         acc = genome.accession
         try:
             obj.save(using=self.database)
