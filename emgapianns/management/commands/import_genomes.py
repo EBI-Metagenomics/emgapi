@@ -246,7 +246,7 @@ class Command(BaseCommand):
 
     def upload_genome_files(self, genome):
         logger.info('Uploading genome files...')
-        self.upload_genome_file(genome, 'Genome CDS', 'fasta', genome.accession + '.fa', 'Genome analysis', 'genome')
+        self.upload_genome_file(genome, 'Genome CDS', 'fasta', genome.accession + '.faa', 'Genome analysis', 'genome')
         self.upload_genome_file(genome, 'Genome Assembly', 'fasta',
                                 genome.accession + '.fna', 'Genome analysis', 'genome')
         self.upload_genome_file(genome, 'EggNOG annotation results', 'tsv',
@@ -314,7 +314,7 @@ class Command(BaseCommand):
 
     def upload_release_files(self, release_dir):
         self.upload_release_file(self.release_obj,
-                                 'Phylogenetic tree',
+                                 'Phylogenetic tree of release genomes',
                                  'json',
                                  'phylo_tree.json')
 

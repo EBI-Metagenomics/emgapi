@@ -92,7 +92,7 @@ downloads = (
     ("Protein sequence FASTA file of the accessory genes", "Accessory genes",),
     ("Protein sequence FASTA of both core and accessory genes", "Core & Accessory genes",),
     ('Genome GFF', 'Genome GFF'),
-    ('Phylogenetic tree', 'Phylogenetic tree')
+    ('Phylogenetic tree of release genomes', 'Phylogenetic tree of release genomes')
 )
 
 

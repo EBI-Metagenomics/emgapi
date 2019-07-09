@@ -1252,7 +1252,7 @@ class ReleaseDownloadViewSet(emg_mixins.ListModelMixin,
         except ValueError:
             raise Http404()
         return emg_models.ReleaseDownload.objects.available(self.request) \
-            .filter(version=version)
+            .filter(release__version=version)
 
     def get_object(self):
         return get_object_or_404(

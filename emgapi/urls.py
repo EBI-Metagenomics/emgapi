@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import emgapi.views_relations
 from rest_framework import routers
 
 from . import views
@@ -339,7 +339,7 @@ router.register(
 
 router.register(
     r'release/(?P<version>[^/]+)/downloads',
-    views.ReleaseDownloadViewSet,
+    emgapi.views.ReleaseDownloadViewSet,
     base_name='release-download'
 )
 

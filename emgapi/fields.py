@@ -42,7 +42,7 @@ class DownloadHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
             }
         elif hasattr(obj, 'release'):
             kwargs = {
-                'release_version': obj.release.release_version
+                'version': obj.release.version
             }
         kwargs['alias'] = obj.alias
 
