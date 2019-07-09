@@ -142,8 +142,10 @@ class BiomeSerializer(ExplicitFieldsModelSerializer,
         related_link_url_kwarg='lineage',
         related_link_lookup_field='lineage',
     )
+
     def get_genomes(self, obj):
         return None
+
     class Meta:
         model = emg_models.Biome
         exclude = (
@@ -1426,7 +1428,7 @@ class GenomeSerializer(ExplicitFieldsModelSerializer):
         source='get_releases',
         model=emg_models.Release,
         related_link_self_view_name='emgapi_v1:release-detail',
-        related_link_self_lookup_field='release_version'
+        related_link_self_lookup_field='version'
     )
 
     def get_releases(self, obj):
@@ -1489,8 +1491,7 @@ class ReleaseDownloadSerializer(BaseDownloadSerializer):
 
 
 class ReleaseSerializer(ExplicitFieldsModelSerializer,
-                         serializers.HyperlinkedModelSerializer):
-
+                        serializers.HyperlinkedModelSerializer):
     included_serializers = {
         'genomes': 'emgapi.serializers.GenomeSerializer',
         'download': 'emgapi.serializers.ReleaseDownloadSerializer'
@@ -1498,7 +1499,7 @@ class ReleaseSerializer(ExplicitFieldsModelSerializer,
 
     url = serializers.HyperlinkedIdentityField(
         view_name='emgapi_v1:release-detail',
-        lookup_field='release_version',
+        lookup_field='version',
     )
 
     genomes = relations.SerializerMethodResourceRelatedField(
@@ -1507,8 +1508,8 @@ class ReleaseSerializer(ExplicitFieldsModelSerializer,
         many=True,
         read_only=True,
         related_link_view_name='emgapi_v1:release-genomes-list',
-        related_link_url_kwarg='release_version',
-        related_link_lookup_field='release_version',
+        related_link_url_kwarg='version',
+        related_link_lookup_field='version',
     )
 
     def get_genomes(self, obj):
@@ -1523,8 +1524,8 @@ class ReleaseSerializer(ExplicitFieldsModelSerializer,
         source='get_downloads',
         model=emg_models.ReleaseDownload,
         related_link_view_name='emgapi_v1:release-download-list',
-        related_link_url_kwarg='release_version',
-        related_link_lookup_field='release_version',
+        related_link_url_kwarg='version',
+        related_link_lookup_field='version',
     )
 
     def get_downloads(self, obj):
@@ -1533,11 +1534,44 @@ class ReleaseSerializer(ExplicitFieldsModelSerializer,
     class Meta:
         model = emg_models.Release
         fields = (
-            'release_version',
+            'version',
             'last_update',
             'first_created',
             'genome_count',
             'genomes',
             'url',
             'downloads'
+        )
+
+
+class GenomeSetSerializer(ExplicitFieldsModelSerializer,
+                          serializers.HyperlinkedModelSerializer):
+    included_serializers = {
+        'genomes': 'emgapi.serializers.GenomeSerializer'
+    }
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi_v1:genomeset-detail',
+        lookup_field='name',
+    )
+
+    genomes = relations.SerializerMethodResourceRelatedField(
+        source='get_genomes',
+        model=emg_models.Genome,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:genomeset-genomes-list',
+        related_link_url_kwarg='name',
+        related_link_lookup_field='name',
+    )
+
+    def get_genomes(self, obj):
+        return None
+
+    class Meta:
+        model = emg_models.GenomeSet
+        fields = (
+            'url',
+            'name',
+            'genomes',
         )

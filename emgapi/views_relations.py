@@ -15,12 +15,13 @@
 
 import logging
 
-from django.http import HttpResponse
-from django.db.models import Prefetch, Count, F
+from django.http import HttpResponse, Http404
+from django.db.models import Prefetch, Count, F, Q
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
 from django_filters.rest_framework import DjangoFilterBackend
+from emgapi import mixins as emg_mixins, serializers as emg_serializers, models as emg_models
 
 from rest_framework import viewsets, mixins
 from rest_framework import filters
@@ -1120,19 +1121,23 @@ class GenomeKeggModuleRelationshipsViewSet(emg_mixins.ListModelMixin,
 
 class ReleaseGenomesViewSet(emg_mixins.ListModelMixin,
                             emg_viewsets.BaseGenomeGenericViewSet):  # noqa
-    lookup_field = 'release_version'
+    lookup_field = 'version'
 
     def get_queryset(self):
         genome_version = self.kwargs[self.lookup_field]
-        if genome_version == 'latest':
-            genome_release = emg_models.Release.objects \
-                .order_by('release_version').last()
+        if genome_version == 'all':
+            genomes = emg_models.Genome.objects.all()
         else:
-            genome_release = get_object_or_404(
-                emg_models.Release,
-                release_version=self.kwargs[self.lookup_field])
+            if genome_version == 'latest':
+                genome_release = emg_models.Release.objects \
+                    .order_by('-version').last()
+            else:
+                genome_release = get_object_or_404(
+                    emg_models.Release,
+                    version=genome_version)
+            genomes = genome_release.genomes.all()
 
-        return genome_release.genomes.all()
+        return genomes
 
     def list(self, request, *args, **kwargs):
         return super(ReleaseGenomesViewSet, self) \
@@ -1153,4 +1158,24 @@ class GenomeReleasesViewSet(emg_mixins.ListModelMixin,
 
     def list(self, request, *args, **kwargs):
         return super(GenomeReleasesViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class GenomeSetGenomes(emg_mixins.ListModelMixin,
+                       emg_viewsets.BaseGenomeGenericViewSet):  # noqa
+    lookup_field = 'name'
+
+    def get_queryset(self):
+        set_name = self.kwargs[self.lookup_field]
+        if set_name == 'all':
+            genomes = emg_models.Genome.objects.all()
+        else:
+            genome_set = get_object_or_404(
+                emg_models.GenomeSet,
+                name=set_name)
+            genomes = emg_models.Genome.objects.filter(genome_set=genome_set)
+        return genomes
+
+    def list(self, request, *args, **kwargs):
+        return super(GenomeSetGenomes, self) \
             .list(request, *args, **kwargs)

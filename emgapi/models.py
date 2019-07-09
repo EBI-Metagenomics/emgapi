@@ -1282,6 +1282,7 @@ class GeographicLocation(models.Model):
 class GenomeSet(models.Model):
     class Meta:
         db_table = 'GENOME_SET'
+
     name = models.CharField(db_column='NAME', max_length=40, unique=True)
 
 
@@ -1304,7 +1305,8 @@ class Genome(models.Model):
     ncbi_study_accession = models.CharField(db_column='NCBI_STUDY_ACCESSION', max_length=20, null=True)
 
     img_genome_accession = models.CharField(db_column='IMG_GENOME_ACCESSION', max_length=20, unique=True, null=True)
-    patric_genome_accession = models.CharField(db_column='PATRIC_GENOME_ACCESSION', max_length=20, unique=True, null=True)
+    patric_genome_accession = models.CharField(db_column='PATRIC_GENOME_ACCESSION', max_length=20, unique=True,
+                                               null=True)
 
     genome_set = models.ForeignKey(GenomeSet,
                                    db_column='GENOME_SET_ID',
@@ -1378,7 +1380,7 @@ class Genome(models.Model):
         db_column='RESULT_DIRECTORY', max_length=100, blank=True, null=True)
 
     releases = models.ManyToManyField(
-        'Release', related_name='releases')
+        'Release', through='ReleaseGenomes')
 
     def __str__(self):
         return self.accession
@@ -1414,17 +1416,26 @@ class Release(models.Model):
 
     objects = ReleaseManager()
 
-    release_version = models.CharField(
-        db_column='RELEASE_VERSION', max_length=20)
+    version = models.CharField(
+        db_column='VERSION', max_length=20)
     last_update = models.DateTimeField(
         db_column='LAST_UPDATE', auto_now=True)
     first_created = models.DateTimeField(
         db_column='FIRST_CREATED', auto_now_add=True)
 
     genomes = models.ManyToManyField(
-        Genome, related_name='genomes')
+        Genome, through='ReleaseGenomes')
     result_directory = models.CharField(
         db_column='RESULT_DIRECTORY', max_length=100)
+
+
+class ReleaseGenomes(models.Model):
+    class Meta:
+        db_table = 'RELEASE_GENOMES'
+        unique_together = ('genome', 'release')
+
+    genome = models.ForeignKey('Genome', db_column='GENOME_ID')
+    release = models.ForeignKey('Release', db_column='RELEASE_ID')
 
 
 class GenomeCogCounts(models.Model):
@@ -1468,7 +1479,7 @@ class KeggModule(models.Model):
         db_table = 'KEGG_MODULE'
 
     name = models.CharField(db_column='MODULE_NAME', max_length=10,
-                                   unique=True)
+                            unique=True)
     description = models.CharField(db_column='DESCRIPTION', max_length=200)
 
 
@@ -1545,7 +1556,7 @@ class ReleaseDownload(BaseDownload):
 
     @property
     def accession(self):
-        return self.release.release_version
+        return self.release.version
 
     objects = ReleaseDownloadManager()
 

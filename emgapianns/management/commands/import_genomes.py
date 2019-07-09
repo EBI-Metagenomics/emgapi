@@ -26,7 +26,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('rootpath', action='store', type=str, )
-        parser.add_argument('release_version', action='store', type=str)
+        parser.add_argument('version', action='store', type=str)
         parser.add_argument('--database', type=str,
                             default='default')
 
@@ -36,10 +36,10 @@ class Command(BaseCommand):
             raise FileNotFoundError('Results dir {} does not exist'
                                     .format(self.rootpath))
 
-        release_version = options['release_version'].strip()
-        release_dir = os.path.join(self.rootpath, release_version)
+        version = options['version'].strip()
+        release_dir = os.path.join(self.rootpath, version)
 
-        self.release_obj = self.get_release(release_version, release_dir)
+        self.release_obj = self.get_release(version, release_dir)
         self.database = options['database']
 
         logger.info("CLI %r" % options)
@@ -57,10 +57,11 @@ class Command(BaseCommand):
 
         self.upload_release_files(release_dir)
 
-    def get_release(self, release_version, result_dir):
+    def get_release(self, version, result_dir):
+        base_result_dir = get_result_path(result_dir)
         return emg_models.Release.objects.using(
-            self.database).get_or_create(release_version=release_version,
-                                         result_directory=result_dir)[0]
+            self.database).get_or_create(version=version,
+                                         result_directory=base_result_dir)[0]
 
     def upload_dir(self, d):
         logger.info('Uploading dir: {}'.format(d))
@@ -73,8 +74,10 @@ class Command(BaseCommand):
         self.upload_genome_files(genome)
 
     def set_genome_release(self, genome):
-        self.release_obj.genomes.add(genome)
-        genome.releases.add(self.release_obj)
+        try:
+            emg_models.ReleaseGenomes(release=self.release_obj, genome=genome).save(using=self.database)
+        except IntegrityError:
+            pass
 
     @staticmethod
     def get_gold_biome(lineage):
@@ -241,33 +244,32 @@ class Command(BaseCommand):
 
     def upload_genome_files(self, genome):
         logger.info('Uploading genome files...')
-        # TODO add filepath
         self.upload_genome_file(genome, 'Genome CDS', 'fasta',
-                                genome.accession + '.fa')
+                                genome.accession + '.fa', 'Genome analysis')
         self.upload_genome_file(genome, 'Genome Assembly', 'fasta',
-                                genome.accession + '.fna')
+                                genome.accession + '.fna', 'Genome analysis')
         self.upload_genome_file(genome, 'EggNOG annotation results', 'tsv',
-                                genome.accession + '_eggNOG.tsv')
-        self.upload_genome_file(genome, 'InterProScan results', 'tsv',
-                                genome.accession + '_InterProScan.tsv')
+                                genome.accession + '_eggNOG.tsv', 'Genome analysis')
+        self.upload_genome_file(genome, 'InterProScan annotation results', 'tsv',
+                                genome.accession + '_InterProScan.tsv', 'Genome analysis')
 
         self.upload_genome_file(genome, 'Accessory genes', 'fasta',
-                                'accessory_genes.faa')
+                                'accessory_genes.faa', 'Pan-Genome analysis')
         self.upload_genome_file(genome, 'Core genes', 'fasta',
-                                'core_genes.faa')
+                                'core_genes.faa', 'Pan-Genome analysis')
         self.upload_genome_file(genome, 'Core & Accessory genes', 'fasta',
-                                'pan-genome.faa')
+                                'pan-genome.faa', 'Pan-Genome analysis')
         self.upload_genome_file(genome,
-                                'EggNOG annotation results (pangenome)', 'tsv',
-                                'pan-genome_eggNOG.tsv')
+                                'EggNOG annotation results', 'tsv',
+                                'pan-genome_eggNOG.tsv', 'Pan-Genome analysis')
         self.upload_genome_file(genome,
-                                'InterProScan annotation results (pangenome)',
-                                'tsv', 'pan-genome_InterProScan.tsv')
+                                'InterProScan annotation results',
+                                'tsv', 'pan-genome_InterProScan.tsv', 'Pan-Genome analysis')
         self.upload_genome_file(genome,
-                                'Gene Presence / Absence matrix (pangenome)',
-                                'tsv', 'genes_presence-absence.tsv')
+                                'Gene Presence / Absence matrix',
+                                'tsv', 'genes_presence-absence.tsv', 'Pan-Genome analysis')
 
-    def prepare_file_upload(self, obj, desc_label, file_format, filename):
+    def prepare_file_upload(self, obj, desc_label, file_format, filename, group_name):
         desc = emg_models.DownloadDescriptionLabel \
             .objects.using(self.database) \
             .filter(description_label=desc_label) \
@@ -281,7 +283,7 @@ class Command(BaseCommand):
         name = os.path.basename(filename)
         group = emg_models.DownloadGroupType \
             .objects.using(self.database) \
-            .filter(group_type='Genome analysis') \
+            .filter(group_type=group_name) \
             .first()
         obj.description = desc
         obj.file_format = fmt
@@ -289,9 +291,9 @@ class Command(BaseCommand):
         obj.group_type = group
         obj.alias = name
 
-    def upload_genome_file(self, genome, desc_label, file_format, filename):
+    def upload_genome_file(self, genome, desc_label, file_format, filename, group_type):
         obj = emg_models.GenomeDownload(genome=genome)
-        self.prepare_file_upload(obj, desc_label, file_format, filename)
+        self.prepare_file_upload(obj, desc_label, file_format, filename, group_type)
         acc = genome.accession
         try:
             obj.save(using=self.database)
@@ -309,12 +311,12 @@ class Command(BaseCommand):
 
     def upload_release_file(self, release, desc_label, file_format, filename):
         obj = emg_models.ReleaseDownload(release=release)
-        self.prepare_file_upload(obj, desc_label, file_format, filename)
+        self.prepare_file_upload(obj, desc_label, file_format, filename, "Genome release set")
         try:
             obj.save(using=self.database)
             logger.info('Upload {}'.format(filename))
         except IntegrityError:
-            vers = release.release_version
+            vers = release.version
             logger.debug(
                 '{} was already uploaded for release {} '.format(filename,
                                                                  vers))

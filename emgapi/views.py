@@ -19,12 +19,11 @@ import logging
 import inflection
 
 from django.conf import settings
-from django.db.models import Q
-from django.db.models import Prefetch
-from django.shortcuts import get_object_or_404
+from django.db.models import Prefetch, Count, F, Q
 from django.http import Http404
 from django.middleware import csrf
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from django.views.decorators.clickjacking import xframe_options_exempt
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -1098,6 +1097,7 @@ class GenomeViewSet(mixins.RetrieveModelMixin,
 
     filter_backends = (
         filters.SearchFilter,
+        DjangoFilterBackend,
         filters.OrderingFilter,
     )
 
@@ -1116,13 +1116,24 @@ class GenomeViewSet(mixins.RetrieveModelMixin,
 
     search_fields = (
         'accession',
+        'taxon_lineage',
+        'type',
+        'genome_set__name',
+        'release__version'
     )
+
+    filter_fields = (
+        'accession',
+        'taxon_lineage',
+        'type',
+        'genome_set__name',
+        'release__version'
+    )
+
+    queryset = emg_models.Genome.objects.all()
 
     def get_serializer_class(self):
         return super(GenomeViewSet, self).get_serializer_class()
-
-    def get_queryset(self):
-        return emg_models.Genome.objects.all()
 
     def list(self, request, *args, **kwargs):
         return super(GenomeViewSet, self).list(request, *args, **kwargs)
@@ -1134,6 +1145,16 @@ class GenomeViewSet(mixins.RetrieveModelMixin,
 class GenomeDownloadViewSet(emg_mixins.ListModelMixin,
                             viewsets.GenericViewSet):
     serializer_class = emg_serializers.GenomeDownloadSerializer
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'alias',
+    )
+
+    ordering = ('alias',)
 
     lookup_field = 'alias'
     lookup_value_regex = '[^/]+'
@@ -1189,7 +1210,6 @@ class GenomeDownloadViewSet(emg_mixins.ListModelMixin,
 class ReleaseViewSet(mixins.RetrieveModelMixin,
                      emg_mixins.ListModelMixin,
                      viewsets.GenericViewSet):
-
     serializer_class = emg_serializers.ReleaseSerializer
     queryset = emg_models.Release.objects.all()
 
@@ -1198,13 +1218,13 @@ class ReleaseViewSet(mixins.RetrieveModelMixin,
     )
 
     ordering_fields = (
-        'release_version',
+        'version',
         'genomes_count'
     )
 
-    ordering = ('release_version',)
+    ordering = ('-version',)
 
-    lookup_field = 'release_version'
+    lookup_field = 'version'
     lookup_value_regex = '[0-9.]+'
 
     def get_serializer_class(self):
@@ -1220,7 +1240,7 @@ class ReleaseViewSet(mixins.RetrieveModelMixin,
 
 
 class ReleaseDownloadViewSet(emg_mixins.ListModelMixin,
-                            viewsets.GenericViewSet):
+                             viewsets.GenericViewSet):
     serializer_class = emg_serializers.ReleaseDownloadSerializer
 
     lookup_field = 'alias'
@@ -1228,11 +1248,11 @@ class ReleaseDownloadViewSet(emg_mixins.ListModelMixin,
 
     def get_queryset(self):
         try:
-            release_version = self.kwargs['release_version']
+            version = self.kwargs['version']
         except ValueError:
             raise Http404()
         return emg_models.ReleaseDownload.objects.available(self.request) \
-            .filter(release__release_version=release_version)
+            .filter(version=version)
 
     def get_object(self):
         return get_object_or_404(
@@ -1247,7 +1267,7 @@ class ReleaseDownloadViewSet(emg_mixins.ListModelMixin,
         return super(ReleaseDownloadViewSet, self) \
             .list(request, *args, **kwargs)
 
-    def retrieve(self, request, release_version, alias,
+    def retrieve(self, request, version, alias,
                  *args, **kwargs):
         """
         Retrieves static summary file
@@ -1264,13 +1284,52 @@ class ReleaseDownloadViewSet(emg_mixins.ListModelMixin,
             "attachment; filename={0}".format(alias)
         if obj.subdir is not None:
             response['X-Accel-Redirect'] = \
-                "/results{0}/{1}/{2}".format(
+                "/results/genomes{0}/{1}/{2}".format(
                     obj.release.result_directory, obj.subdir, obj.realname
                 )
         else:
             response['X-Accel-Redirect'] = \
-                "/results{0}/{1}".format(
+                "/results/genomes{0}/{1}".format(
                     obj.release.result_directory, obj.realname
                 )
-        print(alias)
         return response
+
+
+class GenomeSetViewSet(mixins.RetrieveModelMixin,
+                       emg_mixins.ListModelMixin,
+                       viewsets.GenericViewSet):
+    serializer_class = emg_serializers.GenomeSetSerializer
+    queryset = emg_models.GenomeSet.objects.all()
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'name',
+    )
+
+    ordering = ('-name',)
+
+    lookup_field = 'name'
+    lookup_value_regex = '[^/]+'
+
+    def get_queryset(self):
+        genome_set = emg_models.GenomeSet.objects.all()
+
+        if self.kwargs.get('name'):
+            genome_set = genome_set.filter(name=self.kwargs['name'])
+
+        genome_set.annotate(genome_count=Count('genome'))
+        return genome_set
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return emg_serializers.GenomeSetSerializer
+        return super(GenomeSetViewSet, self).get_serializer_class()
+
+    def retrieve(self, request, *args, **kwargs):
+        return super(GenomeSetViewSet, self).retrieve(request, *args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        return super(GenomeSetViewSet, self).list(request, *args, **kwargs)
