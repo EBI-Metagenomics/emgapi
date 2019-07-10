@@ -247,8 +247,9 @@ class Command(BaseCommand):
     def upload_genome_files(self, genome):
         logger.info('Uploading genome files...')
         self.upload_genome_file(genome, 'Genome CDS', 'fasta', genome.accession + '.faa', 'Genome analysis', 'genome')
-        self.upload_genome_file(genome, 'Genome Assembly', 'fasta',
-                                genome.accession + '.fna', 'Genome analysis', 'genome')
+        self.upload_genome_file(genome, 'Genome Assembly', 'fasta', genome.accession + '.fna', 'Genome analysis', 'genome')
+        self.upload_genome_file(genome, 'Genome Assembly index', 'fai', genome.accession + '.fna.fai', 'Genome analysis', 'genome')
+        self.upload_genome_file(genome, 'Genome GFF', 'gff', genome.accession + '.gff', 'Genome analysis', 'genome')
         self.upload_genome_file(genome, 'EggNOG annotation results', 'tsv',
                                 genome.accession + '_eggNOG.tsv', 'Genome analysis', 'genome')
         self.upload_genome_file(genome, 'InterProScan annotation results', 'tsv',
@@ -270,47 +271,49 @@ class Command(BaseCommand):
                                 'Gene Presence / Absence matrix',
                                 'tsv', 'genes_presence-absence.tsv', 'Pan-Genome analysis', 'pan-genome')
 
-    def prepare_file_upload(self, obj, desc_label, file_format, filename, group_name, subdir_name=None):
+    def prepare_file_upload(self, desc_label, file_format, filename, group_name=None, subdir_name=None):
+
+        obj = {}
         desc = emg_models.DownloadDescriptionLabel \
             .objects.using(self.database) \
             .filter(description_label=desc_label) \
             .first()
-        obj.description = desc
+        obj['description'] = desc
+        if desc is None:
+            print(desc_label)
+            quit()
 
         fmt = emg_models.FileFormat \
             .objects.using(self.database) \
             .filter(format_extension=file_format, compression=False) \
             .first()
-        obj.file_format = fmt
+        obj['file_format'] = fmt
 
         name = os.path.basename(filename)
-        obj.alias = name
-        obj.realname = name
+        obj['realname'] = name
+        obj['alias'] = name
 
-        group = emg_models.DownloadGroupType \
-            .objects.using(self.database) \
-            .filter(group_type=group_name) \
-            .first()
-        obj.group_type = group
+        if group_name:
+            group = emg_models.DownloadGroupType \
+                .objects.using(self.database) \
+                .filter(group_type=group_name) \
+                .first()
+            obj['group_type'] = group
 
         if subdir_name:
             subdir = emg_models.DownloadSubdir \
                 .objects.using(self.database) \
                 .filter(subdir=subdir_name) \
                 .first()
-            obj.subdir = subdir
+            obj['subdir'] = subdir
+
+        return obj
 
     def upload_genome_file(self, genome, desc_label, file_format, filename, group_type, subdir):
-        obj = emg_models.GenomeDownload(genome=genome)
-        self.prepare_file_upload(obj, desc_label, file_format, filename, group_type, subdir)
-        acc = genome.accession
-        try:
-            obj.save(using=self.database)
-            logger.info('Upload {} file {}'.format(acc, filename))
-        except IntegrityError:
-            logger.debug(
-                '{} was already uploaded for genome {}'.format(filename,
-                                                               acc))
+        defaults = self.prepare_file_upload(desc_label, file_format, filename, group_type, subdir)
+        emg_models.GenomeDownload.objects.using(self.database).update_or_create(genome=genome,
+                                                                                alias=defaults['alias'],
+                                                                                defaults=defaults)
 
     def upload_release_files(self, release_dir):
         self.upload_release_file(self.release_obj,
@@ -319,13 +322,7 @@ class Command(BaseCommand):
                                  'phylo_tree.json')
 
     def upload_release_file(self, release, desc_label, file_format, filename):
-        obj = emg_models.ReleaseDownload(release=release)
-        self.prepare_file_upload(obj, desc_label, file_format, filename, "Genome release set")
-        try:
-            obj.save(using=self.database)
-            logger.info('Upload {}'.format(filename))
-        except IntegrityError:
-            vers = release.version
-            logger.debug(
-                '{} was already uploaded for release {} '.format(filename,
-                                                                 vers))
+        defaults = self.prepare_file_upload(desc_label, file_format, filename, None, None)
+        emg_models.ReleaseDownload.objects.using(self.database).update_or_create(release=release,
+                                                                                 alias=defaults['alias'],
+                                                                                 defaults=defaults)

@@ -13,18 +13,20 @@ subdirs = (
 )
 
 def add_subdirs(apps, schema_editor):
+    db_name = schema_editor.connection.alias
     DownloadSubdir = apps.get_model("emgapi", "DownloadSubdir")
     _subdirs = list()
     for d in subdirs:
         _subdirs.append(
             DownloadSubdir(subdir=d)
         )
-        DownloadSubdir.objects.bulk_create(_subdirs)
+        DownloadSubdir.objects.using(db_name).bulk_create(_subdirs)
 
 
 def remove_subdirs(apps, schema_editor):
+    db_name = schema_editor.connection.alias
     DownloadSubdir = apps.get_model("emgapi", "DownloadSubdir")
-    DownloadSubdir.objects.filter(subdir__in=subdirs).delete()
+    DownloadSubdir.objects.using(db_name).filter(subdir__in=subdirs).delete()
 
 
 group_types = (
@@ -35,28 +37,32 @@ group_types = (
 
 
 def add_group_types(apps, schema_editor):
+    db_name = schema_editor.connection.alias
     DownloadGroupType = apps.get_model("emgapi", "DownloadGroupType")
     _groups = list()
     for group_type in group_types:
         _groups.append(
             DownloadGroupType(group_type=group_type)
         )
-    DownloadGroupType.objects.bulk_create(_groups)
+    DownloadGroupType.objects.using(db_name).bulk_create(_groups)
 
 
 def remove_group_types(apps, schema_editor):
+    db_name = schema_editor.connection.alias
     DownloadGroupType = apps.get_model("emgapi", "DownloadGroupType")
-    DownloadGroupType.objects.filter(group_type__in=group_types).delete()
+    DownloadGroupType.objects.using(db_name).filter(group_type__in=group_types).delete()
 
 
 file_formats = (
     ("TAB", "tab", False),
     ("GFF", "gff", False),
     ("JSON", "json", False),
+    ("FAI", "fai", False)
 )
 
 
 def add_fileformats(apps, schema_editor):
+    db_name = schema_editor.connection.alias
     FileFormat = apps.get_model("emgapi", "FileFormat")
     _formats = list()
     for file_format in file_formats:
@@ -67,24 +73,26 @@ def add_fileformats(apps, schema_editor):
                 compression=file_format[2],
             )
         )
-    FileFormat.objects.bulk_create(_formats)
+    FileFormat.objects.using(db_name).bulk_create(_formats)
 
 
 def remove_file_formats(apps, schema_editor):
+    db_name = schema_editor.connection.alias
     FileFormat = apps.get_model("emgapi", "FileFormat")
     for name, ext, compression in file_formats:
-        FileFormat.objects.filter(format_name=name,
+        FileFormat.objects.using(db_name).filter(format_name=name,
                                  format_extension=ext,
                                  compression=compression).delete()
 
 
 downloads = (
-    ("Protein coding sequences of the reference genome.", "Genome CDS",),
-    ("Genome sequence of the reference genome.", "Genome Assembly",),
-    ("Protein sequence of the accessory genome.", "Protein sequence (accessory)",),
+    ("Protein coding sequences of the reference genome", "Genome CDS",),
+    ("Genome sequence of the reference genome", "Genome Assembly",),
+    ("Index of the reference genome's sequence", "Genome Assembly index",),
+    ("Protein sequence of the accessory genome", "Protein sequence (accessory)",),
     ("Protein sequence of the core genome", "Protein sequence (core)",),
-    ("Raw output of eggNOG-mapper.", "EggNOG annotation results",),
-    ("Raw output of eggNOG-mapper.", "EggNOG annotation results",),
+    ("Raw output of eggNOG-mapper", "EggNOG annotation results",),
+    ("Raw output of eggNOG-mapper", "EggNOG annotation results",),
     ("Raw output of InterProScan", "InterProScan annotation results",),
     ("Raw output of InterProScan", "InterProScan annotation results",),
     ("Matrix of gene presence/absence of the pan-genome across all genomes", "Gene Presence / Absence matrix",),
@@ -97,6 +105,7 @@ downloads = (
 
 
 def add_download_description(apps, schema_editor):
+    db_name = schema_editor.connection.alias
     DownloadDescriptionLabel = apps.get_model("emgapi",
                                               "DownloadDescriptionLabel")
     _downloads = list()
@@ -107,7 +116,7 @@ def add_download_description(apps, schema_editor):
                 description_label=d[1]
             )
         )
-    DownloadDescriptionLabel.objects.bulk_create(_downloads)
+    DownloadDescriptionLabel.objects.using(db_name).bulk_create(_downloads)
 
 
 def remove_download_description(apps, schema_editor):
