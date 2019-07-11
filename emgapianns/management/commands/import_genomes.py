@@ -66,13 +66,13 @@ class Command(BaseCommand):
 
     def upload_dir(self, d):
         logger.info('Uploading dir: {}'.format(d))
-        genome = self.create_genome(d)
+        genome, has_pangenome = self.create_genome(d)
         self.set_genome_release(genome)
 
-        self.upload_cog_results(genome, d)
-        self.upload_kegg_class_results(genome, d)
-        self.upload_kegg_module_results(genome, d)
-        self.upload_genome_files(genome)
+        self.upload_cog_results(genome, d, has_pangenome)
+        self.upload_kegg_class_results(genome, d, has_pangenome)
+        self.upload_kegg_module_results(genome, d, has_pangenome)
+        self.upload_genome_files(genome, has_pangenome)
 
     def set_genome_release(self, genome):
         try:
@@ -89,15 +89,19 @@ class Command(BaseCommand):
     def prepare_genome_data(self, genome_dir):
         d = read_json(os.path.join(genome_dir, 'genome.json'))
 
+        has_pangenome = 'pangenome' in d
         d['biome'] = self.get_gold_biome(d['gold_biome'])
         d['genome_set'] = self.get_or_create_genome_set(d['genome_set'])
-        d.update(d['pangenome'])
-        d['geo_origin'] = self.get_geo_location(d['geographic_origin'])
+        if has_pangenome:
+            d.update(d['pangenome'])
+            del d['pangenome']
 
-        del d['geographic_origin']
-        del d['pangenome']
+        if 'geographic_origin' in d:
+            d['geo_origin'] = self.get_geo_location(d['geographic_origin'])
+            del d['geographic_origin']
+
         del d['gold_biome']
-        return d
+        return d, has_pangenome
 
     def get_geo_location(self, location):
         return emg_models.GeographicLocation \
@@ -107,9 +111,10 @@ class Command(BaseCommand):
         genome.pangenome_geographic_range.add(self.get_geo_location(location))
 
     def create_genome(self, genome_dir):
-        data = self.prepare_genome_data(genome_dir)
-        geo_locations = data['geographic_range']
-        del data['geographic_range']
+        data, has_pangenome = self.prepare_genome_data(genome_dir)
+
+        geo_locations = data.get('geographic_range')
+        data.pop('geographic_range', None)
 
         data['result_directory'] = '/genomes/{}'.format(self.release_obj.version) + get_result_path(genome_dir)
 
@@ -118,18 +123,20 @@ class Command(BaseCommand):
             defaults=data)
         g.save(using=self.database)
 
-        [self.attach_geo_location(g, l) for l in geo_locations]
+        if geo_locations:
+            [self.attach_geo_location(g, l) for l in geo_locations]
 
-        return g
+        return g, has_pangenome
 
-    def upload_cog_results(self, genome, d):
+    def upload_cog_results(self, genome, d, has_pangenome):
         genome_cogs = os.path.join(d, 'genome', 'cog_summary.tsv')
         self.upload_cog_result(genome, genome_cogs, False)
         logger.info('Loaded Genome COG for {}'.format(genome.accession))
 
         pangenome_cogs = os.path.join(d, 'pan-genome', 'cog_summary.tsv')
-        self.upload_cog_result(genome, pangenome_cogs, True)
-        logger.info('Loaded PanGenome COG for {}'.format(genome.accession))
+        if has_pangenome:
+            self.upload_cog_result(genome, pangenome_cogs, True)
+            logger.info('Loaded PanGenome COG for {}'.format(genome.accession))
 
     def upload_cog_result(self, genome, f, is_pangenome):
         counts = read_tsv_w_headers(f)
@@ -160,7 +167,7 @@ class Command(BaseCommand):
         return emg_models.CogCat.objects.using(self.database) \
             .get_or_create(name=c_name)[0]
 
-    def upload_kegg_class_results(self, genome, d):
+    def upload_kegg_class_results(self, genome, d, has_pangenome):
         genome_kegg_classes = os.path.join(d, 'genome', 'kegg_classes.tsv')
         self.upload_kegg_class_result(genome, genome_kegg_classes, False)
         logger.info(
@@ -168,9 +175,10 @@ class Command(BaseCommand):
 
         pangenome_kegg_classes = os.path.join(d, 'pan-genome',
                                               'kegg_classes.tsv')
-        self.upload_kegg_class_result(genome, pangenome_kegg_classes, True)
-        logger.info(
-            'Loaded PanGenome KEGG classes for {}'.format(genome.accession))
+        if has_pangenome:
+            self.upload_kegg_class_result(genome, pangenome_kegg_classes, True)
+            logger.info(
+                'Loaded PanGenome KEGG classes for {}'.format(genome.accession))
 
     def upload_kegg_class_result(self, genome, f, pangenome):
         kegg_matches = read_tsv_w_headers(f)
@@ -202,7 +210,7 @@ class Command(BaseCommand):
 
         count.save(using=self.database)
 
-    def upload_kegg_module_results(self, genome, d):
+    def upload_kegg_module_results(self, genome, d, has_pangenome):
         genome_kegg_modules = os.path.join(d, 'genome', 'kegg_modules.tsv')
         self.upload_kegg_module_result(genome, genome_kegg_modules, False)
         logger.info(
@@ -210,9 +218,10 @@ class Command(BaseCommand):
 
         pangenome_kegg_classes = os.path.join(d, 'pan-genome',
                                               'kegg_modules.tsv')
-        self.upload_kegg_module_result(genome, pangenome_kegg_classes, True)
-        logger.info(
-            'Loaded PanGenome KEGG modules for {}'.format(genome.accession))
+        if has_pangenome:
+            self.upload_kegg_module_result(genome, pangenome_kegg_classes, True)
+            logger.info(
+                'Loaded PanGenome KEGG modules for {}'.format(genome.accession))
 
     def upload_kegg_module_result(self, genome, f, is_pangenome):
         kegg_matches = read_tsv_w_headers(f)
@@ -244,7 +253,7 @@ class Command(BaseCommand):
 
         count.save(using=self.database)
 
-    def upload_genome_files(self, genome):
+    def upload_genome_files(self, genome, has_pangenome):
         logger.info('Uploading genome files...')
         self.upload_genome_file(genome, 'Genome CDS', 'fasta', genome.accession + '.faa', 'Genome analysis', 'genome')
         self.upload_genome_file(genome, 'Genome Assembly', 'fasta', genome.accession + '.fna', 'Genome analysis', 'genome')
@@ -255,21 +264,22 @@ class Command(BaseCommand):
         self.upload_genome_file(genome, 'InterProScan annotation results', 'tsv',
                                 genome.accession + '_InterProScan.tsv', 'Genome analysis', 'genome')
 
-        self.upload_genome_file(genome, 'Accessory genes', 'fasta',
-                                'accessory_genes.faa', 'Pan-Genome analysis', 'pan-genome')
-        self.upload_genome_file(genome, 'Core genes', 'fasta',
-                                'core_genes.faa', 'Pan-Genome analysis', 'pan-genome')
-        self.upload_genome_file(genome, 'Core & Accessory genes', 'fasta',
-                                'pan-genome.faa', 'Pan-Genome analysis', 'pan-genome')
-        self.upload_genome_file(genome,
-                                'EggNOG annotation results', 'tsv',
-                                'pan-genome_eggNOG.tsv', 'Pan-Genome analysis', 'pan-genome')
-        self.upload_genome_file(genome,
-                                'InterProScan annotation results',
-                                'tsv', 'pan-genome_InterProScan.tsv', 'Pan-Genome analysis', 'pan-genome')
-        self.upload_genome_file(genome,
-                                'Gene Presence / Absence matrix',
-                                'tsv', 'genes_presence-absence.tsv', 'Pan-Genome analysis', 'pan-genome')
+        if has_pangenome:
+            self.upload_genome_file(genome, 'Accessory genes', 'fasta',
+                                    'accessory_genes.faa', 'Pan-Genome analysis', 'pan-genome')
+            self.upload_genome_file(genome, 'Core genes', 'fasta',
+                                    'core_genes.faa', 'Pan-Genome analysis', 'pan-genome')
+            self.upload_genome_file(genome, 'Core & Accessory genes', 'fasta',
+                                    'pan-genome.faa', 'Pan-Genome analysis', 'pan-genome')
+            self.upload_genome_file(genome,
+                                    'EggNOG annotation results', 'tsv',
+                                    'pan-genome_eggNOG.tsv', 'Pan-Genome analysis', 'pan-genome')
+            self.upload_genome_file(genome,
+                                    'InterProScan annotation results',
+                                    'tsv', 'pan-genome_InterProScan.tsv', 'Pan-Genome analysis', 'pan-genome')
+            self.upload_genome_file(genome,
+                                    'Gene Presence / Absence matrix',
+                                    'tsv', 'genes_presence-absence.tsv', 'Pan-Genome analysis', 'pan-genome')
 
     def prepare_file_upload(self, desc_label, file_format, filename, group_name=None, subdir_name=None):
 

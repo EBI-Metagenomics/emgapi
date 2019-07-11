@@ -72,7 +72,6 @@ REQUIRED_JSON_FIELDS = {
     'eggnog_coverage',
     'gc_content',
     'genome_set',
-    'geographic_origin',
     'gold_biome',
     'ipr_coverage',
     'length',
@@ -91,7 +90,6 @@ REQUIRED_JSON_FIELDS = {
 REQUIRED_JSON_PANGENOME_FIELDS = {
     'pangenome_accessory_size',
     'num_genomes_non_redundant',
-    'geographic_range',
     'pangenome_core_size',
     'pangenome_eggnog_coverage',
     'num_genomes_total',
@@ -104,7 +102,7 @@ def sanity_check_genome_json(data):
     keys = data.keys()
     missing_req_keys = set(REQUIRED_JSON_FIELDS).difference(set(keys))
     if len(missing_req_keys):
-        raise ValueError('{} JSON is missing fields: '.format(
+        raise ValueError('{} JSON is missing fields: {}'.format(
             data.get('accession'), " ".join(missing_req_keys)))
 
     if 'pangenome_stats' in data:
@@ -113,7 +111,7 @@ def sanity_check_genome_json(data):
         missing_preq_keys = set(REQUIRED_JSON_PANGENOME_FIELDS).difference(
             set(p_keys))
         if len(missing_preq_keys):
-            raise ValueError('{} JSON is missing fields: '.format(
+            raise ValueError('{} JSON is missing fields: {}'.format(
                 data['accession'], " ".join(missing_preq_keys)))
 
 

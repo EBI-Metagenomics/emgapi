@@ -1336,28 +1336,20 @@ class Genome(models.Model):
     ipr_coverage = models.FloatField(db_column='IPR_COVERAGE')
     taxon_lineage = models.CharField(db_column='TAXON_LINEAGE', max_length=400)
 
-    num_genomes_total = models.IntegerField(
-        db_column='PANGENOME_TOTAL_GENOMES', null=True)
-    num_genomes_non_redundant = models.IntegerField(
-        db_column='PANGENOME_NON_RED_GENOMES', null=True)
+    num_genomes_total = models.IntegerField(db_column='PANGENOME_TOTAL_GENOMES', null=True)
+    num_genomes_non_redundant = models.IntegerField(db_column='PANGENOME_NON_RED_GENOMES', null=True)
     pangenome_size = models.IntegerField(db_column='PANGENOME_SIZE', null=True)
-    pangenome_core_size = models.IntegerField(db_column='PANGENOME_CORE_PROP',
-                                              null=True)
-    pangenome_accessory_size = models.IntegerField(
-        db_column='PANGENOME_ACCESSORY_PROP',
-        null=True)
-    pangenome_eggnog_coverage = models.FloatField(
-        db_column='PANGENOME_EGGNOG_COV',
-        null=True)
-    pangenome_ipr_coverage = models.FloatField(db_column='PANGENOME_IPR_COV',
-                                               null=True)
+    pangenome_core_size = models.IntegerField(db_column='PANGENOME_CORE_PROP', null=True)
+    pangenome_accessory_size = models.IntegerField(db_column='PANGENOME_ACCESSORY_PROP', null=True)
+    pangenome_eggnog_coverage = models.FloatField(db_column='PANGENOME_EGGNOG_COV', null=True)
+    pangenome_ipr_coverage = models.FloatField(db_column='PANGENOME_IPR_COV', null=True)
 
     last_update = models.DateTimeField(
         db_column='LAST_UPDATE', auto_now=True)
     first_created = models.DateTimeField(
         db_column='FIRST_CREATED', auto_now_add=True)
 
-    geo_origin = models.ForeignKey('GeographicLocation', db_column='GEOGRAPHIC_ORIGIN')
+    geo_origin = models.ForeignKey('GeographicLocation', db_column='GEOGRAPHIC_ORIGIN', null=True)
 
     pangenome_geographic_range = models.ManyToManyField('GeographicLocation',
                                                         related_name='geographic_range')
