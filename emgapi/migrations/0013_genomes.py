@@ -419,7 +419,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='genomedownload',
-            unique_together=set([('realname', 'alias')]),
+            unique_together=set([('realname', 'alias', 'genome')]),
         ),
         migrations.AlterUniqueTogether(
             name='genomecogcounts',

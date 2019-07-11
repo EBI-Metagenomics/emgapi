@@ -1360,7 +1360,11 @@ class Genome(models.Model):
 
     @property
     def geographic_origin(self):
-        return self.geo_origin.name
+        if self.geo_origin:
+            name = self.geo_origin.name
+        else:
+            name = None
+        return name
 
     cog_matches = models.ManyToManyField('CogCat',
                                          through='emgapi.GenomeCogCounts')
@@ -1521,7 +1525,7 @@ class GenomeDownload(BaseDownload):
 
     class Meta:
         db_table = 'GENOME_DOWNLOAD'
-        unique_together = (('realname', 'alias'),)
+        unique_together = (('realname', 'alias', 'genome'),)
         ordering = ('group_type', 'alias')
 
 
