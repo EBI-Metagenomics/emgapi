@@ -38,7 +38,7 @@ def pull_latest_study_metadata_from_ena_api(study_accession):
             raise StudyNotBeRetrievedFromENA
 
 
-def pull_latest_study_metadata_from_ena_db(secondary_study_accession, database='era_pro'):
+def pull_latest_study_metadata_from_ena_db(secondary_study_accession, database):
     """
          Pulls study information from database (erapro).
 
@@ -50,7 +50,17 @@ def pull_latest_study_metadata_from_ena_db(secondary_study_accession, database='
     return RunStudy.objects.using(database).get(study_id=secondary_study_accession)
 
 
-def instantiate_study_object(study_raw_metadata_api, study_raw_metadata_db):
+def lookup_publication_by_pubmed_ids(pubmed_ids):
+    # TODO: Implement
+    pass
+
+
+def lookup_publication_by_project_id(project_id):
+    # TODO: Implement
+    pass
+
+
+def instantiate_study_object(run_study, result_directory, biome_id):
     """
         Attributes to parse out:
             - Center name (done)
@@ -66,7 +76,7 @@ def instantiate_study_object(study_raw_metadata_api, study_raw_metadata_db):
 
         Additional not parsable attributes
             - Study status (FINISHED or IN_PROGRESS)
-            - data origination (SUBMITTED: EBI or HARVESTED: NCBI)
+            - data origination (SUBMITTED: EBI or HARVESTED: NCBI or DDJB)
             - biome_id
             - result directory
 
@@ -80,31 +90,51 @@ def instantiate_study_object(study_raw_metadata_api, study_raw_metadata_db):
             7. public analysis_study, e.g. ERP112567
             8. private analysis_study, e.g.
 
-    :param study_raw_metadata:
+    :param run_study:
     :return:
     """
     apps.get_app_config('emgapi')
     Study = apps.get_model("emgapi", "Study")
+    Biome = apps.get_model("emgapi", "Biome")
 
-    first_public = study_raw_metadata_api['first_public'] if 'first_public' in study_raw_metadata_api else None
-    is_public = True if 'first_public' in study_raw_metadata_api else False
-    new_study = Study.objects.create(
-        project_id=study_raw_metadata_api['study_accession'],
-        secondary_accession=study_raw_metadata_api['secondary_study_accession'],
-        study_abstract=study_raw_metadata_api['description'],
-        study_name=study_raw_metadata_api['study_title'],
-        # TODO: Confirm with Josie that ENA's API retrieves the correct center name now for SRA accessions
-        centre_name=study_raw_metadata_api['center_name'],
-        last_update=study_raw_metadata_api['last_updated'],
-        public_release_date=first_public,
-        first_created=study_raw_metadata_db.first_created,
-        submission_account_id=study_raw_metadata_db.submission_account_id,
-    )
+    secondary_study_accession = run_study.study_id
+    data_origination = 'SUBMITTED' if secondary_study_accession.startswith('ERP') else 'HARVESTED'
+
+    hold_date = run_study.hold_date
+    first_public = hold_date if hold_date else None
+    is_public = True if not hold_date else False
+
+    # Retrieve biome object
+    biome = Biome.objects.get(pk=biome_id)
+
+    # Lookup study publication
     # TODO: Process publications
-    pubmed_ids = study_raw_metadata_db.pubmed_id
+    pubmed_ids = run_study.pubmed_id
+    pubmed_id_list = pubmed_ids.split(',')
+    lookup_publication_by_pubmed_ids(pubmed_ids)
+
+    lookup_publication_by_project_id(run_study.project_id)
+
+    # new_study = Study.objects.using(database).update_or_create(
+    new_study = Study.objects.update_or_create(
+        project_id=run_study.project_id,
+        secondary_accession=secondary_study_accession,
+        defaults={'centre_name': run_study.center_name,
+                  'is_public': is_public,
+                  'public_release_date': hold_date,
+                  'study_abstract': run_study.study_description,
+                  'study_name': run_study.study_title,
+                  'study_status': 'FINISHED',
+                  'data_origination': data_origination,
+                  'last_update': run_study.last_updated,
+                  'submission_account_id': run_study.submission_account_id,
+                  'biome': biome,
+                  'result_directory': result_directory,
+                  'first_created': run_study.first_created},
+    )
 
 
-def run_create_or_update_study(study_accession, result_dir_relative_path):
+def run_create_or_update_run_study(secondary_study_accession, result_dir_relative_path, biome_id, database='era_pro'):
     """
         Both primary and secondary study accessions are support.
 
@@ -112,15 +142,18 @@ def run_create_or_update_study(study_accession, result_dir_relative_path):
             - Check if study already exists
             - Pull latest study metadata from ENA
             - Save or update entry in EMG
-    :param study_accession:
+    :param database: Pointer to the database connection details in the config file.
+    :param secondary_study_accession: e.g. ERP014351 or SRP042265
     :param result_dir_relative_path: Study result folder, e.g. 2015/08/ERP010251
     :return:
     """
     logging.info("Starting process of creating or updating study in EMG...")
-    study_raw_metadata_api = pull_latest_study_metadata_from_ena_api(study_accession)
 
-    secondary_study_accession = study_raw_metadata_api['secondary_study_accession']
+    run_study = pull_latest_study_metadata_from_ena_db(secondary_study_accession, database)
 
-    study_raw_metadata_db = pull_latest_study_metadata_from_ena_db(secondary_study_accession)
+    instantiate_study_object(run_study, result_dir_relative_path, biome_id)
 
-    instantiate_study_object(study_raw_metadata_api, study_raw_metadata_db)
+
+def run_create_or_update_assembly_study(secondary_study_accession, result_dir_relative_path, database='era_pro'):
+    # TODO: Implement
+    pass
