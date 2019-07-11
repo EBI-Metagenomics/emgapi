@@ -117,10 +117,16 @@ class AssemblyMapping(models.Model):
 
 class RunStudy(models.Model):
     study_id = models.CharField(db_column='STUDY_ID', primary_key=True, max_length=15)
+    project_id = models.CharField(db_column='PROJECT_ID', max_length=15)
     study_status = models.CharField(db_column='STUDY_STATUS', max_length=50)
+    center_name = models.TextField(db_column='CENTER_NAME', max_length=500)
+    hold_date = models.DateTimeField(db_column='HOLD_DATE')
     first_created = models.DateTimeField(db_column='FIRST_CREATED')
+    last_updated = models.DateTimeField(db_column='LAST_UPDATED')
+    study_title = models.TextField(db_column='STUDY_TITLE', max_length=4000)
+    study_description = models.TextField(db_column='STUDY_DESCRIPTION')
     submission_account_id = models.CharField(db_column='SUBMISSION_ACCOUNT_ID', max_length=15)
-    pubmed_id = models.TextField(db_column='PUBMED_ID')
+    pubmed_id = models.TextField(db_column='PUBMED_ID', max_length=4000)
 
     @property
     def get_study_id(self):
@@ -132,4 +138,6 @@ class RunStudy(models.Model):
         app_label = 'emgena'
 
     def __str__(self):
-        return self.study_id
+        return '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s' % (
+            self.study_id, self.project_id, self.study_status, self.center_name, self.hold_date, self.first_created,
+            self.last_updated, self.study_title, self.study_description, self.submission_account_id, self.pubmed_id)
