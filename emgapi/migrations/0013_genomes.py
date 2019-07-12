@@ -86,20 +86,18 @@ def remove_file_formats(apps, schema_editor):
 
 
 downloads = (
-    ("Protein coding sequences of the reference genome", "Genome CDS",),
-    ("Genome sequence of the reference genome", "Genome Assembly",),
-    ("Index of the reference genome's sequence", "Genome Assembly index",),
+    ("Protein coding sequences of the reference genome", "Predicted CDS",),
+    ("Genome sequence of the reference genome", "Nucleic Acid Sequence",),
+    ("Index of the reference genome's sequence", "Nucleic Acid Sequence index",),
     ("Protein sequence of the accessory genome", "Protein sequence (accessory)",),
     ("Protein sequence of the core genome", "Protein sequence (core)",),
-    ("Raw output of eggNOG-mapper", "EggNOG annotation results",),
-    ("Raw output of eggNOG-mapper", "EggNOG annotation results",),
-    ("Raw output of InterProScan", "InterProScan annotation results",),
-    ("Raw output of InterProScan", "InterProScan annotation results",),
+    ("Raw output of eggNOG-mapper", "EggNog annotation",),
+    ("Raw output of InterProScan", "InterProScan annotation",),
     ("Matrix of gene presence/absence of the pan-genome across all genomes", "Gene Presence / Absence matrix",),
-    ("Protein sequence FASTA file of the core genes (>90% of the genomes)", "Core genes",),
-    ("Protein sequence FASTA file of the accessory genes", "Accessory genes",),
-    ("Protein sequence FASTA of both core and accessory genes", "Core & Accessory genes",),
-    ('Genome GFF', 'Genome GFF'),
+    ("Protein sequence FASTA file of the core genes (>90% of the genomes)", "Core predicted CDS",),
+    ("Protein sequence FASTA file of the accessory genes", "Accessory predicted CDS",),
+    ("Protein sequence FASTA of both core and accessory genes", "Core & Accessory predicted CDS",),
+    ('Genome Annotation', 'Genome Annotation'),
     ('Phylogenetic tree of release genomes', 'Phylogenetic tree of release genomes')
 )
 

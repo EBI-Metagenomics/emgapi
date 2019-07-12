@@ -255,27 +255,27 @@ class Command(BaseCommand):
 
     def upload_genome_files(self, genome, has_pangenome):
         logger.info('Uploading genome files...')
-        self.upload_genome_file(genome, 'Genome CDS', 'fasta', genome.accession + '.faa', 'Genome analysis', 'genome')
-        self.upload_genome_file(genome, 'Genome Assembly', 'fasta', genome.accession + '.fna', 'Genome analysis', 'genome')
-        self.upload_genome_file(genome, 'Genome Assembly index', 'fai', genome.accession + '.fna.fai', 'Genome analysis', 'genome')
-        self.upload_genome_file(genome, 'Genome GFF', 'gff', genome.accession + '.gff', 'Genome analysis', 'genome')
-        self.upload_genome_file(genome, 'EggNOG annotation results', 'tsv',
+        self.upload_genome_file(genome, 'Predicted CDS', 'fasta', genome.accession + '.faa', 'Genome analysis', 'genome')
+        self.upload_genome_file(genome, 'Nucleic Acid Sequence', 'fasta', genome.accession + '.fna', 'Genome analysis', 'genome')
+        self.upload_genome_file(genome, 'Nucleic Acid Sequence index', 'fai', genome.accession + '.fna.fai', 'Genome analysis', 'genome')
+        self.upload_genome_file(genome, 'Genome Annotation', 'gff', genome.accession + '.gff', 'Genome analysis', 'genome')
+        self.upload_genome_file(genome, 'EggNog annotation', 'tsv',
                                 genome.accession + '_eggNOG.tsv', 'Genome analysis', 'genome')
-        self.upload_genome_file(genome, 'InterProScan annotation results', 'tsv',
+        self.upload_genome_file(genome, 'InterProScan annotation', 'tsv',
                                 genome.accession + '_InterProScan.tsv', 'Genome analysis', 'genome')
 
         if has_pangenome:
-            self.upload_genome_file(genome, 'Accessory genes', 'fasta',
+            self.upload_genome_file(genome, 'Accessory predicted CDS', 'fasta',
                                     'accessory_genes.faa', 'Pan-Genome analysis', 'pan-genome')
-            self.upload_genome_file(genome, 'Core genes', 'fasta',
+            self.upload_genome_file(genome, 'Core predicted CDS', 'fasta',
                                     'core_genes.faa', 'Pan-Genome analysis', 'pan-genome')
-            self.upload_genome_file(genome, 'Core & Accessory genes', 'fasta',
+            self.upload_genome_file(genome, 'Core & Accessory predicted CDS', 'fasta',
                                     'pan-genome.faa', 'Pan-Genome analysis', 'pan-genome')
             self.upload_genome_file(genome,
-                                    'EggNOG annotation results', 'tsv',
+                                    'EggNog annotation', 'tsv',
                                     'pan-genome_eggNOG.tsv', 'Pan-Genome analysis', 'pan-genome')
             self.upload_genome_file(genome,
-                                    'InterProScan annotation results',
+                                    'InterProScan annotation',
                                     'tsv', 'pan-genome_InterProScan.tsv', 'Pan-Genome analysis', 'pan-genome')
             self.upload_genome_file(genome,
                                     'Gene Presence / Absence matrix',
