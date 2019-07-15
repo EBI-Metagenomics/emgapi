@@ -39,17 +39,6 @@ def pull_latest_study_metadata_from_ena_api(study_accession):
             raise StudyNotBeRetrievedFromENA
 
 
-def pull_latest_study_metadata_from_ena_db(secondary_study_accession, database):
-    """
-         Pulls study information from database (erapro).
-
-    :param database: Database to query.
-    :param secondary_study_accession:
-    :return:
-    """
-    return ena_models.RunStudy.objects.using(database).get(study_id=secondary_study_accession)
-
-
 def lookup_publication_by_pubmed_ids(pubmed_ids):
     # TODO: Implement
     pass
@@ -60,7 +49,7 @@ def lookup_publication_by_project_id(project_id):
     pass
 
 
-def instantiate_study_object(run_study, result_directory, biome_id):
+def update_or_create_study(study, result_directory, biome_id, database):
     """
         Attributes to parse out:
             - Center name (done)
@@ -90,14 +79,16 @@ def instantiate_study_object(run_study, result_directory, biome_id):
             7. public analysis_study, e.g. ERP112567
             8. private analysis_study, e.g.
 
-    :param run_study:
+    :param biome_id: biome identifier.
+    :param result_directory: e.g. 2018/08/SRP042265
+    :param study: ENA study - collection of runs.
     :return:
     """
 
-    secondary_study_accession = run_study.study_id
+    secondary_study_accession = study.study_id
     data_origination = 'SUBMITTED' if secondary_study_accession.startswith('ERP') else 'HARVESTED'
 
-    hold_date = run_study.hold_date
+    hold_date = study.hold_date
     first_public = hold_date if hold_date else None
     is_public = True if not hold_date else False
 
@@ -106,28 +97,35 @@ def instantiate_study_object(run_study, result_directory, biome_id):
 
     # Lookup study publication
     # TODO: Process publications
-    pubmed_ids = run_study.pubmed_id
+    pubmed_ids = study.pubmed_id
     pubmed_id_list = pubmed_ids.split(',')
     lookup_publication_by_pubmed_ids(pubmed_ids)
 
-    lookup_publication_by_project_id(run_study.project_id)
+    lookup_publication_by_project_id(study.project_id)
+
+    project_id = study.project_id
+    if secondary_study_accession.startswith('SRP'):
+        project = ena_models.Project.objects.using(database).get(project_id=project_id)
+        center_name = project.center_name
+    else:
+        center_name = study.center_name
 
     # new_study = Study.objects.using(database).update_or_create(
-    new_study = emg_models.Study.objects.update_or_create(
-        project_id=run_study.project_id,
+    return emg_models.Study.objects.update_or_create(
+        project_id=project_id,
         secondary_accession=secondary_study_accession,
-        defaults={'centre_name': run_study.center_name,
+        defaults={'centre_name': center_name,
                   'is_public': is_public,
                   'public_release_date': hold_date,
-                  'study_abstract': run_study.study_description,
-                  'study_name': run_study.study_title,
+                  'study_abstract': study.study_description,
+                  'study_name': study.study_title,
                   'study_status': 'FINISHED',
                   'data_origination': data_origination,
-                  'last_update': run_study.last_updated,
-                  'submission_account_id': run_study.submission_account_id,
+                  'last_update': study.last_updated,
+                  'submission_account_id': study.submission_account_id,
                   'biome': biome,
                   'result_directory': result_directory,
-                  'first_created': run_study.first_created},
+                  'first_created': study.first_created},
     )
 
 
@@ -146,11 +144,17 @@ def run_create_or_update_run_study(secondary_study_accession, result_dir_relativ
     """
     logging.info("Starting process of creating or updating study in EMG...")
 
-    run_study = pull_latest_study_metadata_from_ena_db(secondary_study_accession, database)
+    # Fetches latest study metadata from ENA's production database
+    run_study = ena_models.RunStudy.objects.using(database).get(study_id=secondary_study_accession)
 
-    instantiate_study_object(run_study, result_dir_relative_path, biome_id)
+    return update_or_create_study(run_study, result_dir_relative_path, biome_id, database)
 
 
-def run_create_or_update_assembly_study(secondary_study_accession, result_dir_relative_path, database='era_pro'):
-    # TODO: Implement
-    pass
+def run_create_or_update_assembly_study(secondary_study_accession, result_dir_relative_path, biome_id,
+                                        database='era_pro'):
+    logging.info("Starting process of creating or updating study in EMG...")
+
+    # Fetches latest study metadata from ENA's production database
+    assembly_study = ena_models.AssemblyStudy.objects.using(database).get(study_id=secondary_study_accession)
+
+    return update_or_create_study(assembly_study, result_dir_relative_path, biome_id, database)
