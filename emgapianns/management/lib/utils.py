@@ -110,3 +110,21 @@ def is_assembly(accession):
         return False
     else:
         raise AccessionNotRecognised
+
+
+location_reg = r'^(.+) (N|S) (.+) (W|E)$'
+
+
+def get_lat_long(s):
+    try:
+        latlng = re.findall(location_reg, s)
+        m = latlng[0]
+        lat = float(m[0])
+        lng = float(m[2])
+        if m[1] == 'S':
+            lat *= -1
+        if m[3] == 'E':
+            lng *= -1
+        return lat, lng
+    except IndexError:
+        return None, None
