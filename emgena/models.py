@@ -115,7 +115,7 @@ class AssemblyMapping(models.Model):
         return self.accession
 
 
-class RunStudy(models.Model):
+class Study(models.Model):
     study_id = models.CharField(db_column='STUDY_ID', primary_key=True, max_length=15)
     project_id = models.CharField(db_column='PROJECT_ID', max_length=15)
     study_status = models.CharField(db_column='STUDY_STATUS', max_length=50)
@@ -132,12 +132,32 @@ class RunStudy(models.Model):
     def get_study_id(self):
         return self.study_id
 
-    class Meta:
-        managed = False
-        db_table = 'V_MGP_RUN_STUDY'
-        app_label = 'emgena'
-
     def __str__(self):
         return '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s' % (
             self.study_id, self.project_id, self.study_status, self.center_name, self.hold_date, self.first_created,
             self.last_updated, self.study_title, self.study_description, self.submission_account_id, self.pubmed_id)
+
+    class Meta:
+        managed = False
+        app_label = 'emgena'
+        abstract = True
+
+
+class RunStudy(Study):
+    class Meta(Study.Meta):
+        db_table = 'V_MGP_RUN_STUDY'
+
+
+class AssemblyStudy(Study):
+    class Meta(Study.Meta):
+        db_table = 'V_MGP_ASSEMBLY_STUDY'
+
+
+class Project(models.Model):
+    project_id = models.CharField(db_column='PROJECT_ID', primary_key=True, max_length=15)
+    center_name = models.TextField(db_column='CENTER_NAME', max_length=500)
+
+    class Meta:
+        managed = False
+        app_label = 'emgena'
+        db_table = 'PROJECT'
