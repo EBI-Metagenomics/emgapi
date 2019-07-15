@@ -19,7 +19,7 @@ import os
 import re
 import sys
 
-from emgapianns.management.commands.import_analysis_model import Run, Assembly, ExperimentType
+from emgapianns.management.lib.import_analysis_model import Run, Assembly, ExperimentType
 from emgapianns.management.lib.uploader_exceptions import AccessionNotRecognised
 
 
@@ -31,22 +31,21 @@ def is_assembly_accession(accession):
     return re.match(r'(ERZ\d{6,})', accession)
 
 
-def retrieve_existing_result_dir(rootpath, accession):
+def retrieve_existing_result_dir(rootpath, dest_pattern):
     """
         Searches file system for existing result folder.
 
         Example absolute path:
         /nfs/production/interpro/metagenomics/results/2019/07/ERP108931/version_4.1/ERZ651/009/ERZ651769_FASTA/
     :param rootpath:
-    :param accession:
+    :param dest_pattern: e.g. ['2*', '*', 'version_*', '*', '00*', ERP000001s]
     :return:
     """
-    dest_pattern = ['2*', '*', 'version_*', '*', '00*', accession]
     prod_study_dir = os.path.join(rootpath, *dest_pattern)
 
     existing_result_dir = [d.replace(rootpath, '') for d in glob.glob(prod_study_dir)]
     if existing_result_dir:
-        logging.info(f'Found prod dirs: {existing_result_dir}')
+        logging.info(f'Found result dirs: {existing_result_dir}')
 
     if len(existing_result_dir) == 0:
         logging.info('No existing result dirs found')
