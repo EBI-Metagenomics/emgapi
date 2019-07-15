@@ -551,7 +551,9 @@ class Study(models.Model):
         setattr(self, 'accession', kwargs.get('accession', self._custom_pk()))
 
     def _custom_pk(self):
-        return "MGYS{pk:0>{fill}}".format(pk=self.study_id, fill=8)
+        if self.study_id and isinstance(self.study_id, int):
+            return "MGYS{pk:0>{fill}}".format(pk=self.study_id, fill=8)
+        return None
 
     study_id = models.AutoField(
         db_column='STUDY_ID', primary_key=True)
