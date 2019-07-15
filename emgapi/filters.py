@@ -233,6 +233,27 @@ class QueryArrayWidget(widgets.BaseCSVWidget, forms.TextInput):
         return list(set(ret))
 
 
+class SuperStudyFilter(django_filters.FilterSet):
+
+    biome_name = django_filters.CharFilter(
+        method='filter_biome_name', distinct=True,
+        label='Biome name',
+        help_text='Biome name')
+
+    def filter_biome_name(self, qs, name, value):
+        return qs.filter(
+            biomes__lineage__iregex=WORD_MATCH_REGEX.format(value))
+
+    class Meta:
+        model = emg_models.SuperStudy
+        fields = (
+            'super_study_id',
+            'title',
+            'description',
+            'biome_name',
+        )
+
+
 class SampleFilter(django_filters.FilterSet):
 
     accession = filters.ModelMultipleChoiceFilter(
