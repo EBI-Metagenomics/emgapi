@@ -1028,7 +1028,7 @@ class SampleGeoCoordinateSerializer(ExplicitFieldsModelSerializer,
                                     serializers.HyperlinkedModelSerializer):
 
     # workaround to provide multiple values in PK
-    id = serializers.ReadOnlyField(source="lon_lat_pk")
+    id = serializers.ReadOnlyField(source='lon_lat_pk')
 
     latitude = serializers.FloatField()
     longitude = serializers.FloatField()
@@ -1046,7 +1046,81 @@ class SampleGeoCoordinateSerializer(ExplicitFieldsModelSerializer,
         )
 
 
-# Study serializer
+class SuperStudySerializer(ExplicitFieldsModelSerializer,
+                           serializers.HyperlinkedModelSerializer):
+
+    biomes_count = serializers.IntegerField()
+
+    included_serializers = {
+        'biomes': 'emgapi.serializers.BiomeSerializer',
+        'flagship-studies': 'emgapi.serializers.StudySerializer',
+    }
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi_v1:super-studies-detail',
+        lookup_field='super_study_id',
+    )
+
+    flagship_studies = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_flagship_studies',
+        model=emg_models.Study,
+        related_link_view_name='emgapi_v1:super-studies-flagship-studies-list',
+        related_link_url_kwarg='super_study_id',
+        related_link_lookup_field='super_study_id',
+        related_link_self_view_name='emgapi_v1:studies-detail',
+        related_link_self_lookup_field='accession',
+    )
+
+    def get_flagship_studies(self, obj):
+        return None
+
+    # related studies are inferred from the biomes of the Super Sample
+    related_studies = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_related_studies',
+        model=emg_models.Study,
+        related_link_view_name='emgapi_v1:super-studies-related-studies-list',
+        related_link_url_kwarg='super_study_id',
+        related_link_lookup_field='super_study_id',
+        related_link_self_view_name='emgapi_v1:studies-detail',
+        related_link_self_lookup_field='accession',
+    )
+
+    def get_related_studies(self, obj):
+        return None
+
+    biomes = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_biomes',
+        model=emg_models.Biome,
+        related_link_view_name='emgapi_v1:super-studies-biomes-list',
+        related_link_url_kwarg='super_study_id',
+        related_link_lookup_field='super_study_id',
+        related_link_self_view_name='emgapi_v1:biomes-detail',
+        related_link_self_lookup_field='lineage'
+    )
+
+    def get_biomes(self, obj):
+        return None
+
+    class Meta:
+        model = emg_models.SuperStudy
+        fields = (
+            'super_study_id',
+            'title',
+            'description',
+            'url',
+            'biomes',
+            'biomes_count',
+            'flagship_studies',
+            'related_studies',
+        )
+
+
 class StudySerializer(ExplicitFieldsModelSerializer,
                       serializers.HyperlinkedModelSerializer):
 

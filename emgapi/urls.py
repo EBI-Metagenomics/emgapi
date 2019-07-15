@@ -34,6 +34,12 @@ router.register(
 )
 
 router.register(
+    r'super-studies',
+    views.SuperStudyViewSet,
+    base_name='super-studies'
+)
+
+router.register(
     r'samples',
     views.SampleViewSet,
     base_name='samples'
@@ -123,6 +129,18 @@ router.register(
     r'studies/(?P<accession>[^/]+)/analyses',
     views_relations.StudyAnalysisResultViewSet,
     base_name='studies-analyses'
+)
+
+router.register(
+    r'super-studies/(?P<super_study_id>[0-9\.]+)/flagship-studies',
+    views_relations.SuperStudyFlagshipStudiesViewSet,
+    base_name='super-studies-flagship-studies'
+)
+
+router.register(
+    r'super-studies/(?P<super_study_id>[0-9\.]+)/related-studies',
+    views_relations.SuperStudyRelatedStudiesViewSet,
+    base_name='super-studies-related-studies'
 )
 
 router.register(

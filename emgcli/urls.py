@@ -14,7 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# from django.contrib import admin
+from django.contrib import admin
+
 from django.conf.urls import include, url
 from django.conf import settings
 from django.contrib.auth import views
@@ -108,3 +109,14 @@ urlpatterns += [
         name='verify_jwt_token_v1'),
 
 ]
+
+# Admin
+urlpatterns += [
+    url('admin/', admin.site.urls),
+]
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns

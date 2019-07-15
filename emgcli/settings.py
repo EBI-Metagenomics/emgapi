@@ -163,12 +163,15 @@ except NameError:
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+try:
+    DEBUG = EMG_CONF['emg']['debug']
+except KeyError:
+    DEBUG = False
 
 # Application definition
 
 INSTALLED_APPS = [
-    # 'django.contrib.admin',
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -189,8 +192,22 @@ INSTALLED_APPS = [
     'emgapi',
     'emgena',
     'emgapianns',
-
 ]
+
+if DEBUG:
+    INSTALLED_APPS.extend([
+        'django_extensions',
+        'debug_toolbar',
+    ])
+
+    def show_toolbar(request):
+        """On DEBUG show the toolbar"""
+        return True
+
+    DEBUG_TOOLBAR_CONFIG = {
+        'SHOW_TOOLBAR_CALLBACK': show_toolbar,
+    }
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -208,6 +225,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+if DEBUG:
+    MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
 
 ROOT_URLCONF = 'emgcli.urls'
 
@@ -233,12 +253,6 @@ WSGI_APPLICATION = 'emgcli.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(EMG_DIR, 'db.sqlite3'),
-#     }
-# }
 try:
     DATABASES = EMG_CONF['emg']['databases']
 except KeyError:
@@ -368,6 +382,7 @@ try:
     AUTHENTICATION_BACKENDS = EMG_CONF['emg']['auth_backends']
 except:
     AUTHENTICATION_BACKENDS = (
+        'django.contrib.auth.backends.ModelBackend',
         'emgapi.backends.EMGBackend',
     )
 
@@ -421,6 +436,7 @@ except KeyError:
                   RuntimeWarning)
 
 CORS_ORIGIN_ALLOW_ALL = False
+
 # CORS_URLS_REGEX = r'^%s/.*$' % FORCE_SCRIPT_NAME
 # CORS_URLS_ALLOW_ALL_REGEX = ()
 CORS_ALLOW_METHODS = (
