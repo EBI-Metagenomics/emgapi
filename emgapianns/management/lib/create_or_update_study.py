@@ -17,7 +17,8 @@
 import logging
 from ena_portal_api import ena_handler
 from emgapianns.management.lib.uploader_exceptions import StudyNotBeRetrievedFromENA
-from django.apps import apps
+from emgapi import models as emg_models
+from emgena import models as ena_models
 
 ena = ena_handler.EnaApiHandler()
 
@@ -46,8 +47,7 @@ def pull_latest_study_metadata_from_ena_db(secondary_study_accession, database):
     :param secondary_study_accession:
     :return:
     """
-    RunStudy = apps.get_model("emgena", "RunStudy")
-    return RunStudy.objects.using(database).get(study_id=secondary_study_accession)
+    return ena_models.RunStudy.objects.using(database).get(study_id=secondary_study_accession)
 
 
 def lookup_publication_by_pubmed_ids(pubmed_ids):
@@ -93,9 +93,6 @@ def instantiate_study_object(run_study, result_directory, biome_id):
     :param run_study:
     :return:
     """
-    apps.get_app_config('emgapi')
-    Study = apps.get_model("emgapi", "Study")
-    Biome = apps.get_model("emgapi", "Biome")
 
     secondary_study_accession = run_study.study_id
     data_origination = 'SUBMITTED' if secondary_study_accession.startswith('ERP') else 'HARVESTED'
@@ -105,7 +102,7 @@ def instantiate_study_object(run_study, result_directory, biome_id):
     is_public = True if not hold_date else False
 
     # Retrieve biome object
-    biome = Biome.objects.get(pk=biome_id)
+    biome = emg_models.Biome.objects.get(pk=biome_id)
 
     # Lookup study publication
     # TODO: Process publications
@@ -116,7 +113,7 @@ def instantiate_study_object(run_study, result_directory, biome_id):
     lookup_publication_by_project_id(run_study.project_id)
 
     # new_study = Study.objects.using(database).update_or_create(
-    new_study = Study.objects.update_or_create(
+    new_study = emg_models.Study.objects.update_or_create(
         project_id=run_study.project_id,
         secondary_accession=secondary_study_accession,
         defaults={'centre_name': run_study.center_name,
