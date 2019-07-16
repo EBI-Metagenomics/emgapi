@@ -14,11 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-import sys
 
 from django.core.management import BaseCommand
-from emgapianns.management.lib import utils
-from emgapianns.management.lib.create_or_update_study import run_create_or_update_run_study
+
+from emgapianns.management.lib.create_or_update_study import run_create_or_update_study
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +29,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('accession',
-                            help='ENAs study secondary accession',
+                            help='ENAs study accession (primary or secondary accession)',
                             type=str,
                             action='store')
         parser.add_argument('biome-id',
@@ -51,12 +50,7 @@ class Command(BaseCommand):
         rootpath = options.get('prod_dir')
         biome_id = options['biome-id']
         database = options['ena_db']
-        #
-        result_dir = utils.retrieve_existing_result_dir(rootpath, ['2*', '*', secondary_study_accession])
-        if not result_dir:
-            logging.error("Could not find any result directory for this study. Program will exit now!")
-            sys.exit(1)
 
-        run_create_or_update_run_study(secondary_study_accession, result_dir, biome_id, database)
+        run_create_or_update_study(secondary_study_accession, rootpath, biome_id, database)
 
         logger.info("Program finished successfully.")
