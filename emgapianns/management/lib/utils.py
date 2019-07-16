@@ -123,7 +123,7 @@ def get_lat_long(s):
         lng = float(m[2])
         if m[1] == 'S':
             lat *= -1
-        if m[3] == 'E':
+        if m[3] == 'W':
             lng *= -1
         return lat, lng
     except IndexError:
