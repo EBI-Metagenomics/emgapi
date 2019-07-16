@@ -6,8 +6,19 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
-class Migration(migrations.Migration):
+def rm_optional_keys(apps, schema_editor):
+    ops = [
+        'ALTER TABLE `SAMPLE_ANN` DROP PRIMARY KEY',
+        'ALTER TABLE `SAMPLE_ANN` DROP UNIQUE KEY  `SAMPLE_ANN_PK`'
+    ]
+    for op in ops:
+        try:
+            migrations.RunSQL(sql=op)
+        except Exception:
+            pass
 
+
+class Migration(migrations.Migration):
     dependencies = [
         ('emgapi', '0012_auto_20190507_1219'),
     ]
@@ -18,12 +29,7 @@ class Migration(migrations.Migration):
             name='sample',
             field=models.ForeignKey(db_column='SAMPLE_ID', on_delete=django.db.models.deletion.CASCADE, related_name='metadata', to='emgapi.Sample'),
         ),
-        migrations.RunSQL(
-            sql='ALTER TABLE `SAMPLE_ANN` DROP KEY  `SAMPLE_ANN_PK`',
-        ),
-        migrations.RunSQL(
-            sql='ALTER TABLE `SAMPLE_ANN` DROP PRIMARY KEY',
-        ),
+        migrations.RunPython(rm_optional_keys),
         migrations.AlterUniqueTogether(
             name='sampleann',
             unique_together=set([]),
