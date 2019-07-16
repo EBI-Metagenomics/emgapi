@@ -15,7 +15,12 @@
 # limitations under the License.
 
 import logging
+import sys
+
+from django.db.models import Q
 from ena_portal_api import ena_handler
+
+from emgapianns.management.lib import utils
 from emgapianns.management.lib.uploader_exceptions import StudyNotBeRetrievedFromENA
 from emgapi import models as emg_models
 from emgena import models as ena_models
@@ -129,32 +134,31 @@ def update_or_create_study(study, result_directory, biome_id, database):
     )
 
 
-def run_create_or_update_run_study(secondary_study_accession, result_dir_relative_path, biome_id, database='era_pro'):
+def run_create_or_update_study(study_accession, rootpath, biome_id, database='era_pro'):
     """
-        Both primary and secondary study accessions are support.
+        Creates a new study object in EMG or updates an existing one.
 
-        Steps;
-            - Check if study already exists
-            - Pull latest study metadata from ENA
-            - Save or update entry in EMG
+    :param study_accession:
+    :param rootpath: Root path to EMG's archive
+    :param biome_id: biome identifier
     :param database: Pointer to the database connection details in the config file.
-    :param secondary_study_accession: e.g. ERP014351 or SRP042265
-    :param result_dir_relative_path: Study result folder, e.g. 2015/08/ERP010251
     :return:
     """
     logging.info("Starting process of creating or updating study in EMG...")
 
     # Fetches latest study metadata from ENA's production database
-    run_study = ena_models.RunStudy.objects.using(database).get(study_id=secondary_study_accession)
+    study = ena_models.RunStudy.objects.using(database).get(Q(study_id=study_accession) | Q(project_id=study_accession))
+    if not study:
+        study = ena_models.AssemblyStudy.objects.using(database).get(
+            Q(study_id=study_accession) | Q(project_id=study_accession))
+        if not study:
+            print("Could not find study {0} in the database. Program will exit now!".format(study_accession))
+            sys.exit(1)
 
-    return update_or_create_study(run_study, result_dir_relative_path, biome_id, database)
+    secondary_study_accession = study.study_id
+    result_dir = utils.retrieve_existing_result_dir(rootpath, ['2*', '*', secondary_study_accession])
+    if not result_dir:
+        print("Could not find any result directory for this study. Program will exit now!")
+        sys.exit(1)
 
-
-def run_create_or_update_assembly_study(secondary_study_accession, result_dir_relative_path, biome_id,
-                                        database='era_pro'):
-    logging.info("Starting process of creating or updating study in EMG...")
-
-    # Fetches latest study metadata from ENA's production database
-    assembly_study = ena_models.AssemblyStudy.objects.using(database).get(study_id=secondary_study_accession)
-
-    return update_or_create_study(assembly_study, result_dir_relative_path, biome_id, database)
+    return update_or_create_study(study, result_dir, biome_id, database)
