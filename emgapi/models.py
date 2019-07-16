@@ -618,9 +618,9 @@ class Study(models.Model):
 
 
 class StudyPublication(models.Model):
+    id = models.AutoField(primary_key=True)
     study = models.ForeignKey(
-        Study, db_column='STUDY_ID',
-        primary_key=True, on_delete=models.CASCADE)
+        Study, db_column='STUDY_ID', on_delete=models.CASCADE)
     pub = models.ForeignKey(
         Publication, db_column='PUB_ID', on_delete=models.CASCADE)
 
@@ -1200,8 +1200,9 @@ class SampleAnnManager(models.Manager):
 
 
 class SampleAnn(models.Model):
+    id = models.AutoField(primary_key=True)
     sample = models.ForeignKey(
-        Sample, db_column='SAMPLE_ID', primary_key=True,
+        Sample, db_column='SAMPLE_ID',
         related_name="metadata")
     units = models.CharField(
         db_column='UNITS', max_length=25, blank=True, null=True)
@@ -1214,7 +1215,7 @@ class SampleAnn(models.Model):
 
     class Meta:
         db_table = 'SAMPLE_ANN'
-        unique_together = (('sample', 'var'), ('sample', 'var'),)
+        unique_together = (('sample', 'var'), )
 
     def __str__(self):
         return "%s %s:%r" % (self.sample, self.var.var_name, self.var_val_ucv)
