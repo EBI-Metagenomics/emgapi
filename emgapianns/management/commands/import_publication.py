@@ -14,18 +14,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-
 from django.core.management import BaseCommand
 
+from emgapianns.management.lib.europe_pmc_api.europe_pmc_api_handler import EuropePMCApiHandler
+
 logger = logging.getLogger(__name__)
+
+
+def lookup_publication_by_pubmed_id(pubmed_id):
+    api_handler = EuropePMCApiHandler()
+    return api_handler.get_publication_by_pubmed_id(pubmed_id)
+
+
+def lookup_publication_by_project_id(project_id):
+    # TODO: Implement
+    pass
 
 
 class Command(BaseCommand):
     help = 'Creates or updates a publication in EMG.'
 
     def add_arguments(self, parser):
+        # TODO: Consider lookup by project id
         parser.add_argument('pubmed-id',
-                            help='PubMed id (PMID)',
+                            help='PubMed identifier (PMID)',
                             type=str,
                             action='store')
 
@@ -33,6 +45,6 @@ class Command(BaseCommand):
         logger.info("CLI %r" % options)
 
         pubmed_id = options['pubmed-id']
-        # TODO: Implement
+        lookup_publication_by_pubmed_id(pubmed_id)
 
         logger.info("Program finished successfully.")
