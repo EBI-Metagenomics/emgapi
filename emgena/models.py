@@ -27,8 +27,10 @@
 
 from __future__ import unicode_literals
 
+from datetime import date
 from django.db import models
-
+from lxml import objectify
+from django.db import connections
 
 class Submitter(models.Model):
     submission_account = models.ForeignKey(
@@ -82,7 +84,6 @@ class SubmitterContact(models.Model):
 
 
 class Notify(object):
-
     def __init__(self, **kwargs):
         for field in ('id', 'from_email', 'message', 'subject'):
             setattr(self, field, kwargs.get(field, None))
@@ -161,3 +162,27 @@ class Project(models.Model):
         managed = False
         app_label = 'emgena'
         db_table = 'PROJECT'
+
+
+class Sample(models.Model):
+    sample_id = models.CharField(db_column='SAMPLE_ID', primary_key=True, max_length=15)
+    submission_id = models.CharField(db_column='SUBMISSION_ID', max_length=15)
+    biosample_id = models.CharField(db_column='BIOSAMPLE_ID', max_length=15)
+    submission_account_id = models.CharField(db_column='SUBMISSION_ACCOUNT_ID', max_length=15)
+    first_created = models.DateField(db_column='FIRST_CREATED')
+    last_updated = models.DateField(db_column='LAST_UPDATED')
+    first_public = models.DateField(db_column='FIRST_PUBLIC')
+    tax_id = models.IntegerField(db_column='TAX_ID')
+    scientific_name = models.CharField(db_column='SCIENTIFIC_NAME', max_length=100)
+    title = models.CharField(db_column='SAMPLE_TITLE', max_length=200)
+    alias = models.CharField(db_column='SAMPLE_ALIAS', max_length=200)
+    checklist = models.CharField(db_column='CHECKLIST_ID', max_length=200)
+
+    @property
+    def is_public(self):
+        return date.today() >= self.first_public
+
+    class Meta:
+        managed = False
+        app_label = 'emgena'
+        db_table = 'SAMPLE'
