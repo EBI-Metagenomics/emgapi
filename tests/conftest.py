@@ -21,8 +21,6 @@ import pytest
 import mongoengine
 
 from django.conf import settings
-from django.db import connections
-from pytest_django.fixtures import django_db_setup as _django_db_setup
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'emgcli.settings')
 
@@ -36,6 +34,7 @@ def pytest_configure():
     settings.AUTHENTICATION_BACKENDS = ('test_utils.FakeEMGBackend',)
     # disconnect main database
     mongoengine.connection.disconnect()
+
 
 # List  of DB configs which should NOT be migrated by django-pytest
 HIDE_DB_CONFIGS = ['ena', 'backlog_prod']
