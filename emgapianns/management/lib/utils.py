@@ -45,7 +45,7 @@ def retrieve_existing_result_dir(rootpath, dest_pattern):
 
     existing_result_dir = [d.replace(rootpath, '') for d in glob.glob(prod_study_dir)]
     if existing_result_dir:
-        logging.info(f'Found result dirs: {existing_result_dir}')
+        logging.info('Found result dirs: {}'.format(existing_result_dir))
 
     if len(existing_result_dir) == 0:
         logging.info('No existing result dirs found')
