@@ -88,7 +88,6 @@ class Command(BaseCommand):
     def create_or_update_sample(self, api_ena_db_model, api_data):
         accession = api_data['secondary_sample_accession']
         logger.info('Creating sample {}'.format(accession))
-
         defaults = sanitise_sample_fields({
             'collection_date': api_data['collection_date'],
             'is_public': api_data['status_id'] == '4',
@@ -115,6 +114,7 @@ class Command(BaseCommand):
         return sample
 
     def tag_sample_anns(self, sample, sample_data):
+        print(sample_data)
         logger.info('Tagging annotations for sample {}'.format(sample.accession))
         if sample_data.get('location'):
             lat, lng = get_lat_long(sample_data['location'])
@@ -170,7 +170,10 @@ class Command(BaseCommand):
         return ena_models.Sample.objects.using('ena').filter(query).first()
 
     def get_variable(self, name):
-        return emg_models.VariableNames.objects.using(self.emg_db_name).get(var_name=name)
+        try:
+            return emg_models.VariableNames.objects.using(self.emg_db_name).get(var_name=name)
+        except emg_models.VariableNames.DoesNotExist as e:
+            raise emg_models.VariableNames.DoesNotExist('Variable name {} is missing in db'.format(name))
 
     def tag_study(self, sample):
         study_accessions = ena.get_sample_studies(sample.primary_accession)
