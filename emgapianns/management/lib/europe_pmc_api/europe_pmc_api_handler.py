@@ -38,21 +38,21 @@ def get_default_connection_headers():
 
 class Publication(object):
 
-    def __init__(self, pubYear, authorString, journalIssn, pubType,
-                 journalVolume, title, citedByCount, source,
-                 pmid, pageInfo, doi, journalTitle):
-        self.pubYear = pubYear
-        self.authorString = authorString
-        self.journalIssn = journalIssn
-        self.pubType = pubType
-        self.journalVolume = journalVolume
+    def __init__(self, pub_year, author_string, journal_issn, pub_type,
+                 journal_volume, title, cited_by_count, source,
+                 pmid, page_info, doi, journal_title):
+        self.pub_year = pub_year
+        self.author_string = author_string
+        self.journal_issn = journal_issn
+        self.pub_type = pub_type
+        self.journal_volume = journal_volume
         self.title = title
-        self.citedByCount = citedByCount
+        self.cited_by_count = cited_by_count
         self.source = source
         self.pmid = pmid
-        self.pageInfo = pageInfo
+        self.page_info = page_info
         self.doi = doi
-        self.journalTitle = journalTitle
+        self.journal_title = journal_title
 
 
 class EuropePMCApiHandler:
