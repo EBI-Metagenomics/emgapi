@@ -94,7 +94,7 @@ def update_or_create_study(study, result_directory, biome_id, database):
     data_origination = 'SUBMITTED' if secondary_study_accession.startswith('ERP') else 'HARVESTED'
 
     hold_date = study.hold_date
-    first_public = hold_date if hold_date else None
+    # first_public = hold_date if hold_date else None # TODO
     is_public = True if not hold_date else False
 
     # Retrieve biome object
@@ -103,7 +103,7 @@ def update_or_create_study(study, result_directory, biome_id, database):
     # Lookup study publication
     # TODO: Process publications
     pubmed_ids = study.pubmed_id
-    pubmed_id_list = pubmed_ids.split(',')
+    # pubmed_id_list = pubmed_ids.split(',') # TODO
     lookup_publication_by_pubmed_ids(pubmed_ids)
 
     lookup_publication_by_project_id(study.project_id)

@@ -29,8 +29,7 @@ from __future__ import unicode_literals
 
 from datetime import date
 from django.db import models
-from lxml import objectify
-from django.db import connections
+
 
 class Submitter(models.Model):
     submission_account = models.ForeignKey(

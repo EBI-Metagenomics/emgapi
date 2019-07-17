@@ -38,8 +38,9 @@ class TestImportSampleTransactions(TransactionTestCase):
     def test_import_sample_should_load_sample(self):
         sample_accession = 'ERS1282031'
         mock_api_data = mock_fetch_sample_api()
-        with mock.patch.object(Command, 'fetch_sample_api', new=lambda *args, **kwargs: mock_api_data), \
-             mock.patch.object(Command, 'fetch_sample_ena_db', new=create_model):
+        mock_api = mock.patch.object(Command, 'fetch_sample_api', new=lambda *args, **kwargs: mock_api_data)
+        mock_db = mock.patch.object(Command, 'fetch_sample_ena_db', new=create_model)
+        with mock_api, mock_db:
             cmd = Command()
             cmd.run_from_argv(argv=['manage.py', 'import_sample', sample_accession, '--biome', 'root:foo:bar'])
             created_sample = emg_models.Sample.objects.get(accession=sample_accession)
@@ -58,8 +59,9 @@ class TestImportSampleTransactions(TransactionTestCase):
         sample_accession = 'ERS1282031'
         mock_api_data = mock_fetch_sample_api()
         mock_api_data['status_id'] = '2'
-        with mock.patch.object(Command, 'fetch_sample_api', new=lambda *args, **kwargs: mock_api_data), \
-             mock.patch.object(Command, 'fetch_sample_ena_db', new=create_model):
+        mock_api = mock.patch.object(Command, 'fetch_sample_api', new=lambda *args, **kwargs: mock_api_data)
+        mock_db = mock.patch.object(Command, 'fetch_sample_ena_db', new=create_model)
+        with mock_api, mock_db:
             cmd = Command()
             cmd.run_from_argv(argv=['manage.py', 'import_sample', sample_accession, '--biome', 'root:foo:bar'])
             created_sample = emg_models.Sample.objects.get(accession=sample_accession)
@@ -71,8 +73,9 @@ class TestImportSampleTransactions(TransactionTestCase):
         sample_accession = 'ERS1282031'
         mock_api_data = mock_fetch_sample_api()
         del mock_api_data['location']
-        with mock.patch.object(Command, 'fetch_sample_api', new=lambda *args, **kwargs: mock_api_data), \
-             mock.patch.object(Command, 'fetch_sample_ena_db', new=create_model):
+        mock_api = mock.patch.object(Command, 'fetch_sample_api', new=lambda *args, **kwargs: mock_api_data)
+        mock_db = mock.patch.object(Command, 'fetch_sample_ena_db', new=create_model)
+        with mock_api, mock_db:
             cmd = Command()
             cmd.run_from_argv(argv=['manage.py', 'import_sample', sample_accession, '--biome', 'root:foo:bar'])
             created_sample = emg_models.Sample.objects.get(accession=sample_accession)
@@ -84,8 +87,9 @@ class TestImportSampleTransactions(TransactionTestCase):
     def test_import_sample_should_load_location(self):
         sample_accession = 'ERS1282031'
         mock_api_data = mock_fetch_sample_api()
-        with mock.patch.object(Command, 'fetch_sample_api', new=lambda *args, **kwargs: mock_api_data), \
-             mock.patch.object(Command, 'fetch_sample_ena_db', new=create_model):
+        mock_api = mock.patch.object(Command, 'fetch_sample_api', new=lambda *args, **kwargs: mock_api_data)
+        mock_db = mock.patch.object(Command, 'fetch_sample_ena_db', new=create_model)
+        with mock_api, mock_db:
             cmd = Command()
             cmd.run_from_argv(argv=['manage.py', 'import_sample', sample_accession, '--biome', 'root:foo:bar'])
             created_sample = emg_models.Sample.objects.get(accession=sample_accession)

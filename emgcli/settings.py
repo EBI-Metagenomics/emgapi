@@ -420,7 +420,7 @@ except KeyError:
     warnings.warn("ALLOWED_HOSTS not configured using wildecard",
                   RuntimeWarning)
 
-CORS_ORIGIN_ALLOW_ALL = False
+CORS_ORIGIN_ALLOW_ALL = True
 # CORS_URLS_REGEX = r'^%s/.*$' % FORCE_SCRIPT_NAME
 # CORS_URLS_ALLOW_ALL_REGEX = ()
 CORS_ALLOW_METHODS = (
