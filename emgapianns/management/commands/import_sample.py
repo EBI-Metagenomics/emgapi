@@ -172,7 +172,7 @@ class Command(BaseCommand):
     def get_variable(self, name):
         try:
             return emg_models.VariableNames.objects.using(self.emg_db_name).get(var_name=name)
-        except emg_models.VariableNames.DoesNotExist as e:
+        except emg_models.VariableNames.DoesNotExist:
             raise emg_models.VariableNames.DoesNotExist('Variable name {} is missing in db'.format(name))
 
     def tag_study(self, sample):
