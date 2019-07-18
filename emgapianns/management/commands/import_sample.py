@@ -70,7 +70,7 @@ class Command(BaseCommand):
         logger.info("Program finished successfully.")
 
     def import_sample(self, accession):
-        ena_db_model = self.fetch_sample_ena_db(accession)
+        ena_db_model = self.get_ena_db_sample(accession)
         api_sample_data = self.fetch_sample_api(accession)
         sample = self.create_or_update_sample(ena_db_model, api_sample_data)
         self.tag_sample_anns(sample, api_sample_data)
@@ -80,10 +80,6 @@ class Command(BaseCommand):
     def fetch_sample_api(accession):
         logger.info('Fetching sample {} from ena api'.format(accession))
         return ena.get_sample(accession)
-
-    def fetch_sample_ena_db(self, accession):
-        logger.info('Fetching sample {} from ena oracle DB'.format(accession))
-        return self.get_ena_db_sample(accession)
 
     def create_or_update_sample(self, api_ena_db_model, api_data):
         accession = api_data['secondary_sample_accession']
@@ -165,6 +161,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def get_ena_db_sample(accession):
+        logger.info('Fetching sample {} from ena oracle DB'.format(accession))
         query = Q(sample_id=accession) | Q(biosample_id=accession)
         return ena_models.Sample.objects.using('ena').filter(query).first()
 
