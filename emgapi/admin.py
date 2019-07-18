@@ -5,8 +5,34 @@ from django.contrib import admin
 
 from . import models as emg_models
 
-admin.site.register(emg_models.Study)
-admin.site.register(emg_models.Biome)
+
+@admin.register(emg_models.Biome)
+class Biome(admin.ModelAdmin):
+    search_fields = [
+        'biome_id',
+        'biome_name',
+        'lineage'
+    ]
+
+
+@admin.register(emg_models.Study)
+class Study(admin.ModelAdmin):
+    ordering = ['-last_update']
+    search_fields = [
+        'study_id',
+        'secondary_accession',
+        'project_id',
+        'centre_name',
+        'study_abstract',
+        'study_name',
+        'author_name',
+        'author_email',
+        'biome__biome_name',
+    ]
+    list_display = ('study_id',
+                    'project_id',
+                    'study_name',)
+    list_filter = ('is_public', )
 
 
 class SuperStudyStudiesInline(admin.TabularInline):
