@@ -114,7 +114,6 @@ class Command(BaseCommand):
         return sample
 
     def tag_sample_anns(self, sample, sample_data):
-        print(sample_data)
         logger.info('Tagging annotations for sample {}'.format(sample.accession))
         if sample_data.get('location'):
             lat, lng = get_lat_long(sample_data['location'])
@@ -175,8 +174,11 @@ class Command(BaseCommand):
         except emg_models.VariableNames.DoesNotExist:
             raise emg_models.VariableNames.DoesNotExist('Variable name {} is missing in db'.format(name))
 
+    def get_sample_studies(self, sample):
+        return ena.get_sample_studies(sample.primary_accession)
+
     def tag_study(self, sample):
-        study_accessions = ena.get_sample_studies(sample.primary_accession)
+        study_accessions = self.get_sample_studies(sample)
         studies = emg_models.Study.objects.using(self.emg_db_name).filter(secondary_accession__in=study_accessions)
         for study in studies:
             try:
