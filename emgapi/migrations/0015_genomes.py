@@ -130,7 +130,7 @@ def remove_download_description(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('emgapi', '0012_auto_20190507_1219'),
+        ('emgapi', '0014_study_publication_pk_fix'),
     ]
 
     operations = [
