@@ -1575,3 +1575,21 @@ class GenomeSetSerializer(ExplicitFieldsModelSerializer,
             'name',
             'genomes',
         )
+
+
+class CogCatSerializer(ExplicitFieldsModelSerializer):
+    class Meta:
+        model = emg_models.CogCat
+        fields = '__all__'
+
+
+class KeggModuleSerializer(ExplicitFieldsModelSerializer):
+    class Meta:
+        model = emg_models.KeggModule
+        fields = '__all__'
+
+
+class KeggClassSerializer(ExplicitFieldsModelSerializer):
+    class Meta:
+        model = emg_models.KeggClass
+        fields = ('class_id', 'name')

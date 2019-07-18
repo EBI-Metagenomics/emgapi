@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import emgapi.views_relations
 from rest_framework import routers
 
 from . import views
@@ -339,7 +338,7 @@ router.register(
 
 router.register(
     r'release/(?P<version>[^/]+)/downloads',
-    emgapi.views.ReleaseDownloadViewSet,
+    views.ReleaseDownloadViewSet,
     base_name='release-download'
 )
 
@@ -353,4 +352,22 @@ router.register(
     r'genomeset/(?P<name>[^/]+)/genomes',
     views_relations.GenomeSetGenomes,
     base_name='genomeset-genomes'
+)
+
+router.register(
+    r'cogs',
+    views.CogCatViewSet,
+    base_name='cogs'
+)
+
+router.register(
+    r'kegg-modules',
+    views.KeggModuleViewSet,
+    base_name='kegg-modules'
+)
+
+router.register(
+    r'kegg-classes',
+    views.KeggClassViewSet,
+    base_name='kegg-classes'
 )
