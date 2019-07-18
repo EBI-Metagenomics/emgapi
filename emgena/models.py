@@ -185,3 +185,19 @@ class Sample(models.Model):
         managed = False
         app_label = 'emgena'
         db_table = 'SAMPLE'
+
+
+class Run(models.Model):
+    run_id = models.CharField(db_column='RUN_ID', primary_key=True, max_length=15)
+    submission_id = models.CharField(db_column='SUBMISSION_ID', max_length=15)
+    experiment_id = models.CharField(db_column='EXPERIMENT_ID', max_length=15)
+    alias = models.CharField(db_column='RUN_ALIAS', max_length=100)
+    status_id = models.IntegerField(db_column='STATUS_ID')
+    first_created = models.DateField(db_column='FIRST_CREATED')
+    last_updated = models.DateField(db_column='LAST_UPDATED')
+    submission_account_id = models.CharField(db_column='SUBMISSION_ACCOUNT_ID', max_length=15)
+
+    class Meta:
+        managed = False
+        app_label = 'emgena'
+        db_table = 'RUN'
