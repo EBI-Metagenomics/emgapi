@@ -91,7 +91,7 @@ class TestDefaultAPI(object):
         with pytest.raises(NoReverseMatch):
             reverse(view_name)
 
-    @pytest.mark.parametrize(
+    @pytest.mark.parametrize(  # noqa: C901
         '_model, _camelcase, _view, _view_args, relations',
         [
             ('ExperimentType', 'experiment-types',
