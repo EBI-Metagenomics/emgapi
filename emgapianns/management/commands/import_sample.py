@@ -20,7 +20,7 @@ from django.db import IntegrityError
 from django.db.models import Q
 from django.utils import timezone
 from django.core.management import BaseCommand
-from emgapianns.management.lib.utils import get_lat_long
+from emgapianns.management.lib.utils import get_lat_long, sanitise_fields
 from ena_portal_api import ena_handler
 from emgapi import models as emg_models
 from emgena import models as ena_models
@@ -33,16 +33,6 @@ ipr_cache = {}
 kegg_cache = {}
 
 ena = ena_handler.EnaApiHandler()
-
-
-def sanitise_sample_fields(data):
-    # Remove blank fields
-    keys = list(data.keys())
-    for k in keys:
-        if type(data[k]) == str and len(data[k]) == 0:
-            del data[k]
-
-    return data
 
 
 class Command(BaseCommand):
@@ -84,7 +74,7 @@ class Command(BaseCommand):
     def create_or_update_sample(self, api_ena_db_model, api_data):
         accession = api_data['secondary_sample_accession']
         logger.info('Creating sample {}'.format(accession))
-        defaults = sanitise_sample_fields({
+        defaults = sanitise_fields({
             'collection_date': api_data['collection_date'],
             'is_public': api_data['status_id'] == '4',
             'sample_desc': api_data['description'],
