@@ -128,3 +128,13 @@ def get_lat_long(s):
         return lat, lng
     except IndexError:
         return None, None
+
+
+def sanitise_fields(data):
+    # Remove blank fields
+    keys = list(data.keys())
+    for k in keys:
+        if type(data[k]) == str and len(data[k]) == 0:
+            del data[k]
+
+    return data

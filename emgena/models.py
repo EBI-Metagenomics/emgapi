@@ -201,3 +201,22 @@ class Run(models.Model):
         managed = False
         app_label = 'emgena'
         db_table = 'RUN'
+
+
+class Analysis(models.Model):
+    analysis_id = models.CharField(db_column='ANALYSIS_ID', primary_key=True, max_length=15)
+    title = models.CharField(db_column='ANALYSIS_TITLE', max_length=100)
+    type = models.CharField(db_column='ANALYSIS_TYPE', max_length=100)
+    submission_id = models.CharField(db_column='SUBMISSION_ID', max_length=15)
+    status_id = models.IntegerField(db_column='STATUS_ID')
+    first_created = models.DateField(db_column='FIRST_CREATED')
+    last_updated = models.DateField(db_column='LAST_UPDATED')
+    primary_study_accession = models.CharField(db_column='BIOPROJECT_ID', max_length=15)
+    secondary_study_accession = models.CharField(db_column='STUDY_ID', max_length=15)
+    unique_alias = models.CharField(db_column='UNIQUE_ALIAS', max_length=100)
+    submission_account_id = models.CharField(db_column='SUBMISSION_ACCOUNT_ID', max_length=15)
+
+    class Meta:
+        managed = False
+        app_label = 'emgena'
+        db_table = 'ANALYSIS'
