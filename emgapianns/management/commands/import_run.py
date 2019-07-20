@@ -90,21 +90,16 @@ class Command(BaseCommand):
         accession = api_data['secondary_sample_accession']
         logger.info('Creating sample {}'.format(accession))
         status = emg_models.Status.objects.using(self.emg_db_name).get(status_id=db_data.status_id)
-        print(api_data)
         defaults = sanitise_sample_fields({
             'instrument_platform': api_data['instrument_platform'],
             'instrument_model': api_data['instrument_model'],
             'status_id': status,
             'secondary_accession': accession
         })
-        print(defaults)
-
         run, created = emg_models.Run.objects.using(self.emg_db_name).update_or_create(
             accession=accession,
             defaults=defaults
         )
-        print(run.instrument_platform)
-        print(run.instrument_model)
         return run
 
     def get_ena_sample(self, sample_accession):
