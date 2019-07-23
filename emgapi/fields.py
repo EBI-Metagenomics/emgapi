@@ -32,7 +32,7 @@ class DownloadHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
                 'accession': obj.study.accession,
                 'release_version': obj.pipeline.release_version,
             }
-        except:
+        except:  # noqa: E722
             # if analysis
             kwargs = {
                 'accession': obj.job.accession,

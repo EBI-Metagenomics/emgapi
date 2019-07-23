@@ -42,7 +42,7 @@ def published_year():
             .order_by('published_year') \
             .values('published_year').distinct()
         return [(y['published_year'], y['published_year']) for y in years]
-    except:
+    except:  # noqa: E722
         return []
 
 
@@ -52,7 +52,7 @@ def metadata_keywords():
             .order_by('var_name') \
             .values('var_name').distinct()
         return [(k['var_name'], k['var_name']) for k in keywords]
-    except:
+    except:  # noqa: E722
         return []
 
 
@@ -61,7 +61,7 @@ def pipeline_version():
         pipelines = emg_models.Pipeline.objects.all() \
             .order_by('release_version').distinct()
         return [(p.pk, p.release_version) for p in pipelines]
-    except:
+    except:  # noqa: E722
         return []
 
 

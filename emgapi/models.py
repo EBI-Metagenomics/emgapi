@@ -672,7 +672,7 @@ class SuperStudy(models.Model):
                                       primary_key=True)
     title = models.CharField(db_column='TITLE',
                              max_length=100, blank=True, null=True)
-    description = models.TextField(db_column='DESCRIPTION')
+    description = models.TextField(db_column='DESCRIPTION', blank=True, null=True)
 
     flagship_studies = models.ManyToManyField(
         'Study', through='SuperStudyStudy', related_name='super_studies', blank=True
@@ -681,6 +681,8 @@ class SuperStudy(models.Model):
     biomes = models.ManyToManyField(
         'Biome', through='SuperStudyBiome', related_name='super_studies', blank=True
     )
+
+    image = models.ImageField(upload_to='super-studies-img', blank=True, null=True)
 
     objects = SuperStudyManager()
 

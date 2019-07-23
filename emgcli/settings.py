@@ -401,6 +401,13 @@ try:
 except KeyError:
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+try:
+    MEDIA_URL = EMG_CONF['emg']['media_url']
+    MEDIA_ROOT = EMG_CONF['emg']['media_root']
+except KeyError:
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 WHITENOISE_STATIC_PREFIX = '/static/'
 
 STATIC_URL = '%s%s' % (FORCE_SCRIPT_NAME, WHITENOISE_STATIC_PREFIX)
@@ -435,7 +442,10 @@ except KeyError:
     warnings.warn("ALLOWED_HOSTS not configured using wildecard",
                   RuntimeWarning)
 
-CORS_ORIGIN_ALLOW_ALL = False
+try:
+    CORS_ORIGIN_ALLOW_ALL = EMG_CONF['emg']['cors_origin_allow_all']
+except KeyError:
+    CORS_ORIGIN_ALLOW_ALL = False
 
 # CORS_URLS_REGEX = r'^%s/.*$' % FORCE_SCRIPT_NAME
 # CORS_URLS_ALLOW_ALL_REGEX = ()

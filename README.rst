@@ -45,7 +45,7 @@ Create a virtual environment::
     
     `virtualenv -p python3 venv`
 
-Activate and install the dependencies `source venv/bin/activate && pip install -r requirements.txt`
+Activate and install the dependencies `source venv/bin/activate && pip install -r requirements-local-dev.txt`
 
 Start containers using::
 

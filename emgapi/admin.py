@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from django.contrib import admin
+from django.utils.safestring import mark_safe
 
 from . import models as emg_models
 
@@ -48,3 +49,14 @@ class SuperStudyBiomesInline(admin.TabularInline):
 @admin.register(emg_models.SuperStudy)
 class SuperStudyAdmin(admin.ModelAdmin):
     inlines = [SuperStudyStudiesInline, SuperStudyBiomesInline]
+    readonly_fields = ('image_tag',)
+
+    def image_tag(self, obj):
+        if obj.image and obj.image.url:
+            return mark_safe(
+                '<img src="{}" width="150" height="150" />'.format(obj.image.url)
+            )
+        else:
+            return ''
+
+    image_tag.short_description = 'Image'
