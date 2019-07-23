@@ -41,7 +41,7 @@ class Publication(object):
     def __init__(self, pub_year, author_string, journal_issn, pub_type,
                  journal_volume, title, cited_by_count, source,
                  pmid, page_info, doi, journal_title):
-        self.pub_year = pub_year
+        self.pub_year = int(pub_year)
         self.author_string = author_string
         self.journal_issn = journal_issn
         self.pub_type = pub_type
@@ -49,7 +49,7 @@ class Publication(object):
         self.title = title
         self.cited_by_count = cited_by_count
         self.source = source
-        self.pmid = pmid
+        self.pmid = int(pmid)
         self.page_info = page_info
         self.doi = doi
         self.journal_title = journal_title
@@ -84,7 +84,7 @@ class EuropePMCApiHandler:
 
         return publications
 
-    def _convert_response(self, response):
+    def _convert_response(self, response, pubmed_id):
         """
             Converts the response object into a dict.
 
@@ -99,13 +99,15 @@ class EuropePMCApiHandler:
             if len(json_data[result_key]['result']) > 0:
                 return self._parse_result_list(json_data[result_key])
             else:
-                logging.info("No publications found for the given PubMED identifier!")
+                raise ValueError('Could not find publication for PubMED {} in Europe PMC.'.format(pubmed_id))
         else:
             logging.error("Expected result key - {} - not found in JSON response.".format(result_key))
 
         return None
 
     def get_publication_by_pubmed_id(self, pubmed_id, attempt=1):
+        if not isinstance(pubmed_id, int):
+            raise TypeError("The specified pubmed id: {} is not a number!".format(pubmed_id))
         query = 'ext_id:{0}'.format(pubmed_id)
         search_params = {'query': query, 'resultType': self._result_type, 'format': self._format}
         response = self._send_get_request(search_params)
@@ -123,12 +125,12 @@ class EuropePMCApiHandler:
                 response.raise_for_status()
             else:
                 sleep(1)
-                return self.get_publication(pubmed_id=pubmed_id, attempt=attempt)
+                return self.get_publication_by_pubmed_id(pubmed_id=pubmed_id, attempt=attempt)
 
         elif response.status_code == 204:
-            raise ValueError('Could not find publication {} in Europe PMC.'.format(pubmed_id))
+            raise ValueError('Could not find publication for PubMED {} in Europe PMC.'.format(pubmed_id))
         else:
-            return self._convert_response(response)
+            return self._convert_response(response, pubmed_id)
 
     def get_publication_by_project_id(self, project_id, attempt=1):
         # TODO: Implement
