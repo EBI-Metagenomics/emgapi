@@ -39,7 +39,7 @@ class TestSuperStudyAPI:
         assert rsp['data']['type'] == 'super-studies'
         assert rsp['data']['id'] == '1'
         _attr = rsp['data']['attributes']
-        assert len(_attr) == 4
+        assert len(_attr) == 5
         assert _attr['super-study-id'] == 1
         assert _attr['title'] == 'Human Microbiome'
         assert _attr['description'] == 'Just a test description'
@@ -63,7 +63,7 @@ class TestSuperStudyAPI:
         assert d['type'] == 'super-studies'
         assert d['id'] == '1'
         _attr = d['attributes']
-        assert len(_attr) == 4
+        assert len(_attr) == 5
         assert _attr['super-study-id'] == 1
         assert _attr['title'] == 'Human Microbiome'
         assert _attr['description'] == 'Just a test description'
