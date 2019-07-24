@@ -78,7 +78,7 @@ class Command(BaseCommand):
         defaults = sanitise_fields({
             'instrument_platform': api_data['instrument_platform'],
             'instrument_model': api_data['instrument_model'],
-            'status_id': status,
+            'status': status,
             'secondary_accession': accession
         })
         run, created = emg_models.Run.objects.using(self.emg_db_name).update_or_create(
@@ -87,10 +87,12 @@ class Command(BaseCommand):
         )
         return run
 
-    def get_ena_sample(self, sample_accession):
+    @staticmethod
+    def get_ena_sample(sample_accession):
         return ena.get_sample(sample_accession=sample_accession)
 
-    def get_run_studies(self, sample):
+    @staticmethod
+    def get_run_studies(sample):
         return ena.get_sample_studies(sample.primary_accession)
 
     def tag_study(self, run, study_accession):

@@ -873,7 +873,7 @@ class Run(models.Model):
         db_column='ACCESSION', max_length=80, blank=True, null=True)
     secondary_accession = models.CharField(
         db_column='SECONDARY_ACCESSION', max_length=100, blank=True, null=True)
-    status_id = models.ForeignKey(
+    status = models.ForeignKey(
         'Status', db_column='STATUS_ID', related_name='runs',
         on_delete=models.CASCADE, default=2)
     sample = models.ForeignKey(
