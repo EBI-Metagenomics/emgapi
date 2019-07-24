@@ -220,3 +220,26 @@ class Analysis(models.Model):
         managed = False
         app_label = 'emgena'
         db_table = 'ANALYSIS'
+
+
+class Assembly(models.Model):
+    assembly_id = models.CharField(db_column='ASSEMBLY_ID', primary_key=True, max_length=15)
+    sample_id = models.CharField(db_column='SAMPLE_ID', max_length=15)
+    biosample_id = models.CharField(db_column='BIOSAMPLE_ID', max_length=15)
+    submission_account_id = models.CharField(db_column='SUBMISSION_ACCOUNT_ID', max_length=15)
+    submission_id = models.CharField(db_column='SUBMISSION_ID', max_length=15)
+    status_id = models.IntegerField(db_column='STATUS_ID')
+    gc_id = models.CharField(db_column='GC_ID', max_length=15)
+    assembly_type = models.IntegerField(db_column='ASSEMBLY_TYPE')
+    primary_study_accession = models.CharField(db_column='PROJECT_ACC', max_length=50)
+
+    name = models.CharField(db_column='NAME', max_length=50)
+    wgs_accession = models.CharField(db_column='WGS_ACC', max_length=50)
+    coverage = models.IntegerField(db_column='COVERAGE')
+    min_gap_length = models.IntegerField(db_column='MIN_GAP_LENGTH', null=True, blank=True)
+    contig_accession_range = models.CharField(db_column='CONTIG_ACC_RANGE', max_length=50)
+
+    class Meta:
+        managed = False
+        app_label = 'emgena'
+        db_table = 'gcs_assembly'
