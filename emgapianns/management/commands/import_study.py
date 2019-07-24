@@ -16,6 +16,7 @@
 import logging
 
 from django.core.management import BaseCommand
+from emgapianns.management.lib import utils
 
 from emgapianns.management.lib.create_or_update_study import run_create_or_update_study
 
@@ -30,27 +31,40 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('accession',
                             help='ENAs study accession (primary or secondary accession)',
-                            type=str,
                             action='store')
-        parser.add_argument('biome-id',
+        parser.add_argument('lineage',
                             help="Specify a biome which will be assigned to the study level.",
-                            type=int,
                             action='store')
-        parser.add_argument('--prod_dir',
-                            help="NFS root path of the results archive",
-                            default='/nfs/production/interpro/metagenomics/results/')
+        dir_locations = parser.add_mutually_exclusive_group()
+        dir_locations.add_argument('--study_dir',
+                                   help="NFS root path of the study in the results archive")
+        dir_locations.add_argument('--prod_dir',
+                                   help="NFS root path of the results archive",
+                                   default='/nfs/production/interpro/metagenomics/results/')
         parser.add_argument('--ena_db',
                             help="ENA's production database",
-                            default='era_pro')
+                            default='era')
 
     def handle(self, *args, **options):
         logger.info("CLI %r" % options)
 
         secondary_study_accession = options['accession']
-        rootpath = options.get('prod_dir')
-        biome_id = options['biome-id']
+        lineage = options['lineage']
         database = options['ena_db']
 
-        run_create_or_update_study(secondary_study_accession, rootpath, biome_id, database)
+        study_dir = self.get_study_dir(options.get('study_dir'), options.get('prod_dir'), secondary_study_accession)
+        run_create_or_update_study(secondary_study_accession, study_dir, lineage, database)
 
         logger.info("Program finished successfully.")
+
+    @staticmethod
+    def get_study_dir(study_dir, prod_dir, secondary_study_accession):
+        if study_dir:
+            result_dir = study_dir
+        else:
+            result_dir = utils.retrieve_existing_result_dir(prod_dir, ['2*', '*', secondary_study_accession])
+
+        if not result_dir:
+            raise ValueError("Could not find any result directory for this study. Program will exit now!")
+
+        return result_dir

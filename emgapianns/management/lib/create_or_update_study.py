@@ -54,7 +54,7 @@ def lookup_publication_by_project_id(project_id):
     pass
 
 
-def update_or_create_study(study, result_directory, biome_id, database):
+def update_or_create_study(study, study_result_dir, lineage, database):
     """
         Attributes to parse out:
             - Center name (done)
@@ -85,7 +85,7 @@ def update_or_create_study(study, result_directory, biome_id, database):
             8. private analysis_study, e.g.
 
     :param biome_id: biome identifier.
-    :param result_directory: e.g. 2018/08/SRP042265
+    :param study_result_dir: e.g. 2018/08/SRP042265
     :param study: ENA study - collection of runs.
     :return:
     """
@@ -98,7 +98,7 @@ def update_or_create_study(study, result_directory, biome_id, database):
     is_public = True if not hold_date else False
 
     # Retrieve biome object
-    biome = emg_models.Biome.objects.get(pk=biome_id)
+    biome = emg_models.Biome.objects.get(lineage=lineage)
 
     # Lookup study publication
     # TODO: Process publications
@@ -129,18 +129,18 @@ def update_or_create_study(study, result_directory, biome_id, database):
                   'last_update': study.last_updated,
                   'submission_account_id': study.submission_account_id,
                   'biome': biome,
-                  'result_directory': result_directory,
+                  'result_directory': study_result_dir,
                   'first_created': study.first_created},
     )
 
 
-def run_create_or_update_study(study_accession, rootpath, biome_id, database='era_pro'):
+def run_create_or_update_study(study_accession, study_dir, lineage, database):
     """
         Creates a new study object in EMG or updates an existing one.
 
     :param study_accession:
-    :param rootpath: Root path to EMG's archive
-    :param biome_id: biome identifier
+    :param study_dir: Root path to EMG's archive
+    :param lineage: biome identifier
     :param database: Pointer to the database connection details in the config file.
     :return:
     """
@@ -152,13 +152,6 @@ def run_create_or_update_study(study_accession, rootpath, biome_id, database='er
         study = ena_models.AssemblyStudy.objects.using(database).get(
             Q(study_id=study_accession) | Q(project_id=study_accession))
         if not study:
-            print("Could not find study {0} in the database. Program will exit now!".format(study_accession))
-            sys.exit(1)
+            raise ValueError("Could not find study {0} in the database. Program will exit now!".format(study_accession))
 
-    secondary_study_accession = study.study_id
-    result_dir = utils.retrieve_existing_result_dir(rootpath, ['2*', '*', secondary_study_accession])
-    if not result_dir:
-        print("Could not find any result directory for this study. Program will exit now!")
-        sys.exit(1)
-
-    return update_or_create_study(study, result_dir, biome_id, database)
+    return update_or_create_study(study, study_dir, lineage, database)
