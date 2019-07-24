@@ -16,7 +16,7 @@
 import logging
 
 from django.core.management import BaseCommand
-from emgapianns.management.lib.utils import sanitise_fields
+from emgapianns.management.lib.utils import sanitise_fields, is_run_accession
 from ena_portal_api import ena_handler
 from emgapi import models as emg_models
 from emgena import models as ena_models
@@ -53,33 +53,29 @@ class Command(BaseCommand):
         logger.info("Program finished successfully.")
 
     def import_assembly(self, accession):
-        api_assembly_data = self.get_assembly_api(accession)
         db_assembly_data = self.get_ena_db_assembly(accession)
-        print(1, api_assembly_data)
-        print('\n')
-        print(2, db_assembly_data.__dict__)
-        assembly = self.create_or_update_assembly(db_assembly_data, api_assembly_data)
-        # self.tag_study(assembly, api_assembly_data['secondary_study_accession'])
-        # self.tag_sample(assembly, api_assembly_data['secondary_sample_accession'])
+        assembly = self.create_or_update_assembly(db_assembly_data)
+        self.tag_study(assembly, db_assembly_data.primary_study_accession)
+        self.tag_sample(assembly, db_assembly_data.sample_id)
         self.tag_experiment_type(assembly, 'assembly')
-        assembly.save(using=self.emg_db_name)
+        self.tag_optional_run(assembly, db_assembly_data.name)
 
-    @staticmethod
-    def get_assembly_api(accession):
-        logger.info('Fetching assembly {} from ena api'.format(accession))
-        return ena.get_assembly(accession)
+        assembly.save(using=self.emg_db_name)
 
     @staticmethod
     def get_ena_db_assembly(accession):
         logger.info('Fetching assembly {} from ena oracle DB'.format(accession))
-        return ena_models.Analysis.objects.using('ena').filter(analysis_id=accession).first()
+        return ena_models.Assembly.objects.using('ena').filter(assembly_id=accession).first()
 
-    def create_or_update_assembly(self, db_data, api_data):
-        accession = api_data['secondary_sample_accession']
-        logger.info('Creating sample {}'.format(accession))
-        status = emg_models.Status.objects.using(self.emg_db_name).get(status_id=db_data.status_id)
+    def create_or_update_assembly(self, era_db_data):
+        accession = era_db_data.assembly_id
+
+        logger.info('Creating assembly {}'.format(accession))
+        status = emg_models.Status.objects.using(self.emg_db_name).get(status_id=era_db_data.status_id)
         defaults = sanitise_fields({
             'status_id': status,
+            'wgs_accession': era_db_data.wgs_accession,
+            'legacy_accession': era_db_data.gc_id,
         })
         assembly, created = emg_models.Assembly.objects.using(self.emg_db_name).update_or_create(
             accession=accession,
@@ -87,23 +83,26 @@ class Command(BaseCommand):
         )
         return assembly
 
-    def get_ena_sample(self, sample_accession):
+    @staticmethod
+    def get_ena_sample(sample_accession):
         return ena.get_sample(sample_accession=sample_accession)
 
-    def get_assembly_studies(self, sample):
+    @staticmethod
+    def get_assembly_studies(sample):
         return ena.get_sample_studies(sample.primary_accession)
 
     def tag_study(self, assembly, study_accession):
         try:
             assembly.study = emg_models.Study.objects.using(self.emg_db_name) \
-                .get(secondary_accession=study_accession)
+                .get(project_id=study_accession)
         except emg_models.Study.DoesNotExist:
             raise emg_models.Study.DoesNotExist('Study {} does not exist in emg DB'.format(study_accession))
 
     def tag_sample(self, assembly, sample_accession):
         try:
-            assembly.sample = emg_models.Sample.objects.using(self.emg_db_name) \
+            sample = emg_models.Sample.objects.using(self.emg_db_name) \
                 .get(accession=sample_accession)
+            emg_models.AssemblySample.objects.using(self.emg_db_name).get_or_create(assembly=assembly, sample=sample)
         except emg_models.Sample.DoesNotExist:
             raise emg_models.Sample.DoesNotExist('Sample {} does not exist in emg DB'.format(sample_accession))
 
@@ -114,3 +113,16 @@ class Command(BaseCommand):
         except emg_models.ExperimentType.DoesNotExist:
             raise emg_models.ExperimentType \
                 .DoesNotExist('Experiment type {} does not exist in database'.format(experiment_type))
+
+    def tag_optional_run(self, assembly, name):
+        if is_run_accession(name):
+            self.tag_run(assembly, name)
+
+    def tag_run(self, assembly, run_accession):
+        try:
+            run = emg_models.Run.objects.using(self.emg_db_name) \
+                .get(accession=run_accession)
+            emg_models.AssemblyRun.objects.using(self.emg_db_name).get_or_create(assembly=assembly, run=run)
+        except emg_models.Run.DoesNotExist:
+            raise emg_models.Run \
+                .DoesNotExist('Run {} does not exist in database'.format(run_accession))
