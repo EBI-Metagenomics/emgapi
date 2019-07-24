@@ -22,13 +22,19 @@ import sys
 from emgapianns.management.lib.import_analysis_model import Run, Assembly, ExperimentType
 from emgapianns.management.lib.uploader_exceptions import AccessionNotRecognised
 
+study_accssion_re = r'([ESD]RP\d{6,})'
+run_accession_re = r'([ESD]RR\d{6,})'
+assembly_accession_re = r'(ERZ\d{6,})'
+
+def is_study_accession(accession):
+    return re.match(study_accssion_re, accession)
 
 def is_run_accession(accession):
-    return re.match(r'([ESD]RR\d{6,})', accession)
+    return re.match(run_accession_re, accession)
 
 
 def is_assembly_accession(accession):
-    return re.match(r'(ERZ\d{6,})', accession)
+    return re.match(assembly_accession_re, accession)
 
 
 def retrieve_existing_result_dir(rootpath, dest_pattern):
@@ -138,3 +144,15 @@ def sanitise_fields(data):
             del data[k]
 
     return data
+
+
+def get_accession_from_rootpath(rootpath):
+    dirname = os.path.basename(rootpath)
+    return (re.findall(run_accession_re, dirname) or re.findall(assembly_accession_re, dirname))[0]
+
+
+def get_study_dir(rootpath):
+    path, head = os.path.split(rootpath)
+    while not is_study_accession(head):
+        path, head = os.path.split(path)
+    return os.path.join(*path, head)
