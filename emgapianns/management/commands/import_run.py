@@ -55,7 +55,7 @@ class Command(BaseCommand):
     def import_run(self, accession):
         api_run_data = self.get_run_api(accession)
         db_run_data = self.get_ena_db_run(accession)
-        run = self.create_or_update_run(db_run_data,api_run_data)
+        run = self.create_or_update_run(db_run_data, api_run_data)
         self.tag_study(run, api_run_data['secondary_study_accession'])
         self.tag_sample(run, api_run_data['secondary_sample_accession'])
         self.tag_experiment_type(run, api_run_data['library_source'])
@@ -69,11 +69,11 @@ class Command(BaseCommand):
     @staticmethod
     def get_ena_db_run(accession):
         logger.info('Fetching run {} from ena oracle DB'.format(accession))
-        return ena_models.Run.objects.using('ena').filter(run_id=accession).first()
+        return ena_models.Run.objects.using('era').filter(run_id=accession).first()
 
     def create_or_update_run(self, db_data, api_data):
-        accession = api_data['secondary_sample_accession']
-        logger.info('Creating sample {}'.format(accession))
+        accession = api_data['run_accession']
+        logger.info('Creating run {}'.format(accession))
         status = emg_models.Status.objects.using(self.emg_db_name).get(status_id=db_data.status_id)
         defaults = sanitise_fields({
             'instrument_platform': api_data['instrument_platform'],
