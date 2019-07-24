@@ -15,7 +15,7 @@
 # limitations under the License.
 import logging
 
-from django.core.management import BaseCommand
+from django.core.management import BaseCommand, call_command
 from emgapianns.management.lib.utils import sanitise_fields, is_run_accession
 from ena_portal_api import ena_handler
 from emgapi import models as emg_models
@@ -120,6 +120,7 @@ class Command(BaseCommand):
 
     def tag_run(self, assembly, run_accession):
         try:
+            call_command('import_run', run_accession)
             run = emg_models.Run.objects.using(self.emg_db_name) \
                 .get(accession=run_accession)
             emg_models.AssemblyRun.objects.using(self.emg_db_name).get_or_create(assembly=assembly, run=run)
