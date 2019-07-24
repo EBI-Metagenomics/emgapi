@@ -153,7 +153,7 @@ class Command(BaseCommand):
     def get_ena_db_sample(accession):
         logger.info('Fetching sample {} from ena oracle DB'.format(accession))
         query = Q(sample_id=accession) | Q(biosample_id=accession)
-        return ena_models.Sample.objects.using('ena').filter(query).first()
+        return ena_models.Sample.objects.using('era').filter(query).first()
 
     def get_variable(self, name):
         try:
@@ -161,7 +161,8 @@ class Command(BaseCommand):
         except emg_models.VariableNames.DoesNotExist:
             raise emg_models.VariableNames.DoesNotExist('Variable name {} is missing in db'.format(name))
 
-    def get_sample_studies(self, sample):
+    @staticmethod
+    def get_sample_studies(sample):
         return ena.get_sample_studies(sample.primary_accession)
 
     def tag_study(self, sample):
