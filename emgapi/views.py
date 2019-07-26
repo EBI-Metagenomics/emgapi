@@ -1086,3 +1086,45 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         `/publications?search=text`
         """
         return super(PublicationViewSet, self).list(request, *args, **kwargs)
+
+
+class AnalysisContigsViewSet(emg_mixins.ListModelMixin, 
+                             viewsets.GenericViewSet):
+
+    lookup_field = 'accession'
+    serializer_class = emg_serializers.AnalysisJobContigSerializer
+
+    def get_queryset(self):
+        try:
+            pk = int(self.kwargs['accession'].lstrip('MGYA'))
+        except ValueError:
+            raise Http404()
+        return emg_models.AnalysisJobContig.objects.filter(analysis_job=pk)
+
+    def get_object(self):
+        try:
+            pk = int(self.kwargs['accession'].lstrip('MGYA'))
+        except ValueError:
+            raise Http404()
+        return get_object_or_404(
+            self.get_queryset(), Q(analysis_job=pk)
+        )
+
+    def get_serializer_class(self):
+        return super(AnalysisContigsViewSet, self) \
+            .get_serializer_class()
+
+    def list(self, request, *args, **kwargs):
+        return super(AnalysisContigsViewSet, self) \
+            .list(request, *args, **kwargs)
+
+from rest_framework.decorators import api_view
+
+@api_view(['GET', ''])
+def fasta(request, name, ext):
+    response = HttpResponse()
+    response['Content-Type'] = 'application/octet-stream'
+    response['Content-Disposition'] = f'attachment; filename={name}.{ext}'
+    response['X-Accel-Redirect'] = f'/results/contigs/{name}.{ext}'
+    # print(response.__dict__)
+    return response
