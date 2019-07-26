@@ -1114,6 +1114,21 @@ class AnalysisJob(models.Model):
         return self.accession
 
 
+class AnalysisJobContig(models.Model):
+    """
+    An analysis contig
+    """
+    analysis_job = models.ForeignKey(
+        'AnalysisJob', db_column='ANALYSIS_JOB_ID', on_delete=models.CASCADE
+    )
+    name = models.CharField(db_column='CONTIG_NAME', max_length=500)
+    length = models.IntegerField(db_column='CONTIG_LENGTH', default=0)
+    # other data that we may need
+    # such as taxonomy? annotations of interest?
+    class Meta:
+        db_table = 'ASSEMBLY_CONTIG'
+
+
 class StudyErrorType(models.Model):
     error_id = models.IntegerField(
         db_column='ERROR_ID', primary_key=True)

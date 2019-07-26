@@ -31,6 +31,7 @@ from rest_framework_jwt.views import verify_jwt_token
 from emgapi.urls import router as emg_router
 from emgapi.urls import mydata_router
 from emgapi.urls import utils_router
+from emgapi.urls import urlpatterns as emg_urlpatterns
 from emgapianns.urls import mongo_router
 from emgapianns.urls import router as emg_ext_router
 
@@ -91,7 +92,6 @@ urlpatterns += [
         TemplateView.as_view(template_name='swagger-ui/index.html')),
 
     url(r'^500/$', TemplateView.as_view(template_name='500.html')),
-
 ]
 
 # API URL routing.
@@ -108,3 +108,5 @@ urlpatterns += [
         name='verify_jwt_token_v1'),
 
 ]
+
+urlpatterns += emg_urlpatterns
