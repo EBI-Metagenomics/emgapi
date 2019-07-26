@@ -1316,3 +1316,9 @@ class LDAnalysisSerializer(drf_serializers.ModelSerializer):
             'keywords',
             'dateModified',
         )
+
+class AnalysisJobContigSerializer(drf_serializers.ModelSerializer):
+
+    class Meta:
+        model = emg_models.AnalysisJobContig
+        fields = '__all__'

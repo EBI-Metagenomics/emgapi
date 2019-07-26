@@ -264,6 +264,12 @@ router.register(
     base_name='samples-metadata'
 )
 
+router.register(
+    r'contigs/(?P<accession>[^/]+)',
+    views.AnalysisContigsViewSet,
+    base_name='contigs'
+)
+
 mydata_router = routers.DefaultRouter(trailing_slash=False)
 mydata_router.register(
     r'mydata',
@@ -277,3 +283,9 @@ utils_router.register(
     views.UtilsViewSet,
     base_name='csrf'
 )
+
+from django.conf.urls import url
+
+urlpatterns = [
+    url(r'^contigs/(?P<name>[\w\-.\d]+)/(?P<ext>[\w.]+)$', views.fasta),
+]
