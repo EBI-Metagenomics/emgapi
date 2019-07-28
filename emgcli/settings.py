@@ -402,11 +402,11 @@ except KeyError:
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 try:
-    MEDIA_URL = EMG_CONF['emg']['media_url']
-    MEDIA_ROOT = EMG_CONF['emg']['media_root']
+    IMG_URL = EMG_CONF['emg']['image_root']
+    IMG_FOLDER = EMG_CONF['emg']['image_folder']
 except KeyError:
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    IMG_URL = 'http://localhost:9000/results/images/'
+    IMG_FOLDER = os.path.join(BASE_DIR, 'results/images')
 
 WHITENOISE_STATIC_PREFIX = '/static/'
 

@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
+
+from django.conf import settings
 from django.contrib import admin
 from django.utils.safestring import mark_safe
+from django import forms
 
 from . import models as emg_models
 
@@ -46,17 +50,29 @@ class SuperStudyBiomesInline(admin.TabularInline):
     raw_id_fields = ('biome',)
 
 
+class SuperStudyAdminForm(forms.ModelForm):
+    class Meta:
+        model = emg_models.SuperStudy
+        fields = '__all__'
+        _options = [(x, os.path.abspath(x)) for x in os.listdir(settings.IMG_FOLDER)]
+        _options.insert(0, ('', ''))
+        widgets = {
+            'image': forms.Select(choices=_options)
+        }
+
+
 @admin.register(emg_models.SuperStudy)
 class SuperStudyAdmin(admin.ModelAdmin):
-    inlines = [SuperStudyStudiesInline, SuperStudyBiomesInline]
+
     readonly_fields = ('image_tag',)
+    inlines = [SuperStudyStudiesInline, SuperStudyBiomesInline]
+    form = SuperStudyAdminForm
 
     def image_tag(self, obj):
-        if obj.image and obj.image.url:
+        if obj.image:
             return mark_safe(
-                '<img src="{}" width="150" height="150" />'.format(obj.image.url)
+                '<img src="{}{}" width="150" height="150" />'.format(settings.IMG_URL, obj.image)
             )
         else:
-            return ''
-
+            return 'No image selected'
     image_tag.short_description = 'Image'

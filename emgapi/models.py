@@ -27,6 +27,8 @@
 
 from __future__ import unicode_literals
 
+from django.conf import settings
+
 from django.db import models
 from django.db.models import Count
 from django.db.models import CharField, Value
@@ -682,12 +684,16 @@ class SuperStudy(models.Model):
         'Biome', through='SuperStudyBiome', related_name='super_studies', blank=True
     )
 
-    image = models.ImageField(upload_to='super-studies-img', blank=True, null=True)
+    image = models.CharField(max_length=4096, blank=True, null=True)
 
     objects = SuperStudyManager()
 
     def __str__(self):
         return self.title
+
+    @property
+    def image_url(self):
+        return settings.IMG_URL + str(self.image)
 
     class Meta:
         db_table = 'SUPER_STUDY'
