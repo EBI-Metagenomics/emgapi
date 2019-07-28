@@ -34,6 +34,8 @@ There are 2 docker containers defined, one for `MySQL` and another one `MongoDB`
 
 The app will be executed from a python virtual environment.
 
+**The Docker setup is just for local dev. at the moment.**
+
 Setup
 ^^^^^
 
@@ -45,7 +47,7 @@ Create a virtual environment::
     
     `virtualenv -p python3 venv`
 
-Activate and install the dependencies `source venv/bin/activate && pip install -r requirements-local-dev.txt`
+Activate and install the dependencies `source venv/bin/activate && pip install -r requirements-local-dev.txt`.
 
 Start containers using::
 

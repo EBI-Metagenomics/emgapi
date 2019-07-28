@@ -672,8 +672,7 @@ class SuperStudy(models.Model):
     """
     super_study_id = models.AutoField(db_column='STUDY_ID',
                                       primary_key=True)
-    title = models.CharField(db_column='TITLE',
-                             max_length=100, blank=True, null=True)
+    title = models.CharField(db_column='TITLE', max_length=100)
     description = models.TextField(db_column='DESCRIPTION', blank=True, null=True)
 
     flagship_studies = models.ManyToManyField(
