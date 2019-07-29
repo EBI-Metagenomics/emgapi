@@ -27,6 +27,8 @@
 
 from __future__ import unicode_literals
 
+import os
+
 from django.conf import settings
 
 from django.db import models
@@ -683,7 +685,7 @@ class SuperStudy(models.Model):
         'Biome', through='SuperStudyBiome', related_name='super_studies', blank=True
     )
 
-    image = models.CharField(max_length=4096, blank=True, null=True)
+    image = models.CharField(max_length=100, blank=True, null=True)
 
     objects = SuperStudyManager()
 
@@ -692,7 +694,10 @@ class SuperStudy(models.Model):
 
     @property
     def image_url(self):
-        return settings.IMG_URL + str(self.image)
+        if self.image:
+            return os.path.join(settings.IMG_FOLDER, str(self.image))
+        else:
+            return ''
 
     class Meta:
         db_table = 'SUPER_STUDY'
