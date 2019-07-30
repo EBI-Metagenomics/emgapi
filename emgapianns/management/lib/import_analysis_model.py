@@ -17,29 +17,21 @@ from enum import Enum
 
 
 class Analysis(object):
-    def __init__(self, study_accession, sample_accession, run_accession, experiment_type):
-        self._study_accession = study_accession
-        self._sample_accession = sample_accession
-        self._run_accession = run_accession
-        self._experiment_type = experiment_type
-
-    def get_experiment_type(self):
-        return self._experiment_type
-
-    def get_study_accession(self):
-        return self._study_accession
+    def __init__(self, secondary_study_accession, secondary_sample_accession, run_accession, experiment_type, **kwargs):
+        self.secondary_study_accession = secondary_study_accession
+        self.sample_accession = secondary_sample_accession
+        self.run_accession = run_accession
+        self.experiment_type = experiment_type
 
 
 class Run(Analysis):
-
-    def __init__(self, study_accession, sample_accession, run_accession, experiment_type):
-        super().__init__(study_accession, sample_accession, run_accession, experiment_type)
+    def __init__(self, secondary_study_accession, secondary_sample_accession, run_accession, library_strategy):
+        super().__init__(secondary_study_accession, secondary_sample_accession, run_accession, library_strategy)
 
 
 class Assembly(Analysis):
-
-    def __init__(self, study_accession, sample_accession, run_accession, analysis_accession):
-        super().__init__(study_accession, sample_accession, run_accession, ExperimentType.ASSEMBLY)
+    def __init__(self, secondary_study_accession, secondary_sample_accession, run_accession, analysis_accession, **kwargs):
+        super().__init__(secondary_study_accession, secondary_sample_accession, run_accession, ExperimentType.ASSEMBLY)
         self.analysis_accession = analysis_accession
 
 
