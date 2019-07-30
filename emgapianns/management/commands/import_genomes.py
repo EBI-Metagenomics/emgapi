@@ -1,11 +1,10 @@
 import logging
 import os
 
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.management import BaseCommand
 from django.db import IntegrityError
-
 from emgapi import models as emg_models
+
 from ..lib.genome_util import sanity_check_genome_output, \
     sanity_check_release_dir, find_genome_results, \
     get_result_path, read_tsv_w_headers, read_json
@@ -55,7 +54,7 @@ class Command(BaseCommand):
         for d in genome_dirs:
             self.upload_dir(d)
 
-        self.upload_release_files(release_dir)
+        self.upload_release_files()
 
     def get_release(self, version, result_dir):
         base_result_dir = get_result_path(result_dir)
@@ -325,7 +324,7 @@ class Command(BaseCommand):
                                                                                 alias=defaults['alias'],
                                                                                 defaults=defaults)
 
-    def upload_release_files(self, release_dir):
+    def upload_release_files(self):
         self.upload_release_file(self.release_obj,
                                  'Phylogenetic tree of release genomes',
                                  'json',
