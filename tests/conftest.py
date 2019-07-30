@@ -37,7 +37,7 @@ def pytest_configure():
 
 
 # List  of DB configs which should NOT be migrated by django-pytest
-HIDE_DB_CONFIGS = ['ena', 'backlog_prod']
+HIDE_DB_CONFIGS = ['ena', 'era', 'backlog_prod']
 
 
 # Fixture to mask ena config from pytest-django to avoid migrating their database.
