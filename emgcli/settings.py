@@ -402,8 +402,8 @@ except KeyError:
 
 # Temp user images storage, TODO: a CDN would be a better option
 try:
-    IMG_FOLDER = EMG_CONF['emg']['image_folder']
-    IMG_DIR = os.path.normpath(EMG_CONF['emg']['image_dir'] + IMG_FOLDER)
+    IMG_FOLDER = EMG_CONF['emg']['img_folder']
+    IMG_DIR = os.path.normpath(EMG_CONF['emg']['img_dir'] + IMG_FOLDER)
 except KeyError:
     IMG_FOLDER = '/results/images'
     IMG_DIR = os.path.join(expanduser("~"), 'results/images')
