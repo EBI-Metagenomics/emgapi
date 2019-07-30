@@ -364,7 +364,7 @@ class DownloadGroupType(models.Model):
         db_table = 'DOWNLOAD_GROUP_TYPE'
 
     def __str__(self):
-        return self.group_label
+        return self.group_type
 
 
 class FileFormat(models.Model):
