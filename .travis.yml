@@ -14,6 +14,7 @@ services:
 
 before_install:
   - mysql -e 'CREATE DATABASE emg;'
+  - mysql -e "SET GLOBAL sql_mode = 'STRICT_TRANS_TABLES'"
   - python -V
 
 install:
