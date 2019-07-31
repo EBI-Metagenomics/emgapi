@@ -59,7 +59,7 @@ mongo_router.register(
 )
 
 mongo_router.register(
-    (r'annotations/organisms/(?P<lineage>(.*))/'
+    (r'annotations/organisms/(?P<lineage>[^/]+)/'
      r'analyses'),
     m_views.OrganismAnalysisRelationshipViewSet,
     base_name='organisms-analyses'
