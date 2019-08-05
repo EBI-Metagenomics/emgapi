@@ -403,10 +403,10 @@ except KeyError:
 # Temp user images storage, TODO: a CDN would be a better option
 try:
     IMG_FOLDER = EMG_CONF['emg']['img_folder']
-    IMG_DIR = os.path.normpath(EMG_CONF['emg']['img_dir'] + IMG_FOLDER)
+    IMG_DIR = EMG_CONF['emg']['img_dir']
 except KeyError:
     IMG_FOLDER = '/results/images'
-    IMG_DIR = os.path.join(expanduser("~"), 'results/images')
+    IMG_DIR = os.path.join(expanduser('~'), 'results/images')
 
 WHITENOISE_STATIC_PREFIX = '/static/'
 
