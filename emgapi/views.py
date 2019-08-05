@@ -17,6 +17,7 @@
 import os
 import logging
 import inflection
+import csv
 
 from django.conf import settings
 from django.db.models import Q
@@ -33,7 +34,7 @@ from rest_framework.response import Response
 
 from rest_framework import filters
 from rest_framework import viewsets, mixins
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.decorators import detail_route, list_route, action
 from rest_framework import permissions
 from rest_framework import renderers
 from rest_framework import status
@@ -776,7 +777,6 @@ class KronaViewSet(emg_mixins.ListModelMixin,
             'taxonomy-summary',
             'krona.html')
         )
-        logger.info(krona)
         if os.path.isfile(krona):
             with open(krona, "r") as k:
                 return Response(k.read())
@@ -798,9 +798,8 @@ class KronaViewSet(emg_mixins.ListModelMixin,
             subdir.upper(),
             'krona.html')
         )
-        logger.info(krona)
         if os.path.isfile(krona):
-            with open(krona, "r") as k:
+            with open(krona, 'r') as k:
                 return Response(k.read())
         raise Http404('No chrona chart.')
 
@@ -882,16 +881,16 @@ class AnalysisResultDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
         obj = self.get_object()
         response = HttpResponse()
         response['Content-Type'] = 'application/octet-stream'
-        response["Content-Disposition"] = \
-            "attachment; filename={0}".format(alias)
+        response['Content-Disposition'] = \
+            'attachment; filename={0}'.format(alias)
         if obj.subdir is not None:
             response['X-Accel-Redirect'] = \
-                "/results{0}/{1}/{2}".format(
+                '/results{0}/{1}/{2}'.format(
                     obj.job.result_directory, obj.subdir, obj.realname
                 )
         else:
             response['X-Accel-Redirect'] = \
-                "/results{0}/{1}".format(
+                '/results{0}/{1}'.format(
                     obj.job.result_directory, obj.realname
                 )
         return response
@@ -1090,24 +1089,27 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
 
 class AnalysisContigsViewSet(emg_mixins.ListModelMixin, 
                              viewsets.GenericViewSet):
+    """
+    Retrieves the list of contigs for an analysis (assembly).
+    """
 
     lookup_field = 'accession'
+    schema = None
     serializer_class = emg_serializers.AnalysisJobContigSerializer
 
     def get_queryset(self):
-        try:
-            pk = int(self.kwargs['accession'].lstrip('MGYA'))
-        except ValueError:
-            raise Http404()
-        return emg_models.AnalysisJobContig.objects.filter(analysis_job=pk)
+        return emg_models.AnalysisJobDownload.objects \
+            .available(self.request)
 
     def get_object(self):
         try:
             pk = int(self.kwargs['accession'].lstrip('MGYA'))
         except ValueError:
             raise Http404()
+        # FIXME: we should have a specific field to get the contigs from
+        #        for the fasta index and the gff and the index.
         return get_object_or_404(
-            self.get_queryset(), Q(analysis_job=pk)
+            self.get_queryset(), Q(job__pk=pk)  # fasta
         )
 
     def get_serializer_class(self):
@@ -1115,16 +1117,74 @@ class AnalysisContigsViewSet(emg_mixins.ListModelMixin,
             .get_serializer_class()
 
     def list(self, request, *args, **kwargs):
-        return super(AnalysisContigsViewSet, self) \
-            .list(request, *args, **kwargs)
+        """
+        Retrieve the contigs for this analysis.
+        The top 1000 contigs will be delivered (based on the length.)
 
-from rest_framework.decorators import api_view
+        Example:
+        ---
+        `/analyses/<accession>/contigs` retrieves the top 1000 contigs
+        """
+        obj = self.get_object()
+        contigs = os.path.abspath(os.path.join(
+            settings.RESULTS_DIR,
+            obj.result_directory,
+            'contigs',
+            'topcontigs.fasta.faix') #  TODO: discuss maybe we can just have a summary file (?)
+        )
+        if os.path.isfile(contigs):
+            with open(contigs, 'r') as faix:
+                rd = csv.reader(faix, delimiter='\t')
+                results = emg_serializers.AnalysisJobContigSerializer(
+                    [{'name': r[0], 'length':r[1]} for r in rd], many=True
+                )
+                return results
+        raise Http404('There are no contigs available.')
 
-@api_view(['GET', ''])
-def fasta(request, name, ext):
-    response = HttpResponse()
-    response['Content-Type'] = 'application/octet-stream'
-    response['Content-Disposition'] = f'attachment; filename={name}.{ext}'
-    response['X-Accel-Redirect'] = f'/results/contigs/{name}.{ext}'
-    # print(response.__dict__)
-    return response
+    @action(detail=True, methods=['GET'])
+    def annotation(self, request, *args, **kwargs):
+        """
+        Retrieve a contig GFF file.
+        The GFF file will be parsed with pysam and sliced.
+
+        Example:
+        ---
+        `/analyses/<accession>/contig_gff?contig=<contig_name>`
+        ---
+        """
+        import pysam
+        import io
+
+        # obj = self.get_object()
+        # gff_path = os.path.abspath(os.path.join(
+        #     settings.RESULTS_DIR,
+        #     obj.result_directory,
+        #     'contigs',
+        #     'NAME.gff.gz')
+        # )
+        contig = request.query_params.get('contig', None)
+        if not contig:
+            raise Http400('Please provide a contig id.')
+
+        path = '/home/mbc/Downloads/assembly/'
+        gff_path = path + 'test.sorted.gff.gz'
+        gff_idx_path = path + 'test.sorted.gff.gz.tbi'
+
+        if os.path.isfile(gff_path) and os.path.isfile(gff_idx_path):
+            # multiple_iterators = True as many processes 
+            # could be using the same file at the same moment
+            gff = pysam.TabixFile(filename=gff_path, index=gff_idx_path) 
+            rows = gff.fetch(contig, multiple_iterators=True)
+            output = io.StringIO()
+            for row in rows:
+                output.write(row)
+            
+            response = HttpResponse()
+            response['Content-Type'] = 'text/x-gff3'
+            response['Content-Disposition'] = 'attachment; filename={0}'.format('test')
+            output.seek(0, os.SEEK_END)
+            response['Content-Length'] = output.tell()
+            response.write(output.getvalue())
+            return response
+
+        raise Http404('No GFF file for contig {0}.'.format(contig))

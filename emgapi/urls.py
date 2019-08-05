@@ -265,7 +265,7 @@ router.register(
 )
 
 router.register(
-    r'contigs/(?P<accession>[^/]+)',
+    'contigs',
     views.AnalysisContigsViewSet,
     base_name='contigs'
 )
@@ -284,8 +284,8 @@ utils_router.register(
     base_name='csrf'
 )
 
-from django.conf.urls import url
+# from django.conf.urls import url
 
-urlpatterns = [
-    url(r'^contigs/(?P<name>[\w\-.\d]+)/(?P<ext>[\w.]+)$', views.fasta),
-]
+# urlpatterns = [
+#     url(r'^contigs/(?P<name>[\w\-.\d]+)/(?P<ext>[\w.]+)$', views.fasta),
+# ]
