@@ -5,3 +5,9 @@ __pycache__
 var
 dist
 .eggs
+
+venv/
+.vscode/
+results/
+staticfiles/
+emgcli.egg-info/

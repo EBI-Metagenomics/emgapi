@@ -112,6 +112,18 @@ router.register(
 )
 
 router.register(
+    r'analyses/(?P<accession>[^/]+)/contigs',
+    views.AnalysisJobContigViewSet,
+    base_name='analysis-contigs'
+)
+
+router.register(
+    r'analyses/(?P<accession>[^/]+)/annotations',
+    views.AnalysisJobContigAnnotationViewSet,
+    base_name='analysis-annotations'
+)
+
+router.register(
     r'studies/(?P<accession>[^/]+)/downloads',
     views.StudiesDownloadsViewSet,
     base_name='studydownload'
@@ -264,12 +276,6 @@ router.register(
     base_name='samples-metadata'
 )
 
-router.register(
-    'contigs',
-    views.AnalysisContigsViewSet,
-    base_name='contigs'
-)
-
 mydata_router = routers.DefaultRouter(trailing_slash=False)
 mydata_router.register(
     r'mydata',
@@ -283,9 +289,3 @@ utils_router.register(
     views.UtilsViewSet,
     base_name='csrf'
 )
-
-# from django.conf.urls import url
-
-# urlpatterns = [
-#     url(r'^contigs/(?P<name>[\w\-.\d]+)/(?P<ext>[\w.]+)$', views.fasta),
-# ]
