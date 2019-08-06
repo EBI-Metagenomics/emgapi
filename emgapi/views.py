@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2017 EMBL - European Bioinformatics Institute
+# Copyright 2019 EMBL - European Bioinformatics Institute
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@ import os
 import logging
 import inflection
 import csv
+import io
+
+import pysam
 
 from django.conf import settings
 from django.db.models import Q
@@ -38,6 +41,7 @@ from rest_framework.decorators import detail_route, list_route, action
 from rest_framework import permissions
 from rest_framework import renderers
 from rest_framework import status
+from rest_framework.settings import api_settings
 
 from . import models as emg_models
 from . import serializers as emg_serializers
@@ -896,6 +900,173 @@ class AnalysisResultDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
         return response
 
 
+class AnalysisJobContigViewSet(viewsets.ViewSet):
+    
+    lookup_field = 'name'
+    lookup_value_regex = '.*'
+    resource_name = 'analysis-contig'
+
+    pagination_class = api_settings.DEFAULT_PAGINATION_CLASS
+
+    serializer_class = emg_serializers.AnalysisJobContigSerializer
+
+    def get_queryset(self):
+        return emg_models.AnalysisJob.objects \
+            .available(self.request)
+
+    def get_object(self):
+        try:
+            pk = int(self.kwargs['accession'].lstrip('MGYA'))
+        except ValueError:
+            raise Http404()
+        return get_object_or_404(self.get_queryset(), Q(pk=pk))
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieve the contigs for this analysis.
+        The top 1000 contigs will be delivered (based on the length.)
+
+        Example:
+        ---
+        `/analyses/<accession>/contigs` retrieves the top 1000 contigs
+        """
+        obj = self.get_object()
+
+        # FIXME: we should have a specific field to get the contigs from
+        #        for the fasta index and the gff and the index.
+
+        top_contigs = os.path.abspath(os.path.join(
+            settings.RESULTS_DIR,
+            obj.result_directory,
+            'topcontigs.fasta.fai') #  TODO: discuss maybe we can just have a summary file (?)
+        )
+        if os.path.isfile(top_contigs):
+            with open(top_contigs, 'r') as faix:
+                rd = csv.reader(faix, delimiter='\t')
+                data = [{
+                    'id': str(obj.pk) + '_' + r[0],
+                    'name': r[0], 
+                    'length':r[1]
+                } for r in rd]
+                serializer = emg_serializers.AnalysisJobContigSerializer(data,
+                                                                         many=True, 
+                                                                         context={'request': request})
+                #return self.get_paginated_response(serializer.data)
+                return Response(serializer.data)
+        raise Http404('There are no contigs available.')
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve a contig fasta file.
+        The Fasta file will be retrieved using pysam.
+
+        Example:
+        ---
+        `/analyses/<accession>/contig?contig=<contig_name>`
+        ---
+        """
+        contig = self.kwargs.get('name', None)
+        if not contig:
+            return Response('Please provide a contig id.', status.HTTP_400_BAD_REQUEST)
+
+        obj = self.get_object()
+
+        #  TODO: discuss maybe we can just have a summary file (?)
+        fasta_path = os.path.abspath(os.path.join(
+            settings.RESULTS_DIR,
+            obj.result_directory,
+            'topcontigs.fasta')
+        )
+        fasta_idx_path = os.path.abspath(os.path.join(
+            settings.RESULTS_DIR,
+            obj.result_directory,
+            'topcontigs.fasta.fai')
+        )
+
+        if os.path.isfile(fasta_path) and os.path.isfile(fasta_idx_path):
+            output = io.StringIO()
+            with pysam.Fastafile(filename=fasta_path, filepath_index=fasta_idx_path) as fasta:  
+                rows = fasta.fetch(contig)
+                output.write('>' + contig  + '\n')
+                for row in rows:
+                    output.write(row)
+            response = HttpResponse()
+            response['Content-Type'] = 'chemical/seq-na-fasta' # ?
+            response['Content-Disposition'] = 'attachment; filename={0}.fasta'.format(contig)
+            output.seek(0, os.SEEK_END)
+            response['Content-Length'] = output.tell()
+            response.write(output.getvalue())
+            return response
+
+        raise Http404('No GFF file for contig {0}.'.format(contig))
+
+
+class AnalysisJobContigAnnotationViewSet(viewsets.ViewSet):
+
+    lookup_field = 'name'
+    lookup_value_regex = '.*'
+
+    def get_queryset(self):
+        return emg_models.AnalysisJob.objects \
+            .available(self.request)
+
+    def get_object(self):
+        try:
+            pk = int(self.kwargs['accession'].lstrip('MGYA'))
+        except ValueError:
+            raise Http404()
+        return get_object_or_404(self.get_queryset(), Q(pk=pk))
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve a contig GFF file.
+        The GFF file will be parsed with pysam and sliced.
+
+        Example:
+        ---
+        `/analyses/<accession>/annotation?contig=<contig_name>`
+        ---
+        """
+        # TODO: paginate (?)
+        contig = self.kwargs.get('name', None)
+        if not contig:
+            return Response('Please provide a contig id.', status.HTTP_400_BAD_REQUEST)
+
+        obj = self.get_object()
+
+        #  TODO: discuss maybe we can just have a summary file (?)
+        gff_path = os.path.abspath(os.path.join(
+            settings.RESULTS_DIR,
+            obj.result_directory,
+            'annotation.gff.gz')
+        )
+        gff_idx_path = os.path.abspath(os.path.join(
+            settings.RESULTS_DIR,
+            obj.result_directory,
+            'annotation.gff.gz.tbi')
+        )
+
+        if os.path.isfile(gff_path) and os.path.isfile(gff_idx_path):
+            # multiple_iterators = True as many processes 
+            # could be using the same file at the same moment
+            output = io.StringIO()
+            with pysam.TabixFile(filename=gff_path, index=gff_idx_path) as gff:
+                rows = gff.fetch(contig, multiple_iterators=True)
+                for row in rows:
+                    if 'gene=' in row:
+                        output.write(row + ';color=#FF0000\n')
+                    else:
+                        output.write(row + '\n')
+            response = HttpResponse()
+            response['Content-Type'] = 'text/x-gff3'
+            response['Content-Disposition'] = 'attachment; filename={0}.gff'.format(contig)
+            output.seek(0, os.SEEK_END)
+            response['Content-Length'] = output.tell()
+            response.write(output.getvalue())
+            return response
+
+        raise Http404('No GFF file for contig {0}.'.format(contig))
+
 class PipelineViewSet(mixins.RetrieveModelMixin,
                       emg_mixins.ListModelMixin,
                       viewsets.GenericViewSet):
@@ -1085,106 +1256,3 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         `/publications?search=text`
         """
         return super(PublicationViewSet, self).list(request, *args, **kwargs)
-
-
-class AnalysisContigsViewSet(emg_mixins.ListModelMixin, 
-                             viewsets.GenericViewSet):
-    """
-    Retrieves the list of contigs for an analysis (assembly).
-    """
-
-    lookup_field = 'accession'
-    schema = None
-    serializer_class = emg_serializers.AnalysisJobContigSerializer
-
-    def get_queryset(self):
-        return emg_models.AnalysisJobDownload.objects \
-            .available(self.request)
-
-    def get_object(self):
-        try:
-            pk = int(self.kwargs['accession'].lstrip('MGYA'))
-        except ValueError:
-            raise Http404()
-        # FIXME: we should have a specific field to get the contigs from
-        #        for the fasta index and the gff and the index.
-        return get_object_or_404(
-            self.get_queryset(), Q(job__pk=pk)  # fasta
-        )
-
-    def get_serializer_class(self):
-        return super(AnalysisContigsViewSet, self) \
-            .get_serializer_class()
-
-    def list(self, request, *args, **kwargs):
-        """
-        Retrieve the contigs for this analysis.
-        The top 1000 contigs will be delivered (based on the length.)
-
-        Example:
-        ---
-        `/analyses/<accession>/contigs` retrieves the top 1000 contigs
-        """
-        obj = self.get_object()
-        contigs = os.path.abspath(os.path.join(
-            settings.RESULTS_DIR,
-            obj.result_directory,
-            'contigs',
-            'topcontigs.fasta.faix') #  TODO: discuss maybe we can just have a summary file (?)
-        )
-        if os.path.isfile(contigs):
-            with open(contigs, 'r') as faix:
-                rd = csv.reader(faix, delimiter='\t')
-                results = emg_serializers.AnalysisJobContigSerializer(
-                    [{'name': r[0], 'length':r[1]} for r in rd], many=True
-                )
-                return results
-        raise Http404('There are no contigs available.')
-
-    @action(detail=True, methods=['GET'])
-    def annotation(self, request, *args, **kwargs):
-        """
-        Retrieve a contig GFF file.
-        The GFF file will be parsed with pysam and sliced.
-
-        Example:
-        ---
-        `/analyses/<accession>/contig_gff?contig=<contig_name>`
-        ---
-        """
-        import pysam
-        import io
-
-        # obj = self.get_object()
-        # gff_path = os.path.abspath(os.path.join(
-        #     settings.RESULTS_DIR,
-        #     obj.result_directory,
-        #     'contigs',
-        #     'NAME.gff.gz')
-        # )
-        contig = request.query_params.get('contig', None)
-        if not contig:
-            raise Http400('Please provide a contig id.')
-
-        path = '/home/mbc/Downloads/assembly/'
-        gff_path = path + 'test.sorted.gff.gz'
-        gff_idx_path = path + 'test.sorted.gff.gz.tbi'
-
-        if os.path.isfile(gff_path) and os.path.isfile(gff_idx_path):
-            # multiple_iterators = True as many processes 
-            # could be using the same file at the same moment
-            gff = pysam.TabixFile(filename=gff_path, index=gff_idx_path) 
-            rows = gff.fetch(contig, multiple_iterators=True)
-            output = io.StringIO()
-            for row in rows:
-                output.write(row)
-            
-            response = HttpResponse()
-            response['Content-Type'] = 'text/x-gff3'
-            response['Content-Disposition'] = 'attachment; filename={0}'.format('test')
-            output.seek(0, os.SEEK_END)
-            response['Content-Length'] = output.tell()
-            response.write(output.getvalue())
-            return response
-
-        raise Http404('No GFF file for contig {0}.'.format(contig))

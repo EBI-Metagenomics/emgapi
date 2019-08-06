@@ -1317,8 +1317,12 @@ class LDAnalysisSerializer(drf_serializers.ModelSerializer):
             'dateModified',
         )
 
-class AnalysisJobContigSerializer(drf_serializers.ModelSerializer):
+
+class AnalysisJobContigSerializer(serializers.Serializer):
+
+    id = serializers.CharField() # Fabricated PK (Analysis + Name of contig)
+    name = serializers.CharField()
+    length = serializers.IntegerField()
 
     class Meta:
-        model = emg_models.AnalysisJobContig
         fields = '__all__'
