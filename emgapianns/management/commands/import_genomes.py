@@ -271,10 +271,10 @@ class Command(BaseCommand):
             self.upload_genome_file(genome, 'Core & Accessory predicted CDS', 'fasta',
                                     'pan-genome.faa', 'Pan-Genome analysis', 'pan-genome')
             self.upload_genome_file(genome,
-                                    'EggNog annotation', 'tsv',
+                                    'EggNog annotation (core and accessory)', 'tsv',
                                     'pan-genome_eggNOG.tsv', 'Pan-Genome analysis', 'pan-genome')
             self.upload_genome_file(genome,
-                                    'InterProScan annotation',
+                                    'InterProScan annotation (core and accessory)',
                                     'tsv', 'pan-genome_InterProScan.tsv', 'Pan-Genome analysis', 'pan-genome')
             self.upload_genome_file(genome,
                                     'Gene Presence / Absence matrix',
@@ -289,7 +289,7 @@ class Command(BaseCommand):
             .first()
         obj['description'] = desc
         if desc is None:
-            print(desc_label)
+            logger.error('Desc_label missing: {0}'.format(desc_label))
             quit()
 
         fmt = emg_models.FileFormat \
