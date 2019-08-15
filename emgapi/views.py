@@ -46,6 +46,7 @@ from . import viewsets as emg_viewsets
 from . import utils as emg_utils
 from . import renderers as emg_renderers
 
+from emgcli.pagination import FasterCountPagination
 
 from emgena import models as ena_models
 from emgena import serializers as ena_serializers
@@ -459,6 +460,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
 
     lookup_field = 'accession'
     lookup_value_regex = '[^/]+'
+    pagination_class = FasterCountPagination
 
     def get_queryset(self):
         queryset = emg_models.Sample.objects \
