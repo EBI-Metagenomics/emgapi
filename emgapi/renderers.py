@@ -63,7 +63,8 @@ class CSVStreamingRenderer(CSVRenderer):
         total = queryset.count()
         page_size = 25
 
-        header_fields = list(serializer(queryset.first(), context=context).fields)
+        header_fields = list(serializer(queryset.first(),
+                             context=context).fields)
         yield csv_writer.writerow(header_fields)
 
         for page in range(0, math.ceil(total / page_size)):
