@@ -55,6 +55,8 @@ from . import renderers as emg_renderers
 from emgena import models as ena_models
 from emgena import serializers as ena_serializers
 
+from . import unix_tools
+
 logger = logging.getLogger(__name__)
 
 
@@ -922,38 +924,95 @@ class AnalysisJobContigViewSet(viewsets.ViewSet):
         return get_object_or_404(self.get_queryset(), Q(pk=pk))
 
     def list(self, request, *args, **kwargs):
-        """
-        Retrieve the contigs for this analysis.
-        The top 1000 contigs will be delivered (based on the length.)
+        """Retrieve the contigs for this analysis.
+
+        The contigs are taken from the fasta faidx files, if the file is missing then returns 404.
+
+        It is possible to filter the contigs based on:
+        - length (using the faidx)
+        - features (COG, KEGG KO, Taxonomy)
+        The filters are applied to the faidx (lenght) of the gff (features) file using AWK.
 
         Example:
         ---
-        `/analyses/<accession>/contigs` retrieves the top 1000 contigs
+        `/analyses/<accession>/contigs?gt=100&lt=1000` Get the contigs for this analysis that 
+        are longer than gt and shorter that lt.
         """
+
+        # FIXME: Review this.
+
         obj = self.get_object()
 
-        # FIXME: we should have a specific field to get the contigs from
-        #        for the fasta index and the gff and the index.
-
-        top_contigs = os.path.abspath(os.path.join(
+        contigs_file = os.path.abspath(os.path.join(
             settings.RESULTS_DIR,
             obj.result_directory,
-            'topcontigs.fasta.fai') #  TODO: discuss maybe we can just have a summary file (?)
+            'contigs.fasta.fai')
         )
-        if os.path.isfile(top_contigs):
-            with open(top_contigs, 'r') as faix:
-                rd = csv.reader(faix, delimiter='\t')
-                data = [{
-                    'id': str(obj.pk) + '_' + r[0],
-                    'name': r[0], 
-                    'length':r[1]
-                } for r in rd]
-                serializer = emg_serializers.AnalysisJobContigSerializer(data,
-                                                                         many=True, 
-                                                                         context={'request': request})
-                #return self.get_paginated_response(serializer.data)
-                return Response(serializer.data)
-        raise Http404('There are no contigs available.')
+
+        gff_path = os.path.abspath(os.path.join(
+            settings.RESULTS_DIR,
+            obj.result_directory,
+            'annotation.gff')
+        )
+        
+        if not os.path.isfile(contigs_file):
+            raise Http404('There are no contigs available.')
+    
+        filter_gt = request.GET.get('gt', 5000) or 5000
+        filter_lt = request.GET.get('lt', 10000) or 10000
+        contigs = unix_tools.awk_range(
+            contigs_file, col=2, gt=filter_gt, lt=filter_lt)
+
+        filtered_contigs = []
+        filter_cog = request.GET.get('cog', None)
+        filter_kegg = request.GET.get('kegg', None)
+        filter_tax = request.GET.get('taxonomy', None)
+
+        apply_filter = False
+        filtered_contigs = set()
+
+        if filter_cog:
+            filtered_contigs.update(
+                unix_tools.awk_regex_filter(gff_path, 9, '/cog=.*[,]?' + filter_cog + '/')
+            )
+            apply_filter = True
+        
+        if filter_kegg:
+            filtered_contigs.update(
+                unix_tools.awk_regex_filter(gff_path, 9, '/kegg_ko=.*[,]?' + filter_kegg + '/')
+            )
+            apply_filter = True
+        
+        if filter_tax:
+            filtered_contigs.update(
+                unix_tools.awk_regex_filter(gff_path, 9, '/best_tax_level=.*[,]?' + filter_tax
+                                            + '/')
+            )
+            apply_filter = True
+
+        data = []
+        for contig in contigs:
+            cols = contig.split('\t')
+            name = cols[0]
+            display_name = emg_utils.assembly_contig_name(name)
+            data.append({
+                'id': str(obj.pk) + '_' + display_name,
+                'display_name': display_name,
+                'contig_name': cols[0], # this is the actual name
+                'length': cols[1],
+                'coverage': emg_utils.assembly_contig_coverage(name)
+            })
+
+        result = data
+        if apply_filter:
+            result = [c for c in data if c['contig_name'] in filtered_contigs]
+
+        result.sort(key=lambda c: c['length'])
+
+        serializer = emg_serializers.AnalysisJobContigSerializer(result,
+                                                                 many=True, 
+                                                                 context={'request': request})
+        return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
         """
@@ -975,23 +1034,24 @@ class AnalysisJobContigViewSet(viewsets.ViewSet):
         fasta_path = os.path.abspath(os.path.join(
             settings.RESULTS_DIR,
             obj.result_directory,
-            'topcontigs.fasta')
+            'contigs.fasta')
         )
         fasta_idx_path = os.path.abspath(os.path.join(
             settings.RESULTS_DIR,
             obj.result_directory,
-            'topcontigs.fasta.fai')
+            'contigs.fasta.fai')
         )
 
         if os.path.isfile(fasta_path) and os.path.isfile(fasta_idx_path):
             output = io.StringIO()
+            # FIXME: handle errors
             with pysam.Fastafile(filename=fasta_path, filepath_index=fasta_idx_path) as fasta:  
                 rows = fasta.fetch(contig)
-                output.write('>' + contig  + '\n')
+                output.write('>' + emg_utils.assembly_contig_name(contig)  + '\n')
                 for row in rows:
                     output.write(row)
             response = HttpResponse()
-            response['Content-Type'] = 'chemical/seq-na-fasta' # ?
+            response['Content-Type'] = 'chemical/seq-na-fasta' # TODO check this media type?
             response['Content-Disposition'] = 'attachment; filename={0}.fasta'.format(contig)
             output.seek(0, os.SEEK_END)
             response['Content-Length'] = output.tell()
@@ -1043,7 +1103,7 @@ class AnalysisJobContigAnnotationViewSet(viewsets.ViewSet):
         gff_idx_path = os.path.abspath(os.path.join(
             settings.RESULTS_DIR,
             obj.result_directory,
-            'annotation.gff.gz.tbi')
+            'annotation.gff.tbi.gz')
         )
 
         if os.path.isfile(gff_path) and os.path.isfile(gff_idx_path):
@@ -1053,10 +1113,7 @@ class AnalysisJobContigAnnotationViewSet(viewsets.ViewSet):
             with pysam.TabixFile(filename=gff_path, index=gff_idx_path) as gff:
                 rows = gff.fetch(contig, multiple_iterators=True)
                 for row in rows:
-                    if 'gene=' in row:
-                        output.write(row + ';color=#FF0000\n')
-                    else:
-                        output.write(row + '\n')
+                    output.write(emg_utils.assembly_contig_name(row) + '\n')
             response = HttpResponse()
             response['Content-Type'] = 'text/x-gff3'
             response['Content-Disposition'] = 'attachment; filename={0}.gff'.format(contig)

@@ -63,3 +63,26 @@ def analysisjob_accession_query(accession):
     except ValueError:
         pass
     return query
+
+
+def assembly_contig_name(line):
+    """Parses Mgnify (ENA) assembly contigs names and returns the contig name with no metadata.
+    
+    For example:
+    ENA-OKXA01000001-OKXA01000001.1-human-gut-metagenome-strain-
+    SKBSTL060-genome-assembly--contig:-NODE-1-length-34650-cov-6.786732
+    get the the contig name: NODE-1-length-34650-cov-6.786732
+
+    """
+    return re.sub(r'[^\t=]*\-\-contig\:\-', '', line)
+
+def assembly_contig_coverage(name):
+    """From a contig name return the coverage (from the fasta name)
+
+    Example:
+    From NODE-1-length-34650-cov-6.786732 will return 6.786732 or '-' if failed. 
+    """
+    match = re.match(r'.*cov-(?P<cov>\d*\.?\d*)', name)
+    if match:
+        return match.group('cov')
+    return '-'    
