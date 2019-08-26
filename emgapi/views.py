@@ -964,9 +964,9 @@ class AnalysisJobContigViewSet(viewsets.ViewSet):
             contigs_file, col=2, gt=filter_gt, lt=filter_lt)
 
         filtered_contigs = []
-        filter_cog = request.GET.get('cog', None)
-        filter_kegg = request.GET.get('kegg', None)
-        filter_tax = request.GET.get('taxonomy', None)
+        filter_cog = request.GET.get('cog', '').lower()
+        filter_kegg = request.GET.get('kegg', '').lower()
+        filter_tax = request.GET.get('taxonomy', '').lower()
 
         apply_filter = False
         filtered_contigs = set()
