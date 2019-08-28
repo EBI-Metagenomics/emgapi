@@ -179,3 +179,7 @@ class AnalysisJobTaxonomy(mongoengine.Document):
         AnalysisJobOrganism, required=False)
     taxonomy_ssu = mongoengine.EmbeddedDocumentListField(
             AnalysisJobOrganism, required=False)
+    taxonomy_itsonedb = mongoengine.EmbeddedDocumentListField(
+            AnalysisJobOrganism, required=False)
+    taxonomy_itsunite = mongoengine.EmbeddedDocumentListField(
+            AnalysisJobOrganism, required=False)

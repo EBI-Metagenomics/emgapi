@@ -25,6 +25,8 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import filters
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 from emgapi import serializers as emg_serializers
 from emgapi import models as emg_models
@@ -34,6 +36,7 @@ from . import serializers as m_serializers
 from . import models as m_models
 from . import pagination as m_page
 from . import viewsets as m_viewsets
+from . import mixins as m_mixins
 
 
 logger = logging.getLogger(__name__)
@@ -457,122 +460,93 @@ class OrganismTreeViewSet(m_viewsets.ListReadOnlyModelViewSet):
             .list(request, *args, **kwargs)
 
 
-class AnalysisOrganismRelationshipViewSet(  # NOQA
+class AnalysisOrganismRelationshipViewSet(
+    m_mixins.AnalysisJobTaxonomyViewSetMixin,
     m_viewsets.ListReadOnlyModelViewSet):
-
-    serializer_class = m_serializers.OrganismRetriveSerializer
-
-    pagination_class = m_page.MaxSetPagination
-
-    filter_backends = (
-        filters.OrderingFilter,
-    )
-
-    ordering_fields = (
-        'name',
-        'prefix',
-        'lineage',
-    )
-
-    lookup_field = 'accession'
-
-    def get_queryset(self):
-        job = get_object_or_404(
-            emg_models.AnalysisJob,
-            Q(pk=int(self.kwargs['accession'].lstrip('MGYA')))
-        )
-
-        analysis = None
-        try:
-            analysis = m_models.AnalysisJobTaxonomy.objects \
-                .get(analysis_id=str(job.job_id))
-        except m_models.AnalysisJobTaxonomy.DoesNotExist:
-            pass
-
-        return getattr(analysis, 'taxonomy', [])
-
-    def list(self, request, *args, **kwargs):
-        """
-        Retrieves 16SrRNA Taxonomic analysis for the given accession
-        Example:
-        ---
-        `/analyses/MGYA00102827/taxonomy`
-        """
-
-        return super(AnalysisOrganismRelationshipViewSet, self) \
-            .list(request, *args, **kwargs)
+    """Retrieves 16SrRNA Taxonomic analysis for the given accession
+    Example:
+    ---
+    `/analyses/MGYA00102827/taxonomy`
+    ---
+    """
+    taxonomy_field = 'taxonomy'
 
 
 class AnalysisOrganismSSURelationshipViewSet(  # NOQA
+    m_mixins.AnalysisJobTaxonomyViewSetMixin,
     m_viewsets.ListReadOnlyModelViewSet):
-
-    serializer_class = m_serializers.OrganismRetriveSerializer
-
-    pagination_class = m_page.MaxSetPagination
-
-    lookup_field = 'accession'
-
-    def get_queryset(self):
-        job = get_object_or_404(
-            emg_models.AnalysisJob,
-            Q(pk=int(self.kwargs['accession'].lstrip('MGYA')))
-        )
-
-        analysis = None
-        try:
-            analysis = m_models.AnalysisJobTaxonomy.objects \
-                .get(analysis_id=str(job.job_id))
-        except m_models.AnalysisJobTaxonomy.DoesNotExist:
-            pass
-
-        return getattr(analysis, 'taxonomy_ssu', [])
-
-    def list(self, request, *args, **kwargs):
-        """
-        Retrieves SSU Taxonomic analysis for the given accession
-        Example:
-        ---
-        `/analyses/MGYA00102827/taxonomy/ssu`
-        """
-
-        return super(AnalysisOrganismSSURelationshipViewSet, self) \
-            .list(request, *args, **kwargs)
+    """Retrieves SSU Taxonomic analysis for the given accession
+    Example: 
+    ---
+    `/analyses/MGYA00102827/taxonomy/ssu`
+    ---
+    """
+    taxonomy_field = 'taxonomy_ssu'
 
 
 class AnalysisOrganismLSURelationshipViewSet(  # NOQA
+    m_mixins.AnalysisJobTaxonomyViewSetMixin,
     m_viewsets.ListReadOnlyModelViewSet):
+    """Retrieves LSU Taxonomic analysis for the given accession
+    Example: 
+    ---
+    `/analyses/MGYA00102827/taxonomy/lsu`
+    ---
+    """
+    taxonomy_field = 'taxonomy_lsu'
 
-    serializer_class = m_serializers.OrganismRetriveSerializer
 
-    pagination_class = m_page.MaxSetPagination
+class AnalysisOrganismITSOneDBRelationshipViewSet(  # NOQA
+    m_mixins.AnalysisJobTaxonomyViewSetMixin,
+    m_viewsets.ListReadOnlyModelViewSet):
+    """Retrieves ITSoneDB Taxonomic analysis for the given accession
+    Example:
+    ---
+    `/analyses/MGYA00102827/taxonomy/itsonedb`
+    ---
+    """
+    taxonomy_field = 'taxonomy_itsonedb'
 
-    lookup_field = 'accession'
 
-    def get_queryset(self):
+class AnalysisOrganismITSUniteRelationshipViewSet(  # NOQA
+    m_mixins.AnalysisJobTaxonomyViewSetMixin,
+    m_viewsets.ListReadOnlyModelViewSet):
+    """Retrieves ITS UNITE Taxonomic analysis for the given accession
+    Example: 
+    ---
+    `/analyses/MGYA00102827/taxonomy/itsonedb`
+    ---    
+    """
+    taxonomy_field = 'taxonomy_itsunite'
+
+
+class AnalysisTaxonomyOverview(APIView):
+    """Get the counts for each taxonomic results for an analysis job.
+    """
+
+    def get(self, request, accession):
+        """Get the AnalysisJob and then the AnalysisJobTaxonomy
+        """        
         job = get_object_or_404(
             emg_models.AnalysisJob,
-            Q(pk=int(self.kwargs['accession'].lstrip('MGYA')))
+            Q(pk=int(accession.lstrip('MGYA')))
         )
-
         analysis = None
         try:
             analysis = m_models.AnalysisJobTaxonomy.objects \
                 .get(analysis_id=str(job.job_id))
         except m_models.AnalysisJobTaxonomy.DoesNotExist:
-            pass
+            raise Http404
 
-        return getattr(analysis, 'taxonomy_lsu', [])
-
-    def list(self, request, *args, **kwargs):
-        """
-        Retrieves LSU Taxonomic analysis for the given accession
-        Example:
-        ---
-        `/analyses/MGYA00102827/taxonomy/lsu`
-        """
-
-        return super(AnalysisOrganismLSURelationshipViewSet, self) \
-            .list(request, *args, **kwargs)
+        return Response({
+            'accession': analysis.accession,
+            'pipeline_version': analysis.pipeline_version,
+            'taxonomy_count': len(getattr(analysis, 'taxonomy', [])),
+            'taxonomy_ssu_count': len(getattr(analysis, 'taxonomy_ssu', [])),
+            'taxonomy_lsu_count': len(getattr(analysis, 'taxonomy_lsu', [])),
+            'taxonomy_itsunite_count': len(getattr(analysis, 'taxonomy_itsunite', [])),
+            'taxonomy_itsonedb_count': len(getattr(analysis, 'taxonomy_itsonedb', []))
+        })
 
 
 class OrganismAnalysisRelationshipViewSet(m_viewsets.ListReadOnlyModelViewSet):

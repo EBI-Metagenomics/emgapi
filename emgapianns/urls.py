@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from django.conf.urls import url
+
 from rest_framework import routers
 
 from rest_framework_mongoengine import routers as m_routers
@@ -102,3 +104,21 @@ router.register(
     m_views.AnalysisOrganismLSURelationshipViewSet,
     base_name='analysis-taxonomy-lsu'
 )
+
+router.register(
+    r'analyses/(?P<accession>[^/]+)/taxonomy/itsonedb',
+    m_views.AnalysisOrganismITSOneDBRelationshipViewSet,
+    base_name='analysis-taxonomy-itsonedb'
+)
+
+router.register(
+    r'analyses/(?P<accession>[^/]+)/taxonomy/itsunite',
+    m_views.AnalysisOrganismITSUniteRelationshipViewSet,
+    base_name='analysis-taxonomy-itsunite'
+)
+
+urlpatterns = [
+    url(r'analyses/(?P<accession>[^/]+)/taxonomy/overview',
+        m_views.AnalysisTaxonomyOverview.as_view(),
+        name='analysis-taxonomy-overview'),
+]

@@ -745,7 +745,7 @@ class KronaViewSet(emg_mixins.ListModelMixin,
     renderer_classes = (renderers.StaticHTMLRenderer,)
 
     lookup_field = 'subdir'
-    lookup_value_regex = 'lsu|ssu'
+    lookup_value_regex = 'lsu|ssu|itsunite|itsonedb'
 
     def get_queryset(self):
         return emg_models.AnalysisJob.objects \
@@ -776,7 +776,6 @@ class KronaViewSet(emg_mixins.ListModelMixin,
             'taxonomy-summary',
             'krona.html')
         )
-        logger.info(krona)
         if os.path.isfile(krona):
             with open(krona, "r") as k:
                 return Response(k.read())
@@ -798,7 +797,6 @@ class KronaViewSet(emg_mixins.ListModelMixin,
             subdir.upper(),
             'krona.html')
         )
-        logger.info(krona)
         if os.path.isfile(krona):
             with open(krona, "r") as k:
                 return Response(k.read())
