@@ -782,6 +782,32 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     def get_taxonomy_ssu(self, obj):
         return None
 
+    taxonomy_itsonedb = relations.SerializerMethodResourceRelatedField(
+        source='get_taxonomy_itsonedb',
+        model=m_models.Organism,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:analysis-taxonomy-itsonedb-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
+    )
+
+    def get_taxonomy_itsonedb(self, obj):
+        return None
+
+    taxonomy_itsunite = relations.SerializerMethodResourceRelatedField(
+        source='get_taxonomy_itsunite',
+        model=m_models.Organism,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:analysis-taxonomy-itsunite-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
+    )
+
+    def get_taxonomy_itsunite(self, obj):
+        return None
+
     go_terms = relations.SerializerMethodResourceRelatedField(
         source='get_goterms',
         model=m_models.GoTerm,
