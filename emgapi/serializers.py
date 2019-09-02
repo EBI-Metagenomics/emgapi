@@ -689,6 +689,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     included_serializers = {
         'sample': 'emgapi.serializers.SampleSerializer',
         'study': 'emgapi.serializers.StudySerializer',
+        'downloads': 'emgapi.serializers.AnalysisJobDownloadSerializer',
     }
 
     url = serializers.HyperlinkedIdentityField(

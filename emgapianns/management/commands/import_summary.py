@@ -18,7 +18,7 @@ class Command(EMGBaseCommand):
         super(Command, self).add_arguments(parser)
         parser.add_argument(
             'suffix', nargs='?', type=str,
-            default='.go_slim', choices=['.ipr', '.go', '.go_slim'],
+            default='.go_slim', choices=['.ipr', '.go', '.go_slim', '.kegg_paths'],
             help='summary: .go_slim, .go, .ipr (default: %(default)s)')
 
     def populate_from_accession(self, options):
@@ -30,25 +30,31 @@ class Command(EMGBaseCommand):
         rootpath = options.get('rootpath', None)
         self.suffix = options.get('suffix', None)
 
-        name = "%s_summary%s" % (obj.input_file_name, self.suffix)
+        name = '%s_summary%s' % (obj.input_file_name, self.suffix)
         res = os.path.join(rootpath, obj.result_directory, name)
-        logger.info("Found: %s" % res)
-        if os.path.exists(res):
-            if os.path.isfile(res):
-                if os.stat(res).st_size > 0:
-                    logger.info("Loading: %s" % res)
-                    with open(res) as csvfile:
-                        reader = csv.reader(csvfile, delimiter=',')
-                        if self.suffix == '.ipr':
-                            self.load_ipr_from_summary_file(reader, obj)
-                        elif self.suffix in ('.go_slim', '.go'):
-                            self.load_go_from_summary_file(reader, obj)
-                else:
-                    logger.error("Path %r exist. Empty file. SKIPPING!" % res)
+        logger.info('Found: %s' % res)
+        
+        if not os.path.exists(res):
+            logger.error('Path %r exist. Empty file. SKIPPING!' % res)
+            return
+        if not os.path.isfile(res):
+            logger.error('Path %r exist. No summary. SKIPPING!' % res)
+            return
+        if os.stat(res).st_size == 0:
+            logger.error('Path %r doesn\'t exist. SKIPPING!' % res)
+            return
+        
+        logger.info('Loading: %s' % res)
+        with open(res) as csvfile:
+            if self.suffix == '.kegg_paths':
+                reader = csv.reader(csvfile, delimiter='\t')
+                self.load_kegg_from_summary_file(reader, obj, rootpath)
             else:
-                logger.error("Path %r exist. No summary. SKIPPING!" % res)
-        else:
-            logger.error("Path %r doesn't exist. SKIPPING!" % res)
+                reader = csv.reader(csvfile, delimiter=',')
+                if self.suffix == '.ipr':
+                    self.load_ipr_from_summary_file(reader, obj)
+                elif self.suffix in ('.go_slim', '.go'):
+                    self.load_go_from_summary_file(reader, obj)
 
     def load_go_from_summary_file(self, reader, obj):  # noqa
         try:
@@ -162,3 +168,87 @@ class Command(EMGBaseCommand):
                     "Interpro identifiers %d" % len(run.interpro_identifiers))
             run.save()
             logger.info("Saved Run %r" % run)
+
+    def load_kegg_from_summary_file(self, reader, obj, rootpath):
+        """Load KEGG results for a job into Mongo.
+        KEGG results are outputed in 3 files:
+        - summary file
+        - matching ko per pathway
+        - missing ko per pathway
+        """
+        try:
+            analysis_keggs = m_models.AnalysisJobKeggPathway.objects\
+                .get(pk=str(obj.job_id))
+        except m_models.AnalysisJobKeggPathway.DoesNotExist:
+            analysis_keggs = m_models.AnalysisJobKeggPathway()
+
+        analysis_keggs.analysis_id = str(obj.job_id)
+        analysis_keggs.accession = obj.accession
+        analysis_keggs.pipeline_version = obj.pipeline.release_version
+        analysis_keggs.job_id = obj.job_id
+
+        # Drop previuos annotations
+        analysis_keggs.kegg_pathways = []
+
+        analysis_keggs.save()
+
+        # Fetching the match and mismatch files
+        matches_file = os.path.join(rootpath, obj.result_directory, 'matching_ko_pathways.txt')
+        matches = {}
+        for module, completeness, ko_count, kos in self.get_reader(matches_file, delimiter='\t'):
+            matches[module.strip()] = [
+                float(completeness),
+                int(ko_count),
+                [k.strip() for k in kos.split(',')]
+            ]
+
+        missings_file = os.path.join(rootpath, obj.result_directory, 'missing_ko_pathways.txt') 
+        missings = {}
+        for module, completeness, ko_count, kos in self.get_reader(missings_file, delimiter='\t'):
+            missings[module.strip()] = [
+                float(completeness),
+                int(ko_count),
+                [k.strip() for k in kos.split(',')]
+            ]
+
+        new_kpaths = []
+        annotations = []
+
+        next(reader) # skip header
+
+        for accession, completeness, name, pclass in reader:
+            accession = accession.strip()
+            completeness = float(completeness)
+
+            kpathway = None
+            try:
+                kpathway = m_models.KeggPathway.objects \
+                        .get(accession=accession)
+            except m_models.KeggPathway.DoesNotExist:
+                kpathway = m_models.KeggPathway(
+                    accession=accession,
+                    name=name,
+                    description=pclass
+                )
+                new_kpaths.append(kpathway)
+
+            kpann = m_models.KeggPathwayAnnotation(
+                pathway=kpathway,
+                completeness=completeness,
+                matching_kos=matches[accession][2],
+                missing_kos=missings[accession][2]
+            )
+            annotations.append(kpann)
+
+        if len(new_kpaths):
+            m_models.KeggPathway.objects.insert(new_kpaths)
+            logger.info(
+                f'Created {len(new_kpaths)} new KEGG Pathways')
+
+        if len(annotations):
+            analysis_keggs.kegg_pathways.extend(annotations)
+            logger.info(
+                f'Created {len(annotations)} new KEGG Annotations')
+
+        analysis_keggs.save()
+        logger.info('Saved Run {analysis_keggs}')

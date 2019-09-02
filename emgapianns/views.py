@@ -91,7 +91,6 @@ class GoTermViewSet(m_viewsets.ReadOnlyModelViewSet):
 
 
 class InterproIdentifierViewSet(m_viewsets.ReadOnlyModelViewSet):
-
     """
     Provides list of InterPro identifiers.
     """
@@ -328,6 +327,40 @@ class AnalysisGoSlimRelationshipViewSet(  # NOQA
         `/analyses/MGYA00102827/go-slim`
         """
         return super(AnalysisGoSlimRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class AnalysisKeggPathwaysRelationshipViewSet(  # NOQA
+    m_viewsets.ListReadOnlyModelViewSet):
+
+    serializer_class = m_serializers.KeggPathwayRetrieveSerializer
+
+    pagination_class = m_page.MaxSetPagination
+
+    lookup_field = 'accession'
+
+    def get_queryset(self):
+        job = get_object_or_404(
+            emg_models.AnalysisJob,
+            Q(pk=int(self.kwargs['accession'].lstrip('MGYA')))
+        )
+        kegg_pathways = None
+        try:
+            kegg_pathways = m_models.AnalysisJobKeggPathway.objects \
+                .filter(analysis_id=str(job.job_id))
+        except m_models.AnalysisJobKeggPathway.DoesNotExist:
+            return None # FIXME: return an empty array (?)
+
+        return kegg_pathways
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves KEGG Pathway for the given accession
+        Example:
+        ---
+        `/analyses/MGYA00102827/kegg-pathways`
+        """
+        return super(AnalysisKeggPathwaysRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
 
 

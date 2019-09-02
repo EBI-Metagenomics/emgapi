@@ -109,4 +109,5 @@ urlpatterns += [
         name='verify_jwt_token_v1'),
 ]
 
+# Some API endpoints for the website.
 urlpatterns += mongo_urlpatters
