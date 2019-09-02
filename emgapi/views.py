@@ -708,7 +708,7 @@ class AnalysisQCChartViewSet(mixins.RetrieveModelMixin,
 
     def retrieve(self, request, chart=None, *args, **kwargs):
         """
-        Retrieves krona chart for the given accession and pipeline version
+        Retrieves QC data given accession
         Example:
         ---
         `/analyses/MGYA00102827/gc-distribution`
