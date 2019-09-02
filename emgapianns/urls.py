@@ -49,6 +49,12 @@ mongo_router.register(
 )
 
 mongo_router.register(
+    r'annotations/kegg-pathways/(?P<accession>[a-zA-Z0-9\:]+)/analyses',
+    m_views.AnalysisKeggPathwaysRelationshipViewSet,
+    base_name='keggpathways-analyses'
+)
+
+mongo_router.register(
     r'annotations/organisms',
     m_views.OrganismViewSet,
     base_name='organisms'

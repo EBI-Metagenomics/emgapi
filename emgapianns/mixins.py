@@ -26,7 +26,7 @@ from . import models as m_models
 from . import pagination as m_page
 
 
-class AnalysisJobTaxonomyViewSetMixin():
+class AnalysisJobTaxonomyViewSetMixin:
     """Get the taxonomy information for an analysis from Mongo.
     There are 4 possible set of results: SSU, LSU, ITSOneDB and UNITE(ITS).
     

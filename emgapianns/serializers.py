@@ -134,6 +134,18 @@ class InterproIdentifierRetriveSerializer(  # NOQA
         fields = '__all__'
 
 
+class KeggPathwayRetrieveSerializer(m_serializers.DynamicDocumentSerializer):
+
+    # url = serializers.HyperlinkedIdentityField(
+    #     view_name='emgapi_v1:interproidentifier-detail',
+    #     lookup_field='accession',
+    # )
+
+    class Meta:
+        model = m_models.AnalysisJobKeggPathway
+        fields = '__all__'
+
+
 class OrganismSerializer(m_serializers.DynamicDocumentSerializer,
                          serializers.HyperlinkedModelSerializer):
 
