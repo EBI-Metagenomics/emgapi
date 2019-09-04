@@ -30,10 +30,23 @@ mongo_router.register(
     m_views.GoTermViewSet,
     base_name='goterms'
 )
+
 mongo_router.register(
     r'annotations/interpro-identifiers',
     m_views.InterproIdentifierViewSet,
     base_name='interproidentifier'
+)
+
+mongo_router.register(
+    r'annotations/kegg-modules',
+    m_views.KeggModuleViewSet,
+    base_name='keggmodule'
+)
+
+mongo_router.register(
+    r'annotations/pfam-entries',
+    m_views.PfamEntryViewSet,
+    base_name='pfam'    
 )
 
 mongo_router.register(
@@ -49,9 +62,15 @@ mongo_router.register(
 )
 
 mongo_router.register(
-    r'annotations/kegg-pathways/(?P<accession>[a-zA-Z0-9\:]+)/analyses',
-    m_views.AnalysisKeggPathwaysRelationshipViewSet,
-    base_name='keggpathways-analyses'
+    r'annotations/kegg-modules/(?P<accession>[a-zA-Z0-9\:]+)/analyses',
+    m_views.KeggModuleAnalysisRelationshipViewSet,
+    base_name='keggmodule-analyses'
+)
+
+mongo_router.register(
+    r'annotations/pfam-entries/(?P<accession>[a-zA-Z0-9\:]+)/analyses',
+    m_views.PfamAnalysisRelationshipViewSet,
+    base_name='pfam-analyses'
 )
 
 mongo_router.register(
@@ -91,6 +110,18 @@ router.register(
     r'analyses/(?P<accession>[^/]+)/interpro-identifiers',
     m_views.AnalysisInterproIdentifierRelationshipViewSet,
     base_name='analysis-interpro'
+)
+
+router.register(
+    r'analyses/(?P<accession>[^/]+)/kegg-modules',
+    m_views.AnalysisKeggModulesRelationshipViewSet,
+    base_name='analysis-keggmoduless'
+)
+
+router.register(
+    r'analyses/(?P<accession>[^/]+)/pfam-entries',
+    m_views.AnalysisPfamRelationshipViewSet,
+    base_name='analysis-pfamentries'
 )
 
 router.register(

@@ -18,8 +18,8 @@ class Command(EMGBaseCommand):
         super(Command, self).add_arguments(parser)
         parser.add_argument(
             'suffix', nargs='?', type=str,
-            default='.go_slim', choices=['.ipr', '.go', '.go_slim', '.kegg_paths'],
-            help='summary: .go_slim, .go, .ipr (default: %(default)s)')
+            default='.go_slim', choices=['.ipr', '.go', '.go_slim', '.kegg_paths', '.pfam'],
+            help='summary: .go_slim, .go, .ipr, .kegg_paths, .pfam (default: %(default)s)')
 
     def populate_from_accession(self, options):
         logger.info("Found %d" % len(self.obj_list))
@@ -49,6 +49,9 @@ class Command(EMGBaseCommand):
             if self.suffix == '.kegg_paths':
                 reader = csv.reader(csvfile, delimiter='\t')
                 self.load_kegg_from_summary_file(reader, obj, rootpath)
+            elif self.suffix == '.pfam':
+                reader = csv.reader(csvfile, delimiter='\t')
+                self.load_pfam_from_summary_file(reader, obj, rootpath)
             else:
                 reader = csv.reader(csvfile, delimiter=',')
                 if self.suffix == '.ipr':
@@ -177,41 +180,37 @@ class Command(EMGBaseCommand):
         - missing ko per pathway
         """
         try:
-            analysis_keggs = m_models.AnalysisJobKeggPathway.objects\
+            analysis_keggs = m_models.AnalysisJobKeggModule.objects\
                 .get(pk=str(obj.job_id))
-        except m_models.AnalysisJobKeggPathway.DoesNotExist:
-            analysis_keggs = m_models.AnalysisJobKeggPathway()
+        except m_models.AnalysisJobKeggModule.DoesNotExist:
+            analysis_keggs = m_models.AnalysisJobKeggModule()
 
         analysis_keggs.analysis_id = str(obj.job_id)
         analysis_keggs.accession = obj.accession
         analysis_keggs.pipeline_version = obj.pipeline.release_version
         analysis_keggs.job_id = obj.job_id
 
-        # Drop previuos annotations
-        analysis_keggs.kegg_pathways = []
+        # drop previous annotations
+        analysis_keggs.kegg_modules = []
 
         analysis_keggs.save()
 
-        # Fetching the match and mismatch files
-        matches_file = os.path.join(rootpath, obj.result_directory, 'matching_ko_pathways.txt')
-        matches = {}
-        for module, completeness, ko_count, kos in self.get_reader(matches_file, delimiter='\t'):
-            matches[module.strip()] = [
-                float(completeness),
-                int(ko_count),
-                [k.strip() for k in kos.split(',')]
+        # fetching the match and mismatch files
+        def load_aux_file(filename):
+            data_file = os.path.join(rootpath, obj.result_directory, filename)
+            result = {}
+            for module, completeness, ko_count, kos in self.get_reader(data_file, delimiter='\t'):
+                result[module.strip()] = [
+                    float(completeness),
+                    int(ko_count),
+                    [k.strip() for k in kos.split(',')]
             ]
+            return result
 
-        missings_file = os.path.join(rootpath, obj.result_directory, 'missing_ko_pathways.txt') 
-        missings = {}
-        for module, completeness, ko_count, kos in self.get_reader(missings_file, delimiter='\t'):
-            missings[module.strip()] = [
-                float(completeness),
-                int(ko_count),
-                [k.strip() for k in kos.split(',')]
-            ]
+        matches = load_aux_file('matching_ko_pathways.txt') # FIXME: hardcoded
+        missings = load_aux_file('missing_ko_pathways.txt') # FIXME: hardcoded
 
-        new_kpaths = []
+        new_kmodules = []
         annotations = []
 
         next(reader) # skip header
@@ -220,35 +219,100 @@ class Command(EMGBaseCommand):
             accession = accession.strip()
             completeness = float(completeness)
 
-            kpathway = None
+            k_module = None
             try:
-                kpathway = m_models.KeggPathway.objects \
+                k_module = m_models.KeggModule.objects \
                         .get(accession=accession)
-            except m_models.KeggPathway.DoesNotExist:
-                kpathway = m_models.KeggPathway(
+            except m_models.KeggModule.DoesNotExist:
+                k_module = m_models.KeggModule(
                     accession=accession,
                     name=name,
                     description=pclass
                 )
-                new_kpaths.append(kpathway)
+                new_kmodules.append(k_module)
 
-            kpann = m_models.KeggPathwayAnnotation(
-                pathway=kpathway,
+            kpann = m_models.AnalysisJobKeggModuleAnnotation(
+                module=k_module,
                 completeness=completeness,
                 matching_kos=matches[accession][2],
                 missing_kos=missings[accession][2]
             )
             annotations.append(kpann)
 
-        if len(new_kpaths):
-            m_models.KeggPathway.objects.insert(new_kpaths)
+        if len(new_kmodules):
+            m_models.KeggModule.objects.insert(new_kmodules)
             logger.info(
-                f'Created {len(new_kpaths)} new KEGG Pathways')
+                f'Created {len(new_kmodules)} new KEGG Modules')
 
         if len(annotations):
-            analysis_keggs.kegg_pathways.extend(annotations)
+            analysis_keggs.kegg_modules.extend(annotations)
             logger.info(
-                f'Created {len(annotations)} new KEGG Annotations')
+                f'Created {len(annotations)} new KEGG Module Annotations')
 
         analysis_keggs.save()
         logger.info('Saved Run {analysis_keggs}')
+
+    def load_pfam_from_summary_file(self, reader, obj, rootpath):
+        """Import PFam summary
+        The PFam summary file is a .tsv.
+        Each row has:
+            Nro hits PFam accession \t Description
+        Example:
+             13 PF00001	7 transmembrane receptor (rhodopsin family)
+            1418 PF00004 ATPase family associated with various cellular activities (AAA)
+            27941 PF00005 ABC transporter
+        """
+        try:
+            analysis_pfam = m_models.AnalysisJobPfam.objects\
+                .get(pk=str(obj.job_id))
+        except m_models.AnalysisJobPfam.DoesNotExist:
+            analysis_pfam = m_models.AnalysisJobPfam()
+
+        analysis_pfam.analysis_id = str(obj.job_id)
+        analysis_pfam.accession = obj.accession
+        analysis_pfam.pipeline_version = obj.pipeline.release_version
+        analysis_pfam.job_id = obj.job_id
+
+        # Drop previuos annotations
+        analysis_pfam.pfam_entries = []
+
+        analysis_pfam.save()
+
+        new_pfams = []
+        annotations = []
+
+        next(reader) # skip header
+
+        for count_id, desciption in reader:
+            count, pfam_id = count_id.strip().split(' ') 
+            count = int(count)
+
+            pfam_entry = None
+            try:
+                pfam_entry = m_models.PfamEntry.objects \
+                        .get(accession=pfam_id)
+            except m_models.PfamEntry.DoesNotExist:
+                pfam_entry = m_models.PfamEntry(
+                    accession=pfam_id,
+                    description=desciption
+                )
+                new_pfams.append(pfam_entry)
+            
+            pfam_ann = m_models.AnalysisJobPfamAnnotation(
+                pfam_entry=pfam_entry,
+                count=count
+            )
+            annotations.append(pfam_ann)
+
+        if len(new_pfams):
+            m_models.PfamEntry.objects.insert(new_pfams)
+            logger.info(
+                f'Created {len(new_pfams)} new Pfam entries')
+
+        if len(annotations):
+            analysis_pfam.pfam_entries.extend(annotations)
+            logger.info(
+                f'Created {len(annotations)} new Pfam Annotations')
+
+        analysis_pfam.save()
+        logger.info('Saved Run {analysis_pfam}')        
