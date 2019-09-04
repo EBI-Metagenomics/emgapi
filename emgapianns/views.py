@@ -43,7 +43,6 @@ logger = logging.getLogger(__name__)
 
 
 class GoTermViewSet(m_viewsets.ReadOnlyModelViewSet):
-
     """
     Provides list of GO terms.
     """
@@ -111,7 +110,7 @@ class InterproIdentifierViewSet(m_viewsets.ReadOnlyModelViewSet):
             raise Http404(("Attribute error '%s'." % self.lookup_field))
         except m_models.InterproIdentifier.DoesNotExist:
             raise Http404(('No %s matches the given query.' %
-                           m_models.GoTerm.__class__.__name__))
+                           m_models.InterproIdentifier.__class__.__name__))
 
     def get_serializer_class(self):
         return super(InterproIdentifierViewSet, self).get_serializer_class()
@@ -134,6 +133,101 @@ class InterproIdentifierViewSet(m_viewsets.ReadOnlyModelViewSet):
         `/annotations/interpro-identifier/IPR020405`
         """
         return super(InterproIdentifierViewSet, self) \
+            .retrieve(request, *args, **kwargs)
+
+
+class KeggModuleViewSet(m_viewsets.ReadOnlyModelViewSet):
+    """
+    Provides list of KEEG modules.
+    """
+
+    serializer_class = m_serializers.KeggModuleSerializer
+
+    lookup_field = 'accession'
+    lookup_value_regex = 'M[0-9]+'
+
+    def get_queryset(self):
+        return m_models.KeggModule.objects.all()
+
+    def get_object(self):
+        try:
+            accession = self.kwargs[self.lookup_field]
+            return m_models.KeggModule.objects.get(accession=accession)
+        except KeyError:
+            raise Http404(("Attribute error '%s'." % self.lookup_field))
+        except m_models.KeggModule.DoesNotExist:
+            raise Http404(('No %s matches the given query.' %
+                           m_models.KeggModule.__class__.__name__))
+
+    def get_serializer_class(self):
+        return super(KeggModuleViewSet, self).get_serializer_class()
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of KEGG modules
+        Example:
+        ---
+        `/annotations/kegg-modules`
+        """
+        return super(KeggModuleViewSet, self) \
+            .list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves KEGG module
+        Example:
+        ---
+        `/annotations/kegg-modules/M00127`
+        """
+        return super(KeggModuleViewSet, self) \
+            .retrieve(request, *args, **kwargs)
+
+
+class PfamEntryViewSet(m_viewsets.ReadOnlyModelViewSet):
+    # FIXME: DRY (InterPro, Go, Kegg and this)
+    """
+    Provides list of Pfem entries.
+    """
+
+    serializer_class = m_serializers.PfamSerializer
+
+    lookup_field = 'accession'
+    lookup_value_regex = 'PF[0-9]+'
+
+    def get_queryset(self):
+        return m_models.PfamEntry.objects.all()
+
+    def get_object(self):
+        try:
+            accession = self.kwargs[self.lookup_field]
+            return m_models.PfamEntry.objects.get(accession=accession)
+        except KeyError:
+            raise Http404(("Attribute error '%s'." % self.lookup_field))
+        except m_models.PfamEntry.DoesNotExist:
+            raise Http404(('No %s matches the given query.' %
+                           m_models.PfamEntry.__class__.__name__))
+
+    def get_serializer_class(self):
+        return super(PfamEntryViewSet, self).get_serializer_class()
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of Pfam entries
+        Example:
+        ---
+        `/annotations/pfam-entries`
+        """
+        return super(PfamEntryViewSet, self) \
+            .list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves a Pfram entry
+        Example:
+        ---
+        `/annotations/pfam-entry/P0001`
+        """
+        return super(PfamEntryViewSet, self) \
             .retrieve(request, *args, **kwargs)
 
 
@@ -254,6 +348,121 @@ class InterproIdentifierAnalysisRelationshipViewSet(  # NOQA
             .list(request, *args, **kwargs)
 
 
+class KeggModuleAnalysisRelationshipViewSet(m_viewsets.ListReadOnlyModelViewSet):
+    """Get the KEGG Module analysis
+    """
+    serializer_class = emg_serializers.AnalysisSerializer
+
+    filter_class = emg_filters.AnalysisJobFilter
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'accession',
+    )
+
+    ordering = ('-accession',)
+
+    search_fields = (
+        '@sample__metadata__var_val_ucv',
+    )
+
+    lookup_field = 'accession'
+
+    def get_queryset(self):
+        accession = self.kwargs[self.lookup_field]
+        try:
+            annotation = m_models.KeggModule.objects.get(accession=accession)
+        except KeyError:
+            raise Http404(("Attribute error '%s'." % self.lookup_field))
+        except m_models.KeggModule.DoesNotExist:
+            raise Http404(('No %s matches the given query.' %
+                           m_models.KeggModule.__class__.__name__))
+        job_ids = m_models.AnalysisJobKeggModule.objects \
+            .filter(
+                M_Q(kegg_modules__module=annotation)
+            ) \
+            .distinct('job_id')
+        return emg_models.AnalysisJob.objects \
+            .filter(job_id__in=job_ids) \
+            .available(self.request)
+
+    def get_serializer_class(self):
+        return emg_serializers.AnalysisSerializer
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of analysis results for the given KEGG module M00127 term
+        Example:
+        ---
+        `/annotations/kegg-modules/M00127/analyses`
+        """
+        return super(KeggModuleAnalysisRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class PfamAnalysisRelationshipViewSet(m_viewsets.ListReadOnlyModelViewSet):
+    # FIXME: DRY (InterPro, Go, KEGG and this)
+    """Get the the Analysis that have a particular Pfam
+    """
+    serializer_class = emg_serializers.AnalysisSerializer
+
+    filter_class = emg_filters.AnalysisJobFilter
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'accession',
+    )
+
+    ordering = ('-accession',)
+
+    search_fields = (
+        '@sample__metadata__var_val_ucv',
+    )
+
+    lookup_field = 'accession'
+
+    def get_queryset(self):
+        accession = self.kwargs[self.lookup_field]
+        try:
+            annotation = m_models.PfamEntry.objects.get(accession=accession)
+        except KeyError:
+            raise Http404(("Attribute error '%s'." % self.lookup_field))
+        except m_models.PfamEntry.DoesNotExist:
+            raise Http404(('No %s matches the given query.' %
+                           m_models.PfamEntry.__class__.__name__))
+        job_ids = m_models.AnalysisJobPfamAnnotation.objects \
+            .filter(
+                M_Q(pfram_entries__pfam=annotation)
+            ) \
+            .distinct('job_id')
+        return emg_models.AnalysisJob.objects \
+            .filter(job_id__in=job_ids) \
+            .available(self.request)
+
+    def get_serializer_class(self):
+        return emg_serializers.AnalysisSerializer
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of analysis results for the given Pfam entey P00001 term
+        Example:
+        ---
+        `/annotations/pfram-entries/P00001/analyses`
+        """
+        return super(PfamAnalysisRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
 class AnalysisGoTermRelationshipViewSet(  # NOQA
     m_viewsets.ListReadOnlyModelViewSet):
 
@@ -330,10 +539,10 @@ class AnalysisGoSlimRelationshipViewSet(  # NOQA
             .list(request, *args, **kwargs)
 
 
-class AnalysisKeggPathwaysRelationshipViewSet(  # NOQA
+class AnalysisKeggModulesRelationshipViewSet(  # NOQA
     m_viewsets.ListReadOnlyModelViewSet):
 
-    serializer_class = m_serializers.KeggPathwayRetrieveSerializer
+    serializer_class = m_serializers.KeggModuleRetrieveSerializer
 
     pagination_class = m_page.MaxSetPagination
 
@@ -344,23 +553,57 @@ class AnalysisKeggPathwaysRelationshipViewSet(  # NOQA
             emg_models.AnalysisJob,
             Q(pk=int(self.kwargs['accession'].lstrip('MGYA')))
         )
-        kegg_pathways = None
+        analysis = None
         try:
-            kegg_pathways = m_models.AnalysisJobKeggPathway.objects \
-                .filter(analysis_id=str(job.job_id))
-        except m_models.AnalysisJobKeggPathway.DoesNotExist:
-            return None # FIXME: return an empty array (?)
+            analysis = m_models.AnalysisJobKeggModule.objects \
+                .get(analysis_id=str(job.job_id))
+        except m_models.AnalysisJobKeggModule.DoesNotExist:
+            pass
 
-        return kegg_pathways
+        return getattr(analysis, 'kegg_modules', [])
 
     def list(self, request, *args, **kwargs):
         """
-        Retrieves KEGG Pathway for the given accession
+        Retrieves KEGG Module for the given accession
         Example:
         ---
-        `/analyses/MGYA00102827/kegg-pathways`
+        `/analyses/MGYA00102827/kegg-modules`
         """
-        return super(AnalysisKeggPathwaysRelationshipViewSet, self) \
+        return super(AnalysisKeggModulesRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class AnalysisPfamRelationshipViewSet(  # NOQA
+    m_viewsets.ListReadOnlyModelViewSet):
+
+    serializer_class = m_serializers.PfamRetrieveSerializer
+
+    pagination_class = m_page.MaxSetPagination
+
+    lookup_field = 'accession'
+
+    def get_queryset(self):
+        job = get_object_or_404(
+            emg_models.AnalysisJob,
+            Q(pk=int(self.kwargs['accession'].lstrip('MGYA')))
+        )
+        analysis = None
+        try:
+            analysis = m_models.AnalysisJobPfam.objects \
+                .get(analysis_id=str(job.job_id))
+        except m_models.AnalysisJobPfam.DoesNotExist:
+            pass
+
+        return getattr(analysis, 'pfam_entries', [])
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves Pfam entries for the given accession
+        Example:
+        ---
+        `/analyses/MGYA00102827/pfam-entries`
+        """
+        return super(AnalysisPfamRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
 
 

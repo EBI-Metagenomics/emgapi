@@ -33,16 +33,6 @@ class GoTermSerializer(m_serializers.DocumentSerializer,
         lookup_field='accession',
     )
 
-    # analysis = relations.SerializerMethodResourceRelatedField(
-    #     source='get_analysis',
-    #     model=emg_models.AnalysisJob,
-    #     many=True,
-    #     read_only=True,
-    #     related_link_view_name='emgapi_v1:goterms-analyses-list',
-    #     related_link_url_kwarg='accession',
-    #     related_link_lookup_field='accession'
-    # )
-
     def get_analysis(self, obj):
         return None
 
@@ -59,22 +49,38 @@ class InterproIdentifierSerializer(m_serializers.DocumentSerializer,
         lookup_field='accession',
     )
 
-    # analysis = relations.SerializerMethodResourceRelatedField(
-    #     source='get_analysis',
-    #     model=emg_models.AnalysisJob,
-    #     many=True,
-    #     read_only=True,
-    #     related_link_view_name='emgapi_v1:interproidentifier-analyses-list',
-    #     related_link_url_kwarg='accession',
-    #     related_link_lookup_field='accession'
-    # )
-
     def get_analysis(self, obj):
         return None
 
     class Meta:
         model = m_models.InterproIdentifier
         fields = '__all__'
+
+
+class KeggModuleSerializer(m_serializers.DocumentSerializer,
+                            serializers.HyperlinkedModelSerializer):
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi_v1:keggmodule-detail',
+        lookup_field='accession',
+    )
+
+    class Meta:
+        model = m_models.KeggModule
+        fields = '__all__'
+
+
+class PfamSerializer(m_serializers.DocumentSerializer,
+                            serializers.HyperlinkedModelSerializer):
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi_v1:pfam-detail',
+        lookup_field='accession',
+    )
+
+    class Meta:
+        model = m_models.PfamEntry
+        fields = '__all__'
+
 
 
 class GoTermRetriveSerializer(m_serializers.DynamicDocumentSerializer,
@@ -134,17 +140,38 @@ class InterproIdentifierRetriveSerializer(  # NOQA
         fields = '__all__'
 
 
-class KeggPathwayRetrieveSerializer(m_serializers.DynamicDocumentSerializer):
+class KeggModuleRetrieveSerializer(
+    m_serializers.DynamicDocumentSerializer,
+    serializers.HyperlinkedModelSerializer):
 
-    # url = serializers.HyperlinkedIdentityField(
-    #     view_name='emgapi_v1:interproidentifier-detail',
-    #     lookup_field='accession',
-    # )
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi_v1:keggmodule-detail',
+        lookup_field='accession',
+    )
+
+    completeness = serializers.FloatField(required=True)
+    matching_kos = serializers.ListField(required=True)
+    missing_kos = serializers.ListField(required=True)
 
     class Meta:
-        model = m_models.AnalysisJobKeggPathway
+        model = m_models.KeggModule
         fields = '__all__'
 
+
+class PfamRetrieveSerializer(
+    m_serializers.DynamicDocumentSerializer,
+    serializers.HyperlinkedModelSerializer):
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi_v1:pfam-detail',
+        lookup_field='accession',
+    )
+
+    count = serializers.IntegerField(required=True)
+
+    class Meta:
+        model = m_models.PfamEntry
+        fields = '__all__'
 
 class OrganismSerializer(m_serializers.DynamicDocumentSerializer,
                          serializers.HyperlinkedModelSerializer):
