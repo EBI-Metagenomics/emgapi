@@ -48,7 +48,7 @@ class Command(EMGBaseCommand):
             except emg_models.AnalysisMetadataVariableNames.DoesNotExist:
                 var = emg_models.AnalysisMetadataVariableNames(var_name=row[0])
                 var.save()
-                # becuase PK is not AutoField
+                # because PK is not AutoField
                 var = emg_models.AnalysisMetadataVariableNames.objects \
                     .get(var_name=row[0])
             if var is not None:
