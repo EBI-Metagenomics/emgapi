@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2017 EMBL - European Bioinformatics Institute
+# Copyright 2019 EMBL - European Bioinformatics Institute
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -42,28 +42,18 @@ from . import mixins as m_mixins
 logger = logging.getLogger(__name__)
 
 
-class GoTermViewSet(m_viewsets.ReadOnlyModelViewSet):
+class GoTermViewSet(
+    m_mixins.AnnotationRetrivalMixin,
+    m_viewsets.ReadOnlyModelViewSet):
     """
     Provides list of GO terms.
     """
+    annotation_model = m_models.GoTerm
 
     serializer_class = m_serializers.GoTermSerializer
 
     lookup_field = 'accession'
     lookup_value_regex = 'GO:[0-9]+'
-
-    def get_queryset(self):
-        return m_models.GoTerm.objects.all()
-
-    def get_object(self):
-        try:
-            accession = self.kwargs[self.lookup_field]
-            return m_models.GoTerm.objects.get(accession=accession)
-        except KeyError:
-            raise Http404(("Attribute error '%s'." % self.lookup_field))
-        except m_models.GoTerm.DoesNotExist:
-            raise Http404(('No %s matches the given query.' %
-                           m_models.GoTerm.__class__.__name__))
 
     def get_serializer_class(self):
         return super(GoTermViewSet, self).get_serializer_class()
@@ -89,28 +79,18 @@ class GoTermViewSet(m_viewsets.ReadOnlyModelViewSet):
             .retrieve(request, *args, **kwargs)
 
 
-class InterproIdentifierViewSet(m_viewsets.ReadOnlyModelViewSet):
+class InterproIdentifierViewSet(
+    m_mixins.AnnotationRetrivalMixin,
+    m_viewsets.ReadOnlyModelViewSet):
     """
     Provides list of InterPro identifiers.
     """
+    annotation_model = m_models.InterproIdentifier
 
     serializer_class = m_serializers.InterproIdentifierSerializer
 
     lookup_field = 'accession'
     lookup_value_regex = 'IPR[0-9]+'
-
-    def get_queryset(self):
-        return m_models.InterproIdentifier.objects.all()
-
-    def get_object(self):
-        try:
-            accession = self.kwargs[self.lookup_field]
-            return m_models.InterproIdentifier.objects.get(accession=accession)
-        except KeyError:
-            raise Http404(("Attribute error '%s'." % self.lookup_field))
-        except m_models.InterproIdentifier.DoesNotExist:
-            raise Http404(('No %s matches the given query.' %
-                           m_models.InterproIdentifier.__class__.__name__))
 
     def get_serializer_class(self):
         return super(InterproIdentifierViewSet, self).get_serializer_class()
@@ -136,28 +116,18 @@ class InterproIdentifierViewSet(m_viewsets.ReadOnlyModelViewSet):
             .retrieve(request, *args, **kwargs)
 
 
-class KeggModuleViewSet(m_viewsets.ReadOnlyModelViewSet):
+class KeggModuleViewSet(
+    m_mixins.AnnotationRetrivalMixin,
+    m_viewsets.ReadOnlyModelViewSet):
     """
     Provides list of KEEG modules.
     """
+    annotation_model = m_models.KeggModule
 
     serializer_class = m_serializers.KeggModuleSerializer
 
     lookup_field = 'accession'
     lookup_value_regex = 'M[0-9]+'
-
-    def get_queryset(self):
-        return m_models.KeggModule.objects.all()
-
-    def get_object(self):
-        try:
-            accession = self.kwargs[self.lookup_field]
-            return m_models.KeggModule.objects.get(accession=accession)
-        except KeyError:
-            raise Http404(("Attribute error '%s'." % self.lookup_field))
-        except m_models.KeggModule.DoesNotExist:
-            raise Http404(('No %s matches the given query.' %
-                           m_models.KeggModule.__class__.__name__))
 
     def get_serializer_class(self):
         return super(KeggModuleViewSet, self).get_serializer_class()
@@ -183,29 +153,18 @@ class KeggModuleViewSet(m_viewsets.ReadOnlyModelViewSet):
             .retrieve(request, *args, **kwargs)
 
 
-class PfamEntryViewSet(m_viewsets.ReadOnlyModelViewSet):
-    # FIXME: DRY (InterPro, Go, Kegg and this)
+class PfamEntryViewSet(
+    m_mixins.AnnotationRetrivalMixin,
+    m_viewsets.ReadOnlyModelViewSet):
     """
     Provides list of Pfem entries.
     """
+    annotation_model = m_models.PfamEntry
 
     serializer_class = m_serializers.PfamSerializer
 
     lookup_field = 'accession'
     lookup_value_regex = 'PF[0-9]+'
-
-    def get_queryset(self):
-        return m_models.PfamEntry.objects.all()
-
-    def get_object(self):
-        try:
-            accession = self.kwargs[self.lookup_field]
-            return m_models.PfamEntry.objects.get(accession=accession)
-        except KeyError:
-            raise Http404(("Attribute error '%s'." % self.lookup_field))
-        except m_models.PfamEntry.DoesNotExist:
-            raise Http404(('No %s matches the given query.' %
-                           m_models.PfamEntry.__class__.__name__))
 
     def get_serializer_class(self):
         return super(PfamEntryViewSet, self).get_serializer_class()
@@ -231,384 +190,231 @@ class PfamEntryViewSet(m_viewsets.ReadOnlyModelViewSet):
             .retrieve(request, *args, **kwargs)
 
 
-class GoTermAnalysisRelationshipViewSet(m_viewsets.ListReadOnlyModelViewSet):
+class KeggOrthologViewSet(
+    m_mixins.AnnotationRetrivalMixin,
+    m_viewsets.ReadOnlyModelViewSet):
+    """
+    Provides list of KEGG Ortholog.
+    """
+    annotation_model = m_models.KeggOrtholog
 
-    serializer_class = emg_serializers.AnalysisSerializer
-
-    filter_class = emg_filters.AnalysisJobFilter
-
-    filter_backends = (
-        DjangoFilterBackend,
-        filters.SearchFilter,
-        filters.OrderingFilter,
-    )
-
-    ordering_fields = (
-        'accession',
-    )
-
-    ordering = ('-accession',)
-
-    search_fields = (
-        '@sample__metadata__var_val_ucv',
-    )
+    serializer_class = m_serializers.KeggOrthologSerializer
 
     lookup_field = 'accession'
+    lookup_value_regex = 'K[0-9]+'
 
-    def get_queryset(self):
-        accession = self.kwargs[self.lookup_field]
-        try:
-            annotation = m_models.GoTerm.objects.get(accession=accession)
-        except KeyError:
-            raise Http404(("Attribute error '%s'." % self.lookup_field))
-        except m_models.GoTerm.DoesNotExist:
-            raise Http404(('No %s matches the given query.' %
-                           m_models.GoTerm.__class__.__name__))
-        logger.info("get accession %s" % annotation.accession)
+    def get_serializer_class(self):
+        return super(KeggOrthologViewSet, self).get_serializer_class()
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of KO
+        Example:
+        ---
+        `/annotations/ko`
+        """
+        return super(KeggOrthologViewSet, self) \
+            .list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves a Kegg Ortholog
+        Example:
+        ---
+        `/annotations/ko/ko00001`
+        """
+        return super(KeggOrthologViewSet, self) \
+            .retrieve(request, *args, **kwargs)
+
+
+class GenomePropViewSet(
+    m_mixins.AnnotationRetrivalMixin,
+    m_viewsets.ReadOnlyModelViewSet):
+    """
+    Provides list of Genome Properties.
+    """
+    annotation_model = m_models.GenomeProperty
+
+    serializer_class = m_serializers.GenomePropertySerializer
+
+    lookup_field = 'accession'
+    lookup_value_regex = 'GenProp[0-9]+'
+
+    def get_serializer_class(self):
+        return super(GenomePropViewSet, self).get_serializer_class()
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of Genome properties
+        Example:
+        ---
+        `/annotations/genome-properties`
+        """
+        return super(GenomePropViewSet, self) \
+            .list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves a Genome property
+        Example:
+        ---
+        `/annotations/genome-properties/GenProp0063`
+        """
+        return super(GenomePropViewSet, self) \
+            .retrieve(request, *args, **kwargs)
+
+
+class GoTermAnalysisRelationshipViewSet(m_viewsets.AnalysisRelationshipViewSet):
+    """
+    Retrieves list of analysis results for the given GO term
+    Example:
+    ---
+    `/annotations/go-terms/GO:009579/analyses`
+    """
+    annotation_model = m_models.GoTerm
+
+    def get_job_ids(self):
         job_ids = m_models.AnalysisJobGoTerm.objects \
             .filter(
                 M_Q(go_slim__go_term=annotation) |
                 M_Q(go_terms__go_term=annotation)
             ) \
             .distinct('job_id')
-        logger.info("Found %d analysis" % len(job_ids))
-        return emg_models.AnalysisJob.objects \
-            .filter(job_id__in=job_ids) \
-            .available(self.request)
-
-    def get_serializer_class(self):
-        return emg_serializers.AnalysisSerializer
-
-    def list(self, request, *args, **kwargs):
-        """
-        Retrieves list of analysis results for the given GO term
-        Example:
-        ---
-        `/annotations/go-terms/GO:009579/analyses`
-        """
-        return super(GoTermAnalysisRelationshipViewSet, self) \
-            .list(request, *args, **kwargs)
+        return job_ids
 
 
 class InterproIdentifierAnalysisRelationshipViewSet(  # NOQA
-    m_viewsets.ListReadOnlyModelViewSet):
-
-    serializer_class = emg_serializers.AnalysisSerializer
-
-    filter_class = emg_filters.AnalysisJobFilter
-
-    filter_backends = (
-        DjangoFilterBackend,
-        filters.SearchFilter,
-        filters.OrderingFilter,
-    )
-
-    ordering_fields = (
-        'accession',
-    )
-
-    ordering = ('-accession',)
-
-    search_fields = (
-        '@sample__metadata__var_val_ucv',
-    )
-
-    lookup_field = 'accession'
-
-    def get_queryset(self):
-        accession = self.kwargs[self.lookup_field]
-        try:
-            annotation = m_models.InterproIdentifier.objects \
-                .get(accession=accession)
-        except KeyError:
-            raise Http404(("Attribute error '%s'." % self.lookup_field))
-        except m_models.InterproIdentifier.DoesNotExist:
-            raise Http404(('No %s matches the given query.' %
-                           m_models.InterproIdentifier.__class__.__name__))
-        logger.info("get identifier %s" % annotation.accession)
-        job_ids = m_models.AnalysisJobInterproIdentifier.objects \
-            .filter(interpro_identifiers__interpro_identifier=annotation) \
-            .distinct('job_id')
-        logger.info("Found %d analysis" % len(job_ids))
-        return emg_models.AnalysisJob.objects \
-            .filter(job_id__in=job_ids) \
-            .available(self.request)
-
-    def get_serializer_class(self):
-        return emg_serializers.AnalysisSerializer
-
-    def list(self, request, *args, **kwargs):
-        """
-        Retrieves list of analysis results for the given InterPro identifier
-        Example:
-        ---
-        `/annotations/interpro-identifier/IPR020405/analyses`
-        """
-        return super(InterproIdentifierAnalysisRelationshipViewSet, self) \
-            .list(request, *args, **kwargs)
-
-
-class KeggModuleAnalysisRelationshipViewSet(m_viewsets.ListReadOnlyModelViewSet):
-    """Get the KEGG Module analysis
+    m_viewsets.AnalysisRelationshipViewSet):
     """
-    serializer_class = emg_serializers.AnalysisSerializer
-
-    filter_class = emg_filters.AnalysisJobFilter
-
-    filter_backends = (
-        DjangoFilterBackend,
-        filters.SearchFilter,
-        filters.OrderingFilter,
-    )
-
-    ordering_fields = (
-        'accession',
-    )
-
-    ordering = ('-accession',)
-
-    search_fields = (
-        '@sample__metadata__var_val_ucv',
-    )
-
-    lookup_field = 'accession'
-
-    def get_queryset(self):
-        accession = self.kwargs[self.lookup_field]
-        try:
-            annotation = m_models.KeggModule.objects.get(accession=accession)
-        except KeyError:
-            raise Http404(("Attribute error '%s'." % self.lookup_field))
-        except m_models.KeggModule.DoesNotExist:
-            raise Http404(('No %s matches the given query.' %
-                           m_models.KeggModule.__class__.__name__))
-        job_ids = m_models.AnalysisJobKeggModule.objects \
-            .filter(
-                M_Q(kegg_modules__module=annotation)
-            ) \
-            .distinct('job_id')
-        return emg_models.AnalysisJob.objects \
-            .filter(job_id__in=job_ids) \
-            .available(self.request)
-
-    def get_serializer_class(self):
-        return emg_serializers.AnalysisSerializer
-
-    def list(self, request, *args, **kwargs):
-        """
-        Retrieves list of analysis results for the given KEGG module M00127 term
-        Example:
-        ---
-        `/annotations/kegg-modules/M00127/analyses`
-        """
-        return super(KeggModuleAnalysisRelationshipViewSet, self) \
-            .list(request, *args, **kwargs)
-
-
-class PfamAnalysisRelationshipViewSet(m_viewsets.ListReadOnlyModelViewSet):
-    # FIXME: DRY (InterPro, Go, KEGG and this)
-    """Get the the Analysis that have a particular Pfam
+    Retrieves list of analysis results for the given InterPro identifier
+    Example:
+    ---
+    `/annotations/interpro-identifier/IPR020405/analyses`
     """
-    serializer_class = emg_serializers.AnalysisSerializer
+    annotation_model = m_models.InterproIdentifier
 
-    filter_class = emg_filters.AnalysisJobFilter
-
-    filter_backends = (
-        DjangoFilterBackend,
-        filters.SearchFilter,
-        filters.OrderingFilter,
-    )
-
-    ordering_fields = (
-        'accession',
-    )
-
-    ordering = ('-accession',)
-
-    search_fields = (
-        '@sample__metadata__var_val_ucv',
-    )
-
-    lookup_field = 'accession'
-
-    def get_queryset(self):
-        accession = self.kwargs[self.lookup_field]
-        try:
-            annotation = m_models.PfamEntry.objects.get(accession=accession)
-        except KeyError:
-            raise Http404(("Attribute error '%s'." % self.lookup_field))
-        except m_models.PfamEntry.DoesNotExist:
-            raise Http404(('No %s matches the given query.' %
-                           m_models.PfamEntry.__class__.__name__))
-        job_ids = m_models.AnalysisJobPfamAnnotation.objects \
-            .filter(
-                M_Q(pfram_entries__pfam=annotation)
-            ) \
+    def get_job_ids(self):
+        return m_models.AnalysisJobInterproIdentifier.objects \
+            .filter(M_Q(interpro_identifiers__interpro_identifier=annotation)) \
             .distinct('job_id')
-        return emg_models.AnalysisJob.objects \
-            .filter(job_id__in=job_ids) \
-            .available(self.request)
 
-    def get_serializer_class(self):
-        return emg_serializers.AnalysisSerializer
 
-    def list(self, request, *args, **kwargs):
-        """
-        Retrieves list of analysis results for the given Pfam entey P00001 term
-        Example:
-        ---
-        `/annotations/pfram-entries/P00001/analyses`
-        """
-        return super(PfamAnalysisRelationshipViewSet, self) \
-            .list(request, *args, **kwargs)
+class KeggModuleAnalysisRelationshipViewSet(m_viewsets.AnalysisRelationshipViewSet):
+    """
+    Retrieves list of analysis results for the given KEGG module M00127 term
+    Example:
+    ---
+    `/annotations/kegg-modules/M00127/analyses`
+    """    
+    annotation_model = m_models.KeggModule
+
+    def get_job_ids(self):
+        return m_models.AnalysisJobKeggModule.objects \
+            .filter(M_Q(kegg_modules__module=annotation)) \
+            .distinct('job_id')
+
+
+class PfamAnalysisRelationshipViewSet(m_viewsets.AnalysisRelationshipViewSet):
+    """
+    Retrieves list of analysis results for the given Pfam entey P00001 term
+    Example:
+    ---
+    `/annotations/pfram-entries/P00001/analyses`
+    """
+
+    annotation_model = m_models.PfamEntry
+
+    def get_job_ids(self):
+        return m_models.AnalysisJobPfam.objects \
+            .filter(M_Q(pfam_entries__pfam=annotation)) \
+            .distinct('job_id')
+
+
+class GenomePropertyAnalysisRelationshipViewSet(m_viewsets.AnalysisRelationshipViewSet):
+    """
+    Retrieves list of analysis results for the given Genome Property term
+    Example:
+    ---
+    `/annotations/genome-properties/GenProp0063/analyses`
+    """
+
+    annotation_model = m_models.GenomeProperty
+
+    def get_job_ids(self):
+        return m_models.AnalysisJobGenomeProperty.objects \
+            .filter(M_Q(genome_properties__genome_property=annotation)) \
+            .distinct('job_id')
+
+
+class KeggOrthologRelationshipViewSet(m_viewsets.AnalysisRelationshipViewSet):
+    """
+    Retrieves list of analysis results for the given Kegg Ortholog
+    Example:
+    ---
+    `/annotations/kos/ko00001/analyses`
+    """
+
+    annotation_model = m_models.KeggOrtholog
+
+    def get_job_ids(self):
+        return m_models.AnalysisJobKeggOrtholog.objects \
+            .filter(M_Q(ko_entries__ko=annotation)) \
+            .distinct('job_id')
 
 
 class AnalysisGoTermRelationshipViewSet(  # NOQA
+    m_mixins.AnalysisJobAnnotationMixin,
     m_viewsets.ListReadOnlyModelViewSet):
-
+    """
+    Retrieves GO terms for the given accession
+    Example:
+    ---
+    `/analyses/MGYA00102827/go-terms`
+    """
     serializer_class = m_serializers.GoTermRetriveSerializer
 
     pagination_class = m_page.MaxSetPagination
 
     lookup_field = 'accession'
 
-    def get_queryset(self):
-        job = emg_models.AnalysisJob.objects \
-            .filter(
-                Q(pk=int(self.kwargs['accession'].lstrip('MGYA')))
-            ) \
-            .exclude(experiment_type__experiment_type='amplicon') \
-            .first()
+    annotation_model = m_models.AnalysisJobGoTerm
 
-        analysis = None
-        try:
-            if job is not None:
-                analysis = m_models.AnalysisJobGoTerm.objects \
-                    .get(analysis_id=str(job.job_id))
-        except m_models.AnalysisJobGoTerm.DoesNotExist:
-            pass
+    annotation_model_property = 'go_terms'
 
-        return getattr(analysis, 'go_terms', [])
-
-    def list(self, request, *args, **kwargs):
-        """
-        Retrieves GO terms for the given accession
-        Example:
-        ---
-        `/analyses/MGYA00102827/go-terms`
-        """
-        return super(AnalysisGoTermRelationshipViewSet, self) \
-            .list(request, *args, **kwargs)
+    analysis_job_filters = ~Q(experiment_type__experiment_type='amplicon') 
 
 
 class AnalysisGoSlimRelationshipViewSet(  # NOQA
+    m_mixins.AnalysisJobAnnotationMixin,
     m_viewsets.ListReadOnlyModelViewSet):
-
+    """
+    Retrieves GO slim for the given accession
+    Example:
+    ---
+    `/analyses/MGYA00102827/go-slim`
+    """
     serializer_class = m_serializers.GoTermRetriveSerializer
 
     pagination_class = m_page.MaxSetPagination
 
     lookup_field = 'accession'
 
-    def get_queryset(self):
-        job = emg_models.AnalysisJob.objects \
-            .filter(
-                Q(pk=int(self.kwargs['accession'].lstrip('MGYA')))
-            ) \
-            .exclude(experiment_type__experiment_type='amplicon') \
-            .first()
+    annotation_model = m_models.AnalysisJobGoTerm
 
-        analysis = None
-        try:
-            if job is not None:
-                analysis = m_models.AnalysisJobGoTerm.objects \
-                    .get(analysis_id=str(job.job_id))
-        except m_models.AnalysisJobGoTerm.DoesNotExist:
-            pass
+    annotation_model_property = 'go_slim'
 
-        return getattr(analysis, 'go_slim', [])
-
-    def list(self, request, *args, **kwargs):
-        """
-        Retrieves GO slim for the given accession
-        Example:
-        ---
-        `/analyses/MGYA00102827/go-slim`
-        """
-        return super(AnalysisGoSlimRelationshipViewSet, self) \
-            .list(request, *args, **kwargs)
-
-
-class AnalysisKeggModulesRelationshipViewSet(  # NOQA
-    m_viewsets.ListReadOnlyModelViewSet):
-
-    serializer_class = m_serializers.KeggModuleRetrieveSerializer
-
-    pagination_class = m_page.MaxSetPagination
-
-    lookup_field = 'accession'
-
-    def get_queryset(self):
-        job = get_object_or_404(
-            emg_models.AnalysisJob,
-            Q(pk=int(self.kwargs['accession'].lstrip('MGYA')))
-        )
-        analysis = None
-        try:
-            analysis = m_models.AnalysisJobKeggModule.objects \
-                .get(analysis_id=str(job.job_id))
-        except m_models.AnalysisJobKeggModule.DoesNotExist:
-            pass
-
-        return getattr(analysis, 'kegg_modules', [])
-
-    def list(self, request, *args, **kwargs):
-        """
-        Retrieves KEGG Module for the given accession
-        Example:
-        ---
-        `/analyses/MGYA00102827/kegg-modules`
-        """
-        return super(AnalysisKeggModulesRelationshipViewSet, self) \
-            .list(request, *args, **kwargs)
-
-
-class AnalysisPfamRelationshipViewSet(  # NOQA
-    m_viewsets.ListReadOnlyModelViewSet):
-
-    serializer_class = m_serializers.PfamRetrieveSerializer
-
-    pagination_class = m_page.MaxSetPagination
-
-    lookup_field = 'accession'
-
-    def get_queryset(self):
-        job = get_object_or_404(
-            emg_models.AnalysisJob,
-            Q(pk=int(self.kwargs['accession'].lstrip('MGYA')))
-        )
-        analysis = None
-        try:
-            analysis = m_models.AnalysisJobPfam.objects \
-                .get(analysis_id=str(job.job_id))
-        except m_models.AnalysisJobPfam.DoesNotExist:
-            pass
-
-        return getattr(analysis, 'pfam_entries', [])
-
-    def list(self, request, *args, **kwargs):
-        """
-        Retrieves Pfam entries for the given accession
-        Example:
-        ---
-        `/analyses/MGYA00102827/pfam-entries`
-        """
-        return super(AnalysisPfamRelationshipViewSet, self) \
-            .list(request, *args, **kwargs)
+    analysis_job_filters = ~Q(experiment_type__experiment_type='amplicon')
 
 
 class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
+    m_mixins.AnalysisJobAnnotationMixin,
     m_viewsets.ListReadOnlyModelViewSet):
+    """
+    Retrieves InterPro identifiers for the given accession
+    Example:
+    ---
+    `/analyses/MGYA00102827/interpro-identifiers`
+    """
 
     serializer_class = m_serializers.InterproIdentifierRetriveSerializer
 
@@ -616,33 +422,95 @@ class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
 
     lookup_field = 'accession'
 
-    def get_queryset(self):
-        job = emg_models.AnalysisJob.objects \
-            .filter(
-                Q(pk=int(self.kwargs['accession'].lstrip('MGYA')))
-            ) \
-            .exclude(experiment_type__experiment_type='amplicon') \
-            .first()
+    annotation_model = m_models.AnalysisJobInterproIdentifier
 
-        analysis = None
-        try:
-            if job is not None:
-                analysis = m_models.AnalysisJobInterproIdentifier.objects \
-                    .get(analysis_id=str(job.job_id))
-        except m_models.AnalysisJobInterproIdentifier.DoesNotExist:
-            pass
+    annotation_model_property = 'interpro_identifiers'
 
-        return getattr(analysis, 'interpro_identifiers', [])
+    analysis_job_filters = ~Q(experiment_type__experiment_type='amplicon') 
 
-    def list(self, request, *args, **kwargs):
-        """
-        Retrieves InterPro identifiers for the given accession
-        Example:
-        ---
-        `/analyses/MGYA00102827/interpro-identifiers`
-        """
-        return super(AnalysisInterproIdentifierRelationshipViewSet, self) \
-            .list(request, *args, **kwargs)
+
+class AnalysisPfamRelationshipViewSet(  # NOQA
+    m_mixins.AnalysisJobAnnotationMixin,
+    m_viewsets.ListReadOnlyModelViewSet):
+    """
+    Retrieves Pfram entries for the given accession
+    Example:
+    ---
+    `/analyses/MGYA00102827/pfam-entries`
+    """
+
+    serializer_class = m_serializers.PfamRetrieveSerializer
+
+    pagination_class = m_page.MaxSetPagination
+
+    lookup_field = 'accession'
+
+    annotation_model = m_models.AnalysisJobPfam
+
+    annotation_model_property = 'pfam_entries'
+
+
+class AnalysisKeggModulesRelationshipViewSet(  # NOQA
+    m_mixins.AnalysisJobAnnotationMixin,
+    m_viewsets.ListReadOnlyModelViewSet):
+    """
+    Retrieves KEGG Module for the given accession
+    Example:
+    ---
+    `/analyses/MGYA00102827/kegg-modules`
+    """
+
+    serializer_class = m_serializers.KeggModuleRetrieveSerializer
+
+    pagination_class = m_page.MaxSetPagination
+
+    lookup_field = 'accession'
+
+    annotation_model = m_models.AnalysisJobKeggModule
+
+    annotation_model_property = 'kegg_modules'
+
+
+class AnalysisKeggOrthologsRelationshipViewSet(  # NOQA
+    m_mixins.AnalysisJobAnnotationMixin,
+    m_viewsets.ListReadOnlyModelViewSet):
+    """
+    Retrieves Kegg Orthologs for the given accession
+    Example:
+    ---
+    `/analyses/MGYA00102827/kos`
+    """
+
+    serializer_class = m_serializers.KeggOrthologRetrieveSerializer
+
+    pagination_class = m_page.MaxSetPagination
+
+    lookup_field = 'accession'
+
+    annotation_model = m_models.AnalysisJobKeggOrtholog
+
+    annotation_model_property = 'ko_entries'
+
+
+class AnalysisGenomePropertiesRelationshipViewSet(  # NOQA
+    m_mixins.AnalysisJobAnnotationMixin,
+    m_viewsets.ListReadOnlyModelViewSet):
+    """
+    Retrieves GenomeProperties for the given accession
+    Example:
+    ---
+    `/analyses/MGYA00102827/genome-properties`
+    """
+
+    serializer_class = m_serializers.GenomePropertyRetrieveSerializer
+
+    pagination_class = m_page.MaxSetPagination
+
+    lookup_field = 'accession'
+
+    annotation_model = m_models.AnalysisJobGenomeProperty
+
+    annotation_model_property = 'genome_properties'
 
 
 class OrganismViewSet(m_viewsets.ListReadOnlyModelViewSet):
@@ -684,7 +552,6 @@ class OrganismViewSet(m_viewsets.ListReadOnlyModelViewSet):
 
 
 class OrganismTreeViewSet(m_viewsets.ListReadOnlyModelViewSet):
-
     """
     Provides list of Organisms.
     """
@@ -737,7 +604,7 @@ class OrganismTreeViewSet(m_viewsets.ListReadOnlyModelViewSet):
 
 
 class AnalysisOrganismRelationshipViewSet(
-    m_mixins.AnalysisJobTaxonomyViewSetMixin,
+    m_mixins.AnalysisJobAnnotationMixin,
     m_viewsets.ListReadOnlyModelViewSet):
     """Retrieves 16SrRNA Taxonomic analysis for the given accession
     Example:
@@ -745,11 +612,29 @@ class AnalysisOrganismRelationshipViewSet(
     `/analyses/MGYA00102827/taxonomy`
     ---
     """
-    taxonomy_field = 'taxonomy'
+    serializer_class = m_serializers.OrganismRetriveSerializer
+
+    pagination_class = m_page.MaxSetPagination
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'name',
+        'prefix',
+        'lineage',
+    )
+
+    lookup_field = 'accession'
+
+    annotation_model = m_models.AnalysisJobTaxonomy 
+    
+    annotation_model_property = 'taxonomy'
 
 
 class AnalysisOrganismSSURelationshipViewSet(  # NOQA
-    m_mixins.AnalysisJobTaxonomyViewSetMixin,
+    m_mixins.AnalysisJobAnnotationMixin,
     m_viewsets.ListReadOnlyModelViewSet):
     """Retrieves SSU Taxonomic analysis for the given accession
     Example: 
@@ -757,11 +642,29 @@ class AnalysisOrganismSSURelationshipViewSet(  # NOQA
     `/analyses/MGYA00102827/taxonomy/ssu`
     ---
     """
-    taxonomy_field = 'taxonomy_ssu'
+    serializer_class = m_serializers.OrganismRetriveSerializer
+
+    pagination_class = m_page.MaxSetPagination
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'name',
+        'prefix',
+        'lineage',
+    )
+
+    lookup_field = 'accession'
+
+    annotation_model = m_models.AnalysisJobTaxonomy
+    
+    annotation_model_property = 'taxonomy_ssu'
 
 
 class AnalysisOrganismLSURelationshipViewSet(  # NOQA
-    m_mixins.AnalysisJobTaxonomyViewSetMixin,
+    m_mixins.AnalysisJobAnnotationMixin,
     m_viewsets.ListReadOnlyModelViewSet):
     """Retrieves LSU Taxonomic analysis for the given accession
     Example: 
@@ -769,11 +672,29 @@ class AnalysisOrganismLSURelationshipViewSet(  # NOQA
     `/analyses/MGYA00102827/taxonomy/lsu`
     ---
     """
-    taxonomy_field = 'taxonomy_lsu'
+    serializer_class = m_serializers.OrganismRetriveSerializer
+
+    pagination_class = m_page.MaxSetPagination
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'name',
+        'prefix',
+        'lineage',
+    )
+
+    lookup_field = 'accession'
+
+    annotation_model = m_models.AnalysisJobTaxonomy
+
+    annotation_model_property = 'taxonomy_lsu'
 
 
 class AnalysisOrganismITSOneDBRelationshipViewSet(  # NOQA
-    m_mixins.AnalysisJobTaxonomyViewSetMixin,
+    m_mixins.AnalysisJobAnnotationMixin,
     m_viewsets.ListReadOnlyModelViewSet):
     """Retrieves ITSoneDB Taxonomic analysis for the given accession
     Example:
@@ -781,11 +702,29 @@ class AnalysisOrganismITSOneDBRelationshipViewSet(  # NOQA
     `/analyses/MGYA00102827/taxonomy/itsonedb`
     ---
     """
-    taxonomy_field = 'taxonomy_itsonedb'
+    serializer_class = m_serializers.OrganismRetriveSerializer
+
+    pagination_class = m_page.MaxSetPagination
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'name',
+        'prefix',
+        'lineage',
+    )
+
+    lookup_field = 'accession'
+
+    annotation_model = m_models.AnalysisJobTaxonomy
+ 
+    annotation_model_property = 'taxonomy_itsonedb'
 
 
 class AnalysisOrganismITSUniteRelationshipViewSet(  # NOQA
-    m_mixins.AnalysisJobTaxonomyViewSetMixin,
+    m_mixins.AnalysisJobAnnotationMixin,
     m_viewsets.ListReadOnlyModelViewSet):
     """Retrieves ITS UNITE Taxonomic analysis for the given accession
     Example: 
@@ -793,7 +732,25 @@ class AnalysisOrganismITSUniteRelationshipViewSet(  # NOQA
     `/analyses/MGYA00102827/taxonomy/itsonedb`
     ---    
     """
-    taxonomy_field = 'taxonomy_itsunite'
+    serializer_class = m_serializers.OrganismRetriveSerializer
+
+    pagination_class = m_page.MaxSetPagination
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'name',
+        'prefix',
+        'lineage',
+    )
+
+    lookup_field = 'accession'
+
+    annotation_model = m_models.AnalysisJobTaxonomy
+
+    annotation_model_property = 'taxonomy_itsunite'
 
 
 class AnalysisTaxonomyOverview(APIView):
