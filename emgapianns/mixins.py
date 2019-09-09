@@ -14,61 +14,63 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from django.http import Http404
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
-from rest_framework import filters
-
 from emgapi import models as emg_models
 
-from . import serializers as m_serializers
-from . import models as m_models
-from . import pagination as m_page
 
+class AnalysisJobAnnotationMixin:
+    """Analysis Job Annotation Mixin.
+    This mixin povides a basic get_queryset that will get an AnalysisJobAnnotation
+    and will return the defined property from the Mongo model (annotation_model)
 
-class AnalysisJobTaxonomyViewSetMixin:
-    """Get the taxonomy information for an analysis from Mongo.
-    There are 4 possible set of results: SSU, LSU, ITSOneDB and UNITE(ITS).
-    
-    The field property is required, possible values:
-    - taxonomy
-    - taxonomy_ssu
-    - taxonomu_lsu
-    - taxonomy_itsonedb
-    - taxonomy_itsunite
-
-    This corresponds to the model fields (AnalysisJobTaxonomy)
+    Usage:
+        `annotation_model`: class to be used (the mongo model)
+        `annotation_model_property`: field within the class to get the data
+        `analysis_job_filters`: an Q object to use to filter the AnalysisJob query
     """
-    taxonomy_field = None
-
-    serializer_class = m_serializers.OrganismRetriveSerializer
-
-    pagination_class = m_page.MaxSetPagination
-
-    filter_backends = (
-        filters.OrderingFilter,
-    )
-
-    ordering_fields = (
-        'name',
-        'prefix',
-        'lineage',
-    )
-
-    lookup_field = 'accession'
+    annotation_model = None
+    annotation_model_property = None
+    analysis_job_filters = None
 
     def get_queryset(self):
-        """Get the AnalysisJob and then the AnalysisJobTaxonomy
+        """Get the AnalysisJob Annotation corresponding property from Mongo.
         """
-        job = get_object_or_404(
-            emg_models.AnalysisJob,
-            Q(pk=int(self.kwargs['accession'].lstrip('MGYA')))
-        )
+        acc = self.kwargs['accession'].lstrip('MGYA')
+        job_query = Q(pk=acc)
+
+        if self.analysis_job_filters:
+            job_query &= self.analysis_job_filters
+
+        job = get_object_or_404(emg_models.AnalysisJob, job_query)
+
         analysis = None
         try:
-            analysis = m_models.AnalysisJobTaxonomy.objects \
-                .get(analysis_id=str(job.job_id))
-        except m_models.AnalysisJobTaxonomy.DoesNotExist:
-            pass
+            analysis = self.annotation_model.objects \
+                    .get(analysis_id=str(job.job_id))
+        except self.annotation_model.DoesNotExist:
+            raise Http404
 
-        return getattr(analysis, self.taxonomy_field, [])
+        return getattr(analysis, self.annotation_model_property, [])
+
+
+class AnnotationRetrivalMixin():
+    """FIXME
+    """
+
+    annotation_model = None
+
+    def get_queryset(self):
+        return self.annotation_model.objects.all()
+
+    def get_object(self):
+        try:
+            accession = self.kwargs[self.lookup_field]
+            return self.annotation_model.objects.get(accession=accession)
+        except KeyError:
+            raise Http404(("Attribute error '%s'." % self.lookup_field))
+        except self.annotation_model.DoesNotExist:
+            raise Http404(('No %s matches the given query.' %
+                           self.annotation_model.__class__.__name__))
