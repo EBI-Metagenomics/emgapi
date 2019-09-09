@@ -46,7 +46,19 @@ mongo_router.register(
 mongo_router.register(
     r'annotations/pfam-entries',
     m_views.PfamEntryViewSet,
-    base_name='pfam'    
+    base_name='pfam'
+)
+
+mongo_router.register(
+    r'annotations/kegg-orthologs',
+    m_views.KeggOrthologViewSet,
+    base_name='kegg-orthologs'
+)
+
+mongo_router.register(
+    r'annotations/genome-properties',
+    m_views.GenomePropViewSet,
+    base_name='genome-properties'
 )
 
 mongo_router.register(
@@ -71,6 +83,18 @@ mongo_router.register(
     r'annotations/pfam-entries/(?P<accession>[a-zA-Z0-9\:]+)/analyses',
     m_views.PfamAnalysisRelationshipViewSet,
     base_name='pfam-analyses'
+)
+
+mongo_router.register(
+    r'annotations/kegg-orthologs/(?P<accession>[a-zA-Z0-9\:]+)/analyses',
+    m_views.KeggOrthologRelationshipViewSet,
+    base_name='kegg-orthologs-analyses'
+)
+
+mongo_router.register(
+    r'annotations/genome-properties/(?P<accession>[a-zA-Z0-9\:]+)/analyses',
+    m_views.GenomePropertyAnalysisRelationshipViewSet,
+    base_name='genome-properties-analyses'
 )
 
 mongo_router.register(
@@ -115,13 +139,25 @@ router.register(
 router.register(
     r'analyses/(?P<accession>[^/]+)/kegg-modules',
     m_views.AnalysisKeggModulesRelationshipViewSet,
-    base_name='analysis-keggmoduless'
+    base_name='analysis-keggmodules'
 )
 
 router.register(
     r'analyses/(?P<accession>[^/]+)/pfam-entries',
     m_views.AnalysisPfamRelationshipViewSet,
     base_name='analysis-pfamentries'
+)
+
+router.register(
+    r'analyses/(?P<accession>[^/]+)/kegg-orthologs',
+    m_views.AnalysisKeggOrthologsRelationshipViewSet,
+    base_name='analysis-keggorthologs'
+)
+
+router.register(
+    r'analyses/(?P<accession>[^/]+)/genome-properties',
+    m_views.AnalysisGenomePropertiesRelationshipViewSet,
+    base_name='analysis-genomeproperties'
 )
 
 router.register(

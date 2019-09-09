@@ -62,6 +62,18 @@ class PfamEntry(BaseAnnotation):
     pass
 
 
+class KeggOrtholog(BaseAnnotation):
+    """KEGG Ortholog (KO)
+    """
+    pass
+
+
+class GenomeProperty(BaseAnnotation):
+    """Genome property
+    """
+    pass
+
+
 class BaseAnalysisJobAnnotation(mongoengine.EmbeddedDocument):
 
     count = mongoengine.IntField(required=True)
@@ -141,6 +153,34 @@ class AnalysisJobPfamAnnotation(BaseAnalysisJobAnnotation):
         return self.pfam_entry.description
 
 
+class AnalysisJobGenomePropAnnotation(BaseAnalysisJobAnnotation):
+    """GenomeProperty on a given Analysis Job.
+    """
+    genome_property = mongoengine.ReferenceField(GenomeProperty, required=True)
+
+    @property
+    def accession(self):
+        return self.genome_property.accession
+
+    @property
+    def description(self):
+        return self.genome_property.description
+
+
+class AnalysisJobKeggOrthologAnnotation(BaseAnalysisJobAnnotation):
+    """KEGG KO on a given Analysis Job.
+    """
+    ko = mongoengine.ReferenceField(KeggOrtholog, required=True)
+
+    @property
+    def accession(self):
+        return self.ko.accession
+
+    @property
+    def description(self):
+        return self.ko.description
+
+
 class BaseAnalysisJob(mongoengine.Document):
 
     analysis_id = mongoengine.StringField(primary_key=True, required=True)
@@ -180,6 +220,22 @@ class AnalysisJobPfam(BaseAnalysisJob):
     """
     pfam_entries = mongoengine.SortedListField(
         mongoengine.EmbeddedDocumentField(AnalysisJobPfamAnnotation),
+        required=False, ordering='count', reverse=True)
+
+
+class AnalysisJobKeggOrtholog(BaseAnalysisJob):
+    """KeggOrtholog entries for an analysis
+    """
+    ko_entries = mongoengine.SortedListField(
+        mongoengine.EmbeddedDocumentField(AnalysisJobKeggOrthologAnnotation),
+        required=False, ordering='count', reverse=True)
+
+
+class AnalysisJobGenomeProperty(BaseAnalysisJob):
+    """Genome properties for an analysis
+    """
+    genome_properties = mongoengine.SortedListField(
+        mongoengine.EmbeddedDocumentField(AnalysisJobGenomePropAnnotation),
         required=False, ordering='count', reverse=True)
 
 

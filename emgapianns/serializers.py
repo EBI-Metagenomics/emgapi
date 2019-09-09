@@ -15,11 +15,9 @@
 # limitations under the License.
 
 from rest_framework_json_api import serializers
-# from rest_framework_json_api import relations
 
 from rest_framework_mongoengine import serializers as m_serializers
 
-# from emgapi import models as emg_models
 from emgapi import fields as emg_fields
 
 from . import models as m_models
@@ -58,7 +56,7 @@ class InterproIdentifierSerializer(m_serializers.DocumentSerializer,
 
 
 class KeggModuleSerializer(m_serializers.DocumentSerializer,
-                            serializers.HyperlinkedModelSerializer):
+                           serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
         view_name='emgapi_v1:keggmodule-detail',
@@ -71,7 +69,8 @@ class KeggModuleSerializer(m_serializers.DocumentSerializer,
 
 
 class PfamSerializer(m_serializers.DocumentSerializer,
-                            serializers.HyperlinkedModelSerializer):
+                     serializers.HyperlinkedModelSerializer):
+
     url = serializers.HyperlinkedIdentityField(
         view_name='emgapi_v1:pfam-detail',
         lookup_field='accession',
@@ -82,6 +81,31 @@ class PfamSerializer(m_serializers.DocumentSerializer,
         fields = '__all__'
 
 
+class KeggOrthologSerializer(m_serializers.DocumentSerializer,
+                             serializers.HyperlinkedModelSerializer):
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi_v1:kegg-orthologs-detail',
+        lookup_field='accession',
+    )
+
+    class Meta:
+        model = m_models.KeggOrtholog
+        fields = '__all__'
+
+
+class GenomePropertySerializer(m_serializers.DocumentSerializer,
+                               serializers.HyperlinkedModelSerializer):
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi_v1:genome-properties-detail',
+        lookup_field='accession',
+    )
+
+    class Meta:
+        model = m_models.GenomeProperty
+        fields = '__all__'
+
 
 class GoTermRetriveSerializer(m_serializers.DynamicDocumentSerializer,
                               serializers.HyperlinkedModelSerializer):
@@ -91,19 +115,6 @@ class GoTermRetriveSerializer(m_serializers.DynamicDocumentSerializer,
         lookup_field='accession',
     )
 
-    # analyses = relations.SerializerMethodResourceRelatedField(
-    #     source='get_analyses',
-    #     model=emg_models.AnalysisJob,
-    #     many=True,
-    #     read_only=True,
-    #     related_link_view_name='emgapi_v1:goterms-analyses-list',
-    #     related_link_url_kwarg='accession',
-    #     related_link_lookup_field='accession'
-    # )
-
-    def get_analyses(self, obj):
-        return None
-
     count = serializers.IntegerField(required=False)
 
     class Meta:
@@ -111,27 +122,13 @@ class GoTermRetriveSerializer(m_serializers.DynamicDocumentSerializer,
         fields = '__all__'
 
 
-class InterproIdentifierRetriveSerializer(  # NOQA
-    m_serializers.DynamicDocumentSerializer,
-    serializers.HyperlinkedModelSerializer):
+class InterproIdentifierRetriveSerializer(m_serializers.DynamicDocumentSerializer,
+                                          serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
         view_name='emgapi_v1:interproidentifier-detail',
         lookup_field='accession',
     )
-
-    # analyses = relations.SerializerMethodResourceRelatedField(
-    #     source='get_analyses',
-    #     model=emg_models.AnalysisJob,
-    #     many=True,
-    #     read_only=True,
-    #     related_link_view_name='emgapi_v1:interproidentifier-analyses-list',
-    #     related_link_url_kwarg='accession',
-    #     related_link_lookup_field='accession'
-    # )
-
-    def get_analyses(self, obj):
-        return None
 
     count = serializers.IntegerField(required=False)
 
@@ -140,9 +137,8 @@ class InterproIdentifierRetriveSerializer(  # NOQA
         fields = '__all__'
 
 
-class KeggModuleRetrieveSerializer(
-    m_serializers.DynamicDocumentSerializer,
-    serializers.HyperlinkedModelSerializer):
+class KeggModuleRetrieveSerializer(m_serializers.DynamicDocumentSerializer,
+                                   serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
         view_name='emgapi_v1:keggmodule-detail',
@@ -158,9 +154,8 @@ class KeggModuleRetrieveSerializer(
         fields = '__all__'
 
 
-class PfamRetrieveSerializer(
-    m_serializers.DynamicDocumentSerializer,
-    serializers.HyperlinkedModelSerializer):
+class PfamRetrieveSerializer(m_serializers.DynamicDocumentSerializer,
+                             serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
         view_name='emgapi_v1:pfam-detail',
@@ -173,6 +168,37 @@ class PfamRetrieveSerializer(
         model = m_models.PfamEntry
         fields = '__all__'
 
+
+class KeggOrthologRetrieveSerializer(m_serializers.DynamicDocumentSerializer,
+                                     serializers.HyperlinkedModelSerializer):
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi_v1:kegg-orthologs-detail',
+        lookup_field='accession',
+    )
+
+    count = serializers.IntegerField(required=True)
+
+    class Meta:
+        model = m_models.KeggOrtholog
+        fields = '__all__'
+
+
+class GenomePropertyRetrieveSerializer(m_serializers.DynamicDocumentSerializer,
+                                       serializers.HyperlinkedModelSerializer):
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi_v1:genome-properties-detail',
+        lookup_field='accession',
+    )
+
+    count = serializers.IntegerField(required=True)
+
+    class Meta:
+        model = m_models.GenomeProperty
+        fields = '__all__'
+
+
 class OrganismSerializer(m_serializers.DynamicDocumentSerializer,
                          serializers.HyperlinkedModelSerializer):
 
@@ -180,33 +206,6 @@ class OrganismSerializer(m_serializers.DynamicDocumentSerializer,
         view_name='emgapi_v1:organisms-children-list',
         lookup_field='lineage',
     )
-
-    # attributes
-    # children = relations.SerializerMethodResourceRelatedField(
-    #     source='get_children',
-    #     model=m_models.Organism,
-    #     many=True,
-    #     read_only=True,
-    #     related_link_view_name='emgapi_v1:organisms-children-list',
-    #     related_link_url_kwarg='lineage',
-    #     related_link_lookup_field='lineage',
-    # )
-    #
-    # def get_children(self, obj):
-    #     return None
-
-    # analyses = relations.SerializerMethodResourceRelatedField(
-    #     source='get_analyses',
-    #     model=emg_models.AnalysisJob,
-    #     many=True,
-    #     read_only=True,
-    #     related_link_view_name='emgapi_v1:organisms-analyses-list',
-    #     related_link_url_kwarg='lineage',
-    #     related_link_lookup_field='lineage'
-    # )
-
-    def get_analyses(self, obj):
-        return None
 
     class Meta:
         model = m_models.Organism

@@ -18,8 +18,10 @@ class Command(EMGBaseCommand):
         super(Command, self).add_arguments(parser)
         parser.add_argument(
             'suffix', nargs='?', type=str,
-            default='.go_slim', choices=['.ipr', '.go', '.go_slim', '.kegg_paths', '.pfam'],
-            help='summary: .go_slim, .go, .ipr, .kegg_paths, .pfam (default: %(default)s)')
+            default='.go_slim', choices=['.ipr', '.go', '.go_slim', '.kegg_paths', 
+                                         '.pfam', '.ko', '.gprops'],
+            help='summary: .go_slim, .go, .ipr, .kegg_paths, .pfam,' + 
+                 'ko, .gprops (default: %(default)s)')
 
     def populate_from_accession(self, options):
         logger.info("Found %d" % len(self.obj_list))
@@ -51,7 +53,31 @@ class Command(EMGBaseCommand):
                 self.load_kegg_from_summary_file(reader, obj, rootpath)
             elif self.suffix == '.pfam':
                 reader = csv.reader(csvfile, delimiter='\t')
-                self.load_pfam_from_summary_file(reader, obj, rootpath)
+                self.load_summary_file(reader, 
+                                       obj,
+                                       m_models.AnalysisJobPfam,
+                                       'pfam_entries',
+                                       m_models.PfamEntry,
+                                       m_models.AnalysisJobPfamAnnotation,
+                                       'pfam_entry')
+            elif self.suffix == '.ko':
+                reader = csv.reader(csvfile, delimiter='\t')
+                self.load_summary_file(reader, 
+                                       obj,
+                                       m_models.AnalysisJobKeggOrtholog,
+                                       'ko_entries',
+                                       m_models.KeggOrtholog,
+                                       m_models.AnalysisJobKeggOrthologAnnotation,
+                                       'ko')
+            elif self.suffix == '.gprops':
+                reader = csv.reader(csvfile, delimiter='\t')
+                self.load_summary_file(reader, 
+                                       obj,
+                                       m_models.AnalysisJobGenomeProperty,
+                                       'genome_properties',
+                                       m_models.GenomeProperty,
+                                       m_models.AnalysisJobGenomePropAnnotation,
+                                       'genome_property')
             else:
                 reader = csv.reader(csvfile, delimiter=',')
                 if self.suffix == '.ipr':
@@ -173,7 +199,7 @@ class Command(EMGBaseCommand):
             logger.info("Saved Run %r" % run)
 
     def load_kegg_from_summary_file(self, reader, obj, rootpath):
-        """Load KEGG results for a job into Mongo.
+        """Load KEGG Modules results for a job into Mongo.
         KEGG results are outputed in 3 files:
         - summary file
         - matching ko per pathway
@@ -251,68 +277,55 @@ class Command(EMGBaseCommand):
 
         analysis_keggs.save()
         logger.info('Saved Run {analysis_keggs}')
-
-    def load_pfam_from_summary_file(self, reader, obj, rootpath):
-        """Import PFam summary
-        The PFam summary file is a .tsv.
-        Each row has:
-            Nro hits PFam accession \t Description
-        Example:
-             13 PF00001	7 transmembrane receptor (rhodopsin family)
-            1418 PF00004 ATPase family associated with various cellular activities (AAA)
-            27941 PF00005 ABC transporter
+ 
+    def load_summary_file(self, reader, obj, analysis_model, analysis_field, 
+                          entity_model, ann_model, ann_field):
+        """Annotation summary file, generated with uniq.
+        To generate this file for example:
+        sed 's/\t/ /23g' KO.tbl | cut -f1,23 | sort | uniq -c
         """
+        analysis = None
         try:
-            analysis_pfam = m_models.AnalysisJobPfam.objects\
-                .get(pk=str(obj.job_id))
-        except m_models.AnalysisJobPfam.DoesNotExist:
-            analysis_pfam = m_models.AnalysisJobPfam()
+            analysis = analysis_model.objects \
+                    .get(pk=str(obj.job_id))
+        except analysis_model.DoesNotExist:
+            analysis = analysis_model()
+        analysis.analysis_id = str(obj.job_id)
+        analysis.accession = obj.accession
+        analysis.pipeline_version = obj.pipeline.release_version
+        analysis.job_id = obj.job_id
 
-        analysis_pfam.analysis_id = str(obj.job_id)
-        analysis_pfam.accession = obj.accession
-        analysis_pfam.pipeline_version = obj.pipeline.release_version
-        analysis_pfam.job_id = obj.job_id
-
-        # Drop previuos annotations
-        analysis_pfam.pfam_entries = []
-
-        analysis_pfam.save()
-
-        new_pfams = []
+        new_entities = []
         annotations = []
 
         next(reader) # skip header
 
         for count_id, desciption in reader:
-            count, pfam_id = count_id.strip().split(' ') 
+            count, model_id = count_id.strip().split(' ') 
             count = int(count)
 
-            pfam_entry = None
+            new_entity = None
             try:
-                pfam_entry = m_models.PfamEntry.objects \
-                        .get(accession=pfam_id)
-            except m_models.PfamEntry.DoesNotExist:
-                pfam_entry = m_models.PfamEntry(
-                    accession=pfam_id,
+                new_entity = entity_model.objects.get(accession=model_id)
+            except entity_model.DoesNotExist:
+                new_entity = entity_model(
+                    accession=model_id,
                     description=desciption
                 )
-                new_pfams.append(pfam_entry)
-            
-            pfam_ann = m_models.AnalysisJobPfamAnnotation(
-                pfam_entry=pfam_entry,
-                count=count
-            )
-            annotations.append(pfam_ann)
+                new_entities.append(new_entity)
+            new_annotation = ann_model(count=count)
+            setattr(new_annotation, ann_field, new_entity)
+            annotations.append(new_annotation)
 
-        if len(new_pfams):
-            m_models.PfamEntry.objects.insert(new_pfams)
+        if len(new_entities):
+            entity_model.objects.insert(new_entities)
             logger.info(
-                f'Created {len(new_pfams)} new Pfam entries')
+                f'Created {len(new_entities)} new entries')
 
         if len(annotations):
-            analysis_pfam.pfam_entries.extend(annotations)
+            setattr(analysis, analysis_field, annotations)
             logger.info(
-                f'Created {len(annotations)} new Pfam Annotations')
+                f'Created {len(annotations)} new annotations')
 
-        analysis_pfam.save()
-        logger.info('Saved Run {analysis_pfam}')        
+        analysis.save()
+        logger.info('Saved {instance}')
