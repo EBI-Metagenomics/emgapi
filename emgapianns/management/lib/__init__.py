@@ -11,10 +11,10 @@ logger = logging.getLogger(__name__)
 
 
 class EMGBaseCommand(BaseCommand):
-
     obj_list = list()
     rootpath = None
     accession = None
+    pipeline = None
 
     def add_arguments(self, parser):
         parser.add_argument(
