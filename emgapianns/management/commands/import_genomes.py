@@ -254,10 +254,14 @@ class Command(BaseCommand):
 
     def upload_genome_files(self, genome, has_pangenome):
         logger.info('Uploading genome files...')
-        self.upload_genome_file(genome, 'Predicted CDS', 'fasta', genome.accession + '.faa', 'Genome analysis', 'genome')
-        self.upload_genome_file(genome, 'Nucleic Acid Sequence', 'fasta', genome.accession + '.fna', 'Genome analysis', 'genome')
-        self.upload_genome_file(genome, 'Nucleic Acid Sequence index', 'fai', genome.accession + '.fna.fai', 'Genome analysis', 'genome')
-        self.upload_genome_file(genome, 'Genome Annotation', 'gff', genome.accession + '.gff', 'Genome analysis', 'genome')
+        self.upload_genome_file(genome, 'Predicted CDS', 'fasta',
+                                genome.accession + '.faa', 'Genome analysis', 'genome')
+        self.upload_genome_file(genome, 'Nucleic Acid Sequence', 'fasta',
+                                genome.accession + '.fna', 'Genome analysis', 'genome')
+        self.upload_genome_file(genome, 'Nucleic Acid Sequence index', 'fai',
+                                genome.accession + '.fna.fai', 'Genome analysis', 'genome')
+        self.upload_genome_file(genome, 'Genome Annotation', 'gff',
+                                genome.accession + '.gff', 'Genome analysis', 'genome')
         self.upload_genome_file(genome, 'EggNog annotation', 'tsv',
                                 genome.accession + '_eggNOG.tsv', 'Genome analysis', 'genome')
         self.upload_genome_file(genome, 'InterProScan annotation', 'tsv',

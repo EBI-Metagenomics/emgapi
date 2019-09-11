@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2017 EMBL - European Bioinformatics Institute
+# Copyright 2019 EMBL - European Bioinformatics Institute
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ from __future__ import unicode_literals
 from enum import Enum
 
 from django.db import models
-from django.db.models import Count, F
+from django.db.models import Count
 from django.db.models import CharField, Value
 from django.db.models.functions import Concat, Cast
 from django.db.models import Q
@@ -760,10 +760,8 @@ class SampleGeoCoordinateQuerySet(BaseQuerySet):
 class SampleGeoCoordinateManager(models.Manager):
     def get_queryset(self):
         return SampleGeoCoordinateQuerySet(self.model, using=self._db) \
-            .annotate(lon_lat_pk=Concat(
-            Cast('longitude', CharField()), Value(','),
-            Cast('latitude', CharField())
-        ))
+            .annotate(lon_lat_pk=Concat(Cast('longitude', CharField()), Value(','),
+                                        Cast('latitude', CharField())))
 
     def available(self, request):
         queryset = self.get_queryset().available(request)
@@ -1352,6 +1350,7 @@ class Genome(models.Model):
     geo_origin = models.ForeignKey('GeographicLocation', db_column='GEOGRAPHIC_ORIGIN', null=True)
 
     pangenome_geographic_range = models.ManyToManyField('GeographicLocation',
+                                                        db_table='GENOME_PANGENOME_GEOGRAPHIC_RANGE',
                                                         related_name='geographic_range')
 
     @property

@@ -3,7 +3,6 @@ import json
 import re
 
 from django.core.management import BaseCommand
-from django.db import IntegrityError
 
 from emgapi import models as emg_models
 
@@ -38,7 +37,7 @@ class Command(BaseCommand):
         entries = {}
 
         def find_nodes(node, parent_id=None, depth=0):
-            match = re.findall('^([^K]\d+) ([^[]*)', node['name'])
+            match = re.findall('^([^K]\d+) ([^[]*)', node['name'])  # noqa: W605
             if len(match) > 0:
                 node_id, node_name = match[0]
                 if node_id not in entries:

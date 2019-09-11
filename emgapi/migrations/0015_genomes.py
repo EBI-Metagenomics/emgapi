@@ -31,7 +31,7 @@ def remove_subdirs(apps, schema_editor):
 
 group_types = (
     "Genome analysis",
-    "Pan-Genome analysis",
+    "Pan-genome analysis",
     "Genome release set"
 )
 
@@ -395,7 +395,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='genome',
             name='pangenome_geographic_range',
-            field=models.ManyToManyField(related_name='geographic_range', to='emgapi.GeographicLocation'),
+            field=models.ManyToManyField(db_table='GENOME_PANGENOME_GEOGRAPHIC_RANGE', related_name='geographic_range', to='emgapi.GeographicLocation'),
         ),
         migrations.AddField(
             model_name='genome',

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017 EMBL - European Bioinformatics Institute
+# Copyright 2019 EMBL - European Bioinformatics Institute
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,13 +15,11 @@
 
 import logging
 
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse
 from django.db.models import Prefetch, Count, F, Q
 from django.shortcuts import get_object_or_404
-from django.db.models import Q
 
 from django_filters.rest_framework import DjangoFilterBackend
-from emgapi import mixins as emg_mixins, serializers as emg_serializers, models as emg_models
 
 from rest_framework import viewsets, mixins
 from rest_framework import filters
@@ -45,10 +43,9 @@ class BiomeStudyRelationshipViewSet(emg_mixins.ListModelMixin,
         obj = get_object_or_404(emg_models.Biome, lineage=lineage)
         queryset = emg_models.Study.objects \
             .available(self.request) \
-            .filter(
-            samples__biome__lft__gte=obj.lft,
-            samples__biome__rgt__lte=obj.rgt,
-            samples__biome__depth__gte=obj.depth)
+            .filter(samples__biome__lft__gte=obj.lft,
+                    samples__biome__rgt__lte=obj.rgt,
+                    samples__biome__depth__gte=obj.depth)
         if 'samples' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Sample.objects \
                 .available(self.request, prefetch=True)
@@ -128,8 +125,7 @@ class StudyGeoCoordinateRelationshipViewSet(mixins.ListModelMixin,
             .available(self.request) \
             .filter(studies=study.study_id) \
             .values('lon_lat_pk', 'longitude', 'latitude') \
-            .annotate(
-            samples_count=Count('lon_lat_pk'))
+            .annotate(samples_count=Count('lon_lat_pk'))
         return queryset
 
     def list(self, request, *args, **kwargs):
@@ -158,10 +154,9 @@ class StudyStudyRelationshipViewSet(emg_mixins.ListModelMixin,
             .filter(study_id=study.study_id) \
             .values("sample_id")
         studies = emg_models.StudySample.objects \
-            .filter(
-            Q(sample_id__in=samples),
-            ~Q(study_id=study.study_id)
-        ).values("study_id")
+            .filter(Q(sample_id__in=samples),
+                    ~Q(study_id=study.study_id)) \
+            .values("study_id")
         queryset = emg_models.Study.objects.filter(study_id__in=studies) \
             .available(self.request).distinct()
         return queryset
@@ -342,10 +337,8 @@ class StudyAnalysisResultViewSet(emg_mixins.ListModelMixin,
     def get_queryset(self):
         queryset = emg_models.AnalysisJob.objects \
             .available(self.request) \
-            .filter(
-            *emg_utils.related_study_accession_query(
-                self.kwargs['accession'])
-        )
+            .filter(*emg_utils.related_study_accession_query(
+                    self.kwargs['accession']))
         return queryset
 
     def list(self, request, *args, **kwargs):
@@ -580,15 +573,12 @@ class BiomeSampleRelationshipViewSet(emg_mixins.ListModelMixin,
         obj = get_object_or_404(emg_models.Biome, lineage=lineage)
         queryset = emg_models.Sample.objects \
             .available(self.request, prefetch=True) \
-            .filter(
-            biome__lft__gte=obj.lft, biome__rgt__lte=obj.rgt,
-            biome__depth__gte=obj.depth)
+            .filter(biome__lft__gte=obj.lft, biome__rgt__lte=obj.rgt,
+                    biome__depth__gte=obj.depth)
         if 'runs' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Run.objects.available(self.request)
             queryset = queryset.prefetch_related(
                 Prefetch('runs', queryset=_qs))
-        # if 'studies' in self.request.GET.get('include', '').split(','):
-        #     queryset = queryset.select_related('studies')
         return queryset
 
     def list(self, request, *args, **kwargs):
@@ -789,7 +779,7 @@ class BiomeTreeViewSet(mixins.ListModelMixin,
     ordering = ('biome_id',)
 
     lookup_field = 'lineage'
-    lookup_value_regex = '[a-zA-Z0-9\:\-\s\(\)\<\>]+'
+    lookup_value_regex = '[a-zA-Z0-9\:\-\s\(\)\<\>]+'  # noqa: W605
 
     def get_queryset(self):
         lineage = self.kwargs.get('lineage', None).strip()
@@ -862,16 +852,14 @@ class SampleMetadataRelationshipViewSet(mixins.ListModelMixin,
     serializer_class = emg_serializers.SampleAnnSerializer
 
     lookup_field = 'accession'
-    lookup_value_regex = '[a-zA-Z0-9\-\_]+'
+    lookup_value_regex = '[a-zA-Z0-9\-\_]+'  # noqa: W605
 
     def get_queryset(self):
         accession = self.kwargs[self.lookup_field]
         return emg_models.SampleAnn.objects \
             .filter(sample__accession=accession) \
-            .prefetch_related(Prefetch(
-            'sample',
-            queryset=emg_models.Sample.objects.available(self.request)
-        )) \
+            .prefetch_related(
+                Prefetch('sample', queryset=emg_models.Sample.objects.available(self.request))) \
             .order_by('var')
 
     def list(self, request, *args, **kwargs):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2017 EMBL - European Bioinformatics Institute
+# Copyright 2019 EMBL - European Bioinformatics Institute
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import logging
 import inflection
 
 from django.conf import settings
-from django.db.models import Prefetch, Count, F, Q
+from django.db.models import Prefetch, Count, Q
 from django.http import Http404
 from django.middleware import csrf
 from django.http import HttpResponse
@@ -1041,7 +1041,7 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
                          emg_viewsets.BasePublicationGenericViewSet):
 
     lookup_field = 'pubmed_id'
-    lookup_value_regex = '[0-9\.]+'
+    lookup_value_regex = '[0-9\.]+'  # noqa: W605
 
     def get_queryset(self):
         queryset = emg_models.Publication.objects.all()
@@ -1191,19 +1191,18 @@ class GenomeDownloadViewSet(emg_mixins.ListModelMixin,
         obj = self.get_object()
         response = HttpResponse()
         response['Content-Type'] = 'application/octet-stream'
-        response["Content-Disposition"] = \
-            "attachment; filename={0}".format(alias)
+        response['Content-Disposition'] = \
+            'attachment; filename={0}'.format(alias)
         if obj.subdir is not None:
             response['X-Accel-Redirect'] = \
-                "/results{0}/{1}/{2}".format(
+                '/results{0}/{1}/{2}'.format(
                     obj.genome.result_directory, obj.subdir, obj.realname
                 )
         else:
             response['X-Accel-Redirect'] = \
-                "/results{0}/{1}".format(
+                '/results{0}/{1}'.format(
                     obj.genome.result_directory, obj.realname
                 )
-        print(response.__dict__)
         return response
 
 
@@ -1280,16 +1279,16 @@ class ReleaseDownloadViewSet(emg_mixins.ListModelMixin,
         obj = self.get_object()
         response = HttpResponse()
         response['Content-Type'] = 'application/octet-stream'
-        response["Content-Disposition"] = \
-            "attachment; filename={0}".format(alias)
+        response['Content-Disposition'] = \
+            'attachment; filename={0}'.format(alias)
         if obj.subdir is not None:
             response['X-Accel-Redirect'] = \
-                "/results/genomes{0}/{1}/{2}".format(
+                '/results/genomes{0}/{1}/{2}'.format(
                     obj.release.result_directory, obj.subdir, obj.realname
                 )
         else:
             response['X-Accel-Redirect'] = \
-                "/results/genomes{0}/{1}".format(
+                '/results/genomes{0}/{1}'.format(
                     obj.release.result_directory, obj.realname
                 )
         return response
