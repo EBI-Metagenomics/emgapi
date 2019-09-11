@@ -57,7 +57,7 @@ class TestDefaultAPI(object):
             'genomeset': '%s/genomeset' % host,
             'kegg-classes': '%s/kegg-classes' % host,
             'kegg-modules': '%s/kegg-modules' % host,
-            'release': '%s/release' % host            
+            'release': '%s/release' % host
         }
         assert rsp['data'] == expected
 
