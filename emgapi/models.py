@@ -27,6 +27,9 @@
 
 from __future__ import unicode_literals
 
+import os
+
+from django.conf import settings
 from enum import Enum
 
 from django.db import models
@@ -608,6 +611,7 @@ class Study(models.Model):
         db_table = 'STUDY'
         unique_together = (('study_id', 'secondary_accession'),)
         ordering = ('study_id',)
+        verbose_name_plural = 'studies'
 
     def __str__(self):
         return self._custom_pk()
@@ -634,6 +638,105 @@ class StudySample(models.Model):
     class Meta:
         db_table = 'STUDY_SAMPLE'
         unique_together = (('study', 'sample'),)
+
+
+class SuperStudyQuerySet(BaseQuerySet):
+    pass
+
+
+class SuperStudyManager(models.Manager):
+
+    def get_queryset(self):
+        return SuperStudyQuerySet(self.model, using=self._db) \
+            .annotate(biomes_count=Count('biomes', distinct=True))
+
+    def available(self, request, prefetch=False):
+        queryset = self.get_queryset()
+        if prefetch:
+            queryset = queryset.prefetch_related(
+                Prefetch('flagship_studies', queryset=Study.objects.available(request)),
+                Prefetch('biome', queryset=Biome.objects.all()),
+            )
+        return queryset
+
+
+class SuperStudy(models.Model):
+    """
+    Aggregation of studies.
+    Each Super Study will have multiples Studies under 2 categories:
+    - Flaship Projects, those that are directly related to the Super Study
+    - Related Projects, the studies that share the biome with the Super Study
+    """
+    super_study_id = models.AutoField(db_column='STUDY_ID',
+                                      primary_key=True)
+    title = models.CharField(db_column='TITLE', max_length=100)
+    description = models.TextField(db_column='DESCRIPTION', blank=True, null=True)
+
+    flagship_studies = models.ManyToManyField(
+        'Study', through='SuperStudyStudy', related_name='super_studies', blank=True
+    )
+
+    biomes = models.ManyToManyField(
+        'Biome', through='SuperStudyBiome', related_name='super_studies', blank=True
+    )
+
+    image = models.CharField(max_length=100, blank=True, null=True)
+
+    objects = SuperStudyManager()
+
+    def __str__(self):
+        return self.title
+
+    @property
+    def image_url(self):
+        if self.image:
+            return os.path.join(settings.IMG_FOLDER, str(self.image))
+        else:
+            return ''
+
+    class Meta:
+        db_table = 'SUPER_STUDY'
+        verbose_name_plural = 'super studies'
+
+
+class SuperStudyStudy(models.Model):
+    """
+    Relation between a Super Study and a Study
+    """
+    study = models.ForeignKey(
+        'Study', db_column='STUDY_ID',
+        on_delete=models.CASCADE)
+    super_study = models.ForeignKey(
+        'SuperStudy', db_column='SUPER_STUDY_ID',
+        on_delete=models.CASCADE)
+
+    def __str__(self):
+        return '{} - {}'.format(self.super_study, self.study)
+
+    class Meta:
+        db_table = 'SUPER_STUDY_STUDY'
+        unique_together = (('study', 'super_study'),)
+        verbose_name_plural = 'super studies studies'
+
+
+class SuperStudyBiome(models.Model):
+    """
+    Relation between a Super Study and a Biome
+    """
+    biome = models.ForeignKey(
+        'Biome', db_column='BIOME_ID',
+        on_delete=models.CASCADE)
+    super_study = models.ForeignKey(
+        'SuperStudy', db_column='SUPER_STUDY_ID',
+        on_delete=models.CASCADE)
+
+    def __str__(self):
+        return '{} - {}'.format(self.super_study, self.biome)
+
+    class Meta:
+        db_table = 'SUPER_STUDY_BIOME'
+        unique_together = (('biome', 'super_study'),)
+        verbose_name_plural = 'super studies biomes'
 
 
 class SampleQuerySet(BaseQuerySet):

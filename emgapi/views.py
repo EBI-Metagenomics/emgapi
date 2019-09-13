@@ -452,6 +452,80 @@ class StudiesDownloadsViewSet(emg_mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
+class SuperStudyViewSet(mixins.RetrieveModelMixin,
+                        emg_mixins.ListModelMixin,
+                        emg_viewsets.BaseSuperStudyViewSet):
+    """
+    Retrieves the Super Studies.
+    """
+    serializer_class = emg_serializers.SuperStudySerializer
+
+    lookup_field = 'super_study_id'
+
+    def get_queryset(self):
+        return emg_models.SuperStudy.objects.available(self.request)
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of super studies
+        Example:
+        `/super-studies`
+
+        `/super-studies?fields[super-studies]=super_study_id,title`
+        retrieve only selected fileds
+
+        `/super-studies?include=biomes` with biomes
+
+        Filter by:
+        ---
+        `/super-studies?lineage=root:Environmental:Terrestrial:Soil`
+
+        `/studies?title=Human`
+
+        Search for:
+        ---
+        title, description etc.
+
+        `/super-studies?search=%20micriobiome`
+        ---
+        """
+        return super(SuperStudyViewSet, self).list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves super study for the given super_study_id
+        Example:
+        ---
+        `/super-studies/1`
+        """
+        return super(SuperStudyViewSet, self).retrieve(request, *args, **kwargs)
+
+    @detail_route(
+        methods=['get', ],
+        url_name='biomes-list',
+        serializer_class=emg_serializers.BiomeSerializer
+    )
+    def biomes(self, request, super_study_id=None):
+        """
+        Retrieves list of biomes for the given super study id
+        Example:
+        ---
+        `/super-studies/1/biomes` retrieve linked biomes
+        """
+
+        obj = self.get_object()
+        biomes = obj.biomes.all()
+        page = self.paginate_queryset(biomes)
+        if page is not None:
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(
+            biomes, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
 class SampleViewSet(mixins.RetrieveModelMixin,
                     emg_mixins.ListModelMixin,
                     emg_viewsets.BaseSampleGenericViewSet):
@@ -1041,6 +1115,7 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
                          emg_viewsets.BasePublicationGenericViewSet):
 
     lookup_field = 'pubmed_id'
+
     lookup_value_regex = '[0-9\.]+'  # noqa: W605
 
     def get_queryset(self):

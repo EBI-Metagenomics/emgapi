@@ -27,6 +27,30 @@ logger = logging.getLogger(__name__)
 
 
 # Base classes
+class BaseSuperStudyViewSet(viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.SuperStudySerializer
+
+    filter_class = emg_filters.SuperStudyFilter
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'super_study_id',
+        'title'
+    )
+
+    ordering = ('super_study_id',)
+
+    search_fields = (
+        '@title',
+        '@description',
+    )
+
 
 class BaseStudyGenericViewSet(viewsets.GenericViewSet):
 

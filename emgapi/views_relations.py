@@ -352,6 +352,59 @@ class StudyAnalysisResultViewSet(emg_mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
+class SuperStudyFlagshipStudiesViewSet(emg_mixins.ListModelMixin,
+                                       emg_viewsets.BaseStudyGenericViewSet):
+
+    lookup_field = 'super_study_id'
+
+    def get_queryset(self):
+        super_study = get_object_or_404(
+            emg_models.SuperStudy,
+            pk=self.kwargs['super_study_id']
+        )
+        return super_study.flagship_studies.available(self.request)
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves flagship studies for the given super_study_id
+        Example:
+        ---
+        `/studies/1/flagship-studies`
+        """
+        return super(SuperStudyFlagshipStudiesViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class SuperStudyRelatedStudiesViewSet(emg_mixins.ListModelMixin,
+                                      emg_viewsets.BaseStudyGenericViewSet):
+
+    lookup_field = 'super_study_id'
+
+    def get_queryset(self):
+        super_study = get_object_or_404(
+            emg_models.SuperStudy,
+            pk=self.kwargs['super_study_id']
+        )
+        biomes = super_study.biomes.all() \
+                                   .values('biome_id')
+        flagship_studies = super_study.flagship_studies.all() \
+                                      .values('study_id')
+        return emg_models.Study.objects \
+                         .filter(biome_id__in=biomes) \
+                         .exclude(pk__in=flagship_studies) \
+                         .available(self.request)
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves related studies for the given super_study_id
+        Example:
+        ---
+        `/super-studies/1/related-studies`
+        """
+        return super(SuperStudyRelatedStudiesViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
 class RunAnalysisViewSet(emg_mixins.ListModelMixin,
                          viewsets.GenericViewSet):
     serializer_class = emg_serializers.AnalysisSerializer
@@ -779,6 +832,7 @@ class BiomeTreeViewSet(mixins.ListModelMixin,
     ordering = ('biome_id',)
 
     lookup_field = 'lineage'
+
     lookup_value_regex = '[a-zA-Z0-9\:\-\s\(\)\<\>]+'  # noqa: W605
 
     def get_queryset(self):
@@ -852,6 +906,7 @@ class SampleMetadataRelationshipViewSet(mixins.ListModelMixin,
     serializer_class = emg_serializers.SampleAnnSerializer
 
     lookup_field = 'accession'
+
     lookup_value_regex = '[a-zA-Z0-9\-\_]+'  # noqa: W605
 
     def get_queryset(self):

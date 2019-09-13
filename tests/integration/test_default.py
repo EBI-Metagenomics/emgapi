@@ -39,6 +39,7 @@ class TestDefaultAPI(object):
         expected = {
             'biomes': '%s/biomes' % host,
             'studies': '%s/studies' % host,
+            "super-studies": "%s/super-studies" % host,
             'samples': '%s/samples' % host,
             'runs': '%s/runs' % host,
             'analyses': '%s/analyses' % host,
@@ -71,6 +72,7 @@ class TestDefaultAPI(object):
             'emgapi_v1:samples',
             'emgapi_v1:runs',
             'emgapi_v1:analyses',
+            'emgapi_v1:super-studies',
             'emgapi_v1:studies',
             'emgapi_v1:pipeline-tools',
             'emgapi_v1:goterms',
@@ -96,7 +98,7 @@ class TestDefaultAPI(object):
         with pytest.raises(NoReverseMatch):
             reverse(view_name)
 
-    @pytest.mark.parametrize(
+    @pytest.mark.parametrize(  # noqa: C901
         '_model, _camelcase, _view, _view_args, relations',
         [
             ('ExperimentType', 'experiment-types',
@@ -115,6 +117,9 @@ class TestDefaultAPI(object):
              ['pipelines', 'analyses', 'runs', 'samples']),
             ('Sample', 'samples', 'emgapi_v1:samples', [],
              ['biome', 'studies', 'runs', 'metadata']),
+            ('SuperStudy', 'super-studies', 'emgapi_v1:super-studies', [],
+             ['title', 'description', 'flagship-studies',
+              'related-studies', 'biomes']),
             ('Study', 'studies', 'emgapi_v1:studies', [],
              ['biomes', 'publications', 'samples', 'downloads',
               'geocoordinates', 'analyses']),
@@ -194,6 +199,14 @@ class TestDefaultAPI(object):
             elif _model in ('Publication',):
                 mommy.make('emgapi.Publication', pk=pk,
                            pubmed_id=pk)
+            elif _model in ('SuperStudy',):
+                _biome = mommy.make('emgapi.Biome', pk=pk)
+                _study = mommy.make('emgapi.Study', pk=pk)
+                _ss = mommy.make('emgapi.SuperStudy', pk=pk, title='Dummy',
+                                 description='Desc')
+                mommy.make('emgapi.SuperStudyStudy',
+                           study=_study, super_study=_ss)
+                mommy.make('emgapi.SuperStudyBiome', super_study=_ss, biome=_biome)
             else:
                 mommy.make(model_name, pk=pk)
 
