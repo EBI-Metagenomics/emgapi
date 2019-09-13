@@ -3,13 +3,13 @@
 
 # Copyright 2017 EMBL - European Bioinformatics Institute
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
+# distributed under the License is distributed on an 'AS IS' BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
@@ -35,24 +35,30 @@ class TestDefaultAPI(object):
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
 
-        host = "http://testserver/%s" % api_version
+        host = 'http://testserver/%s' % api_version
         expected = {
-            "biomes": "%s/biomes" % host,
+            'biomes': '%s/biomes' % host,
+            'studies': '%s/studies' % host,
             "super-studies": "%s/super-studies" % host,
-            "studies": "%s/studies" % host,
-            "samples": "%s/samples" % host,
-            "runs": "%s/runs" % host,
-            "analyses": "%s/analyses" % host,
-            "assemblies": "%s/assemblies" % host,
-            "pipelines": "%s/pipelines" % host,
-            "experiment-types": "%s/experiment-types" % host,
-            "publications": "%s/publications" % host,
-            "pipeline-tools": "%s/pipeline-tools" % host,
-            "annotations/go-terms": "%s/annotations/go-terms" % host,
-            "annotations/interpro-identifiers":
-                "%s/annotations/interpro-identifiers" % host,
-            "annotations/organisms": "%s/annotations/organisms" % host,
-            "mydata": "%s/mydata" % host,
+            'samples': '%s/samples' % host,
+            'runs': '%s/runs' % host,
+            'analyses': '%s/analyses' % host,
+            'assemblies': '%s/assemblies' % host,
+            'pipelines': '%s/pipelines' % host,
+            'experiment-types': '%s/experiment-types' % host,
+            'publications': '%s/publications' % host,
+            'pipeline-tools': '%s/pipeline-tools' % host,
+            'annotations/go-terms': '%s/annotations/go-terms' % host,
+            'annotations/interpro-identifiers':
+                '%s/annotations/interpro-identifiers' % host,
+            'annotations/organisms': '%s/annotations/organisms' % host,
+            'mydata': '%s/mydata' % host,
+            'genomes': '%s/genomes' % host,
+            'cogs': '%s/cogs' % host,
+            'genomeset': '%s/genomeset' % host,
+            'kegg-classes': '%s/kegg-classes' % host,
+            'kegg-modules': '%s/kegg-modules' % host,
+            'release': '%s/release' % host
         }
         assert rsp['data'] == expected
 
@@ -71,12 +77,13 @@ class TestDefaultAPI(object):
             'emgapi_v1:pipeline-tools',
             'emgapi_v1:goterms',
             'emgapi_v1:interproidentifier',
-            'emgapi_v1:organisms'
+            'emgapi_v1:organisms',
+            'emgapi_v1:genomes'
         ]
     )
     @pytest.mark.django_db
     def test_empty_list(self, client, _view):
-        view_name = "%s-list" % _view
+        view_name = '%s-list' % _view
         url = reverse(view_name)
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -127,8 +134,8 @@ class TestDefaultAPI(object):
     @pytest.mark.django_db
     def test_list(self, client, _model, _camelcase, _view, _view_args,
                   relations, api_version, run_status):
-        model_name = "emgapi.%s" % _model
-        view_name = "%s-list" % _view
+        model_name = 'emgapi.%s' % _model
+        view_name = '%s-list' % _view
 
         # start from 1
         # https://code.djangoproject.com/ticket/17653
@@ -140,7 +147,7 @@ class TestDefaultAPI(object):
                 _st = mommy.make('emgapi.Study', pk=pk, biome=_biome,
                                  is_public=1, samples=[_sm])
                 _as = mommy.make('emgapi.AnalysisStatus', pk=3)
-                _p = mommy.make('emgapi.Pipeline', pk=1, release_version="1.0")
+                _p = mommy.make('emgapi.Pipeline', pk=1, release_version='1.0')
                 mommy.make('emgapi.AnalysisJob', pk=pk, pipeline=_p,
                            analysis_status=_as, run_status_id=4,
                            study=_st, sample=_sm)
@@ -171,24 +178,24 @@ class TestDefaultAPI(object):
                 _r = mommy.make('emgapi.Run', pk=pk, status_id=run_status,
                                 study=_st, sample=_sm)
                 _as = mommy.make('emgapi.AnalysisStatus', pk=3)
-                _p = mommy.make('emgapi.Pipeline', pk=1, release_version="1.0")
+                _p = mommy.make('emgapi.Pipeline', pk=1, release_version='1.0')
                 mommy.make('emgapi.AnalysisJob', pk=pk, pipeline=_p,
                            analysis_status=_as, run_status_id=4,
                            study=_st, sample=_sm, run=_r)
             elif _model in ('PipelineTool',):
                 _p = mommy.make('emgapi.Pipeline', pk=pk,
-                                release_version="1.0")
+                                release_version='1.0')
                 _t = mommy.make('emgapi.PipelineTool', pk=pk,
                                 tool_name='ToolName')
                 mommy.make('emgapi.PipelineReleaseTool', pk=pk,
                            pipeline=_p, tool=_t)
             elif _model in ('Pipeline',):
                 mommy.make('emgapi.Pipeline', pk=pk,
-                           release_version="1.0")
+                           release_version='1.0')
             # elif _model in ('Biome',):
             #     mommy.make('emgapi.Biome', pk=pk,
-            #                biome_name="foo%d" % pk,
-            #                lineage="root:foo%d" % pk)
+            #                biome_name='foo%d' % pk,
+            #                lineage='root:foo%d' % pk)
             elif _model in ('Publication',):
                 mommy.make('emgapi.Publication', pk=pk,
                            pubmed_id=pk)
@@ -214,8 +221,8 @@ class TestDefaultAPI(object):
         assert rsp['meta']['pagination']['count'] == 100
 
         # Links
-        host = "http://testserver/%s" % api_version
-        _view_url = _view.split(":")[1]
+        host = 'http://testserver/%s' % api_version
+        _view_url = _view.split(':')[1]
         first_link = '%s/%s?page=1' % (host, _view_url)
         last_link = '%s/%s?page=4' % (host, _view_url)
         next_link = '%s/%s?page=2' % (host, _view_url)

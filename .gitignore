@@ -9,6 +9,8 @@ dist
 staticfiles/
 media/
 venv/
+database/
+results/
 
 # VS Code
 .vscode/

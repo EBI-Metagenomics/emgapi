@@ -235,3 +235,29 @@ class BasePublicationGenericViewSet(viewsets.GenericViewSet):
         'pubmed_id',
         'published_year',
     )
+
+
+class BaseGenomeGenericViewSet(viewsets.GenericViewSet):
+    serializer_class = emg_serializers.GenomeSerializer
+
+    filter_backends = (
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'accession',
+        'length',
+        'num_contigs',
+        'completeness',
+        'contamination',
+        'num_genomes',
+        'num_proteins',
+        'last_update',
+    )
+
+    ordering = ('-accession',)
+
+    search_fields = (
+        'accession',
+    )
