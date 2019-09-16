@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 ('super_study_id', models.AutoField(db_column='STUDY_ID', primary_key=True, serialize=False)),
                 ('title', models.CharField(db_column='TITLE', max_length=100)),
                 ('description', models.TextField(blank=True, db_column='DESCRIPTION', null=True)),
-                ('image', models.CharField(blank=True, max_length=100, null=True)),
+                ('image', models.CharField(blank=True, db_column='IMAGE', max_length=100, null=True)),
             ],
             options={
                 'verbose_name_plural': 'super studies',

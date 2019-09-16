@@ -680,7 +680,7 @@ class SuperStudy(models.Model):
         'Biome', through='SuperStudyBiome', related_name='super_studies', blank=True
     )
 
-    image = models.CharField(max_length=100, blank=True, null=True)
+    image = models.CharField(db_column='IMAGE', max_length=100, blank=True, null=True)
 
     objects = SuperStudyManager()
 
