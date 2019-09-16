@@ -5,3 +5,12 @@ __pycache__
 var
 dist
 .eggs
+
+staticfiles/
+media/
+venv/
+database/
+results/
+
+# VS Code
+.vscode/

@@ -25,17 +25,24 @@ class DownloadHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
     def get_url(self, obj, view_name, request, format):
         if obj.pk is None:
             return None
-
-        try:
-            # if study
+        # if study
+        if hasattr(obj, 'study') and hasattr(obj, 'pipeline'):
             kwargs = {
                 'accession': obj.study.accession,
                 'release_version': obj.pipeline.release_version,
             }
-        except:
-            # if analysis
+        # if analysis
+        elif hasattr(obj, 'job'):
             kwargs = {
                 'accession': obj.job.accession,
+            }
+        elif hasattr(obj, 'genome'):
+            kwargs = {
+                'accession': obj.genome.accession
+            }
+        elif hasattr(obj, 'release'):
+            kwargs = {
+                'version': obj.release.version
             }
         kwargs['alias'] = obj.alias
 
