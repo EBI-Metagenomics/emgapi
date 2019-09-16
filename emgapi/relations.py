@@ -185,7 +185,7 @@ class DownloadSerializerMethodResourceRelatedField(SerializerMethodResourceRelat
         try:
             # TODO: add related_link_lookup_fields, a list
             related_kwargs['release_version'] = obj.pipeline.release_version
-        except:
+        except:  # noqa: E722
             pass
 
         related_link = self.get_url(
