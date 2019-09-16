@@ -1,37 +1,44 @@
-version: '2'
+version: '3'
 services: 
 
   mysql:
     image: mysql:5.6
-    volumes:
-      # - ./mysql:/var/lib/mysql:rw
-      - ../schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
       - MYSQL_DATABASE=emg
-
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - ../:/home/emg/src
-      - ../docker/config.yaml:/home/emg/emg/config.yaml:ro
-    links:
-      - mysql
-      - mongodb
-    environment:
-      - PYTHONUNBUFFERED=0
-
-  nginx:
-    image: nginx:1.12
-    links:
-      - app
-    volumes:
-      - ../nginx/conf.d:/etc/nginx/conf.d:ro
-      - ../results:/results:ro
     ports:
-      - "80:80"
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
 
 ***REMOVED***
     image: mongo:3.4
+    ports:
+      - "27017:27017"
+volumes:
+   mysql-data:
+
+  # TODO: the app will run using a virtual env.
+  # app:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ../:/home/emg/src
+  #     - ../docker/config.yaml:/home/emg/emg/config.yaml:ro
+  #   links:
+  #     - mysql
+  #     - mongodb
+  #   environment:
+  #     - PYTHONUNBUFFERED=0
+
+  # TODO: for development use django built-in server 
+  # nginx:
+  #   image: nginx:1.12
+  #   links:
+  #     - app
+  #   volumes:
+  #     - ../nginx/conf.d:/etc/nginx/conf.d:ro
+  #     - ../results:/results:ro
+  #   ports:
+  #     - "80:80"
