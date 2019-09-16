@@ -236,7 +236,7 @@ class QueryArrayWidget(widgets.BaseCSVWidget, forms.TextInput):
 class SuperStudyFilter(django_filters.FilterSet):
 
     biome_name = django_filters.CharFilter(
-        method='filter_biome_name', distinct=True,
+        method='filter_biome_lineage', distinct=True,
         label='Biome name',
         help_text='Biome name')
 
