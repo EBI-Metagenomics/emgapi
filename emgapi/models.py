@@ -664,7 +664,7 @@ class SuperStudy(models.Model):
     """
     Aggregation of studies.
     Each Super Study will have multiples Studies under 2 categories:
-    - Flaship Projects, those that are directly related to the Super Study
+    - Flagship Projects, those that are directly related to the Super Study
     - Related Projects, the studies that share the biome with the Super Study
     """
     super_study_id = models.AutoField(db_column='STUDY_ID',
