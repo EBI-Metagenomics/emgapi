@@ -118,8 +118,8 @@ class Command(BaseCommand):
         data['result_directory'] = '/genomes/{}'.format(self.release_obj.version) + get_result_path(genome_dir)
 
         # TODO: remove after Alex A. regenerates the genomes files.
-        gtype = data.get('genome_set', '')
-        if gtype == 'PATRIC/IMG':
+        gtype = data.get('genome_set', None)
+        if gtype and gtype.name == 'PATRIC/IMG':
             ga = data.pop('genome_accession')
             if '.' in ga:
                 data['patric_genome_accession'] = ga
