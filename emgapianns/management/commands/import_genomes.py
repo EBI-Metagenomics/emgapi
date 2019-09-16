@@ -119,7 +119,7 @@ class Command(BaseCommand):
 
         # TODO: remove after Alex A. regenerates the genomes files.
         gtype = data.get('genome_set', None)
-        if gtype and gtype.name == 'PATRIC/IMG':
+        if gtype and gtype.name == 'PATRIC/IMG' and 'genome_accession' in data:
             ga = data.pop('genome_accession')
             if '.' in ga:
                 data['patric_genome_accession'] = ga
