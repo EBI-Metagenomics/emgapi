@@ -117,6 +117,15 @@ class Command(BaseCommand):
 
         data['result_directory'] = '/genomes/{}'.format(self.release_obj.version) + get_result_path(genome_dir)
 
+        # TODO: remove after Alex A. regenerates the genomes files.
+        gtype = data.get('genome_set', '')
+        if gtype == 'PATRIC/IMG':
+            ga = data.pop('genome_accession')
+            if '.' in ga:
+                data['patric_genome_accession'] = ga
+            else:
+                data['img_genome_accession'] = ga
+
         g, created = emg_models.Genome.objects.using(self.database).update_or_create(
             accession=data['accession'],
             defaults=data)
