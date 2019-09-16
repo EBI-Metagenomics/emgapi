@@ -240,7 +240,7 @@ class SuperStudyFilter(django_filters.FilterSet):
         label='Biome name',
         help_text='Biome name')
 
-    def filter_biome_name(self, qs, name, value):
+    def filter_biome_lineage(self, qs, name, value):
         return qs.filter(
             biomes__lineage__iregex=WORD_MATCH_REGEX.format(value))
 
