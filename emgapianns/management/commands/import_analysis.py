@@ -58,7 +58,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('rootpath',
                             help="NFS root path of the results archive")
-        parser.add_argument('--biome', help='Lineage of GOLD biome')
+        parser.add_argument('biome', help='Lineage of GOLD biome')
 
         parser.add_argument('--database', help='Target emg_db_name alias', default='default')
 
@@ -88,7 +88,6 @@ class Command(BaseCommand):
         self.upload_analysis_files(metadata.experiment_type, analysis, input_file_name)
 
         self.upload_analysis_data()
-
 
         logger.info("Program finished successfully.")
 
