@@ -8,6 +8,18 @@ from django.db import migrations, models
 import django
 
 
+def rm_optional_keys(apps, schema_editor):
+    ops = [
+        'ALTER TABLE `STUDY_PUBLICATION` DROP PRIMARY KEY'
+    ]
+    for op in ops:
+        try:
+            migrations.RunSQL(sql=op)
+        except Exception:
+            pass
+
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -20,6 +32,9 @@ class Migration(migrations.Migration):
             name='study',
             field=models.ForeignKey(db_column='STUDY_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.Study'),
         ),
+
+        migrations.RunPython(rm_optional_keys),
+
         migrations.AlterUniqueTogether(
             name='studypublication',
             unique_together=set([]),

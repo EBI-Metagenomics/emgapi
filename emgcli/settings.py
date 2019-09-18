@@ -447,6 +447,7 @@ try:
 except KeyError:
     CORS_ORIGIN_ALLOW_ALL = False
 
+
 # CORS_URLS_REGEX = r'^%s/.*$' % FORCE_SCRIPT_NAME
 # CORS_URLS_ALLOW_ALL_REGEX = ()
 CORS_ALLOW_METHODS = (

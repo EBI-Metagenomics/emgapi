@@ -25,7 +25,7 @@ __all__ = ['apiclient', 'api_version', 'biome', 'super_study', 'studies',
            'run_status', 'analysis_status',
            'pipeline', 'pipelines', 'experiment_type',
            'runs', 'run', 'run_emptyresults', 'run_with_sample',
-           'analysis_results', 'run_multiple_analysis']
+           'analysis_results', 'run_multiple_analysis', 'var_names']
 
 
 @pytest.fixture()
@@ -294,13 +294,13 @@ def runs(study, samples, run_status, analysis_status, pipeline,
 @pytest.fixture
 def run(study, sample, run_status, analysis_status, pipeline, experiment_type):
     run, created = emg_models.Run.objects.get_or_create(
-            run_id=1234,
-            accession="ABC01234",
-            sample=sample,
-            study=study,
-            status_id=run_status,
-            experiment_type=experiment_type
-        )
+        run_id=1234,
+        accession="ABC01234",
+        sample=sample,
+        study=study,
+        status_id=run_status,
+        experiment_type=experiment_type
+    )
     analysis = emg_models.AnalysisJob.objects.create(  # NOQA
         job_id=1234,
         sample=sample,
@@ -331,39 +331,39 @@ def run_multiple_analysis(study, sample, run_status, analysis_status,
         release_date="1970-01-01",
     )
     run = emg_models.Run.objects.create(
-            run_id=1234,
-            accession="ABC01234",
-            sample=sample,
-            study=study,
-            status_id=run_status,
-            experiment_type=experiment_type
-        )
+        run_id=1234,
+        accession="ABC01234",
+        sample=sample,
+        study=study,
+        status_id=run_status,
+        experiment_type=experiment_type
+    )
     _anl1 = emg_models.AnalysisJob.objects.create(
-            job_id=1234,
-            sample=sample,
-            study=study,
-            run=run,
-            run_status_id=4,
-            experiment_type=experiment_type,
-            pipeline=pipeline,
-            analysis_status=analysis_status,
-            input_file_name="ABC_FASTQ",
-            result_directory="path/version_1.0/ABC_FASTQ",
-            submit_time="1970-01-01 00:00:00",
-        )
+        job_id=1234,
+        sample=sample,
+        study=study,
+        run=run,
+        run_status_id=4,
+        experiment_type=experiment_type,
+        pipeline=pipeline,
+        analysis_status=analysis_status,
+        input_file_name="ABC_FASTQ",
+        result_directory="path/version_1.0/ABC_FASTQ",
+        submit_time="1970-01-01 00:00:00",
+    )
     _anl4 = emg_models.AnalysisJob.objects.create(
-            job_id=5678,
-            sample=sample,
-            study=study,
-            run=run,
-            run_status_id=4,
-            experiment_type=experiment_type,
-            pipeline=pipeline4,
-            analysis_status=analysis_status,
-            input_file_name="ABC_FASTQ",
-            result_directory="path/version_4.0/ABC_FASTQ",
-            submit_time="1970-01-01 00:00:00",
-        )
+        job_id=5678,
+        sample=sample,
+        study=study,
+        run=run,
+        run_status_id=4,
+        experiment_type=experiment_type,
+        pipeline=pipeline4,
+        analysis_status=analysis_status,
+        input_file_name="ABC_FASTQ",
+        result_directory="path/version_4.0/ABC_FASTQ",
+        submit_time="1970-01-01 00:00:00",
+    )
     return (_anl1, _anl4)
 
 
@@ -397,13 +397,13 @@ def run_emptyresults(study, sample, run_status, analysis_status, pipeline,
 def run_with_sample(study, sample, run_status, analysis_status, pipeline,
                     experiment_type):
     run = emg_models.Run.objects.create(
-            run_id=1234,
-            accession="ABC01234",
-            status_id=run_status,
-            sample=sample,
-            study=study,
-            experiment_type=experiment_type,
-        )
+        run_id=1234,
+        accession="ABC01234",
+        status_id=run_status,
+        sample=sample,
+        study=study,
+        experiment_type=experiment_type,
+    )
     return emg_models.AnalysisJob.objects.create(
         job_id=1234,
         sample=sample,
@@ -447,3 +447,19 @@ def analysis_results(study, sample, run_status, analysis_status,
             submit_time="1970-01-01 00:00:00",
         )
     return res
+
+
+@pytest.fixture
+def var_names():
+    data = (
+        'collection date',
+        'geographic location (latitude)',
+        'geographic location (longitude)',
+        'ENA checklist',
+        'host taxid',
+        'host scientific name'
+    )
+    variable_names = []
+    for i, name in enumerate(data):
+        variable_names.append(emg_models.VariableNames(var_id=i, var_name=name))
+    emg_models.VariableNames.objects.bulk_create(variable_names)
