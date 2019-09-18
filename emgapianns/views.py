@@ -588,10 +588,10 @@ class OrganismAnalysisRelationshipViewSet(m_viewsets.ListReadOnlyModelViewSet):
     )
 
     ordering_fields = (
-        'accession',
+        'job_id',
     )
 
-    ordering = ('-accession',)
+    ordering = ('-job_id',)
 
     search_fields = (
         '@sample__metadata__var_val_ucv',
@@ -600,7 +600,8 @@ class OrganismAnalysisRelationshipViewSet(m_viewsets.ListReadOnlyModelViewSet):
     lookup_field = 'lineage'
 
     def get_queryset(self):
-        lineage = self.kwargs[self.lookup_field]
+        lineage = urllib.parse.unquote(
+            self.kwargs.get(self.lookup_field, None).strip())
         organism = m_models.Organism.objects.filter(lineage=lineage) \
             .only('id')
         if len(organism) == 0:
@@ -611,7 +612,6 @@ class OrganismAnalysisRelationshipViewSet(m_viewsets.ListReadOnlyModelViewSet):
                 M_Q(taxonomy_lsu__organism__in=organism) |
                 M_Q(taxonomy_ssu__organism__in=organism)
             ).distinct('job_id')
-        logger.info("Found %d analysis" % len(job_ids))
         return emg_models.AnalysisJob.objects \
             .filter(job_id__in=job_ids) \
             .available(self.request)

@@ -1,0 +1,5 @@
+-r requirements.txt
+
+# dev requeriments
+django-debug-toolbar==2.0
+django-extensions==2.1.9
