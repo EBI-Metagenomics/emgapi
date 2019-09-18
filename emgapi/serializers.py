@@ -133,6 +133,19 @@ class BiomeSerializer(ExplicitFieldsModelSerializer,
     # counters
     samples_count = serializers.IntegerField()
 
+    genomes = relations.SerializerMethodResourceRelatedField(
+        source='get_genomes',
+        model=emg_models.Genome,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:biomes-genomes-list',
+        related_link_url_kwarg='lineage',
+        related_link_lookup_field='lineage',
+    )
+
+    def get_genomes(self, obj):
+        return None
+
     class Meta:
         model = emg_models.Biome
         exclude = (
@@ -621,6 +634,8 @@ class BaseDownloadSerializer(ExplicitFieldsModelSerializer,
             }
         return None
 
+
+class BasePipelineDownloadSerializer(BaseDownloadSerializer):
     pipeline = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name='emgapi_v1:pipelines-detail',
@@ -628,7 +643,7 @@ class BaseDownloadSerializer(ExplicitFieldsModelSerializer,
     )
 
 
-class StudyDownloadSerializer(BaseDownloadSerializer):
+class StudyDownloadSerializer(BasePipelineDownloadSerializer):
 
     url = emg_fields.DownloadHyperlinkedIdentityField(
         view_name='emgapi_v1:studydownload-detail',
@@ -655,7 +670,7 @@ class StudyDownloadSerializer(BaseDownloadSerializer):
         )
 
 
-class AnalysisJobDownloadSerializer(BaseDownloadSerializer):
+class AnalysisJobDownloadSerializer(BasePipelineDownloadSerializer):
 
     url = emg_fields.DownloadHyperlinkedIdentityField(
         view_name='emgapi_v1:analysisdownload-detail',
@@ -1028,7 +1043,7 @@ class SampleGeoCoordinateSerializer(ExplicitFieldsModelSerializer,
                                     serializers.HyperlinkedModelSerializer):
 
     # workaround to provide multiple values in PK
-    id = serializers.ReadOnlyField(source="lon_lat_pk")
+    id = serializers.ReadOnlyField(source='lon_lat_pk')
 
     latitude = serializers.FloatField()
     longitude = serializers.FloatField()
@@ -1046,7 +1061,82 @@ class SampleGeoCoordinateSerializer(ExplicitFieldsModelSerializer,
         )
 
 
-# Study serializer
+class SuperStudySerializer(ExplicitFieldsModelSerializer,
+                           serializers.HyperlinkedModelSerializer):
+
+    biomes_count = serializers.IntegerField()
+
+    included_serializers = {
+        'biomes': 'emgapi.serializers.BiomeSerializer',
+        'flagship-studies': 'emgapi.serializers.StudySerializer',
+    }
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi_v1:super-studies-detail',
+        lookup_field='super_study_id',
+    )
+
+    flagship_studies = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_flagship_studies',
+        model=emg_models.Study,
+        related_link_view_name='emgapi_v1:super-studies-flagship-studies-list',
+        related_link_url_kwarg='super_study_id',
+        related_link_lookup_field='super_study_id',
+        related_link_self_view_name='emgapi_v1:studies-detail',
+        related_link_self_lookup_field='accession',
+    )
+
+    def get_flagship_studies(self, obj):
+        return None
+
+    # related studies are inferred from the biomes of the Super Sample
+    related_studies = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_related_studies',
+        model=emg_models.Study,
+        related_link_view_name='emgapi_v1:super-studies-related-studies-list',
+        related_link_url_kwarg='super_study_id',
+        related_link_lookup_field='super_study_id',
+        related_link_self_view_name='emgapi_v1:studies-detail',
+        related_link_self_lookup_field='accession',
+    )
+
+    def get_related_studies(self, obj):
+        return None
+
+    biomes = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_biomes',
+        model=emg_models.Biome,
+        related_link_view_name='emgapi_v1:super-studies-biomes-list',
+        related_link_url_kwarg='super_study_id',
+        related_link_lookup_field='super_study_id',
+        related_link_self_view_name='emgapi_v1:biomes-detail',
+        related_link_self_lookup_field='lineage'
+    )
+
+    def get_biomes(self, obj):
+        return None
+
+    class Meta:
+        model = emg_models.SuperStudy
+        fields = (
+            'super_study_id',
+            'title',
+            'description',
+            'url',
+            'image_url',
+            'biomes',
+            'biomes_count',
+            'flagship_studies',
+            'related_studies',
+        )
+
+
 class StudySerializer(ExplicitFieldsModelSerializer,
                       serializers.HyperlinkedModelSerializer):
 
@@ -1316,3 +1406,265 @@ class LDAnalysisSerializer(drf_serializers.ModelSerializer):
             'keywords',
             'dateModified',
         )
+
+
+class CogCountSerializer(ExplicitFieldsModelSerializer):
+    name = serializers.CharField(source='cog_name')
+    description = serializers.CharField(source='cog_desc')
+
+    class Meta:
+        model = emg_models.GenomeCogCounts
+        fields = ('name', 'description', 'genome_count', 'pangenome_count')
+
+
+class KeggClassMatchSerializer(ExplicitFieldsModelSerializer):
+    class_id = serializers.CharField()
+    name = serializers.CharField()
+
+    class Meta:
+        model = emg_models.GenomeKeggClassCounts
+        fields = ('class_id', 'name', 'genome_count', 'pangenome_count')
+
+
+class KeggModuleMatchSerializer(ExplicitFieldsModelSerializer):
+    name = serializers.CharField()
+    description = serializers.CharField()
+
+    class Meta:
+        model = emg_models.GenomeKeggModuleCounts
+        fields = ('name', 'description', 'genome_count', 'pangenome_count')
+
+
+class GenomeSerializer(ExplicitFieldsModelSerializer):
+    included_serializers = {
+        'download': 'emgapi.serializers.GenomeDownloadSerializer',
+    }
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi_v1:genomes-detail',
+        lookup_field='accession',
+    )
+
+    downloads = relations.SerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_downloads',
+        model=emg_models.GenomeDownload,
+        related_link_view_name='emgapi_v1:genome-download-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+    )
+
+    def get_downloads(self, obj):
+        return None
+
+    kegg_class_matches = relations.SerializerMethodResourceRelatedField(
+        source='get_kegg_class_matches',
+        model=emg_models.KeggClass,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:genome-kegg-class-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+    )
+
+    def get_kegg_class_matches(self, obj):
+        return None
+
+    kegg_modules_matches = relations.SerializerMethodResourceRelatedField(
+        source='get_kegg_module_matches',
+        model=emg_models.KeggModule,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:genome-kegg-module-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+    )
+
+    def get_kegg_module_matches(self, obj):
+        return None
+
+    cog_matches = relations.SerializerMethodResourceRelatedField(
+        source='get_cog_matches',
+        model=emg_models.CogCat,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:genome-cog-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+    )
+
+    def get_cog_matches(self, obj):
+        return None
+
+    # relationships
+    releases = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_releases',
+        model=emg_models.Release,
+        related_link_self_view_name='emgapi_v1:release-detail',
+        related_link_self_lookup_field='version'
+    )
+
+    def get_releases(self, obj):
+        return obj.releases.all()
+
+    biome = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emgapi_v1:biomes-detail',
+        lookup_field='lineage',
+    )
+
+    geographic_range = serializers.ListField()
+
+    geographic_origin = serializers.CharField()
+
+    class Meta:
+        model = emg_models.Genome
+        exclude = ('result_directory',
+                   'kegg_classes',
+                   'kegg_modules',
+                   'genome_set',
+                   'pangenome_geographic_range',
+                   'geo_origin')
+
+
+class GenomeDownloadSerializer(BaseDownloadSerializer):
+    url = emg_fields.DownloadHyperlinkedIdentityField(
+        view_name='emgapi_v1:genome-download-detail',
+        lookup_field='alias',
+    )
+
+    class Meta:
+        model = emg_models.GenomeDownload
+        fields = (
+            'id',
+            'url',
+            'alias',
+            'file_format',
+            'description',
+            'group_type',
+        )
+
+
+class ReleaseDownloadSerializer(BaseDownloadSerializer):
+    url = emg_fields.DownloadHyperlinkedIdentityField(
+        view_name='emgapi_v1:release-download-detail',
+        lookup_field='alias',
+    )
+
+    class Meta:
+        model = emg_models.ReleaseDownload
+        fields = (
+            'id',
+            'url',
+            'alias',
+            'file_format',
+            'description',
+            'group_type'
+        )
+
+
+class ReleaseSerializer(ExplicitFieldsModelSerializer,
+                        serializers.HyperlinkedModelSerializer):
+    included_serializers = {
+        'genomes': 'emgapi.serializers.GenomeSerializer',
+        'download': 'emgapi.serializers.ReleaseDownloadSerializer'
+    }
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi_v1:release-detail',
+        lookup_field='version',
+    )
+
+    genomes = relations.SerializerMethodResourceRelatedField(
+        source='get_genomes',
+        model=emg_models.Genome,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:release-genomes-list',
+        related_link_url_kwarg='version',
+        related_link_lookup_field='version',
+    )
+
+    def get_genomes(self, obj):
+        return None
+
+    # counters
+    genome_count = serializers.IntegerField()
+
+    downloads = relations.SerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_downloads',
+        model=emg_models.ReleaseDownload,
+        related_link_view_name='emgapi_v1:release-download-list',
+        related_link_url_kwarg='version',
+        related_link_lookup_field='version',
+    )
+
+    def get_downloads(self, obj):
+        return None
+
+    class Meta:
+        model = emg_models.Release
+        fields = (
+            'version',
+            'last_update',
+            'first_created',
+            'genome_count',
+            'genomes',
+            'url',
+            'downloads'
+        )
+
+
+class GenomeSetSerializer(ExplicitFieldsModelSerializer,
+                          serializers.HyperlinkedModelSerializer):
+    included_serializers = {
+        'genomes': 'emgapi.serializers.GenomeSerializer'
+    }
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi_v1:genomeset-detail',
+        lookup_field='name',
+    )
+
+    genomes = relations.SerializerMethodResourceRelatedField(
+        source='get_genomes',
+        model=emg_models.Genome,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:genomeset-genomes-list',
+        related_link_url_kwarg='name',
+        related_link_lookup_field='name',
+    )
+
+    def get_genomes(self, obj):
+        return None
+
+    class Meta:
+        model = emg_models.GenomeSet
+        fields = (
+            'url',
+            'name',
+            'genomes',
+        )
+
+
+class CogCatSerializer(ExplicitFieldsModelSerializer):
+    class Meta:
+        model = emg_models.CogCat
+        fields = '__all__'
+
+
+class KeggModuleSerializer(ExplicitFieldsModelSerializer):
+    class Meta:
+        model = emg_models.KeggModule
+        fields = '__all__'
+
+
+class KeggClassSerializer(ExplicitFieldsModelSerializer):
+    class Meta:
+        model = emg_models.KeggClass
+        fields = ('class_id', 'name')
