@@ -82,17 +82,17 @@ class Command(BaseCommand):
         # TODO: How to sanity check AMPLICON: SSU, LSU and ITS?
         SanityCheck(self.accession, self.result_dir, metadata.experiment_type, self.version).check_all()
 
-        # self.call_import_study(metadata)
-        #
-        # self.call_import_sample(metadata)
-        #
-        # if isinstance(metadata, Run):
-        #     self.call_import_run(metadata.run_accession)
-        # else:
-        #     self.call_import_assembly(metadata.analysis_accession)
-        #
-        # analysis = self.create_or_update_analysis(metadata, input_file_name)
-        # self.upload_analysis_files(metadata.experiment_type, analysis, input_file_name)
+        self.call_import_study(metadata)
+
+        self.call_import_sample(metadata)
+
+        if isinstance(metadata, Run):
+            self.call_import_run(metadata.run_accession)
+        else:
+            self.call_import_assembly(metadata.analysis_accession)
+
+        analysis = self.create_or_update_analysis(metadata, input_file_name)
+        self.upload_analysis_files(metadata.experiment_type, analysis, input_file_name)
 
         self.upload_qc_stats()
 
