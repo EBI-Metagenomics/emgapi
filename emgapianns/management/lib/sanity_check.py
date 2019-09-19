@@ -1,3 +1,4 @@
+import glob
 import os
 
 from emgapianns.management.lib.utils import read_chunkfile
@@ -48,5 +49,5 @@ class SanityCheck:
 
     @staticmethod
     def check_exists(filepath):
-        if not os.path.exists(filepath):
+        if not glob.glob(filepath):
             raise FileNotFoundError('{} is missing'.format(filepath))
