@@ -27,6 +27,30 @@ logger = logging.getLogger(__name__)
 
 
 # Base classes
+class BaseSuperStudyViewSet(viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.SuperStudySerializer
+
+    filter_class = emg_filters.SuperStudyFilter
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'super_study_id',
+        'title'
+    )
+
+    ordering = ('super_study_id',)
+
+    search_fields = (
+        '@title',
+        '@description',
+    )
+
 
 class BaseStudyGenericViewSet(viewsets.GenericViewSet):
 
@@ -210,4 +234,30 @@ class BasePublicationGenericViewSet(viewsets.GenericViewSet):
         'isbn',
         'pubmed_id',
         'published_year',
+    )
+
+
+class BaseGenomeGenericViewSet(viewsets.GenericViewSet):
+    serializer_class = emg_serializers.GenomeSerializer
+
+    filter_backends = (
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'accession',
+        'length',
+        'num_contigs',
+        'completeness',
+        'contamination',
+        'num_genomes',
+        'num_proteins',
+        'last_update',
+    )
+
+    ordering = ('-accession',)
+
+    search_fields = (
+        'accession',
     )
