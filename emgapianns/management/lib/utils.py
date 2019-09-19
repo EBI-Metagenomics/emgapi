@@ -152,8 +152,8 @@ def sanitise_fields(data):
     return data
 
 
-def get_accession_from_rootpath(rootpath):
-    return (re.findall(run_accession_re, rootpath) or re.findall(assembly_accession_re, rootpath))[0]
+def get_accession_from_result_dir_path(result_dir_path):
+    return (re.findall(run_accession_re, result_dir_path) or re.findall(assembly_accession_re, result_dir_path))[0]
 
 
 def get_study_accession_from_rootpath(rootpath):
@@ -370,6 +370,6 @@ class DownloadSet:
         f.save(analysis_job)
 
 
-def get_conf_downloadset(rootpath, input_file_name, emg_db_name, experiment_type):
-    config = get_downloadset_config('4.1', experiment_type)
+def get_conf_downloadset(rootpath, input_file_name, emg_db_name, experiment_type, version):
+    config = get_downloadset_config(version, experiment_type)
     return DownloadSet(rootpath, input_file_name, emg_db_name, config)
