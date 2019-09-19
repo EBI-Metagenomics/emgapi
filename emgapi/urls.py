@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from rest_framework import routers
 
 from . import views
@@ -31,6 +30,12 @@ router.register(
     r'studies',
     views.StudyViewSet,
     base_name='studies'
+)
+
+router.register(
+    r'super-studies',
+    views.SuperStudyViewSet,
+    base_name='super-studies'
 )
 
 router.register(
@@ -126,6 +131,18 @@ router.register(
 )
 
 router.register(
+    r'super-studies/(?P<super_study_id>[0-9\.]+)/flagship-studies',
+    views_relations.SuperStudyFlagshipStudiesViewSet,
+    base_name='super-studies-flagship-studies'
+)
+
+router.register(
+    r'super-studies/(?P<super_study_id>[0-9\.]+)/related-studies',
+    views_relations.SuperStudyRelatedStudiesViewSet,
+    base_name='super-studies-related-studies'
+)
+
+router.register(
     r'runs/(?P<accession>[^/]+)/analyses',
     views_relations.RunAnalysisViewSet,
     base_name='runs-analyses'
@@ -166,6 +183,12 @@ router.register(
     r'biomes/(?P<lineage>[^/]+)/samples',
     views_relations.BiomeSampleRelationshipViewSet,
     base_name='biomes-samples'
+)
+
+router.register(
+    r'biomes/(?P<lineage>[^/]+)/genomes',
+    views_relations.BiomeGenomeRelationshipViewSet,
+    base_name='biomes-genomes'
 )
 
 router.register(
@@ -276,4 +299,93 @@ utils_router.register(
     r'utils',
     views.UtilsViewSet,
     base_name='csrf'
+)
+
+
+router.register(
+    r'genomes',
+    views.GenomeViewSet,
+    base_name='genomes'
+)
+
+router.register(
+    r'genomes/(?P<accession>[^/]+)/cogs',
+    views_relations.GenomeCogsRelationshipsViewSet,
+    base_name='genome-cog'
+)
+
+router.register(
+    r'genomes/(?P<accession>[^/]+)/kegg-class',
+    views_relations.GenomeKeggClassRelationshipsViewSet,
+    base_name='genome-kegg-class'
+)
+
+router.register(
+    r'genomes/(?P<accession>[^/]+)/kegg-module',
+    views_relations.GenomeKeggModuleRelationshipsViewSet,
+    base_name='genome-kegg-module'
+)
+
+router.register(
+    r'genomes/(?P<accession>[^/]+)/kegg-class',
+    views_relations.GenomeKeggClassRelationshipsViewSet,
+    base_name='genome-kegg-class'
+)
+
+router.register(
+    r'genomes/(?P<accession>[^/]+)/downloads',
+    views.GenomeDownloadViewSet,
+    base_name='genome-download'
+)
+
+router.register(
+    r'genomes/(?P<accession>[^/]+)/releases',
+    views_relations.GenomeReleasesViewSet,
+    base_name='genome-releases'
+)
+router.register(
+    r'release',
+    views.ReleaseViewSet,
+    base_name='release'
+)
+router.register(
+    r'release/(?P<version>[^/]+)/genomes',
+    views_relations.ReleaseGenomesViewSet,
+    base_name='release-genomes'
+)
+
+router.register(
+    r'release/(?P<version>[^/]+)/downloads',
+    views.ReleaseDownloadViewSet,
+    base_name='release-download'
+)
+
+router.register(
+    r'genomeset',
+    views.GenomeSetViewSet,
+    base_name='genomeset'
+)
+
+router.register(
+    r'genomeset/(?P<name>[^/]+)/genomes',
+    views_relations.GenomeSetGenomes,
+    base_name='genomeset-genomes'
+)
+
+router.register(
+    r'cogs',
+    views.CogCatViewSet,
+    base_name='cogs'
+)
+
+router.register(
+    r'kegg-modules',
+    views.KeggModuleViewSet,
+    base_name='kegg-modules'
+)
+
+router.register(
+    r'kegg-classes',
+    views.KeggClassViewSet,
+    base_name='kegg-classes'
 )
