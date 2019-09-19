@@ -54,46 +54,55 @@ class Command(BaseCommand):
     emg_db_name = None
     biome = None
     accession = None
+    version = None
 
     def add_arguments(self, parser):
-        parser.add_argument('rootpath',
-                            help="NFS root path of the results archive")
+        parser.add_argument('--rootpath',
+                            help="NFS root path of the results archive.",
+                            default="/nfs/production/interpro/metagenomics/results/")
+        parser.add_argument('result_dir', help="Result dir folder - absolute path.")
         parser.add_argument('biome', help='Lineage of GOLD biome')
-
+        parser.add_argument('--pipeline_version', help='Pipeline version',
+                            choices=['4.1', '5.0'], default='4.1')
         parser.add_argument('--database', help='Target emg_db_name alias', default='default')
 
     def handle(self, *args, **options):
         self.emg_db_name = options['database']
         self.rootpath = os.path.abspath(options['rootpath'])
+        self.result_dir = os.path.abspath(options['result_dir'])
         self.biome = options['biome']
+        self.version = options['pipeline_version']
 
-        input_file_name = os.path.basename(self.rootpath)
+        input_file_name = os.path.basename(self.result_dir)
         logger.info("CLI %r" % options)
-        self.accession = utils.get_accession_from_rootpath(self.rootpath)
+        self.accession = utils.get_accession_from_result_dir_path(self.result_dir)
 
         metadata = self.retrieve_metadata()
 
-        SanityCheck(self.accession, self.rootpath, metadata.experiment_type).check_all()
+        # TODO: How to sanity check AMPLICON: SSU, LSU and ITS?
+        SanityCheck(self.accession, self.result_dir, metadata.experiment_type, self.version).check_all()
 
-        self.call_import_study(metadata)
+        # self.call_import_study(metadata)
+        #
+        # self.call_import_sample(metadata)
+        #
+        # if isinstance(metadata, Run):
+        #     self.call_import_run(metadata.run_accession)
+        # else:
+        #     self.call_import_assembly(metadata.analysis_accession)
+        #
+        # analysis = self.create_or_update_analysis(metadata, input_file_name)
+        # self.upload_analysis_files(metadata.experiment_type, analysis, input_file_name)
 
-        self.call_import_sample(metadata)
+        self.upload_qc_stats()
 
-        if isinstance(metadata, Run):
-            self.call_import_run(metadata.run_accession)
-        else:
-            self.call_import_assembly(metadata.analysis_accession)
-
-        analysis = self.create_or_update_analysis(metadata, input_file_name)
-        self.upload_analysis_files(metadata.experiment_type, analysis, input_file_name)
-
-        self.upload_analysis_data()
+        self.populate_mongodb()
 
         logger.info("Program finished successfully.")
 
     def call_import_study(self, metadata):
         logger.info('Import study {}'.format(metadata.secondary_study_accession))
-        study_dir = utils.get_study_dir(self.rootpath)
+        study_dir = self.get_result_dir(utils.get_study_dir(self.result_dir))
         call_command('import_study',
                      metadata.secondary_study_accession,
                      self.biome,
@@ -139,21 +148,30 @@ class Command(BaseCommand):
     def get_emg_assembly(self, assembly_accession):
         return emg_models.Assembly.objects.using(self.emg_db_name).get(analysis_accession=assembly_accession)
 
-    def get_pipeline_version(self):
-        return emg_models.Pipeline.objects.using(self.emg_db_name).order_by('-release_date').first()
+    def get_pipeline_by_version(self):
+        return emg_models.Pipeline.objects.using(self.emg_db_name).get(release_version=self.version)
 
     def get_analysis_status(self, description):
         return emg_models.AnalysisStatus.objects.using(self.emg_db_name).get(analysis_status=description)
 
+    def get_result_dir(self, result_dir, substring="results/"):
+        """
+
+        :param substring:
+        :return:
+        """
+        pos = result_dir.find(substring)
+        return result_dir[pos + len(substring):]
+
     def create_or_update_analysis(self, metadata, input_file_name):
-        pipeline = self.get_pipeline_version()
+        pipeline = self.get_pipeline_by_version()
         study = self.get_emg_study(metadata.secondary_study_accession)
         sample = self.get_emg_sample(metadata.sample_accession)
 
         defaults = {
             'study': study,
             'sample': sample,
-            'result_directory': self.rootpath,
+            'result_directory': self.get_result_dir(self.result_dir),
             're_run_count': 0,
             'input_file_name': input_file_name,
             'is_production_run': 1,
@@ -189,13 +207,16 @@ class Command(BaseCommand):
         return analysis
 
     def upload_analysis_files(self, experiment_type, analysis_job, input_file_name):
-        dl_set = get_conf_downloadset(self.rootpath, input_file_name, self.emg_db_name, experiment_type)
+        # TODO: Add existence check on the file system
+        dl_set = get_conf_downloadset(self.result_dir, input_file_name, self.emg_db_name, experiment_type, self.version)
         dl_set.insert_files(analysis_job)
 
-    def upload_analysis_data(self):
-        results_dir = utils.retrieve_existing_result_dir(self.rootpath, self.accession)
+    def upload_qc_stats(self):
         logger.info('Importing QC stats')
-        call_command('import_qc', self.accession, results_dir)
+        call_command('import_qc', self.accession, self.rootpath)
+
+    def populate_mongodb(self):
+        results_dir = utils.retrieve_existing_result_dir(self.rootpath, self.accession)
         logger.info('Importing Taxonomy stats')
         call_command('import_taxonomy', self.accession, results_dir)
         for sum_type in ['.ipr', '.go', '.go_slim']:

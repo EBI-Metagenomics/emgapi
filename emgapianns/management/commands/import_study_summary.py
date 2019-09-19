@@ -114,7 +114,7 @@ class Command(BaseCommand):
     def merge_dfs(self, filelist, delimiter, key, raw_cols, skip_rows=0):
         study_df = pd.DataFrame(columns=key)
         for f in sorted(filelist):
-            accession = utils.get_accession_from_rootpath(f)
+            accession = utils.get_accession_from_result_dir_path(f)
             df = self.read_count_tsv(f, delimiter, raw_cols, skip_rows)
             df = df.filter(key + ['count'])
             df = df.rename(columns={'count': accession})
