@@ -5,11 +5,11 @@ from emgapianns.management.webuploader_configs import get_downloadset_config
 
 
 class SanityCheck:
-    def __init__(self, accession, d, experiment_type):
+    def __init__(self, accession, d, experiment_type, version):
         self.dir = d
         self.prefix = os.path.basename(d)
         self.accession = accession
-        self.config = get_downloadset_config('4.1', experiment_type)
+        self.config = get_downloadset_config(version, experiment_type)
 
     def check_all(self):
         for f in self.config:
