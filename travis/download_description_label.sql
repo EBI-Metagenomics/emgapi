@@ -1,0 +1,26 @@
+-- MySQL dump 10.13  Distrib 5.6.33, for debian-linux-gnu (x86_64)
+--
+-- Host: mysql-vm-022.ebi.ac.uk    Database: emg
+-- ------------------------------------------------------
+--
+-- Dumping data for table `DOWNLOAD_DESCRIPTION_LABEL`
+--
+
+LOCK TABLES `DOWNLOAD_DESCRIPTION_LABEL` WRITE;
+/*!40000 ALTER TABLE `DOWNLOAD_DESCRIPTION_LABEL` DISABLE KEYS */;
+INSERT INTO `DOWNLOAD_DESCRIPTION_LABEL` (DESCRIPTION, DESCRIPTION_LABEL) VALUES ('MAPSeq output file for SSU','MAPseq SSU assignments');
+INSERT INTO `DOWNLOAD_DESCRIPTION_LABEL` (DESCRIPTION, DESCRIPTION_LABEL) VALUES ('MAPSeq output file for LSU','MAPseq LSU assignments');
+INSERT INTO `DOWNLOAD_DESCRIPTION_LABEL` (DESCRIPTION, DESCRIPTION_LABEL) VALUES ('Processed contigs','Processed contigs');
+INSERT INTO `DOWNLOAD_DESCRIPTION_LABEL` (DESCRIPTION, DESCRIPTION_LABEL) VALUES ('All contigs that have predicted CDS','Processed contigs with pCDS');
+INSERT INTO `DOWNLOAD_DESCRIPTION_LABEL` (DESCRIPTION, DESCRIPTION_LABEL) VALUES ('All contigs with an interproscan match','Processed contigs with annotation');
+INSERT INTO `DOWNLOAD_DESCRIPTION_LABEL` (DESCRIPTION, DESCRIPTION_LABEL) VALUES ('All contigs with a predicted CDS but no interproscan match','Processed contigs without annotation');
+INSERT INTO `DOWNLOAD_DESCRIPTION_LABEL` (DESCRIPTION, DESCRIPTION_LABEL) VALUES ('All contigs encoding 5S rRNA','Contigs encoding 5S rRNA');
+INSERT INTO `DOWNLOAD_DESCRIPTION_LABEL` (DESCRIPTION, DESCRIPTION_LABEL) VALUES ('All contigs encoding 16S rRNA','Contigs encoding 16S rRNA');
+INSERT INTO `DOWNLOAD_DESCRIPTION_LABEL` (DESCRIPTION, DESCRIPTION_LABEL) VALUES ('All contigs encoding 23S rRNA','Contigs encoding 23S rRNA');
+INSERT INTO `DOWNLOAD_DESCRIPTION_LABEL` (DESCRIPTION, DESCRIPTION_LABEL) VALUES ('All contigs encoded SSU rRNA','Contigs encoded SSU rRNA');
+INSERT INTO `DOWNLOAD_DESCRIPTION_LABEL` (DESCRIPTION, DESCRIPTION_LABEL) VALUES ('All contigs encoded LSU rRNA','Contigs encoded LSU rRNA');
+INSERT INTO `DOWNLOAD_DESCRIPTION_LABEL` (DESCRIPTION, DESCRIPTION_LABEL) VALUES ('OTUs and taxonomic assignments','OTUs, counts and taxonomic assignments');
+INSERT INTO `DOWNLOAD_DESCRIPTION_LABEL` (DESCRIPTION, DESCRIPTION_LABEL) VALUES ('OTUs and taxonomic assignments for SSU rRNA','OTUs, counts and taxonomic assignments for SSU rRNA');
+INSERT INTO `DOWNLOAD_DESCRIPTION_LABEL` (DESCRIPTION, DESCRIPTION_LABEL) VALUES ('OTUs and taxonomic assignments for LSU rRNA','OTUs, counts and taxonomic assignments for LSU rRNA');
+/*!40000 ALTER TABLE `DOWNLOAD_DESCRIPTION_LABEL` ENABLE KEYS */;
+UNLOCK TABLES;
