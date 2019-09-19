@@ -20,7 +20,7 @@ from django.conf import settings
 
 from emgapi import models as emg_models
 
-__all__ = ['apiclient', 'api_version', 'biome', 'studies',
+__all__ = ['apiclient', 'api_version', 'biome', 'super_study', 'studies',
            'samples', 'study', 'study_private', 'sample', 'sample_private',
            'run_status', 'analysis_status',
            'pipeline', 'pipelines', 'experiment_type',
@@ -47,6 +47,22 @@ def biome():
         lft=0, rgt=1, depth=2,
         lineage="root:foo:bar",
     )
+
+
+@pytest.fixture
+def super_study(study, study_private, biome):
+    ss = emg_models.SuperStudy.objects.create(
+        super_study_id=1,
+        title='Human Microbiome',
+        description='Just a test description',
+    )
+    emg_models.SuperStudyBiome.objects.create(biome=biome,
+                                              super_study=ss)
+    emg_models.SuperStudyStudy.objects.create(study=study,
+                                              super_study=ss)
+    emg_models.SuperStudyStudy.objects.create(study=study_private,
+                                              super_study=ss)
+    return ss
 
 
 @pytest.fixture
