@@ -46,4 +46,4 @@ django-rest-framework-mongoengine~=3.3.1
 
 #EBI MGnify libs
 ena-api-libs~=1.0.1
-emg-backlog-schema~=0.12.0
+emg-backlog-schema~=0.12.2
