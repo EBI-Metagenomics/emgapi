@@ -131,9 +131,12 @@ class Command(BaseCommand):
         if is_assembly:
             analysis = Assembly(**ena.get_assembly(assembly_name=self.accession))
         else:  # Run accession detected
-            analysis = Run(**ena.get_run(run_accession=self.accession,
-                                         fields='secondary_study_accession,secondary_sample_accession,'
-                                                'run_accession,library_strategy'))
+            run = ena.get_run(run_accession=self.accession,
+                              fields='secondary_study_accession,secondary_sample_accession,'
+                                     'run_accession,library_strategy')
+            if 'sample_accession' in run:
+                del run['sample_accession']
+            analysis = Run(**run)
         return analysis
 
     def get_emg_study(self, secondary_study_accession):
@@ -207,7 +210,6 @@ class Command(BaseCommand):
         return analysis
 
     def upload_analysis_files(self, experiment_type, analysis_job, input_file_name):
-        # TODO: Add existence check on the file system
         dl_set = get_conf_downloadset(self.result_dir, input_file_name, self.emg_db_name, experiment_type, self.version)
         dl_set.insert_files(analysis_job)
 
