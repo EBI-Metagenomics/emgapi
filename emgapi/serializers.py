@@ -1695,3 +1695,18 @@ class KeggClassSerializer(ExplicitFieldsModelSerializer):
     class Meta:
         model = emg_models.KeggClass
         fields = ('class_id', 'name')
+
+
+class AnalysisJobContigSerializer(serializers.Serializer):
+    """
+    Contig serializer for the assembly contigs.
+    """
+
+    id = serializers.CharField() # Fabricated PK (Analysis + Name of contig)
+    display_name = serializers.CharField() # Display name
+    contig_name = serializers.CharField()
+    length = serializers.IntegerField()
+    coverage = serializers.CharField()
+
+    class Meta:
+        fields = '__all__'
