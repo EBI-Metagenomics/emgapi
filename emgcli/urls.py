@@ -92,7 +92,6 @@ urlpatterns += [
         TemplateView.as_view(template_name='swagger-ui/index.html')),
 
     url(r'^500/$', TemplateView.as_view(template_name='500.html')),
-
 ]
 
 # API URL routing.

@@ -1202,7 +1202,6 @@ class AnalysisJob(models.Model):
     def __str__(self):
         return self.accession
 
-
 class StudyErrorType(models.Model):
     error_id = models.IntegerField(
         db_column='ERROR_ID', primary_key=True)

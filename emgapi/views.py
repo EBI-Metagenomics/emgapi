@@ -17,6 +17,10 @@
 import os
 import logging
 import inflection
+import csv
+import io
+
+import pysam
 
 from django.conf import settings
 from django.db.models import Prefetch, Count, Q
@@ -32,10 +36,11 @@ from rest_framework.response import Response
 
 from rest_framework import filters
 from rest_framework import viewsets, mixins
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.decorators import detail_route, list_route, action
 from rest_framework import permissions
 from rest_framework import renderers
 from rest_framework import status
+from rest_framework.settings import api_settings
 
 from . import models as emg_models
 from . import serializers as emg_serializers
@@ -49,6 +54,8 @@ from emgcli.pagination import FasterCountPagination
 
 from emgena import models as ena_models
 from emgena import serializers as ena_serializers
+
+from . import unix_tools
 
 logger = logging.getLogger(__name__)
 
@@ -873,7 +880,7 @@ class KronaViewSet(emg_mixins.ListModelMixin,
             'krona.html')
         )
         if os.path.isfile(krona):
-            with open(krona, "r") as k:
+            with open(krona, 'r') as k:
                 return Response(k.read())
         raise Http404('No chrona chart.')
 
@@ -955,20 +962,246 @@ class AnalysisResultDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
         obj = self.get_object()
         response = HttpResponse()
         response['Content-Type'] = 'application/octet-stream'
-        response["Content-Disposition"] = \
-            "attachment; filename={0}".format(alias)
+        response['Content-Disposition'] = \
+            'attachment; filename={0}'.format(alias)
         if obj.subdir is not None:
             response['X-Accel-Redirect'] = \
-                "/results{0}/{1}/{2}".format(
+                '/results{0}/{1}/{2}'.format(
                     obj.job.result_directory, obj.subdir, obj.realname
                 )
         else:
             response['X-Accel-Redirect'] = \
-                "/results{0}/{1}".format(
+                '/results{0}/{1}'.format(
                     obj.job.result_directory, obj.realname
                 )
         return response
 
+
+class AnalysisJobContigViewSet(viewsets.ViewSet):
+    
+    lookup_field = 'name'
+    lookup_value_regex = '.*'
+    resource_name = 'analysis-contig'
+
+    pagination_class = api_settings.DEFAULT_PAGINATION_CLASS
+
+    serializer_class = emg_serializers.AnalysisJobContigSerializer
+
+    def get_queryset(self):
+        return emg_models.AnalysisJob.objects \
+            .available(self.request)
+
+    def get_object(self):
+        try:
+            pk = int(self.kwargs['accession'].lstrip('MGYA'))
+        except ValueError:
+            raise Http404()
+        return get_object_or_404(self.get_queryset(), Q(pk=pk))
+
+    def list(self, request, *args, **kwargs):
+        """Retrieve the contigs for this analysis.
+
+        The contigs are taken from the fasta faidx files, if the file is missing then returns 404.
+
+        It is possible to filter the contigs based on:
+        - length (using the faidx)
+        - features (COG, KEGG KO, Taxonomy)
+        The filters are applied to the faidx (lenght) of the gff (features) file using AWK.
+
+        Example:
+        ---
+        `/analyses/<accession>/contigs?gt=100&lt=1000` Get the contigs for this analysis that 
+        are longer than gt and shorter that lt.
+        """
+        obj = self.get_object()
+
+        contigs_file = os.path.abspath(os.path.join(
+            settings.RESULTS_DIR,
+            obj.result_directory,
+            'contigs.fasta.fai')
+        )
+
+        gff_path = os.path.abspath(os.path.join(
+            settings.RESULTS_DIR,
+            obj.result_directory,
+            'annotation.gff')
+        )
+        
+        if not os.path.isfile(contigs_file):
+            raise Http404('There are no contigs available.')
+    
+        filter_gt = request.GET.get('gt', 5000) or 5000
+        filter_lt = request.GET.get('lt', 10000) or 10000
+        contigs = unix_tools.awk_range(
+            contigs_file, col=2, gt=filter_gt, lt=filter_lt)
+
+        filtered_contigs = []
+        filter_cog = request.GET.get('cog', '').lower()
+        filter_kegg = request.GET.get('kegg', '').lower()
+        filter_tax = request.GET.get('taxonomy', '').lower()
+        filter_gos = request.GET.get('gos', '').lower()
+
+        apply_filter = False
+        filtered_contigs = set()
+
+        # FIXME: index this data in Mongo
+
+        if filter_cog:
+            filtered_contigs.update(
+                unix_tools.awk_regex_filter(gff_path, 9, '/cog=.*[,]?' + filter_cog + '/')
+            )
+            apply_filter = True
+        
+        if filter_kegg:
+            filtered_contigs.update(
+                unix_tools.awk_regex_filter(gff_path, 9, '/kegg_ko=.*[,]?' + filter_kegg + '/')
+            )
+            apply_filter = True
+        
+        if filter_tax:
+            filtered_contigs.update(
+                unix_tools.awk_regex_filter(gff_path, 9, '/best_tax_level=.*[,]?' + filter_tax
+                                            + '/')
+            )
+            apply_filter = True
+
+        if filter_gos:
+            filtered_contigs.update(
+                unix_tools.awk_regex_filter(gff_path, 9, '/gos=.*[,]?' + filter_gos
+                                            + '/')
+            )
+            apply_filter = True
+
+        data = []
+        for contig in contigs:
+            cols = contig.split('\t')
+            name = cols[0]
+            display_name = emg_utils.assembly_contig_name(name)
+            data.append({
+                'id': str(obj.pk) + '_' + display_name,
+                'display_name': display_name,
+                'contig_name': cols[0], # this is the actual name
+                'length': cols[1],
+                'coverage': emg_utils.assembly_contig_coverage(name)
+            })
+
+        result = data
+        if apply_filter:
+            result = [c for c in data if c['contig_name'] in filtered_contigs]
+
+        result.sort(key=lambda c: c['length'])
+
+        serializer = emg_serializers.AnalysisJobContigSerializer(result,
+                                                                 many=True, 
+                                                                 context={'request': request})
+        return Response(serializer.data)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve a contig fasta file.
+        The Fasta file will be retrieved using pysam.
+
+        Example:
+        ---
+        `/analyses/<accession>/contig?contig=<contig_name>`
+        ---
+        """
+        contig = self.kwargs.get('name', None)
+        if not contig:
+            return Response('Please provide a contig id.', status.HTTP_400_BAD_REQUEST)
+
+        obj = self.get_object()
+
+        #  TODO: discuss maybe we can just have a summary file (?)
+        fasta_path = os.path.abspath(os.path.join(
+            settings.RESULTS_DIR,
+            obj.result_directory,
+            'contigs.fasta')
+        )
+        fasta_idx_path = os.path.abspath(os.path.join(
+            settings.RESULTS_DIR,
+            obj.result_directory,
+            'contigs.fasta.fai')
+        )
+
+        if os.path.isfile(fasta_path) and os.path.isfile(fasta_idx_path):
+            output = io.StringIO()
+            # FIXME: handle errors
+            with pysam.Fastafile(filename=fasta_path, filepath_index=fasta_idx_path) as fasta:  
+                rows = fasta.fetch(contig)
+                output.write('>' + emg_utils.assembly_contig_name(contig)  + '\n')
+                for row in rows:
+                    output.write(row)
+            response = HttpResponse()
+            response['Content-Type'] = 'chemical/seq-na-fasta' # TODO check this media type?
+            response['Content-Disposition'] = 'attachment; filename={0}.fasta'.format(contig)
+            output.seek(0, os.SEEK_END)
+            response['Content-Length'] = output.tell()
+            response.write(output.getvalue())
+            return response
+
+        raise Http404('No GFF file for contig {0}.'.format(contig))
+
+
+class AnalysisJobContigAnnotationViewSet(viewsets.ViewSet):
+
+    lookup_field = 'name'
+    lookup_value_regex = '.*'
+
+    def get_queryset(self):
+        return emg_models.AnalysisJob.objects \
+            .available(self.request)
+
+    def get_object(self):
+        try:
+            pk = int(self.kwargs['accession'].lstrip('MGYA'))
+        except ValueError:
+            raise Http404()
+        return get_object_or_404(self.get_queryset(), Q(pk=pk))
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve a contig GFF file.
+        The GFF file will be parsed with pysam and sliced.
+
+        Example:
+        ---
+        `/analyses/<accession>/annotation?contig=<contig_name>`
+        ---
+        """
+        contig = self.kwargs.get('name', None)
+        if not contig:
+            return Response('Please provide a contig id.', status.HTTP_400_BAD_REQUEST)
+
+        obj = self.get_object()
+        gff_path = os.path.abspath(os.path.join(
+            settings.RESULTS_DIR,
+            obj.result_directory,
+            'annotation.gff.gz')
+        )
+        gff_idx_path = os.path.abspath(os.path.join(
+            settings.RESULTS_DIR,
+            obj.result_directory,
+            'annotation.gff.tbi.gz')
+        )
+
+        if os.path.isfile(gff_path) and os.path.isfile(gff_idx_path):
+            # multiple_iterators = True as many processes 
+            # could be using the same file at the same moment
+            output = io.StringIO()
+            with pysam.TabixFile(filename=gff_path, index=gff_idx_path) as gff:
+                rows = gff.fetch(contig, multiple_iterators=True)
+                for row in rows:
+                    output.write(emg_utils.assembly_contig_name(row) + '\n')
+            response = HttpResponse()
+            response['Content-Type'] = 'text/x-gff3'
+            response['Content-Disposition'] = 'attachment; filename={0}.gff'.format(contig)
+            output.seek(0, os.SEEK_END)
+            response['Content-Length'] = output.tell()
+            response.write(output.getvalue())
+            return response
+
+        raise Http404('No GFF file for contig {0}.'.format(contig))
 
 class PipelineViewSet(mixins.RetrieveModelMixin,
                       emg_mixins.ListModelMixin,
