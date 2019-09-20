@@ -69,6 +69,8 @@ Install
 
 Install application::
 
+    pip install -U git+git://github.com/EBI-Metagenomics/emg-backlog-schema.git;
+    pip install -U git+git://github.com/EBI-Metagenomics/ena-api-handler.git
     pip install "git+git://github.com/EBI-Metagenomics/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
     pip install https://github.com/EBI-Metagenomics/emgapi/archive/$latestTag.tar.gz
 
