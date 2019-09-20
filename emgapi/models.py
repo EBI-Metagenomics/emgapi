@@ -363,7 +363,7 @@ class DownloadGroupType(models.Model):
         db_table = 'DOWNLOAD_GROUP_TYPE'
 
     def __str__(self):
-        return self.group_label
+        return self.group_type
 
 
 class FileFormat(models.Model):
@@ -550,7 +550,9 @@ class Study(models.Model):
         setattr(self, 'accession', kwargs.get('accession', self._custom_pk()))
 
     def _custom_pk(self):
-        return "MGYS{pk:0>{fill}}".format(pk=self.study_id, fill=8)
+        if self.study_id and isinstance(self.study_id, int):
+            return "MGYS{pk:0>{fill}}".format(pk=self.study_id, fill=8)
+        return None
 
     study_id = models.AutoField(
         db_column='STUDY_ID', primary_key=True)
@@ -963,7 +965,7 @@ class Run(models.Model):
         db_column='ACCESSION', max_length=80, blank=True, null=True)
     secondary_accession = models.CharField(
         db_column='SECONDARY_ACCESSION', max_length=100, blank=True, null=True)
-    status_id = models.ForeignKey(
+    status = models.ForeignKey(
         'Status', db_column='STATUS_ID', related_name='runs',
         on_delete=models.CASCADE, default=2)
     sample = models.ForeignKey(
