@@ -117,6 +117,18 @@ router.register(
 )
 
 router.register(
+    r'analyses/(?P<accession>[^/]+)/contigs',
+    views.AnalysisJobContigViewSet,
+    base_name='analysis-contigs'
+)
+
+router.register(
+    r'analyses/(?P<accession>[^/]+)/annotations',
+    views.AnalysisJobContigAnnotationViewSet,
+    base_name='analysis-annotations'
+)
+
+router.register(
     r'studies/(?P<accession>[^/]+)/downloads',
     views.StudiesDownloadsViewSet,
     base_name='studydownload'
