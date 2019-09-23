@@ -1,0 +1,5 @@
+-r requirements.txt
+
+#EBI MGnify libs
+ena-api-libs~=1.0.1
+emg-backlog-schema~=0.12.2
