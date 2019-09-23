@@ -21,9 +21,11 @@ class Command(EMGBaseCommand):
 
     def find_path(self, obj, options):
         rootpath = options.get('rootpath', None)
-        res = os.path.join(
-            rootpath, obj.result_directory, 'charts', 'new.summary')
+        res = os.path.join(rootpath, obj.result_directory, 'stats_summary')
         logger.info("Found: %s" % res)
+        if not os.path.exists(res):  # Check existence of the v4.1 result file
+            res = os.path.join(rootpath, obj.result_directory, 'charts', 'new.summary')
+
         if os.path.exists(res):
             if os.path.isfile(res):
                 if os.stat(res).st_size > 0:
