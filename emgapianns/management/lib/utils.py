@@ -356,10 +356,11 @@ class DownloadSet:
 
     def insert_files(self, analysis_job):
         for f in self.config:
-            if f['_chunked']:
-                self.insert_chunked_file(f, analysis_job)
-            else:
-                self.insert_file(f, analysis_job)
+            if f['downloadable']:
+                if f['_chunked']:
+                    self.insert_chunked_file(f, analysis_job)
+                else:
+                    self.insert_file(f, analysis_job)
 
     def insert_file(self, f, analysis_job):
         f = Download(self.emg_db_name, self.rootpath, self.input_file_name, f)
