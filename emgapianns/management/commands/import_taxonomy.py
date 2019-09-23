@@ -103,10 +103,10 @@ class Command(EMGBaseCommand):
             logger.error(f'ITS not supported {db}')
             return
 
-        _f = os.path.join(res, 'ITS', f'{db}.mseq.txt')
+        _f = os.path.join(res, 'ITS', f'{db}', f'{ajob.input_file_name}_ITS_{db}.fasta.mseq.txt')
         if not os.path.exists(_f):
             # OK, let's try in lowercase
-            _f = os.path.join(res, 'ITS', f'{db.lower()}.mseq.txt')
+            _f = os.path.join(res, 'ITS', f'{db.lower()}', f'{ajob.input_file_name}_ITS_{db.lower()}.fasta.mseq.txt')
             if not os.path.exists(_f):
                 logger.warn(f'ITS file {_f} not found (not even with lowercase).')
                 return
