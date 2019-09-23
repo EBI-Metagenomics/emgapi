@@ -58,7 +58,7 @@ class Command(BaseCommand):
         run = self.create_or_update_run(db_run_data, api_run_data)
         self.tag_study(run, api_run_data['secondary_study_accession'])
         self.tag_sample(run, api_run_data['secondary_sample_accession'])
-        self.tag_experiment_type(run, api_run_data['library_source'])
+        self.tag_experiment_type(run, api_run_data['library_strategy'])
         run.save(using=self.emg_db_name)
 
     @staticmethod
