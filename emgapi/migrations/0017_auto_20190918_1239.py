@@ -18,7 +18,6 @@ def create_pipeline_v5(apps, schema_editor):
 def create_group_types(apps, schema_editor):
     DownloadGroupType = apps.get_model("emgapi", "DownloadGroupType")
     group_types = (
-        # "Taxonomic analysis SSU rRNA",
         "Taxonomic analysis ITS",
         "Taxonomic analysis ITSoneDB",
         "Taxonomic analysis UNITE",
@@ -32,30 +31,10 @@ def create_group_types(apps, schema_editor):
     DownloadGroupType.objects.bulk_create(_groups)
 
 
-# def create_file_formats(apps, schema_editor):
-#     FileFormat = apps.get_model("emgapi", "FileFormat")
-#     file_formats = (
-#         # ("TSV", "tsv", True),
-#         # TODO: Do we have any new output formats
-#     )
-#     _formats = list()
-#     for file_format in file_formats:
-#         _formats.append(
-#             FileFormat(
-#                 format_name=file_format[0],
-#                 format_extension=file_format[1],
-#                 compression=file_format[2],
-#             )
-#         )
-#     FileFormat.objects.bulk_create(_formats)
-
-
 def create_subdirs(apps, schema_editor):
     DownloadSubdir = apps.get_model("emgapi", "DownloadSubdir")
     subdirs = (
-        # "version_4.1/project-summary",
         "version_5.0/project-summary",
-        # "taxonomy-summary/SSU",
         "taxonomy-summary/ITS",
         "taxonomy-summary/ITS/ITSoneDB",
         "taxonomy-summary/ITS/UNITE",
@@ -73,6 +52,7 @@ def create_subdirs(apps, schema_editor):
 def create_download_description(apps, schema_editor):
     DownloadDescriptionLabel = apps.get_model("emgapi", "DownloadDescriptionLabel")
     downloads = (
+        ("All reads encoding 5S", "Reads encoding 5S"),
         ("All reads encoding ITS", "Reads encoding ITS (with SSU and LSU sequences masked)"),
         ("Taxonomic assignments (TSV)", "MAPseq ITSoneDB assignments"),
         ("Taxonomic assignments (TSV)", "MAPseq UNITE assignments"),
@@ -98,7 +78,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunPython(create_pipeline_v5),
         migrations.RunPython(create_group_types),
-        # migrations.RunPython(create_file_formats),
         migrations.RunPython(create_subdirs),
         migrations.RunPython(create_download_description),
     ]
