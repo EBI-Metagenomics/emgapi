@@ -20,7 +20,7 @@ import inflection
 import csv
 import io
 
-import pysam
+# import pysam
 
 from django.conf import settings
 from django.db.models import Prefetch, Count, Q
@@ -1127,11 +1127,11 @@ class AnalysisJobContigViewSet(viewsets.ViewSet):
         if os.path.isfile(fasta_path) and os.path.isfile(fasta_idx_path):
             output = io.StringIO()
             # FIXME: handle errors
-            with pysam.Fastafile(filename=fasta_path, filepath_index=fasta_idx_path) as fasta:  
-                rows = fasta.fetch(contig)
-                output.write('>' + emg_utils.assembly_contig_name(contig)  + '\n')
-                for row in rows:
-                    output.write(row)
+            # with pysam.Fastafile(filename=fasta_path, filepath_index=fasta_idx_path) as fasta:  
+            #     rows = fasta.fetch(contig)
+            #     output.write('>' + emg_utils.assembly_contig_name(contig)  + '\n')
+            #     for row in rows:
+            #         output.write(row)
             response = HttpResponse()
             response['Content-Type'] = 'chemical/seq-na-fasta' # TODO check this media type?
             response['Content-Disposition'] = 'attachment; filename={0}.fasta'.format(contig)
@@ -1189,10 +1189,10 @@ class AnalysisJobContigAnnotationViewSet(viewsets.ViewSet):
             # multiple_iterators = True as many processes 
             # could be using the same file at the same moment
             output = io.StringIO()
-            with pysam.TabixFile(filename=gff_path, index=gff_idx_path) as gff:
-                rows = gff.fetch(contig, multiple_iterators=True)
-                for row in rows:
-                    output.write(emg_utils.assembly_contig_name(row) + '\n')
+            # with pysam.TabixFile(filename=gff_path, index=gff_idx_path) as gff:
+            #     rows = gff.fetch(contig, multiple_iterators=True)
+            #     for row in rows:
+            #         output.write(emg_utils.assembly_contig_name(row) + '\n')
             response = HttpResponse()
             response['Content-Type'] = 'text/x-gff3'
             response['Content-Disposition'] = 'attachment; filename={0}.gff'.format(contig)
