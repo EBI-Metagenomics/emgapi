@@ -729,7 +729,7 @@ class AnalysisOrganismITSUniteRelationshipViewSet(  # NOQA
     """Retrieves ITS UNITE Taxonomic analysis for the given accession
     Example: 
     ---
-    `/analyses/MGYA00102827/taxonomy/itsonedb`
+    `/analyses/MGYA00102827/taxonomy/unite`
     ---    
     """
     serializer_class = m_serializers.OrganismRetriveSerializer
