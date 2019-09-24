@@ -61,7 +61,6 @@ logger = logging.getLogger(__name__)
 
 
 class UtilsViewSet(viewsets.GenericViewSet):
-
     schema = None
 
     def get_queryset(self):
@@ -110,9 +109,9 @@ class UtilsViewSet(viewsets.GenericViewSet):
     def myaccounts(self, request, pk=None):
         submitter = ena_models.Submitter.objects.using('era_pro') \
             .filter(
-                submission_account__submission_account__iexact=self
+            submission_account__submission_account__iexact=self
                 .request.user.username
-            ) \
+        ) \
             .select_related('submission_account')
 
         serializer = self.get_serializer(submitter, many=True)
@@ -161,7 +160,6 @@ class UtilsViewSet(viewsets.GenericViewSet):
 
 class MyDataViewSet(emg_mixins.ListModelMixin,
                     viewsets.GenericViewSet):
-
     serializer_class = emg_serializers.StudySerializer
     permission_classes = (
         permissions.IsAuthenticated,
@@ -210,7 +208,6 @@ class MyDataViewSet(emg_mixins.ListModelMixin,
 class BiomeViewSet(mixins.RetrieveModelMixin,
                    emg_mixins.ListModelMixin,
                    viewsets.GenericViewSet):
-
     serializer_class = emg_serializers.BiomeSerializer
 
     filter_backends = (
@@ -298,7 +295,6 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
 class StudyViewSet(mixins.RetrieveModelMixin,
                    emg_mixins.ListModelMixin,
                    emg_viewsets.BaseStudyGenericViewSet):
-
     lookup_field = 'accession'
     lookup_value_regex = '[^/]+'
 
@@ -387,7 +383,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         """
         limit = settings.EMG_DEFAULT_LIMIT
         queryset = emg_models.Study.objects \
-            .recent(self.request)[:limit]
+                       .recent(self.request)[:limit]
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(
@@ -426,7 +422,6 @@ class StudyViewSet(mixins.RetrieveModelMixin,
 
 class StudiesDownloadsViewSet(emg_mixins.ListModelMixin,
                               viewsets.GenericViewSet):
-
     serializer_class = emg_serializers.StudyDownloadSerializer
 
     lookup_field = 'alias'
@@ -435,9 +430,9 @@ class StudiesDownloadsViewSet(emg_mixins.ListModelMixin,
     def get_queryset(self):
         return emg_models.StudyDownload.objects.available(self.request) \
             .filter(
-                *emg_utils.related_study_accession_query(
-                    self.kwargs['accession'])
-            )
+            *emg_utils.related_study_accession_query(
+                self.kwargs['accession'])
+        )
 
     def get_object(self):
         return get_object_or_404(
@@ -537,7 +532,6 @@ class SuperStudyViewSet(mixins.RetrieveModelMixin,
 class SampleViewSet(mixins.RetrieveModelMixin,
                     emg_mixins.ListModelMixin,
                     emg_viewsets.BaseSampleGenericViewSet):
-
     lookup_field = 'accession'
     lookup_value_regex = '[^/]+'
     pagination_class = FasterCountPagination
@@ -611,7 +605,6 @@ class SampleViewSet(mixins.RetrieveModelMixin,
 class RunViewSet(mixins.RetrieveModelMixin,
                  emg_mixins.ListModelMixin,
                  emg_viewsets.BaseRunGenericViewSet):
-
     lookup_field = 'accession'
     lookup_value_regex = '[^/]+'
 
@@ -664,7 +657,6 @@ class RunViewSet(mixins.RetrieveModelMixin,
 class AssemblyViewSet(mixins.RetrieveModelMixin,
                       emg_mixins.ListModelMixin,
                       emg_viewsets.BaseAssemblyGenericViewSet):
-
     lookup_field = 'accession'
     lookup_value_regex = '[^/]+'
 
@@ -711,7 +703,6 @@ class AssemblyViewSet(mixins.RetrieveModelMixin,
 class AnalysisJobViewSet(mixins.RetrieveModelMixin,
                          emg_mixins.ListModelMixin,
                          emg_viewsets.BaseAnalysisGenericViewSet):
-
     lookup_field = 'accession'
     lookup_value_regex = '[^/]+'
 
@@ -756,7 +747,6 @@ class AnalysisJobViewSet(mixins.RetrieveModelMixin,
 
 class AnalysisQCChartViewSet(mixins.RetrieveModelMixin,
                              viewsets.GenericViewSet):
-
     serializer_class = emg_serializers.AnalysisSerializer
 
     schema = None
@@ -803,7 +793,7 @@ class AnalysisQCChartViewSet(mixins.RetrieveModelMixin,
         }
 
         filepath = self._build_path(
-                "{name}.out".format(name=mapping[chart]))
+            "{name}.out".format(name=mapping[chart]))
         if not os.path.isfile(filepath):
             filepath = self._build_path(
                 "{name}.out.full".format(name=mapping[chart]))
@@ -819,7 +809,6 @@ class AnalysisQCChartViewSet(mixins.RetrieveModelMixin,
 
 class KronaViewSet(emg_mixins.ListModelMixin,
                    viewsets.GenericViewSet):
-
     serializer_class = emg_serializers.AnalysisSerializer
 
     schema = None
@@ -827,7 +816,7 @@ class KronaViewSet(emg_mixins.ListModelMixin,
     renderer_classes = (renderers.StaticHTMLRenderer,)
 
     lookup_field = 'subdir'
-    lookup_value_regex = 'lsu|ssu|itsunite|itsonedb'
+    lookup_value_regex = 'lsu|ssu|unite|itsonedb'
 
     def get_queryset(self):
         return emg_models.AnalysisJob.objects \
@@ -852,6 +841,8 @@ class KronaViewSet(emg_mixins.ListModelMixin,
         `/analyses/MGYA00102827/krona`
         """
         obj = self.get_object()
+        # FIXME: Introduce sub directory structure in the taxonomy folder for new ITS results
+        # e.g. taxonomy/{lsu|ssu|its}/
         krona = os.path.abspath(os.path.join(
             settings.RESULTS_DIR,
             obj.result_directory,
@@ -861,7 +852,7 @@ class KronaViewSet(emg_mixins.ListModelMixin,
         if os.path.isfile(krona):
             with open(krona, "r") as k:
                 return Response(k.read())
-        raise Http404('No chrona chart.')
+        raise Http404('No krona chart.')
 
     @xframe_options_exempt
     def retrieve(self, request, subdir=None, **kwargs):
@@ -872,22 +863,21 @@ class KronaViewSet(emg_mixins.ListModelMixin,
         `/runs/GCA_900216095/pipelines/4.0/krona/lsu`
         """
         obj = self.get_object()
-        krona = os.path.abspath(os.path.join(
-            settings.RESULTS_DIR,
-            obj.result_directory,
-            'taxonomy-summary',
-            subdir.upper(),
-            'krona.html')
-        )
+        path = os.path.join(settings.RESULTS_DIR, obj.result_directory, 'taxonomy-summary')
+        if subdir in ['unite', 'itsonedb']:
+            path = os.path.join(path, 'its', subdir)
+        else:
+            path = os.path.join(path, subdir.upper())
+
+        krona = os.path.abspath(os.path.join(path, 'krona.html'))
         if os.path.isfile(krona):
             with open(krona, 'r') as k:
                 return Response(k.read())
-        raise Http404('No chrona chart.')
+        raise Http404('No krona chart.')
 
 
 class AnalysisResultDownloadsViewSet(emg_mixins.ListModelMixin,
                                      viewsets.GenericViewSet):
-
     serializer_class = emg_serializers.AnalysisJobDownloadSerializer
 
     lookup_field = 'alias'
@@ -928,7 +918,6 @@ class AnalysisResultDownloadsViewSet(emg_mixins.ListModelMixin,
 class AnalysisResultDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
                                     mixins.RetrieveModelMixin,
                                     viewsets.GenericViewSet):
-
     serializer_class = emg_serializers.AnalysisJobDownloadSerializer
 
     lookup_field = 'alias'
@@ -978,7 +967,6 @@ class AnalysisResultDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
 
 
 class AnalysisJobContigViewSet(viewsets.ViewSet):
-    
     lookup_field = 'name'
     lookup_value_regex = '.*'
     resource_name = 'analysis-contig'
@@ -1026,10 +1014,10 @@ class AnalysisJobContigViewSet(viewsets.ViewSet):
             obj.result_directory,
             'annotation.gff')
         )
-        
+
         if not os.path.isfile(contigs_file):
             raise Http404('There are no contigs available.')
-    
+
         filter_gt = request.GET.get('gt', 5000) or 5000
         filter_lt = request.GET.get('lt', 10000) or 10000
         contigs = unix_tools.awk_range(
@@ -1051,13 +1039,13 @@ class AnalysisJobContigViewSet(viewsets.ViewSet):
                 unix_tools.awk_regex_filter(gff_path, 9, '/cog=.*[,]?' + filter_cog + '/')
             )
             apply_filter = True
-        
+
         if filter_kegg:
             filtered_contigs.update(
                 unix_tools.awk_regex_filter(gff_path, 9, '/kegg_ko=.*[,]?' + filter_kegg + '/')
             )
             apply_filter = True
-        
+
         if filter_tax:
             filtered_contigs.update(
                 unix_tools.awk_regex_filter(gff_path, 9, '/best_tax_level=.*[,]?' + filter_tax
@@ -1080,7 +1068,7 @@ class AnalysisJobContigViewSet(viewsets.ViewSet):
             data.append({
                 'id': str(obj.pk) + '_' + display_name,
                 'display_name': display_name,
-                'contig_name': cols[0], # this is the actual name
+                'contig_name': cols[0],  # this is the actual name
                 'length': cols[1],
                 'coverage': emg_utils.assembly_contig_coverage(name)
             })
@@ -1092,7 +1080,7 @@ class AnalysisJobContigViewSet(viewsets.ViewSet):
         result.sort(key=lambda c: c['length'])
 
         serializer = emg_serializers.AnalysisJobContigSerializer(result,
-                                                                 many=True, 
+                                                                 many=True,
                                                                  context={'request': request})
         return Response(serializer.data)
 
@@ -1133,7 +1121,7 @@ class AnalysisJobContigViewSet(viewsets.ViewSet):
             #     for row in rows:
             #         output.write(row)
             response = HttpResponse()
-            response['Content-Type'] = 'chemical/seq-na-fasta' # TODO check this media type?
+            response['Content-Type'] = 'chemical/seq-na-fasta'  # TODO check this media type?
             response['Content-Disposition'] = 'attachment; filename={0}.fasta'.format(contig)
             output.seek(0, os.SEEK_END)
             response['Content-Length'] = output.tell()
@@ -1144,7 +1132,6 @@ class AnalysisJobContigViewSet(viewsets.ViewSet):
 
 
 class AnalysisJobContigAnnotationViewSet(viewsets.ViewSet):
-
     lookup_field = 'name'
     lookup_value_regex = '.*'
 
@@ -1203,10 +1190,10 @@ class AnalysisJobContigAnnotationViewSet(viewsets.ViewSet):
 
         raise Http404('No GFF file for contig {0}.'.format(contig))
 
+
 class PipelineViewSet(mixins.RetrieveModelMixin,
                       emg_mixins.ListModelMixin,
                       viewsets.GenericViewSet):
-
     serializer_class = emg_serializers.PipelineSerializer
     queryset = emg_models.Pipeline.objects.all()
 
@@ -1255,7 +1242,6 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
 
 class PipelineToolViewSet(emg_mixins.ListModelMixin,
                           viewsets.GenericViewSet):
-
     serializer_class = emg_serializers.PipelineToolSerializer
     queryset = emg_models.PipelineTool.objects.all()
 
@@ -1274,7 +1260,6 @@ class PipelineToolViewSet(emg_mixins.ListModelMixin,
 
 class PipelineToolVersionViewSet(mixins.RetrieveModelMixin,
                                  viewsets.GenericViewSet):
-
     serializer_class = emg_serializers.PipelineToolSerializer
     queryset = emg_models.PipelineTool.objects.all()
 
@@ -1288,8 +1273,8 @@ class PipelineToolVersionViewSet(mixins.RetrieveModelMixin,
         tool_name = self.kwargs['tool_name']
         version = self.kwargs['version']
         return get_object_or_404(
-             emg_models.PipelineTool,
-             tool_name__iexact=tool_name, version=version)
+            emg_models.PipelineTool,
+            tool_name__iexact=tool_name, version=version)
 
     def retrieve(self, request, *args, **kwargs):
         """
@@ -1305,7 +1290,6 @@ class PipelineToolVersionViewSet(mixins.RetrieveModelMixin,
 class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
                             emg_mixins.ListModelMixin,
                             viewsets.GenericViewSet):
-
     serializer_class = emg_serializers.ExperimentTypeSerializer
     queryset = emg_models.ExperimentType.objects.all()
 
@@ -1346,7 +1330,6 @@ class ExperimentTypeViewSet(mixins.RetrieveModelMixin,
 class PublicationViewSet(mixins.RetrieveModelMixin,
                          emg_mixins.ListModelMixin,
                          emg_viewsets.BasePublicationGenericViewSet):
-
     lookup_field = 'pubmed_id'
 
     lookup_value_regex = '[0-9\.]+'  # noqa: W605
