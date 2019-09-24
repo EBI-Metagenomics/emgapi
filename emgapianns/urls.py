@@ -185,9 +185,9 @@ router.register(
 )
 
 router.register(
-    r'analyses/(?P<accession>[^/]+)/taxonomy/itsunite',
+    r'analyses/(?P<accession>[^/]+)/taxonomy/unite',
     m_views.AnalysisOrganismITSUniteRelationshipViewSet,
-    base_name='analysis-taxonomy-itsunite'
+    base_name='analysis-taxonomy-unite'
 )
 
 urlpatterns = [
