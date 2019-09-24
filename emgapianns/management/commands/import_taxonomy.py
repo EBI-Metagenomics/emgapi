@@ -100,24 +100,25 @@ class Command(EMGBaseCommand):
         If the file is not found then the method will fail silently.
         """
         if db not in ('ITSoneDB', 'UNITE',):
-            logger.error(f'ITS not supported {db}')
+            logger.error('ITS not supported {}'.format(db))
             return
 
-        _f = os.path.join(res, 'ITS', f'{db}', f'{ajob.input_file_name}_ITS_{db}.fasta.mseq.txt')
+        _f = os.path.join(res, 'ITS', db, '{}_ITS_{}.fasta.mseq.txt'.format(ajob.input_file_name, db))
         if not os.path.exists(_f):
             # OK, let's try in lowercase
-            _f = os.path.join(res, 'ITS', f'{db.lower()}', f'{ajob.input_file_name}_ITS_{db.lower()}.fasta.mseq.txt')
+            _f = os.path.join(res, 'ITS', db.lower(),
+                             '{}_ITS_{}.fasta.mseq.txt'.format(ajob.input_file_name, db.lower()))
             if not os.path.exists(_f):
-                logger.warn(f'ITS file {_f} not found (not even with lowercase).')
+                logger.warn('ITS file {} not found (not even with lowercase).'.format(_f))
                 return
 
-        logger.info(f'ITS {db} loading: {_f}')
+        logger.info('ITS {} loading: {}'.format(db, _f))
         
         with open(_f) as csvfile:
             reader = csv.reader(csvfile, delimiter='\t')
             field = db.replace('ITS', '').lower()
             self.load_organism_from_summary_file(
-                reader, ajob, f'taxonomy_its{field}')
+                reader, ajob, 'taxonomy_its{}'.format(field))
 
     def load_organism_from_summary_file(self, reader, obj, tax):  # noqa
         try:
@@ -166,7 +167,7 @@ class Command(EMGBaseCommand):
                     else:
                         name = 'Unusigned'
                         rank = None
-                        lineage = ["Unusigned"]
+                        lineage = ['Unusigned']
                         hierarchy = {}
                         domain = None
                 except KeyError:
@@ -204,10 +205,10 @@ class Command(EMGBaseCommand):
 
         if len(orgs) > 0:
             logger.info(
-                f'Total {len(orgs)} Organisms for Run: {obj.accession} {version} {tax}')
+                'Total {} Organisms for Run: {} {} {}'.format(len(orgs), obj.accession, version, tax))
             if len(new_orgs) > 0:
                 m_models.Organism.objects.insert(new_orgs)
                 logger.info(
-                    f'Created {len(new_orgs)} new Organisms')
+                    'Created {} new Organisms'.format(len(new_orgs)))
             run.save()
-            logger.info("Saved Run %r" % run)
+            logger.info('Saved Run {}'.format(run))
