@@ -268,12 +268,12 @@ class Command(EMGBaseCommand):
         if len(new_kmodules):
             m_models.KeggModule.objects.insert(new_kmodules)
             logger.info(
-                f'Created {len(new_kmodules)} new KEGG Modules')
+                'Created {} new KEGG Modules'.format(len(new_kmodules)))
 
         if len(annotations):
             analysis_keggs.kegg_modules.extend(annotations)
             logger.info(
-                f'Created {len(annotations)} new KEGG Module Annotations')
+                'Created {} new KEGG Module Annotations'.format(len(annotations)))
 
         analysis_keggs.save()
         logger.info('Saved Run {analysis_keggs}')
@@ -320,12 +320,12 @@ class Command(EMGBaseCommand):
         if len(new_entities):
             entity_model.objects.insert(new_entities)
             logger.info(
-                f'Created {len(new_entities)} new entries')
+                'Created {} new entries'.format(len(new_entities)))
 
         if len(annotations):
             setattr(analysis, analysis_field, annotations)
             logger.info(
-                f'Created {len(annotations)} new annotations')
+                'Created {} new annotations'.format(len(annotations)))
 
         analysis.save()
-        logger.info('Saved {instance}')
+        logger.info('Saved {}'.format(instance))
