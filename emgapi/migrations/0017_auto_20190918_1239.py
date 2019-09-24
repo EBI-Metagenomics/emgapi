@@ -35,9 +35,9 @@ def create_subdirs(apps, schema_editor):
     DownloadSubdir = apps.get_model("emgapi", "DownloadSubdir")
     subdirs = (
         "version_5.0/project-summary",
-        "taxonomy-summary/ITS",
-        "taxonomy-summary/ITS/ITSoneDB",
-        "taxonomy-summary/ITS/UNITE",
+        "taxonomy-summary/its",
+        "taxonomy-summary/its/itsonedb",
+        "taxonomy-summary/its/unite",
     )
     _subdirs = list()
     for subdir in subdirs:
