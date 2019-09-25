@@ -500,7 +500,7 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     class Meta:
         model = emg_models.Run
         exclude = (
-            'status_id',
+            'status',
         )
 
 
