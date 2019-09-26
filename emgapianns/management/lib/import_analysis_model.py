@@ -25,19 +25,61 @@ class Analysis(object):
 
 
 class Run(Analysis):
-    def __init__(self, secondary_study_accession, secondary_sample_accession, run_accession, library_strategy):
-        super().__init__(secondary_study_accession, secondary_sample_accession, run_accession, library_strategy)
+    def __init__(self, secondary_study_accession, secondary_sample_accession, run_accession, library_strategy,
+                 library_source):
+        super().__init__(secondary_study_accession, secondary_sample_accession, run_accession,
+                         identify(library_strategy, library_source).value)
 
 
 class Assembly(Analysis):
-    def __init__(self, secondary_study_accession, secondary_sample_accession, run_accession, analysis_accession, **kwargs):
+    def __init__(self, secondary_study_accession, secondary_sample_accession, run_accession, analysis_accession,
+                 **kwargs):
         super().__init__(secondary_study_accession, secondary_sample_accession, run_accession, ExperimentType.ASSEMBLY)
         self.analysis_accession = analysis_accession
 
 
 class ExperimentType(Enum):
-    AMPLICON = 'AMPLICON'
-    WGS = 'WGS'
-    OTHER = 'OTHER'
-    RNA_SEQ = 'RNA-Seq'
-    ASSEMBLY = 'ASSEMBLY'
+    """
+        In the EMG database we do store the following experiment types at the moment.
+            - metatranscriptomic.
+            - metagenomic.
+            - amplicon.
+            - assembly.
+            - metabarcoding.
+            - unknown.
+
+        Short form explanation for the most common library strategy:
+            WGS: Whole genome sequencing
+            WXS: Whole exome sequencing
+            WGA: Whole genome amplification
+            RNA-Seq: RNA Sequencing
+            Tn-Seq: Transposon sequencing
+            POOLCLONE: Pooled clone sequencing
+
+        A list of all library strategies can be found here:
+        http://www.ebi.ac.uk/ena/submit/reads-library-strategy
+    """
+    AMPLICON = 'amplicon'
+    METAGENOMIC = 'metagenomic'
+    METATRANSCRIPTOMIC = 'metatranscriptomic'
+    OTHER = 'other'
+    METABARCODING = 'metabarcoding'
+    ASSEMBLY = 'assembly'
+
+
+def identify(library_strategy, library_source):
+    if library_strategy == 'WGS' and library_source == 'METATRANSCRIPTOMIC':
+        return ExperimentType.METATRANSCRIPTOMIC
+    elif library_strategy == 'WGS' and (
+            library_source == 'METAGENOMIC' or library_source == 'GENOMIC'):
+        return ExperimentType.METAGENOMIC
+    elif library_strategy == 'AMPLICON':
+        return ExperimentType.AMPLICON
+    elif library_strategy == 'RNA-Seq':
+        return ExperimentType.METATRANSCRIPTOMIC
+    elif library_strategy == 'WXS':
+        return ExperimentType.METAGENOMIC
+    elif library_strategy == 'ASSEMBLY':
+        return ExperimentType.ASSEMBLY
+    else:
+        return ExperimentType.OTHER
