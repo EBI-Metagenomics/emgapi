@@ -80,8 +80,9 @@ def parse_run_metadata(raw_metadata):
         sample_accession = raw_metadata['secondary_sample_accession']
         run_accession = raw_metadata['run_accession']
         library_strategy = raw_metadata['library_strategy']
+        library_source = raw_metadata['library_source']
         # Convert library_strategy string to ExperimentType Enum
-        return Run(study_accession, sample_accession, run_accession, ExperimentType[library_strategy])
+        return Run(study_accession, sample_accession, run_accession, library_strategy, library_source)
     except KeyError as err:
         print("Could NOT retrieve all run metadata need from ENA's API: {0}".format(err))
         raise
@@ -322,10 +323,12 @@ class ChunkedDownload(Download):
 
         chunk_filepath = os.path.join(self.rootpath, file_config['subdir'] or '', chunk_filename)
         self.chunks = read_chunkfile(chunk_filepath)
+        if len(self.chunks) == 1:
+            self.alias = file_config['alias'].format(input_file_name)
         self.file_format = ''.join(pathlib.Path(chunk_filename).suffixes)  # todo use config
 
     def save(self, analysis_job):
-        if len(self.chunks) == 0:
+        if len(self.chunks) == 1:
             realname = self.chunks[0]
             realname = realname.format(self.input_file_name) if '{}' in realname else realname
             super()._save(self.alias, realname, analysis_job)
@@ -374,3 +377,14 @@ class DownloadSet:
 def get_conf_downloadset(rootpath, input_file_name, emg_db_name, experiment_type, version):
     config = get_downloadset_config(version, experiment_type)
     return DownloadSet(rootpath, input_file_name, emg_db_name, config)
+
+
+def get_result_dir(result_dir, substring="results/"):
+    """
+
+    :param result_dir:
+    :param substring:
+    :return:
+    """
+    pos = result_dir.find(substring)
+    return result_dir[pos + len(substring):]
