@@ -14,10 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
+import os
 
-from django.core.management import BaseCommand
+from django.core.management import BaseCommand, call_command
 from emgapi import models as emg_models
-from emgapianns.management.lib.utils import sanitise_fields
+from emgapianns.management.lib import utils
+from emgapianns.management.lib.import_analysis_model import ExperimentType, identify
 from emgena import models as ena_models
 from ena_portal_api import ena_handler
 
@@ -39,14 +41,19 @@ class Command(BaseCommand):
 
     emg_db_name = None
     biome = None
+    result_dir = None
 
     def add_arguments(self, parser):
         parser.add_argument('accessions', help='ENA run accessions', nargs='+')
         parser.add_argument('--database', help='Target emg_db_name alias', default='default')
+        parser.add_argument('--result_dir', help="Result dir folder - absolute path.")
+        parser.add_argument('--biome', help='Lineage of GOLD biome')
 
     def handle(self, *args, **options):
         logger.info("CLI %r" % options)
         self.emg_db_name = options['database']
+        self.result_dir = os.path.abspath(options['result_dir'])
+        self.biome = options['biome']
         for acc in options['accessions']:
             self.import_run(acc)
 
@@ -58,7 +65,10 @@ class Command(BaseCommand):
         run = self.create_or_update_run(db_run_data, api_run_data)
         self.tag_study(run, api_run_data['secondary_study_accession'])
         self.tag_sample(run, api_run_data['secondary_sample_accession'])
-        self.tag_experiment_type(run, api_run_data['library_strategy'])
+        library_strategy = api_run_data['library_strategy']
+        library_source = api_run_data['library_source']
+        self.tag_experiment_type(run, identify(library_strategy=library_strategy,
+                                               library_source=library_source).value)
         run.save(using=self.emg_db_name)
 
     @staticmethod
@@ -75,7 +85,7 @@ class Command(BaseCommand):
         accession = api_data['run_accession']
         logger.info('Creating run {}'.format(accession))
         status = emg_models.Status.objects.using(self.emg_db_name).get(status_id=db_data.status_id)
-        defaults = sanitise_fields({
+        defaults = utils.sanitise_fields({
             'instrument_platform': api_data['instrument_platform'],
             'instrument_model': api_data['instrument_model'],
             'status': status,
@@ -100,7 +110,18 @@ class Command(BaseCommand):
             run.study = emg_models.Study.objects.using(self.emg_db_name) \
                 .get(secondary_accession=study_accession)
         except emg_models.Study.DoesNotExist:
-            raise emg_models.Study.DoesNotExist('Study {} does not exist in emg DB'.format(study_accession))
+            logging.warning('Study {} does not exist in emg DB'.format(study_accession))
+            logging.info("Importing study {} now...".format(study_accession))
+            study_dir = utils.get_result_dir(utils.get_study_dir(self.result_dir))
+            call_command('import_study',
+                         study_accession,
+                         self.biome,
+                         '--study_dir', study_dir)
+            try:
+                run.study = emg_models.Study.objects.using(self.emg_db_name) \
+                    .get(secondary_accession=study_accession)
+            except emg_models.Study.DoesNotExist:
+                raise emg_models.Study.DoesNotExist('Study {} does not exist in emg DB'.format(study_accession))
 
     def tag_sample(self, run, sample_accession):
         try:
@@ -114,5 +135,5 @@ class Command(BaseCommand):
             run.experiment_type = emg_models.ExperimentType.objects.using(self.emg_db_name) \
                 .get(experiment_type=experiment_type.lower())
         except emg_models.ExperimentType.DoesNotExist:
-            raise emg_models.ExperimentType\
+            raise emg_models.ExperimentType \
                 .DoesNotExist('Experiment type {} does not exist in database'.format(experiment_type))

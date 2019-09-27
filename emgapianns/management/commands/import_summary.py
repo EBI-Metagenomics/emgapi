@@ -49,10 +49,10 @@ class Command(EMGBaseCommand):
         logger.info('Loading: %s' % res)
         with open(res) as csvfile:
             if self.suffix == '.kegg_paths':
-                reader = csv.reader(csvfile, delimiter='\t')
+                reader = csv.reader(csvfile, delimiter=',')
                 self.load_kegg_from_summary_file(reader, obj, rootpath)
             elif self.suffix == '.pfam':
-                reader = csv.reader(csvfile, delimiter='\t')
+                reader = csv.reader(csvfile, delimiter=',')
                 self.load_summary_file(reader, 
                                        obj,
                                        m_models.AnalysisJobPfam,
@@ -61,7 +61,7 @@ class Command(EMGBaseCommand):
                                        m_models.AnalysisJobPfamAnnotation,
                                        'pfam_entry')
             elif self.suffix == '.ko':
-                reader = csv.reader(csvfile, delimiter='\t')
+                reader = csv.reader(csvfile, delimiter=',')
                 self.load_summary_file(reader, 
                                        obj,
                                        m_models.AnalysisJobKeggOrtholog,
@@ -70,7 +70,7 @@ class Command(EMGBaseCommand):
                                        m_models.AnalysisJobKeggOrthologAnnotation,
                                        'ko')
             elif self.suffix == '.gprops':
-                reader = csv.reader(csvfile, delimiter='\t')
+                reader = csv.reader(csvfile, delimiter=',')
                 self.load_summary_file(reader, 
                                        obj,
                                        m_models.AnalysisJobGenomeProperty,
@@ -300,8 +300,7 @@ class Command(EMGBaseCommand):
 
         next(reader) # skip header
 
-        for count_id, desciption in reader:
-            count, model_id = count_id.strip().split(' ') 
+        for count, model_id, desciption in reader:
             count = int(count)
 
             new_entity = None
@@ -328,4 +327,4 @@ class Command(EMGBaseCommand):
                 'Created {} new annotations'.format(len(annotations)))
 
         analysis.save()
-        logger.info('Saved {}'.format(instance))
+        logger.info('Saved {}'.format(analysis_field))

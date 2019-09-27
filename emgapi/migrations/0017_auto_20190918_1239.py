@@ -21,6 +21,7 @@ def create_group_types(apps, schema_editor):
         "Taxonomic analysis ITS",
         "Taxonomic analysis ITSoneDB",
         "Taxonomic analysis UNITE",
+        "Pathways and Systems",
         # TODO: Do we need sub groups for the function and pathways
     )
     _groups = list()
@@ -58,6 +59,9 @@ def create_download_description(apps, schema_editor):
         ("Taxonomic assignments (TSV)", "MAPseq UNITE assignments"),
         ("OTUs and taxonomic assignments", "OTUs, counts and taxonomic assignments for ITSOneDB"),
         ("OTUs and taxonomic assignments", "OTUs, counts and taxonomic assignments for UNITE"),
+        ("Complete Pfam annotation", "Pfam annotation"),
+        ("KEGG orthologes annotation", "KEGG orthologes annotation"),
+        ("Genome Properties annotation", "Genome Properties annotation"),
     )
     _downloads = list()
     for d in downloads:
