@@ -28,13 +28,13 @@ def awk_range(file, col, gt, lt):
         .format(col=col, gt=gt, lt=lt)
     return awk(file, criteria=flt)
 
-def awk_regex_filter(file, col, regex):
+def awk_regex_filter(file, regex):
     """
-    Filter a file by a using a regex on a column.
+    Filter a file by a using a regex.
 
     For example, on a gff attributes field by COG category: /COG=.*G/
     """
-    flt = '{{ if (tolower(${col}) ~ {regex}) print $1 }}'.format(col=col, regex=regex)
+    flt = '{{ if (tolower($0) ~ {regex}) print $1 }}'.format(regex=regex)
     return awk(file, flt)
 
 def awk(file, criteria):
