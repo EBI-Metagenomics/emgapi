@@ -1025,11 +1025,11 @@ class AnalysisJobContigViewSet(viewsets.ViewSet):
 
         filtered_contigs = []
         # FIXME: sanitaze this
-        filter_cog = request.GET.get('cog', '').lower()
-        filter_kegg = request.GET.get('kegg', '').lower()
-        filter_go = request.GET.get('go', '').lower()
-        filter_interpro = request.GET.get('interpro', '').lower()
-        filter_pfam = request.GET.get('pfam', '').lower()
+        filter_cog = request.GET.get('cog', '').upper()
+        filter_kegg = request.GET.get('kegg', '').upper()
+        filter_go = request.GET.get('go', '').upper()
+        filter_interpro = request.GET.get('interpro', '').upper()
+        filter_pfam = request.GET.get('pfam', '').upper()
 
         apply_filter = False
         filtered_contigs = set()
@@ -1038,31 +1038,31 @@ class AnalysisJobContigViewSet(viewsets.ViewSet):
 
         if filter_cog:
             filtered_contigs.update(
-                unix_tools.awk_regex_filter(gff_path, '/cog=.*[,]?' + filter_cog + '/')
+                unix_tools.awk_regex_filter(gff_path, '/COG=.*[,]?' + filter_cog + '/')
             )
             apply_filter = True
 
         if filter_kegg:
             filtered_contigs.update(
-                unix_tools.awk_regex_filter(gff_path, '/kegg=.*[,]?' + filter_kegg + '/')
+                unix_tools.awk_regex_filter(gff_path, '/KEGG=.*[,]?' + filter_kegg + '/')
             )
             apply_filter = True
 
         if filter_go:
             filtered_contigs.update(
-                unix_tools.awk_regex_filter(gff_path, '/go=.*[,]?' + filter_go + '/')
+                unix_tools.awk_regex_filter(gff_path, '/GO=.*[,]?' + filter_go + '/')
             )
             apply_filter = True
 
         if filter_interpro:
             filtered_contigs.update(
-                unix_tools.awk_regex_filter(gff_path, '/interpro=.*[,]?' + filter_interpro + '/')
+                unix_tools.awk_regex_filter(gff_path, '/InterPro=.*[,]?' + filter_interpro + '/')
             )
             apply_filter = True
 
         if filter_pfam:
             filtered_contigs.update(
-                unix_tools.awk_regex_filter(gff_path, '/pfam=.*[,]?' + filter_pfam + '/')
+                unix_tools.awk_regex_filter(gff_path, '/Pfam=.*[,]?' + filter_pfam + '/')
             )
             apply_filter = True
 
