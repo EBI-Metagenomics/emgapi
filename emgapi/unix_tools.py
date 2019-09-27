@@ -34,7 +34,7 @@ def awk_regex_filter(file, regex):
 
     For example, on a gff attributes field by COG category: /COG=.*G/
     """
-    flt = '{{ if (tolower($0) ~ {regex}) print $1 }}'.format(regex=regex)
+    flt = '{{ if ($0 ~ {regex}) print $1 }}'.format(regex=regex)
     return awk(file, flt)
 
 def awk(file, criteria):
