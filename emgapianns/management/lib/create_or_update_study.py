@@ -15,15 +15,15 @@
 # limitations under the License.
 
 import logging
-import sys
 
 from django.db.models import Q
 from ena_portal_api import ena_handler
 
+from emgapi import models as emg_models
 from emgapianns.management.lib import utils
 from emgapianns.management.lib.uploader_exceptions import StudyNotBeRetrievedFromENA
-from emgapi import models as emg_models
 from emgena import models as ena_models
+from emgena.models import RunStudy, AssemblyStudy
 
 ena = ena_handler.EnaApiHandler()
 
@@ -147,11 +147,14 @@ def run_create_or_update_study(study_accession, study_dir, lineage, database):
     logging.info("Starting process of creating or updating study in EMG...")
 
     # Fetches latest study metadata from ENA's production database
-    study = ena_models.RunStudy.objects.using(database).get(Q(study_id=study_accession) | Q(project_id=study_accession))
-    if not study:
-        study = ena_models.AssemblyStudy.objects.using(database).get(
+    try:
+        study = ena_models.RunStudy.objects.using(database).get(
             Q(study_id=study_accession) | Q(project_id=study_accession))
-        if not study:
-            raise ValueError("Could not find study {0} in the database. Program will exit now!".format(study_accession))
+    except RunStudy.DoesNotExist:
+        try:
+            study = ena_models.AssemblyStudy.objects.using(database).get(
+                Q(study_id=study_accession) | Q(project_id=study_accession))
+        except AssemblyStudy.DoesNotExist:
+            raise AssemblyStudy.DoesNotExist("Could not find study {0} in the database. Program will exit now!".format(study_accession))
 
     return update_or_create_study(study, study_dir, lineage, database)

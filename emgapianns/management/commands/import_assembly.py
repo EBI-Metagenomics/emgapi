@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
+import os
 
 from django.core.management import BaseCommand, call_command
 from emgapianns.management.lib.utils import sanitise_fields, is_run_accession
@@ -39,14 +40,19 @@ class Command(BaseCommand):
 
     emg_db_name = None
     biome = None
+    result_dir = None
 
     def add_arguments(self, parser):
         parser.add_argument('accessions', help='ENA assembly accessions', nargs='+')
         parser.add_argument('--database', help='Target emg_db_name alias', default='default')
+        parser.add_argument('--result_dir', help="Result dir folder - absolute path.")
+        parser.add_argument('--biome', help='Lineage of GOLD biome')
 
     def handle(self, *args, **options):
         logger.info("CLI %r" % options)
         self.emg_db_name = options['database']
+        self.result_dir = os.path.abspath(options['result_dir'])
+        self.biome = options['biome']
         for acc in options['accessions']:
             self.import_assembly(acc)
 
@@ -120,7 +126,7 @@ class Command(BaseCommand):
 
     def tag_run(self, assembly, run_accession):
         try:
-            call_command('import_run', run_accession)
+            call_command('import_run', run_accession, '--result_dir', self.result_dir, '--biome', self.biome)
             run = emg_models.Run.objects.using(self.emg_db_name) \
                 .get(accession=run_accession)
             emg_models.AssemblyRun.objects.using(self.emg_db_name).get_or_create(assembly=assembly, run=run)

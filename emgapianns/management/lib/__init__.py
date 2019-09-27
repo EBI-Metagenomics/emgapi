@@ -50,7 +50,8 @@ class EMGBaseCommand(BaseCommand):
                 .filter(
                     Q(study__secondary_accession=self.accession) |
                     Q(sample__accession=self.accession) |
-                    Q(run__accession=self.accession)
+                    Q(run__accession=self.accession) |
+                    Q(assembly__accession=self.accession)
                 )
             if self.pipeline:
                 queryset = queryset.filter(
