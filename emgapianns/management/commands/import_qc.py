@@ -21,10 +21,17 @@ class Command(EMGBaseCommand):
 
     def find_path(self, obj, options):
         rootpath = options.get('rootpath', None)
-        res = os.path.join(rootpath, obj.result_directory, 'stats_summary')
+
+        for infile in ['qc_summary', 'func_summary']:
+            self.load_stats(rootpath, obj, infile)
+
+    def load_stats(self, rootpath, obj, input_file_name):
+        res = os.path.join(rootpath, obj.result_directory, input_file_name)
         logger.info("Found: %s" % res)
-        if not os.path.exists(res):  # Check existence of the v4.1 result file
-            res = os.path.join(rootpath, obj.result_directory, 'charts', 'new.summary')
+
+        if input_file_name == 'qc_summary':
+            if not os.path.exists(res):  # Check existence of the v4.1 result file
+                res = os.path.join(rootpath, obj.result_directory, 'charts', 'new.summary')
 
         if os.path.exists(res):
             if os.path.isfile(res):
