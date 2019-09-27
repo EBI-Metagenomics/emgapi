@@ -20,7 +20,7 @@ import inflection
 import csv
 import io
 
-# import pysam
+import pysam
 
 from django.conf import settings
 from django.db.models import Prefetch, Count, Q
@@ -1024,10 +1024,12 @@ class AnalysisJobContigViewSet(viewsets.ViewSet):
             contigs_file, col=2, gt=filter_gt, lt=filter_lt)
 
         filtered_contigs = []
+        # FIXME: sanitaze this
         filter_cog = request.GET.get('cog', '').lower()
         filter_kegg = request.GET.get('kegg', '').lower()
-        filter_tax = request.GET.get('taxonomy', '').lower()
-        filter_gos = request.GET.get('gos', '').lower()
+        filter_go = request.GET.get('go', '').lower()
+        filter_interpro = request.GET.get('interpro', '').lower()
+        filter_pfam = request.GET.get('pfam', '').lower()
 
         apply_filter = False
         filtered_contigs = set()
@@ -1036,27 +1038,31 @@ class AnalysisJobContigViewSet(viewsets.ViewSet):
 
         if filter_cog:
             filtered_contigs.update(
-                unix_tools.awk_regex_filter(gff_path, 9, '/cog=.*[,]?' + filter_cog + '/')
+                unix_tools.awk_regex_filter(gff_path, '/cog=.*[,]?' + filter_cog + '/')
             )
             apply_filter = True
 
         if filter_kegg:
             filtered_contigs.update(
-                unix_tools.awk_regex_filter(gff_path, 9, '/kegg_ko=.*[,]?' + filter_kegg + '/')
+                unix_tools.awk_regex_filter(gff_path, '/kegg=.*[,]?' + filter_kegg + '/')
             )
             apply_filter = True
 
-        if filter_tax:
+        if filter_go:
             filtered_contigs.update(
-                unix_tools.awk_regex_filter(gff_path, 9, '/best_tax_level=.*[,]?' + filter_tax
-                                            + '/')
+                unix_tools.awk_regex_filter(gff_path, '/go=.*[,]?' + filter_go + '/')
             )
             apply_filter = True
 
-        if filter_gos:
+        if filter_interpro:
             filtered_contigs.update(
-                unix_tools.awk_regex_filter(gff_path, 9, '/gos=.*[,]?' + filter_gos
-                                            + '/')
+                unix_tools.awk_regex_filter(gff_path, '/interpro=.*[,]?' + filter_interpro + '/')
+            )
+            apply_filter = True
+
+        if filter_pfam:
+            filtered_contigs.update(
+                unix_tools.awk_regex_filter(gff_path, '/pfam=.*[,]?' + filter_pfam + '/')
             )
             apply_filter = True
 
@@ -1114,12 +1120,12 @@ class AnalysisJobContigViewSet(viewsets.ViewSet):
 
         if os.path.isfile(fasta_path) and os.path.isfile(fasta_idx_path):
             output = io.StringIO()
-            # FIXME: handle errors
-            # with pysam.Fastafile(filename=fasta_path, filepath_index=fasta_idx_path) as fasta:  
-            #     rows = fasta.fetch(contig)
-            #     output.write('>' + emg_utils.assembly_contig_name(contig)  + '\n')
-            #     for row in rows:
-            #         output.write(row)
+            # TODO: handle errors
+            with pysam.Fastafile(filename=fasta_path, filepath_index=fasta_idx_path) as fasta:  
+                rows = fasta.fetch(contig)
+                output.write('>' + emg_utils.assembly_contig_name(contig)  + '\n')
+                for row in rows:
+                    output.write(row)
             response = HttpResponse()
             response['Content-Type'] = 'chemical/seq-na-fasta'  # TODO check this media type?
             response['Content-Disposition'] = 'attachment; filename={0}.fasta'.format(contig)
@@ -1169,17 +1175,17 @@ class AnalysisJobContigAnnotationViewSet(viewsets.ViewSet):
         gff_idx_path = os.path.abspath(os.path.join(
             settings.RESULTS_DIR,
             obj.result_directory,
-            'annotation.gff.tbi.gz')
+            'annotation.gff.gz.tbi')
         )
 
         if os.path.isfile(gff_path) and os.path.isfile(gff_idx_path):
             # multiple_iterators = True as many processes 
             # could be using the same file at the same moment
             output = io.StringIO()
-            # with pysam.TabixFile(filename=gff_path, index=gff_idx_path) as gff:
-            #     rows = gff.fetch(contig, multiple_iterators=True)
-            #     for row in rows:
-            #         output.write(emg_utils.assembly_contig_name(row) + '\n')
+            with pysam.TabixFile(filename=gff_path, index=gff_idx_path) as gff:
+                rows = gff.fetch(contig, multiple_iterators=True)
+                for row in rows:
+                    output.write(emg_utils.assembly_contig_name(row) + '\n')
             response = HttpResponse()
             response['Content-Type'] = 'text/x-gff3'
             response['Content-Disposition'] = 'attachment; filename={0}.gff'.format(contig)
