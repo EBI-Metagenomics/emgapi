@@ -62,6 +62,12 @@ class PfamEntry(BaseAnnotation):
     pass
 
 
+class COG(BaseAnnotation):
+    """COG entry
+    """
+    meta = {'collection': 'cog'}
+
+
 class KeggOrtholog(BaseAnnotation):
     """KEGG Ortholog (KO)
     """
@@ -140,7 +146,7 @@ class AnalysisJobKeggModuleAnnotation(mongoengine.EmbeddedDocument):
 
 
 class AnalysisJobPfamAnnotation(BaseAnalysisJobAnnotation):
-    """PFam on a given Analysis Job.
+    """Pfam on a given Analysis Job.
     """
     pfam_entry = mongoengine.ReferenceField(PfamEntry, required=True)
 
@@ -151,6 +157,20 @@ class AnalysisJobPfamAnnotation(BaseAnalysisJobAnnotation):
     @property
     def description(self):
         return self.pfam_entry.description
+
+
+class AnalysisJobCOGAnnotation(BaseAnalysisJobAnnotation):
+    """COG on a given Analysis Job.
+    """
+    cog = mongoengine.ReferenceField(COG, required=True)
+
+    @property
+    def accession(self):
+        return self.cog.accession
+
+    @property
+    def description(self):
+        return self.cog.description
 
 
 class AnalysisJobGenomePropAnnotation(BaseAnalysisJobAnnotation):
@@ -312,3 +332,34 @@ class AnalysisJobTaxonomy(mongoengine.Document):
             AnalysisJobOrganism, required=False)
     taxonomy_itsunite = mongoengine.EmbeddedDocumentListField(
             AnalysisJobOrganism, required=False)
+
+
+class AnalysisJobContig(mongoengine.Document):
+
+    contig_id = mongoengine.StringField(primary_key=True)
+    length = mongoengine.IntField()
+    coverage = mongoengine.FloatField()
+
+    analysis_id = mongoengine.StringField(required=True)
+    accession = mongoengine.StringField(required=True)
+    pipeline_version = mongoengine.StringField(required=True)
+    job_id = mongoengine.IntField(required=True)
+
+    cogs = mongoengine.EmbeddedDocumentListField(AnalysisJobCOGAnnotation)
+    keggs = mongoengine.EmbeddedDocumentListField(AnalysisJobKeggOrthologAnnotation)
+    gos = mongoengine.EmbeddedDocumentListField(AnalysisJobGoTermAnnotation)
+    pfams = mongoengine.EmbeddedDocumentListField(AnalysisJobPfamAnnotation)
+    interpros = mongoengine.EmbeddedDocumentListField(AnalysisJobInterproIdentifierAnnotation)
+
+    meta = {
+        'indexes': [
+            'analysis_id',
+            'accession',
+            'job_id',
+            'cogs.cog',
+            'keggs.ko',
+            'gos.go_term',
+            'pfams.pfam_entry',
+            'interpros.interpro_identifier',
+        ]
+    }

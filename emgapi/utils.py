@@ -86,4 +86,4 @@ def assembly_contig_coverage(name):
     match = re.match(r'.*cov-(?P<cov>\d*\.?\d*)', name)
     if match:
         return match.group('cov')
-    return '-'    
+    return '-'
