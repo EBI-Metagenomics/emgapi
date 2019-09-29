@@ -119,6 +119,18 @@ mongo_router.register(
 router = routers.DefaultRouter(trailing_slash=False)
 
 router.register(
+    r'analyses/(?P<accession>[^/]+)/contigs',
+    m_views.AnalysisContigViewSet,
+    base_name='analysis-contigs'
+)
+
+router.register(
+    r'analyses/(?P<accession>[^/]+)/annotations',
+    m_views.AnalysisContigAnnotationViewSet,
+    base_name='analysis-annotations'
+)
+
+router.register(
     r'analyses/(?P<accession>[^/]+)/go-terms',
     m_views.AnalysisGoTermRelationshipViewSet,
     base_name='analysis-goterms'

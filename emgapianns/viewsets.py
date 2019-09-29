@@ -28,6 +28,8 @@ from emgapi import serializers as emg_serializers
 from emgapi import models as emg_models
 from emgapi import filters as emg_filters
 
+from mongoengine import DoesNotExist
+
 
 class ReadOnlyModelViewSet(mixins.RetrieveModelMixin,
                            emg_mixins.ListModelMixin,
@@ -94,7 +96,7 @@ class AnalysisRelationshipViewSet(ListReadOnlyModelViewSet):
             annotation = self.annotation_model.objects.get(accession=accession)
         except KeyError:
             raise Http404(("Attribute error '%s'." % self.lookup_field))
-        except ObjectDoesNotExist:
+        except DoesNotExist:
             raise Http404(('No %s matches the given query.' %
                            self.annotation_model.__class__.__name__))
         
