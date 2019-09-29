@@ -14,23 +14,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import io
+
 import logging
 import urllib
 
+import pysam
+
+from django.conf import settings
 from django.db.models import Q
 from mongoengine.queryset.visitor import Q as M_Q
 
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import filters
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
+from rest_framework import viewsets
+from rest_framework import status
 
 from emgapi import serializers as emg_serializers
 from emgapi import models as emg_models
 from emgapi import filters as emg_filters
+from emgapi import utils as emg_utils
 
 from . import serializers as m_serializers
 from . import models as m_models
@@ -264,6 +274,7 @@ class GenomePropViewSet(
             .retrieve(request, *args, **kwargs)
 
 
+# FIXME: None of the RelationshipViewSet are working, on Master either...
 class GoTermAnalysisRelationshipViewSet(m_viewsets.AnalysisRelationshipViewSet):
     """
     Retrieves list of analysis results for the given GO term
@@ -273,7 +284,7 @@ class GoTermAnalysisRelationshipViewSet(m_viewsets.AnalysisRelationshipViewSet):
     """
     annotation_model = m_models.GoTerm
 
-    def get_job_ids(self):
+    def get_job_ids(self, annotation):
         job_ids = m_models.AnalysisJobGoTerm.objects \
             .filter(
                 M_Q(go_slim__go_term=annotation) |
@@ -293,7 +304,7 @@ class InterproIdentifierAnalysisRelationshipViewSet(  # NOQA
     """
     annotation_model = m_models.InterproIdentifier
 
-    def get_job_ids(self):
+    def get_job_ids(self, annotation):
         return m_models.AnalysisJobInterproIdentifier.objects \
             .filter(M_Q(interpro_identifiers__interpro_identifier=annotation)) \
             .distinct('job_id')
@@ -308,7 +319,7 @@ class KeggModuleAnalysisRelationshipViewSet(m_viewsets.AnalysisRelationshipViewS
     """    
     annotation_model = m_models.KeggModule
 
-    def get_job_ids(self):
+    def get_job_ids(self, annotation):
         return m_models.AnalysisJobKeggModule.objects \
             .filter(M_Q(kegg_modules__module=annotation)) \
             .distinct('job_id')
@@ -322,9 +333,9 @@ class PfamAnalysisRelationshipViewSet(m_viewsets.AnalysisRelationshipViewSet):
     `/annotations/pfram-entries/P00001/analyses`
     """
 
-    annotation_model = m_models.PfamEntry
+    annotation_model = m_models.AnalysisJobPfamAnnotation
 
-    def get_job_ids(self):
+    def get_job_ids(self, annotation):
         return m_models.AnalysisJobPfam.objects \
             .filter(M_Q(pfam_entries__pfam=annotation)) \
             .distinct('job_id')
@@ -340,7 +351,7 @@ class GenomePropertyAnalysisRelationshipViewSet(m_viewsets.AnalysisRelationshipV
 
     annotation_model = m_models.GenomeProperty
 
-    def get_job_ids(self):
+    def get_job_ids(self, annotation):
         return m_models.AnalysisJobGenomeProperty.objects \
             .filter(M_Q(genome_properties__genome_property=annotation)) \
             .distinct('job_id')
@@ -356,7 +367,7 @@ class KeggOrthologRelationshipViewSet(m_viewsets.AnalysisRelationshipViewSet):
 
     annotation_model = m_models.KeggOrtholog
 
-    def get_job_ids(self):
+    def get_job_ids(self, annotation):
         return m_models.AnalysisJobKeggOrtholog.objects \
             .filter(M_Q(ko_entries__ko=annotation)) \
             .distinct('job_id')
@@ -836,3 +847,180 @@ class OrganismAnalysisRelationshipViewSet(m_viewsets.ListReadOnlyModelViewSet):
 
         return super(OrganismAnalysisRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
+
+
+class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
+
+    lookup_field = 'contig_id'
+    lookup_value_regex = '.*'
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'contig_id',
+        'length',
+        'coverage',
+    )
+    ordering = ('-length',)
+
+    serializer_class = m_serializers.AnalysisJobContigSerializer
+    pagination_class = api_settings.DEFAULT_PAGINATION_CLASS
+
+    def get_object(self):
+        try:
+            pk = int(self.kwargs['accession'].lstrip('MGYA'))
+        except ValueError:
+            raise Http404()
+        query_set = emg_models.AnalysisJob.objects.available(self.request)
+        return get_object_or_404(query_set, Q(pk=pk))
+
+    def get_queryset(self):
+        """
+        """
+        obj = self.get_object()
+
+        queryset = m_models.AnalysisJobContig.objects
+        request = self.request
+
+        query_filter = M_Q()
+        
+        filter_cog = request.GET.get('cog', '').upper()
+        if filter_cog:
+            query_filter |= M_Q(cogs__cog=filter_cog)
+
+        filter_kegg = request.GET.get('kegg', '').upper()
+        if filter_kegg:
+            query_filter |= M_Q(keggs__ko=filter_kegg)
+
+        filter_go = request.GET.get('go', '').upper()
+        if filter_go:
+            query_filter |= M_Q(gos__go_term=filter_go)
+
+        filter_interpro = request.GET.get('interpro', '').upper()
+        if filter_interpro:
+            query_filter |= M_Q(interpros__interpro_identifier=filter_interpro)
+
+        filter_pfam = request.GET.get('pfam', '').upper()
+        if filter_pfam:
+            query_filter |= M_Q(pfams__pfam_entry=filter_pfam)
+
+        filter_gt = int(request.GET.get('gt', 5000) or 5000)
+        filter_lt = int(request.GET.get('lt', 10000) or 10000)
+       
+        query_filter &= (
+            M_Q(length__gte=filter_gt) & M_Q(length__lte=filter_lt))
+
+        search = request.GET.get('search', '')
+        if search:
+            query_filter &= M_Q(contig_id__icontains=search)
+
+        return queryset.filter(M_Q(job_id=obj.job_id) & query_filter)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve a contig fasta file.
+        The Fasta file will be retrieved using pysam.
+
+        Example:
+        ---
+        `/analyses/<accession>/contigs/<contig_id>`
+        ---
+        """
+        contig = self.kwargs.get('contig_id', None)
+        if not contig:
+            return Response('Please provide a contig id.', status.HTTP_400_BAD_REQUEST)
+
+        obj = self.get_object()
+
+        fasta_path = os.path.abspath(os.path.join(
+            settings.RESULTS_DIR,
+            obj.result_directory,
+            'contigs.fasta')
+        )
+        fasta_idx_path = os.path.abspath(os.path.join(
+            settings.RESULTS_DIR,
+            obj.result_directory,
+            'contigs.fasta.fai')
+        )
+        
+        if os.path.isfile(fasta_path) and os.path.isfile(fasta_idx_path):
+            output = io.StringIO()
+            # TODO: handle errors
+            with pysam.Fastafile(filename=fasta_path, filepath_index=fasta_idx_path) as fasta:  
+                rows = fasta.fetch(contig)
+                output.write('>' + emg_utils.assembly_contig_name(contig)  + '\n')
+                for row in rows:
+                    output.write(row)
+            response = HttpResponse()
+            response['Content-Type'] = 'chemical/seq-na-fasta'
+            response['Content-Disposition'] = 'attachment; filename={0}.fasta'.format(contig)
+            output.seek(0, os.SEEK_END)
+            response['Content-Length'] = output.tell()
+            response.write(output.getvalue())
+            return response
+
+        return Response('Contig {0} not found.'.format(fasta_path), status.HTTP_404_NOT_FOUND)
+
+
+class AnalysisContigAnnotationViewSet(viewsets.ViewSet): # viewsets.ReadOnlyModelViewSet?
+    """Get aa contig annotations gff file
+    """
+    lookup_field = 'contig_id'
+    lookup_value_regex = '.*'
+
+    def get_queryset(self):
+        return emg_models.AnalysisJob.objects \
+            .available(self.request)
+
+    def get_object(self):
+        try:
+            pk = int(self.kwargs['accession'].lstrip('MGYA'))
+        except ValueError:
+            raise Http404()
+        return get_object_or_404(self.get_queryset(), Q(pk=pk))
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve a contig GFF file.
+        The GFF file will be parsed with pysam and sliced.
+
+        Example:
+        ---
+        `/analyses/<accession>/annotation/<contig_name>`
+        ---
+        """
+        contig = self.kwargs.get('contig_id', None)
+        if not contig:
+            return Response('Please provide a contig id.', status.HTTP_400_BAD_REQUEST)
+
+        obj = self.get_object()
+        gff_path = os.path.abspath(os.path.join(
+            settings.RESULTS_DIR,
+            obj.result_directory,
+            'annotation.gff.gz')
+        )
+        gff_idx_path = os.path.abspath(os.path.join(
+            settings.RESULTS_DIR,
+            obj.result_directory,
+            'annotation.gff.gz.tbi')
+        )
+
+        if os.path.isfile(gff_path) and os.path.isfile(gff_idx_path):
+            # multiple_iterators = True as many processes 
+            # could be using the same file at the same moment
+            output = io.StringIO()
+            with pysam.TabixFile(filename=gff_path, index=gff_idx_path) as gff:
+                rows = gff.fetch(contig, multiple_iterators=True)
+                for row in rows:
+                    output.write(emg_utils.assembly_contig_name(row) + '\n')
+            response = HttpResponse()
+            response['Content-Type'] = 'text/x-gff3'
+            response['Content-Disposition'] = 'attachment; filename={0}.gff'.format(contig)
+            output.seek(0, os.SEEK_END)
+            response['Content-Length'] = output.tell()
+            response.write(output.getvalue())
+            return response
+
+        return Response('No GFF file for contig {0}.'.format(contig), status.HTTP_404_NOT_FOUND)

@@ -225,3 +225,16 @@ class OrganismRetriveSerializer(OrganismSerializer):
             'id',
             'ancestors',
         )
+
+
+class AnalysisJobContigSerializer(m_serializers.DocumentSerializer):
+
+    class Meta:
+        model = m_models.AnalysisJobContig
+        exclude = (
+            'cogs',
+            'keggs',
+            'pfams',
+            'gos',
+            'interpros'
+        )
