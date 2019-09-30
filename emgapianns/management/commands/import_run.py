@@ -52,7 +52,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         logger.info("CLI %r" % options)
         self.emg_db_name = options['database']
-        self.result_dir = os.path.abspath(options['result_dir'])
+        if options['result_dir']:
+            self.result_dir = os.path.abspath(options['result_dir'])
         self.biome = options['biome']
         for acc in options['accessions']:
             self.import_run(acc)
