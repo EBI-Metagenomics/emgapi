@@ -52,9 +52,7 @@ from . import mixins as m_mixins
 logger = logging.getLogger(__name__)
 
 
-class GoTermViewSet(
-    m_mixins.AnnotationRetrivalMixin,
-    m_viewsets.ReadOnlyModelViewSet):
+class GoTermViewSet(m_mixins.AnnotationRetrivalMixin, m_viewsets.ReadOnlyModelViewSet):
     """
     Provides list of GO terms.
     """
@@ -89,9 +87,7 @@ class GoTermViewSet(
             .retrieve(request, *args, **kwargs)
 
 
-class InterproIdentifierViewSet(
-    m_mixins.AnnotationRetrivalMixin,
-    m_viewsets.ReadOnlyModelViewSet):
+class InterproIdentifierViewSet(m_mixins.AnnotationRetrivalMixin, m_viewsets.ReadOnlyModelViewSet):
     """
     Provides list of InterPro identifiers.
     """
@@ -126,9 +122,7 @@ class InterproIdentifierViewSet(
             .retrieve(request, *args, **kwargs)
 
 
-class KeggModuleViewSet(
-    m_mixins.AnnotationRetrivalMixin,
-    m_viewsets.ReadOnlyModelViewSet):
+class KeggModuleViewSet(m_mixins.AnnotationRetrivalMixin, m_viewsets.ReadOnlyModelViewSet):
     """
     Provides list of KEEG modules.
     """
@@ -163,9 +157,7 @@ class KeggModuleViewSet(
             .retrieve(request, *args, **kwargs)
 
 
-class PfamEntryViewSet(
-    m_mixins.AnnotationRetrivalMixin,
-    m_viewsets.ReadOnlyModelViewSet):
+class PfamEntryViewSet(m_mixins.AnnotationRetrivalMixin, m_viewsets.ReadOnlyModelViewSet):
     """
     Provides list of Pfem entries.
     """
@@ -200,9 +192,7 @@ class PfamEntryViewSet(
             .retrieve(request, *args, **kwargs)
 
 
-class KeggOrthologViewSet(
-    m_mixins.AnnotationRetrivalMixin,
-    m_viewsets.ReadOnlyModelViewSet):
+class KeggOrthologViewSet(m_mixins.AnnotationRetrivalMixin, m_viewsets.ReadOnlyModelViewSet):
     """
     Provides list of KEGG Ortholog.
     """
@@ -237,9 +227,7 @@ class KeggOrthologViewSet(
             .retrieve(request, *args, **kwargs)
 
 
-class GenomePropViewSet(
-    m_mixins.AnnotationRetrivalMixin,
-    m_viewsets.ReadOnlyModelViewSet):
+class GenomePropViewSet(m_mixins.AnnotationRetrivalMixin, m_viewsets.ReadOnlyModelViewSet):
     """
     Provides list of Genome Properties.
     """
@@ -294,8 +282,7 @@ class GoTermAnalysisRelationshipViewSet(m_viewsets.AnalysisRelationshipViewSet):
         return job_ids
 
 
-class InterproIdentifierAnalysisRelationshipViewSet(  # NOQA
-    m_viewsets.AnalysisRelationshipViewSet):
+class InterproIdentifierAnalysisRelationshipViewSet(m_viewsets.AnalysisRelationshipViewSet):
     """
     Retrieves list of analysis results for the given InterPro identifier
     Example:
@@ -316,7 +303,7 @@ class KeggModuleAnalysisRelationshipViewSet(m_viewsets.AnalysisRelationshipViewS
     Example:
     ---
     `/annotations/kegg-modules/M00127/analyses`
-    """    
+    """
     annotation_model = m_models.KeggModule
 
     def get_job_ids(self, annotation):
@@ -373,9 +360,8 @@ class KeggOrthologRelationshipViewSet(m_viewsets.AnalysisRelationshipViewSet):
             .distinct('job_id')
 
 
-class AnalysisGoTermRelationshipViewSet(  # NOQA
-    m_mixins.AnalysisJobAnnotationMixin,
-    m_viewsets.ListReadOnlyModelViewSet):
+class AnalysisGoTermRelationshipViewSet(m_mixins.AnalysisJobAnnotationMixin,
+                                        m_viewsets.ListReadOnlyModelViewSet):
     """
     Retrieves GO terms for the given accession
     Example:
@@ -392,12 +378,11 @@ class AnalysisGoTermRelationshipViewSet(  # NOQA
 
     annotation_model_property = 'go_terms'
 
-    analysis_job_filters = ~Q(experiment_type__experiment_type='amplicon') 
+    analysis_job_filters = ~Q(experiment_type__experiment_type='amplicon')
 
 
-class AnalysisGoSlimRelationshipViewSet(  # NOQA
-    m_mixins.AnalysisJobAnnotationMixin,
-    m_viewsets.ListReadOnlyModelViewSet):
+class AnalysisGoSlimRelationshipViewSet(m_mixins.AnalysisJobAnnotationMixin,
+                                        m_viewsets.ListReadOnlyModelViewSet):
     """
     Retrieves GO slim for the given accession
     Example:
@@ -437,7 +422,7 @@ class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
 
     annotation_model_property = 'interpro_identifiers'
 
-    analysis_job_filters = ~Q(experiment_type__experiment_type='amplicon') 
+    analysis_job_filters = ~Q(experiment_type__experiment_type='amplicon')
 
 
 class AnalysisPfamRelationshipViewSet(  # NOQA
@@ -614,9 +599,8 @@ class OrganismTreeViewSet(m_viewsets.ListReadOnlyModelViewSet):
             .list(request, *args, **kwargs)
 
 
-class AnalysisOrganismRelationshipViewSet(
-    m_mixins.AnalysisJobAnnotationMixin,
-    m_viewsets.ListReadOnlyModelViewSet):
+class AnalysisOrganismRelationshipViewSet(m_mixins.AnalysisJobAnnotationMixin,
+                                          m_viewsets.ListReadOnlyModelViewSet):
     """Retrieves 16SrRNA Taxonomic analysis for the given accession
     Example:
     ---
@@ -639,8 +623,8 @@ class AnalysisOrganismRelationshipViewSet(
 
     lookup_field = 'accession'
 
-    annotation_model = m_models.AnalysisJobTaxonomy 
-    
+    annotation_model = m_models.AnalysisJobTaxonomy
+
     annotation_model_property = 'taxonomy'
 
 
@@ -648,7 +632,7 @@ class AnalysisOrganismSSURelationshipViewSet(  # NOQA
     m_mixins.AnalysisJobAnnotationMixin,
     m_viewsets.ListReadOnlyModelViewSet):
     """Retrieves SSU Taxonomic analysis for the given accession
-    Example: 
+    Example:
     ---
     `/analyses/MGYA00102827/taxonomy/ssu`
     ---
@@ -670,7 +654,7 @@ class AnalysisOrganismSSURelationshipViewSet(  # NOQA
     lookup_field = 'accession'
 
     annotation_model = m_models.AnalysisJobTaxonomy
-    
+
     annotation_model_property = 'taxonomy_ssu'
 
 
@@ -678,7 +662,7 @@ class AnalysisOrganismLSURelationshipViewSet(  # NOQA
     m_mixins.AnalysisJobAnnotationMixin,
     m_viewsets.ListReadOnlyModelViewSet):
     """Retrieves LSU Taxonomic analysis for the given accession
-    Example: 
+    Example:
     ---
     `/analyses/MGYA00102827/taxonomy/lsu`
     ---
@@ -730,7 +714,7 @@ class AnalysisOrganismITSOneDBRelationshipViewSet(  # NOQA
     lookup_field = 'accession'
 
     annotation_model = m_models.AnalysisJobTaxonomy
- 
+
     annotation_model_property = 'taxonomy_itsonedb'
 
 
@@ -738,10 +722,10 @@ class AnalysisOrganismITSUniteRelationshipViewSet(  # NOQA
     m_mixins.AnalysisJobAnnotationMixin,
     m_viewsets.ListReadOnlyModelViewSet):
     """Retrieves ITS UNITE Taxonomic analysis for the given accession
-    Example: 
+    Example:
     ---
     `/analyses/MGYA00102827/taxonomy/unite`
-    ---    
+    ---
     """
     serializer_class = m_serializers.OrganismRetriveSerializer
 
@@ -770,7 +754,7 @@ class AnalysisTaxonomyOverview(APIView):
 
     def get(self, request, accession):
         """Get the AnalysisJob and then the AnalysisJobTaxonomy
-        """        
+        """
         job = get_object_or_404(
             emg_models.AnalysisJob,
             Q(pk=int(accession.lstrip('MGYA')))
@@ -885,7 +869,7 @@ class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
         request = self.request
 
         query_filter = M_Q()
-        
+
         filter_cog = request.GET.get('cog', '').upper()
         if filter_cog:
             query_filter |= M_Q(cogs__cog=filter_cog)
@@ -908,7 +892,7 @@ class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
 
         filter_gt = int(request.GET.get('gt', 5000) or 5000)
         filter_lt = int(request.GET.get('lt', 10000) or 10000)
-       
+
         query_filter &= (
             M_Q(length__gte=filter_gt) & M_Q(length__lte=filter_lt))
 
@@ -944,13 +928,13 @@ class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
             obj.result_directory,
             'contigs.fasta.fai')
         )
-        
+
         if os.path.isfile(fasta_path) and os.path.isfile(fasta_idx_path):
             output = io.StringIO()
             # TODO: handle errors
-            with pysam.Fastafile(filename=fasta_path, filepath_index=fasta_idx_path) as fasta:  
+            with pysam.Fastafile(filename=fasta_path, filepath_index=fasta_idx_path) as fasta:
                 rows = fasta.fetch(contig)
-                output.write('>' + emg_utils.assembly_contig_name(contig)  + '\n')
+                output.write('>' + emg_utils.assembly_contig_name(contig) + '\n')
                 for row in rows:
                     output.write(row)
             response = HttpResponse()
@@ -964,7 +948,7 @@ class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
         return Response('Contig {0} not found.'.format(fasta_path), status.HTTP_404_NOT_FOUND)
 
 
-class AnalysisContigAnnotationViewSet(viewsets.ViewSet): # viewsets.ReadOnlyModelViewSet?
+class AnalysisContigAnnotationViewSet(viewsets.ViewSet):
     """Get aa contig annotations gff file
     """
     lookup_field = 'contig_id'
@@ -1008,7 +992,7 @@ class AnalysisContigAnnotationViewSet(viewsets.ViewSet): # viewsets.ReadOnlyMode
         )
 
         if os.path.isfile(gff_path) and os.path.isfile(gff_idx_path):
-            # multiple_iterators = True as many processes 
+            # multiple_iterators = True as many processes
             # could be using the same file at the same moment
             output = io.StringIO()
             with pysam.TabixFile(filename=gff_path, index=gff_idx_path) as gff:
