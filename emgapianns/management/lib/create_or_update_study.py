@@ -17,6 +17,7 @@
 import logging
 
 from django.db.models import Q
+from django.utils import timezone
 from ena_portal_api import ena_handler
 
 from emgapi import models as emg_models
@@ -126,7 +127,9 @@ def update_or_create_study(study, study_result_dir, lineage, database):
                   'study_name': utils.sanitise_string(study.study_title),
                   'study_status': 'FINISHED',
                   'data_origination': data_origination,
-                  'last_update': study.last_updated,
+                  # README: We want to draw attention to updated studies,
+                  # therefore set the date for last updated to today
+                  'last_update': timezone.now(),
                   'submission_account_id': study.submission_account_id,
                   'biome': biome,
                   'result_directory': study_result_dir,
@@ -155,6 +158,7 @@ def run_create_or_update_study(study_accession, study_dir, lineage, database):
             study = ena_models.AssemblyStudy.objects.using(database).get(
                 Q(study_id=study_accession) | Q(project_id=study_accession))
         except AssemblyStudy.DoesNotExist:
-            raise AssemblyStudy.DoesNotExist("Could not find study {0} in the database. Program will exit now!".format(study_accession))
+            raise AssemblyStudy.DoesNotExist(
+                "Could not find study {0} in the database. Program will exit now!".format(study_accession))
 
     return update_or_create_study(study, study_dir, lineage, database)
