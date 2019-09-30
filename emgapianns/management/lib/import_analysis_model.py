@@ -28,7 +28,7 @@ class Run(Analysis):
     def __init__(self, secondary_study_accession, secondary_sample_accession, run_accession, library_strategy,
                  library_source):
         super().__init__(secondary_study_accession, secondary_sample_accession, run_accession,
-                         identify(library_strategy, library_source).value)
+                         identify(library_strategy, library_source))
 
 
 class Assembly(Analysis):
