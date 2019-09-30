@@ -55,6 +55,7 @@ class Command(BaseCommand):
     biome = None
     accession = None
     version = None
+    result_dir = None
 
     def add_arguments(self, parser):
         parser.add_argument('--rootpath',
@@ -80,7 +81,7 @@ class Command(BaseCommand):
         metadata = self.retrieve_metadata()
 
         # TODO: How to sanity check AMPLICON: SSU, LSU and ITS?
-        SanityCheck(self.accession, self.result_dir, metadata.experiment_type, self.version).check_all()
+        SanityCheck(self.accession, self.result_dir, metadata.experiment_type.value, self.version).check_all()
 
         self.call_import_study(metadata)
 
@@ -92,17 +93,20 @@ class Command(BaseCommand):
             self.call_import_assembly(metadata.analysis_accession)
 
         analysis = self.create_or_update_analysis(metadata, input_file_name)
-        self.upload_analysis_files(metadata.experiment_type, analysis, input_file_name)
+        self.upload_analysis_files(metadata.experiment_type.value, analysis, input_file_name)
 
-        self.upload_qc_stats()
+        self.upload_statistics()
 
-        self.populate_mongodb()
+        self.populate_mongodb_taxonomy()
+
+        if metadata.experiment_type != 'amplicon':
+            self.populate_mongodb_function_and_pathways()
 
         logger.info("Program finished successfully.")
 
     def call_import_study(self, metadata):
         logger.info('Import study {}'.format(metadata.secondary_study_accession))
-        study_dir = self.get_result_dir(utils.get_study_dir(self.result_dir))
+        study_dir = utils.get_result_dir(utils.get_study_dir(self.result_dir))
         call_command('import_study',
                      metadata.secondary_study_accession,
                      self.biome,
@@ -114,26 +118,33 @@ class Command(BaseCommand):
                      metadata.sample_accession,
                      '--biome', self.biome)
 
-    @staticmethod
-    def call_import_run(run_accession):
+    def call_import_run(self, run_accession):
         logger.info('Import run {}'.format(run_accession))
-        call_command('import_run', run_accession)
+        call_command('import_run', run_accession, '--biome', self.biome)
 
-    @staticmethod
-    def call_import_assembly(analysis_accession):
+    def call_import_assembly(self, analysis_accession):
         logger.info('Import assembly {}'.format(analysis_accession))
-        call_command('import_assembly', analysis_accession)
+        call_command('import_assembly', analysis_accession, '--result_dir', self.result_dir, '--biome', self.biome)
 
     def retrieve_metadata(self):
         is_assembly = utils.is_assembly(self.accession)
         logger.info("Identified assembly accession: {0}".format(is_assembly))
 
         if is_assembly:
-            analysis = Assembly(**ena.get_assembly(assembly_name=self.accession))
+            # assembly = ena.get_assembly(assembly_name=self.accession)
+            assembly = ena.get_assembly(assembly_name=self.accession,
+                                        fields='secondary_study_accession,secondary_sample_accession,'
+                                               'analysis_alias,analysis_accession')
+            if 'sample_accession' in assembly:
+                del assembly['sample_accession']
+            if 'analysis_alias' in assembly:
+                assembly['run_accession'] = assembly['analysis_alias']
+                del assembly['analysis_alias']
+            analysis = Assembly(**assembly)
         else:  # Run accession detected
             run = ena.get_run(run_accession=self.accession,
                               fields='secondary_study_accession,secondary_sample_accession,'
-                                     'run_accession,library_strategy')
+                                     'run_accession,library_strategy,library_source')
             if 'sample_accession' in run:
                 del run['sample_accession']
             analysis = Run(**run)
@@ -149,7 +160,7 @@ class Command(BaseCommand):
         return emg_models.Run.objects.using(self.emg_db_name).get(accession=run_accession)
 
     def get_emg_assembly(self, assembly_accession):
-        return emg_models.Assembly.objects.using(self.emg_db_name).get(analysis_accession=assembly_accession)
+        return emg_models.Assembly.objects.using(self.emg_db_name).get(accession=assembly_accession)
 
     def get_pipeline_by_version(self):
         return emg_models.Pipeline.objects.using(self.emg_db_name).get(release_version=self.version)
@@ -157,14 +168,8 @@ class Command(BaseCommand):
     def get_analysis_status(self, description):
         return emg_models.AnalysisStatus.objects.using(self.emg_db_name).get(analysis_status=description)
 
-    def get_result_dir(self, result_dir, substring="results/"):
-        """
-
-        :param substring:
-        :return:
-        """
-        pos = result_dir.find(substring)
-        return result_dir[pos + len(substring):]
+    def get_experiment_type(self, experiment_typ):
+        return emg_models.ExperimentType.objects.using(self.emg_db_name).get(experiment_type=experiment_typ)
 
     def create_or_update_analysis(self, metadata, input_file_name):
         pipeline = self.get_pipeline_by_version()
@@ -174,10 +179,11 @@ class Command(BaseCommand):
         defaults = {
             'study': study,
             'sample': sample,
-            'result_directory': self.get_result_dir(self.result_dir),
+            'result_directory': utils.get_result_dir(self.result_dir),
             're_run_count': 0,
             'input_file_name': input_file_name,
-            'is_production_run': 1,
+            # Removed due to (1406, "Data too long for column 'IS_PRODUCTION_RUN' at row 1")
+            # 'is_production_run': 1,
             'analysis_status': self.get_analysis_status('completed'),
             'submit_time': timezone.now(),
             'complete_time': timezone.now(),
@@ -199,11 +205,15 @@ class Command(BaseCommand):
             defaults['experiment_type'] = run.experiment_type
             defaults['run_status_id'] = run.status_id
         else:
+            run = self.get_emg_run(metadata.run_accession)
             assembly = self.get_emg_assembly(metadata.analysis_accession)
             comp_key.update({
-                'external_run_ids': assembly.analysis_accession,
-                'assembly': assembly
+                'external_run_ids': assembly.accession,
+                'assembly': assembly,
             })
+            defaults['experiment_type'] = self.get_experiment_type('assembly')
+            defaults['instrument_model'] = run.instrument_model
+            defaults['instrument_platform'] = run.instrument_platform
             pass
         analysis, _ = emg_models.AnalysisJob.objects.using(self.emg_db_name).update_or_create(**comp_key,
                                                                                               defaults=defaults)
@@ -213,13 +223,20 @@ class Command(BaseCommand):
         dl_set = get_conf_downloadset(self.result_dir, input_file_name, self.emg_db_name, experiment_type, self.version)
         dl_set.insert_files(analysis_job)
 
-    def upload_qc_stats(self):
-        logger.info('Importing QC stats')
-        call_command('import_qc', self.accession, self.rootpath)
+    def upload_statistics(self):
+        """
+            Please note that the name of the import module is misleading as this is not just about QC stats but also
+            about functional stats
+        :return:
+        """
+        logger.info('Importing statistics...')
+        call_command('import_qc', self.accession, self.rootpath, '--pipeline', self.version)
 
-    def populate_mongodb(self):
-        results_dir = utils.retrieve_existing_result_dir(self.rootpath, self.accession)
-        logger.info('Importing Taxonomy stats')
-        call_command('import_taxonomy', self.accession, results_dir)
-        for sum_type in ['.ipr', '.go', '.go_slim']:
-            call_command('import_summary', self.accession, results_dir, sum_type)
+    def populate_mongodb_taxonomy(self):
+        logger.info('Importing Taxonomy data...')
+        call_command('import_taxonomy', self.accession, self.rootpath, '--pipeline', self.version)
+
+    def populate_mongodb_function_and_pathways(self):
+        logger.info('Importing functional and pathway data...')
+        for sum_type in ['.ipr', '.go', '.go_slim', '.kegg_paths', '.pfam', '.ko', '.gprops']:
+            call_command('import_summary', self.accession, self.rootpath, sum_type, '--pipeline', self.version)
