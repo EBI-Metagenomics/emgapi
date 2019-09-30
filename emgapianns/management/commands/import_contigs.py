@@ -35,12 +35,13 @@ class Command(EMGBaseCommand):
     result_dir = None
 
     def add_arguments(self, parser):
-        super().add_arguments(parser)     
+        parser.add_argument('accession', action='store', type=str,)
+        parser.add_argument('--pipeline', action='store', dest='pipeline')
         parser.add_argument('--faix', action='store', type=str,
                             help='Fasta index file.', required=True)
         parser.add_argument('--gff', action='store', type=str,
                             help='GFF with the contigs annotations.', required=True)
-        parser.add_argument('--min-length', action='store', type=int, default=1000,
+        parser.add_argument('--min-length', action='store', type=int, default=500,
                             help='Only import contigs longer that this value.', required=False)
 
     def populate_from_accession(self, options):
@@ -133,7 +134,8 @@ class Command(EMGBaseCommand):
                     feature_count = Counter(annotations['InterPro'])
                     for feature in feature_count:
                         contig.interpros.append(
-                            m_models.AnalysisJobInterproIdentifierAnnotation(interpro_identifier=feature, count=feature_count[feature])
+                            m_models.AnalysisJobInterproIdentifierAnnotation(
+                                interpro_identifier=feature, count=feature_count[feature])
                         )
                 if 'GO' in annotations:
                     feature_count = Counter(annotations['GO'])
