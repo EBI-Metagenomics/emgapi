@@ -82,8 +82,8 @@ class Command(EMGBaseCommand):
                             reader, obj, 'taxonomy_lsu')
                 if obj.pipeline.release_version == '5.0':
                     # This version of the pipeline introduced ITS
-                    self.load_its(res, obj, 'ITSoneDB')
-                    self.load_its(res, obj, 'UNITE')
+                    self.load_its(res, obj, 'itsonedb')
+                    self.load_its(res, obj, 'unite')
             else:
                 logger.error("Pipeline not supported SKIPPING!")
         else:
@@ -95,19 +95,19 @@ class Command(EMGBaseCommand):
         Arguments:
         res  -- root path of the results
         ajob -- AnalysisJob
-        db  --  ITS DB (oneDB or UNITE)
+        db  --  ITS DB (unite or itsonedb)
 
         If the file is not found then the method will fail silently.
         """
-        if db not in ('ITSoneDB', 'UNITE',):
+        if db not in ('itsonedb', 'unite',):
             logger.error('ITS not supported {}'.format(db))
             return
 
-        _f = os.path.join(res, 'ITS', db, '{}_ITS_{}.fasta.mseq.txt'.format(ajob.input_file_name, db))
+        _f = os.path.join(res, 'its', db, '{}_{}.fasta.mseq.txt'.format(ajob.input_file_name, db))
         if not os.path.exists(_f):
             # OK, let's try in lowercase
-            _f = os.path.join(res, 'ITS', db.lower(),
-                             '{}_ITS_{}.fasta.mseq.txt'.format(ajob.input_file_name, db.lower()))
+            _f = os.path.join(res, 'its', db.lower(),
+                             '{}_{}.fasta.mseq.txt'.format(ajob.input_file_name, db.lower()))
             if not os.path.exists(_f):
                 logger.warn('ITS file {} not found (not even with lowercase).'.format(_f))
                 return
@@ -116,7 +116,7 @@ class Command(EMGBaseCommand):
         
         with open(_f) as csvfile:
             reader = csv.reader(csvfile, delimiter='\t')
-            field = db.replace('ITS', '').lower()
+            field = db.replace('its', '').lower()
             self.load_organism_from_summary_file(
                 reader, ajob, 'taxonomy_its{}'.format(field))
 
