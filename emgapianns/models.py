@@ -40,17 +40,18 @@ class InterproIdentifier(BaseAnnotation):
 
 class KeggModule(BaseAnnotation):
     """KEGG MODULE.
-    KEGG MODULE is a collection of manually defined functional units, called KEGG modules and identified 
-    by the M numbers, used for annotation and biological interpretation of sequenced genomes. 
+    KEGG MODULE is a collection of manually defined functional units, called KEGG modules and identified
+    by the M numbers, used for annotation and biological interpretation of sequenced genomes.
     There are three types of KEGG modules:
 
-    pathway modules – representing tight functional units in KEGG metabolic pathway maps, 
+    pathway modules – representing tight functional units in KEGG metabolic pathway maps,
                       such as M00002 (Glycolysis, core module involving three-carbon compounds)
-    structural complexes – often forming molecular machineries, such as M00144 (NADH:quinone oxidoreductase, prokaryotes)
-    functional sets – other types of functional units, especially those that can be used to infer 
+    structural complexes – often forming molecular machineries, such as M00144 (NADH:quinone oxidoreductase,
+                           prokaryotes)
+    functional sets – other types of functional units, especially those that can be used to infer
                       phenotypes, such as M00363 (EHEC pathogenicity signature, Shiga toxin)
 
-    For more information: https://www.genome.jp/kegg/module.html  
+    For more information: https://www.genome.jp/kegg/module.html
     """
     name = mongoengine.StringField(required=True)
 
