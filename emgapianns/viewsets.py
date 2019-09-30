@@ -15,7 +15,6 @@
 # limitations under the License.
 
 from django.http import Http404
-from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import mixins
@@ -53,8 +52,8 @@ class ListReadOnlyModelViewSet(emg_mixins.ListModelMixin,
 
 class AnalysisRelationshipViewSet(ListReadOnlyModelViewSet):
     """Get the the Analysis that have a particular Model
-    
-    This mixin povides abstracts the common code to get the Analysis that have a 
+
+    This mixin povides abstracts the common code to get the Analysis that have a
     particular annotation.
 
     For example: get all the analysis that have the Pfam entry X.
@@ -99,7 +98,7 @@ class AnalysisRelationshipViewSet(ListReadOnlyModelViewSet):
         except DoesNotExist:
             raise Http404(('No %s matches the given query.' %
                            self.annotation_model.__class__.__name__))
-        
+
         job_ids = self.get_job_ids(annotation)
 
         return emg_models.AnalysisJob.objects \
