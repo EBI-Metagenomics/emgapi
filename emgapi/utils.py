@@ -83,7 +83,7 @@ def assembly_contig_coverage(name):
     Example:
     From NODE-1-length-34650-cov-6.786732 will return 6.786732 or '-' if failed. 
     """
-    match = re.match(r'.*cov-(?P<cov>\d*\.?\d*)', name)
+    match = re.match(r'.*cov[-|_](?P<cov>\d*\.?\d*)', name)
     if match:
         return match.group('cov')
-    return '-'
+    return 0

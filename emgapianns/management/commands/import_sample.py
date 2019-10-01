@@ -147,7 +147,8 @@ class Command(BaseCommand):
             'var_val_ucv': value,
             'units': unit
         }
-        emg_models.SampleAnn.objects.using(self.emg_db_name).update_or_create(sample=sample, var=var, defaults=defaults)
+        emg_models.SampleAnn.objects.using(self.emg_db_name) \
+            .update_or_create(sample=sample, var=var, defaults=defaults)
 
     @staticmethod
     def get_ena_db_sample(accession):

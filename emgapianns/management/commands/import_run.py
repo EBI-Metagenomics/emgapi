@@ -19,7 +19,7 @@ import os
 from django.core.management import BaseCommand, call_command
 from emgapi import models as emg_models
 from emgapianns.management.lib import utils
-from emgapianns.management.lib.import_analysis_model import ExperimentType, identify
+from emgapianns.management.lib.import_analysis_model import identify
 from emgena import models as ena_models
 from ena_portal_api import ena_handler
 
