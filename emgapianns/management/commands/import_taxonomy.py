@@ -25,7 +25,7 @@ ORGANISM_RANK = {
     '4.1': ['super kingdom', 'kingdom', 'phylum', 'class', 'order', 'family',
             'genus', 'species'],
     '5.0': ['super kingdom', 'kingdom', 'phylum', 'class', 'order', 'family',
-            'genus', 'species'],            
+            'genus', 'species'],
 }
 
 
@@ -91,7 +91,6 @@ class Command(EMGBaseCommand):
 
     def load_its(self, res, ajob, db):
         """Load ITS results into Mongo.
-        
         Arguments:
         res  -- root path of the results
         ajob -- AnalysisJob
@@ -107,13 +106,13 @@ class Command(EMGBaseCommand):
         if not os.path.exists(_f):
             # OK, let's try in lowercase
             _f = os.path.join(res, 'ITS', db.lower(),
-                             '{}_ITS_{}.fasta.mseq.txt'.format(ajob.input_file_name, db.lower()))
+                              '{}_ITS_{}.fasta.mseq.txt'.format(ajob.input_file_name, db.lower()))
             if not os.path.exists(_f):
                 logger.warn('ITS file {} not found (not even with lowercase).'.format(_f))
                 return
 
         logger.info('ITS {} loading: {}'.format(db, _f))
-        
+
         with open(_f) as csvfile:
             reader = csv.reader(csvfile, delimiter='\t')
             field = db.replace('ITS', '').lower()

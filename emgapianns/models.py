@@ -75,6 +75,12 @@ class KeggOrtholog(BaseAnnotation):
     pass
 
 
+class AntiSmashGeneCluster(BaseAnnotation):
+    """antiSMASH gene cluster
+    """
+    pass
+
+
 class GenomeProperty(BaseAnnotation):
     """Genome property
     """
@@ -202,6 +208,20 @@ class AnalysisJobKeggOrthologAnnotation(BaseAnalysisJobAnnotation):
         return self.ko.description
 
 
+class AnalysisJobAntiSmashGCAnnotation(BaseAnalysisJobAnnotation):
+    """antiSMASH gene cluster on a given Analysis Job
+    """
+    gene_cluster = mongoengine.ReferenceField(AntiSmashGeneCluster, required=True)
+
+    @property
+    def accession(self):
+        return self.gene_cluster.accession
+
+    @property
+    def description(self):
+        return self.gene_cluster.description
+
+
 class BaseAnalysisJob(mongoengine.Document):
 
     analysis_id = mongoengine.StringField(primary_key=True, required=True)
@@ -259,6 +279,15 @@ class AnalysisJobGenomeProperty(BaseAnalysisJob):
         mongoengine.EmbeddedDocumentField(AnalysisJobGenomePropAnnotation),
         required=False, ordering='count', reverse=True)
 
+
+class AnalysisJobAntiSmashGeneCluser(BaseAnalysisJob):
+    """antiSMASH gene clusters for an analysis
+    """
+    antismash_gene_clusters = mongoengine.SortedListField(
+        mongoengine.EmbeddedDocumentField(AnalysisJobAntiSmashGCAnnotation),
+        required=False, ordering='count', reverse=True
+    )
+    
 
 class Organism(mongoengine.Document):
     """Taxonomic model
@@ -337,7 +366,8 @@ class AnalysisJobTaxonomy(mongoengine.Document):
 
 class AnalysisJobContig(mongoengine.Document):
 
-    contig_id = mongoengine.StringField(primary_key=True)
+    contig_id = mongoengine.StringField(required=True,
+                                        unique_with=['accession','pipeline_version'])
     length = mongoengine.IntField()
     coverage = mongoengine.FloatField()
 
@@ -354,9 +384,11 @@ class AnalysisJobContig(mongoengine.Document):
 
     meta = {
         'indexes': [
+            'contig_id',
             'analysis_id',
             'accession',
             'job_id',
+            'pipeline_version',
             'cogs.cog',
             'keggs.ko',
             'gos.go_term',
