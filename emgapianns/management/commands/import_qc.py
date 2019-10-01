@@ -1,12 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import os
 import csv
 import logging
+import os
 
 from emgapi import models as emg_models
-
 from ..lib import EMGBaseCommand
 
 logger = logging.getLogger(__name__)
@@ -61,8 +60,10 @@ class Command(EMGBaseCommand):
                 var = emg_models.AnalysisMetadataVariableNames.objects \
                     .get(var_name=row[0])
             if var is not None:
-                job_ann = emg_models.AnalysisJobAnn.objects.get_or_create(
-                    job=job, var=var, var_val_ucv=row[1]
+                job_ann, created = emg_models.AnalysisJobAnn.objects.update_or_create(
+                    job=job, var=var,
+                    defaults={'var_val_ucv': row[1]}
                 )
+
                 anns.append(job_ann)
         logger.info("Total %d Annotations for Run: %s" % (len(anns), job))

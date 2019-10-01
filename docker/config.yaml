@@ -1,12 +1,20 @@
 emg:
   databases:
+    # default:
+    #   ENGINE: 'django.db.backends.mysql'
+    #   NAME: 'emg'
+    #   USER: 'root'
+    #   PASSWORD: ''
+    #   HOST: 0.0.0.0 # localhost won't work with docker
+    #   PORT: 3306
+  databases:
     default:
       ENGINE: 'django.db.backends.mysql'
-      NAME: 'emg'
-      USER: 'root'
-      PASSWORD: ''
-      HOST: 0.0.0.0 # localhost won't work with docker
-      PORT: 3306
+      NAME: emg
+      USER: emguser
+      PASSWORD: emguser
+      HOST: mysql-vm-076.ebi.ac.uk
+      PORT: 4499
   
   # Is this used?
   # session_engine: 'django.contrib.sessions.backends.cache'
@@ -16,7 +24,10 @@ emg:
   #     LOCATION: "redis://redis:6379/0"
   #     KEY_PREFIX: "emg"
 
+  debug: true
   allowed_host: '*'
+  prefix: '/metagenomics/api'
+  results_dir: '/home/mbc/projects/emgapi/results/'
 
   secure_cookies: false
 
@@ -24,9 +35,15 @@ emg:
     - 'emgapi.backends.EMGBackend'
     - 'django.contrib.auth.backends.ModelBackend'
 
+  # mongodb:
+  #   db: 'emgapi'
+  #   host: 'localhost'
+
   mongodb:
-    db: 'emg'
-    host: 'localhost'
+    db: 'emgapi'
+    host: 'mongodb://mongos-hxvm7-dev-001.ebi.ac.uk/emgapi?authSource=admin'
+    username: 'emgapi'
+    password: 'OfdduXhyGzu1'
 
   documentation:
     title: 'EBI Metagenomics API'
