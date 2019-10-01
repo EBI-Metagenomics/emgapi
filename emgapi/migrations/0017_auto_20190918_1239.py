@@ -62,6 +62,8 @@ def create_download_description(apps, schema_editor):
         ("Complete Pfam annotation", "Pfam annotation"),
         ("KEGG orthologes annotation", "KEGG orthologes annotation"),
         ("Genome Properties annotation", "Genome Properties annotation"),
+        ("antiSMASH annotation", "antiSMASH annotation"),
+        ("Diamond annotation", "Diamond annotation"),
     )
     _downloads = list()
     for d in downloads:
@@ -74,6 +76,24 @@ def create_download_description(apps, schema_editor):
     DownloadDescriptionLabel.objects.bulk_create(_downloads)
 
 
+def create_fileformats(apps, schema_editor):
+    FileFormat = apps.get_model("emgapi", "FileFormat")
+    file_formats = (
+        ("EMBL", "embl", True),
+        ("GenBank", "gbk", True),
+    )
+    _formats = list()
+    for file_format in file_formats:
+        _formats.append(
+            FileFormat(
+                format_name=file_format[0],
+                format_extension=file_format[1],
+                compression=file_format[2],
+            )
+        )
+    FileFormat.objects.bulk_create(_formats)
+
+
 class Migration(migrations.Migration):
     dependencies = [
         ('emgapi', '0016_auto_20190913_1512'),
@@ -84,4 +104,5 @@ class Migration(migrations.Migration):
         migrations.RunPython(create_group_types),
         migrations.RunPython(create_subdirs),
         migrations.RunPython(create_download_description),
+        migrations.RunPython(create_fileformats),
     ]
