@@ -14,10 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-import os
 from collections import Counter
 
-from django.core.management import BaseCommand, call_command
 from emgapianns import models as m_models
 
 from emgapi.utils import assembly_contig_coverage
@@ -49,7 +47,7 @@ class Command(EMGBaseCommand):
         for analysis_job in self.obj_list:
             self.load_contigs(analysis_job, options)
 
-    def load_contigs(self, analysis_job, options):
+    def load_contigs(self, analysis_job, options):  # noqa: C901
         """Load the contigs in Mongo
         """
         logger.info('CLI {}'.format(options))
@@ -83,11 +81,10 @@ class Command(EMGBaseCommand):
         # Remove contigs
         m_models.AnalysisJobContig.objects.filter(
             analysis_id=str(analysis_job.job_id),
-            accession = analysis_job.accession,
+            accession=analysis_job.accession,
             job_id=analysis_job.job_id,
             pipeline_version=analysis_job.pipeline.release_version).delete()
 
-        # FIXME: DRY
         with open(faix, 'r') as fasta:
             new_contigs = []
             for line in fasta:
@@ -102,7 +99,7 @@ class Command(EMGBaseCommand):
                     length=length,
                     coverage=assembly_contig_coverage(contig_id),
                     analysis_id=str(analysis_job.job_id),
-                    accession = analysis_job.accession,
+                    accession=analysis_job.accession,
                     job_id=analysis_job.job_id,
                     pipeline_version=analysis_job.pipeline.release_version
                 )
@@ -111,24 +108,24 @@ class Command(EMGBaseCommand):
                 contig.pfams = list()
                 contig.interpros = list()
                 contig.gos = list()
-                                
+
                 if 'KEGG' in annotations:
                     feature_count = Counter(annotations['KEGG'])
                     for feature in feature_count:
                         contig.keggs.append(
-                            m_models.AnalysisJobKeggOrthologAnnotation(ko=feature, count=feature_count[feature])    
+                            m_models.AnalysisJobKeggOrthologAnnotation(ko=feature, count=feature_count[feature])
                         )
                 if 'COG' in annotations:
                     feature_count = Counter(annotations['COG'])
                     for feature in feature_count:
                         contig.cogs.append(
-                            m_models.AnalysisJobCOGAnnotation(cog=feature, count=feature_count[feature])    
+                            m_models.AnalysisJobCOGAnnotation(cog=feature, count=feature_count[feature])
                         )
                 if 'Pfam' in annotations:
                     feature_count = Counter(annotations['Pfam'])
                     for feature in feature_count:
                         contig.pfams.append(
-                            m_models.AnalysisJobPfamAnnotation(pfam_entry=feature, count=feature_count[feature])    
+                            m_models.AnalysisJobPfamAnnotation(pfam_entry=feature, count=feature_count[feature])
                         )
                 if 'InterPro' in annotations:
                     feature_count = Counter(annotations['InterPro'])

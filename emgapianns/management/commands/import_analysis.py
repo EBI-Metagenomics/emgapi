@@ -205,12 +205,13 @@ class Command(BaseCommand):
                 'assembly': assembly
             })
             pass
-        analysis, _ = emg_models.AnalysisJob.objects.using(self.emg_db_name).update_or_create(**comp_key,
-                                                                                              defaults=defaults)
+        analysis, _ = emg_models.AnalysisJob.objects.using(self.emg_db_name) \
+                                                    .update_or_create(**comp_key, defaults=defaults)
         return analysis
 
     def upload_analysis_files(self, experiment_type, analysis_job, input_file_name):
-        dl_set = get_conf_downloadset(self.result_dir, input_file_name, self.emg_db_name, experiment_type, self.version)
+        dl_set = get_conf_downloadset(self.result_dir, input_file_name,
+                                      self.emg_db_name, experiment_type, self.version)
         dl_set.insert_files(analysis_job)
 
     def upload_qc_stats(self):

@@ -861,7 +861,7 @@ class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
         return get_object_or_404(query_set, Q(pk=pk))
 
     def get_queryset(self):
-        """
+        """Filter the analysis job contigs
         """
         obj = self.get_object()
 
@@ -890,17 +890,25 @@ class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
         if filter_pfam:
             query_filter |= M_Q(pfams__pfam_entry=filter_pfam)
 
-        filter_gt = int(request.GET.get('gt', 5000) or 5000)
-        filter_lt = int(request.GET.get('lt', 10000) or 10000)
+        len_filter = M_Q()
+        filter_gt = request.GET.get('gt', None)
+        filter_lt = request.GET.get('lt', None)
 
-        query_filter &= (
-            M_Q(length__gte=filter_gt) & M_Q(length__lte=filter_lt))
+        if filter_gt:
+            len_filter &= M_Q(length__gte=filter_gt)
+        if filter_lt:
+            len_filter &= M_Q(length__lte=filter_lt)
+
+        if len_filter:
+            query_filter &= (len_filter)
 
         search = request.GET.get('search', '')
         if search:
             query_filter &= M_Q(contig_id__icontains=search)
 
-        return queryset.filter(M_Q(job_id=obj.job_id) & query_filter)
+        identifier = M_Q(job_id=obj.job_id, pipeline_version=obj.pipeline.release_version)
+
+        return queryset.filter(identifier & query_filter)
 
     def retrieve(self, request, *args, **kwargs):
         """
