@@ -32,8 +32,10 @@ class EMGBaseCommand(BaseCommand):
         )
         parser.add_argument(
             '--pipeline',
+            help='Pipeline version',
             action='store',
-            dest='pipeline'
+            dest='pipeline',
+            choices=['4.1', '5.0'], default='4.1'
         )
 
     def handle(self, *args, **options):
@@ -48,11 +50,11 @@ class EMGBaseCommand(BaseCommand):
         if self.accession:
             queryset = emg_models.AnalysisJob.objects \
                 .filter(
-                    Q(study__secondary_accession=self.accession) |
-                    Q(sample__accession=self.accession) |
-                    Q(run__accession=self.accession) |
-                    Q(assembly__accession=self.accession)
-                )
+                Q(study__secondary_accession=self.accession) |
+                Q(sample__accession=self.accession) |
+                Q(run__accession=self.accession) |
+                Q(assembly__accession=self.accession)
+            )
             if self.pipeline:
                 queryset = queryset.filter(
                     Q(pipeline__release_version=self.pipeline)
@@ -77,7 +79,7 @@ class EMGBaseCommand(BaseCommand):
         if os.stat(filename).st_size == 0:
             logger.error("Path %r doesn't exist. SKIPPING!" % filename)
             return
-        
+
         csvfile = open(filename)
         reader = csv.reader(csvfile, delimiter=delimiter)
         if skip_header:
