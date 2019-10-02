@@ -1,0 +1,53 @@
+├── ERR1817096_FASTQ.cmsearch.all.tblout.deoverlapped.gz
+├── ERR1817096_FASTQ.cmsearch.all.tblout.gz
+├── ERR1817096_FASTQ.fasta.chunks
+├── ERR1817096_FASTQ.fasta.gz
+├── qc-statistics
+│   ├── GC-distribution.out.full
+│   ├── GC-distribution.out.full_bin
+│   ├── GC-distribution.out.full_pcbin
+│   ├── nucleotide-distribution.out.full
+│   ├── seq-length.out.full
+│   ├── seq-length.out.full_bin
+│   ├── seq-length.out.full_pcbin
+│   └── summary.out
+├── qc_summary
+├── sequence-categorisation
+│   ├── 5S.fasta.chunks
+│   ├── 5S.fasta.gz
+│   ├── ITS_masked.fasta.chunks
+│   ├── ITS_masked.fasta.gz
+│   ├── LSU.fasta.chunks
+│   ├── LSU.fasta.gz
+│   ├── SSU.fasta.chunks
+│   └── SSU.fasta.gz
+└── taxonomy-summary
+    ├── its
+    │   ├── itsonedb
+    │   │   ├── ERR1817096_FASTQ_itsonedb.fasta.mseq.gz
+    │   │   ├── ERR1817096_FASTQ_itsonedb.fasta.mseq_hdf5.biom
+    │   │   ├── ERR1817096_FASTQ_itsonedb.fasta.mseq_json.biom
+    │   │   ├── ERR1817096_FASTQ_itsonedb.fasta.mseq.tsv
+    │   │   ├── ERR1817096_FASTQ_itsonedb.fasta.mseq.txt
+    │   │   └── krona.html
+    │   └── unite
+    │       ├── ERR1817096_FASTQ_unite.fasta.mseq.gz
+    │       ├── ERR1817096_FASTQ_unite.fasta.mseq_hdf5.biom
+    │       ├── ERR1817096_FASTQ_unite.fasta.mseq_json.biom
+    │       ├── ERR1817096_FASTQ_unite.fasta.mseq.tsv
+    │       ├── ERR1817096_FASTQ_unite.fasta.mseq.txt
+    │       └── krona.html
+    ├── LSU
+    │   ├── ERR1817096_FASTQ_LSU.fasta.mseq.gz
+    │   ├── ERR1817096_FASTQ_LSU.fasta.mseq_hdf5.biom
+    │   ├── ERR1817096_FASTQ_LSU.fasta.mseq_json.biom
+    │   ├── ERR1817096_FASTQ_LSU.fasta.mseq.tsv
+    │   ├── ERR1817096_FASTQ_LSU.fasta.mseq.txt
+    │   └── krona.html
+    └── SSU
+        ├── ERR1817096_FASTQ_SSU.fasta.mseq.gz
+        ├── ERR1817096_FASTQ_SSU.fasta.mseq_hdf5.biom
+        ├── ERR1817096_FASTQ_SSU.fasta.mseq_json.biom
+        ├── ERR1817096_FASTQ_SSU.fasta.mseq.tsv
+        ├── ERR1817096_FASTQ_SSU.fasta.mseq.txt
+        └── krona.html
