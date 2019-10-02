@@ -14,14 +14,16 @@ logger = logging.getLogger(__name__)
 
 class Command(EMGBaseCommand):
 
+    def __init__(self):
+        super().__init__()
+        self.suffixes = ['.ipr', '.go', '.go_slim', '.paths.kegg', '.pfam', '.ko', '.paths.gprops', '.antismash']
+        self.kegg_pathway_suffix = ['.paths.kegg']
+        self.joined_suffixes = self.suffixes + self.kegg_pathway_suffix
+
     def add_arguments(self, parser):
         super(Command, self).add_arguments(parser)
-        parser.add_argument(
-            'suffix', nargs='?', type=str,
-            default='.go_slim', choices=['.ipr', '.go', '.go_slim', '.kegg_paths',
-                                         '.pfam', '.ko', '.gprops', '.antismash'],
-            help='summary: .go_slim, .go, .ipr, .kegg_paths, .pfam,' +
-                 'ko, .gprops, .antismash (default: %(default)s)')
+        parser.add_argument('suffix', nargs='?', type=str, default='.go_slim', choices=self.joined_suffixes,
+                            help='Provide summary file suffix: ' + ' (default: %(default)s)')
 
     def populate_from_accession(self, options):
         logger.info("Found %d" % len(self.obj_list))
@@ -50,7 +52,7 @@ class Command(EMGBaseCommand):
         rootpath = options.get('rootpath', None)
         self.suffix = options.get('suffix', None)
 
-        if self.suffix in ['.ipr', '.go', '.go_slim', '.pfam', '.ko', '.gprops']:
+        if self.suffix in self.suffixes:
             name = '%s_summary%s' % (obj.input_file_name, self.suffix)
             source_file = os.path.join(rootpath, obj.result_directory, name)
             logger.info('Found: %s' % source_file)
@@ -58,8 +60,9 @@ class Command(EMGBaseCommand):
                 return
             self._parse_and_load_summary_file(source_file, rootpath, obj)
 
-        elif self.suffix in ['.kegg_paths']:
-            self.load_kegg_from_summary_file(obj, rootpath)
+        elif self.suffix in self.kegg_pathway_suffix:
+            name = '%s_summary%s' % (obj.input_file_name, self.suffix)
+            self.load_kegg_from_summary_file(obj, rootpath, name)
         else:
             logger.warning("Suffix {} not accepted!".format(self.suffix))
 
@@ -176,13 +179,11 @@ class Command(EMGBaseCommand):
             run.save()
             logger.info("Saved Run %r" % run)
 
-    def load_kegg_from_summary_file(self, obj, rootpath, subdir='kegg-pathways',
-                                    summary_filename='summary_pathways.txt',
-                                    matches_filename='matching_ko_pathways.txt',
-                                    missing_filename='missing_ko_pathways.txt',
-                                    delimiter='\t'):
+    @staticmethod
+    def load_kegg_from_summary_file(obj, rootpath, file_name, delimiter=','):
         """
             Load KEGG Modules results for a job into Mongo.
+
             KEGG results are composed of 3 files:
                 - summary file
                 - matching ko per pathway
@@ -204,27 +205,7 @@ class Command(EMGBaseCommand):
 
         analysis_keggs.save()
 
-        # fetching the match and mismatch files
-        def load_aux_file(data_file):
-            if not self._check_source_file(data_file):
-                return
-
-            result = {}
-            for module, completeness, ko_count, kos in self.get_reader(data_file, delimiter=delimiter):
-                result[module.strip()] = [
-                    float(completeness),
-                    int(ko_count),
-                    [k.strip() for k in kos.split(',')]
-                ]
-            return result
-
-        path = os.path.join(rootpath, obj.result_directory, subdir)
-        summary_infile = os.path.join(path, summary_filename)
-        matches_infile = os.path.join(path, matches_filename)
-        missing_infile = os.path.join(path, missing_filename)
-
-        matches = load_aux_file(matches_infile)
-        missings = load_aux_file(missing_infile)
+        summary_infile = os.path.join(rootpath, obj.result_directory, file_name)
 
         new_kmodules = []
         annotations = []
@@ -233,9 +214,11 @@ class Command(EMGBaseCommand):
             reader = csv.reader(csvfile, delimiter=delimiter)
             next(reader)  # skip header
 
-            for accession, completeness, pathway_name, pathway_class, matching_ko_count, missing_ko_count in reader:
+            for accession, completeness, pathway_name, pathway_class, matching_kos, missing_kos in reader:
                 accession = accession.strip()
                 completeness = float(completeness)
+                matching_kos_list = matching_kos.strip().split(",")
+                missing_kos_list = missing_kos.strip().split(",")
 
                 k_module = None
                 try:
@@ -249,15 +232,11 @@ class Command(EMGBaseCommand):
                     )
                     new_kmodules.append(k_module)
 
-                missing_kos = None
-                if accession in missings:
-                    missing_kos = missings[accession][2]
-
                 kpann = m_models.AnalysisJobKeggModuleAnnotation(
                     module=k_module,
                     completeness=completeness,
-                    matching_kos=matches[accession][2],
-                    missing_kos=missing_kos
+                    matching_kos=matching_kos_list,
+                    missing_kos=missing_kos_list
                 )
                 annotations.append(kpann)
 
@@ -346,7 +325,7 @@ class Command(EMGBaseCommand):
                                        m_models.KeggOrtholog,
                                        m_models.AnalysisJobKeggOrthologAnnotation,
                                        'ko')
-            elif self.suffix == '.gprops':
+            elif self.suffix == '.paths.gprops':
                 self.load_summary_file(reader,
                                        obj,
                                        m_models.AnalysisJobGenomeProperty,
@@ -361,7 +340,7 @@ class Command(EMGBaseCommand):
                                        'antismash_gene_clusters',
                                        m_models.AntiSmashGeneCluster,
                                        m_models.AnalysisJobAntiSmashGCAnnotation,
-                                       'gene_cluster')                                       
+                                       'gene_cluster')
             elif self.suffix == '.ipr':
                 self.load_ipr_from_summary_file(reader, obj)
             elif self.suffix in ('.go_slim', '.go'):
