@@ -179,22 +179,23 @@
       "alias": "{}_pfam.tsv",
       "compression": false,
       "description_label": "Pfam annotation",
-      "format_name": "TSV",
+      "format_name": "CSV",
       "group_type": "Functional analysis",
       "real_name": "{}_summary.pfam",
       "subdir": null
     },
     {
       "_accession_substitution": "full",
-      "_chunked": false,
+      "_chunked": true,
+      "chunk_file": "{}_summary.diamond.chunks",
       "_required": true,
       "downloadable": true,
-      "alias": "{}_diamond.tsv",
-      "compression": false,
+      "alias": "{}_diamond.tsv.gz",
+      "compression": true,
       "description_label": "Diamond annotation",
       "format_name": "TSV",
       "group_type": "Functional analysis",
-      "real_name": "{}_summary.diamond",
+      "real_name": "{}_summary.diamond.gz",
       "subdir": null
     },
     {
@@ -205,7 +206,7 @@
       "alias": "{}_ko.tsv",
       "compression": false,
       "description_label": "KEGG orthologes annotation",
-      "format_name": "TSV",
+      "format_name": "CSV",
       "group_type": "Functional analysis",
       "real_name": "{}_summary.ko",
       "subdir": null
@@ -220,7 +221,20 @@
       "description_label": "Genome Properties annotation",
       "format_name": "CSV",
       "group_type": "Pathways and Systems",
-      "real_name": "{}_summary.gprops",
+      "real_name": "{}_summary.paths.gprops",
+      "subdir": null
+    },
+    {
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "_required": true,
+      "downloadable": true,
+      "alias": "{}_kegg_pathways.csv",
+      "compression": false,
+      "description_label": "KEGG pathway annotation",
+      "format_name": "CSV",
+      "group_type": "Pathways and Systems",
+      "real_name": "{}_summary.paths.kegg",
       "subdir": null
     },
     {
