@@ -863,6 +863,19 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     def get_interproidentifier(self, obj):
         return None
 
+    antismash_gene_clusters = relations.SerializerMethodResourceRelatedField(  # NOQA
+        source='get_antismashgeneclusters',
+        model=m_models.AntiSmashGeneCluster,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:analysis-antismash-gene-clusters-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
+    )
+
+    def get_antismashgeneclusters(self, obj):
+        return None
+
     class Meta:
         model = emg_models.AnalysisJob
         exclude = (

@@ -62,6 +62,12 @@ mongo_router.register(
 )
 
 mongo_router.register(
+    r'annotations/antismash-gene-clusters',
+    m_views.AntiSmashGeneClusterViewSet,
+    base_name='antismash-gene-clusters'
+)
+
+mongo_router.register(
     r'annotations/go-terms/(?P<accession>[a-zA-Z0-9\:]+)/analyses',
     m_views.GoTermAnalysisRelationshipViewSet,
     base_name='goterms-analyses'
@@ -95,6 +101,12 @@ mongo_router.register(
     r'annotations/genome-properties/(?P<accession>[a-zA-Z0-9\:]+)/analyses',
     m_views.GenomePropertyAnalysisRelationshipViewSet,
     base_name='genome-properties-analyses'
+)
+
+mongo_router.register(
+    r'annotations/antismash-gene-clusters/(?P<accession>[a-zA-Z0-9\:]+)/analyses',
+    m_views.AntiSmashGeneClusterAnalysisRelationshipViewSet,
+    base_name='antismash-gene-clusters-analyses'
 )
 
 mongo_router.register(
@@ -170,6 +182,12 @@ router.register(
     r'analyses/(?P<accession>[^/]+)/genome-properties',
     m_views.AnalysisGenomePropertiesRelationshipViewSet,
     base_name='analysis-genomeproperties'
+)
+
+router.register(
+    r'analyses/(?P<accession>[^/]+)/antismash-gene-clusters',
+    m_views.AnalysisAntiSmashGeneClustersRelationshipViewSet,
+    base_name='analysis-antismash-gene-clusters'
 )
 
 router.register(

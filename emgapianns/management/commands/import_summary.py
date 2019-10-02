@@ -275,7 +275,7 @@ class Command(EMGBaseCommand):
 
         next(reader)  # skip header
 
-        for count, model_id, desciption in reader:
+        for count, model_id, description in reader:
             count = int(count)
 
             new_entity = None
@@ -284,7 +284,7 @@ class Command(EMGBaseCommand):
             except entity_model.DoesNotExist:
                 new_entity = entity_model(
                     accession=model_id,
-                    description=desciption
+                    description=description
                 )
                 new_entities.append(new_entity)
             new_annotation = ann_model(count=count)
