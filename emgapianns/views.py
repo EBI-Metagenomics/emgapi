@@ -262,6 +262,38 @@ class GenomePropViewSet(m_mixins.AnnotationRetrivalMixin, m_viewsets.ReadOnlyMod
             .retrieve(request, *args, **kwargs)
 
 
+class AntiSmashGeneClusterViewSet(m_mixins.AnnotationRetrivalMixin, m_viewsets.ReadOnlyModelViewSet):
+    """Provides list of antiSMASH gene clusters.
+    """
+    annotation_model = m_models.AntiSmashGeneCluster
+
+    serializer_class = m_serializers.AntiSmashGeneClusterSerializer
+
+    lookup_field = 'accession'
+    lookup_value_regex = '.*'
+
+    def get_serializer_class(self):
+        return super().get_serializer_class()
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of antiSMASH gene clusters
+        Example:
+        ---
+        `/annotations/antismash-gene-clusters`
+        """
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves an antiSMASH gene cluster
+        Example:
+        ---
+        `/annotations/antismash-gene-clusters/terpene`
+        """
+        return super().retrieve(request, *args, **kwargs)
+
+
 # FIXME: None of the RelationshipViewSet are working, on Master either...
 class GoTermAnalysisRelationshipViewSet(m_viewsets.AnalysisRelationshipViewSet):
     """
@@ -330,10 +362,24 @@ class PfamAnalysisRelationshipViewSet(m_viewsets.AnalysisRelationshipViewSet):
 
 class GenomePropertyAnalysisRelationshipViewSet(m_viewsets.AnalysisRelationshipViewSet):
     """
-    Retrieves list of analysis results for the given Genome Property term
+    Retrieves list of analysis results for the given antiSMASH gene cluster term
     Example:
     ---
-    `/annotations/genome-properties/GenProp0063/analyses`
+    `/annotations/antismash-gene-clusters/terpene/analyses`
+    """
+    annotation_model = m_models.AntiSmashGeneCluster
+
+    def get_job_ids(self, annotation):
+        return m_models.AnalysisJobAntiSmashGeneCluser.objects \
+            .filter(M_Q(antismash_gene_clusters__gene_cluster=annotation)) \
+            .distinct('job_id')
+
+
+class AntiSmashGeneClusterAnalysisRelationshipViewSet(m_viewsets.AnalysisRelationshipViewSet):
+    """Retrieves list of analysis results for the given Genome Property term
+    Example:
+    ---
+    `/annotations//GenProp0063/analyses`
     """
 
     annotation_model = m_models.GenomeProperty
@@ -507,6 +553,25 @@ class AnalysisGenomePropertiesRelationshipViewSet(  # NOQA
     annotation_model = m_models.AnalysisJobGenomeProperty
 
     annotation_model_property = 'genome_properties'
+
+
+class AnalysisAntiSmashGeneClustersRelationshipViewSet(m_mixins.AnalysisJobAnnotationMixin,
+                                                       m_viewsets.ListReadOnlyModelViewSet):
+    """Retrieves the antiSMASH gene clusters for the given accession
+    Example:
+    ---
+    `/analyses/MGYA00102827/antismash-gene-clusters`
+    """
+
+    serializer_class = m_serializers.AntiSmashGeneClusterRetrieveSerializer
+
+    pagination_class = m_page.MaxSetPagination
+
+    lookup_field = 'accession'
+
+    annotation_model = m_models.AnalysisJobAntiSmashGeneCluser
+
+    annotation_model_property = 'antismash_gene_clusters'
 
 
 class OrganismViewSet(m_viewsets.ListReadOnlyModelViewSet):
