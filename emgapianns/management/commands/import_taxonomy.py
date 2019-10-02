@@ -106,7 +106,7 @@ class Command(EMGBaseCommand):
         if not os.path.exists(_f):
             # OK, let's try in lowercase
             _f = os.path.join(res, 'its', db.lower(),
-                             '{}_{}.fasta.mseq.txt'.format(ajob.input_file_name, db.lower()))
+                              '{}_{}.fasta.mseq.txt'.format(ajob.input_file_name, db.lower()))
             if not os.path.exists(_f):
                 logger.warn('ITS file {} not found (not even with lowercase).'.format(_f))
                 return
@@ -172,7 +172,7 @@ class Command(EMGBaseCommand):
                 except KeyError:
                     name = 'Unusigned'
                     rank = None
-                    lineage = ["Unusigned"]
+                    lineage = ['Unusigned']
                     hierarchy = {}
                     domain = None
             organism = None

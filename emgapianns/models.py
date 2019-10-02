@@ -66,7 +66,9 @@ class PfamEntry(BaseAnnotation):
 class COG(BaseAnnotation):
     """COG entry
     """
-    meta = {'collection': 'cog'}
+    meta = {
+        'collection': 'cog'
+    }
 
 
 class KeggOrtholog(BaseAnnotation):
@@ -77,8 +79,13 @@ class KeggOrtholog(BaseAnnotation):
 
 class AntiSmashGeneCluster(BaseAnnotation):
     """antiSMASH gene cluster
+    antiSMASH uses some abbreviations internally to refer to the different
+    types of secondary metabolite clusters, a short explanation of the different
+    types can be found https://docs.antismash.secondarymetabolites.org/glossary/
     """
-    pass
+    meta = {
+        'collection': 'antismash_gene_cluster'
+    }
 
 
 class GenomeProperty(BaseAnnotation):
@@ -285,9 +292,12 @@ class AnalysisJobAntiSmashGeneCluser(BaseAnalysisJob):
     """
     antismash_gene_clusters = mongoengine.SortedListField(
         mongoengine.EmbeddedDocumentField(AnalysisJobAntiSmashGCAnnotation),
-        required=False, ordering='count', reverse=True
-    )
-    
+        required=False, ordering='count', reverse=True)
+
+    meta = {
+        'collection': 'analysis_job_antismash_gene_cluser'
+    }
+
 
 class Organism(mongoengine.Document):
     """Taxonomic model
@@ -365,9 +375,11 @@ class AnalysisJobTaxonomy(mongoengine.Document):
 
 
 class AnalysisJobContig(mongoengine.Document):
+    """An analysis job contig, this is used on assemblies
+    """
 
     contig_id = mongoengine.StringField(required=True,
-                                        unique_with=['accession','pipeline_version'])
+                                        unique_with=['accession', 'pipeline_version'])
     length = mongoengine.IntField()
     coverage = mongoengine.FloatField()
 
@@ -389,6 +401,8 @@ class AnalysisJobContig(mongoengine.Document):
             'accession',
             'job_id',
             'pipeline_version',
+            'length',  # ordering
+            'coverage',  # ordering
             'cogs.cog',
             'keggs.ko',
             'gos.go_term',

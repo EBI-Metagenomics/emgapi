@@ -107,6 +107,19 @@ class GenomePropertySerializer(m_serializers.DocumentSerializer,
         fields = '__all__'
 
 
+class AntiSmashGeneClusterSerializer(m_serializers.DocumentSerializer,
+                                     serializers.HyperlinkedModelSerializer):
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi_v1:antismash-gene-clusters-detail',
+        lookup_field='accession',
+    )
+
+    class Meta:
+        model = m_models.AntiSmashGeneCluster
+        fields = '__all__'
+
+
 class GoTermRetriveSerializer(m_serializers.DynamicDocumentSerializer,
                               serializers.HyperlinkedModelSerializer):
 
@@ -196,6 +209,21 @@ class GenomePropertyRetrieveSerializer(m_serializers.DynamicDocumentSerializer,
 
     class Meta:
         model = m_models.GenomeProperty
+        fields = '__all__'
+
+
+class AntiSmashGeneClusterRetrieveSerializer(m_serializers.DynamicDocumentSerializer,
+                                             serializers.HyperlinkedModelSerializer):
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi_v1:antismash-gene-clusters-detail',
+        lookup_field='accession',
+    )
+
+    count = serializers.IntegerField(required=True)
+
+    class Meta:
+        model = m_models.AntiSmashGeneCluster
         fields = '__all__'
 
 
