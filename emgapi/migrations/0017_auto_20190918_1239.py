@@ -53,7 +53,8 @@ def create_subdirs(apps, schema_editor):
 def create_download_description(apps, schema_editor):
     DownloadDescriptionLabel = apps.get_model("emgapi", "DownloadDescriptionLabel")
     downloads = (
-        ("All reads encoding 5S", "Reads encoding 5S"),
+        ("All reads encoding 5.8S", "Reads encoding 5.8S"),
+        ("All contigs encoding 5.8S", "Contigs encoding 5.8S"),
         ("All reads encoding ITS", "Reads encoding ITS (with SSU and LSU sequences masked)"),
         ("Taxonomic assignments (TSV)", "MAPseq ITSoneDB assignments"),
         ("Taxonomic assignments (TSV)", "MAPseq UNITE assignments"),
@@ -64,6 +65,8 @@ def create_download_description(apps, schema_editor):
         ("Genome Properties annotation", "Genome Properties annotation"),
         ("antiSMASH annotation", "antiSMASH annotation"),
         ("Diamond annotation", "Diamond annotation"),
+        ("KEGG pathway annotation", "KEGG pathway annotation"),
+        ("All predicted ORF", "Predicted ORF"),
     )
     _downloads = list()
     for d in downloads:
@@ -74,6 +77,8 @@ def create_download_description(apps, schema_editor):
             )
         )
     DownloadDescriptionLabel.objects.bulk_create(_downloads)
+    DownloadDescriptionLabel.objects.filter(
+        description="Protein sequence FASTA file of the species representative").delete()
 
 
 def create_fileformats(apps, schema_editor):
