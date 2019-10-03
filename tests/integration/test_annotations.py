@@ -22,7 +22,6 @@ from django.core.management import call_command
 
 from rest_framework import status
 
-# import fixtures
 from test_utils.emg_fixtures import *  # noqa
 
 
@@ -109,41 +108,41 @@ class TestAnnotations(object):
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_empty(self, client, run_emptyresults):
-        job = run_emptyresults.accession
-        assert job == 'MGYA00001234'
+        assert run_emptyresults.release_version == '4.1'
+        assert run_emptyresults.accession == 'MGYA00001234'
 
-        call_command('import_summary', job,
+        accession = run_emptyresults.accession
+
+        call_command('import_summary', accession,
                      os.path.dirname(os.path.abspath(__file__)),
                      suffix='.go_slim')
-        call_command('import_summary', job,
+        call_command('import_summary', accession,
                      os.path.dirname(os.path.abspath(__file__)),
                      suffix='.go')
-        call_command('import_summary', job,
+        call_command('import_summary', accession,
                      os.path.dirname(os.path.abspath(__file__)),
                      suffix='.ipr')
 
-        url = reverse("emgapi_v1:analysis-goslim-list",
-                      args=[job])
+        url = reverse('emgapi_v1:analysis-goslim-list', args=[accession])
         response = client.get(url)
-        assert response.status_code == status.HTTP_200_OK
-        rsp = response.json()
 
+        assert response.status_code == status.HTTP_200_OK
+
+        rsp = response.json()
         assert len(rsp['data']) == 0
 
-        url = reverse("emgapi_v1:analysis-goterms-list",
-                      args=[job])
+        url = reverse('emgapi_v1:analysis-goterms-list', args=[accession])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
-        rsp = response.json()
 
+        rsp = response.json()
         assert len(rsp['data']) == 0
 
-        url = reverse("emgapi_v1:analysis-interpro-list",
-                      args=[job])
+        url = reverse('emgapi_v1:analysis-interpro-list', args=[accession])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
-        rsp = response.json()
 
+        rsp = response.json()
         assert len(rsp['data']) == 0
 
     @pytest.mark.parametrize(

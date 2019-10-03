@@ -1,8 +1,10 @@
+import os
+
 import pytest
 from django.test import TransactionTestCase
-from emgapianns.management.commands.import_sample import Command
-import os
+
 from emgapi import models as emg_models
+from emgapianns.management.commands.import_sample import Command
 from test_utils.emg_fixtures import *  # noqa
 
 # Integrations tests requiring access to the ERAPRO database and emg_backlog_2 on prod database
@@ -10,13 +12,12 @@ from test_utils.emg_fixtures import *  # noqa
 
 
 @pytest.mark.django_db
-@pytest.mark.skipif("TRAVIS" in os.environ and os.environ["TRAVIS"] == "true", reason="Skipping this test on Travis CI."
-                                                                                      " as internal databases are "
-                                                                                      "required for full integration "
-                                                                                      "tests")
+@pytest.mark.skipif('TRAVIS' in os.environ and os.environ['TRAVIS'] == 'true',
+                    reason='Skipping this test on Travis CI as internal databases are '
+                           'required for full integration tests')
 class TestImportSample(TransactionTestCase):
-    @pytest.mark.usefixtures("biome")
-    @pytest.mark.usefixtures("var_names")
+    @pytest.mark.usefixtures('biome')
+    @pytest.mark.usefixtures('var_names')
     def test_import_sample_should_load_sample(self):
         accession = 'ERS1282031'
         cmd = Command()

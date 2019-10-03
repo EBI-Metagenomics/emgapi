@@ -51,7 +51,9 @@ class AnalysisJobAnnotationMixin:
             analysis = self.annotation_model.objects \
                     .get(analysis_id=str(job.job_id))
         except self.annotation_model.DoesNotExist:
-            raise Http404
+            # Return an empty list, the entity exists
+            # but it doesn't have annotations
+            return []
 
         return getattr(analysis, self.annotation_model_property, [])
 

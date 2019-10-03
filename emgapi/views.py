@@ -375,8 +375,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         `/studies/recent`
         """
         limit = settings.EMG_DEFAULT_LIMIT
-        queryset = emg_models.Study.objects \
-                       .recent(self.request)[:limit]
+        queryset = emg_models.Study.objects.recent(self.request)[:limit]
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(

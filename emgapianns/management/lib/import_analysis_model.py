@@ -17,7 +17,8 @@ from enum import Enum
 
 
 class Analysis(object):
-    def __init__(self, secondary_study_accession, secondary_sample_accession, run_accession, experiment_type, **kwargs):
+    def __init__(self, secondary_study_accession, secondary_sample_accession, run_accession,
+                 experiment_type, **kwargs):
         self.secondary_study_accession = secondary_study_accession
         self.sample_accession = secondary_sample_accession
         self.run_accession = run_accession
