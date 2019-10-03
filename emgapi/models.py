@@ -1120,7 +1120,7 @@ class AnalysisJob(models.Model):
 
     def _custom_pk(self):
         if self.job_id is not None:
-            return "MGYA{pk:0>{fill}}".format(pk=self.job_id, fill=8)
+            return 'MGYA{pk:0>{fill}}'.format(pk=self.job_id, fill=8)
         return None
 
     job_id = models.BigAutoField(
@@ -1203,6 +1203,7 @@ class AnalysisJob(models.Model):
 
     def __str__(self):
         return self.accession
+
 
 class StudyErrorType(models.Model):
     error_id = models.IntegerField(

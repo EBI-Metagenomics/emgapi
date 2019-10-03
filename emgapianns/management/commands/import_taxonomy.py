@@ -1,9 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import os
 import csv
 import logging
+import os
 import re
 
 from emgapianns import models as m_models
