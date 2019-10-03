@@ -63,7 +63,7 @@ class Command(BaseCommand):
                             default="/nfs/production/interpro/metagenomics/results/")
         parser.add_argument('result_dir', help="Result dir folder - absolute path.")
         parser.add_argument('biome', help='Lineage of GOLD biome')
-        parser.add_argument('--pipeline_version', help='Pipeline version',
+        parser.add_argument('--pipeline', help='Pipeline version',
                             choices=['4.1', '5.0'], default='4.1')
         parser.add_argument('--database', help='Target emg_db_name alias', default='default')
 
@@ -72,7 +72,7 @@ class Command(BaseCommand):
         self.rootpath = os.path.abspath(options['rootpath'])
         self.result_dir = os.path.abspath(options['result_dir'])
         self.biome = options['biome']
-        self.version = options['pipeline_version']
+        self.version = options['pipeline']
 
         input_file_name = os.path.basename(self.result_dir)
         logger.info("CLI %r" % options)
@@ -216,7 +216,7 @@ class Command(BaseCommand):
             defaults['instrument_platform'] = run.instrument_platform
             pass
         analysis, _ = emg_models.AnalysisJob.objects.using(self.emg_db_name) \
-                                                    .update_or_create(**comp_key, defaults=defaults)
+            .update_or_create(**comp_key, defaults=defaults)
         return analysis
 
     def upload_analysis_files(self, experiment_type, analysis_job, input_file_name):
@@ -239,5 +239,5 @@ class Command(BaseCommand):
 
     def populate_mongodb_function_and_pathways(self):
         logger.info('Importing functional and pathway data...')
-        for sum_type in ['.ipr', '.go', '.go_slim', '.kegg_paths', '.pfam', '.ko', '.gprops']:
+        for sum_type in ['.ipr', '.go', '.go_slim', '.paths.kegg', '.pfam', '.ko', '.paths.gprops']:
             call_command('import_summary', self.accession, self.rootpath, sum_type, '--pipeline', self.version)
