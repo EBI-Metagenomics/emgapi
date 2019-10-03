@@ -22,8 +22,9 @@ import sys
 import unicodedata
 
 from emgapi import models as emg_models
-from emgapianns.management.lib.import_analysis_model import Run, Assembly, ExperimentType
-from emgapianns.management.lib.uploader_exceptions import AccessionNotRecognised
+from emgapianns.management.lib.import_analysis_model import Assembly, Run
+from emgapianns.management.lib.uploader_exceptions import \
+    AccessionNotRecognised
 from emgapianns.management.webuploader_configs import get_downloadset_config
 
 study_accssion_re = r'([ESD]RP\d{6,})'
@@ -86,7 +87,7 @@ def parse_run_metadata(raw_metadata):
     except KeyError as err:
         print("Could NOT retrieve all run metadata need from ENA's API: {0}".format(err))
         raise
-    except:
+    except: # noqa
         print("Unexpected error:", sys.exc_info()[0])
         raise
 
@@ -106,7 +107,7 @@ def parse_assembly_metadata(raw_metadata):
     except KeyError as err:
         print("Could NOT retrieve all run metadata need from ENA's API: {0}".format(err))
         raise
-    except:
+    except: # noqa
         print("Unexpected error:", sys.exc_info()[0])
         raise
 
