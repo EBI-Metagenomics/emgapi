@@ -31,6 +31,7 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import filters
+from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
@@ -901,7 +902,7 @@ class OrganismAnalysisRelationshipViewSet(m_viewsets.ListReadOnlyModelViewSet):
 class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
 
     lookup_field = 'contig_id'
-    lookup_value_regex = '.*'
+    lookup_value_regex = '[^/]+'
 
     filter_backends = (
         filters.OrderingFilter,
@@ -917,7 +918,7 @@ class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = m_serializers.AnalysisJobContigSerializer
     pagination_class = api_settings.DEFAULT_PAGINATION_CLASS
 
-    def get_object(self):
+    def get_object(self, ):
         try:
             pk = int(self.kwargs['accession'].lstrip('MGYA'))
         except ValueError:
@@ -925,7 +926,7 @@ class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
         query_set = emg_models.AnalysisJob.objects.available(self.request)
         return get_object_or_404(query_set, Q(pk=pk))
 
-    def get_queryset(self):
+    def get_queryset(self): # noqa C901
         """Filter the analysis job contigs
         """
         obj = self.get_object()
@@ -955,6 +956,10 @@ class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
         if filter_pfam:
             query_filter |= M_Q(pfams__pfam_entry=filter_pfam)
 
+        filter_antismash = request.GET.get('antismash', '').upper()
+        if filter_antismash:
+            query_filter |= M_Q(as_geneclusters__gene_cluster=filter_pfam)
+
         len_filter = M_Q()
         filter_gt = request.GET.get('gt', None)
         filter_lt = request.GET.get('lt', None)
@@ -975,9 +980,8 @@ class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
 
         return queryset.filter(identifier & query_filter)
 
-    def retrieve(self, request, *args, **kwargs):
-        """
-        Retrieve a contig fasta file.
+    def retrieve(self, *args, **kwargs):
+        """Retrieve a contig fasta file.
         The Fasta file will be retrieved using pysam.
 
         Example:
@@ -985,11 +989,8 @@ class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
         `/analyses/<accession>/contigs/<contig_id>`
         ---
         """
-        contig = self.kwargs.get('contig_id', None)
-        if not contig:
-            return Response('Please provide a contig id.', status.HTTP_400_BAD_REQUEST)
-
         obj = self.get_object()
+        contig = self.kwargs['contig_id']
 
         fasta_path = os.path.abspath(os.path.join(
             settings.RESULTS_DIR,
@@ -1011,73 +1012,67 @@ class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
                 for row in rows:
                     output.write(row)
             response = HttpResponse()
-            response['Content-Type'] = 'chemical/seq-na-fasta'
+            response['Content-Type'] = 'text/x-fasta'
             response['Content-Disposition'] = 'attachment; filename={0}.fasta'.format(contig)
             output.seek(0, os.SEEK_END)
             response['Content-Length'] = output.tell()
             response.write(output.getvalue())
             return response
 
-        return Response('Contig {0} not found.'.format(fasta_path), status.HTTP_404_NOT_FOUND)
+        if settings.DEBUG:
+            return Response('Contig {0} not found.'.format(fasta_path), status.HTTP_404_NOT_FOUND)
+        else:
+            return Response('Contig not found.', status.HTTP_404_NOT_FOUND)
 
-
-class AnalysisContigAnnotationViewSet(viewsets.ViewSet):
-    """Get aa contig annotations gff file
-    """
-    lookup_field = 'contig_id'
-    lookup_value_regex = '.*'
-
-    def get_queryset(self):
-        return emg_models.AnalysisJob.objects \
-            .available(self.request)
-
-    def get_object(self):
-        try:
-            pk = int(self.kwargs['accession'].lstrip('MGYA'))
-        except ValueError:
-            raise Http404()
-        return get_object_or_404(self.get_queryset(), Q(pk=pk))
-
-    def retrieve(self, request, *args, **kwargs):
-        """
-        Retrieve a contig GFF file.
+    @action(detail=True, methods=['get'], url_path='annotations')
+    def retrieve_gff(self, request, *args, **kwargs):
+        """Retrieve a contig GFF file.
+        The are 2 flavors for the GFF files:
+        - COG,KEGG, Pfam, InterPro and EggNOG annotations
+        - antiSMASH
+        By default the action will return the `main one`, unless specified using the querystring param `antismash=True`
         The GFF file will be parsed with pysam and sliced.
-
         Example:
         ---
-        `/analyses/<accession>/annotation/<contig_name>`
+        `/analyses/<accession>/<contig_id>/annotation`
         ---
         """
-        contig = self.kwargs.get('contig_id', None)
-        if not contig:
-            return Response('Please provide a contig id.', status.HTTP_400_BAD_REQUEST)
-
         obj = self.get_object()
+        contig = self.kwargs['contig_id']
+
+        source = 'annotation_antismash' if self.request.GET.get('antismash', False) else 'annotation'
+
         gff_path = os.path.abspath(os.path.join(
             settings.RESULTS_DIR,
             obj.result_directory,
-            'annotation.gff.gz')
+            '{}.gff.gz'.format(source))
         )
         gff_idx_path = os.path.abspath(os.path.join(
             settings.RESULTS_DIR,
             obj.result_directory,
-            'annotation.gff.gz.tbi')
+            '{}.gff.gz.tbi'.format(source))
         )
 
         if os.path.isfile(gff_path) and os.path.isfile(gff_idx_path):
             # multiple_iterators = True as many processes
             # could be using the same file at the same moment
             output = io.StringIO()
-            with pysam.TabixFile(filename=gff_path, index=gff_idx_path) as gff:
-                rows = gff.fetch(contig, multiple_iterators=True)
-                for row in rows:
-                    output.write(emg_utils.assembly_contig_name(row) + '\n')
-            response = HttpResponse()
-            response['Content-Type'] = 'text/x-gff3'
-            response['Content-Disposition'] = 'attachment; filename={0}.gff'.format(contig)
-            output.seek(0, os.SEEK_END)
-            response['Content-Length'] = output.tell()
-            response.write(output.getvalue())
-            return response
+            try:
+                with pysam.TabixFile(filename=gff_path, index=gff_idx_path) as gff:
+                    rows = gff.fetch(contig, multiple_iterators=True)
+                    for row in rows:
+                        output.write(emg_utils.assembly_contig_name(row) + '\n')
+                response = HttpResponse()
+                response['Content-Type'] = 'text/x-gff3'
+                response['Content-Disposition'] = 'attachment; filename={0}.gff'.format(contig)
+                output.seek(0, os.SEEK_END)
+                response['Content-Length'] = output.tell()
+                response.write(output.getvalue())
+                return response
+            except ValueError:
+                return Response('Contig not found on GFF file.', status.HTTP_404_NOT_FOUND)
 
-        return Response('No GFF file for contig {0}.'.format(contig), status.HTTP_404_NOT_FOUND)
+        if settings.DEBUG:
+            return Response('No GFF file for contig {0}.'.format(contig), status.HTTP_404_NOT_FOUND)
+        else:
+            return Response('No GFF file for contig.', status.HTTP_404_NOT_FOUND)
