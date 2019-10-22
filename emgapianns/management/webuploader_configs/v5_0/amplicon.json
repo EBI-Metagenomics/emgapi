@@ -142,7 +142,7 @@
       "format_name": "TSV",
       "group_type": "Taxonomic analysis UNITE",
       "real_name": "{}_ITS_UNITE.fasta.mseq.gz",
-      "subdir": "taxonomy-summary/ITS/UNITE"
+      "subdir": "taxonomy-summary/its/unite"
     },
     {
       "_accession_substitution": "full",
@@ -155,7 +155,7 @@
       "format_name": "TSV",
       "group_type": "Taxonomic analysis ITSoneDB",
       "real_name": "{}_ITS_ITSoneDB.fasta.mseq.gz",
-      "subdir": "taxonomy-summary/ITS/ITSoneDB"
+      "subdir": "taxonomy-summary/its/itsonedb"
     },
     {
       "_accession_substitution": "full",
@@ -194,7 +194,7 @@
       "format_name": "TSV",
       "group_type": "Taxonomic analysis UNITE",
       "real_name": "{}_ITS_UNITE.fasta.mseq.tsv",
-      "subdir": "taxonomy-summary/ITS/UNITE"
+      "subdir": "taxonomy-summary/its/unite"
     },
     {
       "_accession_substitution": "full",
@@ -207,7 +207,7 @@
       "format_name": "TSV",
       "group_type": "Taxonomic analysis ITSoneDB",
       "real_name": "{}_ITS_ITSoneDB.fasta.mseq.tsv",
-      "subdir": "taxonomy-summary/ITS/ITSoneDB"
+      "subdir": "taxonomy-summary/its/itsonedb"
     },
     {
       "_accession_substitution": "full",
@@ -246,7 +246,7 @@
       "format_name": "HDF5 Biom",
       "group_type": "Taxonomic analysis UNITE",
       "real_name": "{}_ITS_UNITE.fasta.mseq_hdf5.biom",
-      "subdir": "taxonomy-summary/ITS/UNITE"
+      "subdir": "taxonomy-summary/its/unite"
     },
     {
       "_accession_substitution": "full",
@@ -259,7 +259,7 @@
       "format_name": "HDF5 Biom",
       "group_type": "Taxonomic analysis ITSOneDB",
       "real_name": "{}_ITS_ITSoneDB.fasta.mseq_hdf5.biom",
-      "subdir": "taxonomy-summary/ITS/ITSoneDB"
+      "subdir": "taxonomy-summary/its/itsonedb"
     },
     {
       "_accession_substitution": "full",
@@ -298,7 +298,7 @@
       "format_name": "JSON Biom",
       "group_type": "Taxonomic analysis UNITE",
       "real_name": "{}_ITS_UNITE.fasta.mseq_json.biom",
-      "subdir": "taxonomy-summary/ITS/UNITE"
+      "subdir": "taxonomy-summary/its/unite"
     },
     {
       "_accession_substitution": "full",
@@ -311,7 +311,7 @@
       "format_name": "JSON Biom",
       "group_type": "Taxonomic analysis ITSOneDB",
       "real_name": "{}_ITS_ITSoneDB.fasta.mseq_json.biom",
-      "subdir": "taxonomy-summary/ITS/ITSoneDB"
+      "subdir": "taxonomy-summary/its/itsonedb"
     },
     {
       "_accession_substitution": "full",
@@ -402,7 +402,7 @@
       "format_name": null,
       "group_type": null,
       "real_name": "krona.html",
-      "subdir": "taxonomy-summary/ITS/UNITE"
+      "subdir": "taxonomy-summary/its/unite"
     },
     {
       "_accession_substitution": null,
@@ -415,7 +415,7 @@
       "format_name": null,
       "group_type": null,
       "real_name": "krona.html",
-      "subdir": "taxonomy-summary/ITS/ITSoneDB"
+      "subdir": "taxonomy-summary/its/itsonedb"
     },
     {
       "_accession_substitution": "full",
@@ -448,7 +448,7 @@
     {
       "_accession_substitution": "full",
       "_chunked": true,
-      "chunk_file": "5S.fasta.chunks",
+      "chunk_file": "5_8S.fa.chunks",
       "_required": false,
       "downloadable": true,
       "alias": "{}_5.8S.fasta.gz",
@@ -456,7 +456,21 @@
       "description_label": "Reads encoding 5.8S",
       "format_name": "FASTA",
       "group_type": "non-coding RNAs",
-      "real_name": "5S.fasta.gz",
+      "real_name": "5_8S.fa.gz",
+      "subdir": "sequence-categorisation"
+    },
+    {
+      "_accession_substitution": "full",
+      "_chunked": true,
+      "chunk_file": "5S.fa.chunks",
+      "_required": false,
+      "downloadable": true,
+      "alias": "{}_5S.fasta.gz",
+      "compression": true,
+      "description_label": "Reads encoding 5S",
+      "format_name": "FASTA",
+      "group_type": "non-coding RNAs",
+      "real_name": "5S.fa.gz",
       "subdir": "sequence-categorisation"
     },
     {
