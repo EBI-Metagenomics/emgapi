@@ -94,11 +94,10 @@ class Command(EMGBaseCommand):
                         'COG': [],
                         'Pfam': [],
                         'InterPro': [],
-                        'GO': [],
-                        'antiSMASH': []
+                        'GO': []
                     }
                 for category in atts.split(';'):
-                    for possible_cat in ['KEGG', 'COG', 'Pfam', 'InterPro', 'GO', 'antiSMASH']:
+                    for possible_cat in ['KEGG', 'COG', 'Pfam', 'InterPro', 'GO']:
                         if category.startswith(possible_cat + '='):
                             values = Command._split(category.replace(possible_cat + '=', ''))
                             annotations_dict[contig_id][possible_cat].extend(values)
@@ -115,6 +114,8 @@ class Command(EMGBaseCommand):
                             annotations_dict[contig_id] = {
                                 'antiSMASH': []
                             }
+                        if 'antiSMASH' not in annotations_dict[contig_id]:
+                            annotations_dict[contig_id]['antiSMASH'] = []
                         annotations_dict[contig_id]['antiSMASH'].append(cluster)
             else:
                 logger.warning('antiSMASH file does not exist. SKIPPING!')
@@ -174,33 +175,30 @@ class Command(EMGBaseCommand):
                     job_id=analysis_job.job_id,
                     pipeline_version=analysis_job.pipeline.release_version
                 )
-                contig.keggs = list()
-                contig.cogs = list()
-                contig.pfams = list()
-                contig.interpros = list()
-                contig.gos = list()
-                contig.as_geneclusters = list()
-                contig.kegg_modules = list()
 
                 if 'KEGG' in annotations:
+                    contig.keggs = list()
                     feature_count = Counter(annotations['KEGG'])
                     for feature in feature_count:
                         contig.keggs.append(
                             m_models.AnalysisJobKeggOrthologAnnotation(ko=feature, count=feature_count[feature])
                         )
                 if 'COG' in annotations:
+                    contig.cogs = list()
                     feature_count = Counter(annotations['COG'])
                     for feature in feature_count:
                         contig.cogs.append(
                             m_models.AnalysisJobCOGAnnotation(cog=feature, count=feature_count[feature])
                         )
                 if 'Pfam' in annotations:
+                    contig.pfams = list()
                     feature_count = Counter(annotations['Pfam'])
                     for feature in feature_count:
                         contig.pfams.append(
                             m_models.AnalysisJobPfamAnnotation(pfam_entry=feature, count=feature_count[feature])
                         )
                 if 'InterPro' in annotations:
+                    contig.interpros = list()
                     feature_count = Counter(annotations['InterPro'])
                     for feature in feature_count:
                         contig.interpros.append(
@@ -208,12 +206,14 @@ class Command(EMGBaseCommand):
                                 interpro_identifier=feature, count=feature_count[feature])
                         )
                 if 'GO' in annotations:
+                    contig.gos = list()              
                     feature_count = Counter(annotations['GO'])
                     for feature in feature_count:
                         contig.gos.append(
                             m_models.AnalysisJobGoTermAnnotation(go_term=feature, count=feature_count[feature])
                         )
                 if 'antiSMASH' in annotations:
+                    contig.as_geneclusters = list()
                     feature_count = Counter(annotations['antiSMASH'])
                     for feature in feature_count:
                         contig.as_geneclusters.append(
@@ -221,6 +221,7 @@ class Command(EMGBaseCommand):
                                                                       count=feature_count[feature])
                         )
                 if 'KEGGModules' in annotations:
+                    contig.kegg_modules = list()
                     for module, data in annotations['KEGGModules'].items():
                         for completeness, matching, missing in data:
                             contig.kegg_modules.append(

@@ -956,9 +956,12 @@ class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
         if filter_pfam:
             query_filter |= M_Q(pfams__pfam_entry=filter_pfam)
 
-        filter_antismash = request.GET.get('antismash', '').upper()
+        filter_antismash = request.GET.get('antismash', '').lower()
         if filter_antismash:
-            query_filter |= M_Q(as_geneclusters__gene_cluster=filter_pfam)
+            query_filter |= M_Q(as_geneclusters__gene_cluster=filter_antismash)
+
+        if request.GET.get('antismash_only', '').lower() == 'true':
+            query_filter &= M_Q(as_geneclusters__not__size=0)
 
         len_filter = M_Q()
         filter_gt = request.GET.get('gt', None)
@@ -995,12 +998,12 @@ class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
         fasta_path = os.path.abspath(os.path.join(
             settings.RESULTS_DIR,
             obj.result_directory,
-            'contigs.fasta')
+            obj.input_file_name + '_contigs.fasta')
         )
         fasta_idx_path = os.path.abspath(os.path.join(
             settings.RESULTS_DIR,
             obj.result_directory,
-            'contigs.fasta.fai')
+            obj.input_file_name + '_contigs.fasta.fai')
         )
 
         if os.path.isfile(fasta_path) and os.path.isfile(fasta_idx_path):
@@ -1045,12 +1048,12 @@ class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
         gff_path = os.path.abspath(os.path.join(
             settings.RESULTS_DIR,
             obj.result_directory,
-            '{}.gff.gz'.format(source))
+            '{}_{}.gff.gz'.format(obj.input_file_name, source))
         )
         gff_idx_path = os.path.abspath(os.path.join(
             settings.RESULTS_DIR,
             obj.result_directory,
-            '{}.gff.gz.tbi'.format(source))
+            '{}_{}.gff.gz.tbi'.format(obj.input_file_name, source))
         )
 
         if os.path.isfile(gff_path) and os.path.isfile(gff_idx_path):
