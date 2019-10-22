@@ -214,7 +214,7 @@ class Command(BaseCommand):
             defaults['experiment_type'] = self.get_experiment_type('assembly')
             defaults['instrument_model'] = run.instrument_model
             defaults['instrument_platform'] = run.instrument_platform
-            pass
+            defaults['run_status_id'] = run.status_id
         analysis, _ = emg_models.AnalysisJob.objects.using(self.emg_db_name) \
             .update_or_create(**comp_key, defaults=defaults)
         return analysis
