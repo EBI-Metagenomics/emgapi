@@ -481,15 +481,29 @@
     {
       "_accession_substitution": "full",
       "_chunked": true,
-      "chunk_file": "5S.fasta.chunks",
+      "chunk_file": "5_8S.fa.chunks",
       "_required": false,
       "downloadable": true,
       "alias": "{}_5.8S.fasta.gz",
       "compression": true,
-      "description_label": "Contigs encoding 5.8S rRNA",
+      "description_label": "Reads encoding 5.8S",
       "format_name": "FASTA",
       "group_type": "non-coding RNAs",
-      "real_name": "5S.fasta.gz",
+      "real_name": "5_8S.fa.gz",
+      "subdir": "sequence-categorisation"
+    },
+    {
+      "_accession_substitution": "full",
+      "_chunked": true,
+      "chunk_file": "5S.fa.chunks",
+      "_required": false,
+      "downloadable": true,
+      "alias": "{}_5S.fasta.gz",
+      "compression": true,
+      "description_label": "Reads encoding 5S",
+      "format_name": "FASTA",
+      "group_type": "non-coding RNAs",
+      "real_name": "5S.fa.gz",
       "subdir": "sequence-categorisation"
     },
     {
