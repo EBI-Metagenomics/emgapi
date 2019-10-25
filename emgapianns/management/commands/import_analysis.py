@@ -13,9 +13,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import glob
 import logging
 import os
 import getpass
+import sys
 
 from django.core.management import BaseCommand, call_command
 from django.utils import timezone
@@ -61,22 +63,26 @@ class Command(BaseCommand):
         parser.add_argument('--rootpath',
                             help="NFS root path of the results archive.",
                             default="/nfs/production/interpro/metagenomics/results/")
-        parser.add_argument('result_dir', help="Result dir folder - absolute path.")
+        parser.add_argument('accession', help="Specify run or assembly/analysis accession.")
         parser.add_argument('biome', help='Lineage of GOLD biome')
         parser.add_argument('--pipeline', help='Pipeline version',
                             choices=['4.1', '5.0'], default='4.1')
-        parser.add_argument('--database', help='Target emg_db_name alias', default='default')
+        parser.add_argument('--database',
+                            help='Target emg_db_name alias',
+                            choices=['default', 'dev', 'prod'],
+                            default='default')
 
     def handle(self, *args, **options):
         self.emg_db_name = options['database']
         self.rootpath = os.path.abspath(options['rootpath'])
-        self.result_dir = os.path.abspath(options['result_dir'])
+        self.accession = options['accession']
         self.biome = options['biome']
         self.version = options['pipeline']
+        logger.info("CLI %r" % options)
+
+        self.result_dir = self.__find_existing_result_dir(self.accession, self.version)
 
         input_file_name = os.path.basename(self.result_dir)
-        logger.info("CLI %r" % options)
-        self.accession = utils.get_accession_from_result_dir_path(self.result_dir)
 
         metadata = self.retrieve_metadata()
 
@@ -103,6 +109,29 @@ class Command(BaseCommand):
             self.populate_mongodb_function_and_pathways()
 
         logger.info("Program finished successfully.")
+
+    def __find_existing_result_dir(self, run_accession, version):
+        """
+
+        :param run_accession:
+        :param version:
+        :return:
+        """
+        # 2017/11/ERP104174/version_5.0/ERZ477/006
+        dest_pattern = ['2*', '*', '*', f'version_{version}', '*', '*', f'{run_accession}*']
+        prod_result_dir = os.path.join(self.rootpath, *dest_pattern)
+
+        existing_result_dir = glob.glob(prod_result_dir)
+
+        if existing_result_dir:
+            logging.info(f'Found result dir: {existing_result_dir}')
+            if len(existing_result_dir) > 1:
+                sys.exit(f'Found more than 1 result directory: {existing_result_dir}')
+
+        else:
+            sys.exit(f'Could not find result directory: {prod_result_dir}')
+
+        return os.path.join(self.rootpath, existing_result_dir[0])
 
     def call_import_study(self, metadata):
         logger.info('Import study {}'.format(metadata.secondary_study_accession))
