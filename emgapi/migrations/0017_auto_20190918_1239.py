@@ -61,7 +61,7 @@ def create_download_description(apps, schema_editor):
         ("OTUs and taxonomic assignments", "OTUs, counts and taxonomic assignments for ITSOneDB"),
         ("OTUs and taxonomic assignments", "OTUs, counts and taxonomic assignments for UNITE"),
         ("Complete Pfam annotation", "Pfam annotation"),
-        ("KEGG orthologes annotation", "KEGG orthologes annotation"),
+        ("KEGG orthologues annotation", "KEGG orthologues annotation"),
         ("Genome Properties annotation", "Genome Properties annotation"),
         ("antiSMASH annotation", "antiSMASH annotation"),
         ("Diamond annotation", "Diamond annotation"),
