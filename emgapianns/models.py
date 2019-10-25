@@ -396,6 +396,15 @@ class AnalysisJobContig(mongoengine.Document):
     as_geneclusters = mongoengine.EmbeddedDocumentListField(AnalysisJobAntiSmashGCAnnotation, required=False)
     kegg_modules = mongoengine.EmbeddedDocumentListField(AnalysisJobKeggModuleAnnotation, required=False)
 
+    # Cache, using the _size_ method has an overhead
+    has_cog = mongoengine.BooleanField(default=False)
+    has_kegg = mongoengine.BooleanField(default=False)
+    has_go = mongoengine.BooleanField(default=False)
+    has_pfam = mongoengine.BooleanField(default=False)
+    has_interpro = mongoengine.BooleanField(default=False)
+    has_antismash = mongoengine.BooleanField(default=False)
+    has_kegg_module = mongoengine.BooleanField(default=False)
+
     meta = {
         'indexes': [
             'contig_id',
@@ -411,6 +420,19 @@ class AnalysisJobContig(mongoengine.Document):
             'pfams.pfam_entry',
             'interpros.interpro_identifier',
             'as_geneclusters.gene_cluster',
-            'kegg_modules.module'
+            'kegg_modules.module',
+            'has_cog',
+            'has_kegg',
+            'has_go',
+            'has_pfam',
+            'has_interpro',
+            'has_antismash',
+            'has_kegg_module',
         ]
     }
+
+    @classmethod
+    def has_facet_field(cls, field):
+        """Return True if the model has the field
+        """
+        return getattr(cls, field, False)

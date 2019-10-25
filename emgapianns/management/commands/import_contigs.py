@@ -179,6 +179,7 @@ class Command(EMGBaseCommand):
                 if 'KEGG' in annotations:
                     contig.keggs = list()
                     feature_count = Counter(annotations['KEGG'])
+                    contig.has_kegg = bool(feature_count)
                     for feature in feature_count:
                         contig.keggs.append(
                             m_models.AnalysisJobKeggOrthologAnnotation(ko=feature, count=feature_count[feature])
@@ -186,6 +187,7 @@ class Command(EMGBaseCommand):
                 if 'COG' in annotations:
                     contig.cogs = list()
                     feature_count = Counter(annotations['COG'])
+                    contig.has_cog = bool(feature_count)
                     for feature in feature_count:
                         contig.cogs.append(
                             m_models.AnalysisJobCOGAnnotation(cog=feature, count=feature_count[feature])
@@ -193,6 +195,7 @@ class Command(EMGBaseCommand):
                 if 'Pfam' in annotations:
                     contig.pfams = list()
                     feature_count = Counter(annotations['Pfam'])
+                    contig.has_pfam = bool(feature_count)
                     for feature in feature_count:
                         contig.pfams.append(
                             m_models.AnalysisJobPfamAnnotation(pfam_entry=feature, count=feature_count[feature])
@@ -200,14 +203,16 @@ class Command(EMGBaseCommand):
                 if 'InterPro' in annotations:
                     contig.interpros = list()
                     feature_count = Counter(annotations['InterPro'])
+                    contig.has_interpro = bool(feature_count)
                     for feature in feature_count:
                         contig.interpros.append(
                             m_models.AnalysisJobInterproIdentifierAnnotation(
                                 interpro_identifier=feature, count=feature_count[feature])
                         )
                 if 'GO' in annotations:
-                    contig.gos = list()              
+                    contig.gos = list()
                     feature_count = Counter(annotations['GO'])
+                    contig.has_go = bool(feature_count)
                     for feature in feature_count:
                         contig.gos.append(
                             m_models.AnalysisJobGoTermAnnotation(go_term=feature, count=feature_count[feature])
@@ -215,6 +220,7 @@ class Command(EMGBaseCommand):
                 if 'antiSMASH' in annotations:
                     contig.as_geneclusters = list()
                     feature_count = Counter(annotations['antiSMASH'])
+                    contig.has_antismash = bool(feature_count)
                     for feature in feature_count:
                         contig.as_geneclusters.append(
                             m_models.AnalysisJobAntiSmashGCAnnotation(gene_cluster=feature,
@@ -222,7 +228,9 @@ class Command(EMGBaseCommand):
                         )
                 if 'KEGGModules' in annotations:
                     contig.kegg_modules = list()
-                    for module, data in annotations['KEGGModules'].items():
+                    kegg_modules = annotations['KEGGModules'].items()
+                    contig.has_antismash = bool(kegg_modules)
+                    for module, data in kegg_modules:
                         for completeness, matching, missing in data:
                             contig.kegg_modules.append(
                                 m_models.AnalysisJobKeggModuleAnnotation(module=module,
@@ -230,6 +238,7 @@ class Command(EMGBaseCommand):
                                                                          matching_kos=matching or list(),
                                                                          missing_kos=missing or list())
                             )
+
                 new_contigs.append(contig)
                 if len(new_contigs) % batch_size == 0:
                     m_models.AnalysisJobContig.objects.insert(new_contigs, load_bulk=False)

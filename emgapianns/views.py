@@ -936,6 +936,7 @@ class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
 
         query_filter = M_Q()
 
+        # TODO: simplify!
         filter_cog = request.GET.get('cog', '').upper()
         if filter_cog:
             query_filter |= M_Q(cogs__cog=filter_cog)
@@ -960,8 +961,19 @@ class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
         if filter_antismash:
             query_filter |= M_Q(as_geneclusters__gene_cluster=filter_antismash)
 
-        if request.GET.get('antismash_only', '').lower() == 'true':
-            query_filter &= M_Q(as_geneclusters__not__size=0)
+        if 'facet[]' in request.GET:
+            facets = request.GET.getlist('facet[]')
+            # TODO: try to simplify this
+            facet_qs = M_Q()
+            if len(facets):
+                for facet in [f for f in facets if m_models.AnalysisJobContig.has_facet_field('has_' + f)]:
+                    facet_qs |= M_Q(**{'has_' + facet: True})
+            else:
+                # contigs with no annotations
+                for f in m_models.AnalysisJobContig._fields:
+                    if f.startswith('has_'):
+                        facet_qs &= M_Q(**{f: False})
+            query_filter &= (facet_qs)
 
         len_filter = M_Q()
         filter_gt = request.GET.get('gt', None)
