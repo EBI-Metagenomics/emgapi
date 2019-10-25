@@ -317,16 +317,19 @@ class ChunkedDownload(Download):
         self.rootpath = rootpath
         self.file_config = file_config
         self.input_file_name = input_file_name
+        self.exists = False
 
         chunk_filename = file_config['chunk_file']
         if '{}' in chunk_filename:
             chunk_filename = chunk_filename.format(input_file_name)
 
         chunk_filepath = os.path.join(self.rootpath, file_config['subdir'] or '', chunk_filename)
-        self.chunks = read_chunkfile(chunk_filepath)
-        if len(self.chunks) == 1:
-            self.alias = file_config['alias'].format(input_file_name)
-        self.file_format = ''.join(pathlib.Path(chunk_filename).suffixes)  # todo use config
+        if os.path.exists(chunk_filepath):
+            self.exists = True
+            self.chunks = read_chunkfile(chunk_filepath)
+            if len(self.chunks) == 1:
+                self.alias = file_config['alias'].format(input_file_name)
+            self.file_format = ''.join(pathlib.Path(chunk_filename).suffixes)  # todo use config
 
     def save(self, analysis_job):
         if len(self.chunks) == 1:
@@ -372,7 +375,8 @@ class DownloadSet:
 
     def insert_chunked_file(self, f, analysis_job):
         f = ChunkedDownload(self.emg_db_name, self.rootpath, self.input_file_name, f)
-        f.save(analysis_job)
+        if f.exists:
+            f.save(analysis_job)
 
 
 def get_conf_downloadset(rootpath, input_file_name, emg_db_name, experiment_type, version):
