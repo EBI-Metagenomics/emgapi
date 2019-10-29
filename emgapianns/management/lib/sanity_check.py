@@ -6,6 +6,9 @@ from emgapianns.management.webuploader_configs import get_downloadset_config
 
 
 class SanityCheck:
+    # TODO: Introduce coverage check:
+    # For Amplicnn datasets one of the following must exist: UNITE, ITSonedb, SSU or LSU annotations
+    # For WGS and assembly datasets proteins must be predicted and they must have some annotations (e.g. InterProScan 5)
     def __init__(self, accession, d, experiment_type, version):
         self.dir = d
         self.prefix = os.path.basename(d)

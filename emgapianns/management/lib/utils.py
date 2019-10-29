@@ -186,7 +186,7 @@ def read_chunkfile(filename):
 
 
 def get_study_summary_dir(study_dir):
-    return os.path.join(study_dir, 'project-summary-tmp')
+    return os.path.join(study_dir, 'project-summary')
 
 
 class Download:
@@ -253,6 +253,14 @@ class Download:
             raise emg_models.DownloadDescriptionLabel.DoesNotExist(
                 'Download label "{}" not found in db'.format(desc_label))
 
+    def get_pipeline_release(self, release_version):
+        try:
+            return emg_models.Pipeline.objects.using(self.emg_db_name).get(
+                release_version=release_version)
+        except emg_models.Pipeline.DoesNotExist:
+            raise emg_models.Pipeline.DoesNotExist(
+                'Pipeline release "{}" not found in db'.format(release_version))
+
     def get_download_subdir(self):
         subdir_name = self.file_config['subdir']
         if not subdir_name:
@@ -287,7 +295,7 @@ class StudyDownload(Download):
 
     def _save(self, alias, realname, study):
         try:
-            path = [self.rootpath, os.pardir, self.file_config['subdir'], realname]
+            path = [self.rootpath, self.file_config['subdir'], realname]
             self.check_file_exists(path)
         except ValueError:
             if self.file_config['_required']:
@@ -299,10 +307,11 @@ class StudyDownload(Download):
             'subdir': self.get_download_subdir(),
             'file_format': self.get_file_format()
         }
+        pipeline_release = self.get_pipeline_release(self.pipeline)
         dl, _ = emg_models.StudyDownload.objects \
             .using(self.emg_db_name) \
             .update_or_create(study=study,
-                              pipeline=self.pipeline,
+                              pipeline=pipeline_release,
                               alias=alias,
                               realname=realname,
                               defaults=defaults)
