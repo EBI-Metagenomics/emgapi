@@ -15,8 +15,10 @@
 # limitations under the License.
 import logging
 import os
+import sys
 from pathlib import Path
 from django.core.management import BaseCommand
+from django.db.models import Q
 from ena_portal_api import ena_handler
 import pandas as pd
 import numpy as np
@@ -33,7 +35,7 @@ ena = ena_handler.EnaApiHandler()
 
 
 class Command(BaseCommand):
-    help = 'Generate new '
+    help = 'Generates project summary files (for taxonomy (SSU, LSU), GO and InterProScan annotations)'
 
     obj_list = list()
     rootpath = None
@@ -44,38 +46,60 @@ class Command(BaseCommand):
     summary_dir = None
     study = None
     pipeline = None
+    study_result_dir = None
 
     def add_arguments(self, parser):
-        parser.add_argument('rootpath',
-                            help='NFS root path of the study archive, eg /..../ERP001736/version_4.1/')
+        parser.add_argument('accession', help="Specify a secondary study accession.")
+        parser.add_argument('pipeline', help='Pipeline version',
+                            choices=['4.1', '5.0'], default='4.1')
+        parser.add_argument('--rootpath',
+                            help="NFS root path of the results archive.",
+                            default="/nfs/production/interpro/metagenomics/results/")
         parser.add_argument('--database', help='Target emg_db_name alias', default='default')
 
     def handle(self, *args, **options):
+        logger.info('CLI %r' % options)
+        self.study_accession = options['accession']
+        self.pipeline = options['pipeline']
         self.emg_db_name = options['database']
         self.rootpath = os.path.abspath(options['rootpath'])
-        self.study_accession = utils.get_study_accession_from_rootpath(self.rootpath)
+
         self.study = emg_models.Study.objects.using(self.emg_db_name).get(secondary_accession=self.study_accession)
+        self.study_result_dir = os.path.join(self.rootpath, self.study.result_directory)
+        if not os.path.exists(self.study_result_dir):
+            sys.exit(
+                f"Study result directory for {self.study_accession} does not exist:\n{self.study_result_dir}")
 
-        pipeline_version = utils.get_pipeline_version(self.rootpath)
-        self.pipeline = emg_models.Pipeline.objects.using(self.emg_db_name).get(release_version=pipeline_version)
+        jobs = emg_models.AnalysisJob.objects.using(self.emg_db_name)
+        jobs = jobs.filter(
+            Q(study__secondary_accession=self.study_accession) &
+            Q(analysis_status__analysis_status='completed') &
+            Q(pipeline__release_version=self.pipeline))
 
-        self.summary_dir = utils.get_study_summary_dir(self.rootpath)
+        analysis_result_dirs = {}
+        for job in jobs:
+            job_result_directory = os.path.join(self.rootpath, job.result_directory)
+            job_input_file_name = job.input_file_name
+            analysis_result_dirs[job_input_file_name] = job_result_directory
+
+        self.summary_dir = os.path.join(self.study_result_dir, f'version_{self.pipeline}/project-summary')
         self.create_summary_dir()
 
-        logger.info('CLI %r' % options)
+        # self.generate_taxonomy_phylum_summary('SSU', f'phylum_taxonomy_abundances_SSU_v{self.pipeline}.tsv')
+        # self.generate_taxonomy_phylum_summary('LSU', f'phylum_taxonomy_abundances_LSU_v{self.pipeline}.tsv')
+        #
+        self.generate_taxonomy_summary(analysis_result_dirs, 'SSU', f'taxonomy_abundances_SSU_v{self.pipeline}.tsv')
+        self.generate_taxonomy_summary(analysis_result_dirs, 'LSU', f'taxonomy_abundances_LSU_v{self.pipeline}.tsv')
+        # TODO: Add UNITE and ITSoneDB
 
-        self.generate_taxonomy_phylum_summary('SSU', 'phylum_taxonomy_abundances_SSU_v4.1.tsv')
-        self.generate_taxonomy_phylum_summary('LSU', 'phylum_taxonomy_abundances_LSU_v4.1.tsv')
+        self.generate_ipr_summary(analysis_result_dirs, f'IPR_abundances_v{self.pipeline}.tsv')
 
-        self.generate_taxonomy_summary('SSU', 'taxonomy_abundances_SSU_v4.1.tsv')
-        self.generate_taxonomy_summary('LSU', 'taxonomy_abundances_LSU_v4.1.tsv')
+        self.generate_go_summary(analysis_result_dirs, 'slim')
+        self.generate_go_summary(analysis_result_dirs, 'full')
 
-        self.generate_ipr_summary('IPR_abundances_v4.1.tsv')
+        logging.info("Program finished successfully.")
 
-        self.generate_go_summary('slim')
-        self.generate_go_summary('full')
-
-        # TODO handle diversity script
+        # TODO handle diversity script: Raise question on slack whether this needs to be integrated
 
     def generate_taxonomy_phylum_summary(self, su_type, filename):
         res_file_re = os.path.join('**', 'taxonomy-summary', su_type, 'kingdom-counts.txt')
@@ -86,14 +110,13 @@ class Command(BaseCommand):
                                   raw_cols=['kingdom', 'phylum', 'count', 'ignored'])
         self.write_results_file(study_df, filename)
 
-        alias = '{}_phylum_taxonomy_abundances_{}_v4.1.tsv'.format(self.study_accession, su_type)
+        alias = '{}_phylum_taxonomy_abundances_{}_v{}.tsv'.format(self.study_accession, su_type, self.pipeline)
         description = 'Phylum level taxonomies {}'.format(su_type)
         group = 'Taxonomic analysis {} rRNA'.format(su_type)
         self.upload_study_file(filename, alias, description, group)
 
-    def generate_taxonomy_summary(self, su_type, filename):
-        res_file_re = os.path.join('**', 'taxonomy-summary', su_type, '*{}*.fasta.mseq.tsv'.format(su_type))
-        res_files = self.get_raw_result_files(res_file_re)
+    def generate_taxonomy_summary(self, analysis_result_dirs, su_type, filename):
+        res_files = self.get_taxonomy_result_files(analysis_result_dirs, su_type)
         study_df = self.merge_dfs(res_files,
                                   key=['lineage'],
                                   delimiter='\t',
@@ -102,13 +125,13 @@ class Command(BaseCommand):
         study_df = study_df.rename(columns={'lineage': '#SampleID'})
         self.write_results_file(study_df, filename)
 
-        alias = '{}_taxonomy_abundances_{}_v4.1.tsv'.format(self.study_accession, su_type)
+        alias = '{}_taxonomy_abundances_{}_v{}.tsv'.format(self.study_accession, su_type, self.pipeline)
         description = 'Taxonomic assignments {}'.format(su_type)
         group = 'Taxonomic analysis {} rRNA'.format(su_type)
         self.upload_study_file(filename, alias, description, group)
 
     def get_raw_result_files(self, res_file_re):
-        paths = list(Path(self.rootpath).glob(res_file_re))
+        paths = list(Path(self.study_result_dir).glob(res_file_re))
         return [str(p.resolve()) for p in paths]
 
     def merge_dfs(self, filelist, delimiter, key, raw_cols, skip_rows=0):
@@ -123,50 +146,47 @@ class Command(BaseCommand):
         study_df = self.clean_summary_df(study_df)
         return study_df
 
-    def generate_ipr_summary(self, filename):
-        res_file_re = os.path.join('**', '*_summary.ipr')
-        res_files = self.get_raw_result_files(res_file_re)
+    def generate_ipr_summary(self, analysis_result_dirs, filename):
+        res_files = self.get_ipr_result_files(analysis_result_dirs)
         study_df = self.merge_dfs(res_files, delimiter=',',
                                   key=['IPR', 'description'],
                                   raw_cols=['IPR', 'description', 'count'])
         self.write_results_file(study_df, filename)
 
-        alias = '{}_IPR_abundances_v4.1.tsv'.format(self.study_accession)
+        alias = '{}_IPR_abundances_v{}.tsv'.format(self.study_accession, self.pipeline)
         description = 'InterPro matches'
         self.upload_study_file(filename, alias, description, 'Functional analysis')
 
-    def generate_go_summary(self, mode):
+    def generate_go_summary(self, analysis_result_dirs, mode):
         if mode == 'slim':
-            raw_file_re = '*.go_slim'
             sum_file = 'GO-slim'
             description = 'GO slim annotation'
         else:
-            raw_file_re = '*.go'
             sum_file = 'GO'
             description = 'Complete GO annotation'
-        res_file_re = os.path.join('**', raw_file_re)
-        res_files = self.get_raw_result_files(res_file_re)
+
+        res_files = self.get_go_result_files(analysis_result_dirs, mode)
         study_df = self.merge_dfs(res_files, delimiter=',',
                                   key=['GO', 'description', 'category'],
                                   raw_cols=['GO', 'description', 'category', 'count'])
         study_df['description'] = study_df['description'].str.replace(',', '@')
         study_df['category'] = study_df['category'].str.replace('_', ' ')
-        realname = sum_file + '_abundances_v4.1.tsv'
+        realname = sum_file + '_abundances_v{}.tsv'.format(self.pipeline)
         self.write_results_file(study_df, realname)
 
         self.generate_filtered_go_summary(study_df,
                                           'category == "cellular component"',
-                                          'CC_{}_abundances_v4.1.tsv'.format(sum_file))
+                                          'CC_{}_abundances_v{}.tsv'.format(sum_file, self.pipeline))
 
         self.generate_filtered_go_summary(study_df,
                                           'category == "biological process"',
-                                          'BP_{}_abundances_v4.1.tsv'.format(sum_file))
+                                          'BP_{}_abundances_v{}.tsv'.format(sum_file, self.pipeline))
 
         self.generate_filtered_go_summary(study_df,
                                           'category not in ["biological process", "cellular component"]',
-                                          'MF_{}_abundances_v4.1.tsv'.format(sum_file))
+                                          'MF_{}_abundances_v{}.tsv'.format(sum_file, self.pipeline))
 
-        alias = '{}_{}_abundances_v4.1.tsv'.format(self.study_accession, sum_file)
+        alias = '{}_{}_abundances_v{}.tsv'.format(self.study_accession, sum_file, self.pipeline)
         self.upload_study_file(realname, alias, description, 'Functional analysis')
         return study_df
 
@@ -202,7 +222,46 @@ class Command(BaseCommand):
             'format_name': 'TSV',
             'group_type': group,
             'real_name': realname,
-            'subdir': 'version_4.1/project-summary',
+            'subdir': f'version_{self.pipeline}/project-summary',
             '_required': True
         }
-        utils.StudyDownload(self.emg_db_name, self.rootpath, file_config, self.pipeline).save(self.study)
+        _study_rootpath = self.study_result_dir.replace(f'version_{self.pipeline}', '')
+        utils.StudyDownload(self.emg_db_name, _study_rootpath, file_config, self.pipeline).save(self.study)
+
+    @staticmethod
+    def get_taxonomy_result_files(analysis_result_dirs, su_type):
+        result = []
+        for input_file_name, dir in analysis_result_dirs.items():
+            res_file_re = os.path.join(dir, 'taxonomy-summary', su_type,
+                                       '{}_{}.fasta.mseq.tsv'.format(input_file_name, su_type))
+            if os.path.exists(res_file_re):
+                result.append(res_file_re)
+            else:
+                logging.warning(
+                    f"Result file does not exist:\n{res_file_re}")
+        return result
+
+    @staticmethod
+    def get_ipr_result_files(analysis_result_dirs):
+        result = []
+        for input_file_name, dir in analysis_result_dirs.items():
+            res_file_re = os.path.join(dir, '{}_summary.ipr'.format(input_file_name))
+            if os.path.exists(res_file_re):
+                result.append(res_file_re)
+            else:
+                logging.warning(
+                    f"Result file does not exist:\n{res_file_re}")
+        return result
+
+    @staticmethod
+    def get_go_result_files(analysis_result_dirs, mode):
+        result = []
+        for input_file_name, dir in analysis_result_dirs.items():
+            file_name = '{}_summary.go' if mode == 'full' else '{}_summary.go_slim'
+            res_file_re = os.path.join(dir, file_name.format(input_file_name))
+            if os.path.exists(res_file_re):
+                result.append(res_file_re)
+            else:
+                logging.warning(
+                    f"Result file does not exist:\n{res_file_re}")
+        return result
