@@ -40,15 +40,13 @@ ena = ena_handler.EnaApiHandler()
 
 """
     Cl call:
-        emgcli import_analysis <primary_accession> /home/maxim/
-    Draft
-    Inputs:
-        - Path to the result directory
+        emgcli import_analysis <accession> 'root:Environmental:Aquatic:Marine' --pipeline 5.0
 """
 
 
 class Command(BaseCommand):
-    help = 'Imports new objects into EMG.'
+    help = 'Imports new run and assembly annotation objects into EMG. The tool will import all associated objects like' \
+           'studies, samples and assemblies as well. It will also populate MongoDB.'
 
     obj_list = list()
     rootpath = None
@@ -86,7 +84,7 @@ class Command(BaseCommand):
 
         metadata = self.retrieve_metadata()
 
-        # TODO: How to sanity check AMPLICON: SSU, LSU and ITS?
+        # TODO: Introduce coverage check
         SanityCheck(self.accession, self.result_dir, metadata.experiment_type.value, self.version).check_all()
 
         self.call_import_study(metadata)
