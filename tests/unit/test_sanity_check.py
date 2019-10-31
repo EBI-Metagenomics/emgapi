@@ -57,18 +57,12 @@ def gen_all_seqdir_files(tmpdir):
 
 class TestSanityCheck:
 
-    @patch('os.path.basename')
-    def test_sanitycheck_initialisation(self, mock_dir):
-        mock_dir.return_value = "test"
-        expected_accession = "ERRXXXXXX"
-        experiment_type = 'amplicon'
-        version = '4.1'
-        expected_result_dir = "/tmp"
-        test_instance = sanity_check.SanityCheck(expected_accession, expected_result_dir, experiment_type, version)
-        assert expected_accession == test_instance.accession
-        assert expected_result_dir == test_instance.dir
-        assert mock_dir.return_value == test_instance.prefix
-        config = test_instance.config
+    @staticmethod
+    def run_init_tests(actual, expected_accession, expected_result_dir, expected_prefix):
+        assert expected_accession == actual.accession
+        assert expected_result_dir == actual.dir
+        assert expected_prefix == actual.prefix
+        config = actual.config
         assert config is not None
         assert isinstance(config, list)
         assert len(config) > 0
@@ -78,16 +72,85 @@ class TestSanityCheck:
         assert "_required" in file
         assert "blah" not in file
 
-    def test_sanity_check_version_4_results_succeeds(self):
-        accession = 'ERR2985769'
+    @patch('os.path.basename')
+    def test_check_initialisation_amplicon_v4(self, mock_dir):
+        mock_dir.return_value = "test"
+        expected_accession = "ERRXXXXXX"
+        experiment_type = 'amplicon'
+        version = '4.1'
+        expected_result_dir = "/tmp"
+        test_instance = sanity_check.SanityCheck(expected_accession, expected_result_dir, experiment_type, version)
+        self.run_init_tests(test_instance, expected_accession, expected_result_dir, mock_dir.return_value)
+
+    @patch('os.path.basename')
+    def test_check_initialisation_amplicon_v5(self, mock_dir):
+        mock_dir.return_value = "test"
+        expected_accession = "ERRXXXXXX"
+        experiment_type = 'amplicon'
+        version = '5.0'
+        expected_result_dir = "/tmp"
+        test_instance = sanity_check.SanityCheck(expected_accession, expected_result_dir, experiment_type, version)
+        self.run_init_tests(test_instance, expected_accession, expected_result_dir, mock_dir.return_value)
+
+    @patch('os.path.basename')
+    def test_check_initialisation_assembly_v4(self, mock_dir):
+        mock_dir.return_value = "test"
+        expected_accession = "ERZXXXXXX"
+        experiment_type = 'assembly'
+        version = '4.1'
+        expected_result_dir = "/tmp"
+        test_instance = sanity_check.SanityCheck(expected_accession, expected_result_dir, experiment_type, version)
+        self.run_init_tests(test_instance, expected_accession, expected_result_dir, mock_dir.return_value)
+
+    @patch('os.path.basename')
+    def test_check_initialisation_assembly_v5(self, mock_dir):
+        mock_dir.return_value = "test"
+        expected_accession = "ERZXXXXXX"
+        experiment_type = 'assembly'
+        version = '5.0'
+        expected_result_dir = "/tmp"
+        test_instance = sanity_check.SanityCheck(expected_accession, expected_result_dir, experiment_type, version)
+        self.run_init_tests(test_instance, expected_accession, expected_result_dir, mock_dir.return_value)
+
+    @patch('os.path.basename')
+    def test_check_initialisation_wgs_v4(self, mock_dir):
+        mock_dir.return_value = "test"
+        expected_accession = "EREXXXXXX"
+        experiment_type = 'wgs'
+        version = '4.1'
+        expected_result_dir = "/tmp"
+        test_instance = sanity_check.SanityCheck(expected_accession, expected_result_dir, experiment_type, version)
+        self.run_init_tests(test_instance, expected_accession, expected_result_dir, mock_dir.return_value)
+
+    @patch('os.path.basename')
+    def test_check_initialisation_should_raise_exception(self, mock_dir):
+        mock_dir.return_value = "test"
+        expected_accession = "EREXXXXXX"
+        experiment_type = 'wgs'
+        version = '1.0'
+        expected_result_dir = "/tmp"
+        with pytest.raises(FileNotFoundError):
+            test_instance = sanity_check.SanityCheck(expected_accession, expected_result_dir, experiment_type, version)
+
+    def test_check_amplicon_v4_results_succeeds(self):
+        accession = 'ERR3506537'
         experiment_type = 'amplicon'
         version = '4.1'
         root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
-        result_dir = os.path.join(root_dir, 'results/2019/08/ERP112711/version_4.1/ERR298/ERR2985769_MERGED_FASTQ')
+        result_dir = os.path.join(root_dir, 'results/2019/09/ERP117125/version_4.1/ERR350/007/ERR3506537_MERGED_FASTQ')
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
         test_instance.check_all()
 
-    def test_sanity_check_version_4_results_raise_exception(self):
+    def test_check_amplicon_v5_results_succeeds(self):
+        accession = 'ERR3506537'
+        experiment_type = 'amplicon'
+        version = '5.0'
+        root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
+        result_dir = os.path.join(root_dir, 'results/2019/09/ERP117125/version_4.1/ERR350/007/ERR3506537_MERGED_FASTQ')
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
+        test_instance.check_all()
+
+    def test_check_amplicon_v4_results_raise_exception(self):
         accession = 'ERR2985769'
         experiment_type = 'amplicon'
         version = '4.1'
