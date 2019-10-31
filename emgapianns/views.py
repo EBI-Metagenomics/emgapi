@@ -966,7 +966,7 @@ class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
             # TODO: try to simplify this
             facet_qs = M_Q()
             if len(facets):
-                for facet in [f for f in facets if m_models.AnalysisJobContig.has_facet_field('has_' + f)]:
+                for facet in [f for f in facets if getattr(m_models.AnalysisJobContig, 'has_' + f, False)]:
                     facet_qs |= M_Q(**{'has_' + facet: True})
             else:
                 # contigs with no annotations

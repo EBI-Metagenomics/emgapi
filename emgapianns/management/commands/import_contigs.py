@@ -90,14 +90,14 @@ class Command(EMGBaseCommand):
                 contig_id, _, _, _, _, _, _, _, atts = line.split('\t')
                 if contig_id not in annotations_dict:
                     annotations_dict[contig_id] = {
-                        'KEGG': [],
-                        'COG': [],
-                        'Pfam': [],
-                        'InterPro': [],
-                        'GO': []
+                        'kegg': [],
+                        'cog': [],
+                        'pfam': [],
+                        'interpro': [],
+                        'go': []
                     }
                 for category in atts.split(';'):
-                    for possible_cat in ['KEGG', 'COG', 'Pfam', 'InterPro', 'GO']:
+                    for possible_cat in ['kegg', 'cog', 'pfam', 'interpro', 'go']:
                         if category.startswith(possible_cat + '='):
                             values = Command._split(category.replace(possible_cat + '=', ''))
                             annotations_dict[contig_id][possible_cat].extend(values)
@@ -112,11 +112,11 @@ class Command(EMGBaseCommand):
                         # extend the annotations
                         if contig_id not in annotations_dict:
                             annotations_dict[contig_id] = {
-                                'antiSMASH': []
+                                'antismash': []
                             }
-                        if 'antiSMASH' not in annotations_dict[contig_id]:
-                            annotations_dict[contig_id]['antiSMASH'] = []
-                        annotations_dict[contig_id]['antiSMASH'].append(cluster)
+                        if 'antismash' not in annotations_dict[contig_id]:
+                            annotations_dict[contig_id]['antismash'] = []
+                        annotations_dict[contig_id]['antismash'].append(cluster)
             else:
                 logger.warning('antiSMASH file does not exist. SKIPPING!')
 
@@ -176,59 +176,59 @@ class Command(EMGBaseCommand):
                     pipeline_version=analysis_job.pipeline.release_version
                 )
 
-                if 'KEGG' in annotations:
+                if 'kegg' in annotations:
                     contig.keggs = list()
-                    feature_count = Counter(annotations['KEGG'])
+                    feature_count = Counter(annotations['kegg'])
                     contig.has_kegg = bool(feature_count)
                     for feature in feature_count:
                         contig.keggs.append(
                             m_models.AnalysisJobKeggOrthologAnnotation(ko=feature, count=feature_count[feature])
                         )
-                if 'COG' in annotations:
+                if 'cog' in annotations:
                     contig.cogs = list()
-                    feature_count = Counter(annotations['COG'])
+                    feature_count = Counter(annotations['cog'])
                     contig.has_cog = bool(feature_count)
                     for feature in feature_count:
                         contig.cogs.append(
                             m_models.AnalysisJobCOGAnnotation(cog=feature, count=feature_count[feature])
                         )
-                if 'Pfam' in annotations:
+                if 'pfam' in annotations:
                     contig.pfams = list()
-                    feature_count = Counter(annotations['Pfam'])
+                    feature_count = Counter(annotations['pfam'])
                     contig.has_pfam = bool(feature_count)
                     for feature in feature_count:
                         contig.pfams.append(
                             m_models.AnalysisJobPfamAnnotation(pfam_entry=feature, count=feature_count[feature])
                         )
-                if 'InterPro' in annotations:
+                if 'interpro' in annotations:
                     contig.interpros = list()
-                    feature_count = Counter(annotations['InterPro'])
+                    feature_count = Counter(annotations['interpro'])
                     contig.has_interpro = bool(feature_count)
                     for feature in feature_count:
                         contig.interpros.append(
                             m_models.AnalysisJobInterproIdentifierAnnotation(
                                 interpro_identifier=feature, count=feature_count[feature])
                         )
-                if 'GO' in annotations:
+                if 'go' in annotations:
                     contig.gos = list()
-                    feature_count = Counter(annotations['GO'])
+                    feature_count = Counter(annotations['go'])
                     contig.has_go = bool(feature_count)
                     for feature in feature_count:
                         contig.gos.append(
                             m_models.AnalysisJobGoTermAnnotation(go_term=feature, count=feature_count[feature])
                         )
-                if 'antiSMASH' in annotations:
+                if 'antismash' in annotations:
                     contig.as_geneclusters = list()
-                    feature_count = Counter(annotations['antiSMASH'])
+                    feature_count = Counter(annotations['antismash'])
                     contig.has_antismash = bool(feature_count)
                     for feature in feature_count:
                         contig.as_geneclusters.append(
                             m_models.AnalysisJobAntiSmashGCAnnotation(gene_cluster=feature,
                                                                       count=feature_count[feature])
                         )
-                if 'KEGGModules' in annotations:
+                if 'keggmodules' in annotations:
                     contig.kegg_modules = list()
-                    kegg_modules = annotations['KEGGModules'].items()
+                    kegg_modules = annotations['keggmodules'].items()
                     contig.has_antismash = bool(kegg_modules)
                     for module, data in kegg_modules:
                         for completeness, matching, missing in data:

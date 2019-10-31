@@ -430,9 +430,3 @@ class AnalysisJobContig(mongoengine.Document):
             'has_kegg_module',
         ]
     }
-
-    @classmethod
-    def has_facet_field(cls, field):
-        """Return True if the model has the field
-        """
-        return getattr(cls, field, False)
