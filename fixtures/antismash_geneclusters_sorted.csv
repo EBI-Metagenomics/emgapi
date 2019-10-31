@@ -1,0 +1,58 @@
+acyl_amino_acids,N-acyl amino acid cluster
+amglyccycl,Aminoglycoside/aminocyclitol cluster
+aminocoumarin,Aminocoumarin cluster
+arylpolyene,Aryl polyene cluster
+bacteriocin,Bacteriocin or other unspecified ribosomally synthesised and post-translationally modified peptide product (RiPP) cluster
+betalactone,beta-lactone containing protease inhibitor
+blactam,β-lactam cluster
+bottromycin,Bottromycin cluster
+butyrolactone,Butyrolactone cluster
+CDPS,tRNA-dependent cyclodipeptide synthases
+cyanobactin,Cyanobactin cluster
+ectoine,Ectoine cluster
+fatty_acid,"Fatty acid cluster (loose strictness, likely from primary metabolism)"
+fungal-RiPP,Fungal RiPP with POP or UstH peptidase types and a modification
+furan,Furan cluster
+fused,Pheganomycin-style protein ligase-containing cluster
+glycocin,Glycocin cluster
+halogenated,Cluster containing a halogenase and thus potentially generating a halogenated product
+head_to_tail,Head-to-tail cyclised (subtilosin-like) cluster
+hglE-KS,heterocyst glycolipid synthase-like PKS
+hserlactone,Homoserine lactone cluster
+indole,Indole cluster
+ladderane,Ladderane cluster
+lanthipeptide,Lanthipeptide cluster
+LAP,Linear azol(in)e-containing peptides
+lassopeptide,Lasso peptide cluster
+linaridin,Linaridin cluster
+lipolanthine,Lanthipeptide class containing N-terminal fatty acids
+melanin,Melanin cluster
+microviridin,Microviridin cluster
+NAGGN,N-acetylglutaminylglutamine amide
+nrps-like,NRPS-like fragment
+nrps,Non-ribosomal peptide synthetase cluster
+nucleoside,Nucleoside cluster
+oligosaccharide,Oligosaccharide cluster
+other,Cluster containing a secondary metabolite-related protein that does not fit into any other category
+PBDE,Polybrominated diphenyl ether cluster
+phenazine,Phenazine cluster
+phosphoglycolipid,Phosphoglycolipid cluster
+phosphonate,Phosphonate cluster
+PKS-like,Other types of PKS cluster
+PpyS-KS,PPY-like pyrone cluster
+proteusin,Proteusin cluster
+PUFA,Polyunsaturated fatty acid cluster
+RaS-RiPP,Streptide-like thioether-bond RiPPs
+resorcinol,Resorcinol cluster
+saccharide,"Saccharide cluster (loose strictness, likely from primary metabolism)"
+sactipeptide,Sactipeptide cluster
+siderophore,Siderophore cluster
+T1PKS,Type I PKS (Polyketide synthase)
+T2PKS,Type II PKS
+T3PKS,Type III PKS
+terpene,Terpene
+thioamide-NRP,Thioamide-containing non-ribosomal peptide
+thiopeptide,Thiopeptide cluster
+transAT-PKS,"Trans-AT PKS fragment, with trans-AT domain not found"
+transAT-PKS,Trans-AT PKS
+tropodithietic-acid,Tropodithietic acid cluster

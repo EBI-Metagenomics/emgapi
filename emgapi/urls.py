@@ -301,7 +301,6 @@ utils_router.register(
     base_name='csrf'
 )
 
-
 router.register(
     r'genomes',
     views.GenomeViewSet,

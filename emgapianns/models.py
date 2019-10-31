@@ -388,11 +388,22 @@ class AnalysisJobContig(mongoengine.Document):
     pipeline_version = mongoengine.StringField(required=True)
     job_id = mongoengine.IntField(required=True)
 
-    cogs = mongoengine.EmbeddedDocumentListField(AnalysisJobCOGAnnotation)
-    keggs = mongoengine.EmbeddedDocumentListField(AnalysisJobKeggOrthologAnnotation)
-    gos = mongoengine.EmbeddedDocumentListField(AnalysisJobGoTermAnnotation)
-    pfams = mongoengine.EmbeddedDocumentListField(AnalysisJobPfamAnnotation)
-    interpros = mongoengine.EmbeddedDocumentListField(AnalysisJobInterproIdentifierAnnotation)
+    cogs = mongoengine.EmbeddedDocumentListField(AnalysisJobCOGAnnotation, required=False)
+    keggs = mongoengine.EmbeddedDocumentListField(AnalysisJobKeggOrthologAnnotation, required=False)
+    gos = mongoengine.EmbeddedDocumentListField(AnalysisJobGoTermAnnotation, required=False)
+    pfams = mongoengine.EmbeddedDocumentListField(AnalysisJobPfamAnnotation, required=False)
+    interpros = mongoengine.EmbeddedDocumentListField(AnalysisJobInterproIdentifierAnnotation, required=False)
+    as_geneclusters = mongoengine.EmbeddedDocumentListField(AnalysisJobAntiSmashGCAnnotation, required=False)
+    kegg_modules = mongoengine.EmbeddedDocumentListField(AnalysisJobKeggModuleAnnotation, required=False)
+
+    # Cache, using the _size_ method has an overhead
+    has_cog = mongoengine.BooleanField(default=False)
+    has_kegg = mongoengine.BooleanField(default=False)
+    has_go = mongoengine.BooleanField(default=False)
+    has_pfam = mongoengine.BooleanField(default=False)
+    has_interpro = mongoengine.BooleanField(default=False)
+    has_antismash = mongoengine.BooleanField(default=False)
+    has_kegg_module = mongoengine.BooleanField(default=False)
 
     meta = {
         'indexes': [
@@ -408,5 +419,14 @@ class AnalysisJobContig(mongoengine.Document):
             'gos.go_term',
             'pfams.pfam_entry',
             'interpros.interpro_identifier',
+            'as_geneclusters.gene_cluster',
+            'kegg_modules.module',
+            'has_cog',
+            'has_kegg',
+            'has_go',
+            'has_pfam',
+            'has_interpro',
+            'has_antismash',
+            'has_kegg_module',
         ]
     }
