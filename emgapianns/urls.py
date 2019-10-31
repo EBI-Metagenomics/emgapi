@@ -137,12 +137,6 @@ router.register(
 )
 
 router.register(
-    r'analyses/(?P<accession>[^/]+)/annotations',
-    m_views.AnalysisContigAnnotationViewSet,
-    base_name='analysis-annotations'
-)
-
-router.register(
     r'analyses/(?P<accession>[^/]+)/go-terms',
     m_views.AnalysisGoTermRelationshipViewSet,
     base_name='analysis-goterms'
