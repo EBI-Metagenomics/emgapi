@@ -5,7 +5,7 @@ python:
   - '3.6'
 
 env:
-  - EMG_CONFIG=$TRAVIS_BUILD_DIR/travis/config.yaml
+  - EMG_CONFIG=$TRAVIS_BUILD_DIR/travis/configuration.yaml
 
 services:
   - mysql
