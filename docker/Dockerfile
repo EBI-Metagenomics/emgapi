@@ -18,7 +18,7 @@ RUN useradd emg
 
 ADD run.sh /tmp/docker/run.sh
 RUN chmod a+x /tmp/docker/run.sh
-RUN chown ***REMOVED***emg /tmp/docker/run.sh
+RUN chown emg:emg /tmp/docker/run.sh
 
 USER emg
 

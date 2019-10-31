@@ -11,7 +11,7 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
 
-***REMOVED***
+  mongodb:
     image: mongo:3.4
     ports:
       - "27017:27017"
