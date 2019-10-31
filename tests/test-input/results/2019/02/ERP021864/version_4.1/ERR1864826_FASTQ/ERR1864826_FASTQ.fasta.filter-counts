@@ -1,0 +1,5 @@
+Sequences after fastq filtering:	1
+Sequences rejected due to duplicate ids:	0
+Sequences rejected on length:	1
+Sequences rejected due to undetermined bases (N):	0
+Remaining sequences after QC filtering step:	0
