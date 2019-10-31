@@ -1,0 +1,5 @@
+407	sk__Bacteria
+2	sk__Bacteria	k__	p__Acidobacteria	c__Acidobacteriia	o__Acidobacteriales	f__Acidobacteriaceae	g__Candidatus_Koribacter	s__Candidatus_Koribacter_versatilis
+1	sk__Bacteria	k__	p__Candidatus_Hydrogenedentes	c__	o__	f__	g__	s__Candidatus_Hydrogenedentes_bacterium_ADurb.Bin101
+28	sk__Bacteria	k__	p__Gemmatimonadetes	c__Gemmatimonadetes	o__Gemmatimonadales	f__Gemmatimonadaceae	g__Gemmatimonas
+1	sk__Bacteria	k__	p__candidate_division_Zixibacteria
