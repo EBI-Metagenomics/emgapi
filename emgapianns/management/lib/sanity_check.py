@@ -1,5 +1,6 @@
 import glob
 import os
+import sys
 
 from emgapianns.management.lib.utils import read_chunkfile
 from emgapianns.management.webuploader_configs import get_downloadset_config
@@ -7,6 +8,7 @@ from emgapianns.management.webuploader_configs import get_downloadset_config
 
 class SanityCheck:
     QC_NOT_PASSED = 'no-seqs-passed-qc-flag'
+    EXPECTED_EXPERIMENT_TYPES = ['amplicon', 'wgs', 'assembly', 'rna-seq', 'other']
 
     # TODO: Introduce coverage check:
     # For Amplicnn datasets one of the following must exist: UNITE, ITSonedb, SSU or LSU annotations
@@ -15,6 +17,9 @@ class SanityCheck:
         self.dir = d
         self.prefix = os.path.basename(d)
         self.accession = accession
+        self.experiment_type = experiment_type.lower()
+        if self.experiment_type not in self.EXPECTED_EXPERIMENT_TYPES:
+            sys.exit(f'Unexpected experiment type specified: {self.experiment_type}')
         self.config = get_downloadset_config(version, experiment_type)
 
     def check_file_existence(self):
@@ -35,6 +40,39 @@ class SanityCheck:
             return True
         except FileNotFoundError as e:
             return False
+
+    def coverage_check(self):
+        """
+            For WGS / metaT, I’d do ’do proteins exist? If not, quit with error.
+            If so, check for functional annotations.
+            If functional annotations, proceed with upload.
+            if no functional annotations - throw a warning / require manual intervention before upload.
+
+
+            For Amplicon I do 'do LSU or SSU or ITS exist' If not quit with error
+        :return:
+        """
+        if self.experiment_type == 'amplicon':
+            files_to_check = []
+            for f in self.config:
+                if 'coverage_check' in f:
+                    files_to_check.append(f)
+
+            valid = False
+            for check in files_to_check:
+                try:
+                    if check['_chunked']:
+                        self.__check_chunked_file(check)
+                    else:
+                        self.__check_file(check)
+                    valid = True
+                    break
+                except FileNotFoundError:
+                    continue
+            return valid
+        else:
+            # TODO: Implement
+            pass
 
     def __check_chunked_file(self, file_config):
         chunk_file = file_config['chunk_file']

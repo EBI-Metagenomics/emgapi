@@ -573,6 +573,8 @@
       "subdir": "taxonomy-summary/LSU"
     },
     {
+      "coverage_check": true,
+      "coverage_label": "taxonomy",
       "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": false,
@@ -651,6 +653,7 @@
       "subdir": "taxonomy-summary/SSU"
     },
     {
+      "coverage_check": true,
       "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": false,

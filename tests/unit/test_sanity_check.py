@@ -23,58 +23,28 @@ class TestSanityCheck:
         assert "blah" not in file
 
     @patch('os.path.basename')
-    def test_check_initialisation_amplicon_v4(self, mock_dir):
+    @pytest.mark.parametrize("expected_accession, experiment_type, version, expected_result_dir", [
+        ('ERRXXXXXX', 'amplicon', '4.1', '/tmp'),
+        ('ERRXXXXXX', 'amplicon', '5.0', '/tmp'),
+        ('ERZXXXXXX', 'assembly', '5.0', '/tmp'),
+        ('ERZXXXXXX', 'assembly', '4.1', '/tmp'),
+        ('ERRXXXXXX', 'wgs', '4.1', '/tmp'),
+        ('ERRXXXXXX', 'other', '4.1', '/tmp'),
+        ('ERRXXXXXX', 'rna-seq', '4.1', '/tmp'),
+        ('ERZXXXXXX', 'ASSEMBLY', '4.1', '/tmp'),
+        ('ERRXXXXXX', 'WGS', '4.1', '/tmp'),
+        ('ERRXXXXXX', 'AMPLICON', '4.1', '/tmp')
+    ])
+    def test_check_initialisations(self, mock_dir, expected_accession, experiment_type, version,
+                                   expected_result_dir):
         mock_dir.return_value = "test"
-        expected_accession = "ERRXXXXXX"
-        experiment_type = 'amplicon'
-        version = '4.1'
-        expected_result_dir = "/tmp"
-        test_instance = sanity_check.SanityCheck(expected_accession, expected_result_dir, experiment_type, version)
-        self.run_init_tests(test_instance, expected_accession, expected_result_dir, mock_dir.return_value)
-
-    @patch('os.path.basename')
-    def test_check_initialisation_amplicon_v5(self, mock_dir):
-        mock_dir.return_value = "test"
-        expected_accession = "ERRXXXXXX"
-        experiment_type = 'amplicon'
-        version = '5.0'
-        expected_result_dir = "/tmp"
-        test_instance = sanity_check.SanityCheck(expected_accession, expected_result_dir, experiment_type, version)
-        self.run_init_tests(test_instance, expected_accession, expected_result_dir, mock_dir.return_value)
-
-    @patch('os.path.basename')
-    def test_check_initialisation_assembly_v4(self, mock_dir):
-        mock_dir.return_value = "test"
-        expected_accession = "ERZXXXXXX"
-        experiment_type = 'assembly'
-        version = '4.1'
-        expected_result_dir = "/tmp"
-        test_instance = sanity_check.SanityCheck(expected_accession, expected_result_dir, experiment_type, version)
-        self.run_init_tests(test_instance, expected_accession, expected_result_dir, mock_dir.return_value)
-
-    @patch('os.path.basename')
-    def test_check_initialisation_assembly_v5(self, mock_dir):
-        mock_dir.return_value = "test"
-        expected_accession = "ERZXXXXXX"
-        experiment_type = 'assembly'
-        version = '5.0'
-        expected_result_dir = "/tmp"
-        test_instance = sanity_check.SanityCheck(expected_accession, expected_result_dir, experiment_type, version)
-        self.run_init_tests(test_instance, expected_accession, expected_result_dir, mock_dir.return_value)
-
-    @patch('os.path.basename')
-    def test_check_initialisation_wgs_v4(self, mock_dir):
-        mock_dir.return_value = "test"
-        expected_accession = "EREXXXXXX"
-        experiment_type = 'wgs'
-        version = '4.1'
-        expected_result_dir = "/tmp"
         test_instance = sanity_check.SanityCheck(expected_accession, expected_result_dir, experiment_type, version)
         self.run_init_tests(test_instance, expected_accession, expected_result_dir, mock_dir.return_value)
 
     @patch('os.path.basename')
     @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
-        ('ERR2985769', 'wgs', '1.0', 'no-results')
+        ('ERR2985769', 'wgs', '1.0', 'no-results'),
+        ('ERR2985769', 'wgs', '5.0', '/tmp')
     ])
     def test_check_initialisation_should_raise_exception(self, mock_dir, accession, experiment_type, version,
                                                          result_folder):
@@ -172,3 +142,17 @@ class TestSanityCheck:
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
         with pytest.raises(FileNotFoundError):
             test_instance.check_file_existence()
+
+    @pytest.mark.parametrize("accession, experiment_type, amplicon_type, version, result_folder", [
+        ('ERR3506537', 'amplicon', 'SSU', '4.1',
+         'results/2019/09/ERP117125/version_4.1/ERR350/007/ERR3506537_MERGED_FASTQ'),
+        ('ERR2237853', 'amplicon', 'ITS', '5.0',
+         'results/2018/01/ERP106131/version_5.0/ERR223/ERR2237853_MERGED_FASTQ'),
+    ])
+    def test_coverage_check_succeeds(self, accession, experiment_type, amplicon_type, version,
+                                     result_folder, expected_value):
+        root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
+        result_dir = os.path.join(root_dir, result_folder)
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
+        actual = test_instance.coverage_check()
+        assert expected_value == actual
