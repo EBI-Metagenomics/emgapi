@@ -85,7 +85,7 @@ class Command(BaseCommand):
         metadata = self.retrieve_metadata()
 
         # TODO: Introduce coverage check
-        SanityCheck(self.accession, self.result_dir, metadata.experiment_type.value, self.version).check_all()
+        SanityCheck(self.accession, self.result_dir, metadata.experiment_type.value, self.version).check_file_existence()
 
         self.call_import_study(metadata)
 
