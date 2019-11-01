@@ -6,6 +6,8 @@ from emgapianns.management.webuploader_configs import get_downloadset_config
 
 
 class SanityCheck:
+    QC_NOT_PASSED = 'no-seqs-passed-qc-flag'
+
     # TODO: Introduce coverage check:
     # For Amplicnn datasets one of the following must exist: UNITE, ITSonedb, SSU or LSU annotations
     # For WGS and assembly datasets proteins must be predicted and they must have some annotations (e.g. InterProScan 5)
@@ -15,18 +17,26 @@ class SanityCheck:
         self.accession = accession
         self.config = get_downloadset_config(version, experiment_type)
 
-    def check_all(self):
+    def check_file_existence(self):
         for f in self.config:
             try:
                 if f['_chunked']:
-                    self.check_chunked_file(f)
+                    self.__check_chunked_file(f)
                 else:
-                    self.check_file(f)
+                    self.__check_file(f)
             except FileNotFoundError as e:
                 if f['_required']:
                     raise e
 
-    def check_chunked_file(self, file_config):
+    def check_for_qc_not_passed_flag(self):
+        file_path = os.path.join(self.dir, self.QC_NOT_PASSED)
+        try:
+            self.__check_exists(file_path)
+            return True
+        except FileNotFoundError as e:
+            return False
+
+    def __check_chunked_file(self, file_config):
         chunk_file = file_config['chunk_file']
         if '{}' in chunk_file:
             chunk_file = chunk_file.format(self.prefix)
@@ -34,7 +44,7 @@ class SanityCheck:
         chunks = read_chunkfile(chunk_filepath)
         for f in chunks:
             filepath = self.get_filepath(file_config, f)
-            self.check_exists(filepath)
+            self.__check_exists(filepath)
 
     def get_filepath(self, file_config, filename):
         if file_config['subdir']:
@@ -43,14 +53,14 @@ class SanityCheck:
             p = [self.dir, filename]
         return os.path.join(*p)
 
-    def check_file(self, file_config):
+    def __check_file(self, file_config):
         file_name = file_config['real_name']
         if '{}' in file_name:
             file_name = file_name.format(self.prefix)
         filepath = self.get_filepath(file_config, file_name)
-        self.check_exists(filepath)
+        self.__check_exists(filepath)
 
     @staticmethod
-    def check_exists(filepath):
+    def __check_exists(filepath):
         if not glob.glob(filepath):
             raise FileNotFoundError('{} is missing'.format(filepath))
