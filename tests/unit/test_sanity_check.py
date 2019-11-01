@@ -1,58 +1,8 @@
-# FIXME: update!
 import os
 from unittest.mock import patch
 import pytest
 
 from emgapianns.management.lib import sanity_check  # noqa: E402
-
-
-def write_file(path, content):
-    path.write_text(content, encoding='UTF-8')
-
-
-def gen_all_tax_files(su_types, tmpdir, prefix):
-    tax_dir = tmpdir / 'taxonomy-summary'
-    tax_dir.mkdir()
-
-    for su_type in su_types:
-        path = tax_dir / su_type
-        path.mkdir()
-        pref = prefix + '_' + su_type
-        filelist = sanity_check.SanityCheck.taxonomy_result_files
-        files = [f.format(pref) for f in filelist]
-        for f in files:
-            write_file(path / f, 'data')
-
-
-def gen_all_flag_files(tmpdir):
-    filelist = sanity_check.SanityCheck.flag_files
-    for f in filelist:
-        write_file(tmpdir / f, 'data')
-
-
-def gen_all_qc_files(tmpdir):
-    qc_dir = tmpdir / 'qc-statistics'
-    qc_dir.mkdir()
-
-    filelist = sanity_check.SanityCheck.qc_files
-    for f in filelist:
-        write_file(qc_dir / f, 'data')
-
-
-def gen_all_maindir_files(tmpdir, prefix):
-    filelist = sanity_check.SanityCheck.result_files
-    files = [f.format(prefix) for f in filelist]
-    for f in files:
-        write_file(tmpdir / f, 'data')
-    write_file(tmpdir / prefix + '.fasta.chunks', 'mydata')
-
-
-def gen_all_seqdir_files(tmpdir):
-    seq_dir = tmpdir / 'sequence-categorisation'
-    seq_dir.mkdir()
-    filelist = sanity_check.SanityCheck.seq_categorisation
-    for f in filelist:
-        write_file(seq_dir / f, 'data')
 
 
 class TestSanityCheck:
@@ -123,162 +73,102 @@ class TestSanityCheck:
         self.run_init_tests(test_instance, expected_accession, expected_result_dir, mock_dir.return_value)
 
     @patch('os.path.basename')
-    def test_check_initialisation_should_raise_exception(self, mock_dir):
+    @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
+        ('ERR2985769', 'wgs', '1.0', 'no-results')
+    ])
+    def test_check_initialisation_should_raise_exception(self, mock_dir, accession, experiment_type, version,
+                                                         result_folder):
         mock_dir.return_value = "test"
-        expected_accession = "EREXXXXXX"
-        experiment_type = 'wgs'
-        version = '1.0'
-        expected_result_dir = "/tmp"
         with pytest.raises(FileNotFoundError):
-            test_instance = sanity_check.SanityCheck(expected_accession, expected_result_dir, experiment_type, version)
+            test_instance = sanity_check.SanityCheck(accession, result_folder, experiment_type, version)
 
-    def test_check_amplicon_v4_results_succeeds(self):
-        accession = 'ERR3506537'
-        experiment_type = 'amplicon'
-        version = '4.1'
+    @pytest.mark.parametrize("accession, experiment_type, amplicon_type, version, result_folder", [
+        ('ERR3506537', 'amplicon', 'SSU', '4.1',
+         'results/2019/09/ERP117125/version_4.1/ERR350/007/ERR3506537_MERGED_FASTQ'),
+        ('ERR2237853', 'amplicon', 'ITS', '5.0',
+         'results/2018/01/ERP106131/version_5.0/ERR223/ERR2237853_MERGED_FASTQ'),
+    ])
+    def test_check_amplicons_v4_v5_results_succeeds(self, accession, experiment_type, amplicon_type, version,
+                                                    result_folder):
         root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
-        result_dir = os.path.join(root_dir, 'results/2019/09/ERP117125/version_4.1/ERR350/007/ERR3506537_MERGED_FASTQ')
+        result_dir = os.path.join(root_dir, result_folder)
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
-        test_instance.check_all()
+        test_instance.check_file_existence()
 
-    def test_check_amplicon_v5_results_succeeds(self):
+    @pytest.mark.skip(reason="No example does exist yet")
+    def test_check_amplicon_ssu_v5_results_succeeds(self):
         accession = 'ERR3506537'
         experiment_type = 'amplicon'
         version = '5.0'
         root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
-        result_dir = os.path.join(root_dir, 'results/2019/09/ERP117125/version_4.1/ERR350/007/ERR3506537_MERGED_FASTQ')
+        result_dir = os.path.join(root_dir,
+                                  f'results/2019/09/ERP117125/version_{version}/ERR350/007/{accession}_MERGED_FASTQ')
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
-        test_instance.check_all()
+        test_instance.check_file_existence()
 
-    def test_check_amplicon_v4_results_raise_exception(self):
-        accession = 'ERR2985769'
-        experiment_type = 'amplicon'
-        version = '4.1'
+    @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
+        ('ERR2985769', 'amplicon', '4.1', 'no-results')
+    ])
+    def test_check_amplicon_v4_results_raise_exception(self, accession, experiment_type, version, result_folder):
         root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
-        result_dir = os.path.join(root_dir, 'no-results')
+        result_dir = os.path.join(root_dir, result_folder)
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
         with pytest.raises(FileNotFoundError):
-            test_instance.check_all()
+            test_instance.check_file_existence()
 
-    # def test_amplicon_maindir_results_should_not_raise_exception(self, tmpdir):
-    #     accession = None
-    #     experiment_type = 'amplicon'
-    #     version = None
-    #     prefix = 'SRR6418294_MERGED_FASTQ'
-    #     gen_all_maindir_files(tmpdir, prefix)
-    #     result_dir = str(tmpdir)
-    #     cls = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
-    #     cls.check_maindir_results()
-    #
-    # def test_amplicon_maindir_results_should_raise_error_on_missing_file(self, tmpdir):
-    #     prefix = 'SRR6418294_MERGED_FASTQ'
-    #     tmpdir = str(tmpdir)
-    #     cls = sanity_check.SanityCheck(tmpdir, prefix)
-    #     with pytest.raises(AssertionError):
-    #         cls.check_maindir_results()
-    #
-    # @pytest.mark.parametrize('su_types', [
-    #     ('SSU', 'LSU'),
-    #     ('SSU',),
-    #     ('LSU',)
-    # ])
-    # def test_amplicon_taxonomy_results_varying_subunit(self, su_types, tmpdir):
-    #     prefix = 'SRR6418294_MERGED_FASTQ'
-    #     gen_all_tax_files(su_types, tmpdir, prefix)
-    #     tmpdir = str(tmpdir)
-    #     cls = sanity_check.SanityCheck(tmpdir, prefix)
-    #     cls.check_taxonomy_results()
-    #
-    # def test_amplicon_taxonomy_results_missing_subunits(self, tmpdir):
-    #     prefix = 'SRR6418294_MERGED_FASTQ'
-    #     tax_dir = tmpdir / 'taxonomy-summary'
-    #     tax_dir.mkdir()
-    #
-    #     tmpdir = str(tmpdir)
-    #     cls = sanity_check.SanityCheck(tmpdir, prefix)
-    #     with pytest.raises(AssertionError):
-    #         cls.check_taxonomy_results()
-    #
-    # def test_amplicon_taxonomy_results_should_raise_error_on_missing_tax_dir(self, tmpdir):
-    #     prefix = 'SRR6418294_MERGED_FASTQ'
-    #     tmpdir = str(tmpdir)
-    #     cls = sanity_check.SanityCheck(tmpdir, prefix)
-    #     with pytest.raises(AssertionError):
-    #         cls.check_taxonomy_results()
-    #
-    # def test_check_qc_should_raise_error_on_missing_dir(self, tmpdir):
-    #     prefix = 'SRR6418294_MERGED_FASTQ'
-    #     tmpdir = str(tmpdir)
-    #     cls = sanity_check.SanityCheck(tmpdir, prefix)
-    #     with pytest.raises(AssertionError):
-    #         cls.check_qc_results()
-    #
-    # def test_qc(self, tmpdir):
-    #     prefix = 'SRR6418294_MERGED_FASTQ'
-    #     gen_all_qc_files(tmpdir)
-    #
-    #     tmpdir = str(tmpdir)
-    #     cls = sanity_check.SanityCheck(tmpdir, prefix)
-    #     cls.check_qc_results()
-    #
-    # def test_check_flags(self, tmpdir):
-    #     prefix = 'SRR6418294_MERGED_FASTQ'
-    #     gen_all_flag_files(tmpdir)
-    #     tmpdir = str(tmpdir)
-    #     cls = sanity_check.SanityCheck(tmpdir, prefix)
-    #     cls.check_flags()
-    #
-    # def test_check_flags_should_raise_error_on_missing_flags(self, tmpdir):
-    #     prefix = 'SRR6418294_MERGED_FASTQ'
-    #     tmpdir = str(tmpdir)
-    #     cls = sanity_check.SanityCheck(tmpdir, prefix)
-    #     with pytest.raises(AssertionError):
-    #         cls.check_flags()
-    #
-    # def test_check_seqdir(self, tmpdir):
-    #     prefix = 'SRR6418294_MERGED_FASTQ'
-    #     gen_all_seqdir_files(tmpdir)
-    #     tmpdir = str(tmpdir)
-    #     cls = sanity_check.SanityCheck(tmpdir, prefix)
-    #     cls.check_seq_categorisation()
-    #
-    # def test_check_seqdir_should_raise_error_on_missing_flags(self, tmpdir):
-    #     prefix = 'SRR6418294_MERGED_FASTQ'
-    #     tmpdir = str(tmpdir)
-    #     cls = sanity_check.SanityCheck(tmpdir, prefix)
-    #     with pytest.raises(AssertionError):
-    #         cls.check_seq_categorisation()
-    #
-    # def test_check_all_should_raise_error_on_missing_files(self, tmpdir):
-    #     prefix = 'SRR6418294_MERGED_FASTQ'
-    #     tmpdir = str(tmpdir)
-    #     cls = sanity_check.SanityCheck(tmpdir, prefix)
-    #     with pytest.raises(AssertionError):
-    #         cls.check_all()
-    #
-    # def test_check_all_should_work_on_valid_dir(self, tmpdir):
-    #     prefix = 'SRR6418294_MERGED_FASTQ'
-    #     gen_all_seqdir_files(tmpdir)
-    #     gen_all_maindir_files(tmpdir, prefix)
-    #     gen_all_qc_files(tmpdir)
-    #     gen_all_tax_files(['SSU', 'LSU'], tmpdir, prefix)
-    #     gen_all_flag_files(tmpdir)
-    #     tmpdir = str(tmpdir)
-    #     cls = sanity_check.SanityCheck(tmpdir, prefix)
-    #     cls.check_all()
-    #
-    # def test_run_sanity_check_should_raise_error_on_missing_files(self, tmpdir):
-    #     prefix = 'SRR6418294_MERGED_FASTQ'
-    #     tmpdir = str(tmpdir)
-    #     with pytest.raises(AssertionError):
-    #         sanity_check.run_sanity_check(tmpdir, prefix, 'AMPLICON')
-    #
-    # def test_run_sanity_check_should_pass(self, tmpdir):
-    #     prefix = 'SRR6418294_MERGED_FASTQ'
-    #     gen_all_seqdir_files(tmpdir)
-    #     gen_all_maindir_files(tmpdir, prefix)
-    #     gen_all_qc_files(tmpdir)
-    #     gen_all_tax_files(['SSU', 'LSU'], tmpdir, prefix)
-    #     gen_all_flag_files(tmpdir)
-    #     tmpdir = str(tmpdir)
-    #     sanity_check.run_sanity_check(tmpdir, prefix, 'AMPLICON')
+    @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
+        ('ERZ477576', 'assembly', '4.1',
+         'results/2017/11/ERP104174/version_4.1/ERZ477/006/ERZ477576_FASTA'),
+        ('ERZ477576', 'assembly', '5.0',
+         'results/2017/11/ERP104174/version_5.0/ERZ477/006/ERZ477576_FASTA'),
+    ])
+    def test_check_assemblies_v4_v5_results_succeeds(self, accession, experiment_type, version, result_folder):
+        root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
+        result_dir = os.path.join(root_dir, result_folder)
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
+        test_instance.check_file_existence()
+
+    @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
+        ('ERR1913139', 'wgs', '4.1',
+         'results/2018/12/ERP019674/version_4.1/ERR1913139_FASTQ')
+    ])
+    def test_check_wgs_v4_v5_results_succeeds(self, accession, experiment_type, version, result_folder):
+        root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
+        result_dir = os.path.join(root_dir, result_folder)
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
+        test_instance.check_file_existence()
+
+    @pytest.mark.skip(reason="No example does exist yet")
+    def test_check_wgs_v5_results_succeeds(self):
+        accession = '???'
+        experiment_type = 'wgs'
+        version = '5.0'
+        root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
+        result_dir = os.path.join(root_dir,
+                                  f'results/2019/09/ERP117125/version_{version}/ERR350/007/{accession}_MERGED_FASTQ')
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
+        test_instance.check_file_existence()
+
+    @pytest.mark.parametrize("accession, experiment_type, version, result_folder, expected_value", [
+        ('ERR1864826', 'amplicon', '4.1',
+         'results/2019/02/ERP021864/version_4.1/ERR1864826_FASTQ', True),
+        ('ERR1913139', 'wgs', '4.1',
+         'results/2018/12/ERP019674/version_4.1/ERR1913139_FASTQ', False)
+    ])
+    def test_check_qc_not_passed(self, accession, experiment_type, version, result_folder, expected_value):
+        root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
+        result_dir = os.path.join(root_dir, result_folder)
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
+        actual = test_instance.check_for_qc_not_passed_flag()
+        assert expected_value == actual
+
+    @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
+        ('ERR0000001', 'amplicon', '4.1',
+         'results/2019/02/ERP000001/version_4.1/ERR0000001_FASTQ')
+    ])
+    def test_check_should_raise_error_on_missing_file(self, accession, experiment_type, version, result_folder):
+        root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
+        result_dir = os.path.join(root_dir, result_folder)
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
+        with pytest.raises(FileNotFoundError):
+            test_instance.check_file_existence()
