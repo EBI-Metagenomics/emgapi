@@ -56,7 +56,7 @@ class TestSanityCheck:
         ('ERR3506537', 'amplicon', 'SSU', '4.1',
          'results/2019/09/ERP117125/version_4.1/ERR350/007/ERR3506537_MERGED_FASTQ'),
         ('ERR2237853', 'amplicon', 'ITS', '5.0',
-         'results/2018/01/ERP106131/version_5.0/ERR223/ERR2237853_MERGED_FASTQ'),
+         'results/2018/01/ERP106131/version_5.0/ERR223/ERR2237853_MERGED_FASTQ')
     ])
     def test_check_amplicons_v4_v5_results_succeeds(self, accession, experiment_type, amplicon_type, version,
                                                     result_folder):
@@ -89,7 +89,7 @@ class TestSanityCheck:
         ('ERZ477576', 'assembly', '4.1',
          'results/2017/11/ERP104174/version_4.1/ERZ477/006/ERZ477576_FASTA'),
         ('ERZ477576', 'assembly', '5.0',
-         'results/2017/11/ERP104174/version_5.0/ERZ477/006/ERZ477576_FASTA'),
+         'results/2017/11/ERP104174/version_5.0/ERZ477/006/ERZ477576_FASTA')
     ])
     def test_check_assemblies_v4_v5_results_succeeds(self, accession, experiment_type, version, result_folder):
         root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
@@ -143,9 +143,11 @@ class TestSanityCheck:
 
     @pytest.mark.parametrize("accession, experiment_type, amplicon_type, version, result_folder", [
         ('ERR3506537', 'amplicon', 'SSU', '4.1',
-         'results/2019/09/ERP117125/version_4.1/ERR350/007/ERR3506537_MERGED_FASTQ'),
+         'results/2019/09/ERP117125/version_4.1/ERR350/007/ERR3506537_MERGED_FASTQ', True),
         ('ERR2237853', 'amplicon', 'ITS', '5.0',
-         'results/2018/01/ERP106131/version_5.0/ERR223/ERR2237853_MERGED_FASTQ'),
+         'results/2018/01/ERP106131/version_5.0/ERR223/ERR2237853_MERGED_FASTQ', True),
+        ('ERR1864826', 'amplicon', 'SSU', '4.1',
+         'results/2019/02/ERP021864/version_4.1/ERR1864826_FASTQ', False)
     ])
     def test_coverage_check_succeeds(self, accession, experiment_type, amplicon_type, version,
                                      result_folder, expected_value):
