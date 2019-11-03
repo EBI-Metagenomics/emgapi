@@ -141,7 +141,7 @@ class TestSanityCheck:
         with pytest.raises(FileNotFoundError):
             test_instance.check_file_existence()
 
-    @pytest.mark.parametrize("accession, experiment_type, amplicon_type, version, result_folder", [
+    @pytest.mark.parametrize("accession, experiment_type, amplicon_type, version, result_folder, expected_value", [
         ('ERR3506537', 'amplicon', 'SSU', '4.1',
          'results/2019/09/ERP117125/version_4.1/ERR350/007/ERR3506537_MERGED_FASTQ', True),
         ('ERR2237853', 'amplicon', 'ITS', '5.0',
