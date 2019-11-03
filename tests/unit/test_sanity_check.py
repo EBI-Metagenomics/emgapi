@@ -71,8 +71,7 @@ class TestSanityCheck:
         experiment_type = 'amplicon'
         version = '5.0'
         root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
-        result_dir = os.path.join(root_dir,
-                                  f'results/2019/09/ERP117125/version_{version}/ERR350/007/{accession}_MERGED_FASTQ')
+        result_dir = os.path.join(root_dir, 'results/2019/09/ERP117125/version_{}/ERR350/007/{}_MERGED_FASTQ'.format(version, accession))
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
         test_instance.check_file_existence()
 
@@ -114,8 +113,7 @@ class TestSanityCheck:
         experiment_type = 'wgs'
         version = '5.0'
         root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
-        result_dir = os.path.join(root_dir,
-                                  f'results/2019/09/ERP117125/version_{version}/ERR350/007/{accession}_MERGED_FASTQ')
+        result_dir = os.path.join(root_dir, 'results/2019/09/ERP117125/version_{}/ERR350/007/{}_MERGED_FASTQ'.format(version, accession))
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
         test_instance.check_file_existence()
 

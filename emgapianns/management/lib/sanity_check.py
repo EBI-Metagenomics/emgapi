@@ -19,7 +19,7 @@ class SanityCheck:
         self.accession = accession
         self.experiment_type = experiment_type.lower()
         if self.experiment_type not in self.EXPECTED_EXPERIMENT_TYPES:
-            sys.exit(f'Unexpected experiment type specified: {self.experiment_type}')
+            sys.exit('Unexpected experiment type specified: {}'.format(self.experiment_type))
         self.config = get_downloadset_config(version, experiment_type)
 
     def check_file_existence(self):
