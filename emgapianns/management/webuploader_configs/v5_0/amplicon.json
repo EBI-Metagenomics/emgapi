@@ -158,6 +158,7 @@
       "subdir": "taxonomy-summary/its/itsonedb"
     },
     {
+      "coverage_check": true,
       "_accession_substitution": "full",
       "_chunked": false,
       "_required": false,
@@ -171,6 +172,7 @@
       "subdir": "taxonomy-summary/SSU"
     },
     {
+      "coverage_check": true,
       "_accession_substitution": "full",
       "_chunked": false,
       "_required": false,
@@ -184,6 +186,7 @@
       "subdir": "taxonomy-summary/LSU"
     },
     {
+      "coverage_check": true,
       "_accession_substitution": "full",
       "_chunked": false,
       "_required": false,
@@ -197,6 +200,7 @@
       "subdir": "taxonomy-summary/its/unite"
     },
     {
+      "coverage_check": true,
       "_accession_substitution": "full",
       "_chunked": false,
       "_required": false,
