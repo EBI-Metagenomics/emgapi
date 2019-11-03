@@ -1,6 +1,7 @@
 import glob
 import os
 import sys
+from subprocess import check_output
 
 from emgapianns.management.lib.utils import read_chunkfile
 from emgapianns.management.webuploader_configs import get_downloadset_config
@@ -73,6 +74,22 @@ class SanityCheck:
         else:
             # TODO: Implement
             pass
+
+    def __count_number_of_lines(self, filepath):
+        """
+            Counts number of lines in text file.
+        :return:
+        """
+        count = check_output("wc -l < {}".format(filepath), shell=True).rstrip()
+        return int(count)
+
+    def __count_number_of_seqs(self,filepath):
+        """
+            Counts number of sequences in compressed fastq file.
+        :return:
+        """
+        count = check_output("zcat {} | wc -l".format(filepath), shell=True).rstrip()
+        return int(count) / 4
 
     def __check_chunked_file(self, file_config):
         chunk_file = file_config['chunk_file']
