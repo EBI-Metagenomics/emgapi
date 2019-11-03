@@ -10,6 +10,8 @@ from emgapianns.management.webuploader_configs import get_downloadset_config
 class SanityCheck:
     QC_NOT_PASSED = 'no-seqs-passed-qc-flag'
     EXPECTED_EXPERIMENT_TYPES = ['amplicon', 'wgs', 'assembly', 'rna-seq', 'other']
+    MIN_NUM_SEQS = 10
+    MIN_NUM_LINES = 15
 
     # TODO: Introduce coverage check:
     # For Amplicnn datasets one of the following must exist: UNITE, ITSonedb, SSU or LSU annotations
@@ -119,3 +121,14 @@ class SanityCheck:
     def __check_exists(filepath):
         if not glob.glob(filepath):
             raise FileNotFoundError('{} is missing'.format(filepath))
+
+    def __check_file_content(self, filepath):
+        if "faa.gz" in filepath:
+            count = self.__count_number_of_seqs(filepath)
+            if count >= self.MIN_NUM_SEQS:
+                return True
+        else:
+            num_lines = self.__count_number_of_lines(filepath)
+            if num_lines >= self.MIN_NUM_LINES:
+                return True
+        return False
