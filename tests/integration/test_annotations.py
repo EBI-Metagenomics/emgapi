@@ -3,13 +3,13 @@
 
 # Copyright 2017 EMBL - European Bioinformatics Institute
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
+# distributed under the License is distributed on an 'AS IS' BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
@@ -27,15 +27,35 @@ from test_utils.emg_fixtures import *  # noqa
 
 @pytest.mark.usefixtures('mongodb')
 @pytest.mark.django_db
-class TestAnnotations(object):
+class TestAnnotations:
+
+    @property
+    def _annotation_endpoints(self):
+        return [
+            ['emgapi_v1:analysis-goslim-list', 'go_slim'], 
+            ['emgapi_v1:analysis-goterms-list', 'go'],
+            ['emgapi_v1:analysis-interpro-list', 'interpro'],
+            ['emgapi_v1:analysis-genomeproperties-list', 'genome_properties'],
+            ['emgapi_v1:analysis-keggorthologs-list', 'kegg'],
+            ['emgapi_v1:analysis-pfamentries-list', 'pfam'],
+            ['emgapi_v1:analysis-keggmodules-list', 'kegg-module'],
+            ['emgapi_v1:analysis-antismash-gene-clusters-list', 'antismash']
+        ]
+    
+    @property
+    def _import_suffixes(self): 
+        return ['.ipr', '.go', '.go_slim',
+                '.paths.kegg', '.pfam', '.ko',
+                '.paths.gprops', '.antismash']
 
     def test_goslim(self, client, run):
+        """Test GO Slim list and detail"""
         assert run.accession == 'ABC01234'
         call_command('import_summary', run.accession,
                      os.path.dirname(os.path.abspath(__file__)),
                      suffix='.go_slim')
 
-        url = reverse("emgapi_v1:goterms-list")
+        url = reverse('emgapi_v1:goterms-list')
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -45,19 +65,20 @@ class TestAnnotations(object):
         ids = [a['id'] for a in rsp['data']]
         assert ids == expected
 
-        url = reverse("emgapi_v1:goterms-detail", args=['GO:0030246'])
+        url = reverse('emgapi_v1:goterms-detail', args=['GO:0030246'])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
         assert rsp['data']['id'] == 'GO:0030246'
 
     def test_go(self, client, run):
+        """Test GO list and detail"""
         assert run.accession == 'ABC01234'
         call_command('import_summary', run.accession,
                      os.path.dirname(os.path.abspath(__file__)),
                      suffix='.go')
 
-        url = reverse("emgapi_v1:goterms-list")
+        url = reverse('emgapi_v1:goterms-list')
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -68,19 +89,20 @@ class TestAnnotations(object):
         ids = [a['id'] for a in rsp['data']]
         assert ids == expected
 
-        url = reverse("emgapi_v1:goterms-detail", args=['GO:0030170'])
+        url = reverse('emgapi_v1:goterms-detail', args=['GO:0030170'])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
         assert rsp['data']['id'] == 'GO:0030170'
 
     def test_ipr(self, client, run):
+        """Test IPR list and detail"""
         assert run.accession == 'ABC01234'
         call_command('import_summary', run.accession,
                      os.path.dirname(os.path.abspath(__file__)),
                      suffix='.ipr')
 
-        url = reverse("emgapi_v1:interproidentifier-list")
+        url = reverse('emgapi_v1:interproidentifier-list')
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -91,7 +113,7 @@ class TestAnnotations(object):
         ids = [a['id'] for a in rsp['data']]
         assert ids == expected
 
-        url = reverse("emgapi_v1:interproidentifier-detail",
+        url = reverse('emgapi_v1:interproidentifier-detail',
                       args=['IPR009739'])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -99,54 +121,186 @@ class TestAnnotations(object):
         assert rsp['data']['id'] == 'IPR009739'
 
     def test_object_does_not_exist(self, client):
-        url = reverse("emgapi_v1:goterms-detail", args=['GO:9999'])
+        """Test results for an existent annotation"""
+        url = reverse('emgapi_v1:goterms-detail', args=['GO:9999'])
         response = client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-        url = reverse("emgapi_v1:interproidentifier-detail", args=['IPR9999'])
+        url = reverse('emgapi_v1:interproidentifier-detail', args=['IPR9999'])
         response = client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_empty(self, client, run_emptyresults):
+        """Test empty annotations"""
         assert run_emptyresults.release_version == '4.1'
         assert run_emptyresults.accession == 'MGYA00001234'
 
         accession = run_emptyresults.accession
 
-        call_command('import_summary', accession,
-                     os.path.dirname(os.path.abspath(__file__)),
-                     suffix='.go_slim')
-        call_command('import_summary', accession,
-                     os.path.dirname(os.path.abspath(__file__)),
-                     suffix='.go')
-        call_command('import_summary', accession,
-                     os.path.dirname(os.path.abspath(__file__)),
-                     suffix='.ipr')
+        for suffix in self._import_suffixes:
+            call_command('import_summary', accession,
+                        os.path.dirname(os.path.abspath(__file__)),
+                        pipeline=run_emptyresults.release_version,
+                        suffix=suffix)
 
-        url = reverse('emgapi_v1:analysis-goslim-list', args=[accession])
+        for endpoint, _ in self._annotation_endpoints:
+            url = reverse('emgapi_v1:analysis-goslim-list', args=[accession])
+            response = client.get(url)
+            assert response.status_code == status.HTTP_200_OK
+            rsp = response.json()
+            assert len(rsp['data']) == 0
+
+    @pytest.mark.parametrize('expected', [{
+        'data': {
+            'M00003': {
+                'completeness': 100.0,
+                'name': 'Gluconeogenesis, oxaloacetate => fructose-6P',
+                'description': 'Pathway modules; Carbohydrate metabolism; Central carbohydrate metabolism',
+                'matching-kos': ['K01610', 'K01803', 'K15633', 'K01689', 'K00927', 'K00134', 'K01834', 'K03841', 'K01623', 'K01624'],
+                'missing-kos': []
+            },
+            'M00005': {
+                'completeness': 100.0,
+                'name': 'PRPP biosynthesis, ribose 5P => PRPP',
+                'description': 'Pathway modules; Carbohydrate metabolism; Central carbohydrate metabolism',
+                'matching-kos': ['K00948'],
+                'missing-kos': []
+            },
+            'M00010': {
+                'completeness': 100.0,
+                'name': 'Citrate cycle, first carbon oxidation, oxaloacetate => 2-oxoglutarate',
+                'description': 'Pathway modules; Carbohydrate metabolism; Central carbohydrate metabolism',
+                'matching-kos': ['K00031', 'K01647', 'K01681', 'K00030'],
+                'missing-kos': []
+            },
+            'M00015': {
+                'completeness': 99.0,
+                'name': 'Proline biosynthesis, glutamate => proline',
+                'description': 'Pathway modules; Amino acid metabolism; Arginine and proline metabolism',
+                'matching-kos': ['K00147','K00286','K00931'],
+                'missing-kos': ['K00001']
+            }
+        }
+    }])
+    @pytest.mark.parametrize('pipeline_version', ['5.0'])
+    def test_kegg_modules(self, client, analysis_results, pipeline_version, expected):
+        """Test the import_summary for KEGG modules
+        """
+        run = analysis_results[pipeline_version].run
+        job = analysis_results[pipeline_version]
+
+        call_command('import_summary', run.accession,
+                     os.path.dirname(os.path.abspath(__file__)),
+                     pipeline='5.0',
+                     suffix='.paths.kegg')
+
+        url = reverse('emgapi_v1:analysis-keggmodules-list', args=[job.accession])
         response = client.get(url)
 
         assert response.status_code == status.HTTP_200_OK
 
         rsp = response.json()
-        assert len(rsp['data']) == 0
+        for entry in rsp['data']:
+            attributes = entry['attributes']
+            accession = attributes['accession']
+            for key, value in expected['data'][accession].items():
+                assert attributes[key] == value
 
-        url = reverse('emgapi_v1:analysis-goterms-list', args=[accession])
+            detail_url = reverse('emgapi_v1:keggmodules-detail', args=[accession])
+            detail_resp = client.get(detail_url)
+            assert detail_resp.status_code == status.HTTP_200_OK
+            detail_data = detail_resp.json()
+            assert detail_data['data']['attributes']['accession'] == accession
+            for key in detail_data['data']['attributes'].keys():
+                if key != 'accession':
+                    assert detail_data['data']['attributes'][key] == expected['data'][accession][key]
+
+
+    @pytest.mark.parametrize('expected', [{
+        'data': {
+            'GenProp0001': [1, 'Chorismate biosynthesis via shikimate'],
+            'GenProp0002': [1, 'Coenzyme F420 utilization'],
+            'GenProp0010': [1, 'Inteins'],
+            'GenProp0021': [1, 'CRISPR region']
+        }
+    }])
+    @pytest.mark.parametrize('pipeline_version', ['5.0'])
+    def test_genome_properties(self, client, analysis_results, pipeline_version, expected):
+        """Test the import_summary for Genome Properties
+        """
+        run = analysis_results[pipeline_version].run
+        job = analysis_results[pipeline_version]
+
+        call_command('import_summary', run.accession,
+                     os.path.dirname(os.path.abspath(__file__)),
+                     pipeline='5.0',
+                     suffix='.paths.gprops')
+
+        url = reverse('emgapi_v1:analysis-genomeproperties-list', args=[job.accession])
         response = client.get(url)
+
         assert response.status_code == status.HTTP_200_OK
 
         rsp = response.json()
-        assert len(rsp['data']) == 0
+        for entry in rsp['data']:
+            attributes = entry['attributes']
+            accession = attributes['accession']
+            assert attributes['count'] == expected['data'][accession][0]
 
-        url = reverse('emgapi_v1:analysis-interpro-list', args=[accession])
+            detail_url = reverse('emgapi_v1:genome-properties-detail', args=[accession])
+            detail_resp = client.get(detail_url)
+            assert detail_resp.status_code == status.HTTP_200_OK
+            detail_data = detail_resp.json()
+            assert detail_data['data']['attributes']['accession'] in expected['data']
+            assert detail_data['data']['attributes']['description'] == expected['data'][accession][1]
+
+    @pytest.mark.parametrize('expected', [{
+        'data': {
+            'terpene': [62, 'Terpene'],
+            'bacteriocin': [11, 'Bacteriocin or other unspecified ' + 
+                                'ribosomally synthesised and post-translationally ' + 
+                                'modified peptide product (RiPP) cluster'],
+            'arylpolyene': [3, 'Aryl polyene cluster'],
+            't3pks': [1, 'Type III PKS']
+        }
+    }])
+    @pytest.mark.parametrize('pipeline_version', ['5.0'])
+    def test_antismash(self, client, analysis_results, pipeline_version, expected):
+        """Test the import_summary for antiSMASH
+        """
+        run = analysis_results[pipeline_version].run
+        job = analysis_results[pipeline_version]
+
+        call_command('import_antismash_geneclusters', 
+                     os.path.dirname(os.path.abspath(__file__)) + 
+                     '/fixtures/antismash_geneclusters.txt')
+
+        call_command('import_summary', run.accession,
+                     os.path.dirname(os.path.abspath(__file__)),
+                     pipeline='5.0',
+                     suffix='.antismash')
+
+        url = reverse('emgapi_v1:analysis-antismash-gene-clusters-list',
+                      args=[job.accession])
         response = client.get(url)
+
         assert response.status_code == status.HTTP_200_OK
 
         rsp = response.json()
-        assert len(rsp['data']) == 0
+        for entry in rsp['data']:
+            attributes = entry['attributes']
+            accession = attributes['accession']
+            assert attributes['count'] == expected['data'][accession][0]
+
+            detail_url = reverse('emgapi_v1:antismash-gene-clusters-detail', args=[accession])
+            detail_resp = client.get(detail_url)
+            assert detail_resp.status_code == status.HTTP_200_OK
+            detail_data = detail_resp.json()
+            assert detail_data['data']['attributes']['accession'] in expected['data']
+            assert detail_data['data']['attributes']['description'] == expected['data'][accession][1]
 
     @pytest.mark.parametrize(
-        'pipeline_version', [
+        'pipeline_version_data', [
             {'version': '1.0', 'expected': {
                 'go_slim': {
                     'GO:0030246': 23011, 'GO:0043167': 3222011,
@@ -175,67 +329,75 @@ class TestAnnotations(object):
                     'IPR006677': 3, 'IPR010326': 1, 'IPR011459': 6,
                     'IPR023385': 5, 'IPR024548': 2, 'IPR031692': 4
                 },
+            }},
+            {'version': '5.0', 'expected': {
+                'go_slim': {
+                    'GO:0005618': 392, 'GO:0009276': 10,
+                    'GO:0016020': 45671, 'GO:1904659': 101,
+                },
+                'go_terms': {
+                    'GO:0005575': 77, 'GO:0005576': 37, 'GO:0009276': 1, 'GO:0019868': 256, 'GO:0005618': 23,
+                },
+                'interpro': {
+                    'IPR006677': 3, 'IPR010326': 1, 'IPR011459': 6,
+                    'IPR023385': 5, 'IPR024548': 2, 'IPR031692': 4
+                },
+                'genome_properties': {
+                    'GenProp0001': 1, 'GenProp0002': 1,
+                    'GenProp0010': 1, 'GenProp0021': 1
+                },
+                'kegg': {
+                    'K00003': 42, 'K00005': 3, 'K00009': 3,
+                    'K00010': 13, 'K00012': 26, 'K00013': 15
+                },
+                'pfam': {
+                    'PF00002': 1, 'PF00003': 1, 'PF00004': 1092,
+                    'PF00005': 9539
+                },
+                'antismash': {
+                    'terpene': 62,
+                    'bacteriocin': 11,
+                    'arylpolyene': 3,
+                    't3pks': 1
+                },
+                'kegg_module': {
+                    'M00003': 100.0,
+                    'M00005': 100.0,
+                    'M00010': 100.0,
+                    'M00015': 99.0
+                }
             }}
         ]
     )
-    def test_relations(self, client, analysis_results, pipeline_version):
-        version = pipeline_version['version']
+    def test_relations(self, client, analysis_results, pipeline_version_data):
+        """Test the import summary command and the API results
+        """
+        version = pipeline_version_data['version']
         run = analysis_results[version].run
         job = analysis_results[version]
-        call_command('import_summary', run.accession,
-                     os.path.dirname(os.path.abspath(__file__)),
-                     pipeline=version,
-                     suffix='.go_slim')
-        call_command('import_summary', run.accession,
-                     os.path.dirname(os.path.abspath(__file__)),
-                     pipeline=version,
-                     suffix='.go')
-        call_command('import_summary', run.accession,
-                     os.path.dirname(os.path.abspath(__file__)),
-                     pipeline=version,
-                     suffix='.ipr')
 
-        url = reverse("emgapi_v1:analysis-goslim-list",
-                      args=[job.accession])
-        response = client.get(url)
-        assert response.status_code == status.HTTP_200_OK
-        rsp = response.json()
+        # TODO: move to a data migration
+        call_command('import_antismash_geneclusters', 
+                     os.path.dirname(os.path.abspath(__file__)) + 
+                     '/fixtures/antismash_geneclusters.txt')
 
-        assert len(rsp['data']) == 3
+        for suffix in self._import_suffixes:
+            call_command('import_summary', run.accession,
+                        os.path.dirname(os.path.abspath(__file__)),
+                        pipeline=version,
+                        suffix=suffix)
 
-        expected = pipeline_version['expected']['go_slim']
-        ids = {
-            a['attributes']['accession']: a['attributes']['count']
-            for a in rsp['data']
-        }
-        assert ids == expected
-
-        url = reverse("emgapi_v1:analysis-goterms-list",
-                      args=[job.accession])
-        response = client.get(url)
-        assert response.status_code == status.HTTP_200_OK
-        rsp = response.json()
-
-        assert len(rsp['data']) == 6
-
-        expected = pipeline_version['expected']['go_terms']
-        ids = {
-            a['attributes']['accession']: a['attributes']['count']
-            for a in rsp['data']
-        }
-        assert ids == expected
-
-        url = reverse("emgapi_v1:analysis-interpro-list",
-                      args=[job.accession])
-        response = client.get(url)
-        assert response.status_code == status.HTTP_200_OK
-        rsp = response.json()
-
-        assert len(rsp['data']) == 6
-
-        expected = pipeline_version['expected']['interpro']
-        ids = {
-            a['attributes']['accession']: a['attributes']['count']
-            for a in rsp['data']
-        }
-        assert ids == expected
+        for endpoint, prop in self._annotation_endpoints:
+            url = reverse(endpoint, args=[job.accession])
+            response = client.get(url)
+            assert response.status_code == status.HTTP_200_OK
+            rsp = response.json()
+            if prop in pipeline_version_data['expected']:
+                expected = pipeline_version_data['expected'][prop]
+                assert len(rsp['data']) == len(expected)
+                field = 'completeness' if prop == 'kegg_modules' else 'count'
+                ids = {
+                    a['attributes']['accession']: a['attributes'][field]
+                    for a in rsp['data']
+                }
+                assert ids == expected

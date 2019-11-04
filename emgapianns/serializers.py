@@ -59,7 +59,7 @@ class KeggModuleSerializer(m_serializers.DocumentSerializer,
                            serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi_v1:keggmodule-detail',
+        view_name='emgapi_v1:keggmodules-detail',
         lookup_field='accession',
     )
 
@@ -154,13 +154,13 @@ class KeggModuleRetrieveSerializer(m_serializers.DynamicDocumentSerializer,
                                    serializers.HyperlinkedModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi_v1:keggmodule-detail',
+        view_name='emgapi_v1:keggmodules-detail',
         lookup_field='accession',
     )
 
     completeness = serializers.FloatField(required=True)
-    matching_kos = serializers.ListField(required=True)
-    missing_kos = serializers.ListField(required=True)
+    matching_kos = serializers.ListField()
+    missing_kos = serializers.ListField()
 
     class Meta:
         model = m_models.KeggModule

@@ -97,7 +97,7 @@ class TestDefaultAPI(object):
         rsp = response.json()
         assert rsp['meta']['pagination']['page'] == 1
         assert rsp['meta']['pagination']['pages'] == 1
-        # assert rsp['meta']['pagination']['count'] == 0 FIXME:
+        assert rsp['meta']['pagination']['count'] == 0
 
     @pytest.mark.django_db
     def test_invalid_view_should_raise_exception(self):

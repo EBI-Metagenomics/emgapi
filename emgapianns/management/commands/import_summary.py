@@ -16,7 +16,7 @@ class Command(EMGBaseCommand):
 
     def __init__(self):
         super().__init__()
-        self.suffixes = ['.ipr', '.go', '.go_slim', '.paths.kegg', '.pfam', '.ko', '.paths.gprops', '.antismash']
+        self.suffixes = ['.ipr', '.go', '.go_slim', '.pfam', '.ko', '.paths.gprops', '.antismash']
         self.kegg_pathway_suffix = ['.paths.kegg']
         self.joined_suffixes = self.suffixes + self.kegg_pathway_suffix
 
@@ -179,15 +179,12 @@ class Command(EMGBaseCommand):
             run.save()
             logger.info("Saved Run %r" % run)
 
-    @staticmethod
-    def load_kegg_from_summary_file(obj, rootpath, file_name, delimiter=','):
-        """
-            Load KEGG Modules results for a job into Mongo.
-
-            KEGG results are composed of 3 files:
-                - summary file
-                - matching ko per pathway
-                - missing ko per pathway
+    def load_kegg_from_summary_file(self, obj, rootpath, file_name, delimiter=','):
+        """Load KEGG Modules results for a job into Mongo.
+        KEGG results are composed of 3 files:
+            - summary file
+            - matching ko per pathway
+            - missing ko per pathway
         """
         try:
             analysis_keggs = m_models.AnalysisJobKeggModule.objects \
@@ -207,6 +204,9 @@ class Command(EMGBaseCommand):
 
         summary_infile = os.path.join(rootpath, obj.result_directory, file_name)
 
+        if not self._check_source_file(summary_infile):
+            return
+
         new_kmodules = []
         annotations = []
 
@@ -217,8 +217,8 @@ class Command(EMGBaseCommand):
             for accession, completeness, pathway_name, pathway_class, matching_kos, missing_kos in reader:
                 accession = accession.strip()
                 completeness = float(completeness)
-                matching_kos_list = matching_kos.strip().split(",")
-                missing_kos_list = missing_kos.strip().split(",")
+                matching_kos_list = list(filter(None, matching_kos.strip().split(',')))
+                missing_kos_list = list(filter(None, missing_kos.strip().split(',')))
 
                 k_module = None
                 try:
@@ -273,7 +273,7 @@ class Command(EMGBaseCommand):
         new_entities = []
         annotations = []
 
-        next(reader)  # skip header
+        # next(reader)  # skip header
 
         for count, model_id, description in reader:
             count = int(count)

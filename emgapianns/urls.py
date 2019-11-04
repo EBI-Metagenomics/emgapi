@@ -40,7 +40,7 @@ mongo_router.register(
 mongo_router.register(
     r'annotations/kegg-modules',
     m_views.KeggModuleViewSet,
-    base_name='keggmodule'
+    base_name='keggmodules'
 )
 
 mongo_router.register(
