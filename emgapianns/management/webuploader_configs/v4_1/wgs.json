@@ -232,6 +232,7 @@
       "subdir": null
     },
     {
+      "coverage_check": true,
       "_accession_substitution": "full",
       "_chunked": true,
       "_required": true,
