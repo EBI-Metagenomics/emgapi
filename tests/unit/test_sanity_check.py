@@ -3,6 +3,7 @@ from unittest.mock import patch
 import pytest
 
 from emgapianns.management.lib import sanity_check  # noqa: E402
+from emgapianns.management.lib.uploader_exceptions import NoAnnotationsFoundError
 
 
 class TestSanityCheck:
@@ -71,7 +72,9 @@ class TestSanityCheck:
         experiment_type = 'amplicon'
         version = '5.0'
         root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
-        result_dir = os.path.join(root_dir, 'results/2019/09/ERP117125/version_{}/ERR350/007/{}_MERGED_FASTQ'.format(version, accession))
+        result_dir = os.path.join(root_dir,
+                                  'results/2019/09/ERP117125/version_{}/ERR350/007/{}_MERGED_FASTQ'.format(version,
+                                                                                                           accession))
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
         test_instance.check_file_existence()
 
@@ -113,7 +116,9 @@ class TestSanityCheck:
         experiment_type = 'wgs'
         version = '5.0'
         root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
-        result_dir = os.path.join(root_dir, 'results/2019/09/ERP117125/version_{}/ERR350/007/{}_MERGED_FASTQ'.format(version, accession))
+        result_dir = os.path.join(root_dir,
+                                  'results/2019/09/ERP117125/version_{}/ERR350/007/{}_MERGED_FASTQ'.format(version,
+                                                                                                           accession))
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
         test_instance.check_file_existence()
 
@@ -132,9 +137,12 @@ class TestSanityCheck:
 
     @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
         ('ERR0000001', 'amplicon', '4.1',
-         'results/2019/02/ERP000001/version_4.1/ERR0000001_FASTQ')
+         'results/2019/02/ERP000001/version_4.1/ERR0000001_FASTQ'),
+        ('ERR3506531', 'amplicon', '4.1',
+         'results/2019/09/ERP117125/version_4.1/ERR350/001/ERR3506531_MERGED_FASTQ')
     ])
-    def test_check_should_raise_error_on_missing_file(self, accession, experiment_type, version, result_folder):
+    def test_check_file_existence_should_raise_file_not_found_error(self, accession, experiment_type, version,
+                                                                    result_folder):
         root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
         result_dir = os.path.join(root_dir, result_folder)
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
@@ -147,7 +155,9 @@ class TestSanityCheck:
         ('ERR2237853', 'amplicon', 'ITS', '5.0',
          'results/2018/01/ERP106131/version_5.0/ERR223/ERR2237853_MERGED_FASTQ', True),
         ('ERR1864826', 'amplicon', 'SSU', '4.1',
-         'results/2019/02/ERP021864/version_4.1/ERR1864826_FASTQ', False)
+         'results/2019/02/ERP021864/version_4.1/ERR1864826_FASTQ', False),
+        ('ERR3506532', 'wgs', 'WGS', '4.1',
+         'results/2019/09/ERP117125/version_4.1/ERR350/002/ERR3506532_MERGED_FASTQ', True)
     ])
     def test_coverage_check_succeeds(self, accession, experiment_type, amplicon_type, version,
                                      result_folder, expected_value):
@@ -156,3 +166,17 @@ class TestSanityCheck:
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
         actual = test_instance.coverage_check()
         assert expected_value == actual
+
+    @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
+        ('ERR3506531', 'amplicon', '4.1',
+         'results/2019/09/ERP117125/version_4.1/ERR350/001/ERR3506531_MERGED_FASTQ'),
+        ('ERR1913139', 'wgs', '4.1',
+         'results/2018/12/ERP019674/version_4.1/ERR1913139_FASTQ')
+    ])
+    def test_coverage_check_should_raise_no_annotations_found_error(self, accession, experiment_type, version,
+                                                                    result_folder):
+        root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
+        result_dir = os.path.join(root_dir, result_folder)
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
+        with pytest.raises(NoAnnotationsFoundError):
+            test_instance.coverage_check()

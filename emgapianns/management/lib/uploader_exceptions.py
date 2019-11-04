@@ -23,3 +23,8 @@ class AccessionNotRecognised(Exception):
 class StudyNotBeRetrievedFromENA(Exception):
     """Raised when study could not be retrieved from the ENA API"""
     pass
+
+
+class NoAnnotationsFoundError(Exception):
+    """Raised when no annotations found in result files"""
+    pass

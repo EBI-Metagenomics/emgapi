@@ -1,8 +1,9 @@
 import glob
 import os
 import sys
-from subprocess import check_output
+from subprocess import check_output, CalledProcessError
 
+from emgapianns.management.lib.uploader_exceptions import NoAnnotationsFoundError
 from emgapianns.management.lib.utils import read_chunkfile
 from emgapianns.management.webuploader_configs import get_downloadset_config
 
@@ -10,17 +11,15 @@ from emgapianns.management.webuploader_configs import get_downloadset_config
 class SanityCheck:
     QC_NOT_PASSED = 'no-seqs-passed-qc-flag'
     EXPECTED_EXPERIMENT_TYPES = ['amplicon', 'wgs', 'assembly', 'rna-seq', 'other']
-    MIN_NUM_SEQS = 10
-    MIN_NUM_LINES = 15
+    MIN_NUM_SEQS = 1
+    MIN_NUM_LINES = 3
 
-    # TODO: Introduce coverage check:
-    # For Amplicnn datasets one of the following must exist: UNITE, ITSonedb, SSU or LSU annotations
-    # For WGS and assembly datasets proteins must be predicted and they must have some annotations (e.g. InterProScan 5)
     def __init__(self, accession, d, experiment_type, version):
         self.dir = d
         self.prefix = os.path.basename(d)
         self.accession = accession
         self.experiment_type = experiment_type.lower()
+        self.version = version
         if self.experiment_type not in self.EXPECTED_EXPERIMENT_TYPES:
             sys.exit('Unexpected experiment type specified: {}'.format(self.experiment_type))
         self.config = get_downloadset_config(version, experiment_type)
@@ -51,33 +50,25 @@ class SanityCheck:
             If functional annotations, proceed with upload.
             if no functional annotations - throw a warning / require manual intervention before upload.
 
-
             For Amplicon I do 'do LSU or SSU or ITS exist' If not quit with error
         :return:
         """
-        if self.experiment_type == 'amplicon':
-            files_to_check = []
-            for f in self.config:
-                if 'coverage_check' in f:
-                    files_to_check.append(f)
-
-            valid = False
-            for check in files_to_check:
+        valid = False
+        for f in self.config:
+            if 'coverage_check' in f:
                 try:
-                    if check['_chunked']:
-                        self.__check_chunked_file(check)
+                    if f['_chunked']:
+                        self.__check_chunked_file(f, coverage_check=True)
                     else:
-                        self.__check_file(check)
+                        self.__check_file(f, coverage_check=True)
                     valid = True
                     break
                 except FileNotFoundError:
                     continue
-            return valid
-        else:
-            # TODO: Implement
-            pass
+        return valid
 
-    def __count_number_of_lines(self, filepath):
+    @staticmethod
+    def __count_number_of_lines(filepath):
         """
             Counts number of lines in text file.
         :return:
@@ -85,15 +76,19 @@ class SanityCheck:
         count = check_output("wc -l < {}".format(filepath), shell=True).rstrip()
         return int(count)
 
-    def __count_number_of_seqs(self,filepath):
+    @staticmethod
+    def __count_number_of_seqs(filepath):
         """
-            Counts number of sequences in compressed fastq file.
+            Counts number of sequences in compressed fasta file.
         :return:
         """
-        count = check_output("zcat {} | wc -l".format(filepath), shell=True).rstrip()
-        return int(count) / 4
+        try:
+            count = check_output("zcat {} | grep -c '>'".format(filepath), shell=True).rstrip()
+            return int(count)
+        except CalledProcessError:
+            return 0
 
-    def __check_chunked_file(self, file_config):
+    def __check_chunked_file(self, file_config, coverage_check=False):
         chunk_file = file_config['chunk_file']
         if '{}' in chunk_file:
             chunk_file = chunk_file.format(self.prefix)
@@ -102,6 +97,8 @@ class SanityCheck:
         for f in chunks:
             filepath = self.get_filepath(file_config, f)
             self.__check_exists(filepath)
+            if coverage_check:
+                self.__check_file_content(filepath)
 
     def get_filepath(self, file_config, filename):
         if file_config['subdir']:
@@ -110,12 +107,14 @@ class SanityCheck:
             p = [self.dir, filename]
         return os.path.join(*p)
 
-    def __check_file(self, file_config):
+    def __check_file(self, file_config, coverage_check=False):
         file_name = file_config['real_name']
         if '{}' in file_name:
             file_name = file_name.format(self.prefix)
         filepath = self.get_filepath(file_config, file_name)
         self.__check_exists(filepath)
+        if coverage_check:
+            self.__check_file_content(filepath)
 
     @staticmethod
     def __check_exists(filepath):
@@ -131,4 +130,4 @@ class SanityCheck:
             num_lines = self.__count_number_of_lines(filepath)
             if num_lines >= self.MIN_NUM_LINES:
                 return True
-        return False
+        raise NoAnnotationsFoundError('No annotations found in result file:\n{}'.format(filepath))
