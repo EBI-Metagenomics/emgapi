@@ -18,7 +18,7 @@ import logging
 from django.core.management import BaseCommand
 from emgapianns.management.lib import utils
 
-from emgapianns.management.lib.create_or_update_study import run_create_or_update_study
+from emgapianns.management.lib.create_or_update_study import StudyImporter
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +53,8 @@ class Command(BaseCommand):
         database = options['ena_db']
 
         study_dir = self.get_study_dir(options.get('study_dir'), options.get('prod_dir'), secondary_study_accession)
-        run_create_or_update_study(secondary_study_accession, study_dir, lineage, database)
+        importer = StudyImporter(secondary_study_accession, study_dir, lineage, database)
+        importer.run()
 
         logger.info("Program finished successfully.")
 
