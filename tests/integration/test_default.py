@@ -74,7 +74,6 @@ class TestDefaultAPI(object):
         [
             'emgapi_v1:biomes',
             'emgapi_v1:experiment-types',
-            'emgapi_v1:pipelines',
             'emgapi_v1:publications',
             'emgapi_v1:samples',
             'emgapi_v1:runs',
@@ -98,6 +97,19 @@ class TestDefaultAPI(object):
         assert rsp['meta']['pagination']['page'] == 1
         assert rsp['meta']['pagination']['pages'] == 1
         assert rsp['meta']['pagination']['count'] == 0
+
+    @pytest.mark.django_db
+    def test_empty_list_pipelines(self, client):
+        """Pipelines API is never empty as V5 is created on a migration
+        """
+        url = reverse('emgapi_v1:pipelines-list')
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        rsp = response.json()
+        assert rsp['meta']['pagination']['page'] == 1
+        assert rsp['meta']['pagination']['pages'] == 1
+        assert rsp['meta']['pagination']['count'] == 1
+
 
     @pytest.mark.django_db
     def test_invalid_view_should_raise_exception(self):

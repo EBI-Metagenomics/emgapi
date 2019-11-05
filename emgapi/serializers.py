@@ -604,7 +604,7 @@ class RetrieveAssemblySerializer(AssemblySerializer):
 class BaseDownloadSerializer(ExplicitFieldsModelSerializer,
                              serializers.HyperlinkedModelSerializer):
 
-    id = serializers.ReadOnlyField(source="alias")
+    id = serializers.ReadOnlyField(source='alias')
 
     description = serializers.SerializerMethodField()
 

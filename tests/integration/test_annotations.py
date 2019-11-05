@@ -63,7 +63,7 @@ class TestAnnotations:
 
         expected = ['GO:0030246', 'GO:0046906', 'GO:0043167']
         ids = [a['id'] for a in rsp['data']]
-        assert ids == expected
+        assert ids.sort() == expected.sort()
 
         url = reverse('emgapi_v1:goterms-detail', args=['GO:0030246'])
         response = client.get(url)
@@ -87,7 +87,7 @@ class TestAnnotations:
         expected = ['GO:0030170', 'GO:0019842', 'GO:0030246',
                     'GO:0046906', 'GO:0043167', 'GO:0005515']
         ids = [a['id'] for a in rsp['data']]
-        assert ids == expected
+        assert ids.sort() == expected.sort()
 
         url = reverse('emgapi_v1:goterms-detail', args=['GO:0030170'])
         response = client.get(url)
@@ -111,7 +111,7 @@ class TestAnnotations:
         expected = ['IPR009739', 'IPR021425', 'IPR021710',
                     'IPR033771', 'IPR024561', 'IPR013698']
         ids = [a['id'] for a in rsp['data']]
-        assert ids == expected
+        assert ids.sort() == expected.sort()
 
         url = reverse('emgapi_v1:interproidentifier-detail',
                       args=['IPR009739'])
@@ -271,10 +271,6 @@ class TestAnnotations:
         run = analysis_results[pipeline_version].run
         job = analysis_results[pipeline_version]
 
-        call_command('import_antismash_geneclusters', 
-                     os.path.dirname(os.path.abspath(__file__)) + 
-                     '/fixtures/antismash_geneclusters.txt')
-
         call_command('import_summary', run.accession,
                      os.path.dirname(os.path.abspath(__file__)),
                      pipeline='5.0',
@@ -375,11 +371,6 @@ class TestAnnotations:
         version = pipeline_version_data['version']
         run = analysis_results[version].run
         job = analysis_results[version]
-
-        # TODO: move to a data migration
-        call_command('import_antismash_geneclusters', 
-                     os.path.dirname(os.path.abspath(__file__)) + 
-                     '/fixtures/antismash_geneclusters.txt')
 
         for suffix in self._import_suffixes:
             call_command('import_summary', run.accession,

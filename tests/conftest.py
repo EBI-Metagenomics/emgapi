@@ -62,6 +62,8 @@ def django_db_setup(hide_ena_config, django_db_setup):
 # MongoDB connection
 @pytest.fixture(scope='function')
 def mongodb(request):
+    """On the EMG_CONFIG use 'testdb' on the mongo configuration
+    """
     db = mongoengine.connect('testdb')
 
     def finalizer():
