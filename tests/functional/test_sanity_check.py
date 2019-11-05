@@ -61,7 +61,7 @@ class TestSanityCheck:
     ])
     def test_check_amplicons_v4_v5_results_succeeds(self, accession, experiment_type, amplicon_type, version,
                                                     result_folder):
-        root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
+        root_dir = os.path.dirname(__file__).replace('functional', 'test-input')
         result_dir = os.path.join(root_dir, result_folder)
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
         test_instance.check_file_existence()
@@ -71,7 +71,7 @@ class TestSanityCheck:
         accession = 'ERR3506537'
         experiment_type = 'amplicon'
         version = '5.0'
-        root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
+        root_dir = os.path.dirname(__file__).replace('functional', 'test-input')
         result_dir = os.path.join(root_dir,
                                   'results/2019/09/ERP117125/version_{}/ERR350/007/{}_MERGED_FASTQ'.format(version,
                                                                                                            accession))
@@ -82,7 +82,7 @@ class TestSanityCheck:
         ('ERR2985769', 'amplicon', '4.1', 'no-results')
     ])
     def test_check_amplicon_v4_results_raise_exception(self, accession, experiment_type, version, result_folder):
-        root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
+        root_dir = os.path.dirname(__file__).replace('functional', 'test-input')
         result_dir = os.path.join(root_dir, result_folder)
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
         with pytest.raises(FileNotFoundError):
@@ -95,7 +95,7 @@ class TestSanityCheck:
          'results/2017/11/ERP104174/version_5.0/ERZ477/006/ERZ477576_FASTA')
     ])
     def test_check_assemblies_v4_v5_results_succeeds(self, accession, experiment_type, version, result_folder):
-        root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
+        root_dir = os.path.dirname(__file__).replace('functional', 'test-input')
         result_dir = os.path.join(root_dir, result_folder)
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
         test_instance.check_file_existence()
@@ -105,7 +105,7 @@ class TestSanityCheck:
          'results/2018/12/ERP019674/version_4.1/ERR1913139_FASTQ')
     ])
     def test_check_wgs_v4_v5_results_succeeds(self, accession, experiment_type, version, result_folder):
-        root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
+        root_dir = os.path.dirname(__file__).replace('functional', 'test-input')
         result_dir = os.path.join(root_dir, result_folder)
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
         test_instance.check_file_existence()
@@ -115,7 +115,7 @@ class TestSanityCheck:
         accession = '???'
         experiment_type = 'wgs'
         version = '5.0'
-        root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
+        root_dir = os.path.dirname(__file__).replace('functional', 'test-input')
         result_dir = os.path.join(root_dir,
                                   'results/2019/09/ERP117125/version_{}/ERR350/007/{}_MERGED_FASTQ'.format(version,
                                                                                                            accession))
@@ -129,7 +129,7 @@ class TestSanityCheck:
          'results/2018/12/ERP019674/version_4.1/ERR1913139_FASTQ', False)
     ])
     def test_check_qc_not_passed(self, accession, experiment_type, version, result_folder, expected_value):
-        root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
+        root_dir = os.path.dirname(__file__).replace('functional', 'test-input')
         result_dir = os.path.join(root_dir, result_folder)
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
         actual = test_instance.check_for_qc_not_passed_flag()
@@ -143,7 +143,7 @@ class TestSanityCheck:
     ])
     def test_check_file_existence_should_raise_file_not_found_error(self, accession, experiment_type, version,
                                                                     result_folder):
-        root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
+        root_dir = os.path.dirname(__file__).replace('functional', 'test-input')
         result_dir = os.path.join(root_dir, result_folder)
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
         with pytest.raises(FileNotFoundError):
@@ -161,7 +161,7 @@ class TestSanityCheck:
     ])
     def test_coverage_check_succeeds(self, accession, experiment_type, amplicon_type, version,
                                      result_folder, expected_value):
-        root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
+        root_dir = os.path.dirname(__file__).replace('functional', 'test-input')
         result_dir = os.path.join(root_dir, result_folder)
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
         actual = test_instance.coverage_check()
@@ -175,7 +175,7 @@ class TestSanityCheck:
     ])
     def test_coverage_check_should_raise_no_annotations_found_error(self, accession, experiment_type, version,
                                                                     result_folder):
-        root_dir = os.path.dirname(__file__).replace('unit', 'test-input')
+        root_dir = os.path.dirname(__file__).replace('functional', 'test-input')
         result_dir = os.path.join(root_dir, result_folder)
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
         with pytest.raises(NoAnnotationsFoundError):
