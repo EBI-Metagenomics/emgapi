@@ -55,6 +55,7 @@ def create_download_description(apps, schema_editor):
     downloads = (
         ("All reads encoding 5.8S", "Reads encoding 5.8S"),
         ("All contigs encoding 5.8S", "Contigs encoding 5.8S"),
+        ("All contigs encoding 5S", "Contigs encoding 5S"),
         ("All reads encoding ITS", "Reads encoding ITS (with SSU and LSU sequences masked)"),
         ("Taxonomic assignments (TSV)", "MAPseq ITSoneDB assignments"),
         ("Taxonomic assignments (TSV)", "MAPseq UNITE assignments"),
