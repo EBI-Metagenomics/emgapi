@@ -12,7 +12,7 @@ def create_pipeline_v5(apps, schema_editor):
                                                   description='Release of version 5.0',
                                                   changes='Major upgrade.',
                                                   release_version='5.0',
-                                                  release_date='2019-12-01')
+                                                  release_date='2019-11-06')
 
 
 def create_group_types(apps, schema_editor):

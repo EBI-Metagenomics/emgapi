@@ -62,22 +62,9 @@ class Command(EMGBaseCommand):
         for analysis_job in self.obj_list:
             self.load_contigs(analysis_job, options)
 
-    def load_contigs(self, analysis_job, options):  # noqa: C901
-        """Load the contigs in Mongo
+    def load_gff(self, gff, annotations_dict):
+        """Load the GFF eggNOG data on the cache
         """
-        logger.info('CLI {}'.format(options))
-
-        faix = options['faix']
-        gff = options['gff']
-        kegg_modules = options['kegg_modules']
-        antismash = options['antismash']
-        min_length = options['min_length']
-        batch_size = options['batch_size']
-
-        logger.info('Starting the contigs import process for: ' + str(analysis_job.accession))
-
-        # load the gff in memory
-        annotations_dict = {}
         if not os.path.exists(gff):
             logger.error('GFF file does not exist')
             raise ValueError('GFF file does not exist')
@@ -87,7 +74,7 @@ class Command(EMGBaseCommand):
             for line in gff_file:
                 if line.startswith('#'):
                     continue
-                contig_id, _, _, _, _, _, _, _, atts = line.split('\t')
+                contig_id, *_, atts = line.split('\t')
                 if contig_id not in annotations_dict:
                     annotations_dict[contig_id] = {
                         'kegg': [],
@@ -102,53 +89,78 @@ class Command(EMGBaseCommand):
                             values = Command._split(category.replace(possible_cat + '=', ''))
                             annotations_dict[contig_id][possible_cat].extend(values)
 
-        if antismash:
-            logger.info('Loading antiSMASH')
-            if os.path.exists(antismash):
-                with open(antismash, 'rt') as as_file:
-                    for line in as_file:
-                        _, contig, cluster, *_ = line.split('\t')
-                        contig_id = contig.replace(' ', '-')
-                        # extend the annotations
-                        if contig_id not in annotations_dict:
-                            annotations_dict[contig_id] = {
-                                'antismash': []
-                            }
-                        if 'antismash' not in annotations_dict[contig_id]:
-                            annotations_dict[contig_id]['antismash'] = []
-                        annotations_dict[contig_id]['antismash'].append(cluster)
-            else:
-                logger.warning('antiSMASH file does not exist. SKIPPING!')
+    def load_antismash(self, antismash, annotations_dict):
+        """Load antiSMASH file data on the cache
+        """
+        if not antismash:
+            logger.warning('antiSMASH file does not exist. SKIPPING!')
+            return
+        logger.info('Loading antiSMASH')
+        if os.path.exists(antismash):
+            with open(antismash, 'rt') as as_file:
+                for line in as_file:
+                    _, contig, cluster, *_ = line.split('\t')
+                    contig_id = contig.replace(' ', '-')
+                    # extend the annotations
+                    if contig_id not in annotations_dict:
+                        annotations_dict[contig_id] = {
+                            'antismash': []
+                        }
+                    if 'antismash' not in annotations_dict[contig_id]:
+                        annotations_dict[contig_id]['antismash'] = []
+                    annotations_dict[contig_id]['antismash'].append(cluster)
 
-        if kegg_modules:
-            # KEGG Modules per contig is loaded from
-            # the summary file
-            logger.info('Loading the KEGG Modules')
-            km_dict = {}
-            if os.path.exists(kegg_modules):
-                with open(kegg_modules, 'rt') as km_file:
-                    next(km_file)
-                    for line in km_file:
-                        contig, module, completeness, _, _, matching, missing = line.split('\t')
-                        # re-format removing the faa prefix
-                        # ERZ782910.4199-NODE_4199_length_728_cov_2.072808_1 to
-                        # ERZ782910.4199-NODE_4199_length_728_cov_2.072808
-                        contig = re.sub(r'_\d+$', '', contig)
-                        # store the modules per contig, one contig could
-                        # have the same module several times
-                        if contig not in km_dict:
-                            km_dict[contig] = {}
-                        if module not in km_dict[contig]:
-                            km_dict[contig][module] = []
-                        km_dict[contig][module].append(
-                            [float(completeness), Command._split(matching), Command._split(missing)])
-                # extend the annotations
-                for contig, modules in km_dict.items():
-                    if contig not in annotations_dict:
-                        annotations_dict[contig] = {}
-                    annotations_dict[contig].update(KEGGModules=modules)
-            else:
-                logger.warning('KEGG Modules files does not exist. SKIPPING!')
+    def load_kegg_modules(self, kegg_modules, annotations_dict):
+        """Load KEGG Modules and paths
+        """
+        if not kegg_modules:
+            logger.warning('KEGG Modules files does not exist. SKIPPING!')
+            return
+        # KEGG Modules per contig is loaded from
+        # the summary file
+        logger.info('Loading the KEGG Modules')
+        km_dict = {}
+        if os.path.exists(kegg_modules):
+            with open(kegg_modules, 'rt') as km_file:
+                next(km_file)
+                for line in km_file:
+                    contig, module, completeness, _, _, matching, missing = line.split('\t')
+                    # re-format removing the faa prefix
+                    # ERZ782910.4199-NODE_4199_length_728_cov_2.072808_1 to
+                    # ERZ782910.4199-NODE_4199_length_728_cov_2.072808
+                    contig = re.sub(r'_\d+$', '', contig)
+                    # store the modules per contig, one contig could
+                    # have the same module several times
+                    if contig not in km_dict:
+                        km_dict[contig] = {}
+                    if module not in km_dict[contig]:
+                        km_dict[contig][module] = []
+                    km_dict[contig][module].append(
+                        [float(completeness), Command._split(matching), Command._split(missing)])
+            # extend the annotations
+            for contig, modules in km_dict.items():
+                if contig not in annotations_dict:
+                    annotations_dict[contig] = {}
+                annotations_dict[contig].update(KEGGModules=modules)
+
+    def load_contigs(self, analysis_job, options):
+        """Load the contigs in Mongo
+        """
+        logger.info('CLI {}'.format(options))
+
+        faix = options['faix']
+        gff = options['gff']
+        kegg_modules = options['kegg_modules']
+        antismash = options['antismash']
+        min_length = options['min_length']
+        batch_size = options['batch_size']
+
+        logger.info('Starting the contigs import process for: ' + str(analysis_job.accession))
+
+        annotations_dict = {}
+        self.load_gff(gff, annotations_dict)
+        self.load_antismash(antismash, annotations_dict)
+        self.load_kegg_modules(kegg_modules, annotations_dict)
 
         # Remove contigs
         m_models.AnalysisJobContig.objects.filter(
