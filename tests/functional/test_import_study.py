@@ -1,12 +1,13 @@
-import mock
+from unittest.mock import patch
 
+import mock
 import pytest
+from test_utils.emg_fixtures import *  # noqa
+
+from emgapi import models as emg_models
 from emgapianns.management.commands.import_study import Command
 from emgapianns.management.lib.create_or_update_study import StudyImporter
 from emgena import models as ena_models
-from emgapi import models as emg_models
-from test_utils.emg_fixtures import *  # noqa
-from django.test import TransactionTestCase
 
 
 def mock_fetch_ena_study_api(*args, **kwargs):
@@ -50,19 +51,23 @@ def create_model(*args, **kwargs):
 
 
 @pytest.mark.django_db
-class TestImportSampleTransactions(TransactionTestCase):
+class TestImportStudyTransactions:
 
     @pytest.mark.usefixtures("biome")
     @pytest.mark.usefixtures("var_names")
-    @pytest.mark.parametrize("accession", [
-        'ERP117125', 'root:Host-associated:Mammals:Digestive system:Fecal'
+    @pytest.mark.parametrize("accession, lineage", [
+        ('ERP117125', 'root:Host-associated:Mammals:Digestive system:Fecal')
     ])
-    def test_import_study_should_succeed(self, accession):
-        mock_db = mock.patch.object(StudyImporter, '_fetch_study_metadata', new=create_model)
-        with mock_db:
+    @patch('emgapianns.management.commands.import_study.Command.get_study_dir')
+    @patch('emgapianns.management.lib.create_or_update_study.StudyImporter._fetch_study_metadata')
+    def test_import_study_should_succeed(self, mock_db, mock_study_dir, accession, lineage):
+        mock_study_dir.return_value = "2019/09/ERP117125"
+        mock_db.return_value = create_model()
+        # mock_db = mock.patch.object(StudyImporter, '_fetch_study_metadata', new=create_model)
+        with mock_db, mock_study_dir:
             cmd = Command()
             cmd.run_from_argv(
-                argv=['manage.py', 'import_study', accession, 'root:Host-associated:Mammals:Digestive system:Fecal'])
+                argv=['manage.py', 'import_study', accession, lineage])
             created_study = emg_models.Study.objects.get(secondary_accession=accession)
             expected_data = mock_fetch_ena_study_api()
             assert created_study.accession == expected_data['secondary_sample_accession']
