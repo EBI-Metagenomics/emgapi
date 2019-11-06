@@ -35,7 +35,7 @@ class EMGBaseCommand(BaseCommand):
             help='Pipeline version',
             action='store',
             dest='pipeline',
-            choices=['4.1', '5.0'], default='4.1'
+            choices=['4.0', '4.1', '5.0'], default='4.1'
         )
 
     def handle(self, *args, **options):
