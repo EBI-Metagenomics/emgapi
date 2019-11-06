@@ -1,12 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import os
 import csv
 import logging
+import os
 
 from emgapi import models as emg_models
-
 from ..lib import EMGBaseCommand
 
 logger = logging.getLogger(__name__)
@@ -21,9 +20,18 @@ class Command(EMGBaseCommand):
 
     def find_path(self, obj, options):
         rootpath = options.get('rootpath', None)
-        res = os.path.join(
-            rootpath, obj.result_directory, 'charts', 'new.summary')
+
+        for infile in ['qc_summary', 'func_summary']:
+            self.load_stats(rootpath, obj, infile)
+
+    def load_stats(self, rootpath, obj, input_file_name):
+        res = os.path.join(rootpath, obj.result_directory, input_file_name)
         logger.info("Found: %s" % res)
+
+        if input_file_name == 'qc_summary':
+            if not os.path.exists(res):  # Check existence of the v4.1 result file
+                res = os.path.join(rootpath, obj.result_directory, 'charts', 'new.summary')
+
         if os.path.exists(res):
             if os.path.isfile(res):
                 if os.stat(res).st_size > 0:
@@ -48,12 +56,14 @@ class Command(EMGBaseCommand):
             except emg_models.AnalysisMetadataVariableNames.DoesNotExist:
                 var = emg_models.AnalysisMetadataVariableNames(var_name=row[0])
                 var.save()
-                # becuase PK is not AutoField
+                # because PK is not AutoField
                 var = emg_models.AnalysisMetadataVariableNames.objects \
                     .get(var_name=row[0])
             if var is not None:
-                job_ann = emg_models.AnalysisJobAnn.objects.get_or_create(
-                    job=job, var=var, var_val_ucv=row[1]
+                job_ann, created = emg_models.AnalysisJobAnn.objects.update_or_create(
+                    job=job, var=var,
+                    defaults={'var_val_ucv': row[1]}
                 )
+
                 anns.append(job_ann)
         logger.info("Total %d Annotations for Run: %s" % (len(anns), job))

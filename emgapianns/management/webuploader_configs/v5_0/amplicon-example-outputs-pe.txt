@@ -1,0 +1,53 @@
+├── ERR2237853_MERGED_FASTQ.cmsearch.all.tblout.deoverlapped.gz
+├── ERR2237853_MERGED_FASTQ.cmsearch.all.tblout.gz
+├── ERR2237853_MERGED_FASTQ.fasta.chunks
+├── ERR2237853_MERGED_FASTQ.fasta.gz
+├── qc-statistics
+│   ├── GC-distribution.out.full
+│   ├── GC-distribution.out.full_bin
+│   ├── GC-distribution.out.full_pcbin
+│   ├── nucleotide-distribution.out.full
+│   ├── seq-length.out.full
+│   ├── seq-length.out.full_bin
+│   ├── seq-length.out.full_pcbin
+│   └── summary.out
+├── qc_summary
+├── sequence-categorisation
+│   ├── 5S.fasta.chunks
+│   ├── 5S.fasta.gz
+│   ├── ITS_masked.fasta.chunks
+│   ├── ITS_masked.fasta.gz
+│   ├── LSU.fasta.chunks
+│   ├── LSU.fasta.gz
+│   ├── SSU.fasta.chunks
+│   └── SSU.fasta.gz
+└── taxonomy-summary
+    ├── its
+    │   ├── itsonedb
+    │   │   ├── ERR2237853_MERGED_FASTQ_itsonedb.fasta.mseq.gz
+    │   │   ├── ERR2237853_MERGED_FASTQ_itsonedb.fasta.mseq_hdf5.biom
+    │   │   ├── ERR2237853_MERGED_FASTQ_itsonedb.fasta.mseq_json.biom
+    │   │   ├── ERR2237853_MERGED_FASTQ_itsonedb.fasta.mseq.tsv
+    │   │   ├── ERR2237853_MERGED_FASTQ_itsonedb.fasta.mseq.txt
+    │   │   └── krona.html
+    │   └── unite
+    │       ├── ERR2237853_MERGED_FASTQ_unite.fasta.mseq.gz
+    │       ├── ERR2237853_MERGED_FASTQ_unite.fasta.mseq_hdf5.biom
+    │       ├── ERR2237853_MERGED_FASTQ_unite.fasta.mseq_json.biom
+    │       ├── ERR2237853_MERGED_FASTQ_unite.fasta.mseq.tsv
+    │       ├── ERR2237853_MERGED_FASTQ_unite.fasta.mseq.txt
+    │       └── krona.html
+    ├── LSU
+    │   ├── ERR2237853_MERGED_FASTQ_LSU.fasta.mseq.gz
+    │   ├── ERR2237853_MERGED_FASTQ_LSU.fasta.mseq_hdf5.biom
+    │   ├── ERR2237853_MERGED_FASTQ_LSU.fasta.mseq_json.biom
+    │   ├── ERR2237853_MERGED_FASTQ_LSU.fasta.mseq.tsv
+    │   ├── ERR2237853_MERGED_FASTQ_LSU.fasta.mseq.txt
+    │   └── krona.html
+    └── SSU
+        ├── ERR2237853_MERGED_FASTQ_SSU.fasta.mseq.gz
+        ├── ERR2237853_MERGED_FASTQ_SSU.fasta.mseq_hdf5.biom
+        ├── ERR2237853_MERGED_FASTQ_SSU.fasta.mseq_json.biom
+        ├── ERR2237853_MERGED_FASTQ_SSU.fasta.mseq.tsv
+        ├── ERR2237853_MERGED_FASTQ_SSU.fasta.txt
+        └── krona.html

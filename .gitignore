@@ -5,6 +5,7 @@ __pycache__
 var
 dist
 .eggs
+emgcli.egg-info/
 
 staticfiles/
 media/

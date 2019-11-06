@@ -1,3 +1,18 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# Copyright 2019 EMBL - European Bioinformatics Institute
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import logging
 import json
 import re
@@ -5,6 +20,7 @@ import re
 from django.core.management import BaseCommand
 
 from emgapi import models as emg_models
+from emgapianns import models as m_models
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +41,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.database = options['database']
-        logger.info("CLI %r" % options)
+        logger.info('CLI %r' % options)
         entries = self.read_kegg_orthology(options['kegg_module_ontology_file'])
 
         for module_name, description in entries.items():
@@ -56,4 +72,6 @@ class Command(BaseCommand):
             'description': description
         }
         entry, _ = emg_models.KeggModule.objects.using(self.database).update_or_create(name=name, defaults=defs)
+        m_models.KeggModule.objects(accession=name) \
+                           .modify(upsert=True, new=True, set__description=description)
         self.kegg_cache[name] = entry

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2017 EMBL - European Bioinformatics Institute
+# Copyright 2019 EMBL - European Bioinformatics Institute
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ from django.urls.exceptions import NoReverseMatch
 
 from rest_framework import status
 
-# import fixtures
 from test_utils.emg_fixtures import *  # noqa
 
 
@@ -35,31 +34,39 @@ class TestDefaultAPI(object):
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
 
-        host = 'http://testserver/%s' % api_version
+        host = 'http://testserver/{}'.format(api_version)
         expected = {
-            'biomes': '%s/biomes' % host,
-            'studies': '%s/studies' % host,
-            "super-studies": "%s/super-studies" % host,
-            'samples': '%s/samples' % host,
-            'runs': '%s/runs' % host,
-            'analyses': '%s/analyses' % host,
-            'assemblies': '%s/assemblies' % host,
-            'pipelines': '%s/pipelines' % host,
-            'experiment-types': '%s/experiment-types' % host,
-            'publications': '%s/publications' % host,
-            'pipeline-tools': '%s/pipeline-tools' % host,
-            'annotations/go-terms': '%s/annotations/go-terms' % host,
-            'annotations/interpro-identifiers':
-                '%s/annotations/interpro-identifiers' % host,
-            'annotations/organisms': '%s/annotations/organisms' % host,
-            'mydata': '%s/mydata' % host,
-            'genomes': '%s/genomes' % host,
-            'cogs': '%s/cogs' % host,
-            'genomeset': '%s/genomeset' % host,
-            'kegg-classes': '%s/kegg-classes' % host,
-            'kegg-modules': '%s/kegg-modules' % host,
-            'release': '%s/release' % host
+            'biomes': '/biomes',
+            'studies': '/studies',
+            "super-studies": '/super-studies',
+            'samples': '/samples',
+            'runs': '/runs',
+            'analyses': '/analyses',
+            'assemblies': '/assemblies',
+            'pipelines': '/pipelines',
+            'experiment-types': '/experiment-types',
+            'publications': '/publications',
+            'pipeline-tools': '/pipeline-tools',
+            'annotations/go-terms': '/annotations/go-terms',
+            'annotations/interpro-identifiers': '/annotations/interpro-identifiers',
+            'annotations/antismash-gene-clusters': '/annotations/antismash-gene-clusters',
+            'annotations/genome-properties': '/annotations/genome-properties',
+            'annotations/kegg-modules': '/annotations/kegg-modules',
+            'annotations/kegg-orthologs': '/annotations/kegg-orthologs',
+            'annotations/pfam-entries': '/annotations/pfam-entries',
+            'annotations/organisms': '/annotations/organisms',
+            'mydata': '/mydata',
+            'genomes': '/genomes',
+            'cogs': '/cogs',
+            'genomeset': '/genomeset',
+            'kegg-classes': '/kegg-classes',
+            'kegg-modules': '/kegg-modules',
+            'release': '/release'
         }
+
+        for k in expected:
+            expected[k] = host + expected[k]
+
         assert rsp['data'] == expected
 
     @pytest.mark.parametrize(
@@ -67,7 +74,6 @@ class TestDefaultAPI(object):
         [
             'emgapi_v1:biomes',
             'emgapi_v1:experiment-types',
-            'emgapi_v1:pipelines',
             'emgapi_v1:publications',
             'emgapi_v1:samples',
             'emgapi_v1:runs',
@@ -83,7 +89,7 @@ class TestDefaultAPI(object):
     )
     @pytest.mark.django_db
     def test_empty_list(self, client, _view):
-        view_name = '%s-list' % _view
+        view_name = '{}-list'.format(_view)
         url = reverse(view_name)
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -91,6 +97,19 @@ class TestDefaultAPI(object):
         assert rsp['meta']['pagination']['page'] == 1
         assert rsp['meta']['pagination']['pages'] == 1
         assert rsp['meta']['pagination']['count'] == 0
+
+    @pytest.mark.django_db
+    def test_empty_list_pipelines(self, client):
+        """Pipelines API is never empty as V5 is created on a migration
+        """
+        url = reverse('emgapi_v1:pipelines-list')
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        rsp = response.json()
+        assert rsp['meta']['pagination']['page'] == 1
+        assert rsp['meta']['pagination']['pages'] == 1
+        assert rsp['meta']['pagination']['count'] == 1
+
 
     @pytest.mark.django_db
     def test_invalid_view_should_raise_exception(self):
@@ -128,7 +147,8 @@ class TestDefaultAPI(object):
             ('AnalysisJob', 'analysis-jobs', 'emgapi_v1:analyses', [],
              ['go-terms', 'go-slim', 'interpro-identifiers', 'sample',
               'study', 'run', 'assembly', 'downloads', 'taxonomy-ssu',
-              'taxonomy-lsu', 'taxonomy']),
+              'taxonomy-lsu', 'taxonomy-itsunite', 'taxonomy-itsonedb',
+              'taxonomy', 'antismash-gene-clusters']),
         ]
     )
     @pytest.mark.django_db
@@ -157,7 +177,7 @@ class TestDefaultAPI(object):
                                  pk=pk, biome=_biome, is_public=1)
                 _st = mommy.make('emgapi.Study', pk=pk, biome=_biome,
                                  is_public=1, samples=[_sm])
-                mommy.make('emgapi.Run', pk=pk, status_id=run_status,
+                mommy.make('emgapi.Run', pk=pk, status=run_status,
                            study=_st, sample=_sm)
             elif _model in ('Assembly',):
                 _biome = mommy.make('emgapi.Biome', pk=pk)
@@ -165,7 +185,7 @@ class TestDefaultAPI(object):
                                  pk=pk, biome=_biome, is_public=1)
                 _st = mommy.make('emgapi.Study', pk=pk, biome=_biome,
                                  is_public=1, samples=[_sm])
-                _r = mommy.make('emgapi.Run', pk=pk, status_id=run_status,
+                _r = mommy.make('emgapi.Run', pk=pk, status=run_status,
                                 study=_st, sample=_sm)
                 mommy.make('emgapi.Assembly', pk=pk, status_id=run_status,
                            runs=[_r])
@@ -175,7 +195,7 @@ class TestDefaultAPI(object):
                                  pk=pk, biome=_biome, is_public=1)
                 _st = mommy.make('emgapi.Study', pk=pk, biome=_biome,
                                  is_public=1, samples=[_sm])
-                _r = mommy.make('emgapi.Run', pk=pk, status_id=run_status,
+                _r = mommy.make('emgapi.Run', pk=pk, status=run_status,
                                 study=_st, sample=_sm)
                 _as = mommy.make('emgapi.AnalysisStatus', pk=3)
                 _p = mommy.make('emgapi.Pipeline', pk=1, release_version='1.0')
