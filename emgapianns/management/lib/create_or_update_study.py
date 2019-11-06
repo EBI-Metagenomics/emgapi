@@ -31,7 +31,6 @@ ena = ena_handler.EnaApiHandler()
 
 
 class StudyImporter(object):
-
     """
         Creates a new study object in EMG or updates an existing one.
     """
@@ -45,8 +44,8 @@ class StudyImporter(object):
     def run(self):
         logging.info("Creating or updating study {}".format(self.secondary_study_accession))
         ena_study = self._fetch_study_metadata(self.secondary_study_accession, self.database)
-        emg_study = self._update_or_create_study(ena_study, self.study_dir, self.lineage, self.database)
-        logging.info("Finished study {} creation/updating.".format(emg_study.secondary_accession))
+        self._update_or_create_study(ena_study, self.study_dir, self.lineage, self.database)
+        logging.info("Finished study {} creation/updating.".format(self.secondary_study_accession))
 
     @staticmethod
     def _fetch_study_metadata(study_accession, database):
@@ -139,23 +138,26 @@ class StudyImporter(object):
         else:
             center_name = ena_study.center_name
 
-        # new_study = Study.objects.using(database).update_or_create(
+        defaults = {'centre_name': center_name,
+                    'is_public': is_public,
+                    'public_release_date': hold_date,
+                    'study_abstract': utils.sanitise_string(ena_study.study_description),
+                    'study_name': utils.sanitise_string(ena_study.study_title),
+                    'study_status': 'FINISHED',
+                    'data_origination': data_origination,
+                    # README: We want to draw attention to updated studies,
+                    # therefore set the date for last updated to today
+                    'last_update': timezone.now(),
+                    'submission_account_id': ena_study.submission_account_id,
+                    'biome': biome,
+                    'result_directory': study_result_dir,
+                    'first_created': ena_study.first_created}
+
+        if emg_publications and len(emg_publications) > 0:
+            defaults['publications'] = emg_publications
+
         return emg_models.Study.objects.update_or_create(
             project_id=project_id,
             secondary_accession=secondary_study_accession,
-            publications=emg_publications,
-            defaults={'centre_name': center_name,
-                      'is_public': is_public,
-                      'public_release_date': hold_date,
-                      'study_abstract': utils.sanitise_string(ena_study.study_description),
-                      'study_name': utils.sanitise_string(ena_study.study_title),
-                      'study_status': 'FINISHED',
-                      'data_origination': data_origination,
-                      # README: We want to draw attention to updated studies,
-                      # therefore set the date for last updated to today
-                      'last_update': timezone.now(),
-                      'submission_account_id': ena_study.submission_account_id,
-                      'biome': biome,
-                      'result_directory': study_result_dir,
-                      'first_created': ena_study.first_created},
+            defaults=defaults,
         )
