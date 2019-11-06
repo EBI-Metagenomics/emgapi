@@ -1,9 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import os
 import csv
 import logging
+import os
 import re
 
 from emgapianns import models as m_models
@@ -23,6 +23,8 @@ ORGANISM_RANK = {
     '4.0': ['super kingdom', 'kingdom', 'phylum', 'class', 'order', 'family',
             'genus', 'species'],
     '4.1': ['super kingdom', 'kingdom', 'phylum', 'class', 'order', 'family',
+            'genus', 'species'],
+    '5.0': ['super kingdom', 'kingdom', 'phylum', 'class', 'order', 'family',
             'genus', 'species'],
 }
 
@@ -61,7 +63,7 @@ class Command(EMGBaseCommand):
                         reader = csv.reader(csvfile, delimiter='\t')
                         self.load_organism_from_summary_file(
                             reader, obj, 'taxonomy')
-            elif obj.pipeline.release_version in ('4.0', '4.1', ):
+            elif obj.pipeline.release_version in ('4.0', '4.1', '5.0',):
                 name = "%s_SSU.fasta.mseq.txt" % (obj.input_file_name)
                 _f = os.path.join(res, 'SSU', name)
                 if os.path.exists(_f):
@@ -74,15 +76,48 @@ class Command(EMGBaseCommand):
                 _f = os.path.join(res, 'LSU', name)
                 if os.path.exists(_f):
                     logger.info("LSU loading: %s" % _f)
-                    reader = csv.reader(_f, delimiter='\t')
                     with open(_f) as csvfile:
                         reader = csv.reader(csvfile, delimiter='\t')
                         self.load_organism_from_summary_file(
                             reader, obj, 'taxonomy_lsu')
+                if obj.pipeline.release_version == '5.0':
+                    # This version of the pipeline introduced ITS
+                    self.load_its(res, obj, 'itsonedb')
+                    self.load_its(res, obj, 'unite')
             else:
                 logger.error("Pipeline not supported SKIPPING!")
         else:
             logger.error("Path %r doesn't exist. SKIPPING!" % res)
+
+    def load_its(self, res, ajob, db):
+        """Load ITS results into Mongo.
+        Arguments:
+        res  -- root path of the results
+        ajob -- AnalysisJob
+        db  --  ITS DB (unite or itsonedb)
+
+        If the file is not found then the method will fail silently.
+        """
+        if db not in ('itsonedb', 'unite',):
+            logger.error('ITS not supported {}'.format(db))
+            return
+
+        _f = os.path.join(res, 'its', db, '{}_{}.fasta.mseq.txt'.format(ajob.input_file_name, db))
+        if not os.path.exists(_f):
+            # OK, let's try in lowercase
+            _f = os.path.join(res, 'its', db.lower(),
+                              '{}_{}.fasta.mseq.txt'.format(ajob.input_file_name, db.lower()))
+            if not os.path.exists(_f):
+                logger.warn('ITS file {} not found (not even with lowercase).'.format(_f))
+                return
+
+        logger.info('ITS {} loading: {}'.format(db, _f))
+
+        with open(_f) as csvfile:
+            reader = csv.reader(csvfile, delimiter='\t')
+            field = db.replace('its', '').lower()
+            self.load_organism_from_summary_file(
+                reader, ajob, 'taxonomy_its{}'.format(field))
 
     def load_organism_from_summary_file(self, reader, obj, tax):  # noqa
         try:
@@ -131,13 +166,13 @@ class Command(EMGBaseCommand):
                     else:
                         name = 'Unusigned'
                         rank = None
-                        lineage = ["Unusigned"]
+                        lineage = ['Unusigned']
                         hierarchy = {}
                         domain = None
                 except KeyError:
                     name = 'Unusigned'
                     rank = None
-                    lineage = ["Unusigned"]
+                    lineage = ['Unusigned']
                     hierarchy = {}
                     domain = None
             organism = None
@@ -169,11 +204,10 @@ class Command(EMGBaseCommand):
 
         if len(orgs) > 0:
             logger.info(
-                "Total %d Organisms for Run: %s %s" % (
-                    len(orgs), obj.accession, version))
+                'Total {} Organisms for Run: {} {} {}'.format(len(orgs), obj.accession, version, tax))
             if len(new_orgs) > 0:
                 m_models.Organism.objects.insert(new_orgs)
                 logger.info(
-                    "Created %d new Organisms" % len(new_orgs))
+                    'Created {} new Organisms'.format(len(new_orgs)))
             run.save()
-            logger.info("Saved Run %r" % run)
+            logger.info('Saved Run {}'.format(run))

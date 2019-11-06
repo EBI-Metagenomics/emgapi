@@ -500,7 +500,7 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     class Meta:
         model = emg_models.Run
         exclude = (
-            'status_id',
+            'status',
         )
 
 
@@ -604,7 +604,7 @@ class RetrieveAssemblySerializer(AssemblySerializer):
 class BaseDownloadSerializer(ExplicitFieldsModelSerializer,
                              serializers.HyperlinkedModelSerializer):
 
-    id = serializers.ReadOnlyField(source="alias")
+    id = serializers.ReadOnlyField(source='alias')
 
     description = serializers.SerializerMethodField()
 
@@ -704,6 +704,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     included_serializers = {
         'sample': 'emgapi.serializers.SampleSerializer',
         'study': 'emgapi.serializers.StudySerializer',
+        'downloads': 'emgapi.serializers.AnalysisJobDownloadSerializer',
     }
 
     url = serializers.HyperlinkedIdentityField(
@@ -797,6 +798,32 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     def get_taxonomy_ssu(self, obj):
         return None
 
+    taxonomy_itsonedb = relations.SerializerMethodResourceRelatedField(
+        source='get_taxonomy_itsonedb',
+        model=m_models.Organism,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:analysis-taxonomy-itsonedb-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
+    )
+
+    def get_taxonomy_itsonedb(self, obj):
+        return None
+
+    taxonomy_itsunite = relations.SerializerMethodResourceRelatedField(
+        source='get_taxonomy_unite',
+        model=m_models.Organism,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:analysis-taxonomy-unite-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
+    )
+
+    def get_taxonomy_unite(self, obj):
+        return None
+
     go_terms = relations.SerializerMethodResourceRelatedField(
         source='get_goterms',
         model=m_models.GoTerm,
@@ -834,6 +861,19 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     )
 
     def get_interproidentifier(self, obj):
+        return None
+
+    antismash_gene_clusters = relations.SerializerMethodResourceRelatedField(  # NOQA
+        source='get_antismashgeneclusters',
+        model=m_models.AntiSmashGeneCluster,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:analysis-antismash-gene-clusters-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
+    )
+
+    def get_antismashgeneclusters(self, obj):
         return None
 
     class Meta:

@@ -11,6 +11,7 @@ pytest-django
 model_mommy
 mock_services
 mongomock
+mock
 
-jsonapi-client; python_version == '3.6'
+jsonapi-client; python_version >= '3.6'
 pytest-cov

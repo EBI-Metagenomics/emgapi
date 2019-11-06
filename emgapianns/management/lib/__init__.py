@@ -1,7 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import os
 import logging
+
+import csv
 
 from django.core.management.base import BaseCommand
 from django.db.models import Q
@@ -29,8 +32,10 @@ class EMGBaseCommand(BaseCommand):
         )
         parser.add_argument(
             '--pipeline',
+            help='Pipeline version',
             action='store',
-            dest='pipeline'
+            dest='pipeline',
+            choices=['4.1', '5.0'], default='4.1'
         )
 
     def handle(self, *args, **options):
@@ -47,8 +52,8 @@ class EMGBaseCommand(BaseCommand):
                 .filter(
                     Q(study__secondary_accession=self.accession) |
                     Q(sample__accession=self.accession) |
-                    Q(run__accession=self.accession)
-                )
+                    Q(run__accession=self.accession) |
+                    Q(assembly__accession=self.accession))
             if self.pipeline:
                 queryset = queryset.filter(
                     Q(pipeline__release_version=self.pipeline)
@@ -60,3 +65,22 @@ class EMGBaseCommand(BaseCommand):
 
     def populate_from_accession(self, options):
         raise NotImplementedError()
+
+    def get_reader(self, filename, delimiter=',', skip_header=True):
+        """Given a filename return an iterator
+        """
+        if not os.path.exists(filename):
+            logger.error("Path %r exist. Empty file. SKIPPING!" % filename)
+            return
+        if not os.path.isfile(filename):
+            logger.error("Path %r exist.  SKIPPING!" % filename)
+            return
+        if os.stat(filename).st_size == 0:
+            logger.error("Path %r doesn't exist. SKIPPING!" % filename)
+            return
+
+        csvfile = open(filename)
+        reader = csv.reader(csvfile, delimiter=delimiter)
+        if skip_header:
+            next(reader)
+        return reader

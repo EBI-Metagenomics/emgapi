@@ -1,0 +1,5 @@
+"module_accession","completeness","pathway_name","pathway_class","matching_ko","missing_ko"
+"M00003","100.0","Gluconeogenesis, oxaloacetate => fructose-6P","Pathway modules; Carbohydrate metabolism; Central carbohydrate metabolism","K01610,K01803,K15633,K01689,K00927,K00134,K01834,K03841,K01623,K01624",""
+"M00005","100.0","PRPP biosynthesis, ribose 5P => PRPP","Pathway modules; Carbohydrate metabolism; Central carbohydrate metabolism","K00948",""
+"M00010","100.0","Citrate cycle, first carbon oxidation, oxaloacetate => 2-oxoglutarate","Pathway modules; Carbohydrate metabolism; Central carbohydrate metabolism","K00031,K01647,K01681,K00030",""
+"M00015","99.0","Proline biosynthesis, glutamate => proline","Pathway modules; Amino acid metabolism; Arginine and proline metabolism","K00147,K00286,K00931","K00001"

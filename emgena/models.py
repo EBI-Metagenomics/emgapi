@@ -27,6 +27,7 @@
 
 from __future__ import unicode_literals
 
+from datetime import date
 from django.db import models
 
 
@@ -82,7 +83,6 @@ class SubmitterContact(models.Model):
 
 
 class Notify(object):
-
     def __init__(self, **kwargs):
         for field in ('id', 'from_email', 'message', 'subject'):
             setattr(self, field, kwargs.get(field, None))
@@ -113,3 +113,133 @@ class AssemblyMapping(models.Model):
 
     def __str__(self):
         return self.accession
+
+
+class Study(models.Model):
+    study_id = models.CharField(db_column='STUDY_ID', primary_key=True, max_length=15)
+    project_id = models.CharField(db_column='PROJECT_ID', max_length=15)
+    study_status = models.CharField(db_column='STUDY_STATUS', max_length=50)
+    center_name = models.TextField(db_column='CENTER_NAME', max_length=500)
+    hold_date = models.DateTimeField(db_column='HOLD_DATE')
+    first_created = models.DateTimeField(db_column='FIRST_CREATED')
+    last_updated = models.DateTimeField(db_column='LAST_UPDATED')
+    study_title = models.TextField(db_column='STUDY_TITLE', max_length=4000)
+    study_description = models.TextField(db_column='STUDY_DESCRIPTION')
+    submission_account_id = models.CharField(db_column='SUBMISSION_ACCOUNT_ID', max_length=15)
+    pubmed_id = models.TextField(db_column='PUBMED_ID', max_length=4000)
+
+    @property
+    def get_study_id(self):
+        return self.study_id
+
+    def __str__(self):
+        return '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s' % (
+            self.study_id, self.project_id, self.study_status, self.center_name, self.hold_date, self.first_created,
+            self.last_updated, self.study_title, self.study_description, self.submission_account_id, self.pubmed_id)
+
+    class Meta:
+        managed = False
+        app_label = 'emgena'
+        abstract = True
+
+
+class RunStudy(Study):
+    class Meta(Study.Meta):
+        db_table = 'V_MGP_RUN_STUDY'
+
+
+class AssemblyStudy(Study):
+    class Meta(Study.Meta):
+        db_table = 'V_MGP_ASSEMBLY_STUDY'
+
+
+class Project(models.Model):
+    project_id = models.CharField(db_column='PROJECT_ID', primary_key=True, max_length=15)
+    center_name = models.TextField(db_column='CENTER_NAME', max_length=500)
+
+    class Meta:
+        managed = False
+        app_label = 'emgena'
+        db_table = 'PROJECT'
+
+
+class Sample(models.Model):
+    sample_id = models.CharField(db_column='SAMPLE_ID', primary_key=True, max_length=15)
+    submission_id = models.CharField(db_column='SUBMISSION_ID', max_length=15)
+    biosample_id = models.CharField(db_column='BIOSAMPLE_ID', max_length=15)
+    submission_account_id = models.CharField(db_column='SUBMISSION_ACCOUNT_ID', max_length=15)
+    first_created = models.DateField(db_column='FIRST_CREATED')
+    last_updated = models.DateField(db_column='LAST_UPDATED')
+    first_public = models.DateField(db_column='FIRST_PUBLIC')
+    tax_id = models.IntegerField(db_column='TAX_ID')
+    scientific_name = models.CharField(db_column='SCIENTIFIC_NAME', max_length=100)
+    title = models.CharField(db_column='SAMPLE_TITLE', max_length=200)
+    alias = models.CharField(db_column='SAMPLE_ALIAS', max_length=200)
+    checklist = models.CharField(db_column='CHECKLIST_ID', max_length=200)
+
+    @property
+    def is_public(self):
+        return date.today() >= self.first_public
+
+    class Meta:
+        managed = False
+        app_label = 'emgena'
+        db_table = 'SAMPLE'
+
+
+class Run(models.Model):
+    run_id = models.CharField(db_column='RUN_ID', primary_key=True, max_length=15)
+    submission_id = models.CharField(db_column='SUBMISSION_ID', max_length=15)
+    experiment_id = models.CharField(db_column='EXPERIMENT_ID', max_length=15)
+    alias = models.CharField(db_column='RUN_ALIAS', max_length=100)
+    status_id = models.IntegerField(db_column='STATUS_ID')
+    first_created = models.DateField(db_column='FIRST_CREATED')
+    last_updated = models.DateField(db_column='LAST_UPDATED')
+    submission_account_id = models.CharField(db_column='SUBMISSION_ACCOUNT_ID', max_length=15)
+
+    class Meta:
+        managed = False
+        app_label = 'emgena'
+        db_table = 'RUN'
+
+
+class Analysis(models.Model):
+    analysis_id = models.CharField(db_column='ANALYSIS_ID', primary_key=True, max_length=15)
+    title = models.CharField(db_column='ANALYSIS_TITLE', max_length=100)
+    type = models.CharField(db_column='ANALYSIS_TYPE', max_length=100)
+    submission_id = models.CharField(db_column='SUBMISSION_ID', max_length=15)
+    status_id = models.IntegerField(db_column='STATUS_ID')
+    first_created = models.DateField(db_column='FIRST_CREATED')
+    last_updated = models.DateField(db_column='LAST_UPDATED')
+    primary_study_accession = models.CharField(db_column='BIOPROJECT_ID', max_length=15)
+    secondary_study_accession = models.CharField(db_column='STUDY_ID', max_length=15)
+    unique_alias = models.CharField(db_column='UNIQUE_ALIAS', max_length=100)
+    submission_account_id = models.CharField(db_column='SUBMISSION_ACCOUNT_ID', max_length=15)
+
+    class Meta:
+        managed = False
+        app_label = 'emgena'
+        db_table = 'ANALYSIS'
+
+
+class Assembly(models.Model):
+    assembly_id = models.CharField(db_column='ASSEMBLY_ID', primary_key=True, max_length=15)
+    sample_id = models.CharField(db_column='SAMPLE_ID', max_length=15)
+    biosample_id = models.CharField(db_column='BIOSAMPLE_ID', max_length=15)
+    submission_account_id = models.CharField(db_column='SUBMISSION_ACCOUNT_ID', max_length=15)
+    submission_id = models.CharField(db_column='SUBMISSION_ID', max_length=15)
+    status_id = models.IntegerField(db_column='STATUS_ID')
+    gc_id = models.CharField(db_column='GC_ID', max_length=15)
+    assembly_type = models.IntegerField(db_column='ASSEMBLY_TYPE')
+    primary_study_accession = models.CharField(db_column='PROJECT_ACC', max_length=50)
+
+    name = models.CharField(db_column='NAME', max_length=50)
+    wgs_accession = models.CharField(db_column='WGS_ACC', max_length=50)
+    coverage = models.IntegerField(db_column='COVERAGE')
+    min_gap_length = models.IntegerField(db_column='MIN_GAP_LENGTH', null=True, blank=True)
+    contig_accession_range = models.CharField(db_column='CONTIG_ACC_RANGE', max_length=50)
+
+    class Meta:
+        managed = False
+        app_label = 'emgena'
+        db_table = 'gcs_assembly'

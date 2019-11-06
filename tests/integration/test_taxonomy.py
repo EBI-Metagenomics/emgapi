@@ -1,28 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2017 EMBL - European Bioinformatics Institute
+# Copyright 2019 EMBL - European Bioinformatics Institute
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
+# distributed under the License is distributed on an 'AS IS' BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
 import os
 
-from django.core.urlresolvers import reverse
+import pytest
 from django.core.management import call_command
-
+from django.core.urlresolvers import reverse
 from rest_framework import status
 
-# import fixtures
 from test_utils.emg_fixtures import *  # noqa
 
 
@@ -30,12 +28,15 @@ from test_utils.emg_fixtures import *  # noqa
 @pytest.mark.django_db
 class TestTaxonomy(object):
 
-    def test_organism_list(self, client, run):
-        assert run.accession == 'ABC01234'
-        call_command('import_taxonomy', run.accession,
-                     os.path.dirname(os.path.abspath(__file__)))
+    def test_organism_list_pipeline_v1(self, client, runjob_pipeline_v1):
+        assert runjob_pipeline_v1.accession == 'MGYA00012345'
+        run_accession = runjob_pipeline_v1.run.accession
 
-        url = reverse("emgapi_v1:organisms-list")
+        call_command('import_taxonomy', run_accession,
+                     os.path.dirname(os.path.abspath(__file__)),
+                     pipeline='1.0')
+
+        url = reverse('emgapi_v1:organisms-list')
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -49,12 +50,15 @@ class TestTaxonomy(object):
         ids = [a['attributes']['name'] for a in rsp['data']]
         assert ids == expected
 
-    def test_organisms_tree(self, client, run):
-        assert run.accession == 'ABC01234'
-        call_command('import_taxonomy', run.accession,
-                     os.path.dirname(os.path.abspath(__file__)))
+    def test_organisms_tree_pipeline_v1(self, client, runjob_pipeline_v1):
+        assert runjob_pipeline_v1.accession == 'MGYA00012345'
+        run_accession = runjob_pipeline_v1.run.accession
 
-        url = reverse("emgapi_v1:organisms-children-list",
+        call_command('import_taxonomy', run_accession,
+                     os.path.dirname(os.path.abspath(__file__)),
+                     pipeline='1.0')
+
+        url = reverse('emgapi_v1:organisms-children-list',
                       args=['Bacteria:Proteobacteria:Alphaproteobacteria'])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -72,7 +76,7 @@ class TestTaxonomy(object):
         assert ids == expected
 
     def test_object_does_not_exist(self, client):
-        url = reverse("emgapi_v1:organisms-children-list", args=['abc'])
+        url = reverse('emgapi_v1:organisms-children-list', args=['abc'])
         response = client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -81,9 +85,10 @@ class TestTaxonomy(object):
         assert job == 'MGYA00001234'
 
         call_command('import_taxonomy', job,
-                     os.path.dirname(os.path.abspath(__file__)))
+                     os.path.dirname(os.path.abspath(__file__)),
+                     pipeline='1.0')
 
-        url = reverse("emgapi_v1:analysis-taxonomy-list",
+        url = reverse('emgapi_v1:analysis-taxonomy-list',
                       args=[job])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -91,13 +96,14 @@ class TestTaxonomy(object):
 
         assert len(rsp['data']) == 0
 
-    def test_relations(self, client, run):
-        job = run.analyses.all()[0]
-        call_command('import_taxonomy', run.accession,
-                     os.path.dirname(os.path.abspath(__file__)))
+    def test_relations_pipeline_v1(self, client, runjob_pipeline_v1):
+        run_accession = runjob_pipeline_v1.run.accession
+        call_command('import_taxonomy', run_accession,
+                     os.path.dirname(os.path.abspath(__file__)),
+                     pipeline='1.0')
 
-        url = reverse("emgapi_v1:analysis-taxonomy-list",
-                      args=[job.accession])
+        url = reverse('emgapi_v1:analysis-taxonomy-list',
+                      args=[runjob_pipeline_v1.accession])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()

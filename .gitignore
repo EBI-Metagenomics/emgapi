@@ -5,6 +5,7 @@ __pycache__
 var
 dist
 .eggs
+emgcli.egg-info/
 
 staticfiles/
 media/
@@ -14,3 +15,8 @@ results/
 
 # VS Code
 .vscode/
+
+#IntelliJ project structure files
+*.iml
+*.xml
+.idea/
