@@ -68,11 +68,13 @@ class StudyImporter(object):
     @staticmethod
     def _lookup_publication_by_pubmed_ids(pubmed_ids_str):
         emg_publlications = []
-        pubmed_ids = list(filter(lambda x: len(x) > 0, pubmed_ids_str.split(',')))
-        for pubmed_id in pubmed_ids:
-            europepmc_publications = lookup_publication_by_pubmed_id(pubmed_id)
-            for europepmc_publication in europepmc_publications:
-                emg_publlications.append(update_or_create_publication(europepmc_publication))
+        if pubmed_ids_str:
+            pubmed_ids = list(filter(lambda x: len(x) > 0, pubmed_ids_str.split(',')))
+            for pubmed_id in pubmed_ids:
+                europepmc_publications = lookup_publication_by_pubmed_id(pubmed_id)
+                for europepmc_publication in europepmc_publications:
+                    pub, _ = update_or_create_publication(europepmc_publication)
+                    emg_publlications.append(pub)
         return emg_publlications
 
     def _lookup_publication_by_project_id(self, project_id):
@@ -119,7 +121,6 @@ class StudyImporter(object):
         data_origination = 'SUBMITTED' if secondary_study_accession.startswith('ERP') else 'HARVESTED'
 
         hold_date = ena_study.hold_date
-        # first_public = hold_date if hold_date else None # TODO
         is_public = True if not hold_date else False
 
         # Retrieve biome object
@@ -153,11 +154,16 @@ class StudyImporter(object):
                     'result_directory': study_result_dir,
                     'first_created': ena_study.first_created}
 
-        if emg_publications and len(emg_publications) > 0:
-            defaults['publications'] = emg_publications
-
-        return emg_models.Study.objects.update_or_create(
+        study, _ = emg_models.Study.objects.update_or_create(
             project_id=project_id,
             secondary_accession=secondary_study_accession,
             defaults=defaults,
         )
+
+        for pub in emg_publications:
+            emg_models.StudyPublication.objects.update_or_create(
+                study=study,
+                pub=pub
+            )
+
+        return study
