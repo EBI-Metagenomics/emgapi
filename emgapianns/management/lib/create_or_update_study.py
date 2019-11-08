@@ -62,7 +62,8 @@ class StudyImporter(object):
                     Q(study_id=study_accession) | Q(project_id=study_accession))
             except AssemblyStudy.DoesNotExist:
                 raise AssemblyStudy.DoesNotExist(
-                    "Could not find study {0} in the database. Program will exit now!".format(study_accession))
+                    "Could not find study {0} in the ENA database (ERAPRO). Program will exit now!".format(
+                        study_accession))
         return study
 
     @staticmethod
