@@ -15,5 +15,5 @@ emg:
   #     KEY_PREFIX: "emg"
   emg_backend_auth: "https://backend"
   mongodb:
-      db: 'emg'
+      db: 'testdb'
       host: '127.0.0.1'

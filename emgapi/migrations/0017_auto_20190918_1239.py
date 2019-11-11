@@ -12,7 +12,7 @@ def create_pipeline_v5(apps, schema_editor):
                                                   description='Release of version 5.0',
                                                   changes='Major upgrade.',
                                                   release_version='5.0',
-                                                  release_date='2019-12-01')
+                                                  release_date='2019-11-06')
 
 
 def create_group_types(apps, schema_editor):
@@ -54,7 +54,9 @@ def create_download_description(apps, schema_editor):
     DownloadDescriptionLabel = apps.get_model("emgapi", "DownloadDescriptionLabel")
     downloads = (
         ("All reads encoding 5.8S", "Reads encoding 5.8S"),
+        ("All reads encoding 5S", "Reads encoding 5S"),
         ("All contigs encoding 5.8S", "Contigs encoding 5.8S"),
+        ("All contigs encoding 5S", "Contigs encoding 5S"),
         ("All reads encoding ITS", "Reads encoding ITS (with SSU and LSU sequences masked)"),
         ("Taxonomic assignments (TSV)", "MAPseq ITSoneDB assignments"),
         ("Taxonomic assignments (TSV)", "MAPseq UNITE assignments"),

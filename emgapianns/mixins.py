@@ -58,8 +58,8 @@ class AnalysisJobAnnotationMixin:
         return getattr(analysis, self.annotation_model_property, [])
 
 
-class AnnotationRetrivalMixin():
-    """FIXME
+class AnnotationRetrivalMixin:
+    """Basic annotation retrival mixin
     """
 
     annotation_model = None

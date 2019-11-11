@@ -30,9 +30,9 @@ from test_utils.emg_fixtures import *  # noqa
 class TestExamples(object):
 
     def test_list(self, live_server, runs, api_version):
-        '''
+        """
         List samples and its metadata for given study
-        '''
+        """
         from jsonapi_client import Session
 
         api_base = '%s/%s/' % (live_server.url, api_version)
@@ -47,15 +47,13 @@ class TestExamples(object):
                 # list runs
                 run_list = sample.runs
                 assert len(run_list) == 1
-                for run in run_list:
-                    print(
-                        study.accession,
-                        study.bioproject,
-                        sample.accession,
-                        sample.biome.biome_name,
-                        run.accession,
-                        run.experiment_type,
-                    )
+                run = run_list[0]
+                assert study.accession == 'MGYS00000025'
+                assert study.bioproject == 'PRJDB0025'
+                assert sample.accession == 'ERS0025'
+                assert sample.biome.biome_name == 'bar'
+                assert run.accession == 'ABC_025'
+                assert run.experiment_type == 'metagenomic'
 
     def test_annotations(self, live_server, run_with_sample, api_version):
         from jsonapi_client import Session
