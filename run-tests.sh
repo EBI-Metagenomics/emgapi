@@ -1,0 +1,1 @@
+TRAVIS=true EMG_CONFIG=docker/config-test.yaml python setup.py test "$@"

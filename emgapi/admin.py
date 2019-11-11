@@ -34,9 +34,11 @@ class Study(admin.ModelAdmin):
         'author_email',
         'biome__biome_name',
     ]
-    list_display = ('study_id',
-                    'project_id',
-                    'study_name',)
+    list_display = (
+        'study_id',
+        'project_id',
+        'study_name',
+    )
     list_filter = ('is_public', )
 
 
@@ -77,3 +79,78 @@ class SuperStudyAdmin(admin.ModelAdmin):
         else:
             return 'No image selected'
     image_tag.short_description = 'Image'
+
+
+@admin.register(emg_models.Sample)
+class SampleAdmin(admin.ModelAdmin):
+
+    readonly_fields = (
+        'sample_id',
+        'accession',
+        'primary_accession'
+    )
+    ordering = ['-last_update']
+    search_fields = [
+        'sample_id',
+        'accession',
+        'primary_accession',
+        'sample_name',
+        'sample_alias',
+        'species',
+        'biome__biome_name'
+    ]
+    list_filter = ('is_public', )
+    list_display = (
+        'accession',
+        'primary_accession',
+        'sample_name',
+        'sample_desc',
+        'is_public',
+    )
+
+    def get_search_results(self, request, queryset, search_term):
+        """For searches that start with MGYS will only search on samples
+        """
+        if search_term and search_term.startswith('MGYS'):
+            study_id = int(search_term.lstrip('MGYS') or 0)
+            return self.model.objects.filter(studies__in=[study_id]), False
+        else:
+            return super().get_search_results(request, queryset, search_term)
+
+
+@admin.register(emg_models.Run)
+class RunAdmin(admin.ModelAdmin):
+
+    readonly_fields = (
+        'run_id',
+        'accession',
+        'secondary_accession',
+        'sample',
+        'study',
+    )
+    ordering = ['-run_id']
+    search_fields = [
+        'run_id',
+        'secondary_accession',
+        'sample__accession',
+        'instrument_platform',
+        'instrument_model'
+    ]
+    list_filter = ('status', )
+    list_display = (
+        'run_id',
+        'accession',
+        'secondary_accession',
+        'sample',
+        'study',
+        'status'
+    )
+
+    def get_search_results(self, request, queryset, search_term):
+        """For searches that start with MGYS will only search on samples
+        """
+        if search_term and search_term.startswith('MGYS'):
+            study_id = int(search_term.lstrip('MGYS') or 0)
+            return self.model.objects.filter(study=study_id), False
+        else:
+            return super().get_search_results(request, queryset, search_term)

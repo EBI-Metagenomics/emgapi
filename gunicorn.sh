@@ -1,1 +1,1 @@
-PYTHONPATH="${PYTHONPATH}:$(pwd)/emgcli" EMG_CONFIG=docker/config.yaml gunicorn emgcli.wsgi:application --reload
+PYTHONPATH="${PYTHONPATH}:$(pwd)/emgcli" EMG_CONFIG=docker/config-test.yaml gunicorn emgcli.wsgi:application --reload
