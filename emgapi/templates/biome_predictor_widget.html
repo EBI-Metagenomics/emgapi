@@ -1,0 +1,96 @@
+<div class="grp-module bp-module">
+    <div class="grp-row">
+        {% include 'django/forms/widgets/input.html' %}{% if related_url %}<a href="{{ related_url }}"
+            class="related-lookup" id="lookup_id_{{ widget.name }}"
+            title="{{ link_title }}"></a>{% endif %}{% if link_label %}&nbsp;<strong>{% if link_url %}<a
+                href="{{ link_url }}">{% endif %}{{ link_label }}{% if link_url %}</a>{% endif %}</strong>{% endif %}
+    </div>
+    <div class="grp-row bp-container">
+        <a href="#" class="predict-biome grp-button">Predict</a>
+        <table class="grp-table" style="display: none; margin-top: 10px;">
+            <thead>
+                <tr>
+                    <th>Biome</th>
+                    <th>Score</th>
+                    <th>Select</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    (function ($) {
+        var $table = $('.bp-container table');
+        var $tbody = $('.bp-container table tbody');
+        var searchFields = {{ search_fields|safe }};
+        function getText() {
+            var text = '';
+            $.each(searchFields, function(_, field) {
+                var inputText = $('*[name="' + field + '"').val();
+                if (inputText) {
+                    text += ' ' + inputText;
+                }
+            });
+            return text;
+        }
+
+        $('.predict-biome').on('click', function (e) {
+            e.preventDefault();
+            $('.bp-module > .errornote').remove();
+            $tbody.html('');
+            $.ajax({
+                url: '{% url "biom-prediction" %}',
+                data: {
+                    text: getText()
+                }
+            }).then(function (response) {
+                $table.show();
+                $.each(response.data, function (i, prediction) {
+                    var $tr = $('<tr>', {
+                        'class': i % 2 ? "grp-row-even" : "grp-row-odd",
+                    })
+                    var $trLin = $('<td>', {
+                        'text': prediction.lineage
+                    });
+                    var $trScore = $('<td>', {
+                        'text': prediction.score
+                    });
+                    var $actionTd = $('<td>', {
+                        'data-biome': prediction.biome_id
+                    });
+                    $actionTd.append(
+                        $('<a>', {
+                            'href': '#',
+                            'class': 'bp-select',
+                            'data-biome-id': prediction.biome_id,
+                            'data-biome-lineage': prediction.lineage,
+                            'text': 'Pick'
+                        })
+                    );
+                    $tr.append($trLin, $trScore, $actionTd);
+                    $tbody.append($tr);
+                });
+            }, function () {
+                $('.bp-module').append($('<p>', {
+                    'class': 'errornote',
+                    'text': 'There has been an error.'
+                }));
+            })
+        });
+        $(document).on('click', '.bp-select', function (e) {
+            e.preventDefault();
+            var $input = $('#id_biome');
+            var biomeId = $(this).data('biomeId');
+            var biomeLineage = $(this).data('biomeLineage');
+            var $anchor = $('strong > a', $input.parent());
+            var href = $anchor.attr('href');
+            href = href.replace(/\d+/g, biomeId);
+            $anchor.attr('href', href);
+            $anchor.text(biomeLineage);
+            $input.val(biomeId);
+        });
+    })(django.jQuery);
+</script>

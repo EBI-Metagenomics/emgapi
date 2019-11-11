@@ -165,7 +165,7 @@ class Migration(migrations.Migration):
                 ('num_contigs', models.IntegerField(db_column='N_CONTIGS')),
                 ('n_50', models.IntegerField(db_column='N50')),
                 ('gc_content', models.FloatField(db_column='GC_CONTENT')),
-                ('type', models.CharField(choices=[(emgapi.models.GenomeTypes('isolate'), 'isolate'), (emgapi.models.GenomeTypes('mag'), 'mag')], db_column='TYPE', max_length=80)),
+                ('type', models.CharField(choices=[('mag', 'MAG'), ('isolate', 'Isolate')], db_column='TYPE', max_length=80)),
                 ('completeness', models.FloatField(db_column='COMPLETENESS')),
                 ('contamination', models.FloatField(db_column='CONTAMINATION')),
                 ('rna_5s', models.FloatField(db_column='RNA_5S')),

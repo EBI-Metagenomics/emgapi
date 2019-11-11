@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017 EMBL - European Bioinformatics Institute
+# Copyright 2020 EMBL - European Bioinformatics Institute
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from django.conf.urls import url
+from django.conf import settings
 
 from rest_framework import routers
 
@@ -411,3 +412,10 @@ urlpatterns = [
         views.EBISearchCSVDownload.as_view(),
         name='ebi-search-download')
 ]
+
+if settings.ADMIN:
+    urlpatterns += [
+        url(r'^v1/biom-prediction',
+            views.BiomePrediction.as_view(),
+            name='biom-prediction')
+    ]

@@ -168,10 +168,15 @@ try:
 except KeyError:
     DEBUG = False
 
+# Admin panel
+try:
+    ADMIN = EMG_CONF['emg']['admin']
+except KeyError:
+    ADMIN = False
+
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -194,18 +199,30 @@ INSTALLED_APPS = [
     'emgapianns',
 ]
 
+if ADMIN:
+    # django admin panel
+    INSTALLED_APPS.insert(2, 'django.contrib.admin')
+    INSTALLED_APPS.insert(2, 'grappelli')
+    INSTALLED_APPS.insert(2, 'grappelli.dashboard')
+
+    GRAPPELLI_ADMIN_TITLE = 'MGnify admin'
+
+    GRAPPELLI_INDEX_DASHBOARD = 'emgcli.dashboard.MgnifyDashboard'
+
+    try:
+        BIOME_PREDICTION_URL = EMG_CONF['emg']['caches']
+    except KeyError:
+        BIOME_PREDICTION_URL = ''
+
+
 if DEBUG:
     INSTALLED_APPS.extend([
         'django_extensions',
         'debug_toolbar',
     ])
 
-    def show_toolbar(request):
-        """On DEBUG show the toolbar"""
-        return True
-
     DEBUG_TOOLBAR_CONFIG = {
-        'SHOW_TOOLBAR_CALLBACK': show_toolbar,
+        'SHOW_TOOLBAR_CALLBACK': lambda request: True,
     }
 
 

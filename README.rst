@@ -35,6 +35,14 @@ The app will be executed from a python virtual environment.
 
 **The Docker setup is just for local dev. at the moment.**
 
+Helper scipts
+-------------
+
+There are some helper scripts that are meant to make running the project locally easier. 
+
+- `manage.sh` wrapper for `manage.py` commands such as `runserver`.
+- `gunicorn.sh` run the app using gunicorn with the `--reload` flag.
+
 Setup
 ^^^^^
 
@@ -177,13 +185,17 @@ Start containers using::
 Tests
 #####
 
-Tests are ran using `pytest`.
+Tests are ran using `pytest <https://pytest.org>`_.
 
-Set the env variable `EMG_CONFIG`
+Set the env variable `EMG_CONFIG`.
 
 To run tests::
 
     python setup.py test
+
+or use the wrapper script (will user docker/contig-test.yml)::
+
+    ./run-tests.sh
 
 
 Copyright (c) 2019 EMBL - European Bioinformatics Institute

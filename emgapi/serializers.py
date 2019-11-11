@@ -480,7 +480,7 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     )
 
     def get_pipelines(self, obj):
-        # TODO: push that to queryset
+        # TODO: push that to manager
         return emg_models.Pipeline.objects \
             .filter(analyses__run=obj)
 
@@ -570,7 +570,7 @@ class AssemblySerializer(ExplicitFieldsModelSerializer,
 
     def get_pipelines(self, obj):
         # TODO: push that to queryset
-        return emg_models.Pipeline.objects \
+        return emg_models.Pipeline.objects_annotated \
             .filter(analyses__assembly=obj)
 
     def get_analyses(self, obj):
