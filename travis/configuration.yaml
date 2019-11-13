@@ -14,7 +14,6 @@ emg:
       PASSWORD: test
       HOST: 127.0.0.1
       PORT: 3306
-PORT: 1531
   session_engine: 'django.contrib.sessions.backends.cache'
   # caches:
   #   default:
