@@ -28,3 +28,13 @@ class StudyNotBeRetrievedFromENA(Exception):
 class NoAnnotationsFoundError(Exception):
     """Raised when no annotations found in result files"""
     pass
+
+
+class QCNotPassedError(Exception):
+    """Raised when qc not passed flag file found"""
+    pass
+
+
+class CoverageCheckError(Exception):
+    """Raised when coverage check fails due to missing expected files"""
+    pass

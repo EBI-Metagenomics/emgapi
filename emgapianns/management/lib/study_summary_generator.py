@@ -44,10 +44,12 @@ class StudySummaryGenerator(object):
         self.create_summary_dir()
 
         # TODO: Add UNITE and ITSoneDB
-        self.generate_taxonomy_phylum_summary(analysis_result_dirs, 'SSU',
-                                              'phylum_taxonomy_abundances_SSU_v{}.tsv'.format(self.pipeline))
-        # self.generate_taxonomy_phylum_summary('LSU', f'phylum_taxonomy_abundances_LSU_v{self.pipeline}.tsv')
-        #
+        if self.pipeline == '4.1':
+            self.generate_taxonomy_phylum_summary(analysis_result_dirs, self.pipeline, 'SSU',
+                                                  'phylum_taxonomy_abundances_SSU_v{}.tsv'.format(self.pipeline))
+            self.generate_taxonomy_phylum_summary(analysis_result_dirs, self.pipeline, 'LSU',
+                                                  f'phylum_taxonomy_abundances_LSU_v{self.pipeline}.tsv')
+
         self.generate_taxonomy_summary(analysis_result_dirs, 'SSU',
                                        'taxonomy_abundances_SSU_v{}.tsv'.format(self.pipeline))
         self.generate_taxonomy_summary(analysis_result_dirs, 'LSU',
@@ -60,7 +62,28 @@ class StudySummaryGenerator(object):
 
         logging.info("Program finished successfully.")
 
-    def generate_taxonomy_phylum_summary(self, analysis_result_dirs, su_type, filename):
+    def generate_taxonomy_phylum_summary(self, analysis_result_dirs, version, su_type, filename):
+        if version == '4.1':
+            self.generate_taxonomy_phylum_summary_v4(su_type, filename)
+        else:
+            self.generate_taxonomy_phylum_summary_v5(analysis_result_dirs, su_type, filename)
+
+    def generate_taxonomy_phylum_summary_v4(self, su_type, filename):
+        res_file_re = os.path.join('**', 'taxonomy-summary', su_type, 'kingdom-counts.txt')
+        res_files = self.get_raw_result_files(res_file_re)
+        study_df = self.merge_dfs(res_files,
+                                  delimiter='\t',
+                                  key=['kingdom', 'phylum'],
+                                  raw_cols=['kingdom', 'phylum', 'count', 'ignored'])
+        self.write_results_file(study_df, filename)
+
+        alias = '{}_phylum_taxonomy_abundances_{}_v{}.tsv'.format(self.study_accession, su_type, self.pipeline)
+        description = 'Phylum level taxonomies {}'.format(su_type)
+        group = 'Taxonomic analysis {} rRNA'.format(su_type)
+        self.upload_study_file(filename, alias, description, group)
+
+    def generate_taxonomy_phylum_summary_v5(self, analysis_result_dirs, su_type, filename):
+        # Fixme: Work in progress! Finish implementation
         res_files = self.get_mapseq_result_files(analysis_result_dirs, su_type)
 
         study_df = self.merge_dfs(res_files,

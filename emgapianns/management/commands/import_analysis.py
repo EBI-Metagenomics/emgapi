@@ -17,6 +17,7 @@ import glob
 import logging
 import os
 import getpass
+import subprocess
 import sys
 
 from django.core.management import BaseCommand, call_command
@@ -25,7 +26,8 @@ from ena_portal_api import ena_handler
 
 from emgapianns.management.lib import utils
 from emgapianns.management.lib.sanity_check import SanityCheck
-from emgapianns.management.lib.import_analysis_model import Assembly, Run
+from emgapianns.management.lib.import_analysis_model import Assembly, Run, ExperimentType
+from emgapianns.management.lib.uploader_exceptions import QCNotPassedError, CoverageCheckError
 from emgapianns.management.lib.utils import get_conf_downloadset
 
 from emgapi import models as emg_models
@@ -50,8 +52,9 @@ class Command(BaseCommand):
 
     obj_list = list()
     rootpath = None
+    nfs_public_rootpath = None
 
-    emg_db_name = None
+    emg_db = None
     biome = None
     accession = None
     version = None
@@ -61,6 +64,9 @@ class Command(BaseCommand):
         parser.add_argument('--rootpath',
                             help="NFS root path of the results archive.",
                             default="/nfs/production/interpro/metagenomics/results/")
+        parser.add_argument('--nfs-public-rootpath',
+                            help="NFS public root path of the results archive.",
+                            default="/nfs/public/ro/metagenomics/results/")
         parser.add_argument('accession', help="Specify run or assembly/analysis accession.")
         parser.add_argument('biome', help='Lineage of GOLD biome')
         parser.add_argument('--pipeline', help='Pipeline version',
@@ -71,8 +77,9 @@ class Command(BaseCommand):
                             default='default')
 
     def handle(self, *args, **options):
-        self.emg_db_name = options['database']
+        self.emg_db = options['database']
         self.rootpath = os.path.abspath(options['rootpath'])
+        self.nfs_public_rootpath = os.path.abspath(options['nfs_public_rootpath'])
         self.accession = options['accession']
         self.biome = options['biome']
         self.version = options['pipeline']
@@ -84,10 +91,16 @@ class Command(BaseCommand):
 
         metadata = self.retrieve_metadata()
 
-        # TODO: Introduce coverage check
-        SanityCheck(self.accession, self.result_dir, metadata.experiment_type.value, self.version).check_file_existence()
+        sanity_checker = SanityCheck(self.accession, self.result_dir, metadata.experiment_type.value,
+                                     self.version)
+        if not sanity_checker.passed_coverage_check():
+            raise CoverageCheckError("{} did not pass QC step!".format(self.accession))
 
-        self.call_import_study(metadata)
+        if not sanity_checker.passed_quality_control():
+            raise QCNotPassedError("{} did not pass QC step!".format(self.accession))
+
+        secondary_study_accession = metadata.secondary_study_accession
+        study_dir = self.call_import_study(secondary_study_accession)
 
         self.call_import_sample(metadata)
 
@@ -103,8 +116,14 @@ class Command(BaseCommand):
 
         self.populate_mongodb_taxonomy()
 
-        if metadata.experiment_type != 'amplicon':
+        if metadata.experiment_type != ExperimentType.AMPLICON:
             self.populate_mongodb_function_and_pathways()
+
+        if self.version in ['5.0'] and metadata.experiment_type == ExperimentType.ASSEMBLY:
+            self.import_contigs()
+
+        self.__call_generate_study_summary(secondary_study_accession)
+        self.__sync_study_summary_files(study_dir)
 
         logger.info("Program finished successfully.")
 
@@ -131,13 +150,14 @@ class Command(BaseCommand):
 
         return os.path.join(self.rootpath, existing_result_dir[0])
 
-    def call_import_study(self, metadata):
-        logger.info('Import study {}'.format(metadata.secondary_study_accession))
+    def call_import_study(self, secondary_study_accession):
+        logger.info('Import study {}'.format(secondary_study_accession))
         study_dir = utils.get_result_dir(utils.get_study_dir(self.result_dir))
         call_command('import_study',
-                     metadata.secondary_study_accession,
+                     secondary_study_accession,
                      self.biome,
                      '--study_dir', study_dir)
+        return study_dir
 
     def call_import_sample(self, metadata):
         logger.info('Import sample {}'.format(metadata.sample_accession))
@@ -152,6 +172,31 @@ class Command(BaseCommand):
     def call_import_assembly(self, analysis_accession):
         logger.info('Import assembly {}'.format(analysis_accession))
         call_command('import_assembly', analysis_accession, '--result_dir', self.result_dir, '--biome', self.biome)
+
+    def __call_generate_study_summary(self, secondary_study_accession):
+        """
+            Example call:
+            ERP117125 4.1 --rootpath /home/maxim/software-projects/emgapi/tests/test-input/results --database default
+
+        :param study_accession:
+        :return:
+        """
+        logger.info('Generating study summary {}'.format(secondary_study_accession))
+        call_command('import_study_summary', secondary_study_accession, self.version, '--database', self.emg_db,
+                     '--rootpath', self.rootpath)
+
+    def __sync_study_summary_files(self, study_dir):
+        logging.info("Syncing project summary files over to NFS public...")
+        nfs_prod_dest = os.path.join(self.rootpath, study_dir, 'version_{}/{}'.format(self.version, 'project-summary'))
+        nfs_public_dest = os.path.join(self.nfs_public_rootpath, study_dir, 'version_{}/'.format(self.version))
+        logging.info("From: " + nfs_prod_dest)
+        logging.info("To: " + nfs_public_dest)
+        rsync_options = "-rtDzv --no-owner --no-perms --prune-empty-dirs --exclude *.lsf --delete-excluded"
+        chmod_option = "--chmod=754"
+
+        subprocess.check_call(
+            ["sudo", "-H", "-u", "emg_adm", "rsync", rsync_options, chmod_option, nfs_prod_dest, nfs_public_dest])
+        logging.info("Synchronisation is done.")
 
     def retrieve_metadata(self):
         is_assembly = utils.is_assembly(self.accession)
@@ -178,27 +223,28 @@ class Command(BaseCommand):
         return analysis
 
     def get_emg_study(self, secondary_study_accession):
-        return emg_models.Study.objects.using(self.emg_db_name).get(secondary_accession=secondary_study_accession)
+        return emg_models.Study.objects.using(self.emg_db).get(secondary_accession=secondary_study_accession)
 
     def get_emg_sample(self, sample_accession):
-        return emg_models.Sample.objects.using(self.emg_db_name).get(accession=sample_accession)
+        return emg_models.Sample.objects.using(self.emg_db).get(accession=sample_accession)
 
     def get_emg_run(self, run_accession):
-        return emg_models.Run.objects.using(self.emg_db_name).get(accession=run_accession)
+        return emg_models.Run.objects.using(self.emg_db).get(accession=run_accession)
 
     def get_emg_assembly(self, assembly_accession):
-        return emg_models.Assembly.objects.using(self.emg_db_name).get(accession=assembly_accession)
+        return emg_models.Assembly.objects.using(self.emg_db).get(accession=assembly_accession)
 
     def get_pipeline_by_version(self):
-        return emg_models.Pipeline.objects.using(self.emg_db_name).get(release_version=self.version)
+        return emg_models.Pipeline.objects.using(self.emg_db).get(release_version=self.version)
 
     def get_analysis_status(self, description):
-        return emg_models.AnalysisStatus.objects.using(self.emg_db_name).get(analysis_status=description)
+        return emg_models.AnalysisStatus.objects.using(self.emg_db).get(analysis_status=description)
 
     def get_experiment_type(self, experiment_typ):
-        return emg_models.ExperimentType.objects.using(self.emg_db_name).get(experiment_type=experiment_typ)
+        return emg_models.ExperimentType.objects.using(self.emg_db).get(experiment_type=experiment_typ)
 
     def create_or_update_analysis(self, metadata, input_file_name):
+        logging.info("Creating/updating analysis jobs...")
         pipeline = self.get_pipeline_by_version()
         study = self.get_emg_study(metadata.secondary_study_accession)
         sample = self.get_emg_sample(metadata.sample_accession)
@@ -242,14 +288,17 @@ class Command(BaseCommand):
             defaults['instrument_model'] = run.instrument_model
             defaults['instrument_platform'] = run.instrument_platform
             defaults['run_status_id'] = run.status_id
-        analysis, _ = emg_models.AnalysisJob.objects.using(self.emg_db_name) \
+        analysis, _ = emg_models.AnalysisJob.objects.using(self.emg_db) \
             .update_or_create(**comp_key, defaults=defaults)
+        logging.info("Done")
         return analysis
 
     def upload_analysis_files(self, experiment_type, analysis_job, input_file_name):
+        logging.info("Updating downloadable files...")
         dl_set = get_conf_downloadset(self.result_dir, input_file_name,
-                                      self.emg_db_name, experiment_type, self.version)
+                                      self.emg_db, experiment_type, self.version)
         dl_set.insert_files(analysis_job)
+        logging.info("Done")
 
     def upload_statistics(self):
         """
@@ -266,5 +315,9 @@ class Command(BaseCommand):
 
     def populate_mongodb_function_and_pathways(self):
         logger.info('Importing functional and pathway data...')
-        for sum_type in ['.ipr', '.go', '.go_slim', '.paths.kegg', '.pfam', '.ko', '.paths.gprops']:
+        for sum_type in ['.ipr', '.go', '.go_slim', '.paths.kegg', '.pfam', '.ko', '.paths.gprops', '.antismash']:
             call_command('import_summary', self.accession, self.rootpath, sum_type, '--pipeline', self.version)
+
+    def import_contigs(self):
+        logger.info('Importing contigs...')
+        call_command('import_contigs', self.accession, '--pipeline', self.version, '--faix')

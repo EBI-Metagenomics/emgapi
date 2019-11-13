@@ -13,6 +13,13 @@ logger = logging.getLogger(__name__)
 
 class Command(EMGBaseCommand):
 
+    def add_arguments(self, parser):
+        parser.add_argument('--emg_db',
+                            help='Target emg_db_name alias',
+                            choices=['default', 'dev', 'prod'],
+                            default='default')
+        super(Command, self).add_arguments(parser)
+
     def populate_from_accession(self, options):
         logger.info("Found %d" % len(self.obj_list))
         for o in self.obj_list:
@@ -20,13 +27,13 @@ class Command(EMGBaseCommand):
 
     def find_path(self, obj, options):
         rootpath = options.get('rootpath', None)
+        emg_db = options['emg_db']
 
         for infile in ['qc_summary', 'func_summary']:
-            self.load_stats(rootpath, obj, infile)
+            self.load_stats(rootpath, obj, infile, emg_db)
 
-    def load_stats(self, rootpath, obj, input_file_name):
+    def load_stats(self, rootpath, obj, input_file_name, emg_db):
         res = os.path.join(rootpath, obj.result_directory, input_file_name)
-        logger.info("Found: %s" % res)
 
         if input_file_name == 'qc_summary':
             if not os.path.exists(res):  # Check existence of the v4.1 result file
@@ -38,7 +45,7 @@ class Command(EMGBaseCommand):
                     logger.info("Found: %s" % res)
                     with open(res) as csvfile:
                         reader = csv.reader(csvfile, delimiter='\t')
-                        self.import_qc(reader, obj)
+                        self.import_qc(reader, obj, emg_db)
                 else:
                     logger.error("Path %r exist. Empty file. SKIPPING!" % res)
             else:
@@ -46,21 +53,21 @@ class Command(EMGBaseCommand):
         else:
             logger.error("Path %r doesn't exist. SKIPPING!" % res)
 
-    def import_qc(self, reader, job):
+    def import_qc(self, reader, job, emg_db):
         anns = []
         for row in reader:
             var = None
             try:
-                var = emg_models.AnalysisMetadataVariableNames.objects \
+                var = emg_models.AnalysisMetadataVariableNames.objects.using(emg_db) \
                     .get(var_name=row[0])
             except emg_models.AnalysisMetadataVariableNames.DoesNotExist:
                 var = emg_models.AnalysisMetadataVariableNames(var_name=row[0])
                 var.save()
                 # because PK is not AutoField
-                var = emg_models.AnalysisMetadataVariableNames.objects \
+                var = emg_models.AnalysisMetadataVariableNames.objects.using(emg_db) \
                     .get(var_name=row[0])
             if var is not None:
-                job_ann, created = emg_models.AnalysisJobAnn.objects.update_or_create(
+                job_ann, created = emg_models.AnalysisJobAnn.objects.using(emg_db).update_or_create(
                     job=job, var=var,
                     defaults={'var_val_ucv': row[1]}
                 )

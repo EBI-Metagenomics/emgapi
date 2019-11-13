@@ -49,7 +49,10 @@ class Command(BaseCommand):
         parser.add_argument('--rootpath',
                             help="NFS root path of the results archive.",
                             default="/nfs/production/interpro/metagenomics/results/")
-        parser.add_argument('--database', help='Target emg_db_name alias', default='default')
+        parser.add_argument('--database',
+                            help='Target emg_db_name alias',
+                            choices=['default', 'dev', 'prod'],
+                            default='default')
 
     def handle(self, *args, **options):
         logger.info('CLI %r' % options)

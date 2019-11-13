@@ -43,16 +43,21 @@ class Command(BaseCommand):
         parser.add_argument('--ena_db',
                             help="ENA's production database",
                             default='era')
+        parser.add_argument('--emg_db',
+                            help='Target emg_db_name alias',
+                            choices=['default', 'dev', 'prod'],
+                            default='default')
 
     def handle(self, *args, **options):
         logger.info("CLI %r" % options)
 
         secondary_study_accession = options['accession']
         lineage = options['lineage']
-        database = options['ena_db']
+        ena_db = options['ena_db']
+        emg_db = options['emg_db']
 
         study_dir = self.get_study_dir(options.get('study_dir'), options.get('rootpath'), secondary_study_accession)
-        importer = StudyImporter(secondary_study_accession, study_dir, lineage, database)
+        importer = StudyImporter(secondary_study_accession, study_dir, lineage, ena_db, emg_db)
         importer.run()
 
         logger.info("Study import finished successfully.")

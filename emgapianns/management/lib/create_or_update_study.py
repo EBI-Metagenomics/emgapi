@@ -35,16 +35,17 @@ class StudyImporter(object):
         Creates a new study object in EMG or updates an existing one.
     """
 
-    def __init__(self, secondary_study_accession, study_dir, lineage, database):
+    def __init__(self, secondary_study_accession, study_dir, lineage, ena_db, emg_db):
         self.secondary_study_accession = secondary_study_accession
         self.study_dir = study_dir
         self.lineage = lineage
-        self.database = database
+        self.ena_db = ena_db
+        self.emg_db = emg_db
 
     def run(self):
         logging.info("Creating or updating study {}".format(self.secondary_study_accession))
-        ena_study = self._fetch_study_metadata(self.secondary_study_accession, self.database)
-        self._update_or_create_study(ena_study, self.study_dir, self.lineage, self.database)
+        ena_study = self._fetch_study_metadata(self.secondary_study_accession, self.ena_db)
+        self._update_or_create_study(ena_study, self.study_dir, self.lineage, self.ena_db, self.emg_db)
         logging.info("Finished study {} creation/updating.".format(self.secondary_study_accession))
 
     @staticmethod
@@ -82,7 +83,7 @@ class StudyImporter(object):
         # TODO: Implement
         pass
 
-    def _update_or_create_study(self, ena_study, study_result_dir, lineage, database):
+    def _update_or_create_study(self, ena_study, study_result_dir, lineage, ena_db, emg_db):
         """
             Attributes to parse out:
                 - Center name (done)
@@ -125,7 +126,7 @@ class StudyImporter(object):
         is_public = True if not hold_date else False
 
         # Retrieve biome object
-        biome = emg_models.Biome.objects.get(lineage=lineage)
+        biome = emg_models.Biome.objects.using(emg_db).get(lineage=lineage)
 
         # Lookup study publication
         pubmed_ids = ena_study.pubmed_id
@@ -135,7 +136,7 @@ class StudyImporter(object):
 
         project_id = ena_study.project_id
         if secondary_study_accession.startswith('SRP'):
-            project = ena_models.Project.objects.using(database).get(project_id=project_id)
+            project = ena_models.Project.objects.using(ena_db).get(project_id=project_id)
             center_name = project.center_name
         else:
             center_name = ena_study.center_name
@@ -155,14 +156,14 @@ class StudyImporter(object):
                     'result_directory': study_result_dir,
                     'first_created': ena_study.first_created}
 
-        study, _ = emg_models.Study.objects.update_or_create(
+        study, created = emg_models.Study.objects.using(emg_db).update_or_create(
             project_id=project_id,
             secondary_accession=secondary_study_accession,
             defaults=defaults,
         )
 
         for pub in emg_publications:
-            emg_models.StudyPublication.objects.update_or_create(
+            emg_models.StudyPublication.objects.using(emg_db).update_or_create(
                 study=study,
                 pub=pub
             )

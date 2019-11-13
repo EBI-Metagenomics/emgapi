@@ -141,7 +141,7 @@
       "description_label": "MAPseq UNITE assignments",
       "format_name": "TSV",
       "group_type": "Taxonomic analysis UNITE",
-      "real_name": "{}_ITS_UNITE.fasta.mseq.gz",
+      "real_name": "{}_unite.fasta.mseq.gz",
       "subdir": "taxonomy-summary/its/unite"
     },
     {
@@ -154,7 +154,7 @@
       "description_label": "MAPseq ITSoneDB assignments",
       "format_name": "TSV",
       "group_type": "Taxonomic analysis ITSoneDB",
-      "real_name": "{}_ITS_ITSoneDB.fasta.mseq.gz",
+      "real_name": "{}_itsonedb.fasta.mseq.gz",
       "subdir": "taxonomy-summary/its/itsonedb"
     },
     {
@@ -196,7 +196,7 @@
       "description_label": "MAPseq UNITE assignments",
       "format_name": "TSV",
       "group_type": "Taxonomic analysis UNITE",
-      "real_name": "{}_ITS_UNITE.fasta.mseq.tsv",
+      "real_name": "{}_unite.fasta.mseq.tsv",
       "subdir": "taxonomy-summary/its/unite"
     },
     {
@@ -210,7 +210,7 @@
       "description_label": "MAPseq ITSoneDB assignments",
       "format_name": "TSV",
       "group_type": "Taxonomic analysis ITSoneDB",
-      "real_name": "{}_ITS_ITSoneDB.fasta.mseq.tsv",
+      "real_name": "{}_itsonedb.fasta.mseq.tsv",
       "subdir": "taxonomy-summary/its/itsonedb"
     },
     {
@@ -249,7 +249,7 @@
       "description_label": "OTUs, counts and taxonomic assignments for UNITE",
       "format_name": "HDF5 Biom",
       "group_type": "Taxonomic analysis UNITE",
-      "real_name": "{}_ITS_UNITE.fasta.mseq_hdf5.biom",
+      "real_name": "{}_unite.fasta.mseq_hdf5.biom",
       "subdir": "taxonomy-summary/its/unite"
     },
     {
@@ -262,7 +262,7 @@
       "description_label": "OTUs, counts and taxonomic assignments for ITSOneDB",
       "format_name": "HDF5 Biom",
       "group_type": "Taxonomic analysis ITSOneDB",
-      "real_name": "{}_ITS_ITSoneDB.fasta.mseq_hdf5.biom",
+      "real_name": "{}_itsonedb.fasta.mseq_hdf5.biom",
       "subdir": "taxonomy-summary/its/itsonedb"
     },
     {
@@ -301,7 +301,7 @@
       "description_label": "OTUs, counts and taxonomic assignments for UNITE",
       "format_name": "JSON Biom",
       "group_type": "Taxonomic analysis UNITE",
-      "real_name": "{}_ITS_UNITE.fasta.mseq_json.biom",
+      "real_name": "{}_unite.fasta.mseq_json.biom",
       "subdir": "taxonomy-summary/its/unite"
     },
     {
@@ -314,7 +314,7 @@
       "description_label": "OTUs, counts and taxonomic assignments for ITSOneDB",
       "format_name": "JSON Biom",
       "group_type": "Taxonomic analysis ITSOneDB",
-      "real_name": "{}_ITS_ITSoneDB.fasta.mseq_json.biom",
+      "real_name": "{}_itsonedb.fasta.mseq_json.biom",
       "subdir": "taxonomy-summary/its/itsonedb"
     },
     {
@@ -353,7 +353,7 @@
       "description_label": null,
       "format_name": null,
       "group_type": null,
-      "real_name": "{}_ITS_UNITE.fasta.mseq.txt",
+      "real_name": "{}_unite.fasta.mseq.txt",
       "subdir": null
     },
     {
@@ -366,7 +366,7 @@
       "description_label": null,
       "format_name": null,
       "group_type": null,
-      "real_name": "{}_ITS_ITSoneDB.fasta.mseq.txt",
+      "real_name": "{}_itsonedb.fasta.mseq.txt",
       "subdir": null
     },
     {
@@ -451,8 +451,7 @@
     },
     {
       "_accession_substitution": "full",
-      "_chunked": true,
-      "chunk_file": "5_8S.fa.chunks",
+      "_chunked": false,
       "_required": false,
       "downloadable": true,
       "alias": "{}_5.8S.fasta.gz",
@@ -465,8 +464,7 @@
     },
     {
       "_accession_substitution": "full",
-      "_chunked": true,
-      "chunk_file": "5S.fa.chunks",
+      "_chunked": false,
       "_required": false,
       "downloadable": true,
       "alias": "{}_5S.fasta.gz",

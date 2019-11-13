@@ -124,15 +124,15 @@ class TestSanityCheck:
 
     @pytest.mark.parametrize("accession, experiment_type, version, result_folder, expected_value", [
         ('ERR1864826', 'amplicon', '4.1',
-         'results/2019/02/ERP021864/version_4.1/ERR1864826_FASTQ', True),
+         'results/2019/02/ERP021864/version_4.1/ERR1864826_FASTQ', False),
         ('ERR1913139', 'wgs', '4.1',
-         'results/2018/12/ERP019674/version_4.1/ERR1913139_FASTQ', False)
+         'results/2018/12/ERP019674/version_4.1/ERR1913139_FASTQ', True)
     ])
     def test_check_qc_not_passed(self, accession, experiment_type, version, result_folder, expected_value):
         root_dir = os.path.dirname(__file__).replace('functional', 'test-input')
         result_dir = os.path.join(root_dir, result_folder)
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
-        actual = test_instance.check_for_qc_not_passed_flag()
+        actual = test_instance.passed_quality_control()
         assert expected_value == actual
 
     @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
@@ -164,7 +164,7 @@ class TestSanityCheck:
         root_dir = os.path.dirname(__file__).replace('functional', 'test-input')
         result_dir = os.path.join(root_dir, result_folder)
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
-        actual = test_instance.coverage_check()
+        actual = test_instance.passed_coverage_check()
         assert expected_value == actual
 
     @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
@@ -179,4 +179,4 @@ class TestSanityCheck:
         result_dir = os.path.join(root_dir, result_folder)
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
         with pytest.raises(NoAnnotationsFoundError):
-            test_instance.coverage_check()
+            test_instance.passed_coverage_check()

@@ -35,15 +35,15 @@ class SanityCheck:
                 if f['_required']:
                     raise e
 
-    def check_for_qc_not_passed_flag(self):
+    def passed_quality_control(self):
         file_path = os.path.join(self.dir, self.QC_NOT_PASSED)
         try:
             self.__check_exists(file_path)
-            return True
-        except FileNotFoundError as e:
             return False
+        except FileNotFoundError as e:
+            return True
 
-    def coverage_check(self):
+    def passed_coverage_check(self):
         """
             For WGS / metaT, I’d do ’do proteins exist? If not, quit with error.
             If so, check for functional annotations.
