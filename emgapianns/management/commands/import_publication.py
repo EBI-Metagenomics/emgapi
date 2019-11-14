@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 def lookup_publication_by_pubmed_id(pubmed_id):
     api_handler = EuropePMCApiHandler()
-    return api_handler.get_publication_by_pubmed_id(int(pubmed_id))
+    return api_handler.get_publication_by_pubmed_id(pubmed_id)
 
 
 def update_or_create_publication(publication):
