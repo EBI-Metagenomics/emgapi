@@ -968,7 +968,7 @@ class Run(models.Model):
         db_column='ACCESSION', max_length=80, blank=True, null=True)
     secondary_accession = models.CharField(
         db_column='SECONDARY_ACCESSION', max_length=100, blank=True, null=True)
-    status = models.ForeignKey(
+    status_id = models.ForeignKey(
         'Status', db_column='STATUS_ID', related_name='runs',
         on_delete=models.CASCADE, default=2)
     sample = models.ForeignKey(
@@ -1429,6 +1429,8 @@ class Genome(models.Model):
     eggnog_coverage = models.FloatField(db_column='EGGNOG_COVERAGE')
     ipr_coverage = models.FloatField(db_column='IPR_COVERAGE')
     taxon_lineage = models.CharField(db_column='TAXON_LINEAGE', max_length=400)
+    cmseq = models.FloatField(db_column='CMSEQ', null=True)
+    taxincons = models.FloatField(db_column='TAXINCONS')
 
     num_genomes_total = models.IntegerField(db_column='PANGENOME_TOTAL_GENOMES', null=True)
     num_genomes_non_redundant = models.IntegerField(db_column='PANGENOME_NON_RED_GENOMES', null=True)

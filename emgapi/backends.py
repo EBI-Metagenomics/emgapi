@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2017 EMBL - European Bioinformatics Institute
+# Copyright 2019 EMBL - European Bioinformatics Institute
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,13 +22,15 @@ from django.conf import settings
 from django.contrib.auth.models import User
 
 
-class EMGBackend(object):
+class EMGBackend:
+    """ENA Auth backend
+    """
 
     supports_anonymous_user = False
     supports_object_permissions = False
 
     def authenticate(self, request, username=None, password=None):
-        ena_auth_url = self._get_backend_settings()
+        ena_auth_url = settings.EMG_BACKEND_AUTH_URL
         data = {
             'authRealms': ['SRA'],
             'rememberMe': False,
@@ -51,6 +53,3 @@ class EMGBackend(object):
             return User.objects.get(pk=user_id)
         except User.DoesNotExist:
             return None
-
-    def _get_backend_settings(self):
-        return settings.EMG_BACKEND_AUTH_URL

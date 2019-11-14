@@ -1,9 +1,7 @@
 from unittest.mock import patch
 
 import pytest
-from django.test import TransactionTestCase
 from django.utils import timezone
-from test_utils.emg_fixtures import *  # noqa
 
 from emgapi import models as emg_models
 from emgapianns.management.commands.import_study import Command
@@ -100,14 +98,9 @@ def insert_biome(biome_id, biome_name, left, right, depth, lineage):
                                                         'lineage': lineage})
 
 
-@pytest.mark.django_db
-class TestImportStudyTransactions(TransactionTestCase):
+@pytest.mark.django_db(reset_sequences=True, transaction=True)
+class TestImportStudyTransactions:
 
-    # @pytest.mark.usefixtures("biome")
-    # @pytest.mark.usefixtures("var_names")
-    # @pytest.mark.parametrize("accession, lineage", [
-    #     ('ERP117125', 'root:Host-associated:Mammals:Digestive system:Fecal')
-    # ])
     @patch('emgapianns.management.commands.import_study.Command.get_study_dir')
     @patch('emgapianns.management.lib.create_or_update_study.StudyImporter._fetch_study_metadata')
     def test_import_ena_study_should_succeed(self, mock_db, mock_study_dir):
@@ -119,10 +112,10 @@ class TestImportStudyTransactions(TransactionTestCase):
         accession = 'ERP117125'
         lineage = 'root:Host-associated:Mammals:Digestive system:Fecal'
         biome_name = 'Fecal'
-        #
+
         mock_study_dir.return_value = "2019/09/ERP117125"
         mock_db.return_value = expected = mock_ena_run_study()
-        #
+
         insert_biome(422, biome_name, 841, 844, 5, lineage)
 
         with mock_db, mock_study_dir:
@@ -133,15 +126,15 @@ class TestImportStudyTransactions(TransactionTestCase):
             assert expected[0].study_id == actual_study.secondary_accession
             assert expected[0].project_id == actual_study.project_id
             assert expected[0].center_name == actual_study.centre_name
-            assert None == actual_study.experimental_factor
-            assert True == actual_study.is_public
-            assert None == actual_study.public_release_date
+            assert None is actual_study.experimental_factor
+            assert True is actual_study.is_public
+            assert None is actual_study.public_release_date
             assert expected[0].study_description == actual_study.study_abstract
             assert expected[0].study_title == actual_study.study_name
             assert 'FINISHED' == actual_study.study_status
             assert 'SUBMITTED' == actual_study.data_origination
-            assert None == actual_study.author_email
-            assert None == actual_study.author_name
+            assert None is actual_study.author_email
+            assert None is actual_study.author_name
             assert timezone.now().strftime("%m/%d/%Y") == actual_study.last_update.strftime("%m/%d/%Y")
             assert expected[0].submission_account_id == actual_study.submission_account_id
             assert biome_name == actual_study.biome.biome_name
@@ -162,11 +155,11 @@ class TestImportStudyTransactions(TransactionTestCase):
         accession = 'SRP000125'
         lineage = 'root:Host-associated:Mammals:Digestive system:Fecal'
         biome_name = 'Fecal'
-        #
+
         mock_study_dir.return_value = "2019/09/{}".format(accession)
         mock_db.return_value = expected = mock_ncbi_run_study_SRP000125()
         mock_ena_project.return_value = get_ena_project_mock('SDSU Center for Universal Microbial Sequencing')
-        #
+
         insert_biome(422, biome_name, 841, 844, 5, lineage)
 
         with mock_db, mock_study_dir, mock_ena_project:
@@ -177,15 +170,15 @@ class TestImportStudyTransactions(TransactionTestCase):
             assert expected[0].study_id == actual_study.secondary_accession
             assert expected[0].project_id == actual_study.project_id
             assert expected[0].center_name == actual_study.centre_name
-            assert None == actual_study.experimental_factor
-            assert True == actual_study.is_public
-            assert None == actual_study.public_release_date
+            assert None is actual_study.experimental_factor
+            assert True is actual_study.is_public
+            assert None is actual_study.public_release_date
             assert expected[0].study_description == actual_study.study_abstract
             assert expected[0].study_title == actual_study.study_name
             assert 'FINISHED' == actual_study.study_status
             assert 'HARVESTED' == actual_study.data_origination
-            assert None == actual_study.author_email
-            assert None == actual_study.author_name
+            assert None is actual_study.author_email
+            assert None is actual_study.author_name
             assert timezone.now().strftime("%m/%d/%Y") == actual_study.last_update.strftime("%m/%d/%Y")
             assert expected[0].submission_account_id == actual_study.submission_account_id
             assert biome_name == actual_study.biome.biome_name
@@ -221,15 +214,15 @@ class TestImportStudyTransactions(TransactionTestCase):
             assert expected[0].study_id == actual_study.secondary_accession
             assert expected[0].project_id == actual_study.project_id
             assert expected[0].center_name == actual_study.centre_name
-            assert None == actual_study.experimental_factor
-            assert True == actual_study.is_public
-            assert None == actual_study.public_release_date
+            assert None is actual_study.experimental_factor
+            assert True is actual_study.is_public
+            assert None is actual_study.public_release_date
             assert expected[0].study_description == actual_study.study_abstract
             assert expected[0].study_title == actual_study.study_name
             assert 'FINISHED' == actual_study.study_status
             assert 'HARVESTED' == actual_study.data_origination
-            assert None == actual_study.author_email
-            assert None == actual_study.author_name
+            assert None is actual_study.author_email
+            assert None is actual_study.author_name
             assert timezone.now().strftime("%m/%d/%Y") == actual_study.last_update.strftime("%m/%d/%Y")
             assert expected[0].submission_account_id == actual_study.submission_account_id
             assert biome_name == actual_study.biome.biome_name

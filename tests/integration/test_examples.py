@@ -27,7 +27,7 @@ from test_utils.emg_fixtures import *  # noqa
                     reason='requires Python 3.6')
 @pytest.mark.usefixtures('mongodb')
 @pytest.mark.django_db
-class TestExamples(object):
+class TestExamples:
 
     def test_list(self, live_server, runs, api_version):
         """

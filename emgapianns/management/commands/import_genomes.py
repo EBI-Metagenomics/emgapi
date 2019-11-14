@@ -268,7 +268,7 @@ class Command(BaseCommand):
         file = os.path.join(directory, 'genome', 'geneclusters.txt')
 
         if not os.path.exists(file):
-            logger.warn('Genome {} does not have antiSMASH geneclusters'.format(genome.accession))
+            logger.warning('Genome {} does not have antiSMASH geneclusters'.format(genome.accession))
             return
 
         with open(file, 'rt') as tsv:
@@ -322,6 +322,9 @@ class Command(BaseCommand):
             self.upload_genome_file(genome,
                                     'Gene Presence / Absence matrix',
                                     'tsv', 'genes_presence-absence.tsv', 'Pan-Genome analysis', 'pan-genome')
+            self.upload_genome_file(genome,
+                                    'Pairwise Mash distances of conspecific genomes',
+                                    'nwk', 'mashtree.nwk ', 'Pan-Genome analysis', 'pan-genome')
 
     def prepare_file_upload(self, desc_label, file_format, filename, group_name=None, subdir_name=None):
 

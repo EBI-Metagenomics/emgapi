@@ -28,29 +28,68 @@ import emgapi.models as emg_models
 
 from test_utils.emg_fixtures import *  # noqa
 
-@pytest.fixture
-def import_genomes(db):
-    baker.make('emgapi.Biome',
-                lineage='root:Host-Associated:Human:Digestive System:Large intestine')
-    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'path/genomes/')
-    call_command('import_genomes', path, '1.0')
 
-
-@pytest.mark.django_db(transaction=True)
-@pytest.mark.usefixtures('import_genomes')
 class TestGenomes:
     """Genomes API tests
     """
+    def _setup(self):
+        downloads = (
+            ("Protein sequence FASTA file of the species representative", "Predicted CDS",),
+            ("DNA sequence FASTA file of the genome assembly of the species representative", "Nucleic Acid Sequence",),
+            ("DNA sequence FASTA file index of the genome assembly of the species representative", "Nucleic Acid Sequence index",),
+            ("Protein sequence of the accessory genome", "Protein sequence (accessory)",),
+            ("Protein sequence of the core genome", "Protein sequence (core)",),
+            ("eggNOG annotations of the protein coding sequences", "EggNog annotation",),
+            ("eggNOG annotations of the core and accessory genes", "EggNog annotation (core and accessory)",),
+            ("InterProScan annotation of the protein coding sequences", "InterProScan annotation",),
+            ("InterProScan annotations of the core and accessory genes", "InterProScan annotation (core and accessory)",),
+            ("Presence/absence binary matrix of the pan-genome across all conspecific genomes", "Gene Presence / Absence matrix",),
+            ("Protein sequence FASTA file of core genes (>=90% of the " +
+             "genomes with >=90% amino acid identity)", "Core predicted CDS",),
+            ("Protein sequence FASTA file of accessory genes", "Accessory predicted CDS",),
+            ("Protein sequence FASTA file of core and accessory genes", "Core & Accessory predicted CDS",),
+            ("Genome GFF file with various sequence annotations", "Genome Annotation"),
+            ("Phylogenetic tree of release genomes", 'Phylogenetic tree of release genomes'),
+            ("Genome GFF file with antiSMASH geneclusters annotations", "Genome antiSMASH Annotation"),
+            ("Tree generated from the pairwise Mash distances of conspecific genomes",
+             "Pairwise Mash distances of conspecific genomes")
+        )
+        for d in downloads:
+            emg_models.DownloadDescriptionLabel.objects.get_or_create(
+                description=d[0],
+                description_label=d[1]
+            )
 
+        file_formats = (
+            ("TAB", "tab", False),
+            ("GFF", "gff", False),
+            ("JSON", "json", False),
+            ("FAI", "fai", False),
+            ("Newick format", "nwk", False)
+        )
+        for fformat in file_formats:
+            emg_models.FileFormat.objects.get_or_create(
+                format_name=fformat[0],
+                format_extension=fformat[1],
+                compression=fformat[2],
+            )
+
+    @pytest.mark.django_db
     def test_import_genomes(self, client):
         """Assert tha the import worked for genome 'MGYG-HGUT-00776'
         """
+        self._setup()
+        baker.make('emgapi.Biome',
+                   lineage='root:Host-Associated:Human:Digestive System:Large intestine')
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'path/genomes/')
+        call_command('import_genomes', path, '1.0')
+
         genome = emg_models.Genome.objects.get(accession='MGYG-HGUT-00776')
 
-        assert genome.accession == 'MGYG-HGUT-00776' 
-        assert genome.completeness == 83.8 
-        assert genome.contamination == 1.9 
-        assert genome.eggnog_coverage == 89.98 
+        assert genome.accession == 'MGYG-HGUT-00776'
+        assert genome.completeness == 83.8
+        assert genome.contamination == 1.9
+        assert genome.eggnog_coverage == 89.98
         assert genome.ena_genome_accession == 'ERZ840115'
         assert genome.ena_sample_accession == 'DRS026637'
         assert genome.ena_study_accession == 'DRP003048'
@@ -72,20 +111,18 @@ class TestGenomes:
                                        's__UBA5809 sp002417965'
         assert genome.trnas == 17
         assert genome.type == 'MAG'
+        assert genome.cmseq == 0.07
+        assert genome.taxincons == 0.48
 
-
-    def test_genomes_list(self, client):
-        """Genomes list API
-        """
-        url = reverse('emgapi_v1:genomes')
+        url = reverse('emgapi_v1:genomes-list')
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         resp_data = response.json()
-        assert len(data) == 3
-
+        assert len(resp_data) == 3
         expected_ids = [
             'MGYG-HGUT-00776',
             'MGYG-HGUT-00777',
             'MGYG-HGUT-00778'
         ]
-        assert expected_ids.sort() == [d['accession'] for d in data['data']].sort()
+        returned_ids = [d.get('attributes').get('accession') for d in resp_data['data']]
+        assert expected_ids.sort() == returned_ids.sort()

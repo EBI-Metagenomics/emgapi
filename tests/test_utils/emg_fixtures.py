@@ -24,7 +24,7 @@ __all__ = ['apiclient', 'api_version', 'biome', 'biome_human', 'super_study', 's
            'samples', 'study', 'study_private', 'sample', 'sample_private',
            'run_status', 'analysis_status',
            'pipeline', 'pipelines', 'experiment_type',
-           'runs', 'run', 'runjob_pipeline_v1', 'run_emptyresults', 'run_with_sample',
+           'runs', 'run', 'run_v5', 'runjob_pipeline_v1', 'run_emptyresults', 'run_with_sample',
            'analysis_results', 'run_multiple_analysis', 'var_names']
 
 
@@ -278,7 +278,7 @@ def runs(study, samples, run_status, analysis_status, pipeline,
             study=study,
             accession='ABC_{:0>3}'.format(pk),
             secondary_accession='DEF_{:0>3}'.format(pk),
-            status=run_status,
+            status_id=run_status,
             experiment_type=experiment_type,
         )
         _aj = emg_models.AnalysisJob(
@@ -304,10 +304,10 @@ def run(study, sample, run_status, analysis_status, pipeline, experiment_type):
         accession='ABC01234',
         sample=sample,
         study=study,
-        status=run_status,
+        status_id=run_status,
         experiment_type=experiment_type
     )
-    analysis = emg_models.AnalysisJob.objects.create(  # NOQA
+    emg_models.AnalysisJob.objects.create(
         job_id=1234,
         sample=sample,
         study=study,
@@ -318,6 +318,33 @@ def run(study, sample, run_status, analysis_status, pipeline, experiment_type):
         analysis_status=analysis_status,
         input_file_name='ABC_FASTQ',
         result_directory='path/version_1.0/ABC_FASTQ',
+        submit_time='1970-01-01 00:00:00'
+    )
+    return run
+
+
+@pytest.fixture
+def run_v5(study, sample, run_status, analysis_status, pipelines, experiment_type):
+    p5 = pipelines.filter(release_version='5.0').first()
+    run, _ = emg_models.Run.objects.get_or_create(
+        run_id=5555,
+        accession='ABC01234',
+        sample=sample,
+        study=study,
+        status_id=run_status,
+        experiment_type=experiment_type
+    )
+    emg_models.AnalysisJob.objects.create(
+        job_id=1234,
+        sample=sample,
+        study=study,
+        run=run,
+        run_status_id=4,
+        experiment_type=experiment_type,
+        pipeline=p5,
+        analysis_status=analysis_status,
+        input_file_name='ABC_FASTQ',
+        result_directory='path/version_5.0/ABC_FASTQ',
         submit_time='1970-01-01 00:00:00'
     )
     return run
@@ -358,7 +385,7 @@ def run_multiple_analysis(study, sample, run_status, analysis_status,
         accession='ABC01234',
         sample=sample,
         study=study,
-        status=run_status,
+        status_id=run_status,
         experiment_type=experiment_type
     )
     _anl1 = emg_models.AnalysisJob.objects.create(
@@ -398,7 +425,7 @@ def run_emptyresults(study, sample, run_status, analysis_status, pipeline,
         accession='ABC01234',
         sample=sample,
         study=study,
-        status=run_status,
+        status_id=run_status,
         experiment_type=experiment_type
     )
     return emg_models.AnalysisJob.objects.create(
@@ -422,7 +449,7 @@ def run_with_sample(study, sample, run_status, analysis_status, pipeline,
     run = emg_models.Run.objects.create(
         run_id=1234,
         accession='ABC01234',
-        status=run_status,
+        status_id=run_status,
         sample=sample,
         study=study,
         experiment_type=experiment_type,
@@ -448,7 +475,7 @@ def analysis_results(study, sample, run_status, analysis_status,
     run = emg_models.Run.objects.create(
         run_id=1234,
         accession='ABC01234',
-        status=run_status,
+        status_id=run_status,
         sample=sample,
         study=study,
         experiment_type=experiment_type,

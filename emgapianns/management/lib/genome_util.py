@@ -20,7 +20,6 @@ def get_expected_genome_files(accession):
         accession + '.faa',
         accession + '.fna',
         accession + '.gff',
-        accession + '_antismash.gff',
         accession + '.stats',
         accession + '_eggNOG.tsv',
         accession + '_InterProScan.tsv'
@@ -50,7 +49,6 @@ def sanity_check_release_dir(d):
     for f in files:
         try:
             logging.info('Loading file {}'.format(f))
-
             f = os.path.basename(f)
             EXPECTED_RELEASE_FILES.remove(f)
         except KeyError:

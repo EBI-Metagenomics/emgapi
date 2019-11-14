@@ -1,18 +1,14 @@
-## bug https://github.com/aio-libs/multidict/issues/274
-multidict==4.4.0a0
-
-pytest~=5.2.2
-pytest-django~=3.6.0
-pytest-xdist
-
-model_bakery
-mock_services
-mongomock
-mock
+multidict==4.7.4
+pytest==5.3.5
+pytest-django==3.8.0
+pytest-xdist==1.31.0
+model_bakery==1.1.0
+mock_services==0.3.1
+mongomock==3.19.0
 
 jsonapi-client; python_version >= '3.6'
-pytest-cov
+pytest-cov==2.8.1
 
 # For testing webuploader features (under emgapianns/management/commands/...)
-pandas~=0.25.2
-parameterized~=0.7.1
+pandas==0.25.2
+parameterized==0.7.1

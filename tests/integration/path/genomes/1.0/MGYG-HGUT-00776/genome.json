@@ -1,5 +1,6 @@
 {
     "accession": "MGYG-HGUT-00776", 
+    "cmseq": 0.07, 
     "completeness": 83.8, 
     "contamination": 1.9, 
     "eggnog_coverage": 89.98, 
@@ -19,6 +20,7 @@
     "rna_16s": 99.67, 
     "rna_23s": 90.6, 
     "rna_5s": 0.0, 
+    "taxincons": 0.48, 
     "taxon_lineage": "d__Bacteria;p__Firmicutes_C;c__Negativicutes;o__Veillonellales;f__Dialisteraceae;g__UBA5809;s__UBA5809 sp002417965", 
     "trnas": 17, 
     "type": "MAG"

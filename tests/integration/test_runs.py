@@ -34,9 +34,9 @@ class TestRunAPI(APITestCase):
         baker.make('emgapi.StudySample', study=st, sample=_s1)
         baker.make('emgapi.StudySample', study=st, sample=_s2)
 
-        baker.make('emgapi.Run', pk=123, accession='123', status=_status,
+        baker.make('emgapi.Run', pk=123, accession='123', status_id=_status,
                    study=st, sample=_s2)
-        baker.make('emgapi.Run', pk=456, accession='456', status=_status,
+        baker.make('emgapi.Run', pk=456, accession='456', status_id=_status,
                    study=st, sample=_s2)
 
         _as = baker.make('emgapi.AnalysisStatus', pk=3)

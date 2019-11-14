@@ -55,6 +55,7 @@ class TestDefaultAPI(object):
             'annotations/kegg-orthologs': '/annotations/kegg-orthologs',
             'annotations/pfam-entries': '/annotations/pfam-entries',
             'annotations/organisms': '/annotations/organisms',
+            'antismash-geneclusters': '/antismash-geneclusters',
             'mydata': '/mydata',
             'genomes': '/genomes',
             'cogs': '/cogs',
@@ -178,7 +179,7 @@ class TestDefaultAPI(object):
                                  pk=pk, biome=_biome, is_public=1)
                 _st = baker.make('emgapi.Study', pk=pk, biome=_biome,
                                  is_public=1, samples=[_sm])
-                baker.make('emgapi.Run', pk=pk, status=run_status,
+                baker.make('emgapi.Run', pk=pk, status_id=run_status,
                            study=_st, sample=_sm)
             elif _model in ('Assembly',):
                 _biome = baker.make('emgapi.Biome', pk=pk)
@@ -186,7 +187,7 @@ class TestDefaultAPI(object):
                                  pk=pk, biome=_biome, is_public=1)
                 _st = baker.make('emgapi.Study', pk=pk, biome=_biome,
                                  is_public=1, samples=[_sm])
-                _r = baker.make('emgapi.Run', pk=pk, status=run_status,
+                _r = baker.make('emgapi.Run', pk=pk, status_id=run_status,
                                 study=_st, sample=_sm)
                 baker.make('emgapi.Assembly', pk=pk, status_id=run_status,
                            runs=[_r])
@@ -196,7 +197,7 @@ class TestDefaultAPI(object):
                                  pk=pk, biome=_biome, is_public=1)
                 _st = baker.make('emgapi.Study', pk=pk, biome=_biome,
                                  is_public=1, samples=[_sm])
-                _r = baker.make('emgapi.Run', pk=pk, status=run_status,
+                _r = baker.make('emgapi.Run', pk=pk, status_id=run_status,
                                 study=_st, sample=_sm)
                 _as = baker.make('emgapi.AnalysisStatus', pk=3)
                 _p = baker.make('emgapi.Pipeline', pk=1, release_version='1.0')
