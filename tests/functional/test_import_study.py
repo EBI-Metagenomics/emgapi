@@ -58,6 +58,13 @@ def mock_ncbi_run_study_SRP000125():
     return study
 
 
+def get_ena_project_mock():
+    project = ena_models.Project()
+    project.center_name = 'SDSU Center for Universal Microbial Sequencing'
+    project.project_id = 'PRJEB34249'
+    return project
+
+
 def mock_ncbi_run_study_SRP034734():
     """
         Useful tests for this case:
@@ -143,9 +150,10 @@ class TestImportStudyTransactions(TransactionTestCase):
             assert 0 == len(actual_study.publications.all())
             assert 0 == len(actual_study.samples.all())
 
+    @patch('emgapianns.management.lib.create_or_update_study.StudyImporter._get_ena_project')
     @patch('emgapianns.management.commands.import_study.Command.get_study_dir')
     @patch('emgapianns.management.lib.create_or_update_study.StudyImporter._fetch_study_metadata')
-    def test_import_ncbi_study_SRP000125_should_succeed(self, mock_db, mock_study_dir):
+    def test_import_ncbi_study_SRP000125_should_succeed(self, mock_db, mock_study_dir, mock_ena_project):
         """
         :param mock_db:
         :param mock_study_dir:
@@ -157,10 +165,11 @@ class TestImportStudyTransactions(TransactionTestCase):
         #
         mock_study_dir.return_value = "2019/09/{}".format(accession)
         mock_db.return_value = expected = mock_ncbi_run_study_SRP000125()
+        mock_ena_project.return_value = get_ena_project_mock()
         #
         insert_biome(422, biome_name, 841, 844, 5, lineage)
 
-        with mock_db, mock_study_dir:
+        with mock_db, mock_study_dir, mock_ena_project:
             cmd = Command()
             cmd.run_from_argv(
                 argv=['manage.py', 'import_study', accession, lineage])
