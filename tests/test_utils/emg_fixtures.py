@@ -20,7 +20,7 @@ from django.conf import settings
 
 from emgapi import models as emg_models
 
-__all__ = ['apiclient', 'api_version', 'biome', 'super_study', 'studies',
+__all__ = ['apiclient', 'api_version', 'biome', 'biome_human', 'super_study', 'studies',
            'samples', 'study', 'study_private', 'sample', 'sample_private',
            'run_status', 'analysis_status',
            'pipeline', 'pipelines', 'experiment_type',
@@ -46,6 +46,15 @@ def biome():
         biome_name='bar',
         lft=0, rgt=1, depth=2,
         lineage='root:foo:bar',
+    )
+
+@pytest.fixture
+def biome_human():
+    return emg_models.Biome.objects.create(
+        biome_id=1,
+        biome_name='Human',
+        lft=0, rgt=1, depth=2,
+        lineage='root:Host-associated:Human',
     )
 
 
