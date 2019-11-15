@@ -71,7 +71,7 @@ class StudyImporter(object):
     def _lookup_publication_by_pubmed_ids(pubmed_ids_str):
         emg_publlications = []
         if pubmed_ids_str:
-            pubmed_ids = list(filter(lambda x: len(x) > 0, pubmed_ids_str.split(',')))
+            pubmed_ids = [int(y) for y in list(filter(lambda x: len(x) > 0, pubmed_ids_str.split(',')))]
             for pubmed_id in pubmed_ids:
                 europepmc_publications = lookup_publication_by_pubmed_id(pubmed_id)
                 for europepmc_publication in europepmc_publications:
@@ -136,7 +136,7 @@ class StudyImporter(object):
 
         project_id = ena_study.project_id
         if secondary_study_accession.startswith('SRP'):
-            project = ena_models.Project.objects.using(ena_db).get(project_id=project_id)
+            project = self._get_ena_project(ena_db, project_id)
             center_name = project.center_name
         else:
             center_name = ena_study.center_name
@@ -169,3 +169,7 @@ class StudyImporter(object):
             )
 
         return study
+
+    @staticmethod
+    def _get_ena_project(ena_db, project_id):
+        return ena_models.Project.objects.using(ena_db).get(project_id=project_id)
