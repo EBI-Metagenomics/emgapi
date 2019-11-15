@@ -91,8 +91,8 @@ class Command(BaseCommand):
             'environment_material': api_data['environment_material'],
             'sample_name': api_data['sample_alias'],
             'sample_alias': api_data['sample_alias'],
-            'host_tax_id': api_data['host_tax_id'],
-            'species': '',  # TODO
+            'host_tax_id': self.__get_host_tax_id(api_data['host_tax_id']),
+            'species': self.__get_species(),
             'biome': self.get_biome(accession),
             'last_update': timezone.now(),
             'submission_account_id': api_ena_db_model.submission_account_id,
@@ -194,6 +194,18 @@ class Command(BaseCommand):
             lineage = self.get_backlog_lineage(sample_accession)
 
         return self.get_emg_biome_obj(lineage)
+
+    def __get_host_tax_id(self, ena_host_tax_id):
+        if self.biome.startswith('root:Host-associated:Human'):
+            return 9606
+        else:
+            return ena_host_tax_id
+
+    def __get_species(self):
+        if self.biome.startswith('root:Host-associated:Human'):
+            return 'Homo sapiens'
+        else:
+            return None
 
     @staticmethod
     def get_backlog_lineage(sample_accession):
