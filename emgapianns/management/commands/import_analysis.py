@@ -84,8 +84,9 @@ class Command(BaseCommand):
         logger.info("CLI %r" % options)
 
         metadata = self.retrieve_metadata()
+        secondary_study_accession = metadata.secondary_study_accession
 
-        self.result_dir = self.__find_existing_result_dir(self.accession, self.version)
+        self.result_dir = self.__find_existing_result_dir(secondary_study_accession, self.accession, self.version)
 
         input_file_name = os.path.basename(self.result_dir)
 
@@ -97,7 +98,6 @@ class Command(BaseCommand):
         if not sanity_checker.passed_quality_control():
             raise QCNotPassedError("{} did not pass QC step!".format(self.accession))
 
-        secondary_study_accession = metadata.secondary_study_accession
         study_dir = self.call_import_study(secondary_study_accession)
 
         self.call_import_sample(metadata)
