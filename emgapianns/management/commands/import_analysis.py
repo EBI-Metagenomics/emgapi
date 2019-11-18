@@ -136,8 +136,8 @@ class Command(BaseCommand):
         directory = os.path.join(self.rootpath, '2019')
         study_folder = self.__find_folder(directory, search_pattern=secondary_study_accession, recursive=True)
 
-        directory = os.path.join(study_folder, 'version_{}/*/*/'.format(version))
-        result_folder = self.__find_folder(directory, search_pattern=run_accession, maxdepth=1)
+        directory = os.path.join(study_folder, 'version_{}/'.format(version))
+        result_folder = self.__find_folder(directory, search_pattern=run_accession, maxdepth=3)
         logging.info("Found the following result folder:\n{}".format(result_folder))
         return result_folder
 
@@ -342,8 +342,9 @@ class Command(BaseCommand):
         :return: e.g. 2017/11/ERP104174/
         """
         try:
-            stdout = subprocess.check_output(
-                ["find", directory, "-maxdepth", str(maxdepth), "-name", name, "-type", "d"])
+            find_cmd = ["find", directory, "-maxdepth", str(maxdepth), "-name", name, "-type", "d"]
+            logging.debug("Calling;\n{}".format(find_cmd))
+            stdout = subprocess.check_output(find_cmd)
 
             stdout = stdout.decode('utf-8').rstrip("\n\r")
             return stdout.splitlines()
