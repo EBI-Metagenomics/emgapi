@@ -38,3 +38,8 @@ class QCNotPassedError(Exception):
 class CoverageCheckError(Exception):
     """Raised when coverage check fails due to missing expected files"""
     pass
+
+
+class FindResultFolderError(Exception):
+    """Raised when something goes wrong during the result directory search"""
+    pass

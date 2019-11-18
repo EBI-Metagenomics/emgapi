@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import getpass
 # Copyright 2019 EMBL - European Bioinformatics Institute
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import glob
 import logging
 import os
-import getpass
 import subprocess
 import sys
 
@@ -24,13 +23,12 @@ from django.core.management import BaseCommand, call_command
 from django.utils import timezone
 from ena_portal_api import ena_handler
 
-from emgapianns.management.lib import utils
-from emgapianns.management.lib.sanity_check import SanityCheck
-from emgapianns.management.lib.import_analysis_model import Assembly, Run, ExperimentType
-from emgapianns.management.lib.uploader_exceptions import QCNotPassedError, CoverageCheckError
-from emgapianns.management.lib.utils import get_conf_downloadset
-
 from emgapi import models as emg_models
+from emgapianns.management.lib import utils
+from emgapianns.management.lib.import_analysis_model import Assembly, Run, ExperimentType
+from emgapianns.management.lib.sanity_check import SanityCheck
+from emgapianns.management.lib.uploader_exceptions import QCNotPassedError, CoverageCheckError, FindResultFolderError
+from emgapianns.management.lib.utils import get_conf_downloadset
 
 logger = logging.getLogger(__name__)
 
@@ -85,11 +83,11 @@ class Command(BaseCommand):
         self.version = options['pipeline']
         logger.info("CLI %r" % options)
 
+        metadata = self.retrieve_metadata()
+
         self.result_dir = self.__find_existing_result_dir(self.accession, self.version)
 
         input_file_name = os.path.basename(self.result_dir)
-
-        metadata = self.retrieve_metadata()
 
         sanity_checker = SanityCheck(self.accession, self.result_dir, metadata.experiment_type.value,
                                      self.version)
@@ -127,28 +125,21 @@ class Command(BaseCommand):
 
         logger.info("Program finished successfully.")
 
-    def __find_existing_result_dir(self, run_accession, version):
+    def __find_existing_result_dir(self, secondary_study_accession, run_accession, version):
         """
 
         :param run_accession:
         :param version:
         :return:
         """
-        # 2017/11/ERP104174/version_5.0/ERZ477/006
-        dest_pattern = ['2*', '*', '*', f'version_{version}', '*', '*', f'{run_accession}*']
-        prod_result_dir = os.path.join(self.rootpath, *dest_pattern)
+        logging.info("Finding result directory...")
+        directory = os.path.join(self.rootpath, '2019')
+        study_folder = self.__find_folder(directory, search_pattern=secondary_study_accession, recursive=True)
 
-        existing_result_dir = glob.glob(prod_result_dir)
-
-        if existing_result_dir:
-            logging.info(f'Found result dir: {existing_result_dir}')
-            if len(existing_result_dir) > 1:
-                sys.exit(f'Found more than 1 result directory: {existing_result_dir}')
-
-        else:
-            sys.exit(f'Could not find result directory: {prod_result_dir}')
-
-        return os.path.join(self.rootpath, existing_result_dir[0])
+        directory = os.path.join(study_folder, 'version_{}/*/*/'.format(version))
+        result_folder = self.__find_folder(directory, search_pattern=run_accession, maxdepth=1)
+        logging.info("Found the following result folder:\n{}".format(result_folder))
+        return result_folder
 
     def call_import_study(self, secondary_study_accession):
         logger.info('Import study {}'.format(secondary_study_accession))
@@ -199,6 +190,7 @@ class Command(BaseCommand):
         logging.info("Synchronisation is done.")
 
     def retrieve_metadata(self):
+        logger.info("Retrieving metadata...")
         is_assembly = utils.is_assembly(self.accession)
         logger.info("Identified assembly accession: {0}".format(is_assembly))
 
@@ -321,3 +313,41 @@ class Command(BaseCommand):
     def import_contigs(self):
         logger.info('Importing contigs...')
         call_command('import_contigs', self.accession, '--pipeline', self.version, '--faix')
+
+    def __find_folder(self, directory, search_pattern, maxdepth=2, recursive=False):
+        """
+
+        :param dest_pattern:
+        :return: e.g. 2017/11/ERP104174/
+        """
+        study_folder = self.__call_find(directory, "{}*".format(search_pattern), maxdepth)
+
+        if study_folder:
+            if len(study_folder) > 1:
+                sys.exit(f'Found more than 1 result directory: {study_folder}')
+            else:
+                logging.info(f'Found result dir: {study_folder}')
+                return study_folder[0]
+
+        elif recursive:
+            self.__find_folder(self.rootpath, search_pattern, maxdepth=3)
+        else:
+            sys.exit('Could not find result directory for: {}'.format(search_pattern))
+
+    @staticmethod
+    def __call_find(directory, name, maxdepth=2):
+        """
+
+        :param dest_pattern:
+        :return: e.g. 2017/11/ERP104174/
+        """
+        try:
+            stdout = subprocess.check_output(
+                ["find", directory, "-maxdepth", str(maxdepth), "-name", name, "-type", "d"])
+
+            stdout = stdout.decode('utf-8').rstrip("\n\r")
+            return stdout.splitlines()
+        except subprocess.CalledProcessError:
+            raise FindResultFolderError
+        except UnicodeError:
+            raise FindResultFolderError
