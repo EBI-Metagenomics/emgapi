@@ -142,7 +142,6 @@ class Command(BaseCommand):
         return result_folder
 
     def call_import_study(self, secondary_study_accession):
-        logger.info('Import study {}'.format(secondary_study_accession))
         study_dir = utils.get_result_dir(utils.get_study_dir(self.result_dir))
         call_command('import_study',
                      secondary_study_accession,
@@ -151,17 +150,14 @@ class Command(BaseCommand):
         return study_dir
 
     def call_import_sample(self, metadata):
-        logger.info('Import sample {}'.format(metadata.sample_accession))
         call_command('import_sample',
                      metadata.sample_accession,
                      '--biome', self.biome)
 
     def call_import_run(self, run_accession):
-        logger.info('Import run {}'.format(run_accession))
         call_command('import_run', run_accession, '--biome', self.biome)
 
     def call_import_assembly(self, analysis_accession):
-        logger.info('Import assembly {}'.format(analysis_accession))
         call_command('import_assembly', analysis_accession, '--result_dir', self.result_dir, '--biome', self.biome)
 
     def __call_generate_study_summary(self, secondary_study_accession):
@@ -282,15 +278,15 @@ class Command(BaseCommand):
             defaults['run_status_id'] = run.status_id
         analysis, _ = emg_models.AnalysisJob.objects.using(self.emg_db) \
             .update_or_create(**comp_key, defaults=defaults)
-        logging.info("Done")
+        logging.info("Analysis job successfully created.")
         return analysis
 
     def upload_analysis_files(self, experiment_type, analysis_job, input_file_name):
-        logging.info("Updating downloadable files...")
+        logging.info("Creating downloadable files...")
         dl_set = get_conf_downloadset(self.result_dir, input_file_name,
                                       self.emg_db, experiment_type, self.version)
         dl_set.insert_files(analysis_job)
-        logging.info("Done")
+        logging.info("Downloadable files successfully created.")
 
     def upload_statistics(self):
         """

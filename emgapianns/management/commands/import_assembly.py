@@ -61,10 +61,11 @@ class Command(BaseCommand):
         self.ena_db = options['ena_db']
         self.result_dir = os.path.abspath(options['result_dir'])
         self.biome = options['biome']
-        for acc in options['accessions']:
-            self.import_assembly(acc)
 
-        logger.info("Program finished successfully.")
+        for acc in options['accessions']:
+            logger.info('Importing assembly {}'.format(acc))
+            self.import_assembly(acc)
+            logger.info("Assembly import finished successfully.")
 
     def import_assembly(self, accession):
         db_assembly_data = self.get_ena_db_assembly(accession)

@@ -62,10 +62,11 @@ class Command(BaseCommand):
         self.emg_db = options['emg_db']
         self.ena_db = options['ena_db']
         self.biome = options['biome']
-        for acc in options['accessions']:
-            self.import_sample(acc)
 
-        logger.info("Program finished successfully.")
+        for acc in options['accessions']:
+            logger.info('Importing sample {}'.format(acc))
+            self.import_sample(acc)
+            logger.info("Sample import finished successfully.")
 
     def import_sample(self, accession):
         ena_db_model = self.get_ena_db_sample(accession)

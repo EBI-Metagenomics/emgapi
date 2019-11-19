@@ -63,10 +63,11 @@ class Command(BaseCommand):
         if options['result_dir']:
             self.result_dir = os.path.abspath(options['result_dir'])
         self.biome = options['biome']
-        for acc in options['accessions']:
-            self.import_run(acc)
 
-        logger.info("Program finished successfully.")
+        for acc in options['accessions']:
+            logger.info('Importing run {}'.format(acc))
+            self.import_run(acc)
+            logger.info("Run import finished successfully.")
 
     def import_run(self, accession):
         api_run_data = self.get_run_api(accession)
