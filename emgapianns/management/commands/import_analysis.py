@@ -186,7 +186,7 @@ class Command(BaseCommand):
         rsync_options = ['-rtDzv']
 
         more_rsync_options = ['--no-owner', '--no-perms', '--prune-empty-dirs', '--exclude', '*.lsf',
-                              '--delete-excluded']
+                              '--delete-excluded', '--chmod=Do-w,Fu+x,Fg+x,Fo+r']
         rsync_cmd = ["sudo", "-H", "-u", "emg_adm", "rsync"] + rsync_options + more_rsync_options + [nfs_prod_dest,
                                                                                                      nfs_public_dest]
 
