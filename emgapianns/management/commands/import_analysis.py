@@ -116,9 +116,13 @@ class Command(BaseCommand):
 
         if metadata.experiment_type != ExperimentType.AMPLICON:
             self.populate_mongodb_function_and_pathways()
+        else:
+            logging.info("Skipping the import of functional and pathway annotations!")
 
         if self.version in ['5.0'] and metadata.experiment_type == ExperimentType.ASSEMBLY:
             self.import_contigs()
+        else:
+            logging.info("Skipping the import procedure for the contig viewer!")
 
         self.__call_generate_study_summary(secondary_study_accession)
         self.__sync_study_summary_files(study_dir)
@@ -178,11 +182,10 @@ class Command(BaseCommand):
         nfs_public_dest = os.path.join(self.nfs_public_rootpath, study_dir, 'version_{}/'.format(self.version))
         logging.info("From: " + nfs_prod_dest)
         logging.info("To: " + nfs_public_dest)
-        rsync_options = "-rtDzv --no-owner --no-perms --prune-empty-dirs --exclude *.lsf --delete-excluded"
-        chmod_option = "--chmod=754"
+        rsync_options = "-rtDzv --no-owner --perms --prune-empty-dirs --exclude *.lsf --delete-excluded --chmod=Do-w,Fu+x,Fg+x,Fo+r"
 
         subprocess.check_call(
-            ["sudo", "-H", "-u", "emg_adm", "rsync", rsync_options, chmod_option, nfs_prod_dest, nfs_public_dest])
+            ["sudo", "-H", "-u", "emg_adm", "rsync", rsync_options, nfs_prod_dest, nfs_public_dest])
         logging.info("Synchronisation is done.")
 
     def retrieve_metadata(self):
@@ -296,10 +299,12 @@ class Command(BaseCommand):
         """
         logger.info('Importing statistics...')
         call_command('import_qc', self.accession, self.rootpath, '--pipeline', self.version)
+        logger.info('Stats successfully imported.')
 
     def populate_mongodb_taxonomy(self):
         logger.info('Importing Taxonomy data...')
         call_command('import_taxonomy', self.accession, self.rootpath, '--pipeline', self.version)
+        logger.info('Taxonomy data successfully imported.')
 
     def populate_mongodb_function_and_pathways(self):
         logger.info('Importing functional and pathway data...')
