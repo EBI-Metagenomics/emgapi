@@ -17,7 +17,7 @@ def get_downloadset_config(version, experiment_type):
         experiment_type = experiment_type_remapping[experiment_type]
     config_file = os.path.join(DIR_NAME, version_dir_name, experiment_type.lower() + '.json')
     result = read_config(config_file)
-    logging.info("Config file {} successfully loaded!")
+    logging.info("Config file {} successfully loaded!".format(config_file))
     return result
 
 
