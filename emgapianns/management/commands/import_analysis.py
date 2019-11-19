@@ -182,10 +182,15 @@ class Command(BaseCommand):
         nfs_public_dest = os.path.join(self.nfs_public_rootpath, study_dir, 'version_{}/'.format(self.version))
         logging.info("From: " + nfs_prod_dest)
         logging.info("To: " + nfs_public_dest)
-        rsync_options = "-rtDzv --no-owner --perms --prune-empty-dirs --exclude *.lsf --delete-excluded --chmod=Do-w,Fu+x,Fg+x,Fo+r"
 
-        subprocess.check_call(
-            ["sudo", "-H", "-u", "emg_adm", "rsync", rsync_options, nfs_prod_dest, nfs_public_dest])
+        rsync_options = ['-rtDzv']
+
+        more_rsync_options = ['--no-owner', '--no-perms', '--prune-empty-dirs', '--exclude', '*.lsf',
+                              '--delete-excluded']
+        rsync_cmd = ["sudo", "-H", "-u", "emg_adm", "rsync"] + rsync_options + more_rsync_options + [nfs_prod_dest,
+                                                                                                     nfs_public_dest]
+
+        subprocess.check_call(rsync_cmd)
         logging.info("Synchronisation is done.")
 
     def retrieve_metadata(self):
