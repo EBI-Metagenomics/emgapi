@@ -34,11 +34,13 @@ class StudySummaryGenerator(object):
             Q(analysis_status__analysis_status='completed') &
             Q(pipeline__release_version=self.pipeline))
 
+        experiment_types = set()
         analysis_result_dirs = {}
         for job in jobs:
             job_result_directory = os.path.join(self.rootpath, job.result_directory)
             job_input_file_name = job.input_file_name
             analysis_result_dirs[job_input_file_name] = job_result_directory
+            experiment_types.add(job.experiment_type.experiment_type)
 
         self.summary_dir = os.path.join(self.study_result_dir, 'version_{}/project-summary'.format(self.pipeline))
         self.create_summary_dir()
@@ -55,10 +57,12 @@ class StudySummaryGenerator(object):
         self.generate_taxonomy_summary(analysis_result_dirs, 'LSU',
                                        'taxonomy_abundances_LSU_v{}.tsv'.format(self.pipeline))
 
-        self.generate_ipr_summary(analysis_result_dirs, 'IPR_abundances_v{}.tsv'.format(self.pipeline))
-
-        self.generate_go_summary(analysis_result_dirs, 'slim')
-        self.generate_go_summary(analysis_result_dirs, 'full')
+        if len(experiment_types) == 1 and 'amplicon' in experiment_types:
+            logging.info("AMPLICON datasets only! Skipping the generation of the functional matrix files!")
+        else:
+            self.generate_ipr_summary(analysis_result_dirs, 'IPR_abundances_v{}.tsv'.format(self.pipeline))
+            self.generate_go_summary(analysis_result_dirs, 'slim')
+            self.generate_go_summary(analysis_result_dirs, 'full')
 
         logging.info("Program finished successfully.")
 
