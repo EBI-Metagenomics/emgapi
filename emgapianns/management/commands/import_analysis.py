@@ -127,7 +127,7 @@ class Command(BaseCommand):
         self.__call_generate_study_summary(secondary_study_accession)
         self.__sync_study_summary_files(study_dir)
 
-        logger.info("Webuploader finished successfully.")
+        logger.info("The upload of the run/assembly {} finished successfully.".format(self.accession))
 
     def __find_existing_result_dir(self, secondary_study_accession, run_accession, version):
         """
