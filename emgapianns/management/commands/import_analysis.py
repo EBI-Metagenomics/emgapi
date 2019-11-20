@@ -92,11 +92,12 @@ class Command(BaseCommand):
 
         sanity_checker = SanityCheck(self.accession, self.result_dir, metadata.experiment_type.value,
                                      self.version)
-        if not sanity_checker.passed_coverage_check():
-            raise CoverageCheckError("{} did not pass QC step!".format(self.accession))
 
         if not sanity_checker.passed_quality_control():
             raise QCNotPassedError("{} did not pass QC step!".format(self.accession))
+
+        if not sanity_checker.passed_coverage_check():
+            raise CoverageCheckError("{} did not pass QC step!".format(self.accession))
 
         study_dir = self.call_import_study(secondary_study_accession)
 
