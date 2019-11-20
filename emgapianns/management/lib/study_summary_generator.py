@@ -68,53 +68,59 @@ class StudySummaryGenerator(object):
 
     def generate_taxonomy_phylum_summary(self, analysis_result_dirs, version, su_type, filename):
         if version == '4.1':
-            self.generate_taxonomy_phylum_summary_v4(su_type, filename)
+            self.generate_taxonomy_phylum_summary_v4(analysis_result_dirs, su_type, filename)
         else:
             self.generate_taxonomy_phylum_summary_v5(analysis_result_dirs, su_type, filename)
 
-    def generate_taxonomy_phylum_summary_v4(self, su_type, filename):
-        res_file_re = os.path.join('**', 'taxonomy-summary', su_type, 'kingdom-counts.txt')
-        res_files = self.get_raw_result_files(res_file_re)
+    def generate_taxonomy_phylum_summary_v4(self, analysis_result_dirs, su_type, filename):
+        res_files = self.get_kingdom_counts_files(analysis_result_dirs, su_type)
+
         study_df = self.merge_dfs(res_files,
                                   delimiter='\t',
                                   key=['kingdom', 'phylum'],
                                   raw_cols=['kingdom', 'phylum', 'count', 'ignored'])
-        self.write_results_file(study_df, filename)
 
-        alias = '{}_phylum_taxonomy_abundances_{}_v{}.tsv'.format(self.study_accession, su_type, self.pipeline)
-        description = 'Phylum level taxonomies {}'.format(su_type)
-        group = 'Taxonomic analysis {} rRNA'.format(su_type)
-        self.upload_study_file(filename, alias, description, group)
+        if len(study_df.index) > 0:
+            self.write_results_file(study_df, filename)
+
+            alias = '{}_phylum_taxonomy_abundances_{}_v{}.tsv'.format(self.study_accession, su_type, self.pipeline)
+            description = 'Phylum level taxonomies {}'.format(su_type)
+            group = 'Taxonomic analysis {} rRNA'.format(su_type)
+            self.upload_study_file(filename, alias, description, group)
 
     def generate_taxonomy_phylum_summary_v5(self, analysis_result_dirs, su_type, filename):
         # Fixme: Work in progress! Finish implementation
-        res_files = self.get_mapseq_result_files(analysis_result_dirs, su_type)
+        res_files = self.get_mapseq_result_files(analysis_result_dirs, su_type, '.fasta.mseq.gz')
 
         study_df = self.merge_dfs(res_files,
                                   delimiter='\t',
                                   key=['kingdom', 'phylum'],
                                   raw_cols=['kingdom', 'phylum', 'count', 'ignored'])
-        self.write_results_file(study_df, filename)
 
-        alias = '{}_phylum_taxonomy_abundances_{}_v{}.tsv'.format(self.study_accession, su_type, self.pipeline)
-        description = 'Phylum level taxonomies {}'.format(su_type)
-        group = 'Taxonomic analysis {} rRNA'.format(su_type)
-        self.upload_study_file(filename, alias, description, group)
+        if len(study_df.index) > 0:
+            self.write_results_file(study_df, filename)
+
+            alias = '{}_phylum_taxonomy_abundances_{}_v{}.tsv'.format(self.study_accession, su_type, self.pipeline)
+            description = 'Phylum level taxonomies {}'.format(su_type)
+            group = 'Taxonomic analysis {} rRNA'.format(su_type)
+            self.upload_study_file(filename, alias, description, group)
 
     def generate_taxonomy_summary(self, analysis_result_dirs, su_type, filename):
-        res_files = self.get_taxonomy_result_files(analysis_result_dirs, su_type)
+        res_files = self.get_mapseq_result_files(analysis_result_dirs, su_type, '.fasta.mseq.tsv')
         study_df = self.merge_dfs(res_files,
                                   key=['lineage'],
                                   delimiter='\t',
                                   raw_cols=['OTU', 'count', 'lineage'],
                                   skip_rows=2)
         study_df = study_df.rename(columns={'lineage': '#SampleID'})
-        self.write_results_file(study_df, filename)
 
-        alias = '{}_taxonomy_abundances_{}_v{}.tsv'.format(self.study_accession, su_type, self.pipeline)
-        description = 'Taxonomic assignments {}'.format(su_type)
-        group = 'Taxonomic analysis {} rRNA'.format(su_type)
-        self.upload_study_file(filename, alias, description, group)
+        if len(study_df.index) > 0:
+            self.write_results_file(study_df, filename)
+
+            alias = '{}_taxonomy_abundances_{}_v{}.tsv'.format(self.study_accession, su_type, self.pipeline)
+            description = 'Taxonomic assignments {}'.format(su_type)
+            group = 'Taxonomic analysis {} rRNA'.format(su_type)
+            self.upload_study_file(filename, alias, description, group)
 
     def get_raw_result_files(self, res_file_re):
         paths = list(Path(self.study_result_dir).glob(res_file_re))
@@ -137,11 +143,13 @@ class StudySummaryGenerator(object):
         study_df = self.merge_dfs(res_files, delimiter=',',
                                   key=['IPR', 'description'],
                                   raw_cols=['IPR', 'description', 'count'])
-        self.write_results_file(study_df, filename)
 
-        alias = '{}_IPR_abundances_v{}.tsv'.format(self.study_accession, self.pipeline)
-        description = 'InterPro matches'
-        self.upload_study_file(filename, alias, description, 'Functional analysis')
+        if len(study_df.index) > 0:
+            self.write_results_file(study_df, filename)
+
+            alias = '{}_IPR_abundances_v{}.tsv'.format(self.study_accession, self.pipeline)
+            description = 'InterPro matches'
+            self.upload_study_file(filename, alias, description, 'Functional analysis')
 
     def generate_go_summary(self, analysis_result_dirs, mode):
         if mode == 'slim':
@@ -158,23 +166,25 @@ class StudySummaryGenerator(object):
         study_df['description'] = study_df['description'].str.replace(',', '@')
         study_df['category'] = study_df['category'].str.replace('_', ' ')
         realname = sum_file + '_abundances_v{}.tsv'.format(self.pipeline)
-        self.write_results_file(study_df, realname)
 
-        self.generate_filtered_go_summary(study_df,
-                                          'category == "cellular component"',
-                                          'CC_{}_abundances_v{}.tsv'.format(sum_file, self.pipeline))
+        if len(study_df.index) > 0:
+            self.write_results_file(study_df, realname)
 
-        self.generate_filtered_go_summary(study_df,
-                                          'category == "biological process"',
-                                          'BP_{}_abundances_v{}.tsv'.format(sum_file, self.pipeline))
+            self.generate_filtered_go_summary(study_df,
+                                              'category == "cellular component"',
+                                              'CC_{}_abundances_v{}.tsv'.format(sum_file, self.pipeline))
 
-        self.generate_filtered_go_summary(study_df,
-                                          'category not in ["biological process", "cellular component"]',
-                                          'MF_{}_abundances_v{}.tsv'.format(sum_file, self.pipeline))
+            self.generate_filtered_go_summary(study_df,
+                                              'category == "biological process"',
+                                              'BP_{}_abundances_v{}.tsv'.format(sum_file, self.pipeline))
 
-        alias = '{}_{}_abundances_v{}.tsv'.format(self.study_accession, sum_file, self.pipeline)
-        self.upload_study_file(realname, alias, description, 'Functional analysis')
-        return study_df
+            self.generate_filtered_go_summary(study_df,
+                                              'category not in ["biological process", "cellular component"]',
+                                              'MF_{}_abundances_v{}.tsv'.format(sum_file, self.pipeline))
+
+            alias = '{}_{}_abundances_v{}.tsv'.format(self.study_accession, sum_file, self.pipeline)
+            self.upload_study_file(realname, alias, description, 'Functional analysis')
+            return study_df
 
     def generate_filtered_go_summary(self, df, query, filename):
         df = df.query(query)
@@ -215,11 +225,11 @@ class StudySummaryGenerator(object):
         utils.StudyDownload(self.emg_db_name, _study_rootpath, file_config, self.pipeline).save(self.study)
 
     @staticmethod
-    def get_mapseq_result_files(analysis_result_dirs, su_type):
+    def get_mapseq_result_files(analysis_result_dirs, su_type, mapseq_file_extension):
         result = []
         for input_file_name, dir in analysis_result_dirs.items():
             res_file_re = os.path.join(dir, 'taxonomy-summary', su_type,
-                                       '{}_{}.fasta.mseq.gz'.format(input_file_name, su_type))
+                                       '{}_{}{}'.format(input_file_name, su_type, mapseq_file_extension))
             if os.path.exists(res_file_re):
                 result.append(res_file_re)
             else:
@@ -227,11 +237,10 @@ class StudySummaryGenerator(object):
         return result
 
     @staticmethod
-    def get_taxonomy_result_files(analysis_result_dirs, su_type):
+    def get_kingdom_counts_files(analysis_result_dirs, su_type):
         result = []
         for input_file_name, dir in analysis_result_dirs.items():
-            res_file_re = os.path.join(dir, 'taxonomy-summary', su_type,
-                                       '{}_{}.fasta.mseq.tsv'.format(input_file_name, su_type))
+            res_file_re = os.path.join(dir, 'taxonomy-summary', su_type, 'kingdom-counts.txt')
             if os.path.exists(res_file_re):
                 result.append(res_file_re)
             else:
