@@ -10,7 +10,7 @@ from emgapianns.management.webuploader_configs import get_downloadset_config
 
 class SanityCheck:
     QC_NOT_PASSED = 'no-seqs-passed-qc-flag'
-    EXPECTED_EXPERIMENT_TYPES = ['amplicon', 'wgs', 'assembly', 'rna-seq', 'other']
+    EXPECTED_EXPERIMENT_TYPES = ['amplicon', 'wgs', 'assembly', 'rna-seq', 'unknown']
     MIN_NUM_SEQS = 1
     MIN_NUM_LINES = 3
 
