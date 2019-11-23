@@ -1,6 +1,7 @@
 {
   "files": [
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -13,6 +14,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -25,6 +27,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -37,6 +40,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -49,6 +53,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -61,6 +66,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -73,6 +79,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -85,6 +92,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -97,6 +105,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -109,6 +118,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -121,6 +131,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -133,6 +144,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -145,6 +157,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -157,6 +170,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -169,6 +183,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -181,6 +196,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -219,6 +235,7 @@
       "subdir": "taxonomy-summary/SSU"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": true,
       "_required": true,
@@ -232,6 +249,7 @@
       "subdir": null
     },
     {
+      "downloadable": true,
       "coverage_check": true,
       "_accession_substitution": "full",
       "_chunked": true,
@@ -246,6 +264,7 @@
       "subdir": null
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": false,
       "_required": true,
@@ -259,6 +278,7 @@
       "subdir": null
     },
     {
+      "downloadable": false,
       "_accession_substitution": null,
       "_chunked": false,
       "_required": true,
@@ -268,6 +288,7 @@
       "subdir": "charts"
     },
     {
+      "downloadable": false,
       "_accession_substitution": "full",
       "_chunked": false,
       "_required": false,
@@ -286,7 +307,7 @@
       "real_name": "{}_summary.ipr",
       "subdir": null
     },
-    {
+    {"downloadable": true,
       "_accession_substitution": "full",
       "_chunked": false,
       "_required": true,
@@ -299,6 +320,7 @@
       "subdir": null
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": false,
       "_required": true,
@@ -311,6 +333,7 @@
       "subdir": null
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": true,
       "_required": true,
@@ -324,6 +347,7 @@
       "subdir": null
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": false,
       "_required": true,
@@ -375,6 +399,7 @@
       "subdir": "taxonomy-summary/LSU"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": true,
       "_required": true,
@@ -388,6 +413,7 @@
       "subdir": null
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": true,
       "_required": true,
@@ -401,6 +427,7 @@
       "subdir": null
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": false,
       "_required": true,
@@ -470,6 +497,7 @@
       "subdir": "taxonomy-summary/SSU"
     },
     {
+      "downloadable": false,
       "_accession_substitution": "full",
       "_chunked": true,
       "_required": true,
@@ -483,6 +511,7 @@
       "subdir": "sequence-categorisation"
     },
     {
+      "downloadable": false,
       "_accession_substitution": "full",
       "_chunked": true,
       "_required": true,
@@ -496,6 +525,7 @@
       "subdir": "sequence-categorisation"
     },
     {
+      "downloadable": false,
       "_accession_substitution": "full",
       "_chunked": true,
       "_required": true,
@@ -613,6 +643,7 @@
       "subdir": "taxonomy-summary/SSU"
     },
     {
+      "downloadable": false,
       "_required": true,
       "_accession_substitution": "full",
       "_chunked": false,
@@ -621,6 +652,7 @@
       "subdir": null
     },
     {
+      "downloadable": false,
       "_required": true,
       "_accession_substitution": "full",
       "_chunked": false,
@@ -629,6 +661,7 @@
       "subdir": null
     },
     {
+      "downloadable": true,
       "_required": true,
       "_accession_substitution": "full",
       "_chunked": false,
