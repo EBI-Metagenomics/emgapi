@@ -5,8 +5,7 @@ import json
 DIR_NAME = os.path.dirname(__file__)
 
 experiment_type_remapping = {
-    'rna-seq': 'wgs',
-    'other': 'wgs'
+    'rna-seq': 'wgs'
 }
 
 

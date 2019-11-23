@@ -25,21 +25,26 @@ class StudyNotBeRetrievedFromENA(Exception):
     pass
 
 
-class NoAnnotationsFoundError(Exception):
+class NoAnnotationsFoundException(Exception):
     """Raised when no annotations found in result files"""
     pass
 
 
-class QCNotPassedError(Exception):
+class QCNotPassedException(Exception):
     """Raised when qc not passed flag file found"""
     pass
 
 
-class CoverageCheckError(Exception):
+class CoverageCheckException(Exception):
     """Raised when coverage check fails due to missing expected files"""
     pass
 
 
-class FindResultFolderError(Exception):
+class FindResultFolderException(Exception):
     """Raised when something goes wrong during the result directory search"""
+    pass
+
+
+class UnexpectedLibraryStrategyException(Exception):
+    """Raised when unexpected library_strategy found."""
     pass

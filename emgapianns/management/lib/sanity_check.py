@@ -3,26 +3,27 @@ import os
 import sys
 from subprocess import check_output, CalledProcessError
 
-from emgapianns.management.lib.uploader_exceptions import NoAnnotationsFoundError
+from emgapianns.management.lib.uploader_exceptions import NoAnnotationsFoundException, \
+    UnexpectedLibraryStrategyException
 from emgapianns.management.lib.utils import read_chunkfile
 from emgapianns.management.webuploader_configs import get_downloadset_config
 
 
 class SanityCheck:
     QC_NOT_PASSED = 'no-seqs-passed-qc-flag'
-    EXPECTED_EXPERIMENT_TYPES = ['amplicon', 'wgs', 'assembly', 'rna-seq', 'unknown']
+    EXPECTED_LIBRARY_STRATEGIES = ['amplicon', 'wgs', 'assembly', 'rna-seq']
     MIN_NUM_SEQS = 1
     MIN_NUM_LINES = 3
 
-    def __init__(self, accession, d, experiment_type, version):
+    def __init__(self, accession, d, library_strategy, version):
         self.dir = d
         self.prefix = os.path.basename(d)
         self.accession = accession
-        self.experiment_type = experiment_type.lower()
+        self.library_strategy = library_strategy.lower()
         self.version = version
-        if self.experiment_type not in self.EXPECTED_EXPERIMENT_TYPES:
-            sys.exit('Unexpected experiment type specified: {}'.format(self.experiment_type))
-        self.config = get_downloadset_config(version, experiment_type)
+        if self.library_strategy not in self.EXPECTED_LIBRARY_STRATEGIES:
+            raise UnexpectedLibraryStrategyException('Unexpected library_strategy specified: {}'.format(self.library_strategy))
+        self.config = get_downloadset_config(version, library_strategy)
 
     def check_file_existence(self):
         for f in self.config:
@@ -130,4 +131,4 @@ class SanityCheck:
             num_lines = self.__count_number_of_lines(filepath)
             if num_lines >= self.MIN_NUM_LINES:
                 return True
-        raise NoAnnotationsFoundError('No annotations found in result file:\n{}'.format(filepath))
+        raise NoAnnotationsFoundException('No annotations found in result file:\n{}'.format(filepath))

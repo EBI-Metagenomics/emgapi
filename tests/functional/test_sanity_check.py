@@ -3,7 +3,7 @@ from unittest.mock import patch
 import pytest
 
 from emgapianns.management.lib import sanity_check  # noqa: E402
-from emgapianns.management.lib.uploader_exceptions import NoAnnotationsFoundError
+from emgapianns.management.lib.uploader_exceptions import NoAnnotationsFoundException, UnexpectedLibraryStrategyException
 
 
 class TestSanityCheck:
@@ -30,7 +30,6 @@ class TestSanityCheck:
         ('ERZXXXXXX', 'assembly', '5.0', '/tmp'),
         ('ERZXXXXXX', 'assembly', '4.1', '/tmp'),
         ('ERRXXXXXX', 'wgs', '4.1', '/tmp'),
-        ('ERRXXXXXX', 'other', '4.1', '/tmp'),
         ('ERRXXXXXX', 'rna-seq', '4.1', '/tmp'),
         ('ERZXXXXXX', 'ASSEMBLY', '4.1', '/tmp'),
         ('ERRXXXXXX', 'WGS', '4.1', '/tmp'),
@@ -51,6 +50,16 @@ class TestSanityCheck:
                                                          result_folder):
         mock_dir.return_value = "test"
         with pytest.raises(FileNotFoundError):
+            test_instance = sanity_check.SanityCheck(accession, result_folder, experiment_type, version)
+
+    @patch('os.path.basename')
+    @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
+        ('ERR2985769', 'other', '4.1', '/tmp'),
+    ])
+    def test_check_init_should_raise_unexpected_ibrary_strategy_exception(self, mock_dir, accession, experiment_type, version,
+                                                         result_folder):
+        mock_dir.return_value = "test"
+        with pytest.raises(UnexpectedLibraryStrategyException):
             test_instance = sanity_check.SanityCheck(accession, result_folder, experiment_type, version)
 
     @pytest.mark.parametrize("accession, experiment_type, amplicon_type, version, result_folder", [
@@ -178,5 +187,5 @@ class TestSanityCheck:
         root_dir = os.path.dirname(__file__).replace('functional', 'test-input')
         result_dir = os.path.join(root_dir, result_folder)
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
-        with pytest.raises(NoAnnotationsFoundError):
+        with pytest.raises(NoAnnotationsFoundException):
             test_instance.passed_coverage_check()
