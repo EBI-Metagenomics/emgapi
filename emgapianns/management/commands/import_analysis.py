@@ -27,7 +27,7 @@ from emgapi import models as emg_models
 from emgapianns.management.lib import utils
 from emgapianns.management.lib.import_analysis_model import Assembly, Run, ExperimentType
 from emgapianns.management.lib.sanity_check import SanityCheck
-from emgapianns.management.lib.uploader_exceptions import QCNotPassedError, CoverageCheckError, FindResultFolderError
+from emgapianns.management.lib.uploader_exceptions import QCNotPassedException, CoverageCheckException, FindResultFolderException
 from emgapianns.management.lib.utils import get_conf_downloadset
 
 logger = logging.getLogger(__name__)
@@ -57,6 +57,7 @@ class Command(BaseCommand):
     accession = None
     version = None
     result_dir = None
+    library_strategy = None
 
     def add_arguments(self, parser):
         parser.add_argument('--rootpath',
@@ -67,6 +68,9 @@ class Command(BaseCommand):
                             default="/nfs/public/ro/metagenomics/results/")
         parser.add_argument('accession', help="Specify run or assembly/analysis accession.")
         parser.add_argument('biome', help='Lineage of GOLD biome')
+        parser.add_argument('library_strategy',
+                            help='Library strategy',
+                            choices=['amplicon', 'wgs', 'assembly', 'rna-seq'])
         parser.add_argument('--pipeline', help='Pipeline version',
                             choices=['4.1', '5.0'], default='4.1')
         parser.add_argument('--database',
@@ -80,6 +84,7 @@ class Command(BaseCommand):
         self.nfs_public_rootpath = os.path.abspath(options['nfs_public_rootpath'])
         self.accession = options['accession']
         self.biome = options['biome']
+        self.library_strategy = options['library_strategy']
         self.version = options['pipeline']
         logger.info("CLI %r" % options)
 
@@ -90,14 +95,13 @@ class Command(BaseCommand):
 
         input_file_name = os.path.basename(self.result_dir)
 
-        sanity_checker = SanityCheck(self.accession, self.result_dir, metadata.experiment_type.value,
-                                     self.version)
+        sanity_checker = SanityCheck(self.accession, self.result_dir, self.library_strategy, self.version)
 
         if not sanity_checker.passed_quality_control():
-            raise QCNotPassedError("{} did not pass QC step!".format(self.accession))
+            raise QCNotPassedException("{} did not pass QC step!".format(self.accession))
 
         if not sanity_checker.passed_coverage_check():
-            raise CoverageCheckError("{} did not pass QC step!".format(self.accession))
+            raise CoverageCheckException("{} did not pass QC step!".format(self.accession))
 
         study_dir = self.call_import_study(secondary_study_accession)
 
@@ -195,6 +199,10 @@ class Command(BaseCommand):
         logging.info("Synchronisation is done.")
 
     def retrieve_metadata(self):
+        """
+            Please note: Overwrite library strategy. Use library strategy given as a program argument.
+        :return:
+        """
         logger.info("Retrieving metadata...")
         is_assembly = utils.is_assembly(self.accession)
         logger.info("Identified assembly accession: {0}".format(is_assembly))
@@ -214,6 +222,8 @@ class Command(BaseCommand):
             run = ena.get_run(run_accession=self.accession,
                               fields='secondary_study_accession,secondary_sample_accession,'
                                      'run_accession,library_strategy,library_source')
+            # Overwrite library strategy.
+            run['library_strategy'] = self.library_strategy
             if 'sample_accession' in run:
                 del run['sample_accession']
             analysis = Run(**run)
@@ -356,6 +366,6 @@ class Command(BaseCommand):
             stdout = stdout.decode('utf-8').rstrip("\n\r")
             return stdout.splitlines()
         except subprocess.CalledProcessError:
-            raise FindResultFolderError
+            raise FindResultFolderException
         except UnicodeError:
-            raise FindResultFolderError
+            raise FindResultFolderException
