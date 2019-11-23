@@ -388,8 +388,8 @@ class DownloadSet:
             f.save(analysis_job)
 
 
-def get_conf_downloadset(rootpath, input_file_name, emg_db_name, experiment_type, version):
-    config = get_downloadset_config(version, experiment_type)
+def get_conf_downloadset(rootpath, input_file_name, emg_db_name, library_strategy, version):
+    config = get_downloadset_config(version, library_strategy)
     return DownloadSet(rootpath, input_file_name, emg_db_name, config)
 
 

@@ -113,7 +113,7 @@ class Command(BaseCommand):
             self.call_import_assembly(metadata.analysis_accession)
 
         analysis = self.create_or_update_analysis(metadata, input_file_name)
-        self.upload_analysis_files(metadata.experiment_type.value, analysis, input_file_name)
+        self.upload_analysis_files(self.library_strategy, analysis, input_file_name)
 
         self.upload_statistics()
 
@@ -300,10 +300,10 @@ class Command(BaseCommand):
         logging.info("Analysis job successfully created.")
         return analysis
 
-    def upload_analysis_files(self, experiment_type, analysis_job, input_file_name):
+    def upload_analysis_files(self, library_strategy, analysis_job, input_file_name):
         logging.info("Creating downloadable files...")
         dl_set = get_conf_downloadset(self.result_dir, input_file_name,
-                                      self.emg_db, experiment_type, self.version)
+                                      self.emg_db, library_strategy, self.version)
         dl_set.insert_files(analysis_job)
         logging.info("Downloadable files successfully created.")
 
