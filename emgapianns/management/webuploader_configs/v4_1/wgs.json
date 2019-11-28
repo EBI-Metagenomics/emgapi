@@ -499,7 +499,7 @@
       "subdir": "taxonomy-summary/SSU"
     },
     {
-      "downloadable": false,
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": true,
       "_required": true,
@@ -513,7 +513,7 @@
       "subdir": "sequence-categorisation"
     },
     {
-      "downloadable": false,
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": true,
       "_required": true,
@@ -527,7 +527,7 @@
       "subdir": "sequence-categorisation"
     },
     {
-      "downloadable": false,
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": true,
       "_required": true,
