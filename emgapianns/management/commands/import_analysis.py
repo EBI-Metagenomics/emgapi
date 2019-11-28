@@ -134,6 +134,8 @@ class Command(BaseCommand):
             logging.info("Skipping the import procedure for the contig viewer!")
 
         if self.no_study_summary:
+            logging.info("Skipping the study summary generation steps as requested!")
+        else:
             self.__call_generate_study_summary(secondary_study_accession)
             self.__sync_study_summary_files(study_dir)
 
