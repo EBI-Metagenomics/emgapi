@@ -58,6 +58,7 @@ class Command(BaseCommand):
     version = None
     result_dir = None
     library_strategy = None
+    no_study_summary = False
 
     def add_arguments(self, parser):
         parser.add_argument('--rootpath',
@@ -77,6 +78,8 @@ class Command(BaseCommand):
                             help='Target emg_db_name alias',
                             choices=['default', 'dev', 'prod'],
                             default='default')
+        parser.add_argument('--no-study-summary', dest='no_study_summary', action='store_true')
+        parser.set_defaults(no_study_summary=False)
 
     def handle(self, *args, **options):
         self.emg_db = options['database']
@@ -86,6 +89,7 @@ class Command(BaseCommand):
         self.biome = options['biome']
         self.library_strategy = options['library_strategy']
         self.version = options['pipeline']
+        self.no_study_summary = options['no_study_summary']
         logger.info("CLI %r" % options)
 
         metadata = self.retrieve_metadata()
@@ -129,8 +133,9 @@ class Command(BaseCommand):
         else:
             logging.info("Skipping the import procedure for the contig viewer!")
 
-        self.__call_generate_study_summary(secondary_study_accession)
-        self.__sync_study_summary_files(study_dir)
+        if self.no_study_summary:
+            self.__call_generate_study_summary(secondary_study_accession)
+            self.__sync_study_summary_files(study_dir)
 
         logger.info("The upload of the run/assembly {} finished successfully.".format(self.accession))
 
