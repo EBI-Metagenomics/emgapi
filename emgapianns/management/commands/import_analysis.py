@@ -164,7 +164,7 @@ class Command(BaseCommand):
                      '--biome', self.biome)
 
     def call_import_run(self, run_accession):
-        call_command('import_run', run_accession, '--biome', self.biome)
+        call_command('import_run', run_accession, '--biome', self.biome, '--library_strategy', self.library_strategy)
 
     def call_import_assembly(self, analysis_accession):
         call_command('import_assembly', analysis_accession, '--result_dir', self.result_dir, '--biome', self.biome)

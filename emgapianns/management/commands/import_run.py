@@ -43,6 +43,7 @@ class Command(BaseCommand):
     ena_db = None
     biome = None
     result_dir = None
+    library_strategy = None
 
     def add_arguments(self, parser):
         parser.add_argument('accessions', help='ENA run accessions', nargs='+')
@@ -55,6 +56,8 @@ class Command(BaseCommand):
                             default='default')
         parser.add_argument('--result_dir', help="Result dir folder - absolute path.")
         parser.add_argument('--biome', help='Lineage of GOLD biome')
+        parser.add_argument('--library_strategy', help='Library strategy',
+                            choices=['AMPLICON', 'WGS', 'ASSEMBLY', 'RNA-Seq'])
 
     def handle(self, *args, **options):
         logger.info("CLI %r" % options)
@@ -62,7 +65,10 @@ class Command(BaseCommand):
         self.ena_db = options['ena_db']
         if options['result_dir']:
             self.result_dir = os.path.abspath(options['result_dir'])
-        self.biome = options['biome']
+        if options['biome']:
+            self.biome = options['biome']
+        if options['library_strategy']:
+            self.library_strategy = options['library_strategy']
 
         for acc in options['accessions']:
             logger.info('Importing run {}'.format(acc))
@@ -75,10 +81,13 @@ class Command(BaseCommand):
         run = self.create_or_update_run(db_run_data, api_run_data)
         self.tag_study(run, api_run_data['secondary_study_accession'])
         self.tag_sample(run, api_run_data['secondary_sample_accession'])
-        library_strategy = api_run_data['library_strategy']
-        library_source = api_run_data['library_source']
-        self.tag_experiment_type(run, identify(library_strategy=library_strategy,
-                                               library_source=library_source).value)
+        if self.library_strategy:
+            _library_strategy = self.library_strategy
+        else:
+            _library_strategy = api_run_data['library_strategy']
+        _library_source = api_run_data['library_source']
+        self.tag_experiment_type(run, identify(library_strategy=_library_strategy,
+                                               library_source=_library_source).value)
         run.save(using=self.emg_db)
 
     @staticmethod
