@@ -11,6 +11,8 @@ from emgapianns.management.lib import utils
 from emgapi import models as emg_models
 from django.db.models import Q
 
+from emgapianns.management.lib.utils import DownloadFileDatabaseHandler
+
 
 class StudySummaryGenerator(object):
 
@@ -222,7 +224,8 @@ class StudySummaryGenerator(object):
             '_required': True
         }
         _study_rootpath = self.study_result_dir.replace('version_{}'.format(self.pipeline), '')
-        utils.StudyDownload(self.emg_db_name, _study_rootpath, file_config, self.pipeline).save(self.study)
+        f = utils.StudyDownload(_study_rootpath, file_config, self.pipeline)
+        DownloadFileDatabaseHandler(self.emg_db_name).save_study_download_file(f, self.study)
 
     @staticmethod
     def get_mapseq_result_files(analysis_result_dirs, su_type, mapseq_file_extension):
