@@ -250,6 +250,7 @@ class DownloadFileDatabaseHandler:
         return dl
 
     def save_chunked_files(self, chunked_files, analysis_job):
+        parent_dl = None
         if chunked_files.parent_file:
             parent_dl = self.save_download_file(chunked_files.parent_file, analysis_job)
 
