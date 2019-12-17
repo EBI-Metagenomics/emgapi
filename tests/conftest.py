@@ -22,7 +22,7 @@ import mongoengine
 
 from django.conf import settings
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'emgcli.settings')
+# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'emgcli.settings')
 
 
 def pytest_configure():
@@ -57,7 +57,15 @@ def hide_ena_config():
 def django_db_setup(hide_ena_config, django_db_setup):
     if hide_ena_config:
         settings.DATABASES.update(hide_ena_config)
-
+    # settings.DATABASES['default'] = {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'HOST': 'localhost',
+    #     'NAME': 'test_emg2',
+    #     'PORT': '3306',
+    #     'DB': 'Local instance 3306',
+    #     'USER': 'root',
+    #     'PASSWORD': 'ente12.',
+    # }
 
 # MongoDB connection
 @pytest.fixture(scope='function')

@@ -21,6 +21,8 @@ class StudySummaryGenerator(object):
         self.study_accession = accession
         self.pipeline = pipeline
         self.rootpath = rootpath
+        print(nfs_public_rootpath)
+        print(self.nfs_public_rootpath)
         self.nfs_public_rootpath = nfs_public_rootpath
         self.emg_db_name = database
         self.study = emg_models.Study.objects.using(self.emg_db_name).get(secondary_accession=self.study_accession)
