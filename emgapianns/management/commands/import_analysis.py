@@ -27,7 +27,8 @@ from emgapi import models as emg_models
 from emgapianns.management.lib import utils
 from emgapianns.management.lib.import_analysis_model import Assembly, Run, ExperimentType
 from emgapianns.management.lib.sanity_check import SanityCheck
-from emgapianns.management.lib.uploader_exceptions import QCNotPassedException, CoverageCheckException, FindResultFolderException
+from emgapianns.management.lib.uploader_exceptions import QCNotPassedException, CoverageCheckException, \
+    FindResultFolderException
 from emgapianns.management.lib.utils import get_conf_downloadset
 
 logger = logging.getLogger(__name__)
@@ -50,7 +51,6 @@ class Command(BaseCommand):
 
     obj_list = list()
     rootpath = None
-    nfs_public_rootpath = None
 
     emg_db = None
     biome = None
@@ -64,9 +64,6 @@ class Command(BaseCommand):
         parser.add_argument('--rootpath',
                             help="NFS root path of the results archive.",
                             default="/nfs/production/interpro/metagenomics/results/")
-        parser.add_argument('--nfs-public-rootpath',
-                            help="NFS public root path of the results archive.",
-                            default="/nfs/public/ro/metagenomics/results/")
         parser.add_argument('accession', help="Specify run or assembly/analysis accession.")
         parser.add_argument('biome', help='Lineage of GOLD biome')
         parser.add_argument('library_strategy',
@@ -84,7 +81,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.emg_db = options['database']
         self.rootpath = os.path.abspath(options['rootpath'])
-        self.nfs_public_rootpath = os.path.abspath(options['nfs_public_rootpath'])
         self.accession = options['accession']
         self.biome = options['biome']
         self.library_strategy = options['library_strategy']
@@ -137,7 +133,6 @@ class Command(BaseCommand):
             logging.info("Skipping the study summary generation steps as requested!")
         else:
             self.__call_generate_study_summary(secondary_study_accession)
-            self.__sync_study_summary_files(study_dir)
 
         logger.info("The upload of the run/assembly {} finished successfully.".format(self.accession))
 
@@ -187,23 +182,6 @@ class Command(BaseCommand):
         logger.info('Generating study summary {}'.format(secondary_study_accession))
         call_command('import_study_summary', secondary_study_accession, self.version, '--database', self.emg_db,
                      '--rootpath', self.rootpath)
-
-    def __sync_study_summary_files(self, study_dir):
-        logging.info("Syncing project summary files over to NFS public...")
-        nfs_prod_dest = os.path.join(self.rootpath, study_dir, 'version_{}/{}'.format(self.version, 'project-summary'))
-        nfs_public_dest = os.path.join(self.nfs_public_rootpath, study_dir, 'version_{}/'.format(self.version))
-        logging.info("From: " + nfs_prod_dest)
-        logging.info("To: " + nfs_public_dest)
-
-        rsync_options = ['-rtDzv']
-
-        more_rsync_options = ['--no-owner', '--no-perms', '--prune-empty-dirs', '--exclude', '*.lsf',
-                              '--delete-excluded', '--chmod=Do-w,Fu+x,Fg+x,Fo+r']
-        rsync_cmd = ["sudo", "-H", "-u", "emg_adm", "rsync"] + rsync_options + more_rsync_options + [nfs_prod_dest,
-                                                                                                     nfs_public_dest]
-
-        subprocess.check_call(rsync_cmd)
-        logging.info("Synchronisation is done.")
 
     def retrieve_metadata(self):
         """

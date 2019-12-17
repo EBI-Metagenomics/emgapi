@@ -49,10 +49,14 @@ class Command(BaseCommand):
         parser.add_argument('--rootpath',
                             help="NFS root path of the results archive.",
                             default="/nfs/production/interpro/metagenomics/results/")
+        parser.add_argument('--nfs-public-rootpath',
+                            help="NFS public root path of the results archive.",
+                            default="/nfs/public/ro/metagenomics/results/")
         parser.add_argument('--database',
                             help='Target emg_db_name alias',
                             choices=['default', 'dev', 'prod'],
                             default='default')
+        parser.set_defaults(no_study_summary=False)
 
     def handle(self, *args, **options):
         logger.info('CLI %r' % options)
@@ -60,6 +64,7 @@ class Command(BaseCommand):
         pipeline = options['pipeline']
         database = options['database']
         rootpath = os.path.abspath(options['rootpath'])
+        nfs_public_rootpath = os.path.abspath(options['nfs_public_rootpath'])
 
-        gen = StudySummaryGenerator(study_accession, pipeline, rootpath, database)
+        gen = StudySummaryGenerator(study_accession, pipeline, rootpath, nfs_public_rootpath, database)
         gen.run()

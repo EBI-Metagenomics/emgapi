@@ -1,5 +1,6 @@
 import logging
 import os
+import subprocess
 import sys
 from pathlib import Path
 from subprocess import check_output, CalledProcessError
@@ -16,10 +17,11 @@ from emgapianns.management.lib.utils import DownloadFileDatabaseHandler
 
 class StudySummaryGenerator(object):
 
-    def __init__(self, accession, pipeline, rootpath, database):
+    def __init__(self, accession, pipeline, rootpath, nfs_public_rootpath, database):
         self.study_accession = accession
         self.pipeline = pipeline
         self.rootpath = rootpath
+        self.nfs_public_rootpath = nfs_public_rootpath
         self.emg_db_name = database
         self.study = emg_models.Study.objects.using(self.emg_db_name).get(secondary_accession=self.study_accession)
         self.study_result_dir = os.path.join(self.rootpath, self.study.result_directory)
@@ -66,7 +68,26 @@ class StudySummaryGenerator(object):
             self.generate_go_summary(analysis_result_dirs, 'slim')
             self.generate_go_summary(analysis_result_dirs, 'full')
 
+        self.__sync_study_summary_files(self.study_result_dir)
+
         logging.info("Program finished successfully.")
+
+    def __sync_study_summary_files(self, study_dir):
+        logging.info("Syncing project summary files over to NFS public...")
+        nfs_prod_dest = os.path.join(self.rootpath, study_dir, 'version_{}/{}'.format(self.pipeline, 'project-summary'))
+        nfs_public_dest = os.path.join(self.nfs_public_rootpath, study_dir, 'version_{}/'.format(self.pipeline))
+        logging.info("From: " + nfs_prod_dest)
+        logging.info("To: " + nfs_public_dest)
+
+        rsync_options = ['-rtDzv']
+
+        more_rsync_options = ['--no-owner', '--no-perms', '--prune-empty-dirs', '--exclude', '*.lsf',
+                              '--delete-excluded', '--chmod=Do-w,Fu+x,Fg+x,Fo+r']
+        rsync_cmd = ["sudo", "-H", "-u", "emg_adm", "rsync"] + rsync_options + more_rsync_options + [nfs_prod_dest,
+                                                                                                     nfs_public_dest]
+
+        subprocess.check_call(rsync_cmd)
+        logging.info("Synchronisation is done.")
 
     def generate_taxonomy_phylum_summary(self, analysis_result_dirs, version, su_type, filename):
         if version == '4.1':
