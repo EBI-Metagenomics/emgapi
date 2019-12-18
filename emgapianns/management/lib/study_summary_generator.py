@@ -22,7 +22,6 @@ class StudySummaryGenerator(object):
         self.pipeline = pipeline
         self.rootpath = rootpath
         print(nfs_public_rootpath)
-        print(self.nfs_public_rootpath)
         self.nfs_public_rootpath = nfs_public_rootpath
         self.emg_db_name = database
         self.study = emg_models.Study.objects.using(self.emg_db_name).get(secondary_accession=self.study_accession)
@@ -76,6 +75,7 @@ class StudySummaryGenerator(object):
 
     def __sync_study_summary_files(self, study_dir):
         logging.info("Syncing project summary files over to NFS public...")
+        print(self.nfs_public_rootpath)
         nfs_prod_dest = os.path.join(self.rootpath, study_dir, 'version_{}/{}'.format(self.pipeline, 'project-summary'))
         nfs_public_dest = os.path.join(self.nfs_public_rootpath, study_dir, 'version_{}/'.format(self.pipeline))
         logging.info("From: " + nfs_prod_dest)
