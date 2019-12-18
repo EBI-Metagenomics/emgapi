@@ -108,7 +108,7 @@ class Migration(migrations.Migration):
             },
         ),
 
-        # migrations.RunPython(populate_status),
+        migrations.RunPython(populate_status),
 
         migrations.CreateModel(
             name='Run',
