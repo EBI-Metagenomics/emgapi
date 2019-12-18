@@ -21,7 +21,6 @@ class StudySummaryGenerator(object):
         self.study_accession = accession
         self.pipeline = pipeline
         self.rootpath = rootpath
-        print(nfs_public_rootpath)
         self.nfs_public_rootpath = nfs_public_rootpath
         self.emg_db_name = database
         self.study = emg_models.Study.objects.using(self.emg_db_name).get(secondary_accession=self.study_accession)
@@ -69,13 +68,12 @@ class StudySummaryGenerator(object):
             self.generate_go_summary(analysis_result_dirs, 'slim')
             self.generate_go_summary(analysis_result_dirs, 'full')
 
-        self.__sync_study_summary_files(self.study_result_dir)
+        self.sync_study_summary_files(self.study_result_dir)
 
         logging.info("Program finished successfully.")
 
-    def __sync_study_summary_files(self, study_dir):
+    def sync_study_summary_files(self, study_dir):
         logging.info("Syncing project summary files over to NFS public...")
-        print(self.nfs_public_rootpath)
         nfs_prod_dest = os.path.join(self.rootpath, study_dir, 'version_{}/{}'.format(self.pipeline, 'project-summary'))
         nfs_public_dest = os.path.join(self.nfs_public_rootpath, study_dir, 'version_{}/'.format(self.pipeline))
         logging.info("From: " + nfs_prod_dest)
@@ -87,6 +85,7 @@ class StudySummaryGenerator(object):
                               '--delete-excluded', '--chmod=Do-w,Fu+x,Fg+x,Fo+r']
         rsync_cmd = ["sudo", "-H", "-u", "emg_adm", "rsync"] + rsync_options + more_rsync_options + [nfs_prod_dest,
                                                                                                      nfs_public_dest]
+        logging.debug(rsync_cmd)
 
         subprocess.check_call(rsync_cmd)
         logging.info("Synchronisation is done.")
