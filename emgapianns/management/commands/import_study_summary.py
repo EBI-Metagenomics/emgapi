@@ -57,7 +57,6 @@ class Command(BaseCommand):
                             choices=['default', 'dev', 'prod'],
                             default='default')
         parser.set_defaults(no_study_summary=False)
-        parser.add_argument('-v', '--verbose', action='store_true')
 
     def handle(self, *args, **options):
         logger.info('CLI %r' % options)
