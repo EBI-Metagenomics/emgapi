@@ -214,10 +214,10 @@
       "subdir": "taxonomy-summary/its/itsonedb"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": false,
-      "_required": true,
-      "downloadable": true,
+      "_required": false,
       "alias": "{}_SSU_OTU_TABLE_HDF5.biom",
       "compression": false,
       "description_label": "OTUs, counts and taxonomic assignments for SSU rRNA",
@@ -227,10 +227,10 @@
       "subdir": "taxonomy-summary/SSU"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": false,
       "_required": false,
-      "downloadable": true,
       "alias": "{}_LSU_OTU_TABLE_HDF5.biom",
       "compression": false,
       "description_label": "OTUs, counts and taxonomic assignments for LSU rRNA",
@@ -240,10 +240,10 @@
       "subdir": "taxonomy-summary/LSU"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": false,
       "_required": false,
-      "downloadable": true,
       "alias": "{}_ITS_UNITE_OTU_TABLE_HDF5.biom",
       "compression": false,
       "description_label": "OTUs, counts and taxonomic assignments for UNITE",
@@ -253,10 +253,10 @@
       "subdir": "taxonomy-summary/its/unite"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": false,
       "_required": false,
-      "downloadable": true,
       "alias": "{}_ITS_ITSoneDB_OTU_TABLE_HDF5.biom",
       "compression": false,
       "description_label": "OTUs, counts and taxonomic assignments for ITSOneDB",
