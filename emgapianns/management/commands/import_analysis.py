@@ -103,7 +103,7 @@ class Command(BaseCommand):
         if not sanity_checker.passed_coverage_check():
             raise CoverageCheckException("{} did not pass QC step!".format(self.accession))
 
-        study_dir = self.call_import_study(secondary_study_accession)
+        self.call_import_study(secondary_study_accession)
 
         self.call_import_sample(metadata)
 
@@ -332,7 +332,7 @@ class Command(BaseCommand):
                 return study_folder[0]
 
         elif recursive:
-            self.__find_folder(self.rootpath, search_pattern, maxdepth=3)
+            return self.__find_folder(self.rootpath, search_pattern, maxdepth=3)
         else:
             sys.exit('Could not find result directory for: {}'.format(search_pattern))
 
