@@ -239,7 +239,7 @@ class StudySummaryGenerator(object):
         except PermissionError:
             version_dir = os.path.join(self.study_result_dir, 'version_{}'.format(self.pipeline))
             logging.warning("Permission issue encountered on folder: {}".format(version_dir))
-            os.chmod(version_dir, stat.S_IWUSR)
+            os.chmod(version_dir, 0o755)
             os.makedirs(self.summary_dir, exist_ok=True)
 
     def upload_study_file(self, realname, alias, description, group):
