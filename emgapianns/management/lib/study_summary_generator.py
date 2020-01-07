@@ -1,5 +1,6 @@
 import logging
 import os
+import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -233,7 +234,13 @@ class StudySummaryGenerator(object):
         return df
 
     def create_summary_dir(self):
-        os.makedirs(self.summary_dir, exist_ok=True)
+        try:
+            os.makedirs(self.summary_dir, exist_ok=True)
+        except PermissionError:
+            version_dir = os.path.join(self.study_result_dir, 'version_{}'.format(self.pipeline))
+            logging.warning("Permission issue encountered on folder: {}".format(version_dir))
+            os.chmod(version_dir, stat.S_IWUSR)
+            os.makedirs(self.summary_dir, exist_ok=True)
 
     def upload_study_file(self, realname, alias, description, group):
         file_config = {
