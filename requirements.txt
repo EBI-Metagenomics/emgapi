@@ -10,7 +10,7 @@ sqlparse
 requests
 yamjam
 
-django-slack
+django-slack~=5.13.0
 
 # optional session store
 # django-redis>=4.4
