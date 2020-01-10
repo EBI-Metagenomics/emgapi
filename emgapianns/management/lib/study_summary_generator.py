@@ -199,6 +199,7 @@ class StudySummaryGenerator(object):
         unassigned = 'Unassigned'
         # column header keywords: UNITE, ITSone, SILVA
         column_name = self.MAPSEQ_COLUMN_MAPPER.get(rna_type)
+        # Fixme: Replace pandas dataframe read csv function by pure python and introduce buffered reading
         df = pd.read_csv(mapseq_file, compression=compression, header=header, sep=delimiter)
 
         taxonomies = list()
