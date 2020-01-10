@@ -31,7 +31,7 @@ class StudySummaryGenerator(object):
     def run(self):
         if not os.path.exists(self.study_result_dir):
             sys.exit(
-                f"Study result directory for {self.study_accession} does not exist:\n{self.study_result_dir}")
+                "Study result directory for {} does not exist:\n{}".format(self.study_accession, self.study_result_dir))
 
         jobs = emg_models.AnalysisJob.objects.using(self.emg_db_name)
         jobs = jobs.filter(
