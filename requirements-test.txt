@@ -16,4 +16,6 @@ mock
 jsonapi-client; python_version >= '3.6'
 pytest-cov
 
+# For testing webuploader features (under emgapianns/management/commands/...)
+pandas~=0.25.2
 parameterized~=0.7.1
