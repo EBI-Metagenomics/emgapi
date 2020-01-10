@@ -51,10 +51,10 @@ class StudySummaryGenerator(object):
         self.create_summary_dir()
 
         for rna_types in self.MAPSEQ_COLUMN_MAPPER.keys():
-            self.generate_taxonomy_phylum_summary(analysis_jobs, self.pipeline, ''.format(rna_types),
+            self.generate_taxonomy_phylum_summary(analysis_jobs, self.pipeline, '{}'.format(rna_types),
                                                   'phylum_taxonomy_abundances_{}_v{}.tsv'.format(rna_types,
                                                                                                  self.pipeline))
-            self.generate_taxonomy_summary(analysis_jobs, ''.format(rna_types),
+            self.generate_taxonomy_summary(analysis_jobs, '{}'.format(rna_types),
                                            'taxonomy_abundances_{}_v{}.tsv'.format(rna_types, self.pipeline))
 
         if len(experiment_types) == 1 and 'amplicon' in experiment_types:
@@ -93,7 +93,7 @@ class StudySummaryGenerator(object):
         study_df = None
         if version == '4.1':
             study_df = self.generate_taxonomy_phylum_summary_v4(analysis_jobs, su_type)
-        elif version == '5':
+        elif version == '5.0':
             study_df = self.generate_taxonomy_phylum_summary_v5(analysis_jobs, su_type)
         else:
             logging.warning("Pipeline version {} not supported yet!".format(version))

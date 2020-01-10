@@ -66,3 +66,21 @@ class TestStudySummaryGenerator(unittest.TestCase):
     def test_normalize_taxa_hierarchy(self, given, expected):
         actual = self.test_instance.normalize_taxa_hierarchy(given)
         assert expected == actual
+
+    @parameterized.expand([
+        ("LSU", ['ERR2237860_MERGED_FASTQ_LSU.fasta.mseq.tsv', 'ERR2237853_MERGED_FASTQ_LSU.fasta.mseq.tsv']),
+        ("unite", ['ERR2237860_MERGED_FASTQ_unite.fasta.mseq.tsv', 'ERR2237853_MERGED_FASTQ_unite.fasta.mseq.tsv']),
+        ("itsonedb", ['ERR2237860_MERGED_FASTQ_itsonedb.fasta.mseq.tsv', 'ERR2237853_MERGED_FASTQ_itsonedb.fasta.mseq.tsv'])
+    ])
+    def test_get_mapseq_result_files(self, rna_type, expected):
+
+        analysis_result_dirs = dict()
+        rootpath = os.path.dirname(__file__).replace('functional', 'test-input')
+        analysis_result_dirs['ERR2237853_MERGED_FASTQ'] = os.path.join(rootpath, "ERR2237853_MERGED_FASTQ")
+        analysis_result_dirs['ERR2237860_MERGED_FASTQ'] = os.path.join(rootpath, "ERR2237860_MERGED_FASTQ")
+        #
+        actual = self.test_instance.get_mapseq_result_files(analysis_result_dirs, rna_type, '.fasta.mseq.tsv')
+        assert 2 == len(actual)
+        assert 2 == len(expected)
+        for actual_item in actual:
+            assert expected[0] in actual_item or expected[1] in actual_item
