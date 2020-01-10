@@ -138,10 +138,7 @@ class StudySummaryGenerator(object):
             job_df = self.__build_dataframe(phylum_count_data)
             job_data_frames[acc] = job_df
 
-        study_df = self.merge_dfs_v5(job_data_frames,
-                                     delimiter='\t',
-                                     key=['superkingdom', 'kingdom', 'phylum'],
-                                     raw_cols=['kingdom', 'kingdom', 'phylum', 'count', 'ignored'])
+        study_df = self.merge_dfs_v5(job_data_frames, key=['superkingdom', 'kingdom', 'phylum'])
 
         return study_df
 
@@ -166,7 +163,7 @@ class StudySummaryGenerator(object):
         paths = list(Path(self.study_result_dir).glob(res_file_re))
         return [str(p.resolve()) for p in paths]
 
-    def merge_dfs_v5(self, dataframes, delimiter, key, raw_cols, skip_rows=0):
+    def merge_dfs_v5(self, dataframes, key):
         study_df = pd.DataFrame(columns=key)
 
         for accession, df in dataframes.items():
