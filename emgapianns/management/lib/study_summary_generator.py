@@ -99,7 +99,7 @@ class StudySummaryGenerator(object):
             logging.warning("Pipeline version {} not supported yet!".format(version))
             pass
 
-        if study_df.empty:
+        if not study_df.empty:
             self.write_results_file(study_df, filename)
 
             alias = '{}_phylum_taxonomy_abundances_{}_v{}.tsv'.format(self.study_accession, su_type, self.pipeline)
