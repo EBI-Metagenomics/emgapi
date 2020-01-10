@@ -126,9 +126,13 @@ class StudySummaryGenerator(object):
                 sequence_file = self.__get_rna_fasta_file(result_directory, 'ITS_masked.fasta.gz')
             else:  # for SILVA: LSU and SSU
                 sequence_file = self.__get_rna_fasta_file(result_directory, '{}.fasta.gz'.format(rna_type))
+            if not sequence_file:
+                continue
             num_rna_seqs = self.__count_number_of_seqs(sequence_file)
             #
             mapseq_result_file = self.__get_mapseq_result_file(acc, result_directory, rna_type, '.fasta.mseq.gz')
+            if not mapseq_result_file:
+                continue
             phylum_count_data = self.__parse_phylum_counts_v5(mapseq_result_file, num_rna_seqs, rna_type)
 
             job_df = self.__build_dataframe(phylum_count_data)
