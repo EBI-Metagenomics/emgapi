@@ -88,13 +88,26 @@ class StudySummaryGenerator(object):
         subprocess.check_call(rsync_cmd)
         logging.info("Synchronisation is done.")
 
-    def generate_taxonomy_phylum_summary(self, analysis_jobs, version, su_type, filename):
+    @staticmethod
+    def _get_group_type(rna_type):
+        group = None
+        if rna_type in ['SSU', 'LSU']:
+            group = 'Taxonomic analysis {} rRNA'.format(rna_type)
+        elif rna_type == 'unite':
+            group = 'Taxonomic analysis UNITE'
+        elif rna_type == 'itsonedb':
+            group = 'Taxonomic analysis ITSoneDB'
+        else:
+            logging.warning("RNA type {} not supported!".format(rna_type))
+        return group
+
+    def generate_taxonomy_phylum_summary(self, analysis_jobs, version, rna_type, filename):
 
         study_df = None
         if version == '4.1':
-            study_df = self.generate_taxonomy_phylum_summary_v4(analysis_jobs, su_type)
+            study_df = self.generate_taxonomy_phylum_summary_v4(analysis_jobs, rna_type)
         elif version == '5.0':
-            study_df = self.generate_taxonomy_phylum_summary_v5(analysis_jobs, su_type)
+            study_df = self.generate_taxonomy_phylum_summary_v5(analysis_jobs, rna_type)
         else:
             logging.warning("Pipeline version {} not supported yet!".format(version))
             pass
@@ -102,9 +115,9 @@ class StudySummaryGenerator(object):
         if not study_df.empty:
             self.write_results_file(study_df, filename)
 
-            alias = '{}_phylum_taxonomy_abundances_{}_v{}.tsv'.format(self.study_accession, su_type, self.pipeline)
-            description = 'Phylum level taxonomies {}'.format(su_type)
-            group = 'Taxonomic analysis {} rRNA'.format(su_type)
+            alias = '{}_phylum_taxonomy_abundances_{}_v{}.tsv'.format(self.study_accession, rna_type, self.pipeline)
+            description = 'Phylum level taxonomies {}'.format(rna_type)
+            group = self._get_group_type(rna_type)
             self.upload_study_file(filename, alias, description, group)
 
     def generate_taxonomy_phylum_summary_v4(self, analysis_result_dirs, su_type):

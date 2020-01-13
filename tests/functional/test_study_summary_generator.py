@@ -84,3 +84,19 @@ class TestStudySummaryGenerator(unittest.TestCase):
         assert 2 == len(expected)
         for actual_item in actual:
             assert expected[0] in actual_item or expected[1] in actual_item
+
+    @parameterized.expand([
+        ("SSU", 'Taxonomic analysis SSU rRNA'),
+        ("LSU", 'Taxonomic analysis LSU rRNA'),
+        ("unite", 'Taxonomic analysis UNITE'),
+        ("itsonedb", 'Taxonomic analysis ITSoneDB')
+    ])
+    def test_get_group_type(self, rna_type, expected):
+
+        analysis_result_dirs = dict()
+        rootpath = os.path.dirname(__file__).replace('functional', 'test-input')
+        analysis_result_dirs['ERR2237853_MERGED_FASTQ'] = os.path.join(rootpath, "ERR2237853_MERGED_FASTQ")
+        analysis_result_dirs['ERR2237860_MERGED_FASTQ'] = os.path.join(rootpath, "ERR2237860_MERGED_FASTQ")
+        #
+        actual = self.test_instance._get_group_type(rna_type)
+        assert expected == actual
