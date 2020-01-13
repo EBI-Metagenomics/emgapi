@@ -24,23 +24,6 @@ def create_download_description(apps, schema_editor):
     DownloadDescriptionLabel.objects.bulk_create(_downloads)
 
 
-def create_group_types(apps, schema_editor):
-    DownloadGroupType = apps.get_model("emgapi", "DownloadGroupType")
-    group_types = (
-        "Taxonomic analysis ITS",
-        "Taxonomic analysis ITSoneDB",
-        "Taxonomic analysis UNITE",
-        "Pathways and Systems",
-        # TODO: Do we need sub groups for the function and pathways
-    )
-    _groups = list()
-    for group_type in group_types:
-        _groups.append(
-            DownloadGroupType(group_type=group_type)
-        )
-    DownloadGroupType.objects.bulk_create(_groups)
-
-
 class Migration(migrations.Migration):
     dependencies = [
         ('emgapi', '0018_auto_20191105_1052'),
@@ -48,5 +31,4 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(create_download_description),
-        migrations.RunPython(create_group_types)
     ]
