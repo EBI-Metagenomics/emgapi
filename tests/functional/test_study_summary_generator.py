@@ -70,7 +70,8 @@ class TestStudySummaryGenerator(unittest.TestCase):
     @parameterized.expand([
         ("LSU", ['ERR2237860_MERGED_FASTQ_LSU.fasta.mseq.tsv', 'ERR2237853_MERGED_FASTQ_LSU.fasta.mseq.tsv']),
         ("unite", ['ERR2237860_MERGED_FASTQ_unite.fasta.mseq.tsv', 'ERR2237853_MERGED_FASTQ_unite.fasta.mseq.tsv']),
-        ("itsonedb", ['ERR2237860_MERGED_FASTQ_itsonedb.fasta.mseq.tsv', 'ERR2237853_MERGED_FASTQ_itsonedb.fasta.mseq.tsv'])
+        ("itsonedb",
+         ['ERR2237860_MERGED_FASTQ_itsonedb.fasta.mseq.tsv', 'ERR2237853_MERGED_FASTQ_itsonedb.fasta.mseq.tsv'])
     ])
     def test_get_mapseq_result_files(self, rna_type, expected):
 
@@ -92,11 +93,25 @@ class TestStudySummaryGenerator(unittest.TestCase):
         ("itsonedb", 'Taxonomic analysis ITSoneDB')
     ])
     def test_get_group_type(self, rna_type, expected):
-
-        analysis_result_dirs = dict()
-        rootpath = os.path.dirname(__file__).replace('functional', 'test-input')
-        analysis_result_dirs['ERR2237853_MERGED_FASTQ'] = os.path.join(rootpath, "ERR2237853_MERGED_FASTQ")
-        analysis_result_dirs['ERR2237860_MERGED_FASTQ'] = os.path.join(rootpath, "ERR2237860_MERGED_FASTQ")
-        #
         actual = self.test_instance._get_group_type(rna_type)
+        assert expected == actual
+
+    @parameterized.expand([
+        ("SSU", 'Phylum level taxonomies SSU'),
+        ("LSU", 'Phylum level taxonomies LSU'),
+        ("unite", 'Phylum level taxonomies UNITE'),
+        ("itsonedb", 'Phylum level taxonomies ITSoneDB')
+    ])
+    def test_get_phylum_file_description(self, rna_type, expected):
+        actual = self.test_instance._get_phylum_file_description(rna_type)
+        assert expected == actual
+
+    @parameterized.expand([
+        ("SSU", 'Taxonomic assignments SSU'),
+        ("LSU", 'Taxonomic assignments LSU'),
+        ("unite", 'Taxonomic assignments UNITE'),
+        ("itsonedb", 'Taxonomic assignments ITSoneDB')
+    ])
+    def test_get_abundance_file_description(self, rna_type, expected):
+        actual = self.test_instance._get_abundance_file_description(rna_type)
         assert expected == actual

@@ -101,6 +101,28 @@ class StudySummaryGenerator(object):
             logging.warning("RNA type {} not supported!".format(rna_type))
         return group
 
+    @staticmethod
+    def _get_phylum_file_description(rna_type):
+        desc = None
+        if rna_type in ['SSU', 'LSU', 'unite']:
+            desc = 'Phylum level taxonomies {}'.format(rna_type.upper())
+        elif rna_type == 'itsonedb':
+            desc = 'Phylum level taxonomies ITSoneDB'
+        else:
+            logging.warning("RNA type {} not supported!".format(rna_type))
+        return desc
+
+    @staticmethod
+    def _get_abundance_file_description(rna_type):
+        desc = None
+        if rna_type in ['SSU', 'LSU', 'unite']:
+            desc = 'Taxonomic assignments {}'.format(rna_type.upper())
+        elif rna_type == 'itsonedb':
+            desc = 'Taxonomic assignments ITSoneDB'
+        else:
+            logging.warning("RNA type {} not supported!".format(rna_type))
+        return desc
+
     def generate_taxonomy_phylum_summary(self, analysis_jobs, version, rna_type, filename):
 
         study_df = None
@@ -116,7 +138,7 @@ class StudySummaryGenerator(object):
             self.write_results_file(study_df, filename)
 
             alias = '{}_phylum_taxonomy_abundances_{}_v{}.tsv'.format(self.study_accession, rna_type, self.pipeline)
-            description = 'Phylum level taxonomies {}'.format(rna_type)
+            description = self._get_phylum_file_description(rna_type)
             group = self._get_group_type(rna_type)
             self.upload_study_file(filename, alias, description, group)
 
@@ -155,8 +177,8 @@ class StudySummaryGenerator(object):
 
         return study_df
 
-    def generate_taxonomy_summary(self, analysis_result_dirs, su_type, filename):
-        res_files = self.get_mapseq_result_files(analysis_result_dirs, su_type, '.fasta.mseq.tsv')
+    def generate_taxonomy_summary(self, analysis_result_dirs, rna_type, filename):
+        res_files = self.get_mapseq_result_files(analysis_result_dirs, rna_type, '.fasta.mseq.tsv')
         study_df = self.merge_dfs(res_files,
                                   key=['lineage'],
                                   delimiter='\t',
@@ -167,9 +189,10 @@ class StudySummaryGenerator(object):
         if len(study_df.index) > 0:
             self.write_results_file(study_df, filename)
 
-            alias = '{}_taxonomy_abundances_{}_v{}.tsv'.format(self.study_accession, su_type, self.pipeline)
-            description = 'Taxonomic assignments {}'.format(su_type)
-            group = 'Taxonomic analysis {} rRNA'.format(su_type)
+            alias = '{}_taxonomy_abundances_{}_v{}.tsv'.format(self.study_accession, rna_type, self.pipeline)
+            description = self._get_abundance_file_description(rna_type)
+            description = 'Taxonomic assignments {}'.format(rna_type)
+            group = self._get_group_type(rna_type)
             self.upload_study_file(filename, alias, description, group)
 
     def get_raw_result_files(self, res_file_re):
