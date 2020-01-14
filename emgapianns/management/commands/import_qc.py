@@ -101,7 +101,7 @@ class Command(EMGBaseCommand):
                             job=job, var=var,
                             defaults={'var_val_ucv': row[1]}
                         )
-                        logging.info("RNA counts successfully loaded into Mongo.")
+                        logging.info("{} successfully loaded into Mongo.".format(row[0]))
 
                     except emg_models.AnalysisMetadataVariableNames.DoesNotExist:
                         logging.warning("Could not find variable name {} in the database even "
