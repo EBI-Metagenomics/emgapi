@@ -31,6 +31,7 @@ class Command(EMGBaseCommand):
 
         for infile in ['qc_summary', 'func_summary']:
             self.load_stats(rootpath, obj, infile, emg_db)
+        self.import_rna_counts(rootpath=rootpath, job=obj, emg_db=emg_db)
 
     def load_stats(self, rootpath, obj, input_file_name, emg_db):
         res = os.path.join(rootpath, obj.result_directory, input_file_name)
@@ -53,7 +54,8 @@ class Command(EMGBaseCommand):
         else:
             logger.error("Path %r doesn't exist. SKIPPING!" % res)
 
-    def import_qc(self, reader, job, emg_db):
+    @staticmethod
+    def import_qc(reader, job, emg_db):
         anns = []
         for row in reader:
             var = None
@@ -74,3 +76,31 @@ class Command(EMGBaseCommand):
 
                 anns.append(job_ann)
         logger.info("Total %d Annotations for Run: %s" % (len(anns), job))
+
+    @staticmethod
+    def import_rna_counts(rootpath, job, emg_db):
+        res = os.path.join(rootpath, job.result_directory, 'RNA-counts')
+        if os.path.exists(res):
+            with open(res) as tsvfile:
+                reader = csv.reader(tsvfile, delimiter='\t')
+                for row in reader:
+                    try:
+                        if row[0] == 'SSU count':
+                            var_name = 'Nucleotide sequences with predicted SSU'
+                        elif row[0] == 'LSU count':
+                            var_name = 'Nucleotide sequences with predicted SSU'
+                        else:
+                            logging.error("Unsupported variable name {}".format(row[0]))
+                            break
+
+                        var = emg_models.AnalysisMetadataVariableNames.objects.using(emg_db) \
+                            .get(var_name=var_name)
+
+                        job_ann, created = emg_models.AnalysisJobAnn.objects.using(emg_db).update_or_create(
+                            job=job, var=var,
+                            defaults={'var_val_ucv': row[1]}
+                        )
+
+                    except emg_models.AnalysisMetadataVariableNames.DoesNotExist:
+                        logging.warning("Could not find variable name {} in the database even "
+                                        "though it should be supported!".format(row[0]))
