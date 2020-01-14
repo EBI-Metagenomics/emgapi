@@ -79,6 +79,7 @@ class Command(EMGBaseCommand):
 
     @staticmethod
     def import_rna_counts(rootpath, job, emg_db):
+        logging.info("Loading RNA counts into Mongo DB...")
         res = os.path.join(rootpath, job.result_directory, 'RNA-counts')
         if os.path.exists(res):
             with open(res) as tsvfile:
@@ -88,7 +89,7 @@ class Command(EMGBaseCommand):
                         if row[0] == 'SSU count':
                             var_name = 'Nucleotide sequences with predicted SSU'
                         elif row[0] == 'LSU count':
-                            var_name = 'Nucleotide sequences with predicted SSU'
+                            var_name = 'Nucleotide sequences with predicted LSU'
                         else:
                             logging.error("Unsupported variable name {}".format(row[0]))
                             break
@@ -100,7 +101,10 @@ class Command(EMGBaseCommand):
                             job=job, var=var,
                             defaults={'var_val_ucv': row[1]}
                         )
+                        logging.info("RNA counts successfully loaded into Mongo.")
 
                     except emg_models.AnalysisMetadataVariableNames.DoesNotExist:
                         logging.warning("Could not find variable name {} in the database even "
                                         "though it should be supported!".format(row[0]))
+        else:
+            logging.warning("RNA counts file does not exist: {}".format(res))
