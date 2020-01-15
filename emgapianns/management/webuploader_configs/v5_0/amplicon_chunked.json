@@ -439,7 +439,7 @@
       "_accession_substitution": "full",
       "_chunked": true,
       "chunk_file": "LSU.fasta.chunks",
-      "_required": true,
+      "_required": false,
       "downloadable": true,
       "alias": "{}_LSU.fasta.gz",
       "compression": true,
