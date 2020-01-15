@@ -2,7 +2,7 @@
   "files": [
     {
       "_accession_substitution": "full",
-      "_chunked": false,
+      "_chunked": true,
       "_required": true,
       "downloadable": true,
       "alias": "{}.fasta.gz",
@@ -11,6 +11,7 @@
       "format_name": "FASTA",
       "group_type": "Sequence data",
       "real_name": "{}.fasta.gz",
+      "chunk_file": "{}.fasta.chunks",
       "subdir": null
     },
     {
@@ -422,7 +423,8 @@
     },
     {
       "_accession_substitution": "full",
-      "_chunked": false,
+      "_chunked": true,
+      "chunk_file": "SSU.fasta.chunks",
       "_required": false,
       "downloadable": true,
       "alias": "{}_SSU.fasta.gz",
@@ -435,7 +437,8 @@
     },
     {
       "_accession_substitution": "full",
-      "_chunked": false,
+      "_chunked": true,
+      "chunk_file": "LSU.fasta.chunks",
       "_required": true,
       "downloadable": true,
       "alias": "{}_LSU.fasta.gz",
@@ -474,7 +477,8 @@
     },
     {
       "_accession_substitution": "full",
-      "_chunked": false,
+      "_chunked": true,
+      "chunk_file": "ITS_masked.fasta.chunks",
       "_required": false,
       "downloadable": true,
       "alias": "{}_ITS_masked.fasta.gz",
