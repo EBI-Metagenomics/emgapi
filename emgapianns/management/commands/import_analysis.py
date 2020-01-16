@@ -101,7 +101,7 @@ class Command(BaseCommand):
             raise QCNotPassedException("{} did not pass QC step!".format(self.accession))
 
         if not sanity_checker.passed_coverage_check():
-            raise CoverageCheckException("{} did not pass QC step!".format(self.accession))
+            raise CoverageCheckException("{} did not pass coverage check step!".format(self.accession))
 
         self.call_import_study(secondary_study_accession)
 
