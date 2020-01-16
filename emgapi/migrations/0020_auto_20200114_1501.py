@@ -8,9 +8,9 @@ from django.db import migrations
 def create_summary_var_names(apps, schema_editor):
     AnalysisMetadataVariableNames = apps.get_model("emgapi", "AnalysisMetadataVariableNames")
     var_names = (
-        ("Nucleotide sequences with predicted SSU",
+        ("Predicted SSU sequences",
          "Number of sequences with predicted SSU rRNAs. Since pipeline version 5 we generate a file with RNA-counts."),
-        ("Nucleotide sequences with predicted LSU",
+        ("Predicted LSU sequences",
          "Number of sequences with predicted LSU rRNAs. Since pipeline version 5 we generate a file with RNA-counts.")
     )
     _var_names = list()
