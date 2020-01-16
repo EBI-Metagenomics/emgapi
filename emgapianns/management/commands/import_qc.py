@@ -87,9 +87,9 @@ class Command(EMGBaseCommand):
                 for row in reader:
                     try:
                         if row[0] == 'SSU count':
-                            var_name = 'Nucleotide sequences with predicted SSU'
+                            var_name = 'Predicted SSU sequences'
                         elif row[0] == 'LSU count':
-                            var_name = 'Nucleotide sequences with predicted LSU'
+                            var_name = 'Predicted LSU sequences'
                         else:
                             logging.error("Unsupported variable name {}".format(row[0]))
                             break
