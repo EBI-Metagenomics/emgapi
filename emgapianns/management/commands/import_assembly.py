@@ -71,6 +71,10 @@ class Command(BaseCommand):
         db_assembly_data = self.get_ena_db_assembly(accession)
         assembly = self.create_or_update_assembly(db_assembly_data)
         self.tag_study(assembly, db_assembly_data.primary_study_accession)
+
+        if assembly.study.is_public:
+            assembly = self.update_assembly_status(db_assembly_data.assembly_id, 'public')
+
         self.tag_sample(assembly, db_assembly_data.sample_id)
         self.tag_experiment_type(assembly, 'assembly')
         self.tag_optional_run(assembly, db_assembly_data.name)
@@ -90,6 +94,19 @@ class Command(BaseCommand):
             'status_id': status,
             'wgs_accession': era_db_data.wgs_accession,
             'legacy_accession': era_db_data.gc_id,
+        })
+        assembly, created = emg_models.Assembly.objects.using(self.emg_db).update_or_create(
+            accession=accession,
+            defaults=defaults
+        )
+        return assembly
+
+    def update_assembly_status(self, accession, status):
+
+        logger.info('Updating assembly {} to {}'.format(accession, status))
+        status = emg_models.Status.objects.using(self.emg_db).get(status=status)
+        defaults = sanitise_fields({
+            'status_id': status,
         })
         assembly, created = emg_models.Assembly.objects.using(self.emg_db).update_or_create(
             accession=accession,
