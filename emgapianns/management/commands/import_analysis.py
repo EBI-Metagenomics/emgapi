@@ -16,6 +16,7 @@ import getpass
 # limitations under the License.
 import logging
 import os
+import re
 import subprocess
 import sys
 
@@ -200,7 +201,14 @@ class Command(BaseCommand):
             if 'sample_accession' in assembly:
                 del assembly['sample_accession']
             if 'analysis_alias' in assembly:
-                assembly['run_accession'] = assembly['analysis_alias']
+                pattern = re.compile(r'([EDS]RR\d{6,})')
+                search_string = assembly['analysis_alias']
+                match = re.search(pattern, search_string)
+                if len(match.groups())>0:
+                    run_accession = match.group(1)
+                else:
+                    run_accession = assembly['analysis_alias']
+                assembly['run_accession'] = run_accession
                 del assembly['analysis_alias']
             analysis = Assembly(**assembly)
         else:  # Run accession detected
