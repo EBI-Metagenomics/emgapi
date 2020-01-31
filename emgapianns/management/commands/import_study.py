@@ -51,15 +51,15 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         logger.info("CLI %r" % options)
 
-        secondary_study_accession = options['accession']
+        study_accession = options['accession']
         lineage = options['lineage']
         ena_db = options['ena_db']
         emg_db = options['emg_db']
 
-        logger.info('Importing study {}'.format(secondary_study_accession))
+        logger.info('Importing study {}'.format(study_accession))
 
         study_dir = self.get_study_dir(options.get('study_dir'), options.get('rootpath'), secondary_study_accession)
-        importer = StudyImporter(secondary_study_accession, study_dir, lineage, ena_db, emg_db)
+        importer = StudyImporter(study_accession, study_dir, lineage, ena_db, emg_db)
         importer.run()
 
         logger.info("Study import finished successfully.")

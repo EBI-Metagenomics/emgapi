@@ -35,18 +35,24 @@ class StudyImporter(object):
         Creates a new study object in EMG or updates an existing one.
     """
 
-    def __init__(self, secondary_study_accession, study_dir, lineage, ena_db, emg_db):
-        self.secondary_study_accession = secondary_study_accession
+    def __init__(self, study_accession, study_dir, lineage, ena_db, emg_db):
+        self.study_accession = study_accession
         self.study_dir = study_dir
         self.lineage = lineage
         self.ena_db = ena_db
         self.emg_db = emg_db
 
     def run(self):
-        logging.info("Creating or updating study {}".format(self.secondary_study_accession))
-        ena_study = self._fetch_study_metadata(self.secondary_study_accession, self.ena_db)
-        self._update_or_create_study(ena_study, self.study_dir, self.lineage, self.ena_db, self.emg_db)
-        logging.info("Finished study {} creation/updating.".format(self.secondary_study_accession))
+        logging.info("Creating or updating study {}".format(self.study_accession))
+        db_result, api_result = self._fetch_study_metadata(self.study_accession, self.ena_db)
+        if db_result:
+            self._update_or_create_study_from_db_result(db_result, self.study_dir, self.lineage, self.ena_db,
+                                                        self.emg_db)
+        elif api_result:
+            self._update_or_create_study_from_api_result(api_result, self.study_dir, self.lineage, self.ena_db,
+                                                         self.emg_db)
+
+        logging.info("Finished study {} creation/updating.".format(self.study_accession))
 
     @staticmethod
     def _fetch_study_metadata(study_accession, database):
@@ -54,18 +60,33 @@ class StudyImporter(object):
             Fetches latest study metadata from ENA's production database
         :return:
         """
+        db_result, api_result = None, None
         try:
-            study = ena_models.RunStudy.objects.using(database).get(
+            db_result = ena_models.RunStudy.objects.using(database).get(
                 Q(study_id=study_accession) | Q(project_id=study_accession))
         except RunStudy.DoesNotExist:
             try:
-                study = ena_models.AssemblyStudy.objects.using(database).get(
+                db_result = ena_models.AssemblyStudy.objects.using(database).get(
                     Q(study_id=study_accession) | Q(project_id=study_accession))
             except AssemblyStudy.DoesNotExist:
-                raise AssemblyStudy.DoesNotExist(
-                    "Could not find study {0} in the ENA database (ERAPRO). Program will exit now!".format(
-                        study_accession))
-        return study
+                logging.warning(
+                    "Could not find study {0} in the ENA database (ERAPRO). Calling ENA Portal API "
+                    "now to retrieve study metadata.".format(study_accession))
+                try:
+                    api_result = ena.get_study(primary_accession=study_accession)
+                except ValueError:
+                    try:
+                        logging.info("Could NOT find study by primary accession field. Searching with secondary "
+                                     "accession field now.")
+                        api_result = ena.get_study(secondary_accession=study_accession)
+                    except ValueError:
+                        logging.info("Could NOT find study by secondary accession field either. Searching for public "
+                                     "non dcc metagenome space now.")
+                        # FIXME: Apply changes to ENA API handler and updated dependency
+                        # api_result = ena.get_study(secondary_accession=study_accession, metagenome_data_portal=False,
+                        #                            include_metagenomes=False)
+
+        return db_result, api_result
 
     @staticmethod
     def _lookup_publication_by_pubmed_ids(pubmed_ids_str):
@@ -83,7 +104,7 @@ class StudyImporter(object):
         # TODO: Implement
         pass
 
-    def _update_or_create_study(self, ena_study, study_result_dir, lineage, ena_db, emg_db):
+    def _update_or_create_study_from_db_result(self, ena_study, study_result_dir, lineage, ena_db, emg_db):
         """
             Attributes to parse out:
                 - Center name (done)
@@ -156,11 +177,7 @@ class StudyImporter(object):
                     'result_directory': study_result_dir,
                     'first_created': ena_study.first_created}
 
-        study, created = emg_models.Study.objects.using(emg_db).update_or_create(
-            project_id=project_id,
-            secondary_accession=secondary_study_accession,
-            defaults=defaults,
-        )
+        study, _created = self._update_or_create_study(emg_db, project_id, secondary_study_accession, defaults)
 
         for pub in emg_publications:
             emg_models.StudyPublication.objects.using(emg_db).update_or_create(
@@ -173,3 +190,43 @@ class StudyImporter(object):
     @staticmethod
     def _get_ena_project(ena_db, project_id):
         return ena_models.Project.objects.using(ena_db).get(project_id=project_id)
+
+    def _update_or_create_study_from_api_result(self, api_study, study_result_dir, lineage, ena_db, emg_db):
+        secondary_study_accession = api_study.get('secondary_study_accession')
+        data_origination = 'SUBMITTED' if secondary_study_accession.startswith('ERP') else 'HARVESTED'
+
+        is_public = True
+
+        # Retrieve biome object
+        biome = emg_models.Biome.objects.using(emg_db).get(lineage=lineage)
+
+        project_id = api_study.get('study_accession')
+        if secondary_study_accession.startswith('SRP'):
+            project = self._get_ena_project(ena_db, project_id)
+            center_name = project.center_name
+        else:
+            center_name = api_study.get('center_name')
+
+        defaults = {'centre_name': center_name,
+                    'is_public': is_public,
+                    'study_abstract': utils.sanitise_string(api_study.get('description')),
+                    'study_name': utils.sanitise_string(api_study.get('study_title')),
+                    'study_status': 'FINISHED',
+                    'data_origination': data_origination,
+                    # README: We want to draw attention to updated studies,
+                    # therefore set the date for last updated to today
+                    'last_update': timezone.now(),
+                    'biome': biome,
+                    'result_directory': study_result_dir,
+                    'first_created': timezone.now()}
+
+        study, _created = self._update_or_create_study(emg_db, project_id, secondary_study_accession, defaults)
+        return study
+
+    @staticmethod
+    def _update_or_create_study(emg_db, project_id, secondary_study_accession, defaults):
+        return emg_models.Study.objects.using(emg_db).update_or_create(
+            project_id=project_id,
+            secondary_accession=secondary_study_accession,
+            defaults=defaults,
+        )
