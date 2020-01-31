@@ -80,7 +80,7 @@ class Command(BaseCommand):
         logger.info('Fetching sample {} from ena api'.format(accession))
         return ena.get_sample(accession)
 
-    def create_or_update_sample(self, api_ena_db_model, api_data):
+    def create_or_update_sample(self, ena_db_model, api_data):
         accession = api_data['secondary_sample_accession']
         logger.info('Creating sample {}'.format(accession))
         defaults = sanitise_fields({
@@ -96,7 +96,7 @@ class Command(BaseCommand):
             'species': self.__get_species(),
             'biome': self.get_biome(accession),
             'last_update': timezone.now(),
-            'submission_account_id': api_ena_db_model.submission_account_id,
+            'submission_account_id': ena_db_model.submission_account_id,
         })
         if api_data.get('location'):
             defaults['latitude'], defaults['longitude'] = get_lat_long(api_data['location'])
