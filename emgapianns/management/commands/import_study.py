@@ -58,7 +58,7 @@ class Command(BaseCommand):
 
         logger.info('Importing study {}'.format(study_accession))
 
-        study_dir = self.get_study_dir(options.get('study_dir'), options.get('rootpath'), secondary_study_accession)
+        study_dir = self.get_study_dir(options.get('study_dir'), options.get('rootpath'), study_accession)
         importer = StudyImporter(study_accession, study_dir, lineage, ena_db, emg_db)
         importer.run()
 
