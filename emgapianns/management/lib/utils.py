@@ -36,6 +36,16 @@ def is_study_accession(accession):
     return re.match(study_accssion_re, accession)
 
 
+def get_run_accession(path):
+    pattern = re.compile(run_accession_re)
+    match = re.search(pattern, path)
+    if len(match.groups()) > 0:
+        end_pos = match.end()
+        return path[0:end_pos]
+    else:
+        raise Exception("Could not identify run accession from {}".format(path))
+
+
 def is_run_accession(accession):
     return re.match(run_accession_re, accession)
 

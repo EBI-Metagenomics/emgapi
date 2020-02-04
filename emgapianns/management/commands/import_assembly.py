@@ -17,6 +17,8 @@ import logging
 import os
 
 from django.core.management import BaseCommand, call_command
+
+from emgapianns.management.lib import utils
 from emgapianns.management.lib.utils import sanitise_fields, is_run_accession
 from ena_portal_api import ena_handler
 from emgapi import models as emg_models
@@ -59,7 +61,7 @@ class Command(BaseCommand):
         logger.info("CLI %r" % options)
         self.emg_db = options['emg_db']
         self.ena_db = options['ena_db']
-        self.result_dir = os.path.abspath(options['result_dir'])
+        self.result_dir = None
         self.biome = options['biome']
 
         for acc in options['accessions']:
@@ -146,8 +148,9 @@ class Command(BaseCommand):
                 .DoesNotExist('Experiment type {} does not exist in database'.format(experiment_type))
 
     def tag_optional_run(self, assembly, name):
-        if is_run_accession(name):
-            self.tag_run(assembly, name)
+        run_accession = utils.get_run_accession(name)
+        if is_run_accession(run_accession):
+            self.tag_run(assembly, run_accession)
 
     def tag_run(self, assembly, run_accession):
         try:
