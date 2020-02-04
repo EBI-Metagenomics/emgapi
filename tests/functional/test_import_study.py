@@ -27,7 +27,7 @@ def mock_ena_run_study(*args, **kwargs):
     'parasiticides (ivermectin).'
     study.submission_account_id = 'Webin-50804'
     study.pubmed_id = ''
-    return study
+    return study, []
 
 
 def mock_ncbi_run_study_SRP000125():
@@ -55,7 +55,7 @@ def mock_ncbi_run_study_SRP000125():
                               'The WGS project can be found using the Project data link.'
     study.submission_account_id = 'Webin-842'
     study.pubmed_id = '17090214,18337718'
-    return study
+    return study, []
 
 
 def get_ena_project_mock(center_name):
@@ -88,7 +88,7 @@ def mock_ncbi_run_study_SRP034734():
                               'Maharashtra State, India, which was created by a meteor impact.'
     study.submission_account_id = 'Webin-842'
     study.pubmed_id = None
-    return study
+    return study, []
 
 
 def insert_biome(biome_id, biome_name, left, right, depth, lineage):
@@ -130,23 +130,23 @@ class TestImportStudyTransactions(TransactionTestCase):
             cmd.run_from_argv(
                 argv=['manage.py', 'import_study', accession, lineage])
             actual_study = emg_models.Study.objects.get(secondary_accession=accession)
-            assert expected.study_id == actual_study.secondary_accession
-            assert expected.project_id == actual_study.project_id
-            assert expected.center_name == actual_study.centre_name
+            assert expected[0].study_id == actual_study.secondary_accession
+            assert expected[0].project_id == actual_study.project_id
+            assert expected[0].center_name == actual_study.centre_name
             assert None == actual_study.experimental_factor
             assert True == actual_study.is_public
             assert None == actual_study.public_release_date
-            assert expected.study_description == actual_study.study_abstract
-            assert expected.study_title == actual_study.study_name
+            assert expected[0].study_description == actual_study.study_abstract
+            assert expected[0].study_title == actual_study.study_name
             assert 'FINISHED' == actual_study.study_status
             assert 'SUBMITTED' == actual_study.data_origination
             assert None == actual_study.author_email
             assert None == actual_study.author_name
             assert timezone.now().strftime("%m/%d/%Y") == actual_study.last_update.strftime("%m/%d/%Y")
-            assert expected.submission_account_id == actual_study.submission_account_id
+            assert expected[0].submission_account_id == actual_study.submission_account_id
             assert biome_name == actual_study.biome.biome_name
             assert mock_study_dir.return_value == actual_study.result_directory
-            assert expected.first_created == actual_study.first_created.strftime("%Y-%m-%d %H:%M:%S")
+            assert expected[0].first_created == actual_study.first_created.strftime("%Y-%m-%d %H:%M:%S")
             assert 0 == len(actual_study.publications.all())
             assert 0 == len(actual_study.samples.all())
 
@@ -174,23 +174,23 @@ class TestImportStudyTransactions(TransactionTestCase):
             cmd.run_from_argv(
                 argv=['manage.py', 'import_study', accession, lineage])
             actual_study = emg_models.Study.objects.get(secondary_accession=accession)
-            assert expected.study_id == actual_study.secondary_accession
-            assert expected.project_id == actual_study.project_id
-            assert expected.center_name == actual_study.centre_name
+            assert expected[0].study_id == actual_study.secondary_accession
+            assert expected[0].project_id == actual_study.project_id
+            assert expected[0].center_name == actual_study.centre_name
             assert None == actual_study.experimental_factor
             assert True == actual_study.is_public
             assert None == actual_study.public_release_date
-            assert expected.study_description == actual_study.study_abstract
-            assert expected.study_title == actual_study.study_name
+            assert expected[0].study_description == actual_study.study_abstract
+            assert expected[0].study_title == actual_study.study_name
             assert 'FINISHED' == actual_study.study_status
             assert 'HARVESTED' == actual_study.data_origination
             assert None == actual_study.author_email
             assert None == actual_study.author_name
             assert timezone.now().strftime("%m/%d/%Y") == actual_study.last_update.strftime("%m/%d/%Y")
-            assert expected.submission_account_id == actual_study.submission_account_id
+            assert expected[0].submission_account_id == actual_study.submission_account_id
             assert biome_name == actual_study.biome.biome_name
             assert mock_study_dir.return_value == actual_study.result_directory
-            assert expected.first_created == actual_study.first_created.strftime("%Y-%m-%d")
+            assert expected[0].first_created == actual_study.first_created.strftime("%Y-%m-%d")
             assert 2 == len(actual_study.publications.all())
             assert 0 == len(actual_study.samples.all())
 
@@ -218,22 +218,22 @@ class TestImportStudyTransactions(TransactionTestCase):
             cmd.run_from_argv(
                 argv=['manage.py', 'import_study', accession, lineage])
             actual_study = emg_models.Study.objects.get(secondary_accession=accession)
-            assert expected.study_id == actual_study.secondary_accession
-            assert expected.project_id == actual_study.project_id
-            assert expected.center_name == actual_study.centre_name
+            assert expected[0].study_id == actual_study.secondary_accession
+            assert expected[0].project_id == actual_study.project_id
+            assert expected[0].center_name == actual_study.centre_name
             assert None == actual_study.experimental_factor
             assert True == actual_study.is_public
             assert None == actual_study.public_release_date
-            assert expected.study_description == actual_study.study_abstract
-            assert expected.study_title == actual_study.study_name
+            assert expected[0].study_description == actual_study.study_abstract
+            assert expected[0].study_title == actual_study.study_name
             assert 'FINISHED' == actual_study.study_status
             assert 'HARVESTED' == actual_study.data_origination
             assert None == actual_study.author_email
             assert None == actual_study.author_name
             assert timezone.now().strftime("%m/%d/%Y") == actual_study.last_update.strftime("%m/%d/%Y")
-            assert expected.submission_account_id == actual_study.submission_account_id
+            assert expected[0].submission_account_id == actual_study.submission_account_id
             assert biome_name == actual_study.biome.biome_name
             assert mock_study_dir.return_value == actual_study.result_directory
-            assert expected.first_created == actual_study.first_created.strftime("%Y-%m-%d")
+            assert expected[0].first_created == actual_study.first_created.strftime("%Y-%m-%d")
             assert 0 == len(actual_study.publications.all())
             assert 0 == len(actual_study.samples.all())
