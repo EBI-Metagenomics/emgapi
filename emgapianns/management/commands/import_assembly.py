@@ -72,12 +72,12 @@ class Command(BaseCommand):
     def import_assembly(self, accession):
         db_assembly_data = self.get_ena_db_assembly(accession)
         assembly = self.create_or_update_assembly(db_assembly_data)
-        self.tag_study(assembly, db_assembly_data.primary_study_accession)
+        sample = self.tag_sample(assembly, db_assembly_data.sample_id)
+        self.tag_study(assembly, db_assembly_data.primary_study_accession, sample)
 
         if assembly.study.is_public:
             assembly = self.update_assembly_status(db_assembly_data.assembly_id, 'public')
 
-        self.tag_sample(assembly, db_assembly_data.sample_id)
         self.tag_experiment_type(assembly, 'assembly')
         self.tag_optional_run(assembly, db_assembly_data.name)
 
@@ -124,10 +124,12 @@ class Command(BaseCommand):
     def get_assembly_studies(sample):
         return ena.get_sample_studies(sample.primary_accession)
 
-    def tag_study(self, assembly, study_accession):
+    def tag_study(self, assembly, study_accession, sample):
         try:
-            assembly.study = emg_models.Study.objects.using(self.emg_db) \
+            _study = emg_models.Study.objects.using(self.emg_db) \
                 .get(project_id=study_accession)
+            assembly.study = _study
+            emg_models.StudySample.objects.using(self.emg_db).get_or_create(study=_study, sample=sample)
         except emg_models.Study.DoesNotExist:
             raise emg_models.Study.DoesNotExist('Study {} does not exist in emg DB'.format(study_accession))
 
@@ -136,6 +138,7 @@ class Command(BaseCommand):
             sample = emg_models.Sample.objects.using(self.emg_db) \
                 .get(accession=sample_accession)
             emg_models.AssemblySample.objects.using(self.emg_db).get_or_create(assembly=assembly, sample=sample)
+            return sample
         except emg_models.Sample.DoesNotExist:
             raise emg_models.Sample.DoesNotExist('Sample {} does not exist in emg DB'.format(sample_accession))
 
