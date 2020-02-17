@@ -357,7 +357,7 @@ class Publication(models.Model):
         ordering = ('pubmed_id',)
 
     def __str__(self):
-        return self.pubmed_id
+        return str(self.pubmed_id)
 
 
 class DownloadGroupType(models.Model):

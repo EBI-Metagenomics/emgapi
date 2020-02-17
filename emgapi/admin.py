@@ -154,3 +154,21 @@ class RunAdmin(admin.ModelAdmin):
             return self.model.objects.filter(study=study_id), False
         else:
             return super().get_search_results(request, queryset, search_term)
+
+
+@admin.register(emg_models.Publication)
+class PublicationAdmin(admin.ModelAdmin):
+    ordering = ['-published_year']
+    search_fields = [
+        'pub_title',
+        'authors',
+        'doi',
+        'pub_url',
+        'pub_type',
+    ]
+    list_display = (
+        'pub_id',
+        'pub_title',
+        'pub_url',
+        'pub_type',
+    )
