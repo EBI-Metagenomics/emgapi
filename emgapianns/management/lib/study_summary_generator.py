@@ -179,10 +179,14 @@ class StudySummaryGenerator(object):
 
     def generate_taxonomy_summary(self, analysis_result_dirs, rna_type, filename):
         res_files = self.get_mapseq_result_files(analysis_result_dirs, rna_type, '.fasta.mseq.tsv')
+
+        raw_cols = ['OTU', 'count', 'lineage']
+        if self.pipeline in ['5.0']:
+            raw_cols = ['OTU', 'count', 'lineage', 'taxid']
         study_df = self.merge_dfs(res_files,
                                   key=['lineage'],
                                   delimiter='\t',
-                                  raw_cols=['OTU', 'count', 'lineage'],
+                                  raw_cols=raw_cols,
                                   skip_rows=2)
         study_df = study_df.rename(columns={'lineage': '#SampleID'})
 
@@ -191,7 +195,6 @@ class StudySummaryGenerator(object):
 
             alias = '{}_taxonomy_abundances_{}_v{}.tsv'.format(self.study_accession, rna_type, self.pipeline)
             description = self._get_abundance_file_description(rna_type)
-            description = 'Taxonomic assignments {}'.format(rna_type)
             group = self._get_group_type(rna_type)
             self.upload_study_file(filename, alias, description, group)
 
