@@ -1,0 +1,2 @@
+[run]
+omit = *migrations*, emgapi/admin.py, emgapi/apps.py, *__init__.py

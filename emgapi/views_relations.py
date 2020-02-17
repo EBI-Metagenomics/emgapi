@@ -1038,26 +1038,15 @@ class GenomeCogsRelationshipsViewSet(emg_mixins.ListModelMixin,
     lookup_field = 'accession'
     lookup_value_regex = '[^/]+'
 
-    def get_serializer_class(self):
-        return super(GenomeCogsRelationshipsViewSet, self) \
-            .get_serializer_class()
-
     def get_queryset(self):
         genome = get_object_or_404(
             emg_models.Genome,
             Q(accession=self.kwargs['accession'])
         )
         queryset = emg_models.GenomeCogCounts.objects \
+            .select_related('cog', 'genome') \
             .filter(genome=genome)
-
-        queryset = queryset.annotate(cog_name=F('cog__name'),
-                                     cog_desc=F('cog__description'))
-
         return queryset
-
-    def list(self, request, *args, **kwargs):
-        return super(GenomeCogsRelationshipsViewSet, self) \
-            .list(request, *args, **kwargs)
 
 
 class GenomeKeggClassRelationshipsViewSet(emg_mixins.ListModelMixin,
@@ -1080,35 +1069,20 @@ class GenomeKeggClassRelationshipsViewSet(emg_mixins.ListModelMixin,
     lookup_field = 'accession'
     lookup_value_regex = '[^/]+'
 
-    def get_serializer_class(self):
-        return super(GenomeKeggClassRelationshipsViewSet, self) \
-            .get_serializer_class()
-
     def get_queryset(self):
         genome = get_object_or_404(
             emg_models.Genome,
             Q(accession=self.kwargs['accession'])
         )
         queryset = emg_models.GenomeKeggClassCounts.objects \
-            .filter(genome=genome) \
-            .annotate(class_id=F('kegg_class__class_id'),
-                      name=F('kegg_class__name'))
+            .select_related('kegg_class') \
+            .filter(genome=genome)
         filter_param = self.request.GET.get('filter', '').split(',')
         if 'pangenome' in filter_param:
             queryset = queryset.filter(pangenome=True)
         elif 'genome' in filter_param:
             queryset = queryset.filter(pangenome=False)
         return queryset
-
-    def list(self, request, *args, **kwargs):
-        """
-        Retrieves analysis result for the given accession
-        Example:
-        ---
-        `/assemblies/ERZ1385375/analyses`
-        """
-        return super(GenomeKeggClassRelationshipsViewSet, self) \
-            .list(request, *args, **kwargs)
 
 
 class GenomeKeggModuleRelationshipsViewSet(emg_mixins.ListModelMixin,
@@ -1131,19 +1105,14 @@ class GenomeKeggModuleRelationshipsViewSet(emg_mixins.ListModelMixin,
     lookup_field = 'accession'
     lookup_value_regex = '[^/]+'
 
-    def get_serializer_class(self):
-        return super(GenomeKeggModuleRelationshipsViewSet, self) \
-            .get_serializer_class()
-
     def get_queryset(self):
         genome = get_object_or_404(
             emg_models.Genome,
             Q(accession=self.kwargs['accession'])
         )
         queryset = emg_models.GenomeKeggModuleCounts.objects \
-            .filter(genome=genome) \
-            .annotate(name=F('kegg_module__name'),
-                      description=F('kegg_module__description'))
+            .select_related('kegg_module') \
+            .filter(genome=genome)
         filter_param = self.request.GET.get('filter', '').split(',')
         if 'pangenome' in filter_param:
             queryset = queryset.filter(pangenome=True)
@@ -1151,15 +1120,34 @@ class GenomeKeggModuleRelationshipsViewSet(emg_mixins.ListModelMixin,
             queryset = queryset.filter(pangenome=False)
         return queryset
 
-    def list(self, request, *args, **kwargs):
-        """
-        Retrieves analysis result for the given accession
-        Example:
-        ---
-        `/assemblies/ERZ1385375/analyses`
-        """
-        return super(GenomeKeggModuleRelationshipsViewSet, self) \
-            .list(request, *args, **kwargs)
+
+class GenomeAntiSmashGeneClustersRelationshipsViewSet(emg_mixins.ListModelMixin, viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.AntiSmashCountSerializer
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'name',
+        'genome_count'
+    )
+
+    ordering = ['-genome_count']
+
+    lookup_field = 'accession'
+    lookup_value_regex = '[^/]+'
+
+    def get_queryset(self):
+        genome = get_object_or_404(
+            emg_models.Genome,
+            Q(accession=self.kwargs['accession'])
+        )
+        queryset = emg_models.GenomeAntiSmashGCCounts.objects \
+            .selected_related('') \
+            .filter(genome=genome)
+        return queryset
 
 
 class ReleaseGenomesViewSet(emg_mixins.ListModelMixin,

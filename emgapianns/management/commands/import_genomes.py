@@ -63,14 +63,15 @@ class Command(BaseCommand):
             .get_or_create(version=version,
                            result_directory=base_result_dir)[0]
 
-    def upload_dir(self, d):
-        logger.info('Uploading dir: {}'.format(d))
-        genome, has_pangenome = self.create_genome(d)
+    def upload_dir(self, directory):
+        logger.info('Uploading dir: {}'.format(directory))
+        genome, has_pangenome = self.create_genome(directory)
         self.set_genome_release(genome)
 
-        self.upload_cog_results(genome, d, has_pangenome)
-        self.upload_kegg_class_results(genome, d, has_pangenome)
-        self.upload_kegg_module_results(genome, d, has_pangenome)
+        self.upload_cog_results(genome, directory, has_pangenome)
+        self.upload_kegg_class_results(genome, directory, has_pangenome)
+        self.upload_kegg_module_results(genome, directory, has_pangenome)
+        self.upload_antismash_geneclusters(genome, directory)
         self.upload_genome_files(genome, has_pangenome)
 
     def set_genome_release(self, genome):
@@ -261,6 +262,33 @@ class Command(BaseCommand):
 
         count.save(using=self.database)
 
+    def upload_antismash_geneclusters(self, genome, directory):
+        """Upload AS results in the DB
+        """
+        file = os.path.join(directory, 'genome', 'geneclusters.txt')
+
+        if not os.path.exists(file):
+            logger.warn('Genome {} does not have antiSMASH geneclusters'.format(genome.accession))
+            return
+
+        with open(file, 'rt') as tsv:
+            for row in tsv:
+                *_, cluster, features, _ = row.split('\t')
+
+                as_cluster, _ = emg_models.AntiSmashGC.objects \
+                    .using(self.database) \
+                    .get_or_create(name=cluster)
+
+                count_val = len(features.split(';')) if len(features) else 0
+                model, _ = emg_models.GenomeAntiSmashGCCounts.objects \
+                    .using(self.database) \
+                    .get_or_create(genome=genome, antismash_genecluster=as_cluster,
+                                   genome_count=count_val)
+                model.save(using=self.database)
+
+            logger.info(
+                'Loaded Genome AntiSMASH geneclusters for {}'.format(genome.accession))
+
     def upload_genome_files(self, genome, has_pangenome):
         logger.info('Uploading genome files...')
         self.upload_genome_file(genome, 'Predicted CDS', 'fasta',
@@ -271,6 +299,8 @@ class Command(BaseCommand):
                                 genome.accession + '.fna.fai', 'Genome analysis', 'genome')
         self.upload_genome_file(genome, 'Genome Annotation', 'gff',
                                 genome.accession + '.gff', 'Genome analysis', 'genome')
+        self.upload_genome_file(genome, 'Genome antiSMASH Annotation', 'gff',
+                                genome.accession + '_antismash.gff', 'Genome analysis', 'genome')
         self.upload_genome_file(genome, 'EggNog annotation', 'tsv',
                                 genome.accession + '_eggNOG.tsv', 'Genome analysis', 'genome')
         self.upload_genome_file(genome, 'InterProScan annotation', 'tsv',

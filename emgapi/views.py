@@ -1188,16 +1188,9 @@ class GenomeViewSet(mixins.RetrieveModelMixin,
         'release__version'
     )
 
-    queryset = emg_models.Genome.objects.all()
-
-    def get_serializer_class(self):
-        return super(GenomeViewSet, self).get_serializer_class()
-
-    def list(self, request, *args, **kwargs):
-        return super(GenomeViewSet, self).list(request, *args, **kwargs)
-
-    def retrieve(self, request, *args, **kwargs):
-        return super(GenomeViewSet, self).retrieve(request, *args, **kwargs)
+    queryset = emg_models.Genome.objects.all() \
+        .prefetch_related('releases') \
+        .select_related('biome', 'geo_origin')
 
 
 class GenomeDownloadViewSet(emg_mixins.ListModelMixin,
@@ -1385,12 +1378,6 @@ class GenomeSetViewSet(mixins.RetrieveModelMixin,
             return emg_serializers.GenomeSetSerializer
         return super(GenomeSetViewSet, self).get_serializer_class()
 
-    def retrieve(self, request, *args, **kwargs):
-        return super(GenomeSetViewSet, self).retrieve(request, *args, **kwargs)
-
-    def list(self, request, *args, **kwargs):
-        return super(GenomeSetViewSet, self).list(request, *args, **kwargs)
-
 
 class CogCatViewSet(mixins.RetrieveModelMixin,
                     emg_mixins.ListModelMixin,
@@ -1407,17 +1394,6 @@ class CogCatViewSet(mixins.RetrieveModelMixin,
     )
 
     ordering = ('-name',)
-
-    def get_serializer_class(self):
-        # if self.action == 'retrieve':
-        #     return emg_serializers.GenomeSetSerializer
-        return super(CogCatViewSet, self).get_serializer_class()
-
-    def retrieve(self, request, *args, **kwargs):
-        return super(CogCatViewSet, self).retrieve(request, *args, **kwargs)
-
-    def list(self, request, *args, **kwargs):
-        return super(CogCatViewSet, self).list(request, *args, **kwargs)
 
 
 class KeggModuleViewSet(mixins.RetrieveModelMixin,
@@ -1436,17 +1412,6 @@ class KeggModuleViewSet(mixins.RetrieveModelMixin,
 
     ordering = ('-name',)
 
-    def get_serializer_class(self):
-        # if self.action == 'retrieve':
-        #     return emg_serializers.GenomeSetSerializer
-        return super(KeggModuleViewSet, self).get_serializer_class()
-
-    def retrieve(self, request, *args, **kwargs):
-        return super(KeggModuleViewSet, self).retrieve(request, *args, **kwargs)
-
-    def list(self, request, *args, **kwargs):
-        return super(KeggModuleViewSet, self).list(request, *args, **kwargs)
-
 
 class KeggClassViewSet(mixins.RetrieveModelMixin,
                        emg_mixins.ListModelMixin,
@@ -1464,13 +1429,20 @@ class KeggClassViewSet(mixins.RetrieveModelMixin,
 
     ordering = ('-name',)
 
-    def get_serializer_class(self):
-        # if self.action == 'retrieve':
-        #     return emg_serializers.GenomeSetSerializer
-        return super(KeggClassViewSet, self).get_serializer_class()
 
-    def retrieve(self, request, *args, **kwargs):
-        return super(KeggClassViewSet, self).retrieve(request, *args, **kwargs)
+class AntiSmashGeneClustersViewSet(mixins.RetrieveModelMixin,
+                                   emg_mixins.ListModelMixin,
+                                   viewsets.GenericViewSet):
+    serializer_class = emg_serializers.AntiSmashGCSerializer
+    queryset = emg_models.AntiSmashGC.objects.all()
 
-    def list(self, request, *args, **kwargs):
-        return super(KeggClassViewSet, self).list(request, *args, **kwargs)
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'name',
+    )
+
+    ordering = ('-name',)
+        

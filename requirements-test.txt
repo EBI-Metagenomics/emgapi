@@ -1,14 +1,11 @@
-# EMG tests dependencies
-# install and create a virtual environment
-# run pip install -r requirements-test
-
 ## bug https://github.com/aio-libs/multidict/issues/274
 multidict==4.4.0a0
 
 pytest~=5.2.2
 pytest-django~=3.6.0
+pytest-xdist
 
-model_mommy
+model_bakery
 mock_services
 mongomock
 mock

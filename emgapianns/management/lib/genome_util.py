@@ -20,6 +20,7 @@ def get_expected_genome_files(accession):
         accession + '.faa',
         accession + '.fna',
         accession + '.gff',
+        accession + '_antismash.gff',
         accession + '.stats',
         accession + '_eggNOG.tsv',
         accession + '_InterProScan.tsv'
@@ -39,6 +40,7 @@ EXPECTED_PANGENOME_FILES = {
     'pan-genome_eggNOG.tsv',
     'pan-genome_InterProScan.tsv'
 }
+
 EXPECTED_DIR_CONTENT = {'genome.json', 'genome'}
 
 
