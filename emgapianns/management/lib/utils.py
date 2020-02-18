@@ -16,12 +16,12 @@
 import glob
 import logging
 import os
-import pathlib
 import re
 import sys
 import unicodedata
 
 from emgapi import models as emg_models
+from emgapianns.management.lib.downloadable_files import ChunkedDownloadFiles, UnchunkedDownloadFile
 from emgapianns.management.lib.import_analysis_model import Assembly, Run
 from emgapianns.management.lib.uploader_exceptions import \
     AccessionNotRecognised
@@ -34,6 +34,16 @@ assembly_accession_re = r'(ERZ\d{6,})'
 
 def is_study_accession(accession):
     return re.match(study_accssion_re, accession)
+
+
+def get_run_accession(path):
+    pattern = re.compile(run_accession_re)
+    match = re.search(pattern, path)
+    if len(match.groups()) > 0:
+        end_pos = match.end()
+        return path[0:end_pos]
+    else:
+        raise Exception("Could not identify run accession from {}".format(path))
 
 
 def is_run_accession(accession):
@@ -87,7 +97,7 @@ def parse_run_metadata(raw_metadata):
     except KeyError as err:
         print("Could NOT retrieve all run metadata need from ENA's API: {0}".format(err))
         raise
-    except: # noqa
+    except:  # noqa
         print("Unexpected error:", sys.exc_info()[0])
         raise
 
@@ -107,7 +117,7 @@ def parse_assembly_metadata(raw_metadata):
     except KeyError as err:
         print("Could NOT retrieve all run metadata need from ENA's API: {0}".format(err))
         raise
-    except: # noqa
+    except:  # noqa
         print("Unexpected error:", sys.exc_info()[0])
         raise
 
@@ -186,66 +196,87 @@ def read_chunkfile(filename):
 
 
 def get_study_summary_dir(study_dir):
-    return os.path.join(study_dir, 'project-summary-tmp')
+    return os.path.join(study_dir, 'project-summary')
 
 
-class Download:
-    def __init__(self, emg_db_name, rootpath, input_file_name, file_config):
-        if file_config['_accession_substitution'] == 'accession':
-            input_file_name = input_file_name.split('_').pop(0)
+class DownloadFileDatabaseHandler:
+    def __init__(self, emg_db_name):
         self.emg_db_name = emg_db_name
-        self.rootpath = rootpath
-        self.file_config = file_config
-        self.alias = file_config['alias'].format(input_file_name)
 
-        realname = file_config['real_name']
-        self.realname = realname.format(input_file_name) if '{}' in realname else realname
-
-        self.file_format = ''.join(pathlib.Path(realname).suffixes)
-
-    def check_file_exists(self, path):
+    @staticmethod
+    def check_file_exists(path):
         filepath = os.path.join(*path)
         if not (os.path.exists(filepath) or os.path.isfile(filepath)):
             raise ValueError('{} does not exist and cannot be uploaded'.format(filepath))
 
-    def save(self, analysis_job):
-        return self._save(self.alias, self.realname, analysis_job)
-
-    def _save(self, alias, realname, analysis_job):
+    def save_study_download_file(self, study_download, study):
         try:
-            if self.file_config['subdir']:
-                path = [self.rootpath, *os.path.split(self.file_config['subdir']), realname]
-            else:
-                path = [self.rootpath, realname]
+            path = [study_download.rootpath, study_download.subdir, study_download.realname]
             self.check_file_exists(path)
         except ValueError:
-            if self.file_config['_required']:
+            if study_download.required:
                 raise
             return
         defaults = {
-            'description': self.get_download_label(),
-            'group_type': self.get_download_group(),
-            'subdir': self.get_download_subdir(),
-            'file_format': self.get_file_format()
+            'description': self.get_download_label(study_download.desc_label),
+            'group_type': self.get_download_group(study_download.group_type),
+            'subdir': self.get_download_subdir(study_download.subdir),
+            'file_format': self.get_file_format(study_download.file_format, study_download.compression)
+        }
+        pipeline_release = self.get_pipeline_release(study_download.pipeline)
+        dl, _ = emg_models.StudyDownload.objects \
+            .using(self.emg_db_name) \
+            .update_or_create(study=study,
+                              pipeline=pipeline_release,
+                              alias=study_download.alias,
+                              realname=study_download.realname,
+                              defaults=defaults)
+        return dl
+
+    def save_download_file(self, download_file, analysis_job):
+        try:
+            if download_file.sub_dir:
+                path = [download_file.result_dir, *os.path.split(download_file.sub_dir), download_file.realname]
+            else:
+                path = [download_file.result_dir, download_file.realname]
+            self.check_file_exists(path)
+        except ValueError:
+            if download_file.required:
+                raise
+            return
+        defaults = {
+            'description': self.get_download_label(download_file.description_label),
+            'group_type': self.get_download_group(download_file.group_type),
+            'subdir': self.get_download_subdir(download_file.sub_dir),
+            'file_format': self.get_file_format(download_file.file_format, download_file.compression)
         }
         dl, _ = emg_models.AnalysisJobDownload.objects \
             .using(self.emg_db_name) \
             .update_or_create(job=analysis_job,
                               pipeline=analysis_job.pipeline,
-                              alias=alias,
-                              realname=realname,
+                              alias=download_file.alias,
+                              realname=download_file.realname,
                               defaults=defaults)
         return dl
 
-    def get_download_group(self):
-        group_type = self.file_config['group_type']
+    def save_chunked_files(self, chunked_files, analysis_job):
+        parent_dl = None
+        if chunked_files.parent_file:
+            parent_dl = self.save_download_file(chunked_files.parent_file, analysis_job)
+
+        for chunked_file in chunked_files.chunked_files:
+            child_dl = self.save_download_file(chunked_file, analysis_job)
+            if parent_dl:
+                child_dl.parent_id = parent_dl
+                child_dl.save(using=self.emg_db_name)
+
+    def get_download_group(self, group_type):
         try:
             return emg_models.DownloadGroupType.objects.using(self.emg_db_name).get(group_type=group_type)
         except emg_models.DownloadGroupType.DoesNotExist:
             raise emg_models.DownloadGroupType.DoesNotExist('Group type "{}" not found in db'.format(group_type))
 
-    def get_download_label(self):
-        desc_label = self.file_config['description_label']
+    def get_download_label(self, desc_label):
         try:
             return emg_models.DownloadDescriptionLabel.objects.using(self.emg_db_name).get(
                 description_label=desc_label)
@@ -253,8 +284,15 @@ class Download:
             raise emg_models.DownloadDescriptionLabel.DoesNotExist(
                 'Download label "{}" not found in db'.format(desc_label))
 
-    def get_download_subdir(self):
-        subdir_name = self.file_config['subdir']
+    def get_pipeline_release(self, release_version):
+        try:
+            return emg_models.Pipeline.objects.using(self.emg_db_name).get(
+                release_version=release_version)
+        except emg_models.Pipeline.DoesNotExist:
+            raise emg_models.Pipeline.DoesNotExist(
+                'Pipeline release "{}" not found in db'.format(release_version))
+
+    def get_download_subdir(self, subdir_name):
         if not subdir_name:
             return None
         try:
@@ -262,96 +300,28 @@ class Download:
         except emg_models.DownloadSubdir.DoesNotExist:
             raise emg_models.DownloadSubdir.DoesNotExist('Download subdir "{}" not found in db'.format(subdir_name))
 
-    def get_file_format(self):
+    def get_file_format(self, format_name, compression):
         try:
             return emg_models.FileFormat.objects.using(self.emg_db_name).get(
-                format_name=self.file_config['format_name'],
-                compression=self.file_config['compression'])
+                format_name=format_name,
+                compression=compression)
         except emg_models.FileFormat.DoesNotExist:
             raise emg_models.FileFormat.DoesNotExist(
-                'File format "{}" with compression {} not found in db'.format(self.file_config['format_name'],
-                                                                              self.file_config['compression']))
+                'File format "{}" with compression {} not found in db'.format(format_name, compression))
 
 
-class StudyDownload(Download):
-    def __init__(self, emg_db_name, rootpath, file_config, pipeline):
-        self.emg_db_name = emg_db_name
+class StudyDownload:
+    def __init__(self, rootpath, file_config, pipeline):
         self.rootpath = rootpath
-        self.file_config = file_config
         self.pipeline = pipeline
-
-    def save(self, study):
-        alias = self.file_config['alias']
-        realname = self.file_config['real_name']
-        self._save(alias, realname, study)
-
-    def _save(self, alias, realname, study):
-        try:
-            path = [self.rootpath, os.pardir, self.file_config['subdir'], realname]
-            self.check_file_exists(path)
-        except ValueError:
-            if self.file_config['_required']:
-                raise
-            return
-        defaults = {
-            'description': self.get_download_label(),
-            'group_type': self.get_download_group(),
-            'subdir': self.get_download_subdir(),
-            'file_format': self.get_file_format()
-        }
-        dl, _ = emg_models.StudyDownload.objects \
-            .using(self.emg_db_name) \
-            .update_or_create(study=study,
-                              pipeline=self.pipeline,
-                              alias=alias,
-                              realname=realname,
-                              defaults=defaults)
-        return dl
-
-
-class ChunkedDownload(Download):
-    def __init__(self, emg_db_name, rootpath, input_file_name, file_config):
-        if file_config['_accession_substitution'] == 'accession':
-            input_file_name = input_file_name.split('_').pop(0)
-        self.emg_db_name = emg_db_name
-        self.rootpath = rootpath
-        self.file_config = file_config
-        self.input_file_name = input_file_name
-        self.exists = False
-
-        chunk_filename = file_config['chunk_file']
-        if '{}' in chunk_filename:
-            chunk_filename = chunk_filename.format(input_file_name)
-
-        chunk_filepath = os.path.join(self.rootpath, file_config['subdir'] or '', chunk_filename)
-        if os.path.exists(chunk_filepath):
-            self.exists = True
-            self.chunks = read_chunkfile(chunk_filepath)
-            if len(self.chunks) == 1:
-                self.alias = file_config['alias'].format(input_file_name)
-            self.file_format = ''.join(pathlib.Path(chunk_filename).suffixes)  # todo use config
-
-    def save(self, analysis_job):
-        if len(self.chunks) == 1:
-            realname = self.chunks[0]
-            realname = realname.format(self.input_file_name) if '{}' in realname else realname
-            super()._save(self.alias, realname, analysis_job)
-        else:
-            parent_dl = self.save_parent_download(self.chunks.pop(0), analysis_job)
-            for i, realname in enumerate(self.chunks):
-                alias = self.get_chunk_name(i + 1)
-                child_dl = super()._save(alias, realname, analysis_job)
-                child_dl.parent_id = parent_dl
-                child_dl.save(using=self.emg_db_name)
-
-    def save_parent_download(self, realname, analysis_job):
-        alias = self.get_chunk_name(1)
-        return super()._save(alias, realname, analysis_job)
-
-    def get_chunk_name(self, file_num):
-        fmt_name = self.file_config['real_name'].format(self.input_file_name)
-        name_path = pathlib.Path(fmt_name)
-        return name_path.stem + '_' + str(file_num) + name_path.suffix
+        self.alias = file_config['alias']
+        self.realname = file_config['real_name']
+        self.subdir = file_config['subdir']
+        self.required = file_config['_required']
+        self.desc_label = file_config['description_label']
+        self.group_type = file_config['group_type']
+        self.compression = file_config['compression']
+        self.file_format = file_config['format_name']
 
 
 class DownloadSet:
@@ -369,18 +339,17 @@ class DownloadSet:
                 else:
                     self.insert_file(f, analysis_job)
 
-    def insert_file(self, f, analysis_job):
-        f = Download(self.emg_db_name, self.rootpath, self.input_file_name, f)
-        f.save(analysis_job)
+    def insert_file(self, config, analysis_job):
+        f = UnchunkedDownloadFile(config, self.rootpath, self.input_file_name)
+        DownloadFileDatabaseHandler(self.emg_db_name).save_download_file(f, analysis_job)
 
-    def insert_chunked_file(self, f, analysis_job):
-        f = ChunkedDownload(self.emg_db_name, self.rootpath, self.input_file_name, f)
-        if f.exists:
-            f.save(analysis_job)
+    def insert_chunked_file(self, config, analysis_job):
+        f = ChunkedDownloadFiles(config, self.rootpath, self.input_file_name)
+        DownloadFileDatabaseHandler(self.emg_db_name).save_chunked_files(f, analysis_job)
 
 
-def get_conf_downloadset(rootpath, input_file_name, emg_db_name, experiment_type, version):
-    config = get_downloadset_config(version, experiment_type)
+def get_conf_downloadset(rootpath, input_file_name, emg_db_name, library_strategy, version):
+    config = get_downloadset_config(version, library_strategy)
     return DownloadSet(rootpath, input_file_name, emg_db_name, config)
 
 

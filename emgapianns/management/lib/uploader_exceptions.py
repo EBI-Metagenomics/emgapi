@@ -23,3 +23,28 @@ class AccessionNotRecognised(Exception):
 class StudyNotBeRetrievedFromENA(Exception):
     """Raised when study could not be retrieved from the ENA API"""
     pass
+
+
+class NoAnnotationsFoundException(Exception):
+    """Raised when no annotations found in result files"""
+    pass
+
+
+class QCNotPassedException(Exception):
+    """Raised when qc not passed flag file found"""
+    pass
+
+
+class CoverageCheckException(Exception):
+    """Raised when coverage check fails due to missing expected files"""
+    pass
+
+
+class FindResultFolderException(Exception):
+    """Raised when something goes wrong during the result directory search"""
+    pass
+
+
+class UnexpectedLibraryStrategyException(Exception):
+    """Raised when unexpected library_strategy found."""
+    pass

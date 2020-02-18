@@ -1,6 +1,7 @@
 {
   "files": [
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -13,6 +14,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -25,6 +27,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -37,6 +40,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -49,6 +53,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -61,6 +66,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -73,6 +79,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -85,6 +92,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -97,6 +105,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -109,6 +118,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -121,6 +131,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -133,6 +144,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -145,6 +157,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -157,6 +170,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -169,6 +183,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -181,6 +196,7 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "accession",
       "_chunked": false,
       "_required": false,
@@ -193,9 +209,10 @@
       "subdir": "RNASelection"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": false,
-      "_required": true,
+      "_required": false,
       "alias": "{}_LSU_MAPSeq.mseq.gz",
       "compression": true,
       "description_label": "MAPseq LSU assignments",
@@ -205,9 +222,10 @@
       "subdir": "taxonomy-summary/LSU"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": false,
-      "_required": true,
+      "_required": false,
       "alias": "{}_SSU_MAPSeq.mseq.gz",
       "compression": true,
       "description_label": "MAPseq SSU assignments",
@@ -217,6 +235,7 @@
       "subdir": "taxonomy-summary/SSU"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": true,
       "_required": true,
@@ -230,6 +249,8 @@
       "subdir": null
     },
     {
+      "downloadable": true,
+      "coverage_check": true,
       "_accession_substitution": "full",
       "_chunked": true,
       "_required": true,
@@ -243,8 +264,9 @@
       "subdir": null
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
-      "_chunked": false,
+      "_chunked": true,
       "_required": true,
       "alias": "{}_CDS_unannotated.faa.gz",
       "compression": true,
@@ -252,9 +274,40 @@
       "format_name": "FASTA",
       "group_type": "Sequence data",
       "real_name": "{}_CDS_unannotated.faa.gz",
+      "chunk_file": "{}_CDS_unannotated.faa.chunks",
       "subdir": null
     },
     {
+      "downloadable": false,
+      "_accession_substitution": null,
+      "_chunked": false,
+      "_required": true,
+      "compression": false,
+      "format_name": "CSV",
+      "real_name": "new.summary",
+      "subdir": "charts"
+    },
+    {
+      "downloadable": false,
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "_required": false,
+      "compression": false,
+      "format_name": "CSV",
+      "real_name": "{}_summary.rfam",
+      "subdir": null
+    },
+    {
+      "_required": true,
+      "downloadable": false,
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "compression": false,
+      "format_name": "CSV",
+      "real_name": "{}_summary.ipr",
+      "subdir": null
+    },
+    {"downloadable": true,
       "_accession_substitution": "full",
       "_chunked": false,
       "_required": true,
@@ -267,6 +320,7 @@
       "subdir": null
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": false,
       "_required": true,
@@ -279,6 +333,7 @@
       "subdir": null
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": true,
       "_required": true,
@@ -292,8 +347,10 @@
       "subdir": null
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
-      "_chunked": false,
+      "_chunked": true,
+      "chunk_file": "LSU.fasta.chunks",
       "_required": true,
       "alias": "{}_LSU.fasta.gz",
       "compression": true,
@@ -304,9 +361,10 @@
       "subdir": "sequence-categorisation"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": false,
-      "_required": true,
+      "_required": false,
       "alias": "{}_LSU_OTU.tsv",
       "compression": false,
       "description_label": "Reads encoding LSU rRNA",
@@ -316,9 +374,10 @@
       "subdir": "taxonomy-summary/LSU"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": false,
-      "_required": true,
+      "_required": false,
       "alias": "{}_LSU_OTU_TABLE_HDF5.biom",
       "compression": false,
       "description_label": "OTUs, counts and taxonomic assignments for LSU rRNA",
@@ -328,9 +387,10 @@
       "subdir": "taxonomy-summary/LSU"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": false,
-      "_required": true,
+      "_required": false,
       "alias": "{}_LSU_OTU_TABLE_JSON.biom",
       "compression": false,
       "description_label": "OTUs, counts and taxonomic assignments for LSU rRNA",
@@ -340,6 +400,21 @@
       "subdir": "taxonomy-summary/LSU"
     },
     {
+      "downloadable": true,
+      "_accession_substitution": "full",
+      "_chunked": true,
+      "_required": true,
+      "alias": "{}_ORF_annotated.ffn.gz",
+      "compression": true,
+      "description_label": "Predicted ORF with annotation",
+      "format_name": "FASTA",
+      "group_type": "Sequence data",
+      "real_name": "{}_CDS_annotated.ffn.gz",
+      "chunk_file": "{}_CDS_annotated.ffn.chunks",
+      "subdir": null
+    },
+    {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": true,
       "_required": true,
@@ -349,12 +424,14 @@
       "format_name": "FASTA",
       "group_type": "Sequence data",
       "real_name": "{}_CDS_unannotated.ffn.gz",
-      "chunk_file": "{}_CDS_annotated.ffn.chunks",
+      "chunk_file": "{}_CDS_unannotated.ffn.chunks",
       "subdir": null
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
-      "_chunked": false,
+      "_chunked": true,
+      "chunk_file": "SSU.fasta.chunks",
       "_required": true,
       "alias": "{}_SSU.fasta.gz",
       "compression": true,
@@ -365,9 +442,10 @@
       "subdir": "sequence-categorisation"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": false,
-      "_required": true,
+      "_required": false,
       "alias": "{}_SSU_OTU.tsv",
       "compression": false,
       "description_label": "Reads encoding SSU rRNA",
@@ -377,9 +455,28 @@
       "subdir": "taxonomy-summary/SSU"
     },
     {
+      "downloadable": false,
       "_accession_substitution": "full",
       "_chunked": false,
-      "_required": true,
+      "_required": false,
+      "compression": false,
+      "real_name": "{}_SSU.fasta.mseq.txt",
+      "subdir": "taxonomy-summary/SSU"
+    },
+    {
+      "downloadable": false,
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "_required": false,
+      "compression": false,
+      "real_name": "{}_LSU.fasta.mseq.txt",
+      "subdir": "taxonomy-summary/LSU"
+    },
+    {
+      "downloadable": true,
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "_required": false,
       "alias": "{}_SSU_OTU_TABLE_HDF5.biom",
       "compression": false,
       "description_label": "OTUs, counts and taxonomic assignments for SSU rRNA",
@@ -389,9 +486,10 @@
       "subdir": "taxonomy-summary/SSU"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": false,
-      "_required": true,
+      "_required": false,
       "alias": "{}_SSU_OTU_TABLE_JSON.biom",
       "compression": false,
       "description_label": "OTUs, counts and taxonomic assignments for SSU rRNA",
@@ -401,6 +499,7 @@
       "subdir": "taxonomy-summary/SSU"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": true,
       "_required": true,
@@ -414,6 +513,7 @@
       "subdir": "sequence-categorisation"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": true,
       "_required": true,
@@ -427,6 +527,7 @@
       "subdir": "sequence-categorisation"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": true,
       "_required": true,
@@ -438,6 +539,137 @@
       "real_name": "pCDS.fasta.gz",
       "chunk_file": "pCDS.fasta.chunks",
       "subdir": "sequence-categorisation"
+    },
+    {
+      "_accession_substitution": null,
+      "_chunked": false,
+      "_required": true,
+      "downloadable": false,
+      "alias": null,
+      "compression": false,
+      "description_label": null,
+      "format_name": null,
+      "group_type": null,
+      "real_name": "summary.out",
+      "subdir": "qc-statistics"
+    },
+    {
+      "_accession_substitution": null,
+      "_chunked": false,
+      "_required": true,
+      "downloadable": false,
+      "alias": null,
+      "compression": false,
+      "description_label": null,
+      "format_name": null,
+      "group_type": null,
+      "real_name": "nucleotide-distribution.out.*",
+      "subdir": "qc-statistics"
+    },
+    {
+      "_accession_substitution": null,
+      "_chunked": false,
+      "_required": true,
+      "downloadable": false,
+      "alias": null,
+      "compression": false,
+      "description_label": null,
+      "format_name": null,
+      "group_type": null,
+      "real_name": "GC-distribution.out.*",
+      "subdir": "qc-statistics"
+    },
+    {
+      "_accession_substitution": null,
+      "_chunked": false,
+      "_required": true,
+      "downloadable": false,
+      "alias": null,
+      "compression": false,
+      "description_label": null,
+      "format_name": null,
+      "group_type": null,
+      "real_name": "seq-length.out.*",
+      "subdir": "qc-statistics"
+    },
+    {
+      "downloadable": false,
+      "_accession_substitution": null,
+      "_chunked": false,
+      "_required": false,
+      "alias": null,
+      "compression": false,
+      "description_label": null,
+      "format_name": null,
+      "group_type": null,
+      "real_name": "krona.html",
+      "subdir": "taxonomy-summary/SSU"
+    },
+    {
+      "_accession_substitution": null,
+      "_chunked": false,
+      "_required": false,
+      "downloadable": false,
+      "alias": null,
+      "compression": false,
+      "description_label": null,
+      "format_name": null,
+      "group_type": null,
+      "real_name": "krona.html",
+      "subdir": "taxonomy-summary/LSU"
+    },
+    {
+      "downloadable": false,
+      "_accession_substitution": null,
+      "_chunked": false,
+      "_required": false,
+      "alias": null,
+      "compression": false,
+      "description_label": null,
+      "format_name": null,
+      "group_type": null,
+      "real_name": "kingdom-counts.txt",
+      "subdir": "taxonomy-summary/LSU"
+    },
+    {
+      "downloadable": false,
+      "_accession_substitution": null,
+      "_chunked": false,
+      "_required": false,
+      "alias": null,
+      "compression": false,
+      "description_label": null,
+      "format_name": null,
+      "group_type": null,
+      "real_name": "kingdom-counts.txt",
+      "subdir": "taxonomy-summary/SSU"
+    },
+    {
+      "downloadable": false,
+      "_required": true,
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "compression": true,
+      "real_name": "{}.cmsearch.all.tblout.deoverlapped.gz",
+      "subdir": null
+    },
+    {
+      "downloadable": false,
+      "_required": true,
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "compression": true,
+      "real_name": "{}.cmsearch.all.tblout.gz",
+      "subdir": null
+    },
+    {
+      "downloadable": false,
+      "_required": true,
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "compression": false,
+      "real_name": "{}.fasta.submitted.count",
+      "subdir": null
     }
   ]
 }

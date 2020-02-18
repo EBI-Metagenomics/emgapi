@@ -18,15 +18,14 @@ import logging
 from django.core.management import BaseCommand
 from emgapianns.management.lib import utils
 
-from emgapianns.management.lib.create_or_update_study import run_create_or_update_study
+from emgapianns.management.lib.create_or_update_study import StudyImporter
 
 logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = 'Creates or updates a study in EMG.'
-
-    # Example call: import_study SRP101805 358 --prod_dir /home/<user>/metagenomics/results
+    help = 'Creates or updates a study in EMG.\n' \
+           'Example call: import_study SRP101805 358 --prod_dir /home/<user>/metagenomics/results'
 
     def add_arguments(self, parser):
         parser.add_argument('accession',
@@ -38,31 +37,39 @@ class Command(BaseCommand):
         dir_locations = parser.add_mutually_exclusive_group()
         dir_locations.add_argument('--study_dir',
                                    help="NFS root path of the study in the results archive")
-        dir_locations.add_argument('--prod_dir',
+        dir_locations.add_argument('--rootpath',
                                    help="NFS root path of the results archive",
                                    default='/nfs/production/interpro/metagenomics/results/')
         parser.add_argument('--ena_db',
                             help="ENA's production database",
                             default='era')
+        parser.add_argument('--emg_db',
+                            help='Target emg_db_name alias',
+                            choices=['default', 'dev', 'prod'],
+                            default='default')
 
     def handle(self, *args, **options):
         logger.info("CLI %r" % options)
 
-        secondary_study_accession = options['accession']
+        study_accession = options['accession']
         lineage = options['lineage']
-        database = options['ena_db']
+        ena_db = options['ena_db']
+        emg_db = options['emg_db']
 
-        study_dir = self.get_study_dir(options.get('study_dir'), options.get('prod_dir'), secondary_study_accession)
-        run_create_or_update_study(secondary_study_accession, study_dir, lineage, database)
+        logger.info('Importing study {}'.format(study_accession))
 
-        logger.info("Program finished successfully.")
+        study_dir = self.get_study_dir(options.get('study_dir'), options.get('rootpath'), study_accession)
+        importer = StudyImporter(study_accession, study_dir, lineage, ena_db, emg_db)
+        importer.run()
+
+        logger.info("Study import finished successfully.")
 
     @staticmethod
-    def get_study_dir(study_dir, prod_dir, secondary_study_accession):
+    def get_study_dir(study_dir, rootpath, secondary_study_accession):
         if study_dir:
             result_dir = study_dir
         else:
-            result_dir = utils.retrieve_existing_result_dir(prod_dir, ['2*', '*', secondary_study_accession])
+            result_dir = utils.retrieve_existing_result_dir(rootpath, ['2*', '*', secondary_study_accession])
 
         if not result_dir:
             raise ValueError("Could not find any result directory for this study. Program will exit now!")

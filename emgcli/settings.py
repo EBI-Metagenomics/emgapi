@@ -125,7 +125,7 @@ LOGGING = {
             'propagate': True
         },
         '': {
-            'handlers': ['default'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': True
         }

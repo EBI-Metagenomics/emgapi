@@ -1,0 +1,5 @@
+7036	sk__Eukaryota
+78	sk__Eukaryota	k__	p__	c__Chrysophyceae	o__Chromulinales	f__Chromulinaceae	g__	s__Spumella-like_flagellate_1031
+3	sk__Eukaryota	k__	p__	c__Heterolobosea	o__Schizopyrenida	f__Vahlkampfiidae	g__Tetramitus	s__Tetramitus_sp._VK012
+8	sk__Eukaryota	k__	p__Bacillariophyta	c__Bacillariophyceae	o__Bacillariales	f__Bacillariaceae	g__Pseudo-nitzschia	s__Pseudo-nitzschia_cf._australis
+148	sk__Eukaryota	k__	p__Cercozoa	c__	o__Thaumatomonadida	f__Thaumatomastigidae	g__Thaumatomonas	s__Thaumatomonas_zhukovi

@@ -33,6 +33,7 @@ def create_model(*args, **kwargs):
 
 @pytest.mark.django_db
 class TestImportSampleTransactions(TransactionTestCase):
+
     @pytest.mark.usefixtures("biome")
     @pytest.mark.usefixtures("var_names")
     def test_import_sample_should_load_sample(self):
@@ -111,6 +112,38 @@ class TestImportSampleTransactions(TransactionTestCase):
             assert annotations.get(var__var_name='geographic location (latitude)').var_val_ucv == '44.0'
             assert annotations.get(var__var_name='geographic location (longitude)').var_val_ucv == '53.0'
             assert annotations.get(var__var_name='collection date').var_val_ucv == '2019-01-01'
+
+    @pytest.mark.usefixtures("biome_human")
+    @pytest.mark.usefixtures("var_names")
+    def test_import_sample_should_tag_species(self):
+        sample_accession = 'ERS1282031'
+        mock_api_data = mock_fetch_sample_api()
+        del mock_api_data['location']
+        mock_api = mock.patch.object(Command, 'fetch_sample_api', new=lambda *args, **kwargs: mock_api_data)
+        mock_db = mock.patch.object(Command, 'get_ena_db_sample', new=create_model)
+        with mock_api, mock_db:
+            cmd = Command()
+            cmd.run_from_argv(
+                argv=['manage.py', 'import_sample', sample_accession, '--biome', 'root:Host-associated:Human'])
+            created_sample = emg_models.Sample.objects.get(accession=sample_accession)
+            assert created_sample.species == 'Homo sapiens'
+            assert created_sample.host_tax_id == 9606
+
+    @pytest.mark.usefixtures("biome")
+    @pytest.mark.usefixtures("var_names")
+    def test_import_sample_should_tag_no_species(self):
+        sample_accession = 'ERS1282031'
+        mock_api_data = mock_fetch_sample_api()
+        del mock_api_data['location']
+        mock_api = mock.patch.object(Command, 'fetch_sample_api', new=lambda *args, **kwargs: mock_api_data)
+        mock_db = mock.patch.object(Command, 'get_ena_db_sample', new=create_model)
+        with mock_api, mock_db:
+            cmd = Command()
+            cmd.run_from_argv(
+                argv=['manage.py', 'import_sample', sample_accession, '--biome', 'root:foo:bar'])
+            created_sample = emg_models.Sample.objects.get(accession=sample_accession)
+            assert created_sample.species is None
+            assert created_sample.host_tax_id is None
 
     @pytest.mark.usefixtures("biome")
     @pytest.mark.usefixtures("var_names")
