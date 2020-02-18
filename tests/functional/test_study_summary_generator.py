@@ -1,10 +1,12 @@
 import os
 import shutil
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
 
 import pandas as pd
+import pytest
 from pandas.util.testing import assert_frame_equal
 from parameterized import parameterized
 
@@ -44,6 +46,7 @@ class TestStudySummaryGenerator(unittest.TestCase):
         ("itsonedb"),
         ("LSU")
     ])
+    @pytest.mark.skipif(sys.version_info < (3, 6), reason="requires python3.6 or higher")
     def test_generate_taxonomy_phylum_summary_v5(self, rna_type):
 
         analysis_result_dirs = dict()
