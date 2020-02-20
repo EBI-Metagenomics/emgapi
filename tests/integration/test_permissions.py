@@ -21,7 +21,7 @@ from django.core.urlresolvers import reverse
 
 from rest_framework import status
 
-from model_mommy import mommy
+from model_bakery import baker
 
 from test_utils.emg_fixtures import * # noqa
 
@@ -31,35 +31,35 @@ class TestPermissionsAPI(object):
 
     @pytest.fixture(autouse=True)
     def setup_method(self, db):
-        _biome = mommy.make('emgapi.Biome', biome_name="foo",
+        _biome = baker.make('emgapi.Biome', biome_name="foo",
                             lineage="root:foo", pk=123)
 
         # Webin-000 public
-        mommy.make("emgapi.Study", pk=111, secondary_accession="SRP0111",
+        baker.make("emgapi.Study", pk=111, secondary_accession="SRP0111",
                    is_public=1, submission_account_id='Webin-000',
                    biome=_biome)
-        mommy.make("emgapi.Study", pk=112, secondary_accession="SRP0112",
+        baker.make("emgapi.Study", pk=112, secondary_accession="SRP0112",
                    is_public=1, submission_account_id='Webin-000',
                    biome=_biome)
         # Webin-000 private
-        mommy.make("emgapi.Study", pk=113, secondary_accession="SRP0113",
+        baker.make("emgapi.Study", pk=113, secondary_accession="SRP0113",
                    is_public=0, submission_account_id='Webin-000',
                    biome=_biome)
 
         # Webin-111 public
-        mommy.make("emgapi.Study", pk=114, secondary_accession="SRP0114",
+        baker.make("emgapi.Study", pk=114, secondary_accession="SRP0114",
                    is_public=1, submission_account_id='Webin-111',
                    biome=_biome)
         # Webin-111 private
-        mommy.make("emgapi.Study", pk=115, secondary_accession="SRP0115",
+        baker.make("emgapi.Study", pk=115, secondary_accession="SRP0115",
                    is_public=0, submission_account_id='Webin-111',
                    biome=_biome)
 
         # unknown public
-        mommy.make("emgapi.Study", pk=120, secondary_accession="SRP0120",
+        baker.make("emgapi.Study", pk=120, secondary_accession="SRP0120",
                    is_public=1, submission_account_id=None, biome=_biome)
         # unknown private
-        mommy.make("emgapi.Study", pk=121, secondary_accession="SRP0121",
+        baker.make("emgapi.Study", pk=121, secondary_accession="SRP0121",
                    is_public=0, submission_account_id=None, biome=_biome)
 
     @pytest.mark.parametrize(

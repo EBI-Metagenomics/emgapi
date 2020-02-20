@@ -22,7 +22,7 @@ try:
 except ImportError:
     from urllib import urlencode
 
-from model_mommy import mommy
+from model_bakery import baker
 
 from django.core.urlresolvers import reverse
 
@@ -33,7 +33,7 @@ def create_publications(count):
     entries = []
     for pk in range(1, count+1):
         entries.append(
-            mommy.prepare(
+            baker.prepare(
                 "emgapi.Publication",
                 pk=pk,
                 pubmed_id=pk,
@@ -43,7 +43,7 @@ def create_publications(count):
         )
     for pk in range(count+1, 2*count+1):
         entries.append(
-            mommy.prepare(
+            baker.prepare(
                 "emgapi.Publication",
                 pk=pk,
                 pubmed_id=pk,
@@ -57,9 +57,9 @@ def create_publications(count):
 def create_studies(count):
     entries = []
     for pk in range(1, count+1):
-        _biome = mommy.make('emgapi.Biome', pk=pk)
+        _biome = baker.make('emgapi.Biome', pk=pk)
         entries.append(
-            mommy.prepare(
+            baker.prepare(
                 "emgapi.Study",
                 pk=pk,
                 biome=_biome,
@@ -69,9 +69,9 @@ def create_studies(count):
             )
         )
     for pk in range(count+1, 2*count+1):
-        _biome = mommy.make('emgapi.Biome', pk=pk)
+        _biome = baker.make('emgapi.Biome', pk=pk)
         entries.append(
-            mommy.prepare(
+            baker.prepare(
                 "emgapi.Study",
                 pk=pk,
                 biome=_biome,
@@ -86,10 +86,10 @@ def create_studies(count):
 def create_samples(count):
     entries = []
     for pk in range(1, count+1):
-        _biome = mommy.make('emgapi.Biome', pk=pk)
-        _study = mommy.make('emgapi.Study', pk=pk, biome=_biome, is_public=1)
+        _biome = baker.make('emgapi.Biome', pk=pk)
+        _study = baker.make('emgapi.Study', pk=pk, biome=_biome, is_public=1)
         entries.append(
-            mommy.prepare(
+            baker.prepare(
                 "emgapi.Sample",
                 pk=pk,
                 biome=_biome,
@@ -99,10 +99,10 @@ def create_samples(count):
             )
         )
     for pk in range(count+1, 2*count+1):
-        _biome = mommy.make('emgapi.Biome', pk=pk)
-        _study = mommy.make('emgapi.Study', pk=pk, biome=_biome, is_public=1)
+        _biome = baker.make('emgapi.Biome', pk=pk)
+        _study = baker.make('emgapi.Study', pk=pk, biome=_biome, is_public=1)
         entries.append(
-            mommy.prepare(
+            baker.prepare(
                 "emgapi.Sample",
                 pk=pk,
                 biome=_biome,

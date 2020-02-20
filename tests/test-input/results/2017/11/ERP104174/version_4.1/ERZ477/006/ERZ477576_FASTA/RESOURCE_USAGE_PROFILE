@@ -1,0 +1,15 @@
+Step name	Wall clock time in hours	CPUtime in sec	MaxMemory in MB	AverageMemory in MB
+stepDecompression	0:00:04	3.79	5	5.00
+stepFastaHeaderClean	0:00:28	26.57	9	8.75
+stepInit	None	n/a	n/a	n/a
+stepQCStats	0:04:59	297.68	68	65.48
+stepCMSearch	0:13:59	0.0	n/a	n/a
+stepCMSearchDeoverlap	0:00:00	0.10	-	-
+stepRNASummary	0:00:00	0.02	-	-
+stepCMSearchDeoverlap	0:00:04	1.60	103	81.67
+stepMAPseqSSUs	0:00:49	45.10	2800	2136.40
+stepMAPseqLSUs	0:00:14	11.03	22	22.00
+stepCDS	0:27:07	3681.22	n/a	n/a
+stepI5tsv	1:27:41	533843.6	n/a	n/a
+stepGOSummary	0:00:35	61.30	2902	315.20
+stepSummary	None	n/a	n/a	n/a

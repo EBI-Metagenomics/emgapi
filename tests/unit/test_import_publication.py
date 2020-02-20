@@ -49,17 +49,3 @@ def test_lookup_publication_by_pubmed_id_raises_exception_on_string(pubmed_id):
     with pytest.raises(TypeError):
         lookup_publication_by_pubmed_id(pubmed_id)
 
-
-# TODO: Check with Miguel how to run it safely
-# class PublicationTestCase(TransactionTestCase):
-#     def setUp(self):
-#         self.publication = Publication(1974, "Floyd K, Linden RJ, Saunders DA.", '0022-3751; 1469-7793; ',
-#                                        'journal article', '238',
-#                                        'Proceedings: The morphological variation of nervous structures in the'
-#                                        ' atrial endocardium of the dog.',
-#                                        None, None, 4838818, '19P', 'n/a', 'J Physiol')
-#
-#     def test_select_for_update_raises_an_error_without_transaction(self):
-#         with self.assertRaises(TransactionManagementError):
-#             publication = update_or_create_publication(self.publication)
-#             print(publication)  # needed to actually execute the query because they are lazy

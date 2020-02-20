@@ -1,0 +1,11 @@
+================ Program Versions Used in Analysis =====================
+INFERNAL : 1.1.2
+FragGeneScan : 1.20
+InterProScan : 5.25-64.0
+InterPro : 64.0
+Trimmomatic : 0.35
+========================= Analysis Details =============================
+The analyses were started on 16-12-2018 at 19:53:45.
+The file that was analysed was ERP021864/raw/ERR1864826.fastq.gz.
+This is an initial full analysis performed for the first time on this data file.
+========================================================================

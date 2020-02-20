@@ -42,22 +42,31 @@ class Command(BaseCommand):
     rootpath = None
     genome_folders = None
 
-    emg_db_name = None
+    emg_db = None
+    ena_db = None
     biome = None
 
     def add_arguments(self, parser):
         parser.add_argument('accessions', help='ENA sample accessions', nargs='+')
-        parser.add_argument('--database', help='Target emg_db_name alias', default='default')
+        parser.add_argument('--ena_db',
+                            help="ENA's production database",
+                            default='era')
+        parser.add_argument('--emg_db',
+                            help='Target emg_db_name alias',
+                            choices=['default', 'dev', 'prod'],
+                            default='default')
         parser.add_argument('--biome', help='Lineage of GOLD biome')
 
     def handle(self, *args, **options):
         logger.info("CLI %r" % options)
-        self.emg_db_name = options['database']
+        self.emg_db = options['emg_db']
+        self.ena_db = options['ena_db']
         self.biome = options['biome']
-        for acc in options['accessions']:
-            self.import_sample(acc)
 
-        logger.info("Program finished successfully.")
+        for acc in options['accessions']:
+            logger.info('Importing sample {}'.format(acc))
+            self.import_sample(acc)
+            logger.info("Sample import finished successfully.")
 
     def import_sample(self, accession):
         ena_db_model = self.get_ena_db_sample(accession)
@@ -71,7 +80,7 @@ class Command(BaseCommand):
         logger.info('Fetching sample {} from ena api'.format(accession))
         return ena.get_sample(accession)
 
-    def create_or_update_sample(self, api_ena_db_model, api_data):
+    def create_or_update_sample(self, ena_db_model, api_data):
         accession = api_data['secondary_sample_accession']
         logger.info('Creating sample {}'.format(accession))
         defaults = sanitise_fields({
@@ -83,16 +92,16 @@ class Command(BaseCommand):
             'environment_material': api_data['environment_material'],
             'sample_name': api_data['sample_alias'],
             'sample_alias': api_data['sample_alias'],
-            'host_tax_id': api_data['host_tax_id'],
-            'species': '',  # TODO
+            'host_tax_id': self.__get_host_tax_id(api_data['host_tax_id']),
+            'species': self.__get_species(),
             'biome': self.get_biome(accession),
             'last_update': timezone.now(),
-            'submission_account_id': api_ena_db_model.submission_account_id,
+            'submission_account_id': ena_db_model.submission_account_id,
         })
         if api_data.get('location'):
             defaults['latitude'], defaults['longitude'] = get_lat_long(api_data['location'])
 
-        sample, created = emg_models.Sample.objects.using(self.emg_db_name).update_or_create(
+        sample, created = emg_models.Sample.objects.using(self.emg_db).update_or_create(
             accession=accession,
             primary_accession=api_data['sample_accession'],
             defaults=defaults
@@ -147,18 +156,17 @@ class Command(BaseCommand):
             'var_val_ucv': value,
             'units': unit
         }
-        emg_models.SampleAnn.objects.using(self.emg_db_name) \
+        emg_models.SampleAnn.objects.using(self.emg_db) \
             .update_or_create(sample=sample, var=var, defaults=defaults)
 
-    @staticmethod
-    def get_ena_db_sample(accession):
+    def get_ena_db_sample(self, accession):
         logger.info('Fetching sample {} from ena oracle DB'.format(accession))
         query = Q(sample_id=accession) | Q(biosample_id=accession)
-        return ena_models.Sample.objects.using('era').filter(query).first()
+        return ena_models.Sample.objects.using(self.ena_db).filter(query).first()
 
     def get_variable(self, name):
         try:
-            return emg_models.VariableNames.objects.using(self.emg_db_name).get(var_name=name)
+            return emg_models.VariableNames.objects.using(self.emg_db).get(var_name=name)
         except emg_models.VariableNames.DoesNotExist:
             raise emg_models.VariableNames.DoesNotExist('Variable name {} is missing in db'.format(name))
 
@@ -168,17 +176,17 @@ class Command(BaseCommand):
 
     def tag_study(self, sample):
         study_accessions = self.get_sample_studies(sample)
-        studies = emg_models.Study.objects.using(self.emg_db_name).filter(secondary_accession__in=study_accessions)
+        studies = emg_models.Study.objects.using(self.emg_db).filter(secondary_accession__in=study_accessions)
         for study in studies:
             try:
-                emg_models.StudySample(study=study, sample=sample).save(using=self.emg_db_name)
+                emg_models.StudySample(study=study, sample=sample).save(using=self.emg_db)
             except IntegrityError:
                 pass
         if not len(studies):
             logger.warning('No studies tagged to sample {}'.format(sample.accession))
 
     def get_emg_biome_obj(self, lineage):
-        return emg_models.Biome.objects.using(self.emg_db_name).get(lineage=lineage)
+        return emg_models.Biome.objects.using(self.emg_db).get(lineage=lineage)
 
     def get_biome(self, sample_accession):
         if self.biome:
@@ -187,6 +195,18 @@ class Command(BaseCommand):
             lineage = self.get_backlog_lineage(sample_accession)
 
         return self.get_emg_biome_obj(lineage)
+
+    def __get_host_tax_id(self, ena_host_tax_id):
+        if self.biome.startswith('root:Host-associated:Human'):
+            return 9606
+        else:
+            return ena_host_tax_id
+
+    def __get_species(self):
+        if self.biome.startswith('root:Host-associated:Human'):
+            return 'Homo sapiens'
+        else:
+            return None
 
     @staticmethod
     def get_backlog_lineage(sample_accession):

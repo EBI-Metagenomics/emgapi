@@ -215,7 +215,7 @@ router.register(
 )
 
 urlpatterns = [
-    url(r'analyses/(?P<accession>[^/]+)/taxonomy/overview',
+    url(r'^v1/analyses/(?P<accession>[^/]+)/taxonomy/overview',
         m_views.AnalysisTaxonomyOverview.as_view(),
         name='analysis-taxonomy-overview'),
 ]

@@ -500,7 +500,7 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     class Meta:
         model = emg_models.Run
         exclude = (
-            'status',
+            'status_id',
         )
 
 
@@ -1449,8 +1449,8 @@ class LDAnalysisSerializer(drf_serializers.ModelSerializer):
 
 
 class CogCountSerializer(ExplicitFieldsModelSerializer):
-    name = serializers.CharField(source='cog_name')
-    description = serializers.CharField(source='cog_desc')
+    name = serializers.CharField(source='cog.name')
+    description = serializers.CharField(source='cog.description')
 
     class Meta:
         model = emg_models.GenomeCogCounts
@@ -1458,8 +1458,8 @@ class CogCountSerializer(ExplicitFieldsModelSerializer):
 
 
 class KeggClassMatchSerializer(ExplicitFieldsModelSerializer):
-    class_id = serializers.CharField()
-    name = serializers.CharField()
+    class_id = serializers.CharField(source='kegg_class.class_id')
+    name = serializers.CharField(source='kegg_class.name')
 
     class Meta:
         model = emg_models.GenomeKeggClassCounts
@@ -1467,12 +1467,21 @@ class KeggClassMatchSerializer(ExplicitFieldsModelSerializer):
 
 
 class KeggModuleMatchSerializer(ExplicitFieldsModelSerializer):
-    name = serializers.CharField()
-    description = serializers.CharField()
+    name = serializers.CharField(source='kegg_module.name')
+    description = serializers.CharField(source='kegg_module.description')
 
     class Meta:
         model = emg_models.GenomeKeggModuleCounts
         fields = ('name', 'description', 'genome_count', 'pangenome_count')
+
+
+class AntiSmashCountSerializer(ExplicitFieldsModelSerializer):
+    name = serializers.CharField(source='antismash_genecluster.name')
+    description = serializers.CharField(source='antismash_genecluster.description')
+
+    class Meta:
+        model = emg_models.GenomeAntiSmashGCCounts
+        fields = ('name', 'description', 'genome_count')
 
 
 class GenomeSerializer(ExplicitFieldsModelSerializer):
@@ -1534,6 +1543,19 @@ class GenomeSerializer(ExplicitFieldsModelSerializer):
     )
 
     def get_cog_matches(self, obj):
+        return None
+
+    antismash_geneclusters = relations.SerializerMethodResourceRelatedField(
+        source='get_antismash_geneclusters',
+        model=emg_models.AntiSmashGC,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:genome-antismash-genecluster-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+    )
+
+    def get_antismash_geneclusters(self, obj):
         return None
 
     # relationships
@@ -1708,3 +1730,9 @@ class KeggClassSerializer(ExplicitFieldsModelSerializer):
     class Meta:
         model = emg_models.KeggClass
         fields = ('class_id', 'name')
+
+
+class AntiSmashGCSerializer(ExplicitFieldsModelSerializer):
+    class Meta:
+        model = emg_models.AntiSmashGC
+        fields = '__all__'

@@ -1,0 +1,5 @@
+16	sk__Archaea	k__	p__Euryarchaeota
+3	sk__Bacteria	k__	p__Actinobacteria	c__Actinobacteria	o__Candidatus_Actinomarinales	f__Candidatus_Actinomarinaceae	g__Candidatus_Actinomarina
+2	sk__Chloroplast	k__	p__	c__	o__	f__	g__	s__marine_metagenome
+1	sk__Eukaryota	k__Metazoa	p__Cnidaria	c__Hydrozoa	o__Siphonophorae
+

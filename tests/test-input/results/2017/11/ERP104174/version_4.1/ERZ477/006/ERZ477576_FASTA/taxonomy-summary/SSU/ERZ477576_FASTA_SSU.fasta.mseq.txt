@@ -1,0 +1,4 @@
+1	sk__Archaea	k__	p__Thaumarchaeota	c__	o__	f__	g__Candidatus_Nitrosopelagicus
+2	sk__Bacteria	k__	p__Actinobacteria	c__Actinobacteria	o__Candidatus_Actinomarinales	f__Candidatus_Actinomarinaceae	g__Candidatus_Actinomarina
+1	sk__Bacteria	k__	p__Cyanobacteria	c__	o__Synechococcales
+2	sk__Bacteria	k__	p__Proteobacteria	c__Alphaproteobacteria	o__Rhodobacterales	f__Rhodobacteraceae	g__Ascidiaceihabitans

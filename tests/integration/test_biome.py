@@ -21,7 +21,7 @@ from django.core.urlresolvers import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from model_mommy import mommy
+from model_bakery import baker
 
 from emgapi import models as emg_models
 
@@ -41,7 +41,7 @@ class TestBiomeAPI(APITestCase):
             {'lineage': 'root:foo2:bar2', 'depth': 3, 'lft': 37, 'rgt': 48},
         ]
         for b in self.data['_biomes']:
-            mommy.make(
+            baker.make(
                 'emgapi.Biome',
                 depth=b['depth'],
                 biome_name=b['lineage'].split(':')[-1],
@@ -54,7 +54,7 @@ class TestBiomeAPI(APITestCase):
         self.data['samples'] = []
         for pk in range(2, len(self.data['_biomes'])+1):
             self.data['samples'].append(
-                mommy.make(
+                baker.make(
                     'emgapi.Sample',
                     pk=pk,
                     biome=emg_models.Biome.objects.get(pk=pk),
@@ -63,7 +63,7 @@ class TestBiomeAPI(APITestCase):
                 )
             )
 
-        self.data['study'] = mommy.make(
+        self.data['study'] = baker.make(
             'emgapi.Study',
             pk=1,
             secondary_accession="SPR0001",

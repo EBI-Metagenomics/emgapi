@@ -63,7 +63,7 @@ class ExperimentType(Enum):
     AMPLICON = 'amplicon'
     METAGENOMIC = 'metagenomic'
     METATRANSCRIPTOMIC = 'metatranscriptomic'
-    OTHER = 'other'
+    OTHER = 'unknown'
     METABARCODING = 'metabarcoding'
     ASSEMBLY = 'assembly'
 

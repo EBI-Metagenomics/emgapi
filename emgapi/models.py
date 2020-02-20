@@ -53,6 +53,9 @@ class Token(object):
 
 
 class BaseQuerySet(models.QuerySet):
+    """Auth mechanism to filter private models
+    """
+
     def available(self, request=None):
         _query_filters = {
             'StudyQuerySet': {
@@ -965,7 +968,7 @@ class Run(models.Model):
         db_column='ACCESSION', max_length=80, blank=True, null=True)
     secondary_accession = models.CharField(
         db_column='SECONDARY_ACCESSION', max_length=100, blank=True, null=True)
-    status = models.ForeignKey(
+    status_id = models.ForeignKey(
         'Status', db_column='STATUS_ID', related_name='runs',
         on_delete=models.CASCADE, default=2)
     sample = models.ForeignKey(
@@ -1329,24 +1332,20 @@ class AnalysisMetadataVariableNames(models.Model):
 
 
 class AnalysisJobAnn(models.Model):
-    job = models.ForeignKey(
-        AnalysisJob, db_column='JOB_ID',
-        related_name="analysis_metadata")
-    units = models.CharField(
-        db_column='UNITS', max_length=25, blank=True, null=True)
+    job = models.ForeignKey(AnalysisJob, db_column='JOB_ID', related_name='analysis_metadata')
+    units = models.CharField(db_column='UNITS', max_length=25, blank=True, null=True)
     var = models.ForeignKey(AnalysisMetadataVariableNames)
-    var_val_ucv = models.CharField(
-        db_column='VAR_VAL_UCV', max_length=4000, blank=True, null=True)
+    var_val_ucv = models.CharField(db_column='VAR_VAL_UCV', max_length=4000, blank=True, null=True)
 
     class Meta:
         db_table = 'ANALYSIS_JOB_ANN'
         unique_together = (('job', 'var'), ('job', 'var'),)
 
     def __str__(self):
-        return "%s %s" % (self.job, self.var)
+        return '%s %s' % (self.job, self.var)
 
     def multiple_pk(self):
-        return "%s/%s" % (self.var.var_name, self.var_val_ucv)
+        return '%s/%s' % (self.var.var_name, self.var_val_ucv)
 
 
 class GenomeTypes(Enum):
@@ -1354,48 +1353,40 @@ class GenomeTypes(Enum):
     MAG = 'mag'
 
 
-class CogCatQuerySet(BaseQuerySet):
-    pass
-
-
-class CogCatManager(models.Manager):
-    def get_queryset(self):
-        return CogCatQuerySet(self.model, using=self._db)
-
-    def available(self, request):
-        return self.get_queryset().available(request)
-
-
 class CogCat(models.Model):
-    class Meta:
-        db_table = 'COG'
 
     name = models.CharField(db_column='NAME', max_length=80, unique=True)
     description = models.CharField(db_column='DESCRIPTION', max_length=80)
-    objects = CogCatManager()
+
+    class Meta:
+        db_table = 'COG'
+
+
+class AntiSmashGC(models.Model):
+    name = models.CharField(db_column='NAME', max_length=80)
+    description = models.CharField(db_column='DESCRIPTION', max_length=80)
+
+    class Meta:
+        db_table = 'ANTISMASH_GENECLUSTER'
 
 
 class GeographicLocation(models.Model):
-    class Meta:
-        db_table = 'GEOGRAPHIC_RANGE'
 
     name = models.CharField(db_column='CONTINENT', max_length=80, unique=True)
 
+    class Meta:
+        db_table = 'GEOGRAPHIC_RANGE'
+
 
 class GenomeSet(models.Model):
-    class Meta:
-        db_table = 'GENOME_SET'
 
     name = models.CharField(db_column='NAME', max_length=40, unique=True)
 
-
-class GenomeQuerySet(BaseQuerySet):
-    pass
+    class Meta:
+        db_table = 'GENOME_SET'
 
 
 class Genome(models.Model):
-    class Meta:
-        db_table = 'GENOME'
 
     genome_id = models.AutoField(
         db_column='GENOME_ID', primary_key=True)
@@ -1438,6 +1429,8 @@ class Genome(models.Model):
     eggnog_coverage = models.FloatField(db_column='EGGNOG_COVERAGE')
     ipr_coverage = models.FloatField(db_column='IPR_COVERAGE')
     taxon_lineage = models.CharField(db_column='TAXON_LINEAGE', max_length=400)
+    cmseq = models.FloatField(db_column='CMSEQ', null=True)
+    taxincons = models.FloatField(db_column='TAXINCONS')
 
     num_genomes_total = models.IntegerField(db_column='PANGENOME_TOTAL_GENOMES', null=True)
     num_genomes_non_redundant = models.IntegerField(db_column='PANGENOME_NON_RED_GENOMES', null=True)
@@ -1447,10 +1440,8 @@ class Genome(models.Model):
     pangenome_eggnog_coverage = models.FloatField(db_column='PANGENOME_EGGNOG_COV', null=True)
     pangenome_ipr_coverage = models.FloatField(db_column='PANGENOME_IPR_COV', null=True)
 
-    last_update = models.DateTimeField(
-        db_column='LAST_UPDATE', auto_now=True)
-    first_created = models.DateTimeField(
-        db_column='FIRST_CREATED', auto_now_add=True)
+    last_update = models.DateTimeField(db_column='LAST_UPDATE', auto_now=True)
+    first_created = models.DateTimeField(db_column='FIRST_CREATED', auto_now_add=True)
 
     geo_origin = models.ForeignKey('GeographicLocation', db_column='GEOGRAPHIC_ORIGIN', null=True)
 
@@ -1458,8 +1449,23 @@ class Genome(models.Model):
                                                         db_table='GENOME_PANGENOME_GEOGRAPHIC_RANGE',
                                                         related_name='geographic_range')
 
+    cog_matches = models.ManyToManyField('CogCat',
+                                         through='emgapi.GenomeCogCounts')
+    kegg_classes = models.ManyToManyField('KeggClass',
+                                          through='emgapi.GenomeKeggClassCounts')
+    kegg_modules = models.ManyToManyField('KeggModule',
+                                          through='emgapi.GenomeKeggModuleCounts')
+    antismash_geneclusters = models.ManyToManyField('AntiSmashGC', through='emgapi.GenomeAntiSmashGCCounts')
+
+    result_directory = models.CharField(
+        db_column='RESULT_DIRECTORY', max_length=100, blank=True, null=True)
+
+    releases = models.ManyToManyField('Release', through='ReleaseGenomes')
+
     @property
     def geographic_range(self):
+        """TODO: improve this, this is making len(pangenome_geographic_range) queries each time
+        """
         return [v.name for v in self.pangenome_geographic_range.all()]
 
     @property
@@ -1470,27 +1476,14 @@ class Genome(models.Model):
             name = None
         return name
 
-    cog_matches = models.ManyToManyField('CogCat',
-                                         through='emgapi.GenomeCogCounts')
-    kegg_classes = models.ManyToManyField('KeggClass',
-                                          through='emgapi.GenomeKeggClassCounts')
-
-    kegg_modules = models.ManyToManyField('KeggModule',
-                                          through='emgapi.GenomeKeggModuleCounts')
-
-    result_directory = models.CharField(
-        db_column='RESULT_DIRECTORY', max_length=100, blank=True, null=True)
-
-    releases = models.ManyToManyField(
-        'Release', through='ReleaseGenomes')
+    class Meta:
+        db_table = 'GENOME'
 
     def __str__(self):
         return self.accession
 
 
 class GenomeGeographicLocation(models.Model):
-    class Meta:
-        db_table = 'GENOME_GEOGRAPHIC_RANGE'
 
     genome = models.ForeignKey(Genome, db_column='GENOME_ID',
                                on_delete=models.CASCADE)
@@ -1498,52 +1491,47 @@ class GenomeGeographicLocation(models.Model):
                                            db_column='COG_ID',
                                            on_delete=models.DO_NOTHING)
 
-
-class ReleaseQuerySet(BaseQuerySet):
-    pass
+    class Meta:
+        db_table = 'GENOME_GEOGRAPHIC_RANGE'
 
 
 class ReleaseManager(models.Manager):
+
     def get_queryset(self):
-        return ReleaseQuerySet(self.model, using=self._db).annotate(
-            genome_count=Count('genomes'))
+        qs = BaseQuerySet(self.model, using=self._db)
+        return qs.annotate(genome_count=Count('genomes'))
 
     def available(self, request):
         return self.get_queryset().available(request)
 
 
 class Release(models.Model):
-    class Meta:
-        db_table = 'RELEASE'
+    """Genome (MAGs) Release
+    """
+    version = models.CharField(db_column='VERSION', max_length=20)
+    last_update = models.DateTimeField(db_column='LAST_UPDATE', auto_now=True)
+    first_created = models.DateTimeField(db_column='FIRST_CREATED', auto_now_add=True)
+
+    genomes = models.ManyToManyField(Genome, through='ReleaseGenomes')
+    result_directory = models.CharField(db_column='RESULT_DIRECTORY', max_length=100)
 
     objects = ReleaseManager()
 
-    version = models.CharField(
-        db_column='VERSION', max_length=20)
-    last_update = models.DateTimeField(
-        db_column='LAST_UPDATE', auto_now=True)
-    first_created = models.DateTimeField(
-        db_column='FIRST_CREATED', auto_now_add=True)
-
-    genomes = models.ManyToManyField(
-        Genome, through='ReleaseGenomes')
-    result_directory = models.CharField(
-        db_column='RESULT_DIRECTORY', max_length=100)
+    class Meta:
+        db_table = 'RELEASE'
 
 
 class ReleaseGenomes(models.Model):
-    class Meta:
-        db_table = 'RELEASE_GENOMES'
-        unique_together = ('genome', 'release')
 
     genome = models.ForeignKey('Genome', db_column='GENOME_ID')
     release = models.ForeignKey('Release', db_column='RELEASE_ID')
 
+    class Meta:
+        db_table = 'RELEASE_GENOMES'
+        unique_together = ('genome', 'release')
+
 
 class GenomeCogCounts(models.Model):
-    class Meta:
-        db_table = 'GENOME_COG_COUNTS'
-        unique_together = ('genome', 'cog')
 
     genome = models.ForeignKey(Genome, db_column='GENOME_ID',
                                on_delete=models.CASCADE, db_index=True)
@@ -1552,21 +1540,23 @@ class GenomeCogCounts(models.Model):
     genome_count = models.IntegerField(db_column='GENOME_COUNT')
     pangenome_count = models.IntegerField(db_column='PANGENOME_COUNT')
 
+    class Meta:
+        db_table = 'GENOME_COG_COUNTS'
+        unique_together = ('genome', 'cog')
+
 
 class KeggClass(models.Model):
-    class Meta:
-        db_table = 'KEGG_CLASS'
 
     class_id = models.CharField(db_column='CLASS_ID', max_length=10,
                                 unique=True)
     name = models.CharField(db_column='NAME', max_length=80)
-    parent = models.ForeignKey("self", db_column='PARENT', null=True)
+    parent = models.ForeignKey('self', db_column='PARENT', null=True)
+
+    class Meta:
+        db_table = 'KEGG_CLASS'
 
 
 class GenomeKeggClassCounts(models.Model):
-    class Meta:
-        db_table = 'GENOME_KEGG_CLASS_COUNTS'
-        unique_together = ('genome', 'kegg_class')
 
     genome = models.ForeignKey(Genome, db_column='GENOME_ID',
                                on_delete=models.CASCADE, db_index=True)
@@ -1575,20 +1565,22 @@ class GenomeKeggClassCounts(models.Model):
     genome_count = models.IntegerField(db_column='GENOME_COUNT')
     pangenome_count = models.IntegerField(db_column='PANGENOME_COUNT')
 
+    class Meta:
+        db_table = 'GENOME_KEGG_CLASS_COUNTS'
+        unique_together = ('genome', 'kegg_class')
+
 
 class KeggModule(models.Model):
-    class Meta:
-        db_table = 'KEGG_MODULE'
 
     name = models.CharField(db_column='MODULE_NAME', max_length=10,
                             unique=True)
     description = models.CharField(db_column='DESCRIPTION', max_length=200)
 
+    class Meta:
+        db_table = 'KEGG_MODULE'
+
 
 class GenomeKeggModuleCounts(models.Model):
-    class Meta:
-        db_table = 'GENOME_KEGG_MODULE_COUNTS'
-        unique_together = ('genome', 'kegg_module')
 
     genome = models.ForeignKey(Genome, db_column='GENOME_ID',
                                on_delete=models.CASCADE, db_index=True)
@@ -1597,20 +1589,32 @@ class GenomeKeggModuleCounts(models.Model):
     genome_count = models.IntegerField(db_column='GENOME_COUNT')
     pangenome_count = models.IntegerField(db_column='PANGENOME_COUNT')
 
+    class Meta:
+        db_table = 'GENOME_KEGG_MODULE_COUNTS'
+        unique_together = ('genome', 'kegg_module')
 
-class GenomeDownloadQuerySet(BaseQuerySet):
-    pass
+
+class GenomeAntiSmashGCCounts(models.Model):
+
+    genome = models.ForeignKey(Genome, db_column='GENOME_ID', on_delete=models.CASCADE, db_index=True)
+    antismash_genecluster = models.ForeignKey(AntiSmashGC, db_column='ANTISMASH_GENECLUSTER',
+                                              on_delete=models.DO_NOTHING)
+    genome_count = models.IntegerField(db_column='GENOME_COUNT')
+
+    class Meta:
+        db_table = 'GENOME_ANTISMASH_GENECLUSTER_COUNTS'
+        unique_together = ('genome', 'antismash_genecluster')
 
 
 class GenomeDownloadManager(models.Manager):
+    
     def get_queryset(self):
-        return GenomeDownloadQuerySet(self.model, using=self._db) \
+        return BaseQuerySet(self.model, using=self._db) \
             .select_related(
-            'group_type',
-            'subdir',
-            'file_format',
-            'description'
-        )
+                'group_type',
+                'subdir',
+                'file_format',
+                'description')
 
     def available(self, request):
         return self.get_queryset().available(request)
@@ -1633,19 +1637,15 @@ class GenomeDownload(BaseDownload):
         ordering = ('group_type', 'alias')
 
 
-class ReleaseDownloadQuerySet(BaseQuerySet):
-    pass
-
-
 class ReleaseDownloadManager(models.Manager):
+
     def get_queryset(self):
-        return ReleaseDownloadQuerySet(self.model, using=self._db) \
+        return BaseQuerySet(self.model, using=self._db) \
             .select_related(
-            'group_type',
-            'subdir',
-            'file_format',
-            'description'
-        )
+                'group_type',
+                'subdir',
+                'file_format',
+                'description')
 
     def available(self, request):
         return self.get_queryset().available(request)

@@ -13,10 +13,9 @@ venv/
 database/
 results/
 
-# VS Code
 .vscode/
 
-#IntelliJ project structure files
+# IntelliJ project structure files
 *.iml
 *.xml
 .idea/

@@ -14,7 +14,7 @@ with open(_requirements) as f:
     install_requirements = f.read().splitlines()
 
 test_requirements = []
-if "test" in sys.argv:
+if 'test' in sys.argv:
     with open(_requirements_test) as f:
         test_requirements = f.read().splitlines()
 
