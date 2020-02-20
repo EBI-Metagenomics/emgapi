@@ -1,11 +1,12 @@
-import mock
+from unittest import mock
 
 import pytest
+from django.test import TransactionTestCase
+
+from emgapi import models as emg_models
 from emgapianns.management.commands.import_sample import Command
 from emgena import models as ena_models
-from emgapi import models as emg_models
 from test_utils.emg_fixtures import *  # noqa
-from django.test import TransactionTestCase
 
 
 def mock_fetch_sample_api(*args, **kwargs):

@@ -16,7 +16,7 @@
 
 import pytest
 
-from model_mommy import mommy
+from model_bakery import baker
 
 from django.core.urlresolvers import reverse
 from django.urls.exceptions import NoReverseMatch
@@ -55,6 +55,7 @@ class TestDefaultAPI(object):
             'annotations/kegg-orthologs': '/annotations/kegg-orthologs',
             'annotations/pfam-entries': '/annotations/pfam-entries',
             'annotations/organisms': '/annotations/organisms',
+            'antismash-geneclusters': '/antismash-geneclusters',
             'mydata': '/mydata',
             'genomes': '/genomes',
             'cogs': '/cogs',
@@ -162,74 +163,74 @@ class TestDefaultAPI(object):
         # https://code.djangoproject.com/ticket/17653
         for pk in range(1, 101):
             if _model in ('Study', 'Sample'):
-                _biome = mommy.make('emgapi.Biome', pk=pk)
-                _sm = mommy.make('emgapi.Sample',
+                _biome = baker.make('emgapi.Biome', pk=pk)
+                _sm = baker.make('emgapi.Sample',
                                  pk=pk, biome=_biome, is_public=1)
-                _st = mommy.make('emgapi.Study', pk=pk, biome=_biome,
+                _st = baker.make('emgapi.Study', pk=pk, biome=_biome,
                                  is_public=1, samples=[_sm])
-                _as = mommy.make('emgapi.AnalysisStatus', pk=3)
-                _p = mommy.make('emgapi.Pipeline', pk=1, release_version='1.0')
-                mommy.make('emgapi.AnalysisJob', pk=pk, pipeline=_p,
+                _as = baker.make('emgapi.AnalysisStatus', pk=3)
+                _p = baker.make('emgapi.Pipeline', pk=1, release_version='1.0')
+                baker.make('emgapi.AnalysisJob', pk=pk, pipeline=_p,
                            analysis_status=_as, run_status_id=4,
                            study=_st, sample=_sm)
             elif _model in ('Run',):
-                _biome = mommy.make('emgapi.Biome', pk=pk)
-                _sm = mommy.make('emgapi.Sample',
+                _biome = baker.make('emgapi.Biome', pk=pk)
+                _sm = baker.make('emgapi.Sample',
                                  pk=pk, biome=_biome, is_public=1)
-                _st = mommy.make('emgapi.Study', pk=pk, biome=_biome,
+                _st = baker.make('emgapi.Study', pk=pk, biome=_biome,
                                  is_public=1, samples=[_sm])
-                mommy.make('emgapi.Run', pk=pk, status=run_status,
+                baker.make('emgapi.Run', pk=pk, status_id=run_status,
                            study=_st, sample=_sm)
             elif _model in ('Assembly',):
-                _biome = mommy.make('emgapi.Biome', pk=pk)
-                _sm = mommy.make('emgapi.Sample',
+                _biome = baker.make('emgapi.Biome', pk=pk)
+                _sm = baker.make('emgapi.Sample',
                                  pk=pk, biome=_biome, is_public=1)
-                _st = mommy.make('emgapi.Study', pk=pk, biome=_biome,
+                _st = baker.make('emgapi.Study', pk=pk, biome=_biome,
                                  is_public=1, samples=[_sm])
-                _r = mommy.make('emgapi.Run', pk=pk, status=run_status,
+                _r = baker.make('emgapi.Run', pk=pk, status_id=run_status,
                                 study=_st, sample=_sm)
-                mommy.make('emgapi.Assembly', pk=pk, status_id=run_status,
+                baker.make('emgapi.Assembly', pk=pk, status_id=run_status,
                            runs=[_r])
             elif _model in ('AnalysisJob',):
-                _biome = mommy.make('emgapi.Biome', pk=pk)
-                _sm = mommy.make('emgapi.Sample',
+                _biome = baker.make('emgapi.Biome', pk=pk)
+                _sm = baker.make('emgapi.Sample',
                                  pk=pk, biome=_biome, is_public=1)
-                _st = mommy.make('emgapi.Study', pk=pk, biome=_biome,
+                _st = baker.make('emgapi.Study', pk=pk, biome=_biome,
                                  is_public=1, samples=[_sm])
-                _r = mommy.make('emgapi.Run', pk=pk, status=run_status,
+                _r = baker.make('emgapi.Run', pk=pk, status_id=run_status,
                                 study=_st, sample=_sm)
-                _as = mommy.make('emgapi.AnalysisStatus', pk=3)
-                _p = mommy.make('emgapi.Pipeline', pk=1, release_version='1.0')
-                mommy.make('emgapi.AnalysisJob', pk=pk, pipeline=_p,
+                _as = baker.make('emgapi.AnalysisStatus', pk=3)
+                _p = baker.make('emgapi.Pipeline', pk=1, release_version='1.0')
+                baker.make('emgapi.AnalysisJob', pk=pk, pipeline=_p,
                            analysis_status=_as, run_status_id=4,
                            study=_st, sample=_sm, run=_r)
             elif _model in ('PipelineTool',):
-                _p = mommy.make('emgapi.Pipeline', pk=pk,
+                _p = baker.make('emgapi.Pipeline', pk=pk,
                                 release_version='1.0')
-                _t = mommy.make('emgapi.PipelineTool', pk=pk,
+                _t = baker.make('emgapi.PipelineTool', pk=pk,
                                 tool_name='ToolName')
-                mommy.make('emgapi.PipelineReleaseTool', pk=pk,
+                baker.make('emgapi.PipelineReleaseTool', pk=pk,
                            pipeline=_p, tool=_t)
             elif _model in ('Pipeline',):
-                mommy.make('emgapi.Pipeline', pk=pk,
+                baker.make('emgapi.Pipeline', pk=pk,
                            release_version='1.0')
             # elif _model in ('Biome',):
-            #     mommy.make('emgapi.Biome', pk=pk,
+            #     baker.make('emgapi.Biome', pk=pk,
             #                biome_name='foo%d' % pk,
             #                lineage='root:foo%d' % pk)
             elif _model in ('Publication',):
-                mommy.make('emgapi.Publication', pk=pk,
+                baker.make('emgapi.Publication', pk=pk,
                            pubmed_id=pk)
             elif _model in ('SuperStudy',):
-                _biome = mommy.make('emgapi.Biome', pk=pk)
-                _study = mommy.make('emgapi.Study', pk=pk)
-                _ss = mommy.make('emgapi.SuperStudy', pk=pk, title='Dummy',
+                _biome = baker.make('emgapi.Biome', pk=pk)
+                _study = baker.make('emgapi.Study', pk=pk)
+                _ss = baker.make('emgapi.SuperStudy', pk=pk, title='Dummy',
                                  description='Desc')
-                mommy.make('emgapi.SuperStudyStudy',
+                baker.make('emgapi.SuperStudyStudy',
                            study=_study, super_study=_ss)
-                mommy.make('emgapi.SuperStudyBiome', super_study=_ss, biome=_biome)
+                baker.make('emgapi.SuperStudyBiome', super_study=_ss, biome=_biome)
             else:
-                mommy.make(model_name, pk=pk)
+                baker.make(model_name, pk=pk)
 
         url = reverse(view_name, args=_view_args)
         response = client.get(url)

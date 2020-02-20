@@ -39,6 +39,7 @@ EXPECTED_PANGENOME_FILES = {
     'pan-genome_eggNOG.tsv',
     'pan-genome_InterProScan.tsv'
 }
+
 EXPECTED_DIR_CONTENT = {'genome.json', 'genome'}
 
 
@@ -48,7 +49,6 @@ def sanity_check_release_dir(d):
     for f in files:
         try:
             logging.info('Loading file {}'.format(f))
-
             f = os.path.basename(f)
             EXPECTED_RELEASE_FILES.remove(f)
         except KeyError:

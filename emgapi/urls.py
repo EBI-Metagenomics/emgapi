@@ -332,6 +332,12 @@ router.register(
 )
 
 router.register(
+    r'genomes/(?P<accession>[^/]+)/antismash-genecluster',
+    views_relations.GenomeAntiSmashGeneClustersRelationshipsViewSet,
+    base_name='genome-antismash-genecluster'
+)
+
+router.register(
     r'genomes/(?P<accession>[^/]+)/downloads',
     views.GenomeDownloadViewSet,
     base_name='genome-download'
@@ -387,4 +393,10 @@ router.register(
     r'kegg-classes',
     views.KeggClassViewSet,
     base_name='kegg-classes'
+)
+
+router.register(
+    r'antismash-geneclusters',
+    views.AntiSmashGeneClustersViewSet,
+    base_name='antismash-geneclusters'
 )

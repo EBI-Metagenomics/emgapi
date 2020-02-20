@@ -31,21 +31,13 @@ class TestContigs:
     """Integration tests for the contigs and it's annotations
     """
 
-    def test_import_contigs(self, client, run):
+    def test_import_contigs(self, client, run_v5):
         """Run an import contigs and check the results
         """
-        assert run.accession == 'ABC01234'
-        path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            'path/version_5.0/ABC_FASTQ/')
-        faix_path = os.path.join(path, 'ABC_FASTQ_contigs.fasta.fai')
-        gff_path = os.path.join(path, 'ABC_FASTQ_annotation.gff')
-        antismash_path = os.path.join(path, 'ABC_FASTQ_antismash_geneclusters.txt')
+        assert run_v5.accession == 'ABC01234'
+        rootpath = os.path.dirname(os.path.abspath(__file__))
+        call_command('import_contigs', run_v5.accession, rootpath, '--pipeline', '5.0')
 
-        call_command('import_contigs', run.accession,
-                     '--faix', faix_path,
-                     '--gff', gff_path,
-                     '--antismash', antismash_path)
         # list
         list_url = reverse('emgapi_v1:analysis-contigs-list', args=['MGYA00001234'])
         list_response = client.get(list_url)
@@ -54,7 +46,7 @@ class TestContigs:
         assert len(list_data['data']) == 3
 
         # filter with antiSMASH annotations
-        list_resp_as = client.get(list_url + '?antismash=terpene')
+        list_resp_as = client.get(list_url + '?antismash=biosyntethic')
         assert list_resp_as.status_code == status.HTTP_200_OK
         list_data_as = list_resp_as.json()
         assert len(list_data_as['data']) == 1

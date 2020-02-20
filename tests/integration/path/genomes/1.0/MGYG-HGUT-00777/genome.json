@@ -1,0 +1,39 @@
+{
+    "accession": "MGYG-HGUT-00777", 
+    "cmseq": 0.03, 
+    "completeness": 100.0, 
+    "contamination": 1.61, 
+    "eggnog_coverage": 93.54, 
+    "ena_genome_accession": "ERZ840177", 
+    "ena_sample_accession": "DRS026393", 
+    "ena_study_accession": "DRP003048", 
+    "gc_content": 60.02, 
+    "genome_set": "EBI", 
+    "geographic_origin": "Asia", 
+    "gold_biome": "root:Host-Associated:Human:Digestive System:Large intestine", 
+    "ipr_coverage": 91.42, 
+    "length": 2148836, 
+    "n_50": 105359, 
+    "nc_rnas": 59, 
+    "num_contigs": 25, 
+    "num_proteins": 1842, 
+    "pangenome": {
+        "geographic_range": [
+            "Asia"
+        ], 
+        "num_genomes_non_redundant": 1, 
+        "num_genomes_total": 2, 
+        "pangenome_accessory_size": 418, 
+        "pangenome_core_size": 1434, 
+        "pangenome_eggnog_coverage": 93.47, 
+        "pangenome_ipr_coverage": 91.52, 
+        "pangenome_size": 1852
+    }, 
+    "rna_16s": 0.0, 
+    "rna_23s": 0.0, 
+    "rna_5s": 89.92, 
+    "taxincons": 0.0, 
+    "taxon_lineage": "d__Bacteria;p__Actinobacteriota;c__Coriobacteriia;o__Coriobacteriales;f__Coriobacteriaceae;g__Collinsella;s__", 
+    "trnas": 18, 
+    "type": "MAG"
+}

@@ -3,28 +3,23 @@
 # run pip install -r requirements
 
 # deployment
-gunicorn
-whitenoise
-mysqlclient~=1.3.13
-sqlparse
-requests
-yamjam
+gunicorn==19.9.0
+whitenoise==3.3.1
+mysqlclient==1.3.13
+sqlparse==0.2.4
+requests==2.19.1
+yamjam==0.1.7
+# python 3.4
+PyYAML==3.13
 
 django-slack~=5.13.0
-
-# optional session store
-# django-redis>=4.4
 
 # log handler
 ConcurrentLogHandler~=0.9.1
 
-# dependences
-# upgrade https://docs.djangoproject.com/en/dev/releases/2.2/
 Django~=1.11.1
 djangorestframework~=3.9.0
 django-filter~=2.0.0
-# Customized branch
-# djangorestframework-jsonapi~=2.3.0
 djangorestframework-jwt~=1.11.0
 django-cors-headers~=2.4.0
 openapi-codec
