@@ -10,7 +10,7 @@ sqlparse==0.2.4
 requests==2.19.1
 yamjam==0.1.7
 # python 3.4
-PyYAML==3.13
+PyYAML==5.1
 
 django-slack~=5.13.0
 
