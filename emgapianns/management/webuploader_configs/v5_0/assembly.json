@@ -3,7 +3,7 @@
     {
       "_accession_substitution": "full",
       "_chunked": true,
-      "_required": false,
+      "_required": true,
       "downloadable": true,
       "alias": "{}.fasta.gz",
       "compression": true,
@@ -97,7 +97,7 @@
     {
       "_accession_substitution": "full",
       "_chunked": false,
-      "_required": false,
+      "_required": true,
       "downloadable": false,
       "alias": null,
       "compression": false,
@@ -110,7 +110,7 @@
     {
       "_accession_substitution": "full",
       "_chunked": false,
-      "_required": false,
+      "_required": true,
       "downloadable": false,
       "alias": null,
       "compression": false,
@@ -322,6 +322,33 @@
       "_chunked": false,
       "_required": false,
       "downloadable": true,
+      "alias": "{}_ITS_UNITE_MAPSeq.mseq.gz",
+      "compression": true,
+      "description_label": "MAPseq UNITE assignments",
+      "format_name": "TSV",
+      "group_type": "Taxonomic analysis UNITE",
+      "real_name": "{}_unite.fasta.mseq.gz",
+      "subdir": "taxonomy-summary/its/unite"
+    },
+    {
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "_required": false,
+      "downloadable": true,
+      "alias": "{}_ITS_ITSoneDB_MAPSeq.mseq.gz",
+      "compression": true,
+      "description_label": "MAPseq ITSoneDB assignments",
+      "format_name": "TSV",
+      "group_type": "Taxonomic analysis ITSoneDB",
+      "real_name": "{}_itsonedb.fasta.mseq.gz",
+      "subdir": "taxonomy-summary/its/itsonedb"
+    },
+    {
+      "coverage_check": true,
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "_required": false,
+      "downloadable": true,
       "alias": "{}_SSU_OTU.tsv",
       "compression": false,
       "description_label": "MAPseq SSU assignments",
@@ -331,6 +358,7 @@
       "subdir": "taxonomy-summary/SSU"
     },
     {
+      "coverage_check": true,
       "_accession_substitution": "full",
       "_chunked": false,
       "_required": false,
@@ -344,10 +372,38 @@
       "subdir": "taxonomy-summary/LSU"
     },
     {
+      "coverage_check": true,
       "_accession_substitution": "full",
       "_chunked": false,
-      "_required": true,
+      "_required": false,
       "downloadable": true,
+      "alias": "{}_ITS_UNITE_OTU.tsv",
+      "compression": false,
+      "description_label": "MAPseq UNITE assignments",
+      "format_name": "TSV",
+      "group_type": "Taxonomic analysis UNITE",
+      "real_name": "{}_unite.fasta.mseq.tsv",
+      "subdir": "taxonomy-summary/its/unite"
+    },
+    {
+      "coverage_check": true,
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "_required": false,
+      "downloadable": true,
+      "alias": "{}_ITS_ITSoneDB_OTU.tsv",
+      "compression": false,
+      "description_label": "MAPseq ITSoneDB assignments",
+      "format_name": "TSV",
+      "group_type": "Taxonomic analysis ITSoneDB",
+      "real_name": "{}_itsonedb.fasta.mseq.tsv",
+      "subdir": "taxonomy-summary/its/itsonedb"
+    },
+    {
+      "downloadable": true,
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "_required": false,
       "alias": "{}_SSU_OTU_TABLE_HDF5.biom",
       "compression": false,
       "description_label": "OTUs, counts and taxonomic assignments for SSU rRNA",
@@ -357,10 +413,10 @@
       "subdir": "taxonomy-summary/SSU"
     },
     {
+      "downloadable": true,
       "_accession_substitution": "full",
       "_chunked": false,
       "_required": false,
-      "downloadable": true,
       "alias": "{}_LSU_OTU_TABLE_HDF5.biom",
       "compression": false,
       "description_label": "OTUs, counts and taxonomic assignments for LSU rRNA",
@@ -368,6 +424,32 @@
       "group_type": "Taxonomic analysis LSU rRNA",
       "real_name": "{}_LSU.fasta.mseq_hdf5.biom",
       "subdir": "taxonomy-summary/LSU"
+    },
+    {
+      "downloadable": true,
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "_required": false,
+      "alias": "{}_ITS_UNITE_OTU_TABLE_HDF5.biom",
+      "compression": false,
+      "description_label": "OTUs, counts and taxonomic assignments for UNITE",
+      "format_name": "HDF5 Biom",
+      "group_type": "Taxonomic analysis UNITE",
+      "real_name": "{}_unite.fasta.mseq_hdf5.biom",
+      "subdir": "taxonomy-summary/its/unite"
+    },
+    {
+      "downloadable": true,
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "_required": false,
+      "alias": "{}_ITS_ITSoneDB_OTU_TABLE_HDF5.biom",
+      "compression": false,
+      "description_label": "OTUs, counts and taxonomic assignments for ITSOneDB",
+      "format_name": "HDF5 Biom",
+      "group_type": "Taxonomic analysis ITSOneDB",
+      "real_name": "{}_itsonedb.fasta.mseq_hdf5.biom",
+      "subdir": "taxonomy-summary/its/itsonedb"
     },
     {
       "_accession_substitution": "full",
@@ -399,6 +481,32 @@
       "_accession_substitution": "full",
       "_chunked": false,
       "_required": false,
+      "downloadable": true,
+      "alias": "{}_ITS_UNITE_OTU_TABLE_JSON.biom",
+      "compression": false,
+      "description_label": "OTUs, counts and taxonomic assignments for UNITE",
+      "format_name": "JSON Biom",
+      "group_type": "Taxonomic analysis UNITE",
+      "real_name": "{}_unite.fasta.mseq_json.biom",
+      "subdir": "taxonomy-summary/its/unite"
+    },
+    {
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "_required": false,
+      "downloadable": true,
+      "alias": "{}_ITS_ITSoneDB_OTU_TABLE_JSON.biom",
+      "compression": false,
+      "description_label": "OTUs, counts and taxonomic assignments for ITSOneDB",
+      "format_name": "JSON Biom",
+      "group_type": "Taxonomic analysis ITSOneDB",
+      "real_name": "{}_itsonedb.fasta.mseq_json.biom",
+      "subdir": "taxonomy-summary/its/itsonedb"
+    },
+    {
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "_required": false,
       "downloadable": false,
       "alias": null,
       "compression": false,
@@ -419,6 +527,32 @@
       "format_name": null,
       "group_type": null,
       "real_name": "{}_LSU.fasta.mseq.txt",
+      "subdir": null
+    },
+    {
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "_required": false,
+      "downloadable": false,
+      "alias": null,
+      "compression": false,
+      "description_label": null,
+      "format_name": null,
+      "group_type": null,
+      "real_name": "{}_unite.fasta.mseq.txt",
+      "subdir": null
+    },
+    {
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "_required": false,
+      "downloadable": false,
+      "alias": null,
+      "compression": false,
+      "description_label": null,
+      "format_name": null,
+      "group_type": null,
+      "real_name": "{}_itsonedb.fasta.mseq.txt",
       "subdir": null
     },
     {
@@ -446,6 +580,32 @@
       "group_type": null,
       "real_name": "krona.html",
       "subdir": "taxonomy-summary/LSU"
+    },
+    {
+      "_accession_substitution": null,
+      "_chunked": false,
+      "_required": false,
+      "downloadable": false,
+      "alias": null,
+      "compression": false,
+      "description_label": null,
+      "format_name": null,
+      "group_type": null,
+      "real_name": "krona.html",
+      "subdir": "taxonomy-summary/its/unite"
+    },
+    {
+      "_accession_substitution": null,
+      "_chunked": false,
+      "_required": false,
+      "downloadable": false,
+      "alias": null,
+      "compression": false,
+      "description_label": null,
+      "format_name": null,
+      "group_type": null,
+      "real_name": "krona.html",
+      "subdir": "taxonomy-summary/its/itsonedb"
     },
     {
       "_accession_substitution": "full",
@@ -501,6 +661,19 @@
       "format_name": "FASTA",
       "group_type": "non-coding RNAs",
       "real_name": "5S.fa.gz",
+      "subdir": "sequence-categorisation"
+    },
+    {
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "_required": false,
+      "downloadable": true,
+      "alias": "{}_ITS_masked.fasta.gz",
+      "compression": true,
+      "description_label": "Reads encoding ITS (with SSU and LSU sequences masked)",
+      "format_name": "FASTA",
+      "group_type": "Taxonomic analysis ITS",
+      "real_name": "ITS_masked.fasta.gz",
       "subdir": "sequence-categorisation"
     },
     {
