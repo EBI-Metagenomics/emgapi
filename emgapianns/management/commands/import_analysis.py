@@ -276,7 +276,7 @@ class Command(BaseCommand):
             defaults['instrument_model'] = run.instrument_model
             defaults['instrument_platform'] = run.instrument_platform
             defaults['experiment_type'] = run.experiment_type
-            defaults['run_status_id'] = run.status_id
+            defaults['run_status_id'] = run.status_id.pk
         else:
             run = self.get_emg_run(metadata.run_accession)
             assembly = self.get_emg_assembly(metadata.analysis_accession)
@@ -287,7 +287,7 @@ class Command(BaseCommand):
             defaults['experiment_type'] = self.get_experiment_type('assembly')
             defaults['instrument_model'] = run.instrument_model
             defaults['instrument_platform'] = run.instrument_platform
-            defaults['run_status_id'] = run.status_id
+            defaults['run_status_id'] = run.status_id.pk
         analysis, _ = emg_models.AnalysisJob.objects.using(self.emg_db) \
             .update_or_create(**comp_key, defaults=defaults)
         logging.info("Analysis job successfully created.")
