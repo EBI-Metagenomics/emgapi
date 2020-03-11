@@ -1,6 +1,5 @@
 import glob
 import os
-import sys
 from subprocess import check_output, CalledProcessError
 
 from emgapianns.management.lib.uploader_exceptions import NoAnnotationsFoundException, \
@@ -41,7 +40,7 @@ class SanityCheck:
         try:
             self.__check_exists(file_path)
             return False
-        except FileNotFoundError as e:
+        except FileNotFoundError:
             return True
 
     def passed_coverage_check(self):

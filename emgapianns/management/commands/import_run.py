@@ -116,10 +116,6 @@ class Command(BaseCommand):
         return run
 
     @staticmethod
-    def get_ena_sample(sample_accession):
-        return ena.get_sample(sample_accession=sample_accession)
-
-    @staticmethod
     def get_run_studies(sample):
         return ena.get_sample_studies(sample.primary_accession)
 

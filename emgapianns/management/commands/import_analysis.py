@@ -126,7 +126,8 @@ class Command(BaseCommand):
             logging.info("Skipping the import of functional and pathway annotations!")
 
         if self.version in ['5.0'] and metadata.experiment_type == ExperimentType.ASSEMBLY:
-            self.import_contigs()
+            logger.info('Importing contigs...')
+            call_command('import_contigs', self.accession, '--pipeline', self.version)
         else:
             logging.info("Skipping the import procedure for the contig viewer!")
 
@@ -319,10 +320,6 @@ class Command(BaseCommand):
         logger.info('Importing functional and pathway data...')
         for sum_type in ['.ipr', '.go', '.go_slim', '.paths.kegg', '.pfam', '.ko', '.paths.gprops', '.antismash']:
             call_command('import_summary', self.accession, self.rootpath, sum_type, '--pipeline', self.version)
-
-    def import_contigs(self):
-        logger.info('Importing contigs...')
-        call_command('import_contigs', self.accession, '--pipeline', self.version, '--faix')
 
     def __find_folder(self, directory, search_pattern, maxdepth=2, recursive=False):
         """

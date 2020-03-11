@@ -99,7 +99,7 @@ class Command(EMGBaseCommand):
             for line in as_file:
                 if line.startswith('#'):
                     continue
-                contig, *_, atts = line.split('\t')                
+                contig, *_, atts = line.split('\t')
                 contig_id = contig.replace(' ', '-')
                 contig_ann = annotations_dict.setdefault(contig_id, {'antismash': []})
                 for at in atts.split(';'):
@@ -148,6 +148,10 @@ class Command(EMGBaseCommand):
         root_file = os.path.join(rootpath,
                                  analysis_job.result_directory,
                                  analysis_job.input_file_name)
+        # no_antismash file detection
+        if os.path.isfile(os.path.join(rootpath, analysis_job.result_directory, 'no_antismash')):
+            logger.warning('No antismash results, SKIPPING!')
+            return
 
         faix = options['faix'] or root_file + '_contigs.fasta.fai'
         gff = options['gff'] or root_file + '_annotation.gff'

@@ -290,7 +290,7 @@ def runs(study, samples, run_status, analysis_status, pipeline,
             pipeline=pipeline,
             analysis_status=analysis_status,
             input_file_name='ABC_FASTQ',
-            result_directory='path/version_1.0/ABC_FASTQ',
+            result_directory='test_data/version_1.0/ABC_FASTQ',
             submit_time='1970-01-01 00:00:00',
         )
         jobs.append(_aj)
@@ -317,7 +317,7 @@ def run(study, sample, run_status, analysis_status, pipeline, experiment_type):
         pipeline=pipeline,
         analysis_status=analysis_status,
         input_file_name='ABC_FASTQ',
-        result_directory='path/version_1.0/ABC_FASTQ',
+        result_directory='test_data/version_1.0/ABC_FASTQ',
         submit_time='1970-01-01 00:00:00'
     )
     return run
@@ -344,7 +344,7 @@ def run_v5(study, sample, run_status, analysis_status, pipelines, experiment_typ
         pipeline=p5,
         analysis_status=analysis_status,
         input_file_name='ABC_FASTQ',
-        result_directory='path/version_5.0/ABC_FASTQ',
+        result_directory='test_data/version_5.0/ABC_FASTQ',
         submit_time='1970-01-01 00:00:00'
     )
     return run
@@ -362,7 +362,7 @@ def runjob_pipeline_v1(run, sample, study, experiment_type, analysis_status, pip
         pipeline=pipelines.filter(release_version='1.0').first(),
         analysis_status=analysis_status,
         input_file_name='ABC_FASTQ',
-        result_directory='path/version_1.0/ABC_FASTQ',
+        result_directory='test_data/version_1.0/ABC_FASTQ',
         submit_time='1970-01-01 00:00:00'
     )
 
@@ -398,7 +398,7 @@ def run_multiple_analysis(study, sample, run_status, analysis_status,
         pipeline=pipeline,
         analysis_status=analysis_status,
         input_file_name='ABC_FASTQ',
-        result_directory='path/version_1.0/ABC_FASTQ',
+        result_directory='test_data/version_1.0/ABC_FASTQ',
         submit_time='1970-01-01 00:00:00',
     )
     _anl4 = emg_models.AnalysisJob.objects.create(
@@ -411,7 +411,7 @@ def run_multiple_analysis(study, sample, run_status, analysis_status,
         pipeline=pipeline4,
         analysis_status=analysis_status,
         input_file_name='ABC_FASTQ',
-        result_directory='path/version_4.0/ABC_FASTQ',
+        result_directory='test_data/version_4.0/ABC_FASTQ',
         submit_time='1970-01-01 00:00:00',
     )
     return (_anl1, _anl4)
@@ -438,7 +438,7 @@ def run_emptyresults(study, sample, run_status, analysis_status, pipeline,
         pipeline=pipeline,
         analysis_status=analysis_status,
         input_file_name='EMPTY_ABC_FASTQ',
-        result_directory='emptypath/version_1.0/EMPTY_ABC_FASTQ',
+        result_directory='test_data/version_1.0/EMPTY_ABC_FASTQ',
         submit_time='1970-01-01 00:00:00',
     )
 
@@ -464,7 +464,7 @@ def run_with_sample(study, sample, run_status, analysis_status, pipeline,
         pipeline=pipeline,
         analysis_status=analysis_status,
         input_file_name='ABC_FASTQ',
-        result_directory='path/version_1.0/ABC_FASTQ',
+        result_directory='test_data/version_1.0/ABC_FASTQ',
         submit_time='1970-01-01 00:00:00'
     )
 
@@ -492,7 +492,7 @@ def analysis_results(study, sample, run_status, analysis_status,
             pipeline=pipe,
             analysis_status=analysis_status,
             input_file_name='ABC_FASTQ',
-            result_directory='path/version_{}/ABC_FASTQ'.format(pipe.release_version),
+            result_directory='test_data/version_{}/ABC_FASTQ'.format(pipe.release_version),
             submit_time='1970-01-01 00:00:00',
         )
     return res

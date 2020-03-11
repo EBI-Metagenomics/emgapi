@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-import os
 
 from django.core.management import BaseCommand, call_command
 
@@ -25,10 +24,6 @@ from emgapi import models as emg_models
 from emgena import models as ena_models
 
 logger = logging.getLogger(__name__)
-
-cog_cache = {}
-ipr_cache = {}
-kegg_cache = {}
 
 ena = ena_handler.EnaApiHandler()
 
@@ -115,14 +110,6 @@ class Command(BaseCommand):
             defaults=defaults
         )
         return assembly
-
-    @staticmethod
-    def get_ena_sample(sample_accession):
-        return ena.get_sample(sample_accession=sample_accession)
-
-    @staticmethod
-    def get_assembly_studies(sample):
-        return ena.get_sample_studies(sample.primary_accession)
 
     def tag_study(self, assembly, study_accession, sample):
         try:
