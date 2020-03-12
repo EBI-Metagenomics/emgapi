@@ -35,8 +35,8 @@ from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
-from rest_framework import viewsets
-from rest_framework import status
+from rest_framework import viewsets, status
+from rest_framework.exceptions import NotFound
 
 from emgapi import serializers as emg_serializers
 from emgapi import models as emg_models
@@ -476,7 +476,7 @@ class AnalysisPfamRelationshipViewSet(  # NOQA
     m_mixins.AnalysisJobAnnotationMixin,
     m_viewsets.ListReadOnlyModelViewSet):
     """
-    Retrieves Pfram entries for the given accession
+    Retrieves Pfam entries for the given accession
     Example:
     ---
     `/analyses/MGYA00102827/pfam-entries`
@@ -872,14 +872,17 @@ class OrganismAnalysisRelationshipViewSet(m_viewsets.ListReadOnlyModelViewSet):
             self.kwargs.get(self.lookup_field, None).strip())
         organism = m_models.Organism.objects.filter(lineage=lineage) \
             .only('id')
+
         if len(organism) == 0:
-            raise Http404(("Attribute error '%s'." % self.lookup_field))
+            raise NotFound("Lineage not found. Lineage: " + lineage)
+
         job_ids = m_models.AnalysisJobTaxonomy.objects \
             .filter(
                 M_Q(taxonomy__organism__in=organism) |
                 M_Q(taxonomy_lsu__organism__in=organism) |
                 M_Q(taxonomy_ssu__organism__in=organism)
             ).distinct('job_id')
+
         return emg_models.AnalysisJob.objects \
             .filter(job_id__in=job_ids) \
             .available(self.request)

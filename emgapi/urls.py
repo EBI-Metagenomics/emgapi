@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from django.conf.urls import url
+
 from rest_framework import routers
 
 from . import views
@@ -400,3 +402,9 @@ router.register(
     views.AntiSmashGeneClustersViewSet,
     base_name='antismash-geneclusters'
 )
+
+urlpatterns = [
+    url(r'^v1/banner-message',
+        views.BannerMessageView.as_view(),
+        name='banner-message'),
+]
