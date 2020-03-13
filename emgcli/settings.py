@@ -573,3 +573,9 @@ try:
     RESULTS_DIR = EMG_CONF['emg']['results_dir']
 except KeyError:
     RESULTS_DIR = os.path.join(expanduser("~"), 'results')
+
+try:
+    # Banner message, the content of this file will be shown on the website.
+    BANNER_MESSAGE_FILE = EMG_CONF['emg']['banner_message_file']
+except KeyError:
+    BANNER_MESSAGE_FILE = None

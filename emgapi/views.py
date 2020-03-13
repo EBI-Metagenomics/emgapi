@@ -20,9 +20,8 @@ import inflection
 
 from django.conf import settings
 from django.db.models import Prefetch, Count, Q
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.middleware import csrf
-from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.clickjacking import xframe_options_exempt
 
@@ -30,12 +29,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework.response import Response
 
-from rest_framework import filters
-from rest_framework import viewsets, mixins
+from rest_framework import filters, viewsets, mixins, permissions, renderers, status
 from rest_framework.decorators import detail_route, list_route
-from rest_framework import permissions
-from rest_framework import renderers
-from rest_framework import status
+from rest_framework.views import APIView
 
 from . import models as emg_models
 from . import serializers as emg_serializers
@@ -333,7 +329,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         `/studies`
 
         `/studies?fields[studies]=accession,study_name,samples_count,biomes`
-        retrieve only selected fileds
+        retrieve only selected fields
 
         `/studies?include=biomes` with biomes
 
@@ -467,7 +463,7 @@ class SuperStudyViewSet(mixins.RetrieveModelMixin,
         `/super-studies`
 
         `/super-studies?fields[super-studies]=super_study_id,title`
-        retrieve only selected fileds
+        retrieve only selected fields
 
         `/super-studies?include=biomes` with biomes
 
@@ -570,7 +566,7 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         `/samples` retrieves list of samples
 
         `/samples?fields[samples]=accession,runs_count,biome`
-        retrieve only selected fileds
+        retrieve only selected fields
 
         `/samples?include=runs` with related runs
 
@@ -626,7 +622,7 @@ class RunViewSet(mixins.RetrieveModelMixin,
         `/runs`
 
         `/runs?fields[runs]=accession,experiment_type` retrieve only
-        selected fileds
+        selected fields
 
         Filter by:
         ---
@@ -674,7 +670,7 @@ class AssemblyViewSet(mixins.RetrieveModelMixin,
         `/assembly`
 
         `/assembly?fields[assembly]=accession` retrieve only
-        selected fileds
+        selected fields
 
         Filter by:
         ---
@@ -1445,4 +1441,15 @@ class AntiSmashGeneClustersViewSet(mixins.RetrieveModelMixin,
     )
 
     ordering = ('-name',)
-        
+
+
+class BannerMessageView(APIView):
+
+    def get(self, request):
+        """Get the content of the banner message if any
+        """
+        message = ""
+        if settings.BANNER_MESSAGE_FILE and os.path.isfile(settings.BANNER_MESSAGE_FILE):
+            with open(settings.BANNER_MESSAGE_FILE, 'r') as msg_file:
+                message = msg_file.read().strip()
+        return Response({"message": message})
