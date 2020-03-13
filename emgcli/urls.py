@@ -30,9 +30,8 @@ from rest_framework_jwt.views import obtain_jwt_token
 from rest_framework_jwt.views import verify_jwt_token
 
 from emgapi.urls import router as emg_router
-from emgapi.urls import mydata_router
-from emgapi.urls import utils_router
-from emgapianns.urls import mongo_router, urlpatterns as mongo_url_patterns
+from emgapi.urls import mydata_router, utils_router, urlpatterns as emgapi_urlpatterns 
+from emgapianns.urls import mongo_router, urlpatterns as mongo_urlpatterns
 from emgapianns.urls import router as emg_ext_router
 
 from openapi_codec import OpenAPICodec
@@ -109,10 +108,10 @@ urlpatterns += [
         name='verify_jwt_token_v1'),
 ]
 
-# emgapianns custom endpoints
-urlpatterns += mongo_url_patterns
+urlpatterns += mongo_urlpatterns
+urlpatterns += emgapi_urlpatterns
 
-# Admin
+# admin
 urlpatterns += [
     url('admin/', admin.site.urls),
 ]
