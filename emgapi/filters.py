@@ -60,7 +60,7 @@ def pipeline_version():
     try:
         pipelines = emg_models.Pipeline.objects.all() \
             .order_by('release_version').distinct()
-        return [(p.pk, p.release_version) for p in pipelines]
+        return [(p.release_version, p.release_version) for p in pipelines]
     except:  # noqa: E722
         return []
 
@@ -648,7 +648,7 @@ class AnalysisJobFilter(RunFilter):
 
     pipeline_version = filters.ChoiceFilter(
         choices=pipeline_version,
-        field_name='pipeline', distinct=True,
+        field_name='pipeline__release_version', distinct=True,
         label='Pipeline version', help_text='Pipeline version')
 
     class Meta:
