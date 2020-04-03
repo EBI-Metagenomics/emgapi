@@ -16,7 +16,7 @@ class Command(EMGBaseCommand):
 
     def __init__(self):
         super().__init__()
-        self.suffixes = ['.ipr', '.go', '.go_slim', '.pfam', '.ko', '.paths.gprops', '.antismash']
+        self.suffixes = ['.ips', '.ipr', '.go', '.go_slim', '.pfam', '.ko', '.paths.gprops', '.antismash']
         self.kegg_pathway_suffix = ['.paths.kegg']
         self.joined_suffixes = self.suffixes + self.kegg_pathway_suffix
 
@@ -55,13 +55,29 @@ class Command(EMGBaseCommand):
         if self.suffix in self.suffixes:
             name = '%s_summary%s' % (obj.input_file_name, self.suffix)
             source_file = os.path.join(rootpath, obj.result_directory, name)
-            logger.info('Found: %s' % source_file)
             if not self._check_source_file(source_file):
-                return
+                logger.info('Could not find: %s' % source_file)
+                name = '%s.summary%s' % (obj.input_file_name, self.suffix)
+                source_file = os.path.join(rootpath, obj.result_directory, name)
+                if not self._check_source_file(source_file):
+                    logger.info('Could not find: %s' % source_file)
+                    return
+                else:
+                    logger.info('Found: %s' % source_file)
             self._parse_and_load_summary_file(source_file, rootpath, obj)
 
         elif self.suffix in self.kegg_pathway_suffix:
             name = '%s_summary%s' % (obj.input_file_name, self.suffix)
+            source_file = os.path.join(rootpath, obj.result_directory, name)
+            if not self._check_source_file(source_file):
+                logger.info('Could not find: %s' % source_file)
+                name = '%s.summary%s' % (obj.input_file_name, self.suffix)
+                source_file = os.path.join(rootpath, obj.result_directory, name)
+                if not self._check_source_file(source_file):
+                    logger.info('Could not find: %s' % source_file)
+                    return
+                else:
+                    logger.info('Found: %s' % source_file)
             self.load_kegg_from_summary_file(obj, rootpath, name)
         else:
             logger.warning("Suffix {} not accepted!".format(self.suffix))
@@ -159,7 +175,7 @@ class Command(EMGBaseCommand):
                     new_anns.append(ann)
                 if ann is not None:
                     anns.append(ann)
-                    if self.suffix == '.ipr':
+                    if self.suffix in ['.ipr', '.ips']:
                         rann = m_models.AnalysisJobInterproIdentifierAnnotation(  # NOQA
                             count=row[2],
                             interpro_identifier=ann
@@ -341,7 +357,7 @@ class Command(EMGBaseCommand):
                                        m_models.AntiSmashGeneCluster,
                                        m_models.AnalysisJobAntiSmashGCAnnotation,
                                        'gene_cluster')
-            elif self.suffix == '.ipr':
+            elif self.suffix in ['.ipr', '.ips']:
                 self.load_ipr_from_summary_file(reader, obj)
             elif self.suffix in ('.go_slim', '.go'):
                 self.load_go_from_summary_file(reader, obj)
