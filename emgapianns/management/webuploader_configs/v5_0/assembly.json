@@ -369,9 +369,9 @@
       "format_name": "FASTA",
       "group_type": "non-coding RNAs",
       "subdir": "sequence-categorisation",
-      "description_label": "Alphaproteobacteria transfer-messenger RNA",
-      "alias": "{}_alpha_tmRNA.RF01849.fa",
-      "real_name": "{}.alpha_tmRNA.RF01849.fasta"
+      "description_label": "Predicted alpha tmRNA",
+      "alias": "{}_alpha_tmRNA.RF01849.fasta.gz",
+      "real_name": "alpha_tmRNA.RF01849.fasta.gz"
     },
     {
       "_accession_substitution": "accession",
@@ -382,9 +382,9 @@
       "format_name": "FASTA",
       "group_type": "non-coding RNAs",
       "subdir": "sequence-categorisation",
-      "description_label": "Bacterial large signal recognition particle RNA",
-      "alias": "{}_Bacteria_large_SRP.RF01854.fa",
-      "real_name": "{}.Bacteria_large_SRP.RF01854.fasta"
+      "description_label": "Predicted Bacteria large SRP RNA",
+      "alias": "{}_Bacteria_large_SRP.RF01854.fasta.gz",
+      "real_name": "Bacteria_large_SRP.RF01854.fasta.gz"
     },
     {
       "_accession_substitution": "accession",
@@ -395,9 +395,9 @@
       "format_name": "FASTA",
       "group_type": "non-coding RNAs",
       "subdir": "sequence-categorisation",
-      "description_label": "Betaproteobacteria transfer-messenger RNA",
-      "alias": "{}_beta_tmRNA.RF01850.fa",
-      "real_name": "{}.beta_tmRNA.RF01850.fasta"
+      "description_label": "Predicted beta tmRNA",
+      "alias": "{}_beta_tmRNA.RF01850.fasta.gz",
+      "real_name": "beta_tmRNA.RF01850.fasta.gz"
     },
     {
       "_accession_substitution": "accession",
@@ -408,9 +408,9 @@
       "format_name": "FASTA",
       "group_type": "non-coding RNAs",
       "subdir": "sequence-categorisation",
-      "description_label": "Dictyostelium signal recognition particle",
-      "alias": "{}_Dictyostelium_SRP.RF01570.fa",
-      "real_name": "{}.Dictyostelium_SRP.RF01570.fasta"
+      "description_label": "Predicted Dictyostelium SRP RNA",
+      "alias": "{}_Dictyostelium_SRP.RF01570.fasta.gz",
+      "real_name": "Dictyostelium_SRP.RF01570.fasta.gz"
     },
     {
       "_accession_substitution": "accession",
@@ -421,9 +421,9 @@
       "format_name": "FASTA",
       "group_type": "non-coding RNAs",
       "subdir": "sequence-categorisation",
-      "description_label": "Metazoan signal recognition particle RNA",
-      "alias": "{}_Metazoa_SRP.RF00017.fa",
-      "real_name": "{}.Metazoa_SRP.RF00017.fasta"
+      "description_label": "Predicted Metazoa SRP RNA",
+      "alias": "{}_Metazoa_SRP.RF00017.fasta.gz",
+      "real_name": "Metazoa_SRP.RF00017.fasta.gz"
     },
     {
       "_accession_substitution": "accession",
@@ -434,9 +434,9 @@
       "format_name": "FASTA",
       "group_type": "non-coding RNAs",
       "subdir": "sequence-categorisation",
-      "description_label": "Protozoan signal recognition particle RNA",
-      "alias": "{}_Protozoa_SRP.RF01856.fa",
-      "real_name": "{}.Protozoa_SRP.RF01856.fasta"
+      "description_label": "Predicted Protozoa SRP RNA",
+      "alias": "{}_Protozoa_SRP.RF01856.fasta.gz",
+      "real_name": "Protozoa_SRP.RF01856.fasta.gz"
     },
     {
       "_accession_substitution": "accession",
@@ -447,9 +447,9 @@
       "format_name": "FASTA",
       "group_type": "non-coding RNAs",
       "subdir": "sequence-categorisation",
-      "description_label": "Archaeal RNase P",
-      "alias": "{}_RNaseP_arch.RF00373.fa",
-      "real_name": "{}.RNaseP_arch.RF00373.fasta"
+      "description_label": "Predicted Archaeal RNase P RNA",
+      "alias": "{}_RNaseP_arch.RF00373.fasta.gz",
+      "real_name": "RNaseP_arch.RF00373.fasta.gz"
     },
     {
       "_accession_substitution": "accession",
@@ -460,9 +460,9 @@
       "format_name": "FASTA",
       "group_type": "non-coding RNAs",
       "subdir": "sequence-categorisation",
-      "description_label": "Bacterial RNase P class B",
-      "alias": "{}_RNaseP_bact_b.RF00011.fa",
-      "real_name": "{}.RNaseP_bact_b.RF00011.fasta"
+      "description_label": "Predicted Bacterial RNase P class B RNA",
+      "alias": "{}_RNaseP_bact_b.RF00011.fasta.gz",
+      "real_name": "RNaseP_bact_b.RF00011.fasta.gz"
     },
     {
       "_accession_substitution": "accession",
@@ -473,9 +473,9 @@
       "format_name": "FASTA",
       "group_type": "non-coding RNAs",
       "subdir": "sequence-categorisation",
-      "description_label": "Nuclear RNase P",
-      "alias": "{}_RNaseP_nuc.RF00009.fa",
-      "real_name": "{}.RNaseP_nuc.RF00009.fasta"
+      "description_label": "Predicted Nuclear RNase P",
+      "alias": "{}_RNaseP_nuc.RF00009.fasta.gz",
+      "real_name": "RNaseP_nuc.RF00009.fasta.gz"
     },
     {
       "_accession_substitution": "accession",
@@ -486,9 +486,9 @@
       "format_name": "FASTA",
       "group_type": "non-coding RNAs",
       "subdir": "sequence-categorisation",
-      "description_label": "tRNA",
-      "alias": "{}_tRNA.RF00005.fa",
-      "real_name": "{}.tRNA.RF00005.fasta"
+      "description_label": "Predicted tRNA",
+      "alias": "{}_tRNA.RF00005.fasta.gz",
+      "real_name": "tRNA.RF00005.fasta.gz"
     },
     {
       "_accession_substitution": "accession",
@@ -499,9 +499,9 @@
       "format_name": "FASTA",
       "group_type": "non-coding RNAs",
       "subdir": "sequence-categorisation",
-      "description_label": "Bacterial small signal recognition particle RNA",
-      "alias": "{}_Bacteria_small_SRP.RF01854.fa",
-      "real_name": "{}.Bacteria_small_SRP.RF01854.fasta"
+      "description_label": "Predicted Bacteria small SRP RNA",
+      "alias": "{}_Bacteria_small_SRP.RF00169.fasta.gz",
+      "real_name": "Bacteria_small_SRP.RF00169.fasta.gz"
     },
     {
       "_accession_substitution": "accession",
@@ -512,9 +512,9 @@
       "format_name": "FASTA",
       "group_type": "non-coding RNAs",
       "subdir": "sequence-categorisation",
-      "description_label": "Cyanobacteria transfer-messenger RNA",
-      "alias": "{}_cyano_tmRNA.RF01851.fa",
-      "real_name": "{}.cyano_tmRNA.RF01851.fasta"
+      "description_label": "Predicted cyano tmRNA",
+      "alias": "{}_cyano_tmRNA.RF01851.fasta.gz",
+      "real_name": "cyano_tmRNA.RF01851.fasta.gz"
     },
     {
       "_accession_substitution": "accession",
@@ -525,9 +525,9 @@
       "format_name": "FASTA",
       "group_type": "non-coding RNAs",
       "subdir": "sequence-categorisation",
-      "description_label": "Fungal signal recognition particle RNA",
-      "alias": "{}_Fungi_SRP.RF01502.fa",
-      "real_name": "{}.Fungi_SRP.RF01502.fasta"
+      "description_label": "Predicted Fungi SRP RNA",
+      "alias": "{}_Fungi_SRP.RF01502.fasta.gz",
+      "real_name": "Fungi_SRP.RF01502.fasta.gz"
     },
     {
       "_accession_substitution": "accession",
@@ -538,9 +538,9 @@
       "format_name": "FASTA",
       "group_type": "non-coding RNAs",
       "subdir": "sequence-categorisation",
-      "description_label": "Mitochondrion-encoded tmRNA",
-      "alias": "{}_mt-tmRNA.RF02544.fa",
-      "real_name": "{}.mt-tmRNA.RF02544.fasta"
+      "description_label": "Predicted mt-tmRNA",
+      "alias": "{}_mt-tmRNA.RF02544.fasta.gz",
+      "real_name": "mt-tmRNA.RF02544.fasta.gz"
     },
     {
       "_accession_substitution": "accession",
@@ -551,9 +551,9 @@
       "format_name": "FASTA",
       "group_type": "non-coding RNAs",
       "subdir": "sequence-categorisation",
-      "description_label": "Plant signal recognition particle RNA",
-      "alias": "{}_Plant_SRP.RF01855.fa",
-      "real_name": "{}.Plant_SRP.RF01855.fasta"
+      "description_label": "Predicted Plant SRP RNA",
+      "alias": "{}_Plant_SRP.RF01855.fasta.gz",
+      "real_name": "Plant_SRP.RF01855.fasta.gz"
     },
     {
       "_accession_substitution": "accession",
@@ -564,9 +564,9 @@
       "format_name": "FASTA",
       "group_type": "non-coding RNAs",
       "subdir": "sequence-categorisation",
-      "description_label": "RNase MRP",
-      "alias": "{}_RNase_MRP.RF00030.fa",
-      "real_name": "{}.RNase_MRP.RF00030.fasta"
+      "description_label": "Predicted RNase MRP RNA",
+      "alias": "{}_RNase_MRP.RF00030.fasta.gz",
+      "real_name": "RNase_MRP.RF00030.fasta.gz"
     },
     {
       "_accession_substitution": "accession",
@@ -577,9 +577,9 @@
       "format_name": "FASTA",
       "group_type": "non-coding RNAs",
       "subdir": "sequence-categorisation",
-      "description_label": "Bacterial RNase P class A",
-      "alias": "{}_RNaseP_bact_a.RF00010.fa",
-      "real_name": "{}.RNaseP_bact_a.RF00010.fasta"
+      "description_label": "Predicted Bacterial RNase P class A RNA",
+      "alias": "{}_RNaseP_bact_a.RF00010.fasta.gz",
+      "real_name": "RNaseP_bact_a.RF00010.fasta.gz"
     },
     {
       "_accession_substitution": "accession",
@@ -590,9 +590,9 @@
       "format_name": "FASTA",
       "group_type": "non-coding RNAs",
       "subdir": "sequence-categorisation",
-      "description_label": "Plasmodium RNase_P",
-      "alias": "{}_RNase_P.RF01577.fa",
-      "real_name": "{}.RNase_P.RF01577.fasta"
+      "description_label": "Predicted Plasmodium RNase P",
+      "alias": "{}_RNase_P.RF01577.fasta.gz",
+      "real_name": "RNase_P.RF01577.fasta.gz"
     },
     {
       "_accession_substitution": "accession",
@@ -603,9 +603,9 @@
       "format_name": "FASTA",
       "group_type": "non-coding RNAs",
       "subdir": "sequence-categorisation",
-      "description_label": "transfer-messenger RNA",
-      "alias": "{}_tmRNA.RF00023.fa",
-      "real_name": "{}.tmRNA.RF00023.fasta"
+      "description_label": "Predicted tmRNA",
+      "alias": "{}_tmRNA.RF00023.fasta.gz",
+      "real_name": "tmRNA.RF00023.fasta.gz"
     },
     {
       "_accession_substitution": "accession",
@@ -616,9 +616,9 @@
       "format_name": "FASTA",
       "group_type": "non-coding RNAs",
       "subdir": "sequence-categorisation",
-      "description_label": "Selenocysteine transfer RNA",
-      "alias": "{}_tRNA-Sec.RF01852.fa",
-      "real_name": "{}.tRNA-Sec.RF01852.fasta"
+      "description_label": "Predicted tRNA-Sec",
+      "alias": "{}_tRNA-Sec.RF01852.fasta.gz",
+      "real_name": "tRNA-Sec.RF01852.fasta.gz"
     },
     {
       "_accession_substitution": null,
