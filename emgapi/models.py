@@ -79,12 +79,16 @@ class BaseQuerySet(models.QuerySet):
             },
             'AnalysisJobQuerySet': {
                 'all': [
+                    # TMP: IS_PUBLIC = 5 is suppressed
+                    ~Q(sample__is_public=5),
                     Q(run__status_id=4) | Q(assembly__status_id=4),
                     Q(analysis_status_id=3) | Q(analysis_status_id=6)
                 ],
             },
             'AnalysisJobDownloadQuerySet': {
                 'all': [
+                    # TMP: IS_PUBLIC = 5 is suppressed
+                    ~Q(job__sample__is_public=5),
                     Q(job__run__status_id=4) | Q(job__assembly__status_id=4),
                     Q(job__analysis_status_id=3) | Q(job__analysis_status_id=6)
                 ],
@@ -786,6 +790,10 @@ class Sample(models.Model):
     geo_loc_name = models.CharField(
         db_column='GEO_LOC_NAME', max_length=255, blank=True, null=True,
         help_text='Name of geographical location')
+    # possible values
+    # 1 - public
+    # 0 - private
+    # 5 - suppressed
     is_public = models.IntegerField(
         db_column='IS_PUBLIC', blank=True, null=True)
     metadata_received = models.DateTimeField(
