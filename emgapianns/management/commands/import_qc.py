@@ -29,7 +29,7 @@ class Command(EMGBaseCommand):
         rootpath = options.get('rootpath', None)
         emg_db = options['emg_db']
 
-        for infile in ['qc_summary', 'func_summary']:
+        for infile in ['qc_summary', 'functional-annotation/stats/interproscan.stats']:
             self.load_stats(rootpath, obj, infile, emg_db)
         self.import_rna_counts(rootpath=rootpath, job=obj, emg_db=emg_db)
 

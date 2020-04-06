@@ -53,32 +53,25 @@ class Command(EMGBaseCommand):
         self.suffix = options.get('suffix', None)
 
         if self.suffix in self.suffixes:
-            name = '%s_summary%s' % (obj.input_file_name, self.suffix)
-            source_file = os.path.join(rootpath, obj.result_directory, name)
-            if not self._check_source_file(source_file):
-                logger.info('Could not find: %s' % source_file)
-                name = '%s.summary%s' % (obj.input_file_name, self.suffix)
-                source_file = os.path.join(rootpath, obj.result_directory, name)
+            # Output names and folders changed slightly between v4 and v5
+            # This piece of code still supports both versions
+            for infix in ['%s_summary%s', '%s.summary%s']:
+                name = infix % (obj.input_file_name, self.suffix)
+                source_file = os.path.join(rootpath, obj.result_directory, 'functional-annotation', name)
                 if not self._check_source_file(source_file):
                     logger.info('Could not find: %s' % source_file)
-                    return
                 else:
                     logger.info('Found: %s' % source_file)
-            self._parse_and_load_summary_file(source_file, rootpath, obj)
-
+                    self._parse_and_load_summary_file(source_file, obj)
+                    break
         elif self.suffix in self.kegg_pathway_suffix:
-            name = '%s_summary%s' % (obj.input_file_name, self.suffix)
+            name = '%s.summary%s' % (obj.input_file_name, self.suffix)
             source_file = os.path.join(rootpath, obj.result_directory, name)
             if not self._check_source_file(source_file):
                 logger.info('Could not find: %s' % source_file)
-                name = '%s.summary%s' % (obj.input_file_name, self.suffix)
-                source_file = os.path.join(rootpath, obj.result_directory, name)
-                if not self._check_source_file(source_file):
-                    logger.info('Could not find: %s' % source_file)
-                    return
-                else:
-                    logger.info('Found: %s' % source_file)
-            self.load_kegg_from_summary_file(obj, rootpath, name)
+            else:
+                logger.info('Found: %s' % source_file)
+                self.load_kegg_from_summary_file(obj, rootpath, name)
         else:
             logger.warning("Suffix {} not accepted!".format(self.suffix))
 
@@ -320,7 +313,7 @@ class Command(EMGBaseCommand):
         analysis.save()
         logger.info('Saved {}'.format(analysis_field))
 
-    def _parse_and_load_summary_file(self, source_file, rootpath, obj):
+    def _parse_and_load_summary_file(self, source_file, obj):
         logger.info('Loading: %s' % source_file)
         with open(source_file) as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
