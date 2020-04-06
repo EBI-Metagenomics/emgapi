@@ -168,7 +168,7 @@ class Command(EMGBaseCommand):
                     new_anns.append(ann)
                 if ann is not None:
                     anns.append(ann)
-                    if self.suffix in ['.ipr', '.ips']:
+                    if self.suffix in ['.ipr']:
                         rann = m_models.AnalysisJobInterproIdentifierAnnotation(  # NOQA
                             count=row[2],
                             interpro_identifier=ann
@@ -350,7 +350,15 @@ class Command(EMGBaseCommand):
                                        m_models.AntiSmashGeneCluster,
                                        m_models.AnalysisJobAntiSmashGCAnnotation,
                                        'gene_cluster')
-            elif self.suffix in ['.ipr', '.ips']:
+            elif self.suffix in '.ips':
+                self.load_summary_file(reader,
+                                       obj,
+                                       m_models.AnalysisJobInterproIdentifier,
+                                       'interpro_identifiers',
+                                       m_models.InterproIdentifier,
+                                       m_models.AnalysisJobInterproIdentifierAnnotation,
+                                       'interpro_identifier')
+            elif self.suffix == '.ipr':
                 self.load_ipr_from_summary_file(reader, obj)
             elif self.suffix in ('.go_slim', '.go'):
                 self.load_go_from_summary_file(reader, obj)
