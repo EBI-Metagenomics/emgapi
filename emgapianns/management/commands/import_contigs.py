@@ -31,6 +31,7 @@ class Command(EMGBaseCommand):
     obj_list = list()
     rootpath = None
     result_dir = None
+    PATHWAY_SUB_DIR = 'pathways-systems'
 
     @classmethod
     def _split(cls, string, sep=','):
@@ -147,6 +148,7 @@ class Command(EMGBaseCommand):
         rootpath = options.get('rootpath', None)
         root_file = os.path.join(rootpath,
                                  analysis_job.result_directory,
+                                 self.PATHWAY_SUB_DIR,
                                  analysis_job.input_file_name)
         # no_antismash file detection
         if os.path.isfile(os.path.join(rootpath, analysis_job.result_directory, 'no_antismash')):
