@@ -127,7 +127,7 @@ class Command(BaseCommand):
 
         if self.version in ['5.0'] and metadata.experiment_type == ExperimentType.ASSEMBLY:
             logger.info('Importing contigs...')
-            call_command('import_contigs', self.accession, '--pipeline', self.version)
+            call_command('import_contigs', self.accession, self.rootpath, '--pipeline', self.version)
         else:
             logging.info("Skipping the import procedure for the contig viewer!")
 
