@@ -337,7 +337,7 @@ class Command(EMGBaseCommand):
                                        m_models.KeggOrtholog,
                                        m_models.AnalysisJobKeggOrthologAnnotation,
                                        'ko')
-            elif self.suffix == '.paths.gprops':
+            elif self.suffix == '.gprops':
                 self.load_summary_file(reader,
                                        obj,
                                        m_models.AnalysisJobGenomeProperty,
