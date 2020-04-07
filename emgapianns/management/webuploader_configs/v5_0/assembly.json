@@ -736,7 +736,7 @@
       "description_label": "Genome Properties annotation",
       "format_name": "CSV",
       "group_type": "Pathways and Systems",
-      "real_name": "{}.summary.gpropss",
+      "real_name": "{}.summary.gprops",
       "subdir": "pathways-systems"
     },
     {
