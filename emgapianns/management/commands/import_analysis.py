@@ -318,7 +318,7 @@ class Command(BaseCommand):
 
     def populate_mongodb_function_and_pathways(self):
         logger.info('Importing functional and pathway data...')
-        for sum_type in ['.ips', '.ipr', '.go', '.go_slim', '.paths.kegg', '.pfam', '.ko', '.paths.gprops', '.antismash']:
+        for sum_type in ['.ips', '.ipr', '.go', '.go_slim', '.kegg_pathways', '.pfam', '.ko', '.gprops', '.antismash']:
             call_command('import_summary', self.accession, self.rootpath, sum_type, '--pipeline', self.version)
 
     def __find_folder(self, directory, search_pattern, maxdepth=2, recursive=False):
