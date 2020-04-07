@@ -14,10 +14,14 @@ logger = logging.getLogger(__name__)
 
 class Command(EMGBaseCommand):
 
+    FUNCTION_SUB_DIR = 'functional-annotation'
+    PATHWAY_SUB_DIR = 'pathways-systems'
+
     def __init__(self):
         super().__init__()
-        self.suffixes = ['.ips', '.ipr', '.go', '.go_slim', '.pfam', '.ko', '.paths.gprops', '.antismash']
-        self.kegg_pathway_suffix = ['.paths.kegg']
+        self.suffixes = ['.ips', '.ipr', '.go', '.go_slim', '.pfam', '.ko', '.gprops', '.antismash']
+        self.pathway_suffixes = ['.gprops', '.antismash', '.kegg_pathways']
+        self.kegg_pathway_suffix = ['.kegg_pathways']
         self.joined_suffixes = self.suffixes + self.kegg_pathway_suffix
 
     def add_arguments(self, parser):
@@ -57,7 +61,10 @@ class Command(EMGBaseCommand):
             # This piece of code still supports both versions
             for infix in ['%s_summary%s', '%s.summary%s']:
                 name = infix % (obj.input_file_name, self.suffix)
-                source_file = os.path.join(rootpath, obj.result_directory, 'functional-annotation', name)
+                sub_dir = self.FUNCTION_SUB_DIR
+                if self.suffix in self.pathway_suffixes:
+                    sub_dir = self.PATHWAY_SUB_DIR
+                source_file = os.path.join(rootpath, obj.result_directory, sub_dir, name)
                 if not self._check_source_file(source_file):
                     logger.info('Could not find: %s' % source_file)
                 else:
@@ -66,12 +73,12 @@ class Command(EMGBaseCommand):
                     break
         elif self.suffix in self.kegg_pathway_suffix:
             name = '%s.summary%s' % (obj.input_file_name, self.suffix)
-            source_file = os.path.join(rootpath, obj.result_directory, name)
+            source_file = os.path.join(rootpath, obj.result_directory, self.PATHWAY_SUB_DIR, name)
             if not self._check_source_file(source_file):
                 logger.info('Could not find: %s' % source_file)
             else:
                 logger.info('Found: %s' % source_file)
-                self.load_kegg_from_summary_file(obj, rootpath, name)
+                self.load_kegg_from_summary_file(obj, source_file)
         else:
             logger.warning("Suffix {} not accepted!".format(self.suffix))
 
@@ -188,7 +195,8 @@ class Command(EMGBaseCommand):
             run.save()
             logger.info("Saved Run %r" % run)
 
-    def load_kegg_from_summary_file(self, obj, rootpath, file_name, delimiter=','):
+    @staticmethod
+    def load_kegg_from_summary_file(obj, summary_infile, delimiter=','):
         """Load KEGG Modules results for a job into Mongo.
         KEGG results are composed of 3 files:
             - summary file
@@ -210,11 +218,6 @@ class Command(EMGBaseCommand):
         analysis_keggs.kegg_modules = []
 
         analysis_keggs.save()
-
-        summary_infile = os.path.join(rootpath, obj.result_directory, file_name)
-
-        if not self._check_source_file(summary_infile):
-            return
 
         new_kmodules = []
         annotations = []

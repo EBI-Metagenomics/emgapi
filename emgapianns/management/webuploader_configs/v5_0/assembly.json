@@ -736,8 +736,8 @@
       "description_label": "Genome Properties annotation",
       "format_name": "CSV",
       "group_type": "Pathways and Systems",
-      "real_name": "{}_summary.paths.gprops",
-      "subdir": null
+      "real_name": "{}.summary.gpropss",
+      "subdir": "pathways-systems"
     },
     {
       "_accession_substitution": "full",
@@ -749,8 +749,8 @@
       "description_label": "KEGG pathway annotation",
       "format_name": "CSV",
       "group_type": "Pathways and Systems",
-      "real_name": "{}_summary.paths.kegg",
-      "subdir": null
+      "real_name": "{}.summary.kegg_pathways",
+      "subdir": "pathways-systems"
     },
     {
       "_accession_substitution": "full",
@@ -763,7 +763,7 @@
       "format_name": "EMBL",
       "group_type": "Pathways and Systems",
       "real_name": "{}_antismash_final.embl.gz",
-      "subdir": null
+      "subdir": "pathways-systems"
     },
     {
       "_accession_substitution": "full",
@@ -776,7 +776,7 @@
       "format_name": "GenBank",
       "group_type": "Pathways and Systems",
       "real_name": "{}_antismash_final.gbk.gz",
-      "subdir": null
+      "subdir": "pathways-systems"
     }
   ]
 }
