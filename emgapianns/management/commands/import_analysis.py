@@ -318,7 +318,9 @@ class Command(BaseCommand):
 
     def populate_mongodb_function_and_pathways(self):
         logger.info('Importing functional and pathway data...')
-        for sum_type in ['.ips', '.ipr', '.go', '.go_slim', '.pfam', '.ko', '.gprops', '.antismash', '.kegg_pathways']:
+        # TODO: Roll back Genome Properties when fixed
+        # for sum_type in ['.ips', '.ipr', '.go', '.go_slim', '.pfam', '.ko', '.gprops', '.antismash', '.kegg_pathways']:
+        for sum_type in ['.ips', '.ipr', '.go', '.go_slim', '.pfam', '.ko', '.antismash', '.kegg_pathways']:
             call_command('import_summary', self.accession, self.rootpath, sum_type, '--pipeline', self.version)
 
     def __find_folder(self, directory, search_pattern, maxdepth=2, recursive=False):
