@@ -146,20 +146,27 @@ class Command(EMGBaseCommand):
         logger.info('CLI {}'.format(options))
 
         rootpath = options.get('rootpath', None)
-        root_file = os.path.join(rootpath,
-                                 analysis_job.result_directory,
-                                 self.PATHWAY_SUB_DIR,
-                                 analysis_job.input_file_name)
         # no_antismash file detection
         if os.path.isfile(os.path.join(rootpath, analysis_job.result_directory, 'no_antismash')):
             logger.warning('No antismash results, SKIPPING!')
             return
 
-        faix = options['faix'] or root_file + '_contigs.fasta.fai'
-        gff = options['gff'] or root_file + '_annotation.gff'
+        result_folder = os.path.join(rootpath, analysis_job.result_directory)
+        result_file_prefix = analysis_job.input_file_name
+        # ERZ782882_FASTA.fasta.bgz.fai
+        default_faix_file_path = os.path.join(result_folder,
+                                              "{}.{}".format(result_file_prefix, "fasta.bgz.fai"))
+        faix = options['faix'] or default_faix_file_path
+        # functional-annotation/ERZ782882_FASTA.contigs.annotations.gff.gz
+        default_gff_file_path = os.path.join(result_folder, "functional-annotation",
+                                             "{}.{}".format(result_file_prefix, "contigs.annotations.gff"))
+        gff = options['gff'] or default_gff_file_path
         # TODO: calculation not implemented in pipeline yet.
         # kegg_modules = options['kegg_modules'] or root_file + '_summary.paths.kegg'
-        antismash = options['antismash'] or root_file + '_annotation_antismash.gff'
+        # pathways-systems/ERZ782882_FASTA.antismash.gff.gz
+        default_antismash_file_path = os.path.join(result_folder, "pathways-systems",
+                                                   "{}.{}".format(result_file_prefix, "antismash.gff"))
+        antismash = options['antismash'] or default_antismash_file_path
 
         min_length = options['min_length']
         batch_size = options['batch_size']
