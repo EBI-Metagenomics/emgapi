@@ -219,7 +219,7 @@ class Command(EMGBaseCommand):
 
         analysis_keggs.save()
 
-        new_kmodules = []
+        new_kmodules = set()
         annotations = []
 
         with open(summary_infile) as csvfile:
@@ -242,7 +242,7 @@ class Command(EMGBaseCommand):
                         name=pathway_name,
                         description=pathway_class
                     )
-                    new_kmodules.append(k_module)
+                    new_kmodules.add(k_module)
 
                 kpann = m_models.AnalysisJobKeggModuleAnnotation(
                     module=k_module,
