@@ -318,9 +318,7 @@ class Command(BaseCommand):
 
     def populate_mongodb_function_and_pathways(self):
         logger.info('Importing functional and pathway data...')
-        # for sum_type in ['.ips', '.ipr', '.go', '.go_slim', '.kegg_pathways', '.pfam', '.ko', '.gprops', '.antismash']:
-        # TODO: kegg_pathways exclude at the moment because of missing column
-        for sum_type in ['.ips', '.ipr', '.go', '.go_slim', '.pfam', '.ko', '.gprops', '.antismash']:
+        for sum_type in ['.ips', '.ipr', '.go', '.go_slim', '.pfam', '.ko', '.gprops', '.antismash', '.kegg_pathways']:
             call_command('import_summary', self.accession, self.rootpath, sum_type, '--pipeline', self.version)
 
     def __find_folder(self, directory, search_pattern, maxdepth=2, recursive=False):
