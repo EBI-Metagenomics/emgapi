@@ -1,5 +1,18 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+# Copyright 2020 EMBL - European Bioinformatics Institute
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import os
 import csv
@@ -16,14 +29,14 @@ class Command(EMGBaseCommand):
 
     def __init__(self):
         super().__init__()
-        self.suffixes = ['.ipr', '.go', '.go_slim', '.pfam', '.ko', '.paths.gprops', '.antismash']
-        self.kegg_pathway_suffix = ['.paths.kegg']
+        self.suffixes = [".ipr", ".go", ".go_slim", ".pfam", ".ko", ".paths.gprops", ".antismash"]
+        self.kegg_pathway_suffix = [".paths.kegg"]
         self.joined_suffixes = self.suffixes + self.kegg_pathway_suffix
 
     def add_arguments(self, parser):
         super(Command, self).add_arguments(parser)
-        parser.add_argument('suffix', nargs='?', type=str, default='.go_slim', choices=self.joined_suffixes,
-                            help='Provide summary file suffix: ' + ' (default: %(default)s)')
+        parser.add_argument("suffix", nargs="?", type=str, default=".go_slim", choices=self.joined_suffixes,
+                            help="Provide summary file suffix: " + " (default: %(default)s)")
 
     def populate_from_accession(self, options):
         logger.info("Found %d" % len(self.obj_list))
@@ -38,30 +51,30 @@ class Command(EMGBaseCommand):
         :return:
         """
         if not os.path.exists(source_file):
-            logger.error('Path %r does not exist. SKIPPING!' % source_file)
+            logger.error("Path %r does not exist. SKIPPING!" % source_file)
             return False
         if not os.path.isfile(source_file):
-            logger.error('Specified source %r is not a file. SKIPPING!' % source_file)
+            logger.error("Specified source %r is not a file. SKIPPING!" % source_file)
             return False
         if os.stat(source_file).st_size == 0:
-            logger.error('Specified input file %r is empty. SKIPPING!' % source_file)
+            logger.error("Specified input file %r is empty. SKIPPING!" % source_file)
             return False
         return True
 
     def find_path(self, obj, options):
-        rootpath = options.get('rootpath', None)
-        self.suffix = options.get('suffix', None)
+        rootpath = options.get("rootpath", None)
+        self.suffix = options.get("suffix", None)
 
         if self.suffix in self.suffixes:
-            name = '%s_summary%s' % (obj.input_file_name, self.suffix)
+            name = "%s_summary%s" % (obj.input_file_name, self.suffix)
             source_file = os.path.join(rootpath, obj.result_directory, name)
-            logger.info('Found: %s' % source_file)
+            logger.info("Found: %s" % source_file)
             if not self._check_source_file(source_file):
                 return
             self._parse_and_load_summary_file(source_file, rootpath, obj)
 
         elif self.suffix in self.kegg_pathway_suffix:
-            name = '%s_summary%s' % (obj.input_file_name, self.suffix)
+            name = "%s_summary%s" % (obj.input_file_name, self.suffix)
             self.load_kegg_from_summary_file(obj, rootpath, name)
         else:
             logger.warning("Suffix {} not accepted!".format(self.suffix))
@@ -78,13 +91,13 @@ class Command(EMGBaseCommand):
         run.job_id = obj.job_id
         new_anns = []
         anns = []
-        if self.suffix == '.go':
+        if self.suffix == ".go":
             run.go_terms = []
-        if self.suffix == '.go_slim':
+        if self.suffix == ".go_slim":
             run.go_slim = []
         for row in reader:
             try:
-                row[0].lower().startswith('go:')
+                row[0].lower().startswith("go:")
             except KeyError:
                 pass
             else:
@@ -100,13 +113,13 @@ class Command(EMGBaseCommand):
                     new_anns.append(ann)
                 if ann is not None:
                     anns.append(ann)
-                    if self.suffix == '.go_slim':
+                    if self.suffix == ".go_slim":
                         rann = m_models.AnalysisJobGoTermAnnotation(
                             count=row[3],
                             go_term=ann
                         )
                         run.go_slim.append(rann)
-                    elif self.suffix == '.go':
+                    elif self.suffix == ".go":
                         rann = m_models.AnalysisJobGoTermAnnotation(
                             count=row[3],
                             go_term=ann
@@ -125,7 +138,7 @@ class Command(EMGBaseCommand):
             if len(run.go_terms) > 0:
                 logger.info("Go terms %d" % len(run.go_terms))
             run.save()
-            logger.info("Saved Run %r" % run)
+            logger.info("Saved Analysis annotations  %r" % run)
 
     def load_ipr_from_summary_file(self, reader, obj):  # noqa
         try:
@@ -143,7 +156,7 @@ class Command(EMGBaseCommand):
         anns = []
         for row in reader:
             try:
-                row[0].lower().startswith('ipr')
+                row[0].lower().startswith("ipr")
             except KeyError:
                 pass
             else:
@@ -159,7 +172,7 @@ class Command(EMGBaseCommand):
                     new_anns.append(ann)
                 if ann is not None:
                     anns.append(ann)
-                    if self.suffix == '.ipr':
+                    if self.suffix == ".ipr":
                         rann = m_models.AnalysisJobInterproIdentifierAnnotation(  # NOQA
                             count=row[2],
                             interpro_identifier=ann
@@ -177,9 +190,9 @@ class Command(EMGBaseCommand):
                 logger.info(
                     "Interpro identifiers %d" % len(run.interpro_identifiers))
             run.save()
-            logger.info("Saved Run %r" % run)
+            logger.info("Saved Analysis annotations  %r" % run)
 
-    def load_kegg_from_summary_file(self, obj, rootpath, file_name, delimiter=','):
+    def load_kegg_from_summary_file(self, obj, rootpath, file_name, delimiter=","):
         """Load KEGG Modules results for a job into Mongo.
         KEGG results are composed of 3 files:
             - summary file
@@ -217,8 +230,8 @@ class Command(EMGBaseCommand):
             for accession, completeness, pathway_name, pathway_class, matching_kos, missing_kos in reader:
                 accession = accession.strip()
                 completeness = float(completeness)
-                matching_kos_list = list(filter(None, matching_kos.strip().split(',')))
-                missing_kos_list = list(filter(None, missing_kos.strip().split(',')))
+                matching_kos_list = list(filter(None, matching_kos.strip().split(",")))
+                missing_kos_list = list(filter(None, missing_kos.strip().split(",")))
 
                 k_module = None
                 try:
@@ -243,21 +256,85 @@ class Command(EMGBaseCommand):
             if len(new_kmodules):
                 m_models.KeggModule.objects.insert(new_kmodules)
                 logger.info(
-                    'Created {} new KEGG Modules'.format(len(new_kmodules)))
+                    "Created {} new KEGG Modules".format(len(new_kmodules)))
 
             if len(annotations):
                 analysis_keggs.kegg_modules.extend(annotations)
                 logger.info(
-                    'Created {} new KEGG Module Annotations'.format(len(annotations)))
+                    "Created {} new KEGG Module Annotations".format(len(annotations)))
 
         analysis_keggs.save()
-        logger.info('Saved Run {analysis_keggs}')
+        logger.info("Saved Analysis annotations  {}".format(analysis_keggs))
+
+    def load_genome_properties(self, reader,  obj):
+        """Genome properties import, using the output summary from GP
+        File structure:
+        "GenProp0678","C-type cytochrome biogenesis, system I","NO"|"YES"|"PARTIAL  "
+        """
+        analysis_genprop = None
+        try:
+            analysis_genprop = m_models.AnalysisJobGenomeProperty.objects \
+                                                                 .get(pk=str(obj.job_id))
+        except m_models.AnalysisJobGenomeProperty.DoesNotExist:
+            analysis_genprop = m_models.AnalysisJobGenomeProperty()
+
+        analysis_genprop.analysis_id = str(obj.job_id)
+        analysis_genprop.accession = obj.accession
+        analysis_genprop.pipeline_version = obj.pipeline.release_version
+        analysis_genprop.job_id = obj.job_id
+
+        new_entities = []
+        annotations = []
+
+        for gp_id, desc, presence in reader:
+            gp = None
+            try:
+                gp = m_models.GenomeProperty.objects \
+                    .get(accession=gp_id)
+            except m_models.GenomeProperty.DoesNotExist:
+                gp = m_models.GenomeProperty(
+                    accession=gp_id,
+                    description=desc
+                )
+                new_entities.append(gp)
+
+            parsed_presence = None
+            upper_presence = presence.upper() if presence else None
+            if upper_presence == "YES":
+                parsed_presence = m_models.AnalysisJobGenomePropAnnotation.YES_PRESENCE
+            elif upper_presence == "NO":
+                parsed_presence = m_models.AnalysisJobGenomePropAnnotation.NO_PRESENCE
+            elif upper_presence == "PARTIAL":
+                parsed_presence = m_models.AnalysisJobGenomePropAnnotation.PARTIAL_PRESENCE
+
+            if not parsed_presence:
+                raise ValueError("Invalid 'presence' value for genome properties row: {}"
+                                 .format(" ".join(gp_id, desc, presence)))
+
+            new_annotation = m_models.AnalysisJobGenomePropAnnotation(
+                genome_property=gp,
+                presence=parsed_presence
+            )
+            annotations.append(new_annotation)
+
+        if len(new_entities):
+            m_models.GenomeProperty.objects.insert(new_entities)
+            logger.info(
+                "Created {} new genome properties".format(len(new_entities)))
+
+        if len(annotations):
+            analysis_genprop.genome_properties = annotations
+            logger.info(
+                "Created {} new annotations".format(len(annotations)))
+
+        analysis_genprop.save()
+        logger.info("Saved Analysis annnotations Genome Properties")
 
     def load_summary_file(self, reader, obj, analysis_model, analysis_field,
                           entity_model, ann_model, ann_field):
         """Annotation summary file, generated with uniq.
         To generate this file for example:
-        sed 's/\t/ /23g' KO.tbl | cut -f1,23 | sort | uniq -c
+        sed "s/\t/ /23g" KO.tbl | cut -f1,23 | sort | uniq -c
         """
         analysis = None
         try:
@@ -294,56 +371,49 @@ class Command(EMGBaseCommand):
         if len(new_entities):
             entity_model.objects.insert(new_entities)
             logger.info(
-                'Created {} new entries'.format(len(new_entities)))
+                "Created {} new entries".format(len(new_entities)))
 
         if len(annotations):
             setattr(analysis, analysis_field, annotations)
             logger.info(
-                'Created {} new annotations'.format(len(annotations)))
+                "Created {} new annotations".format(len(annotations)))
 
         analysis.save()
-        logger.info('Saved {}'.format(analysis_field))
+        logger.info("Saved {}".format(analysis_field))
 
     def _parse_and_load_summary_file(self, source_file, rootpath, obj):
-        logger.info('Loading: %s' % source_file)
+        logger.info("Loading: %s" % source_file)
         with open(source_file) as csvfile:
-            reader = csv.reader(csvfile, delimiter=',')
-            #
-            if self.suffix == '.pfam':
+            reader = csv.reader(csvfile, delimiter=",")
+            if self.suffix == ".pfam":
                 self.load_summary_file(reader,
                                        obj,
                                        m_models.AnalysisJobPfam,
-                                       'pfam_entries',
+                                       "pfam_entries",
                                        m_models.PfamEntry,
                                        m_models.AnalysisJobPfamAnnotation,
-                                       'pfam_entry')
-            elif self.suffix == '.ko':
+                                       "pfam_entry")
+            elif self.suffix == ".ko":
                 self.load_summary_file(reader,
                                        obj,
                                        m_models.AnalysisJobKeggOrtholog,
-                                       'ko_entries',
+                                       "ko_entries",
                                        m_models.KeggOrtholog,
                                        m_models.AnalysisJobKeggOrthologAnnotation,
-                                       'ko')
-            elif self.suffix == '.paths.gprops':
-                self.load_summary_file(reader,
-                                       obj,
-                                       m_models.AnalysisJobGenomeProperty,
-                                       'genome_properties',
-                                       m_models.GenomeProperty,
-                                       m_models.AnalysisJobGenomePropAnnotation,
-                                       'genome_property')
-            elif self.suffix == '.antismash':
+                                       "ko")
+            elif self.suffix == ".paths.gprops":
+                self.load_genome_properties(reader, obj)
+            elif self.suffix == ".antismash":
                 self.load_summary_file(reader,
                                        obj,
                                        m_models.AnalysisJobAntiSmashGeneCluser,
-                                       'antismash_gene_clusters',
+                                       "antismash_gene_clusters",
                                        m_models.AntiSmashGeneCluster,
                                        m_models.AnalysisJobAntiSmashGCAnnotation,
-                                       'gene_cluster')
-            elif self.suffix == '.ipr':
+                                       "gene_cluster")
+            elif self.suffix == ".ipr":
                 self.load_ipr_from_summary_file(reader, obj)
-            elif self.suffix in ('.go_slim', '.go'):
+            elif self.suffix in (".go_slim", ".go"):
                 self.load_go_from_summary_file(reader, obj)
             else:
                 logger.warning("Suffix {} not accepted!".format(self.suffix))
