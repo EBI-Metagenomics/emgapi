@@ -1,4 +1,4 @@
-"1","GenProp0001","Chorismate biosynthesis via shikimate"
-"1","GenProp0002","Coenzyme F420 utilization"
-"1","GenProp0010","Inteins"
-"1","GenProp0021","CRISPR region"
+"GenProp0001","Chorismate biosynthesis via shikimate","YES"
+"GenProp0002","Coenzyme F420 utilization","PARTIAL"
+"GenProp0010","Inteins","NO"
+"GenProp0021","CRISPR region","YES"

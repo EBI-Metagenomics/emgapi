@@ -876,6 +876,19 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     def get_antismashgeneclusters(self, obj):
         return None
 
+    genome_properties = relations.SerializerMethodResourceRelatedField(  # NOQA
+        source='get_genomeproperties',
+        model=m_models.GenomeProperty,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:analysis-genome-properties-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession'
+    )
+
+    def get_genomeproperties(self, obj):
+        return None
+
     class Meta:
         model = emg_models.AnalysisJob
         exclude = (

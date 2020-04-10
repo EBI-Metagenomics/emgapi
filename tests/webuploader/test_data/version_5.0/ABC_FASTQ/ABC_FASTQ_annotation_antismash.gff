@@ -1,6 +1,0 @@
-##gff-version 3
-ERZ477576.1-NODE-1-length-138181-cov-24.7895	antiSMASH	CDS	3	180	.	-	.	ID=ERZ477576.1-NODE-1-length-138181-cov-24.7895;as_gene_clusters=other
-ERZ477576.1-NODE-1-length-138181-cov-24.7895	antiSMASH	CDS	194	1157	.	-	.	ID=ERZ477576.1-NODE-1-length-138181-cov-24.7895;as_gene_clusters=other
-ERZ477576.1-NODE-1-length-138181-cov-24.7895	antiSMASH	CDS	1158	2106	.	-	.	ID=ERZ477576.1-NODE-1-length-138181-cov-24.7895;as_gene_clusters=other
-ERZ477576.1-NODE-1-length-138181-cov-24.7895	antiSMASH	CDS	2108	5543	.	-	.	ID=ERZ477576.1-NODE-1-length-138181-cov-24.7895;as_gene_clusters=other
-ERZ477576.1-NODE-1-length-138181-cov-24.7895	antiSMASH	CDS	5542	6079	.	-	.	ID=ERZ477576.1-NODE-1-length-138181-cov-24.7895;as_gene_clusters=biosyntethic

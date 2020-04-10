@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 EMBL - European Bioinformatics Institute
+# Copyright 2020 EMBL - European Bioinformatics Institute
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ class ListReadOnlyModelViewSet(emg_mixins.ListModelMixin,
 class AnalysisRelationshipViewSet(ListReadOnlyModelViewSet):
     """Get the the Analysis that have a particular Model
 
-    This mixin povides abstracts the common code to get the Analysis that have a
+    This mixin provides abstracts the common code to get the Analysis that have a
     particular annotation.
 
     For example: get all the analysis that have the Pfam entry X.

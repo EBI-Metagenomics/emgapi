@@ -35,10 +35,10 @@ class TestAnnotations:
             ['emgapi_v1:analysis-goslim-list', 'go_slim'], 
             ['emgapi_v1:analysis-goterms-list', 'go'],
             ['emgapi_v1:analysis-interpro-list', 'interpro'],
-            ['emgapi_v1:analysis-genomeproperties-list', 'genome_properties'],
-            ['emgapi_v1:analysis-keggorthologs-list', 'kegg'],
-            ['emgapi_v1:analysis-pfamentries-list', 'pfam'],
-            ['emgapi_v1:analysis-keggmodules-list', 'kegg-module'],
+            ['emgapi_v1:analysis-genome-properties-list', 'genome_properties'],
+            ['emgapi_v1:analysis-kegg-orthologs-list', 'kegg'],
+            ['emgapi_v1:analysis-pfam-entries-list', 'pfam'],
+            ['emgapi_v1:analysis-kegg-modules-list', 'kegg-module'],
             ['emgapi_v1:analysis-antismash-gene-clusters-list', 'antismash']
         ]
 
@@ -194,7 +194,7 @@ class TestAnnotations:
                      pipeline='5.0',
                      suffix='.paths.kegg')
 
-        url = reverse('emgapi_v1:analysis-keggmodules-list', args=[job.accession])
+        url = reverse('emgapi_v1:analysis-kegg-modules-list', args=[job.accession])
         response = client.get(url)
 
         assert response.status_code == status.HTTP_200_OK
@@ -215,13 +215,12 @@ class TestAnnotations:
                 if key != 'accession':
                     assert detail_data['data']['attributes'][key] == expected['data'][accession][key]
 
-
     @pytest.mark.parametrize('expected', [{
         'data': {
-            'GenProp0001': [1, 'Chorismate biosynthesis via shikimate'],
-            'GenProp0002': [1, 'Coenzyme F420 utilization'],
-            'GenProp0010': [1, 'Inteins'],
-            'GenProp0021': [1, 'CRISPR region']
+            'GenProp0001': ['Chorismate biosynthesis via shikimate', 'Yes'],
+            'GenProp0002': ['Coenzyme F420 utilization', 'Partial'],
+            'GenProp0010': ['Inteins', 'No'],
+            'GenProp0021': ['CRISPR region', 'Yes']
         }
     }])
     @pytest.mark.parametrize('pipeline_version', ['5.0'])
@@ -236,7 +235,7 @@ class TestAnnotations:
                      pipeline='5.0',
                      suffix='.paths.gprops')
 
-        url = reverse('emgapi_v1:analysis-genomeproperties-list', args=[job.accession])
+        url = reverse('emgapi_v1:analysis-genome-properties-list', args=[job.accession])
         response = client.get(url)
 
         assert response.status_code == status.HTTP_200_OK
@@ -245,14 +244,16 @@ class TestAnnotations:
         for entry in rsp['data']:
             attributes = entry['attributes']
             accession = attributes['accession']
-            assert attributes['count'] == expected['data'][accession][0]
+            assert attributes['presence'] == expected['data'][accession][1]
 
             detail_url = reverse('emgapi_v1:genome-properties-detail', args=[accession])
             detail_resp = client.get(detail_url)
             assert detail_resp.status_code == status.HTTP_200_OK
             detail_data = detail_resp.json()
-            assert detail_data['data']['attributes']['accession'] in expected['data']
-            assert detail_data['data']['attributes']['description'] == expected['data'][accession][1]
+
+            attrs = detail_data['data']['attributes']
+            assert attrs['accession'] in expected['data']
+            assert attrs['description'] == expected['data'][accession][0]
 
     @pytest.mark.parametrize('expected', [{
         'data': {
@@ -332,15 +333,16 @@ class TestAnnotations:
                     'GO:0016020': 45671, 'GO:1904659': 101,
                 },
                 'go_terms': {
-                    'GO:0005575': 77, 'GO:0005576': 37, 'GO:0009276': 1, 'GO:0019868': 256, 'GO:0005618': 23,
+                    'GO:0005575': 77, 'GO:0005576': 37, 'GO:0009276': 1, 
+                    'GO:0019868': 256, 'GO:0005618': 23,
                 },
                 'interpro': {
                     'IPR006677': 3, 'IPR010326': 1, 'IPR011459': 6,
                     'IPR023385': 5, 'IPR024548': 2, 'IPR031692': 4
                 },
                 'genome_properties': {
-                    'GenProp0001': 1, 'GenProp0002': 1,
-                    'GenProp0010': 1, 'GenProp0021': 1
+                    'GenProp0001': 'Yes', 'GenProp0002': 'Partial',
+                    'GenProp0010': 'No', 'GenProp0021': 'Yes'
                 },
                 'kegg': {
                     'K00003': 42, 'K00005': 3, 'K00009': 3,
@@ -386,7 +388,11 @@ class TestAnnotations:
             if prop in pipeline_version_data['expected']:
                 expected = pipeline_version_data['expected'][prop]
                 assert len(rsp['data']) == len(expected)
-                field = 'completeness' if prop == 'kegg_modules' else 'count'
+                field = 'count'
+                if prop == 'kegg_modules':
+                    field = 'completeness'
+                elif prop == 'genome_properties':
+                    field = 'presence'
                 ids = {
                     a['attributes']['accession']: a['attributes'][field]
                     for a in rsp['data']

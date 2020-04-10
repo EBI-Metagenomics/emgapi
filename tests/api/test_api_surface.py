@@ -151,7 +151,7 @@ class TestAPISurface:
              ['go-terms', 'go-slim', 'interpro-identifiers', 'sample',
               'study', 'run', 'assembly', 'downloads', 'taxonomy-ssu',
               'taxonomy-lsu', 'taxonomy-itsunite', 'taxonomy-itsonedb',
-              'taxonomy', 'antismash-gene-clusters']),
+              'taxonomy', 'antismash-gene-clusters', 'genome-properties']),
         ]
     )
     @pytest.mark.django_db

@@ -366,13 +366,13 @@ class GenomePropertyAnalysisRelationshipViewSet(m_viewsets.AnalysisRelationshipV
     Retrieves list of analysis results for the given antiSMASH gene cluster term
     Example:
     ---
-    `/annotations/antismash-gene-clusters/terpene/analyses`
+    `/annotations/genome-properties/GenProp0017`
     """
-    annotation_model = m_models.AntiSmashGeneCluster
+    annotation_model = m_models.GenomeProperty
 
     def get_job_ids(self, annotation):
-        return m_models.AnalysisJobAntiSmashGeneCluser.objects \
-            .filter(M_Q(antismash_gene_clusters__gene_cluster=annotation)) \
+        return m_models.AnalysisJobGenomeProperty.objects \
+            .filter(M_Q(genome_properties__genome_property=annotation)) \
             .distinct('job_id')
 
 
@@ -380,14 +380,14 @@ class AntiSmashGeneClusterAnalysisRelationshipViewSet(m_viewsets.AnalysisRelatio
     """Retrieves list of analysis results for the given Genome Property term
     Example:
     ---
-    `/annotations//GenProp0063/analyses`
+    `/annotations/GenProp0063/analyses`
     """
 
-    annotation_model = m_models.GenomeProperty
+    annotation_model = m_models.AntiSmashGeneCluster
 
     def get_job_ids(self, annotation):
-        return m_models.AnalysisJobGenomeProperty.objects \
-            .filter(M_Q(genome_properties__genome_property=annotation)) \
+        return m_models.AnalysisJobAntiSmashGeneCluser.objects \
+            .filter(M_Q(antismash_gene_clusters__gene_cluster=annotation)) \
             .distinct('job_id')
 
 
@@ -1010,18 +1010,25 @@ class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
         fasta_path = os.path.abspath(os.path.join(
             settings.RESULTS_DIR,
             obj.result_directory,
-            obj.input_file_name + '_contigs.fasta')
+            obj.input_file_name + '.fasta.bgz')
         )
         fasta_idx_path = os.path.abspath(os.path.join(
             settings.RESULTS_DIR,
             obj.result_directory,
-            obj.input_file_name + '_contigs.fasta.fai')
+            obj.input_file_name + '.fasta.bgz.fai')
+        )
+        fasta_idx_gzi_path = os.path.abspath(os.path.join(
+            settings.RESULTS_DIR,
+            obj.result_directory,
+            obj.input_file_name + '.fasta.bgz.gzi')
         )
 
         if os.path.isfile(fasta_path) and os.path.isfile(fasta_idx_path):
             output = io.StringIO()
             # TODO: handle errors
-            with pysam.Fastafile(filename=fasta_path, filepath_index=fasta_idx_path) as fasta:
+            with pysam.FastaFile(filename=fasta_path,
+                                 filepath_index=fasta_idx_path,
+                                 filepath_index_compressed=fasta_idx_gzi_path) as fasta:
                 rows = fasta.fetch(contig)
                 output.write('>' + emg_utils.assembly_contig_name(contig) + '\n')
                 for row in rows:
@@ -1045,27 +1052,34 @@ class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
         The are 2 flavors for the GFF files:
         - COG,KEGG, Pfam, InterPro and EggNOG annotations
         - antiSMASH
-        By default the action will return the `main one`, unless specified using the querystring param `antismash=True`
+        By default the action will return the 'main one', unless specified using the querystring param 'antismash=True'
         The GFF file will be parsed with pysam and sliced.
         Example:
         ---
-        `/analyses/<accession>/<contig_id>/annotation`
+        /analyses/<accession>/<contig_id>/annotation
         ---
         """
         obj = self.get_object()
         contig = self.kwargs['contig_id']
 
-        source = 'annotation_antismash' if self.request.GET.get('antismash', False) else 'annotation'
+        file_prefix = 'annotations'
+        folder = 'functional-annotation'
+
+        if self.request.GET.get('antismash', False):
+            file_prefix = 'antismash'
+            folder = 'pathways-systems'
 
         gff_path = os.path.abspath(os.path.join(
             settings.RESULTS_DIR,
             obj.result_directory,
-            '{}_{}.gff.gz'.format(obj.input_file_name, source))
+            folder,
+            '{}.{}.gff.bgz'.format(obj.input_file_name, file_prefix))
         )
         gff_idx_path = os.path.abspath(os.path.join(
             settings.RESULTS_DIR,
             obj.result_directory,
-            '{}_{}.gff.gz.tbi'.format(obj.input_file_name, source))
+            folder,
+            '{}.{}.gff.bgz.tbi'.format(obj.input_file_name, file_prefix))
         )
 
         if os.path.isfile(gff_path) and os.path.isfile(gff_idx_path):
