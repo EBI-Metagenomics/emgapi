@@ -45,8 +45,8 @@ class TestAnnotations:
     @property
     def _import_suffixes(self):
         return ['.ipr', '.go', '.go_slim',
-                '.paths.kegg', '.pfam', '.ko',
-                '.paths.gprops', '.antismash']
+                '.kegg_pathways', '.pfam', '.ko',
+                '.gprops', '.antismash']
 
     def test_goslim(self, client, run):
         """Test GO Slim list and detail"""
