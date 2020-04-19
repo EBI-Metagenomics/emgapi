@@ -24,7 +24,7 @@ def create_download_description(apps, schema_editor):
 def create_file_formats(apps, schema_editor):
     FileFormat = apps.get_model("emgapi", "FileFormat")
     file_formats = (
-        ("GFF", "gff", True)
+        ("GFF", "gff"),
     )
     _formats = list()
     for file_format in file_formats:
@@ -32,7 +32,6 @@ def create_file_formats(apps, schema_editor):
             FileFormat(
                 format_name=file_format[0],
                 format_extension=file_format[1],
-                compression=file_format[2],
             )
         )
     FileFormat.objects.bulk_create(_formats)
