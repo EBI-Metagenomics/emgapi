@@ -777,6 +777,98 @@
       "group_type": "Pathways and Systems",
       "real_name": "{}_antismash_final.gbk.gz",
       "subdir": "pathways-systems"
+    },
+    {
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "_required": true,
+      "downloadable": false,
+      "alias": null,
+      "compression": true,
+      "description_label": null,
+      "format_name": "FASTA",
+      "group_type": null,
+      "real_name": "{}.fasta.bgz",
+      "subdir": null
+    },
+    {
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "_required": true,
+      "downloadable": false,
+      "alias": null,
+      "compression": false,
+      "description_label": null,
+      "format_name": "FASTA Index",
+      "group_type": null,
+      "real_name": "{}.fasta.bgz.fai",
+      "subdir": null
+    },
+    {
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "_required": true,
+      "downloadable": false,
+      "alias": null,
+      "compression": true,
+      "description_label": null,
+      "format_name": "FASTA binary index",
+      "group_type": null,
+      "real_name": "{}.fasta.bgz.gzi",
+      "subdir": null
+    },
+    {
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "_required": true,
+      "downloadable": true,
+      "alias": null,
+      "compression": true,
+      "description_label": "Functional annotation",
+      "format_name": "GFF",
+      "group_type": "Functional annotation",
+      "real_name": "{}.annotations.gff.bgz",
+      "subdir": "functional-annotation"
+    },    
+    {
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "_required": true,
+      "downloadable": false,
+      "alias": null,
+      "compression": false,
+      "description_label": null,
+      "format_name": "GFF index",
+      "group_type": null,
+      "real_name": "{}.annotations.gff.bgz.tbi",
+      "subdir": "functional-annotation"
+    },
+    {
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "_required": true,
+      "downloadable": true,
+      "alias": null,
+      "compression": true,
+      "description_label": "antiSMASH annotation",
+      "format_name": "GFF",
+      "group_type": "Pathways and Systems",
+      "real_name": "{}.antismash.gff.bgz",
+      "subdir": "pathways-systems"
+    }
+    ,
+    {
+      "_accession_substitution": "full",
+      "_chunked": false,
+      "_required": true,
+      "downloadable": false,
+      "alias": null,
+      "compression": false,
+      "description_label": false,
+      "format_name": "GFF index",
+      "group_type": null,
+      "real_name": "{}.antismash.gff.bgz.tbi",
+      "subdir": "pathways-systems"
     }
   ]
 }

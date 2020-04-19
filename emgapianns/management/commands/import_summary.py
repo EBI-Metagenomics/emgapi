@@ -1,5 +1,18 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+# Copyright 2020 EMBL - European Bioinformatics Institute
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import os
 import csv
@@ -56,15 +69,19 @@ class Command(EMGBaseCommand):
         rootpath = options.get('rootpath', None)
         self.suffix = options.get('suffix', None)
 
+        # Output names and folders changed slightly between v4 and v5
+        # This piece of code still supports both versions
         if self.suffix in self.suffixes:
-            # Output names and folders changed slightly between v4 and v5
-            # This piece of code still supports both versions
             for infix in ['%s_summary%s', '%s.summary%s']:
                 name = infix % (obj.input_file_name, self.suffix)
-                sub_dir = self.FUNCTION_SUB_DIR
-                if self.suffix in self.pathway_suffixes:
-                    sub_dir = self.PATHWAY_SUB_DIR
-                source_file = os.path.join(rootpath, obj.result_directory, sub_dir, name)
+                # V5 introduced pathways and functional subfolders
+                if options.get('pipeline') == "5.0":
+                    sub_dir = self.FUNCTION_SUB_DIR
+                    if self.suffix in self.pathway_suffixes:
+                        sub_dir = self.PATHWAY_SUB_DIR
+                    source_file = os.path.join(rootpath, obj.result_directory, sub_dir, name)
+                else:
+                    source_file = os.path.join(rootpath, obj.result_directory, name)
                 if not self._check_source_file(source_file):
                     logger.info('Could not find: %s' % source_file)
                 else:
@@ -72,6 +89,7 @@ class Command(EMGBaseCommand):
                     self._parse_and_load_summary_file(source_file, obj)
                     break
         elif self.suffix in self.kegg_pathway_suffix:
+            # v5 only
             name = '%s.summary%s' % (obj.input_file_name, self.suffix)
             source_file = os.path.join(rootpath, obj.result_directory, self.PATHWAY_SUB_DIR, name)
             if not self._check_source_file(source_file):
@@ -316,11 +334,74 @@ class Command(EMGBaseCommand):
         analysis.save()
         logger.info('Saved {}'.format(analysis_field))
 
+    def load_genome_properties(self, reader,  obj):
+        """Genome properties import, using the output summary from GP
+        File structure:
+        "GenProp0678","C-type cytochrome biogenesis, system I","NO"|"YES"|"PARTIAL  "
+        """
+        analysis_genprop = None
+        try:
+            analysis_genprop = m_models.AnalysisJobGenomeProperty.objects \
+                                                                 .get(pk=str(obj.job_id))
+        except m_models.AnalysisJobGenomeProperty.DoesNotExist:
+            analysis_genprop = m_models.AnalysisJobGenomeProperty()
+
+        analysis_genprop.analysis_id = str(obj.job_id)
+        analysis_genprop.accession = obj.accession
+        analysis_genprop.pipeline_version = obj.pipeline.release_version
+        analysis_genprop.job_id = obj.job_id
+
+        new_entities = []
+        annotations = []
+
+        for gp_id, desc, presence in reader:
+            gp = None
+            try:
+                gp = m_models.GenomeProperty.objects \
+                    .get(accession=gp_id)
+            except m_models.GenomeProperty.DoesNotExist:
+                gp = m_models.GenomeProperty(
+                    accession=gp_id,
+                    description=desc
+                )
+                new_entities.append(gp)
+
+            parsed_presence = None
+            upper_presence = presence.upper() if presence else None
+            if upper_presence == "YES":
+                parsed_presence = m_models.AnalysisJobGenomePropAnnotation.YES_PRESENCE
+            elif upper_presence == "NO":
+                parsed_presence = m_models.AnalysisJobGenomePropAnnotation.NO_PRESENCE
+            elif upper_presence == "PARTIAL":
+                parsed_presence = m_models.AnalysisJobGenomePropAnnotation.PARTIAL_PRESENCE
+
+            if not parsed_presence:
+                raise ValueError("Invalid 'presence' value for genome properties row: {}"
+                                 .format(" ".join(gp_id, desc, presence)))
+
+            new_annotation = m_models.AnalysisJobGenomePropAnnotation(
+                genome_property=gp,
+                presence=parsed_presence
+            )
+            annotations.append(new_annotation)
+
+        if len(new_entities):
+            m_models.GenomeProperty.objects.insert(new_entities)
+            logger.info(
+                "Created {} new genome properties".format(len(new_entities)))
+
+        if len(annotations):
+            analysis_genprop.genome_properties = annotations
+            logger.info(
+                "Created {} new annotations".format(len(annotations)))
+
+        analysis_genprop.save()
+        logger.info("Saved Analysis annnotations Genome Properties")
+
     def _parse_and_load_summary_file(self, source_file, obj):
         logger.info('Loading: %s' % source_file)
         with open(source_file) as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
-            #
             if self.suffix == '.pfam':
                 self.load_summary_file(reader,
                                        obj,
@@ -338,13 +419,7 @@ class Command(EMGBaseCommand):
                                        m_models.AnalysisJobKeggOrthologAnnotation,
                                        'ko')
             elif self.suffix == '.gprops':
-                self.load_summary_file(reader,
-                                       obj,
-                                       m_models.AnalysisJobGenomeProperty,
-                                       'genome_properties',
-                                       m_models.GenomeProperty,
-                                       m_models.AnalysisJobGenomePropAnnotation,
-                                       'genome_property')
+                self.load_genome_properties(reader, obj)
             elif self.suffix == '.antismash':
                 self.load_summary_file(reader,
                                        obj,
