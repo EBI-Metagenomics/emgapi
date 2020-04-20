@@ -1,3 +1,0 @@
-Step name	Wall clock time in hours	CPUtime in sec	MaxMemory in MB	AverageMemory in MB
-stepDecompression	0:00:03	0.02	-	-
-stepFastaHeaderClean	0:00:00	0.03	-	-
