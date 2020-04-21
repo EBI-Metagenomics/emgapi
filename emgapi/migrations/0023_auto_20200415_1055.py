@@ -8,7 +8,9 @@ from django.db import migrations
 def create_download_description(apps, schema_editor):
     DownloadDescriptionLabel = apps.get_model("emgapi", "DownloadDescriptionLabel")
     downloads = (
-        ("Full antiSMASH sequence features", "Full antiSMASH sequence features",),
+        ("antiSMASH summary", "antiSMASH summary"),
+        ("KEGG pathway annotation (contig)", "KEGG pathway annotation (contig)"),
+        ("InterPro summary", "InterPro summary"),
     )
     _downloads = list()
     for d in downloads:
@@ -53,8 +55,20 @@ def create_subdirs(apps, schema_editor):
         )
     DownloadSubdir.objects.bulk_create(_subdirs)
 
-class Migration(migrations.Migration):
 
+def change_description_labels(apps, schema_editor):
+    DownloadDescriptionLabel = apps.get_model("emgapi", "DownloadDescriptionLabel")
+
+    cds_label = DownloadDescriptionLabel.objects.get(description_label="Predicted CDS")
+    cds_label.description_label = "Predicted CDS (aa)"
+    cds_label.save()
+
+    orf_label = DownloadDescriptionLabel.objects.get(description_label="Predicted ORF")
+    orf_label.description_label = "Predicted ORF (nt)"
+    orf_label.save()
+
+
+class Migration(migrations.Migration):
     dependencies = [
         ('emgapi', '0022_auto_20200219_1526'),
     ]
@@ -63,4 +77,5 @@ class Migration(migrations.Migration):
         migrations.RunPython(create_file_formats),
         migrations.RunPython(create_subdirs),
         migrations.RunPython(create_download_description),
+        migrations.RunPython(change_description_labels),
     ]
