@@ -119,7 +119,7 @@ class TestSanityCheck:
         ("ERZ477576", "assembly", "4.1",
          "results/2017/11/ERP104174/version_4.1/ERZ477/006/ERZ477576_FASTA"),
         ("ERZ782882", "assembly", "5.0",
-         "results/2017/11/ERP104174/version_5.0/ERZ477/006/ERZ782882_FASTA")
+         "results/2017/11/ERP104174/version_5.0/ERZ782/002/ERZ782882_FASTA")
     ])
     def test_check_assemblies_v4_v5_results_succeeds(self, accession, experiment_type, version, result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
