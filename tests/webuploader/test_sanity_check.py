@@ -183,6 +183,8 @@ class TestSanityCheck:
          "results/2018/01/ERP106131/version_5.0/ERR223/003/ERR2237853_MERGED_FASTQ", True),
         ("ERZ782882", "assembly", "ASSEMBLY", "5.0",
          "results/2017/11/ERP104174/version_5.0/ERZ782/002/ERZ782882_FASTA", True),
+        ("ERZ782883", "assembly", "ASSEMBLY", "5.0",
+         "results/2017/11/ERP104174/version_5.0/ERZ783/003/ERZ782883_FASTA", False),
         ("ERR1864826", "amplicon", "SSU", "4.1",
          "results/2019/02/ERP021864/version_4.1/ERR1864826_FASTQ", False),
         ("ERR3506532", "wgs", "WGS", "4.1",
