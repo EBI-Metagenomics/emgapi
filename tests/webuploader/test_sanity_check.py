@@ -181,6 +181,8 @@ class TestSanityCheck:
          "results/2019/09/ERP117125/version_4.1/ERR350/007/ERR3506537_MERGED_FASTQ", True),
         ("ERR2237853", "amplicon", "ITS", "5.0",
          "results/2018/01/ERP106131/version_5.0/ERR223/003/ERR2237853_MERGED_FASTQ", True),
+        ("ERZ782882", "assembly", "ASSEMBLY", "5.0",
+         "results/2017/11/ERP104174/version_5.0/ERZ782/002/ERZ782882_FASTA", True),
         ("ERR1864826", "amplicon", "SSU", "4.1",
          "results/2019/02/ERP021864/version_4.1/ERR1864826_FASTQ", False),
         ("ERR3506532", "wgs", "WGS", "4.1",

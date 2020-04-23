@@ -15,13 +15,14 @@
       "subdir": null
     },
     {
+      "coverage_check": true,
       "_accession_substitution": "full",
       "_chunked": true,
       "_required": true,
       "downloadable": true,
       "alias": "{}_predicted_cds.faa.gz",
       "compression": true,
-      "description_label": "Predicted CDS",
+      "description_label": "Predicted CDS (aa)",
       "format_name": "FASTA",
       "group_type": "Sequence data",
       "real_name": "{}_CDS.faa.gz",
@@ -35,7 +36,7 @@
       "downloadable": true,
       "alias": "{}_predicted_orf.ffn.gz",
       "compression": true,
-      "description_label": "Predicted ORF",
+      "description_label": "Predicted ORF (nt)",
       "format_name": "FASTA",
       "group_type": "Sequence data",
       "real_name": "{}_CDS.ffn.gz",
@@ -160,7 +161,6 @@
       "subdir": "taxonomy-summary/LSU"
     },
     {
-      "coverage_check": true,
       "_accession_substitution": "full",
       "_chunked": false,
       "_required": false,
@@ -174,7 +174,6 @@
       "subdir": "taxonomy-summary/SSU"
     },
     {
-      "coverage_check": true,
       "_accession_substitution": "full",
       "_chunked": false,
       "_required": false,
@@ -699,6 +698,7 @@
       "subdir": "functional-annotation/stats"
     },
     {
+      "coverage_check": true,
       "_accession_substitution": "full",
       "_chunked": true,
       "chunk_file": "{}.I5.tsv.chunks",

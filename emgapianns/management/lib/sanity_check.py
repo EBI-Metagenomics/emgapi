@@ -21,7 +21,8 @@ class SanityCheck:
         self.library_strategy = library_strategy.lower()
         self.version = version
         if self.library_strategy not in self.EXPECTED_LIBRARY_STRATEGIES:
-            raise UnexpectedLibraryStrategyException('Unexpected library_strategy specified: {}'.format(self.library_strategy))
+            raise UnexpectedLibraryStrategyException(
+                'Unexpected library_strategy specified: {}'.format(self.library_strategy))
         self.config = get_downloadset_config(version, library_strategy)
 
     def check_file_existence(self):
@@ -53,27 +54,23 @@ class SanityCheck:
             For Amplicon I do 'do LSU or SSU or ITS exist' If not quit with error
         :return:
         """
-        valid = False
-        for f in self.config:
-            if 'coverage_check' in f:
-                try:
-                    if f['_chunked']:
-                        self.__check_chunked_file(f, coverage_check=True)
-                    else:
-                        self.__check_file(f, coverage_check=True)
-                    valid = True
-                    break
-                except FileNotFoundError:
-                    continue
-        return valid
+        # For amplicons the requirement is that only of the files need to exist
+        if self.library_strategy == "amplicon":
+            self.run_coverage_check_amplicon()
+
+        else:  # assembly, wgs or rna-seq
+            self.run_coverage_check_assembly_wgs()
 
     @staticmethod
-    def __count_number_of_lines(filepath):
+    def __count_number_of_lines(filepath, compressed_file=False):
         """
             Counts number of lines in text file.
         :return:
         """
-        count = check_output("wc -l < {}".format(filepath), shell=True).rstrip()
+        if compressed_file:
+            count = check_output("zcat {} | wc -l".format(filepath), shell=True).rstrip()
+        else:
+            count = check_output("wc -l < {}".format(filepath), shell=True).rstrip()
         return int(count)
 
     @staticmethod
@@ -126,8 +123,54 @@ class SanityCheck:
             count = self.__count_number_of_seqs(filepath)
             if count >= self.MIN_NUM_SEQS:
                 return True
+        if "I5.tsv.gz" in filepath:
+            num_lines = self.__count_number_of_lines(filepath, compressed_file=True)
+            if num_lines >= self.MIN_NUM_LINES:
+                return True
         else:
             num_lines = self.__count_number_of_lines(filepath)
             if num_lines >= self.MIN_NUM_LINES:
                 return True
         raise NoAnnotationsFoundException('No annotations found in result file:\n{}'.format(filepath))
+
+    def run_coverage_check_amplicon(self):
+        """
+            For Amplicon I do 'do LSU or SSU or ITS exist' If not quit with error
+        :return:
+        """
+        valid = False
+        for f in self.config:
+            if 'coverage_check' in f:
+                try:
+                    if f['_chunked']:
+                        self.__check_chunked_file(f, coverage_check=True)
+                    else:
+                        self.__check_file(f, coverage_check=True)
+                    valid = True
+                    break
+                except FileNotFoundError:
+                    continue
+        return valid
+
+    def run_coverage_check_assembly_wgs(self):
+        """
+            For WGS / metaT, I’d do ’do proteins exist? If not, quit with error.
+            If so, check for functional annotations.
+            If functional annotations, proceed with upload.
+            if no functional annotations - throw a warning / require manual intervention before upload.
+        :return:
+        """
+        for f in self.config:
+            if 'coverage_check' in f:
+                try:
+                    if f['_chunked']:
+                        self.__check_chunked_file(f, coverage_check=True)
+                    else:
+                        self.__check_file(f, coverage_check=True)
+                except FileNotFoundError:
+                    # Label as coverage check NOT passed
+                    return False
+                except NoAnnotationsFoundException:
+                    # Label as coverage check NOT passed
+                    return False
+        return True
