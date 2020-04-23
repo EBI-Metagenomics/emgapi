@@ -1,5 +1,4 @@
-.. image:: https://travis-ci.org/EBI-Metagenomics/emgapi.svg?branch=master
-    :target: https://travis-ci.org/EBI-Metagenomics/emgapi
+[![Build Status](https://travis-ci.org/EBI-Metagenomics/emgapi.svg?branch=master)](https://travis-ci.org/EBI-Metagenomics/emgapi)
 
 Introduction
 ============
