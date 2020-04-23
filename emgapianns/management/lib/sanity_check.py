@@ -56,10 +56,10 @@ class SanityCheck:
         """
         # For amplicons the requirement is that only of the files need to exist
         if self.library_strategy == "amplicon":
-            self.run_coverage_check_amplicon()
+            return self.run_coverage_check_amplicon()
 
         else:  # assembly, wgs or rna-seq
-            self.run_coverage_check_assembly_wgs()
+            return self.run_coverage_check_assembly_wgs()
 
     @staticmethod
     def __count_number_of_lines(filepath, compressed_file=False):
