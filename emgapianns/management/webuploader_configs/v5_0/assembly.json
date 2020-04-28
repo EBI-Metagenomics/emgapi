@@ -630,7 +630,8 @@
       "format_name": null,
       "group_type": null,
       "real_name": "antismash.stats",
-      "subdir": "functional-annotation/stats"
+      "subdir": "functional-annotation/stats",
+      "antismash": true
     },
     {
       "_accession_substitution": null,
@@ -841,7 +842,8 @@
       "format_name": "CSV",
       "group_type": "Pathways and Systems",
       "real_name": "{}.summary.antismash",
-      "subdir": "pathways-systems"
+      "subdir": "pathways-systems",
+      "antismash": true
     },
     {
       "_accession_substitution": "full",
@@ -854,7 +856,8 @@
       "format_name": "EMBL",
       "group_type": "Pathways and Systems",
       "real_name": "{}_antismash_final.embl.gz",
-      "subdir": "pathways-systems"
+      "subdir": "pathways-systems",
+      "antismash": true
     },
     {
       "_accession_substitution": "full",
@@ -867,7 +870,8 @@
       "format_name": "GenBank",
       "group_type": "Pathways and Systems",
       "real_name": "{}_antismash_final.gbk.gz",
-      "subdir": "pathways-systems"
+      "subdir": "pathways-systems",
+      "antismash": true
     },
     {
       "_accession_substitution": "full",
@@ -945,7 +949,8 @@
       "format_name": "GFF",
       "group_type": "Pathways and Systems",
       "real_name": "{}.antismash.gff.bgz",
-      "subdir": "pathways-systems"
+      "subdir": "pathways-systems",
+      "antismash": true
     }
     ,
     {
@@ -959,7 +964,8 @@
       "format_name": "GFF index",
       "group_type": null,
       "real_name": "{}.antismash.gff.bgz.tbi",
-      "subdir": "pathways-systems"
+      "subdir": "pathways-systems",
+      "antismash": true
     }
   ]
 }

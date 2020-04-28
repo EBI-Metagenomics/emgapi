@@ -2,10 +2,14 @@ import glob
 import os
 from subprocess import check_output, CalledProcessError
 
+import logging
+
 from emgapianns.management.lib.uploader_exceptions import NoAnnotationsFoundException, \
-    UnexpectedLibraryStrategyException
+    UnexpectedLibraryStrategyException, QCNotPassedException, CoverageCheckException
 from emgapianns.management.lib.utils import read_chunkfile
 from emgapianns.management.webuploader_configs import get_downloadset_config
+
+logger = logging.getLogger(__name__)
 
 
 class SanityCheck:
@@ -26,7 +30,14 @@ class SanityCheck:
         self.config = get_downloadset_config(version, library_strategy)
 
     def check_file_existence(self):
+        skip_antismash_check = False
+        if os.path.exists(os.path.join(self.dir, "pathways-systems", "no-antismash")):
+            logging.info("Found no-antismash flag! Skipping check of antiSMASH result files.")
+            skip_antismash_check = True
+
         for f in self.config:
+            if 'antismash' in f and skip_antismash_check:
+                continue
             try:
                 if f['_chunked']:
                     self.__check_chunked_file(f)
@@ -36,15 +47,15 @@ class SanityCheck:
                 if f['_required']:
                     raise e
 
-    def passed_quality_control(self):
+    def run_quality_control_check(self):
         file_path = os.path.join(self.dir, self.QC_NOT_PASSED)
         try:
             self.__check_exists(file_path)
-            return False
+            raise QCNotPassedException("{} did not pass QC step!".format(self.accession))
         except FileNotFoundError:
-            return True
+            pass  # QC not passed file does not exist, so all fine
 
-    def passed_coverage_check(self):
+    def run_coverage_check(self):
         """
             For WGS / metaT, I’d do ’do proteins exist? If not, quit with error.
             If so, check for functional annotations.
@@ -56,10 +67,12 @@ class SanityCheck:
         """
         # For amplicons the requirement is that only of the files need to exist
         if self.library_strategy == "amplicon":
-            return self.run_coverage_check_amplicon()
+            self.run_coverage_check_amplicon()
 
-        else:  # assembly, wgs or rna-seq
-            return self.run_coverage_check_assembly_wgs()
+        elif self.library_strategy == "assembly":  # assembly
+            return self.run_coverage_check_assembly()
+        else: # wgs or rna-seq
+            return self.run_coverage_check_wgs()
 
     @staticmethod
     def __count_number_of_lines(filepath, compressed_file=False):
@@ -150,9 +163,41 @@ class SanityCheck:
                     break
                 except FileNotFoundError:
                     continue
-        return valid
+                except NoAnnotationsFoundException:
+                    continue
+        if not valid:
+            raise CoverageCheckException("{} did not pass coverage check step!".format(self.accession))
 
-    def run_coverage_check_assembly_wgs(self):
+    def run_coverage_check_assembly(self):
+        """
+            For Assemblies, we do 'check for taxonomy output folder' If not, quit with error.
+            If so, check ’do proteins exist? check.
+            If so, check for functional annotations.
+            If functional annotations, proceed with upload.
+            if no functional annotations - throw a warning / require manual intervention before upload.
+        :return:
+        """
+        taxa_folder = os.path.join(self.dir, "taxonomy-summary")
+        if not os.path.exists(taxa_folder):
+            raise CoverageCheckException("Could not find the taxonomy output folder: {}!".format(taxa_folder))
+
+        for f in self.config:
+            if 'coverage_check' in f:
+                try:
+                    if f['_chunked']:
+                        self.__check_chunked_file(f, coverage_check=True)
+                    else:
+                        self.__check_file(f, coverage_check=True)
+                except FileNotFoundError:
+                    # Label as coverage check NOT passed
+                    raise CoverageCheckException("Could not find file for: "
+                                                 "{}".format(f['description_label']))
+                except NoAnnotationsFoundException:
+                    # Label as coverage check NOT passed
+                    raise CoverageCheckException("Could not find any annotations in the output file for: "
+                                    "{}".format(f['description_label']))
+
+    def run_coverage_check_wgs(self):
         """
             For WGS / metaT, I’d do ’do proteins exist? If not, quit with error.
             If so, check for functional annotations.
@@ -169,8 +214,8 @@ class SanityCheck:
                         self.__check_file(f, coverage_check=True)
                 except FileNotFoundError:
                     # Label as coverage check NOT passed
-                    return False
+                    raise CoverageCheckException("{} did not pass coverage check step!".format(self.accession))
+
                 except NoAnnotationsFoundException:
                     # Label as coverage check NOT passed
-                    return False
-        return True
+                    raise CoverageCheckException("{} did not pass coverage check step!".format(self.accession))

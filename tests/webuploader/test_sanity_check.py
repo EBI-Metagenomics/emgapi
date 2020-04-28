@@ -20,7 +20,8 @@ import pytest
 
 from emgapianns.management.lib import sanity_check  # noqa: E402
 from emgapianns.management.lib.uploader_exceptions import (NoAnnotationsFoundException,
-                                                           UnexpectedLibraryStrategyException)
+                                                           UnexpectedLibraryStrategyException, QCNotPassedException,
+                                                           CoverageCheckException)
 
 
 class TestSanityCheck:
@@ -119,7 +120,9 @@ class TestSanityCheck:
         ("ERZ477576", "assembly", "4.1",
          "results/2017/11/ERP104174/version_4.1/ERZ477/006/ERZ477576_FASTA"),
         ("ERZ782882", "assembly", "5.0",
-         "results/2017/11/ERP104174/version_5.0/ERZ782/002/ERZ782882_FASTA")
+         "results/2017/11/ERP104174/version_5.0/ERZ782/002/ERZ782882_FASTA"),
+        ("ERZ782883", "assembly", "5.0",
+         "results/2017/11/ERP104174/version_5.0/ERZ783/003/ERZ782883_FASTA")
     ])
     def test_check_assemblies_v4_v5_results_succeeds(self, accession, experiment_type, version, result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
@@ -149,18 +152,27 @@ class TestSanityCheck:
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
         test_instance.check_file_existence()
 
-    @pytest.mark.parametrize("accession, experiment_type, version, result_folder, expected_value", [
+    @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
         ("ERR1864826", "amplicon", "4.1",
-         "results/2019/02/ERP021864/version_4.1/ERR1864826_FASTQ", False),
-        ("ERR1913139", "wgs", "4.1",
-         "results/2018/12/ERP019674/version_4.1/ERR1913139_FASTQ", True)
+         "results/2019/02/ERP021864/version_4.1/ERR1864826_FASTQ")
     ])
-    def test_check_qc_not_passed(self, accession, experiment_type, version, result_folder, expected_value):
+    def test_check_qc_not_passed_raise_exception(self, accession, experiment_type, version, result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir, result_folder)
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
-        actual = test_instance.passed_quality_control()
-        assert expected_value == actual
+        with pytest.raises(QCNotPassedException):
+            test_instance.run_quality_control_check()
+
+    @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
+        ("ERR1913139", "wgs", "4.1",
+         "results/2018/12/ERP019674/version_4.1/ERR1913139_FASTQ")
+    ])
+    def test_check_qc_not_passed_do_not_raise_exception(self, accession, experiment_type, version, result_folder):
+        root_dir = os.path.join(os.path.dirname(__file__), "test_data")
+        result_dir = os.path.join(root_dir, result_folder)
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
+        test_instance.run_quality_control_check()
+        assert True
 
     @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
         ("ERR0000001", "amplicon", "4.1",
@@ -176,38 +188,38 @@ class TestSanityCheck:
         with pytest.raises(FileNotFoundError):
             test_instance.check_file_existence()
 
-    @pytest.mark.parametrize("accession, experiment_type, amplicon_type, version, result_folder, expected_value", [
+    @pytest.mark.parametrize("accession, experiment_type, amplicon_type, version, result_folder", [
         ("ERR3506537", "amplicon", "SSU", "4.1",
-         "results/2019/09/ERP117125/version_4.1/ERR350/007/ERR3506537_MERGED_FASTQ", True),
+         "results/2019/09/ERP117125/version_4.1/ERR350/007/ERR3506537_MERGED_FASTQ"),
         ("ERR2237853", "amplicon", "ITS", "5.0",
-         "results/2018/01/ERP106131/version_5.0/ERR223/003/ERR2237853_MERGED_FASTQ", True),
+         "results/2018/01/ERP106131/version_5.0/ERR223/003/ERR2237853_MERGED_FASTQ"),
         ("ERZ782882", "assembly", "ASSEMBLY", "5.0",
-         "results/2017/11/ERP104174/version_5.0/ERZ782/002/ERZ782882_FASTA", True),
-        ("ERZ782883", "assembly", "ASSEMBLY", "5.0",
-         "results/2017/11/ERP104174/version_5.0/ERZ783/003/ERZ782883_FASTA", False),
-        ("ERR1864826", "amplicon", "SSU", "4.1",
-         "results/2019/02/ERP021864/version_4.1/ERR1864826_FASTQ", False),
+         "results/2017/11/ERP104174/version_5.0/ERZ782/002/ERZ782882_FASTA"),
         ("ERR3506532", "wgs", "WGS", "4.1",
-         "results/2019/09/ERP117125/version_4.1/ERR350/002/ERR3506532_MERGED_FASTQ", True)
+         "results/2019/09/ERP117125/version_4.1/ERR350/002/ERR3506532_MERGED_FASTQ")
     ])
     def test_coverage_check_succeeds(self, accession, experiment_type, amplicon_type, version,
-                                     result_folder, expected_value):
+                                     result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir, result_folder)
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
-        actual = test_instance.passed_coverage_check()
-        assert expected_value == actual
+        test_instance.run_coverage_check()
+        assert True
 
     @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
         ("ERR3506531", "amplicon", "4.1",
          "results/2019/09/ERP117125/version_4.1/ERR350/001/ERR3506531_MERGED_FASTQ"),
         ("ERR1913139", "wgs", "4.1",
-         "results/2018/12/ERP019674/version_4.1/ERR1913139_FASTQ")
+         "results/2018/12/ERP019674/version_4.1/ERR1913139_FASTQ"),
+        ("ERZ782883", "assembly", "5.0",
+         "results/2017/11/ERP104174/version_5.0/ERZ783/003/ERZ782883_FASTA"),
+        ("ERR1864826", "amplicon", "4.1",
+         "results/2019/02/ERP021864/version_4.1/ERR1864826_FASTQ"),
     ])
-    def test_coverage_check_should_raise_no_annotations_found_error(self, accession, experiment_type, version,
+    def test_coverage_check_should_raise_coverage_check_exception(self, accession, experiment_type, version,
                                                                     result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir, result_folder)
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
-        with pytest.raises(NoAnnotationsFoundException):
-            test_instance.passed_coverage_check()
+        with pytest.raises(CoverageCheckException):
+            test_instance.run_coverage_check()

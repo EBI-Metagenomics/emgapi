@@ -46,6 +46,18 @@ ena = ena_handler.EnaApiHandler()
 """
 
 
+def setup_logging(options):
+    verbosity = options.get('verbosity', None)
+    log_level = logging.WARN
+    if verbosity:
+        if verbosity > 1:
+            log_level = logging.DEBUG
+        else:
+            log_level = logging.INFO
+    logging.basicConfig(format='%(levelname)s %(asctime)s - %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p',
+                        level=log_level)
+
+
 class Command(BaseCommand):
     help = 'Imports new run and assembly annotation objects into EMG. The tool will import all associated objects like' \
            'studies, samples and assemblies as well. It will also populate MongoDB.'
@@ -61,7 +73,11 @@ class Command(BaseCommand):
     library_strategy = None
     no_study_summary = False
 
+    def __init__(self):
+        super().__init__()
+
     def add_arguments(self, parser):
+        super(Command, self).add_arguments(parser)
         parser.add_argument('--rootpath',
                             help="NFS root path of the results archive.",
                             default="/nfs/production/interpro/metagenomics/results/")
@@ -80,6 +96,7 @@ class Command(BaseCommand):
         parser.set_defaults(no_study_summary=False)
 
     def handle(self, *args, **options):
+        setup_logging(options)
         self.emg_db = options['database']
         self.rootpath = os.path.abspath(options['rootpath'])
         self.accession = options['accession']
@@ -97,12 +114,11 @@ class Command(BaseCommand):
         input_file_name = os.path.basename(self.result_dir)
 
         sanity_checker = SanityCheck(self.accession, self.result_dir, self.library_strategy, self.version)
+        sanity_checker.check_file_existence()
 
-        if not sanity_checker.passed_quality_control():
-            raise QCNotPassedException("{} did not pass QC step!".format(self.accession))
+        sanity_checker.run_quality_control_check()
 
-        if not sanity_checker.passed_coverage_check():
-            raise CoverageCheckException("{} did not pass coverage check step!".format(self.accession))
+        sanity_checker.run_coverage_check()
 
         self.call_import_study(secondary_study_accession)
 
