@@ -94,14 +94,13 @@ class TestSanityCheck:
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
         test_instance.check_file_existence()
 
-    @pytest.mark.skip(reason="No example does exist yet")
     def test_check_amplicon_ssu_v5_results_succeeds(self):
-        accession = "ERR3506537"
+        accession = "ERR2237853"
         experiment_type = "amplicon"
         version = "5.0"
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir,
-                                  "results/2019/09/ERP117125/version_{}/ERR350/007/{}_MERGED_FASTQ".format(version,
+                                  "results/2018/01/ERP106131/version_{}/ERR223/003/{}_MERGED_FASTQ".format(version,
                                                                                                            accession))
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
         test_instance.check_file_existence()
@@ -122,7 +121,7 @@ class TestSanityCheck:
         ("ERZ782882", "assembly", "5.0",
          "results/2017/11/ERP104174/version_5.0/ERZ782/002/ERZ782882_FASTA"),
         ("ERZ782883", "assembly", "5.0",
-         "results/2017/11/ERP104174/version_5.0/ERZ783/003/ERZ782883_FASTA")
+         "results/2017/11/ERP104174/version_5.0/ERZ782/003/ERZ782883_FASTA")
     ])
     def test_check_assemblies_v4_v5_results_succeeds(self, accession, experiment_type, version, result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
@@ -212,7 +211,7 @@ class TestSanityCheck:
         ("ERR1913139", "wgs", "4.1",
          "results/2018/12/ERP019674/version_4.1/ERR1913139_FASTQ"),
         ("ERZ782883", "assembly", "5.0",
-         "results/2017/11/ERP104174/version_5.0/ERZ783/003/ERZ782883_FASTA"),
+         "results/2017/11/ERP104174/version_5.0/ERZ782/003/ERZ782883_FASTA"),
         ("ERR1864826", "amplicon", "4.1",
          "results/2019/02/ERP021864/version_4.1/ERR1864826_FASTQ"),
     ])
