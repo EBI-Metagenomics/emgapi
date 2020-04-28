@@ -137,6 +137,7 @@ class SanityCheck:
             raise FileNotFoundError('{} is missing'.format(filepath))
 
     def __check_file_content(self, filepath):
+        logging.info("Checking content of file {}".format(filepath))
         if "faa.gz" in filepath:
             count = self.__count_number_of_seqs(filepath)
             if count >= self.MIN_NUM_SEQS:
