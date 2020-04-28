@@ -81,8 +81,10 @@ class SanityCheck:
         :return:
         """
         if compressed_file:
+            logging.debug("Counting number of lines for compressed file {}".format(filepath))
             count = check_output("zcat {} | wc -l".format(filepath), shell=True).rstrip()
         else:
+            logging.debug("Counting number of lines for uncompressed file {}".format(filepath))
             count = check_output("wc -l < {}".format(filepath), shell=True).rstrip()
         return int(count)
 
@@ -93,6 +95,7 @@ class SanityCheck:
         :return:
         """
         try:
+            logging.debug("Counting number of sequences for compressed file {}".format(filepath))
             count = check_output("zcat {} | grep -c '>'".format(filepath), shell=True).rstrip()
             return int(count)
         except CalledProcessError:
@@ -151,6 +154,7 @@ class SanityCheck:
             For Amplicon I do 'do LSU or SSU or ITS exist' If not quit with error
         :return:
         """
+        logging.info("Running coverage check for amplicon data.")
         valid = False
         for f in self.config:
             if 'coverage_check' in f:
@@ -177,6 +181,7 @@ class SanityCheck:
             if no functional annotations - throw a warning / require manual intervention before upload.
         :return:
         """
+        logging.info("Running coverage check for assembly data.")
         taxa_folder = os.path.join(self.dir, "taxonomy-summary")
         if not os.path.exists(taxa_folder):
             raise CoverageCheckException("Could not find the taxonomy output folder: {}!".format(taxa_folder))
@@ -185,8 +190,10 @@ class SanityCheck:
             if 'coverage_check' in f:
                 try:
                     if f['_chunked']:
+                        logging.debug("Processing chunked file {}".format(f['description_label']))
                         self.__check_chunked_file(f, coverage_check=True)
                     else:
+                        logging.debug("Processing unchunked file {}".format(f['description_label']))
                         self.__check_file(f, coverage_check=True)
                 except FileNotFoundError:
                     # Label as coverage check NOT passed
@@ -205,6 +212,7 @@ class SanityCheck:
             if no functional annotations - throw a warning / require manual intervention before upload.
         :return:
         """
+        logging.info("Running coverage check for wgs data.")
         for f in self.config:
             if 'coverage_check' in f:
                 try:
