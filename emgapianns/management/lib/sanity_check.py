@@ -81,11 +81,12 @@ class SanityCheck:
         :return:
         """
         if compressed_file:
-            logging.debug("Counting number of lines for compressed file {}".format(filepath))
+            logging.info("Counting number of lines for compressed file {}".format(filepath))
             count = check_output("zcat {} | wc -l".format(filepath), shell=True).rstrip()
         else:
-            logging.debug("Counting number of lines for uncompressed file {}".format(filepath))
+            logging.info("Counting number of lines for uncompressed file {}".format(filepath))
             count = check_output("wc -l < {}".format(filepath), shell=True).rstrip()
+        logging.info("Result: File contains {} lines.".format(count))
         return int(count)
 
     @staticmethod
@@ -95,8 +96,9 @@ class SanityCheck:
         :return:
         """
         try:
-            logging.debug("Counting number of sequences for compressed file {}".format(filepath))
+            logging.info("Counting number of sequences for compressed file {}".format(filepath))
             count = check_output("zcat {} | grep -c '>'".format(filepath), shell=True).rstrip()
+            logging.info("Result: File contains {} sequences.".format(count))
             return int(count)
         except CalledProcessError:
             return 0
@@ -190,10 +192,10 @@ class SanityCheck:
             if 'coverage_check' in f:
                 try:
                     if f['_chunked']:
-                        logging.debug("Processing chunked file {}".format(f['description_label']))
+                        logging.info("Processing chunked file {}".format(f['description_label']))
                         self.__check_chunked_file(f, coverage_check=True)
                     else:
-                        logging.debug("Processing unchunked file {}".format(f['description_label']))
+                        logging.info("Processing unchunked file {}".format(f['description_label']))
                         self.__check_file(f, coverage_check=True)
                 except FileNotFoundError:
                     # Label as coverage check NOT passed
