@@ -16,7 +16,6 @@ from emgapianns.management.lib.utils import DownloadFileDatabaseHandler
 
 
 class StudySummaryGenerator(object):
-
     def __init__(self, accession, pipeline, rootpath, nfs_public_rootpath, database):
         self.study_accession = accession
         self.pipeline = pipeline
@@ -60,7 +59,7 @@ class StudySummaryGenerator(object):
         if len(experiment_types) == 1 and 'amplicon' in experiment_types:
             logging.info("AMPLICON datasets only! Skipping the generation of the functional matrix files!")
         else:
-            self.generate_ipr_summary(analysis_jobs, 'IPR_abundances_v{}.tsv'.format(self.pipeline))
+            self.generate_ipr_summary(analysis_jobs, 'IPR_abundances_v{}.tsv'.format(self.pipeline), self.pipeline)
             self.generate_go_summary(analysis_jobs, 'slim')
             self.generate_go_summary(analysis_jobs, 'full')
 
@@ -266,13 +265,31 @@ class StudySummaryGenerator(object):
             data[counter] = [unassigned, unassigned, unassigned, num_unassigned_seqs]
         return data
 
-    def generate_ipr_summary(self, analysis_result_dirs, filename):
-        res_files = self.get_ipr_result_files(analysis_result_dirs)
-        study_df = self.merge_dfs(res_files, delimiter=',',
-                                  key=['IPR', 'description'],
-                                  raw_cols=['IPR', 'description', 'count'])
+    def generate_ips_summary_v4(self, analysis_result_dirs):
+        res_files = self.get_ipr_v4_result_files(analysis_result_dirs)
 
-        if len(study_df.index) > 0:
+        return self.merge_dfs(res_files, delimiter=',',
+                              key=['IPR', 'description'],
+                              raw_cols=['IPR', 'description', 'count'])
+
+    def generate_ips_summary_v5(self, analysis_result_dirs):
+        res_files = self.get_ipr_v5_result_files(analysis_result_dirs)
+
+        return self.merge_dfs(res_files, delimiter=',',
+                              key=['IPR', 'description'],
+                              raw_cols=['count', 'IPR', 'description'])
+
+    def generate_ipr_summary(self, analysis_jobs, filename, version):
+
+        study_df = None
+        if version == '4.1':
+            study_df = self.generate_ips_summary_v4(analysis_jobs)
+        elif version == '5.0':
+            study_df = self.generate_ips_summary_v5(analysis_jobs)
+        else:
+            logging.warning("Pipeline version {} not supported yet!".format(version))
+
+        if not study_df.empty:
             self.write_results_file(study_df, filename)
 
             alias = '{}_IPR_abundances_v{}.tsv'.format(self.study_accession, self.pipeline)
@@ -406,10 +423,21 @@ class StudySummaryGenerator(object):
         return result
 
     @staticmethod
-    def get_ipr_result_files(analysis_result_dirs):
+    def get_ipr_v4_result_files(analysis_result_dirs):
         result = []
         for input_file_name, dir in analysis_result_dirs.items():
             res_file_re = os.path.join(dir, '{}_summary.ipr'.format(input_file_name))
+            if os.path.exists(res_file_re):
+                result.append(res_file_re)
+            else:
+                logging.warning("Result file does not exist:\n{}".format(res_file_re))
+        return result
+
+    @staticmethod
+    def get_ipr_v5_result_files(analysis_result_dirs):
+        result = []
+        for input_file_name, dir in analysis_result_dirs.items():
+            res_file_re = os.path.join(dir, 'functional-annotation', '{}.summary.ips'.format(input_file_name))
             if os.path.exists(res_file_re):
                 result.append(res_file_re)
             else:
