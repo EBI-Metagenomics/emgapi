@@ -1,0 +1,6 @@
+GO	description	category	ERZ782882	ERZ782883
+GO:0008150	biological process	biological_process	123	231
+GO:0071973	bacterial-type flagellar cell motility	biological_process	0	0
+GO:0071840	cellular component organization or biogenesis	biological_process	198	389
+GO:0071103	DNA conformation change	biological_process	43	97
+GO:0045454	cell redox homeostasis	biological_process	56	86
