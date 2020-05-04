@@ -101,6 +101,21 @@ class TestStudySummaryGenerator:
         study_df = study_summary_v5_assembly.generate_ips_summary_v5(analysis_result_dirs)
         self.compare_dataframes(study_df, "IPR_abundances_v5.tsv")
 
+    def test_generate_go_slim_summary_v5(self, study_summary_v5_assembly):
+        """
+            Tests GO slim summary file generation on v5 assembly data.
+        :param study_summary_v5_assembly: fixture
+        :return:
+        """
+        analysis_result_dirs = dict()
+        analysis_result_dirs["ERZ782882_FASTA"] = os.path.join(self._test_data_dir(),
+                                                               "study_summary_generator/version_5.0/assembly/ERZ782882_FASTA")
+        analysis_result_dirs["ERZ782883_FASTA"] = os.path.join(self._test_data_dir(),
+                                                               "study_summary_generator/version_5.0/assembly/ERZ782883_FASTA")
+
+        study_df = study_summary_v5_assembly.generate_go_summary_v5(analysis_result_dirs)
+        self.compare_dataframes(study_df, "GO-slim_abundances_v5.tsv")
+
     def test_generate_ipr_summary_v4(self, study_summary_v4_assembly):
         """
             Tests InterProScan summary file generation on v4 assembly data.
@@ -115,6 +130,21 @@ class TestStudySummaryGenerator:
 
         study_df = study_summary_v4_assembly.generate_ips_summary_v4(analysis_result_dirs)
         self.compare_dataframes(study_df, "IPR_abundances_v4.tsv")
+
+    def test_generate_go_slim_summary_v4(self, study_summary_v4_assembly):
+        """
+            Tests GO slim summary file generation on v4 assembly data.
+        :param study_summary_v4_assembly: fixture
+        :return:
+        """
+        analysis_result_dirs = dict()
+        analysis_result_dirs["ERZ782882_FASTA"] = os.path.join(self._test_data_dir(),
+                                                               "study_summary_generator/version_4.1/assembly/ERZ782882_FASTA")
+        analysis_result_dirs["ERZ782883_FASTA"] = os.path.join(self._test_data_dir(),
+                                                               "study_summary_generator/version_4.1/assembly/ERZ782883_FASTA")
+
+        study_df = study_summary_v4_assembly.generate_go_summary_v4(analysis_result_dirs)
+        self.compare_dataframes(study_df, "GO-slim_abundances_v4.tsv")
 
     @pytest.mark.parametrize("given,expected", [
         ("sk__Eukaryota", "Eukaryota;Unassigned;Unassigned"),
