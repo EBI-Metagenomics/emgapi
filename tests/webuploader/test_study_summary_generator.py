@@ -113,7 +113,7 @@ class TestStudySummaryGenerator:
         analysis_result_dirs["ERZ782883_FASTA"] = os.path.join(self._test_data_dir(),
                                                                "study_summary_generator/version_5.0/assembly/ERZ782883_FASTA")
 
-        study_df = study_summary_v5_assembly.generate_go_summary_v5(analysis_result_dirs)
+        study_df = study_summary_v5_assembly.generate_go_summary_v5(analysis_result_dirs, "slim")
         self.compare_dataframes(study_df, "GO-slim_abundances_v5.tsv")
 
     def test_generate_ipr_summary_v4(self, study_summary_v4_assembly):
@@ -143,7 +143,7 @@ class TestStudySummaryGenerator:
         analysis_result_dirs["ERZ782883_FASTA"] = os.path.join(self._test_data_dir(),
                                                                "study_summary_generator/version_4.1/assembly/ERZ782883_FASTA")
 
-        study_df = study_summary_v4_assembly.generate_go_summary_v4(analysis_result_dirs)
+        study_df = study_summary_v4_assembly.generate_go_summary_v4(analysis_result_dirs, "slim")
         self.compare_dataframes(study_df, "GO-slim_abundances_v4.tsv")
 
     @pytest.mark.parametrize("given,expected", [
