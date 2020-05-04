@@ -479,7 +479,7 @@ class StudySummaryGenerator(object):
     def get_go_v5_result_files(analysis_result_dirs, mode):
         result = []
         for input_file_name, dir in analysis_result_dirs.items():
-            file_name = '{}_summary.go' if mode == 'full' else '{}_summary.go_slim'
+            file_name = '{}.summary.go' if mode == 'full' else '{}.summary.go_slim'
             res_file_re = os.path.join(dir, 'functional-annotation', file_name.format(input_file_name))
             if os.path.exists(res_file_re):
                 result.append(res_file_re)
