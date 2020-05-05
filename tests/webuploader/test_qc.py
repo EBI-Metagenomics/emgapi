@@ -80,16 +80,16 @@ class TestCLI:
                     "value": "12345"
                 },
                 {
-                    "key": "Predicted CDS",
-                    "value": "12345"
+                    "key": "Total InterProScan matches",
+                    "value": "12345678"
                 },
                 {
                     "key": "Predicted CDS with InterProScan match",
                     "value": "12345"
                 },
                 {
-                    "key": "Total InterProScan matches",
-                    "value": "12345678"
+                    "key": "Predicted CDS",
+                    "value": "12345"
                 }
             ]
         }, {
@@ -106,17 +106,17 @@ class TestCLI:
                     "value": "54321"
                 },
                 {
-                    "key": "Predicted CDS",
-                    "value": "54321"
+                    "key": "Total InterProScan matches",
+                    "value": "87654321"
                 },
                 {
                     "key": "Predicted CDS with InterProScan match",
                     "value": "54321"
                 },
                 {
-                    "key": "Total InterProScan matches",
-                    "value": "87654321"
-                }
+                    "key": "Predicted CDS",
+                    "value": "54321"
+                },
             ]
         }, {
             "pipeline": "5.0",
@@ -131,18 +131,6 @@ class TestCLI:
                     "value": "6060"
                 },
                 {
-                    "key": "Predicted CDS",
-                    "value": "19783"
-                },
-                {
-                    "key": "Predicted CDS with InterProScan match",
-                    "value": "13914"
-                },
-                {
-                    "key": "Total InterProScan matches",
-                    "value": "50732"
-                },
-                {
                     "key": "Nucleotide sequences after length filtering",
                     "value": "6060"
                 },
@@ -151,16 +139,36 @@ class TestCLI:
                     "value": "6060"
                 },
                 {
+                    "key": "Total InterProScan matches",
+                    "value": "50732"
+                },
+                {
+                    "key": "Predicted CDS with InterProScan match",
+                    "value": "13914"
+                },
+                {
                     "key": "Contigs with InterProScan match",
                     "value": "5445"
                 },
                 {
-                    "key": "LSU count",
-                    "value": "12"
+                    "key": "Predicted CDS",
+                    "value": "19783"
                 },
                 {
-                    "key": "SSU count",
+                    "key": "Contigs with predicted CDS",
+                    "value": "6043"
+                },
+                {
+                    "key": "Contigs with predicted rRNA",
+                    "value": "152"
+                },
+                {
+                    "key": "Predicted SSU sequences",
                     "value": "7"
+                },
+                {
+                    "key": "Predicted LSU sequences",
+                    "value": "12"
                 }
             ]
         })
