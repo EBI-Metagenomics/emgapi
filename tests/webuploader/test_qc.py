@@ -127,8 +127,15 @@ class TestCLI:
                     "value": "6060"
                 },
                 {
-                    "key": ("Nucleotide sequences after format-specific "
-                            "filtering"),
+                    "key": "Nucleotide sequences after format-specific filtering",
+                    "value": "6060"
+                },
+                {
+                    "key": "Nucleotide sequences after length filtering",
+                    "value": "6060"
+                },
+                {
+                    "key": "Nucleotide sequences after undetermined bases filtering",
                     "value": "6060"
                 },
                 {
@@ -142,6 +149,10 @@ class TestCLI:
                 {
                     "key": "Total InterProScan matches",
                     "value": "50732"
+                },
+                {
+                    "key": "Contigs with InterProScan match",
+                    "value": "5445"
                 }
             ]
         })
@@ -163,7 +174,10 @@ class TestCLI:
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
-        assert len(rsp["data"]["attributes"]["analysis-summary"]) == 5
+        if results["pipeline"] == 5:
+            assert len(rsp["data"]["attributes"]["analysis-summary"]) == 8
+        else:
+            assert len(rsp["data"]["attributes"]["analysis-summary"]) == 5
 
         expected = results["expected"]
         assert rsp["data"]["attributes"]["analysis-summary"] == expected
