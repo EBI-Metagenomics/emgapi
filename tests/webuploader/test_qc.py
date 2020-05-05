@@ -153,6 +153,14 @@ class TestCLI:
                 {
                     "key": "Contigs with InterProScan match",
                     "value": "5445"
+                },
+                {
+                    "key": "LSU count",
+                    "value": "12"
+                },
+                {
+                    "key": "SSU count",
+                    "value": "7"
                 }
             ]
         })
@@ -175,7 +183,7 @@ class TestCLI:
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
         if results["pipeline"] == "5.0":
-            assert len(rsp["data"]["attributes"]["analysis-summary"]) == 8
+            assert len(rsp["data"]["attributes"]["analysis-summary"]) == 10
         else:
             assert len(rsp["data"]["attributes"]["analysis-summary"]) == 5
 
