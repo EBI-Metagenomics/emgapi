@@ -544,9 +544,11 @@ def analysis_metadata_variable_names():
         ("Contigs with InterProScan match", "n/a"),
         ("Predicted CDS", "n/a"),
         ("Contigs with predicted CDS", "n/a"),
+        ("Nucleotide sequences with predicted CDS", "n/a"),
         ("Contigs with predicted rRNA", "n/a"),
-        ("SSU count", "n/a"),
-        ("LSU count", "n/a"),
+        ("Nucleotide sequences with predicted rRNA", "n/a"),
+        ("Predicted SSU sequences", "n/a"),
+        ("Predicted LSU sequences", "n/a"),
     )
     _variable_names = list()
     for v in variable_names:
