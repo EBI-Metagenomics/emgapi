@@ -131,14 +131,6 @@ class TestCLI:
                     "value": "6060"
                 },
                 {
-                    "key": "Nucleotide sequences after length filtering",
-                    "value": "6060"
-                },
-                {
-                    "key": "Nucleotide sequences after undetermined bases filtering",
-                    "value": "6060"
-                },
-                {
                     "key": "Predicted CDS",
                     "value": "19783"
                 },
@@ -149,6 +141,14 @@ class TestCLI:
                 {
                     "key": "Total InterProScan matches",
                     "value": "50732"
+                },
+                {
+                    "key": "Nucleotide sequences after length filtering",
+                    "value": "6060"
+                },
+                {
+                    "key": "Nucleotide sequences after undetermined bases filtering",
+                    "value": "6060"
                 },
                 {
                     "key": "Contigs with InterProScan match",
@@ -180,6 +180,8 @@ class TestCLI:
             assert len(rsp["data"]["attributes"]["analysis-summary"]) == 5
 
         expected = results["expected"]
+        print(expected)
+        print(rsp["data"]["attributes"]["analysis-summary"])
         assert rsp["data"]["attributes"]["analysis-summary"] == expected
 
     def test_empty_qc(self, client, run_emptyresults):
