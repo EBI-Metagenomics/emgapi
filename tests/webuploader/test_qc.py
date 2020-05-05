@@ -165,6 +165,7 @@ class TestCLI:
             ]
         })
     )
+    @pytest.mark.usefixtures("analysis_metadata_variable_names")
     def test_qc_multiple_pipelines(self, client, run_multiple_analysis,
                                    results):
         call_command("import_qc", "ABC01234",
@@ -183,7 +184,7 @@ class TestCLI:
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
         if results["pipeline"] == "5.0":
-            assert len(rsp["data"]["attributes"]["analysis-summary"]) == 10
+            assert len(rsp["data"]["attributes"]["analysis-summary"]) == 12
         else:
             assert len(rsp["data"]["attributes"]["analysis-summary"]) == 5
 

@@ -6,6 +6,7 @@ import logging
 import os
 
 from emgapi import models as emg_models
+from emgapianns.management.lib.uploader_exceptions import UnexpectedVariableName
 from ..lib import EMGBaseCommand
 
 logger = logging.getLogger(__name__)
@@ -93,7 +94,7 @@ class Command(EMGBaseCommand):
                             var_name = 'Predicted LSU sequences'
                         else:
                             logging.error("Unsupported variable name {}".format(row[0]))
-                            break
+                            raise UnexpectedVariableName
 
                         var = emg_models.AnalysisMetadataVariableNames.objects.using(emg_db) \
                             .get(var_name=var_name)
@@ -105,8 +106,9 @@ class Command(EMGBaseCommand):
                         logging.info("{} successfully loaded into the database.".format(row[0]))
 
                     except emg_models.AnalysisMetadataVariableNames.DoesNotExist:
-                        logging.warning("Could not find variable name {} in the database even "
+                        logging.error("Could not find variable name {} in the database even "
                                         "though it should be supported!".format(row[0]))
+                        raise UnexpectedVariableName
         else:
             logging.warning("RNA counts file does not exist: {}".format(res))
 
@@ -131,7 +133,7 @@ class Command(EMGBaseCommand):
                             var_name = "Nucleotide sequences with predicted rRNA"
                         else:
                             logging.error("Unsupported variable name {}".format(row[0]))
-                            break
+                            raise UnexpectedVariableName
 
                         var = emg_models.AnalysisMetadataVariableNames.objects.using(emg_db) \
                             .get(var_name=var_name)
@@ -143,7 +145,8 @@ class Command(EMGBaseCommand):
                         logging.info("{} successfully loaded into the database.".format(row[0]))
 
                     except emg_models.AnalysisMetadataVariableNames.DoesNotExist:
-                        logging.warning("Could not find variable name {} in the database even "
+                        logging.error("Could not find variable name {} in the database even "
                                         "though it should be supported!".format(row[0]))
+                        raise UnexpectedVariableName
         else:
             logging.warning("orf.stats file does not exist: {}".format(res))

@@ -48,3 +48,8 @@ class FindResultFolderException(Exception):
 class UnexpectedLibraryStrategyException(Exception):
     """Raised when unexpected library_strategy found."""
     pass
+
+
+class UnexpectedVariableName(Exception):
+    """Raised when unexpected variable name found."""
+    pass

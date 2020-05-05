@@ -25,7 +25,7 @@ __all__ = ['apiclient', 'api_version', 'biome', 'biome_human', 'super_study', 's
            'run_status', 'analysis_status',
            'pipeline', 'pipelines', 'experiment_type',
            'runs', 'run', 'run_v5', 'runjob_pipeline_v1', 'run_emptyresults', 'run_with_sample',
-           'analysis_results', 'run_multiple_analysis', 'var_names']
+           'analysis_results', 'run_multiple_analysis', 'var_names', 'analysis_metadata_variable_names']
 
 
 @pytest.fixture
@@ -530,3 +530,30 @@ def var_names():
     for i, name in enumerate(data):
         variable_names.append(emg_models.VariableNames(var_id=i, var_name=name))
     emg_models.VariableNames.objects.bulk_create(variable_names)
+
+
+@pytest.fixture
+def analysis_metadata_variable_names():
+    variable_names = (
+        ("Submitted nucleotide sequences", "n/a"),
+        ("Nucleotide sequences after format-specific filtering", "n/a"),
+        ("Nucleotide sequences after length filtering", "n/a"),
+        ("Nucleotide sequences after undetermined bases filtering", "n/a"),
+        ("Total InterProScan matches", "n/a"),
+        ("Predicted CDS with InterProScan match", "n/a"),
+        ("Contigs with InterProScan match", "n/a"),
+        ("Predicted CDS", "n/a"),
+        ("Contigs with predicted CDS", "n/a"),
+        ("Contigs with predicted rRNA", "n/a"),
+        ("SSU count", "n/a"),
+        ("LSU count", "n/a"),
+    )
+    _variable_names = list()
+    for v in variable_names:
+        _variable_names.append(
+            emg_models.AnalysisMetadataVariableNames(
+                var_name=v[0],
+                description=v[1]
+            )
+        )
+    emg_models.AnalysisMetadataVariableNames.objects.bulk_create(_variable_names)
