@@ -118,6 +118,32 @@ class TestCLI:
                     "value": "87654321"
                 }
             ]
+        }, {
+            "pipeline": "5.0",
+            "accession": "MGYA00466090",
+            "expected": [
+                {
+                    "key": "Submitted nucleotide sequences",
+                    "value": "6060"
+                },
+                {
+                    "key": ("Nucleotide sequences after format-specific "
+                            "filtering"),
+                    "value": "6060"
+                },
+                {
+                    "key": "Predicted CDS",
+                    "value": "19783"
+                },
+                {
+                    "key": "Predicted CDS with InterProScan match",
+                    "value": "13914"
+                },
+                {
+                    "key": "Total InterProScan matches",
+                    "value": "50732"
+                }
+            ]
         })
     )
     def test_qc_multiple_pipelines(self, client, run_multiple_analysis,
@@ -128,6 +154,9 @@ class TestCLI:
         call_command("import_qc", "ABC01234",
                      os.path.dirname(os.path.abspath(__file__)),
                      pipeline="4.0")
+        call_command("import_qc", "ABC01234",
+                     os.path.dirname(os.path.abspath(__file__)),
+                     pipeline="5.0")
 
         url = reverse("emgapi_v1:analyses-detail",
                       args=[results["accession"]])

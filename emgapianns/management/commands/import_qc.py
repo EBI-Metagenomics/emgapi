@@ -146,4 +146,4 @@ class Command(EMGBaseCommand):
                         logging.warning("Could not find variable name {} in the database even "
                                         "though it should be supported!".format(row[0]))
         else:
-            logging.warning("RNA counts file does not exist: {}".format(res))
+            logging.warning("orf.stats file does not exist: {}".format(res))

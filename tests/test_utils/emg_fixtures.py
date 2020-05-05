@@ -380,6 +380,11 @@ def run_multiple_analysis(study, sample, run_status, analysis_status,
         release_version='4.0',
         release_date='1970-01-01',
     )
+    pipeline5, created5 = emg_models.Pipeline.objects.get_or_create(
+        pk=5,
+        release_version='5.0',
+        release_date='2020-01-01',
+    )
     run = emg_models.Run.objects.create(
         run_id=1234,
         accession='ABC01234',
@@ -414,7 +419,20 @@ def run_multiple_analysis(study, sample, run_status, analysis_status,
         result_directory='test_data/version_4.0/ABC_FASTQ',
         submit_time='1970-01-01 00:00:00',
     )
-    return (_anl1, _anl4)
+    _anl5 = emg_models.AnalysisJob.objects.create(
+        job_id=5555,
+        sample=sample,
+        study=study,
+        run=run,
+        run_status_id=4,
+        experiment_type=experiment_type,
+        pipeline=pipeline5,
+        analysis_status=analysis_status,
+        input_file_name='ABC_FASTQ',
+        result_directory='test_data/version_5.0/ABC_FASTQ',
+        submit_time='2020-01-01 00:00:00',
+    )
+    return (_anl1, _anl4, _anl5)
 
 
 @pytest.fixture
