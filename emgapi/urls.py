@@ -407,4 +407,7 @@ urlpatterns = [
     url(r'^v1/banner-message',
         views.BannerMessageView.as_view(),
         name='banner-message'),
+    url(r'^v1/ebi-search-download/(?P<domain>[^/]+)',
+        views.EBISearchCSVDownload.as_view(),
+        name='ebi-search-download')
 ]
