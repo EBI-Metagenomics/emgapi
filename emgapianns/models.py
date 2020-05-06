@@ -187,10 +187,19 @@ class AnalysisJobCOGAnnotation(BaseAnalysisJobAnnotation):
         return self.cog.description
 
 
-class AnalysisJobGenomePropAnnotation(BaseAnalysisJobAnnotation):
+class AnalysisJobGenomePropAnnotation(mongoengine.EmbeddedDocument):
     """GenomeProperty on a given Analysis Job.
     """
+    YES_PRESENCE = 1
+    PARTIAL_PRESENCE = 2
+    NO_PRESENCE = 3
+    PRESENCE_CHOICES = (
+        (YES_PRESENCE, 'Yes'),
+        (PARTIAL_PRESENCE, 'Partial'),
+        (NO_PRESENCE, 'No'),
+    )
     genome_property = mongoengine.ReferenceField(GenomeProperty, required=True)
+    presence = mongoengine.IntField(required=True, choices=PRESENCE_CHOICES)
 
     @property
     def accession(self):
@@ -282,9 +291,8 @@ class AnalysisJobKeggOrtholog(BaseAnalysisJob):
 class AnalysisJobGenomeProperty(BaseAnalysisJob):
     """Genome properties for an analysis
     """
-    genome_properties = mongoengine.SortedListField(
-        mongoengine.EmbeddedDocumentField(AnalysisJobGenomePropAnnotation),
-        required=False, ordering='count', reverse=True)
+    genome_properties = mongoengine.ListField(
+        mongoengine.EmbeddedDocumentField(AnalysisJobGenomePropAnnotation), required=False)
 
 
 class AnalysisJobAntiSmashGeneCluser(BaseAnalysisJob):

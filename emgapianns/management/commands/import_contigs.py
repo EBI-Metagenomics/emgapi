@@ -16,6 +16,7 @@ import os
 import logging
 from collections import Counter
 import re
+import gzip
 
 from emgapi.utils import assembly_contig_coverage
 from emgapianns import models as m_models
@@ -31,6 +32,7 @@ class Command(EMGBaseCommand):
     obj_list = list()
     rootpath = None
     result_dir = None
+    PATHWAY_SUB_DIR = 'pathways-systems'
 
     @classmethod
     def _split(cls, string, sep=','):
@@ -48,9 +50,9 @@ class Command(EMGBaseCommand):
         parser.add_argument('--faix', action='store', type=str,
                             help='Fasta index file.', required=False)
         parser.add_argument('--gff', action='store', type=str,
-                            help='GFF with the contigs annotations.', required=False)
+                            help='GFF bgzip with the contigs annotations.', required=False)
         parser.add_argument('--antismash', action='store', type=str,
-                            help='antiSMASH GFF.', required=False)
+                            help='antiSMASH GFF bgzip.', required=False)
         parser.add_argument('--kegg-modules', action='store', type=str,
                             help='KEGG Modules summary file.', required=False)
         parser.add_argument('--min-length', action='store', type=int, default=500,
@@ -68,7 +70,7 @@ class Command(EMGBaseCommand):
             logger.error('GFF file does not exist. Path:' + gff)
             raise ValueError('GFF file does not exist')
 
-        with open(gff, 'rt') as gff_file:
+        with gzip.open(gff, 'rt') as gff_file:
             logger.info('Parsing annotations from: {}'.format(gff))
             for line in gff_file:
                 if line.startswith('#'):
@@ -94,12 +96,13 @@ class Command(EMGBaseCommand):
         if not os.path.exists(antismash):
             logger.warning('antiSMASH file does not exist. SKIPPING!')
             return
+
         logger.info('Loading antiSMASH')
-        with open(antismash, 'rt') as as_file:
+        with gzip.open(antismash, 'rt') as as_file:
             for line in as_file:
                 if line.startswith('#'):
                     continue
-                contig, *_, atts = line.split('\t')                
+                contig, *_, atts = line.split('\t')
                 contig_id = contig.replace(' ', '-')
                 contig_ann = annotations_dict.setdefault(contig_id, {'antismash': []})
                 for at in atts.split(';'):
@@ -145,15 +148,27 @@ class Command(EMGBaseCommand):
         logger.info('CLI {}'.format(options))
 
         rootpath = options.get('rootpath', None)
-        root_file = os.path.join(rootpath,
-                                 analysis_job.result_directory,
-                                 analysis_job.input_file_name)
+        # no_antismash file detection
+        if os.path.isfile(os.path.join(rootpath, analysis_job.result_directory, 'no_antismash')):
+            logger.warning('No antismash results, SKIPPING!')
+            return
 
-        faix = options['faix'] or root_file + '_contigs.fasta.fai'
-        gff = options['gff'] or root_file + '_annotation.gff'
+        result_folder = os.path.join(rootpath, analysis_job.result_directory)
+        result_file_prefix = analysis_job.input_file_name
+        # ERZ782882_FASTA.fasta.bgz.fai
+        default_faix_file_path = os.path.join(result_folder,
+                                              "{}.{}".format(result_file_prefix, "fasta.bgz.fai"))
+        faix = options['faix'] or default_faix_file_path
+        # functional-annotation/ERZ782882_FASTA.contigs.annotations.gff.gz
+        default_gff_file_path = os.path.join(result_folder, "functional-annotation",
+                                             "{}.{}".format(result_file_prefix, "annotations.gff.bgz"))
+        gff = options['gff'] or default_gff_file_path
         # TODO: calculation not implemented in pipeline yet.
         # kegg_modules = options['kegg_modules'] or root_file + '_summary.paths.kegg'
-        antismash = options['antismash'] or root_file + '_annotation_antismash.gff'
+        # pathways-systems/ERZ782882_FASTA.antismash.gff.gz
+        default_antismash_file_path = os.path.join(result_folder, "pathways-systems",
+                                                   "{}.{}".format(result_file_prefix, "antismash.gff.bgz"))
+        antismash = options['antismash'] or default_antismash_file_path
 
         min_length = options['min_length']
         batch_size = options['batch_size']
