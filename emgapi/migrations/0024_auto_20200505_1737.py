@@ -59,4 +59,5 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(create_summary_variable_names),
+        migrations.RunPython(rename_summary_variable_names),
     ]
