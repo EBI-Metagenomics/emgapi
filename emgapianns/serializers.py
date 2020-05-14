@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2017 EMBL - European Bioinformatics Institute
+# Copyright 2020 EMBL - European Bioinformatics Institute
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -205,7 +205,7 @@ class GenomePropertyRetrieveSerializer(m_serializers.DynamicDocumentSerializer,
         lookup_field='accession',
     )
 
-    count = serializers.IntegerField(required=True)
+    presence = serializers.CharField(source="get_presence_display", required=True)
 
     class Meta:
         model = m_models.GenomeProperty

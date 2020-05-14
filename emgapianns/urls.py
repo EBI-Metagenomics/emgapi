@@ -1,6 +1,7 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2017 EMBL - European Bioinformatics Institute
+# Copyright 2020 EMBL - European Bioinformatics Institute
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -157,25 +158,25 @@ router.register(
 router.register(
     r'analyses/(?P<accession>[^/]+)/kegg-modules',
     m_views.AnalysisKeggModulesRelationshipViewSet,
-    base_name='analysis-keggmodules'
+    base_name='analysis-kegg-modules'
 )
 
 router.register(
     r'analyses/(?P<accession>[^/]+)/pfam-entries',
     m_views.AnalysisPfamRelationshipViewSet,
-    base_name='analysis-pfamentries'
+    base_name='analysis-pfam-entries'
 )
 
 router.register(
     r'analyses/(?P<accession>[^/]+)/kegg-orthologs',
     m_views.AnalysisKeggOrthologsRelationshipViewSet,
-    base_name='analysis-keggorthologs'
+    base_name='analysis-kegg-orthologs'
 )
 
 router.register(
     r'analyses/(?P<accession>[^/]+)/genome-properties',
     m_views.AnalysisGenomePropertiesRelationshipViewSet,
-    base_name='analysis-genomeproperties'
+    base_name='analysis-genome-properties'
 )
 
 router.register(
