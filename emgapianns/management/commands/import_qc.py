@@ -94,6 +94,8 @@ class Command(EMGBaseCommand):
                             var_name = 'Predicted SSU sequences'
                         elif row[0] == 'LSU count':
                             var_name = 'Predicted LSU sequences'
+                        elif not row[0]:
+                            continue # Skip empty value rows
                         else:
                             logging.error("Unsupported variable name {}".format(row[0]))
                             raise UnexpectedVariableName
