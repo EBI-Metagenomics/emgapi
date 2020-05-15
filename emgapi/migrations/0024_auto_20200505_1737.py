@@ -27,12 +27,12 @@ def rename_summary_variable_names(apps, schema_editor):
     )
 
     _updated_variable_names = list()
-    for v in new_summary_variable_names:
-        obj = AnalysisMetadataVariableNames.objects.get(
-            var_name=v[0])
-        obj.var_name = v[1]
-        _updated_variable_names.append(obj)
-    AnalysisMetadataVariableNames.objects.bulk_update(_updated_variable_names)
+    # for v in new_summary_variable_names:
+    #     obj = AnalysisMetadataVariableNames.objects.get(
+    #         var_name=v[0])
+    #     obj.var_name = v[1]
+    #     _updated_variable_names.append(obj)
+    # AnalysisMetadataVariableNames.objects.bulk_update(_updated_variable_names)
 
 
 def create_summary_variable_names(apps, schema_editor):
