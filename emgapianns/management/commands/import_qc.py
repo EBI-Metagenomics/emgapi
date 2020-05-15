@@ -87,6 +87,8 @@ class Command(EMGBaseCommand):
             with open(res) as tsvfile:
                 reader = csv.reader(tsvfile, delimiter='\t')
                 for row in reader:
+                    if not row: # skip empty lines at the end of the file
+                        continue
                     try:
                         if row[0] == 'SSU count':
                             var_name = 'Predicted SSU sequences'
