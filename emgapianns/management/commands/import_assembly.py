@@ -38,7 +38,6 @@ class Command(BaseCommand):
     emg_db = None
     ena_db = None
     biome = None
-    result_dir = None
 
     def add_arguments(self, parser):
         parser.add_argument('accessions', help='ENA analysis accessions', nargs='+')
@@ -49,14 +48,12 @@ class Command(BaseCommand):
                             help='Target emg_db_name alias',
                             choices=['default', 'dev', 'prod'],
                             default='default')
-        parser.add_argument('--result_dir', help="Result dir folder - absolute path.")
         parser.add_argument('--biome', help='Lineage of GOLD biome')
 
     def handle(self, *args, **options):
         logger.info("CLI %r" % options)
         self.emg_db = options['emg_db']
         self.ena_db = options['ena_db']
-        self.result_dir = None
         self.biome = options['biome']
 
         for acc in options['accessions']:
@@ -138,13 +135,16 @@ class Command(BaseCommand):
                 .DoesNotExist('Experiment type {} does not exist in database'.format(experiment_type))
 
     def tag_optional_run(self, assembly, name):
+        logging.info("Retrieving run accession from assembly name {}".format(name))
         run_accession = utils.get_run_accession(name)
         if is_run_accession(run_accession):
             self.tag_run(assembly, run_accession)
+        else:
+            logging.warning("Could not retrieve run accession from assembly name!")
 
     def tag_run(self, assembly, run_accession):
         try:
-            call_command('import_run', run_accession, '--result_dir', self.result_dir, '--biome', self.biome)
+            call_command('import_run', run_accession, '--biome', self.biome)
             run = emg_models.Run.objects.using(self.emg_db) \
                 .get(accession=run_accession)
             emg_models.AssemblyRun.objects.using(self.emg_db).get_or_create(assembly=assembly, run=run)

@@ -126,11 +126,12 @@ class Command(BaseCommand):
         except emg_models.Study.DoesNotExist:
             logging.warning('Study {} does not exist in emg DB'.format(study_accession))
             logging.info("Importing study {} now...".format(study_accession))
-            study_dir = utils.get_result_dir(utils.get_study_dir(self.result_dir))
-            call_command('import_study',
-                         study_accession,
-                         self.biome,
-                         '--study_dir', study_dir)
+            study_import_cmd = ['import_study', study_accession, self.biome]
+            if self.result_dir:
+                study_dir = utils.get_result_dir(utils.get_study_dir(self.result_dir))
+                study_import_cmd.append('--study_dir').append(study_dir)
+            call_command(study_import_cmd)
+
             try:
                 run.study = emg_models.Study.objects.using(self.emg_db) \
                     .get(secondary_accession=study_accession)
