@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations
+from django.db import transaction
 
 
 def rename_summary_variable_names(apps, schema_editor):
@@ -26,20 +27,19 @@ def rename_summary_variable_names(apps, schema_editor):
         ("Nucleotide sequences with predicted rRNA", "Reads with predicted rRNA"),
     )
 
-    _updated_variable_names = list()
-    # for v in new_summary_variable_names:
-    #     obj = AnalysisMetadataVariableNames.objects.get(
-    #         var_name=v[0])
-    #     obj.var_name = v[1]
-    #     _updated_variable_names.append(obj)
-    # AnalysisMetadataVariableNames.objects.bulk_update(_updated_variable_names)
+    # with transaction.atomic():
+    #     for v in new_summary_variable_names:
+    #         obj = AnalysisMetadataVariableNames.objects.get(
+    #             var_name=v[0])
+    #         obj.var_name = v[1]
+    #         obj.save()
 
 
 def create_summary_variable_names(apps, schema_editor):
     AnalysisMetadataVariableNames = apps.get_model("emgapi", "AnalysisMetadataVariableNames")
     variable_names = (
-        ("Contigs with predicted CDS", "n/a"),
-        ("Contigs with predicted rRNA", "n/a"),
+        ("Contigs with predicted CDS", None),
+        ("Contigs with predicted rRNA", None),
     )
     _variable_names = list()
     for v in variable_names:
