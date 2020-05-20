@@ -579,3 +579,8 @@ try:
     BANNER_MESSAGE_FILE = EMG_CONF['emg']['banner_message_file']
 except KeyError:
     BANNER_MESSAGE_FILE = None
+
+try:
+    EBI_SEARCH_URL = EMG_CONF['emg']['ebi_search_url']
+except KeyError:
+    EBI_SEARCH_URL = 'https://wwwdev.ebi.ac.uk/ebisearch/ws/rest/metagenomics_'
