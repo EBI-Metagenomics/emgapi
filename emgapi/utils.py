@@ -86,3 +86,15 @@ def assembly_contig_coverage(name):
     if match:
         return match.group('cov')
     return 0
+
+
+def parse_ebi_search_entry(entry, fields):
+    """Convert EBI Search json entry to tuple
+    """
+    row = []
+    entry_fields = entry.get("fields", {})
+    for f in fields:
+        value = entry_fields.get(f, [])
+        if value:
+            row.append(value[0] if len(value) else "")
+    return row

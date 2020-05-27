@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 EMBL - European Bioinformatics Institute
+# Copyright 2020 EMBL - European Bioinformatics Institute
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,10 +17,14 @@
 import os
 import logging
 import inflection
+import csv
+import math
+
+import requests
 
 from django.conf import settings
 from django.db.models import Prefetch, Count, Q
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponseBadRequest, HttpResponse, StreamingHttpResponse
 from django.middleware import csrf
 from django.shortcuts import get_object_or_404
 from django.views.decorators.clickjacking import xframe_options_exempt
@@ -32,6 +36,8 @@ from rest_framework.response import Response
 from rest_framework import filters, viewsets, mixins, permissions, renderers, status
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.views import APIView
+
+from rest_framework_csv.misc import Echo
 
 from . import models as emg_models
 from . import serializers as emg_serializers
@@ -1453,3 +1459,55 @@ class BannerMessageView(APIView):
             with open(settings.BANNER_MESSAGE_FILE, 'r') as msg_file:
                 message = msg_file.read().strip()
         return Response({"message": message})
+
+
+class EBISearchCSVDownload(APIView):
+    """Download an EBI Search query
+    """
+
+    def get(self, request, domain):
+        """Stream the CSV from EBI Search
+        """
+        page_size = 100
+
+        if "total" not in request.GET:
+            return HttpResponseBadRequest(
+                content="Missing 'total' pages params.",
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        total = int(request.GET.get("total"))
+        total_pages = math.ceil(total / page_size)
+        fields = request.GET.get("fields", "").split(",")
+        base = settings.EBI_SEARCH_URL + domain
+
+        csv_buffer = Echo()
+        csv_writer = csv.writer(csv_buffer)
+
+        query = {
+            "format": "json",
+            "fields": request.GET.get("fields", ""),
+            "query": request.GET.get("query", ""),
+            "facets": request.GET.get("facets", "")
+        }
+
+        def get_data():
+            # header
+            yield fields
+            for page in range(total_pages + 1):
+                query["size"] = page_size
+                query["start"] = page + page_size if page else 0
+                response = requests.get(base, params=query)
+                if not response.ok:
+                    raise Exception("There was an error downloading the data from EBI Search" +
+                                    "Status Code: " + str(response.status_code) +
+                                    " Content: " +
+                                    response.content)
+                else:
+                    data = response.json()
+                    for entry in data.get("entries"):
+                        yield emg_utils.parse_ebi_search_entry(entry, fields)
+
+        stream_res = StreamingHttpResponse((csv_writer.writerow(row) for row in get_data()),
+                                           content_type="text/csv")
+        stream_res["Content-Disposition"] = "attachment; filename=search_download.csv"
+        return stream_res
