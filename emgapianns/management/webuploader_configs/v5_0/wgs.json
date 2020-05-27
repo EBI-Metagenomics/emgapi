@@ -786,7 +786,7 @@
       "compression": false,
       "description_label": "mOTUs taxonomic profile",
       "format_name": "TSV",
-      "group_type": "Marker gene taxonomic analysis",
+      "group_type": "Taxonomic analysis mOTU",
       "real_name": "{}.motus.tsv",
       "subdir": null
     }
