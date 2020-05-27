@@ -583,4 +583,4 @@ except KeyError:
 try:
     EBI_SEARCH_URL = EMG_CONF['emg']['ebi_search_url']
 except KeyError:
-    EBI_SEARCH_URL = 'https://wwwdev.ebi.ac.uk/ebisearch/ws/rest/metagenomics_'
+    EBI_SEARCH_URL = 'https://wwwdev.ebi.ac.uk/ebisearch/ws/rest/'

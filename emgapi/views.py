@@ -1495,7 +1495,10 @@ class EBISearchCSVDownload(APIView):
             yield fields
             for page in range(total_pages + 1):
                 query["size"] = page_size
-                query["start"] = page + page_size if page else 0
+                start = page * page_size
+                if start >= total:
+                    return
+                query["start"] = start
                 response = requests.get(base, params=query)
                 if not response.ok:
                     raise Exception("There was an error downloading the data from EBI Search" +
