@@ -291,7 +291,7 @@ class Command(BaseCommand):
 
     def upload_genome_files(self, genome, has_pangenome):
         logger.info('Uploading genome files...')
-        self.upload_genome_file(genome, 'Predicted CDS', 'fasta',
+        self.upload_genome_file(genome, 'Predicted CDS (aa)', 'fasta',
                                 genome.accession + '.faa', 'Genome analysis', 'genome')
         self.upload_genome_file(genome, 'Nucleic Acid Sequence', 'fasta',
                                 genome.accession + '.fna', 'Genome analysis', 'genome')
