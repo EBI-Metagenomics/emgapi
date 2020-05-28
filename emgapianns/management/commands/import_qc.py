@@ -6,6 +6,7 @@ import logging
 import os
 
 from emgapi import models as emg_models
+from emgapianns.management.lib.uploader_exceptions import UnexpectedVariableName
 from ..lib import EMGBaseCommand
 
 logger = logging.getLogger(__name__)
@@ -29,9 +30,10 @@ class Command(EMGBaseCommand):
         rootpath = options.get('rootpath', None)
         emg_db = options['emg_db']
 
-        for infile in ['qc_summary', 'func_summary']:
+        for infile in ['qc_summary', 'functional-annotation/stats/interproscan.stats']:
             self.load_stats(rootpath, obj, infile, emg_db)
         self.import_rna_counts(rootpath=rootpath, job=obj, emg_db=emg_db)
+        self.import_orf_stats(rootpath=rootpath, job=obj, emg_db=emg_db)
 
     def load_stats(self, rootpath, obj, input_file_name, emg_db):
         res = os.path.join(rootpath, obj.result_directory, input_file_name)
@@ -68,31 +70,33 @@ class Command(EMGBaseCommand):
                 # because PK is not AutoField
                 var = emg_models.AnalysisMetadataVariableNames.objects.using(emg_db) \
                     .get(var_name=row[0])
-            if var is not None:
-                job_ann, created = emg_models.AnalysisJobAnn.objects.using(emg_db).update_or_create(
-                    job=job, var=var,
-                    defaults={'var_val_ucv': row[1]}
-                )
-
-                anns.append(job_ann)
+            job_ann, created = emg_models.AnalysisJobAnn.objects.using(emg_db).update_or_create(
+                job=job, var=var,
+                defaults={'var_val_ucv': row[1]}
+            )
+            anns.append(job_ann)
         logger.info("Total %d Annotations for Run: %s" % (len(anns), job))
 
     @staticmethod
     def import_rna_counts(rootpath, job, emg_db):
-        logging.info("Loading RNA counts into Mongo DB...")
+        logging.info("Loading RNA counts into the database...")
         res = os.path.join(rootpath, job.result_directory, 'RNA-counts')
         if os.path.exists(res):
             with open(res) as tsvfile:
                 reader = csv.reader(tsvfile, delimiter='\t')
                 for row in reader:
+                    if not row:  # skip empty lines at the end of the file
+                        continue
                     try:
                         if row[0] == 'SSU count':
                             var_name = 'Predicted SSU sequences'
                         elif row[0] == 'LSU count':
                             var_name = 'Predicted LSU sequences'
+                        elif not row[0]:
+                            continue  # Skip empty value rows
                         else:
                             logging.error("Unsupported variable name {}".format(row[0]))
-                            break
+                            raise UnexpectedVariableName
 
                         var = emg_models.AnalysisMetadataVariableNames.objects.using(emg_db) \
                             .get(var_name=var_name)
@@ -101,10 +105,50 @@ class Command(EMGBaseCommand):
                             job=job, var=var,
                             defaults={'var_val_ucv': row[1]}
                         )
-                        logging.info("{} successfully loaded into Mongo.".format(row[0]))
+                        logging.info("{} successfully loaded into the database.".format(row[0]))
 
                     except emg_models.AnalysisMetadataVariableNames.DoesNotExist:
-                        logging.warning("Could not find variable name {} in the database even "
-                                        "though it should be supported!".format(row[0]))
+                        logging.error("Could not find variable name {} in the database even "
+                                      "though it should be supported!".format(row[0]))
+                        raise UnexpectedVariableName
         else:
             logging.warning("RNA counts file does not exist: {}".format(res))
+
+    @staticmethod
+    def import_orf_stats(rootpath, job, emg_db):
+        logging.info("Loading ORF stats into the database...")
+        res = os.path.join(rootpath, job.result_directory, 'functional-annotation/stats/orf.stats')
+        if os.path.exists(res):
+            with open(res) as tsvfile:
+                reader = csv.reader(tsvfile, delimiter='\t')
+                for row in reader:
+                    try:
+                        if row[0] == "Predicted CDS":
+                            var_name = "Predicted CDS"
+                        elif row[0] == "Contigs with predicted CDS":
+                            var_name = "Contigs with predicted CDS"
+                        elif row[0] == "Nucleotide sequences with predicted CDS":
+                            var_name = "Nucleotide sequences with predicted CDS"
+                        elif row[0] in ["Contigs with predicted rRNA", "Contigs with predicted with rRNA"]:
+                            var_name = "Contigs with predicted rRNA"
+                        elif row[0] == "Nucleotide sequences with predicted rRNA":
+                            var_name = "Nucleotide sequences with predicted rRNA"
+                        else:
+                            logging.error("Unsupported variable name {}".format(row[0]))
+                            raise UnexpectedVariableName
+
+                        var = emg_models.AnalysisMetadataVariableNames.objects.using(emg_db) \
+                            .get(var_name=var_name)
+
+                        job_ann, created = emg_models.AnalysisJobAnn.objects.using(emg_db).update_or_create(
+                            job=job, var=var,
+                            defaults={'var_val_ucv': row[1]}
+                        )
+                        logging.info("{} successfully loaded into the database.".format(row[0]))
+
+                    except emg_models.AnalysisMetadataVariableNames.DoesNotExist:
+                        logging.error("Could not find variable name {} in the database even "
+                                        "though it should be supported!".format(row[0]))
+                        raise UnexpectedVariableName
+        else:
+            logging.warning("orf.stats file does not exist: {}".format(res))

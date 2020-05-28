@@ -55,6 +55,9 @@ class AnalysisJobAnnotationMixin:
             # but it doesn't have annotations
             return []
 
+        if hasattr(self, "annotation_model_property_resolver"):
+            return self.annotation_model_property_resolver(analysis)
+
         return getattr(analysis, self.annotation_model_property, [])
 
 
