@@ -691,7 +691,26 @@ class AnalysisOrganismRelationshipViewSet(m_mixins.AnalysisJobAnnotationMixin,
 
     annotation_model = m_models.AnalysisJobTaxonomy
 
-    annotation_model_property = 'taxonomy'
+    def annotation_model_property_resolver(self, analysis):
+        """Get the taxonomic annotations using the following rules:
+        - SSU -> version <= 5.0 of pipeline
+        - SSU >= 5.0 of pipeline
+        - ITS OneDB {}
+        - ITS unite
+        - LSU
+        """
+        alternatives = [
+            "taxonomy",
+            "taxonomy_ssu",
+            "taxonomy_itsonedb",
+            "taxonomy_unite"
+            "taxonomy_lsu",
+        ]
+        for alt in alternatives:
+            values = getattr(analysis, alt, [])
+            if values:
+                return values
+        return []
 
 
 class AnalysisOrganismSSURelationshipViewSet(  # NOQA
