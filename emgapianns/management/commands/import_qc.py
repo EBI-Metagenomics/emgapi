@@ -62,6 +62,15 @@ class Command(EMGBaseCommand):
         for row in reader:
             var = None
             try:
+                # The following if else case are a fix for older v4.1 uploads after we changed the labels
+                # Could be removed when no more v4.1 results for uploading available
+                if row[0] == "Nucleotide sequences with InterProScan match":
+                    row[0] = "Reads with InterProScan match"
+                elif row[0] == "Nucleotide sequences with predicted CDS":
+                    row[0] = "Reads with predicted CDS"
+                elif row[0] in ["Nucleotide sequences with predicted rRNA", "Nucleotide sequences with predicted RNA"]:
+                    row[0] = "Reads with predicted rRNA"
+                #     End v4.1 fix
                 var = emg_models.AnalysisMetadataVariableNames.objects.using(emg_db) \
                     .get(var_name=row[0])
             except emg_models.AnalysisMetadataVariableNames.DoesNotExist:
