@@ -34,7 +34,7 @@ class TestGenomes:
     """
     def _setup(self):
         downloads = (
-            ("Protein sequence FASTA file of the species representative", "Predicted CDS",),
+            ("Protein sequence FASTA file of the species representative", "Predicted CDS (aa)",),
             ("DNA sequence FASTA file of the genome assembly of the species representative", "Nucleic Acid Sequence",),
             ("DNA sequence FASTA file index of the genome assembly of the species representative", "Nucleic Acid Sequence index",),
             ("Protein sequence of the accessory genome", "Protein sequence (accessory)",),

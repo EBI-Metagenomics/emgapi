@@ -257,15 +257,6 @@ class OrganismRetriveSerializer(OrganismSerializer):
 
 class AnalysisJobContigSerializer(m_serializers.DocumentSerializer):
 
-    antismash_geneclusters_count = serializers.SerializerMethodField(default=0)
-    kegg_modules_count = serializers.SerializerMethodField(default=0)
-
-    def get_antismash_geneclusters_count(self, obj):
-        return len(getattr(obj, 'as_geneclusters', []))
-
-    def get_kegg_modules_count(self, obj):
-        return len(getattr(obj, 'kegg_modules', []))
-
     class Meta:
         model = m_models.AnalysisJobContig
         exclude = (
