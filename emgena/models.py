@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # Copyright 2018 EMBL - European Bioinformatics Institute
@@ -84,7 +83,7 @@ class SubmitterContact(models.Model):
 
 class Notify(object):
     def __init__(self, **kwargs):
-        for field in ('id', 'from_email', 'message', 'subject'):
+        for field in ('id', 'from_email', 'message', 'subject', 'is_consent'):
             setattr(self, field, kwargs.get(field, None))
 
 
