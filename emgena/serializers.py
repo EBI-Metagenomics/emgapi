@@ -66,7 +66,7 @@ class NotifySerializer(serializers.Serializer):
 
     def create(self, validated_data):
         """Create an RT ticket.
-        If this is a consent aproval then the proceruse is:
+        If this is a consent approval then the procedure is:
         - create ticket in ENA-MG queue
         - add EMG email in CC (to link the tickets)
         otherwise:
