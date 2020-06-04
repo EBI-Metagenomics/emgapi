@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
+
 from urllib.parse import urlencode
 
 from django.core.urlresolvers import reverse
@@ -41,6 +43,7 @@ class TestNotify(APITestCase):
         return token
 
     @responses.activate
+    @pytest.mark.skipif(sys.version_info < (3, 6), reason="requires python3.6 or higher")
     def test_notify_not_consent(self):
         """Test notify endpoint for non-consent requests
         """
@@ -80,6 +83,7 @@ class TestNotify(APITestCase):
         assert call.request.body == urlencode(expected_body)
 
     @responses.activate
+    @pytest.mark.skipif(sys.version_info < (3, 6), reason="requires python3.6 or higher")
     def test_notify_consent(self):
         """Test notify endpoint for consent requests
         """
