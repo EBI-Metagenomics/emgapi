@@ -143,24 +143,12 @@ class TestSanityCheck:
         test_instance.check_file_existence()
 
     @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
-        ("ERR1913139", "wgs", "4.1",
-         "sanity_check/version_4.1/wgs/ERR1913139_FASTQ")
+        ("ERR1913139", "wgs", "4.1", "sanity_check/version_4.1/wgs/ERR1913139_FASTQ"),
+        ("ERR1697182", "wgs", "5.0", "sanity_check/version_4.1/wgs/ERR1697182_MERGED_FASTQ")
     ])
-    def test_check_wgs_v4_v5_results_succeeds(self, accession, experiment_type, version, result_folder):
+    def test_check_file_existence_wgs_v4_v5_results_succeeds(self, accession, experiment_type, version, result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir, result_folder)
-        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
-        test_instance.check_file_existence()
-
-    @pytest.mark.skip(reason="No example does exist yet")
-    def test_check_wgs_v5_results_succeeds(self):
-        accession = "???"
-        experiment_type = "wgs"
-        version = "5.0"
-        root_dir = os.path.join(os.path.dirname(__file__), "test_data")
-        result_dir = os.path.join(root_dir,
-                                  "results/2019/09/ERP117125/version_{}/ERR350/007/{}_MERGED_FASTQ".format(version,
-                                                                                                           accession))
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
         test_instance.check_file_existence()
 
@@ -190,7 +178,8 @@ class TestSanityCheck:
         ("ERR0000001", "amplicon", "4.1",
          "results/2019/02/ERP000001/version_4.1/ERR0000001_FASTQ"),
         ("ERR3506531", "amplicon", "4.1",
-         "results/2019/09/ERP117125/version_4.1/ERR350/001/ERR3506531_MERGED_FASTQ")
+         "results/2019/09/ERP117125/version_4.1/ERR350/001/ERR3506531_MERGED_FASTQ"),
+        ("ERR1697183", "wgs", "5.0", "sanity_check/version_4.1/wgs/ERR1697183_MERGED_FASTQ")
     ])
     def test_check_file_existence_should_raise_file_not_found_error(self, accession, experiment_type, version,
                                                                     result_folder):
@@ -208,7 +197,8 @@ class TestSanityCheck:
         ("ERZ782882", "assembly", "ASSEMBLY", "5.0",
          "sanity_check/version_5.0/assembly/ERZ782882_FASTA"),
         ("ERR3506532", "wgs", "WGS", "4.1",
-         "results/2019/09/ERP117125/version_4.1/ERR350/002/ERR3506532_MERGED_FASTQ")
+         "results/2019/09/ERP117125/version_4.1/ERR350/002/ERR3506532_MERGED_FASTQ"),
+        ("ERR1697182", "wgs", "5.0", "sanity_check/version_4.1/wgs/ERR1697182_MERGED_FASTQ")
     ])
     def test_coverage_check_succeeds(self, accession, experiment_type, amplicon_type, version,
                                      result_folder):
@@ -227,6 +217,7 @@ class TestSanityCheck:
          "sanity_check/version_5.0/assembly/ERZ782883_FASTA"),
         ("ERR1864826", "amplicon", "4.1",
          "results/2019/02/ERP021864/version_4.1/ERR1864826_FASTQ"),
+        ("ERR1697183", "wgs", "5.0", "sanity_check/version_4.1/wgs/ERR1697183_MERGED_FASTQ")
     ])
     def test_coverage_check_should_raise_coverage_check_exception(self, accession, experiment_type, version,
                                                                     result_folder):
