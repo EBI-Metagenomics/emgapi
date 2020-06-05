@@ -144,7 +144,7 @@ class TestSanityCheck:
 
     @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
         ("ERR1913139", "wgs", "4.1",
-         "results/2018/12/ERP019674/version_4.1/ERR1913139_FASTQ")
+         "sanity_check/version_4.1/wgs/ERR1913139_FASTQ")
     ])
     def test_check_wgs_v4_v5_results_succeeds(self, accession, experiment_type, version, result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
@@ -177,7 +177,7 @@ class TestSanityCheck:
 
     @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
         ("ERR1913139", "wgs", "4.1",
-         "results/2018/12/ERP019674/version_4.1/ERR1913139_FASTQ")
+         "sanity_check/version_4.1/wgs/ERR1913139_FASTQ")
     ])
     def test_check_qc_not_passed_do_not_raise_exception(self, accession, experiment_type, version, result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
@@ -222,7 +222,7 @@ class TestSanityCheck:
         ("ERR3506531", "amplicon", "4.1",
          "results/2019/09/ERP117125/version_4.1/ERR350/001/ERR3506531_MERGED_FASTQ"),
         ("ERR1913139", "wgs", "4.1",
-         "results/2018/12/ERP019674/version_4.1/ERR1913139_FASTQ"),
+         "sanity_check/version_4.1/wgs/ERR1913139_FASTQ"),
         ("ERZ782883", "assembly", "5.0",
          "sanity_check/version_5.0/assembly/ERZ782883_FASTA"),
         ("ERR1864826", "amplicon", "4.1",
