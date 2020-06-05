@@ -45,10 +45,12 @@ class TestSanityCheck:
     @pytest.mark.parametrize("expected_accession, experiment_type, version, expected_result_dir", [
         ("ERRXXXXXX", "amplicon", "4.1", "/tmp"),
         ("ERRXXXXXX", "amplicon", "5.0", "/tmp"),
-        ("ERZXXXXXX", "assembly", "5.0", "/tmp"),
         ("ERZXXXXXX", "assembly", "4.1", "/tmp"),
+        ("ERZXXXXXX", "assembly", "5.0", "/tmp"),
         ("ERRXXXXXX", "wgs", "4.1", "/tmp"),
+        ("ERRXXXXXX", "wgs", "5.0", "/tmp"),
         ("ERRXXXXXX", "rna-seq", "4.1", "/tmp"),
+        ("ERRXXXXXX", "rna-seq", "5.0", "/tmp"),
         ("ERZXXXXXX", "ASSEMBLY", "4.1", "/tmp"),
         ("ERRXXXXXX", "WGS", "4.1", "/tmp"),
         ("ERRXXXXXX", "AMPLICON", "4.1", "/tmp")
@@ -61,8 +63,18 @@ class TestSanityCheck:
 
     @patch("os.path.basename")
     @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
-        ("ERR2985769", "wgs", "1.0", "no-results"),
-        ("ERR2985769", "wgs", "5.0", "/tmp")
+        ("ERR2985769", "wgs", "1.0", "/tmp"),
+        ("ERR2985769", "wgs", "2.0", "/tmp"),
+        ("ERR2985769", "wgs", "3.0", "/tmp"),
+        ("ERR2985769", "rna-seq", "1.0", "/tmp"),
+        ("ERR2985769", "rna-seq", "2.0", "/tmp"),
+        ("ERR2985769", "rna-seq", "3.0", "/tmp"),
+        ("ERR2985769", "amplicon", "1.0", "/tmp"),
+        ("ERR2985769", "amplicon", "2.0", "/tmp"),
+        ("ERR2985769", "amplicon", "3.0", "/tmp"),
+        ("ERR2985769", "assembly", "1.0", "/tmp"),
+        ("ERR2985769", "assembly", "2.0", "/tmp"),
+        ("ERR2985769", "assembly", "3.0", "/tmp")
     ])
     def test_check_initialisation_should_raise_exception(self, mock_dir, accession, experiment_type, version,
                                                          result_folder):
@@ -73,6 +85,7 @@ class TestSanityCheck:
     @patch("os.path.basename")
     @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
         ("ERR2985769", "other", "4.1", "/tmp"),
+        ("ERR2985769", "WGA", "4.1", "/tmp"),
     ])
     def test_check_init_should_raise_unexpected_library_strategy_exception(self, mock_dir, accession,
                                                                            experiment_type, version,
@@ -119,9 +132,9 @@ class TestSanityCheck:
         ("ERZ477576", "assembly", "4.1",
          "results/2017/11/ERP104174/version_4.1/ERZ477/006/ERZ477576_FASTA"),
         ("ERZ782882", "assembly", "5.0",
-         "results/2017/11/ERP104174/version_5.0/ERZ782/002/ERZ782882_FASTA"),
+         "sanity_check/version_5.0/assembly/ERZ782882_FASTA"),
         ("ERZ782883", "assembly", "5.0",
-         "results/2017/11/ERP104174/version_5.0/ERZ782/003/ERZ782883_FASTA")
+         "sanity_check/version_5.0/assembly/ERZ782883_FASTA")
     ])
     def test_check_assemblies_v4_v5_results_succeeds(self, accession, experiment_type, version, result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
@@ -193,7 +206,7 @@ class TestSanityCheck:
         ("ERR2237853", "amplicon", "ITS", "5.0",
          "results/2018/01/ERP106131/version_5.0/ERR223/003/ERR2237853_MERGED_FASTQ"),
         ("ERZ782882", "assembly", "ASSEMBLY", "5.0",
-         "results/2017/11/ERP104174/version_5.0/ERZ782/002/ERZ782882_FASTA"),
+         "sanity_check/version_5.0/assembly/ERZ782882_FASTA"),
         ("ERR3506532", "wgs", "WGS", "4.1",
          "results/2019/09/ERP117125/version_4.1/ERR350/002/ERR3506532_MERGED_FASTQ")
     ])
@@ -211,7 +224,7 @@ class TestSanityCheck:
         ("ERR1913139", "wgs", "4.1",
          "results/2018/12/ERP019674/version_4.1/ERR1913139_FASTQ"),
         ("ERZ782883", "assembly", "5.0",
-         "results/2017/11/ERP104174/version_5.0/ERZ782/003/ERZ782883_FASTA"),
+         "sanity_check/version_5.0/assembly/ERZ782883_FASTA"),
         ("ERR1864826", "amplicon", "4.1",
          "results/2019/02/ERP021864/version_4.1/ERR1864826_FASTQ"),
     ])
