@@ -189,19 +189,18 @@ class TestSanityCheck:
         with pytest.raises(FileNotFoundError):
             test_instance.check_file_existence()
 
-    @pytest.mark.parametrize("accession, experiment_type, amplicon_type, version, result_folder", [
-        ("ERR3506537", "amplicon", "SSU", "4.1",
+    @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
+        ("ERR3506537", "amplicon", "4.1",
          "results/2019/09/ERP117125/version_4.1/ERR350/007/ERR3506537_MERGED_FASTQ"),
-        ("ERR2237853", "amplicon", "ITS", "5.0",
+        ("ERR2237853", "amplicon", "5.0",
          "results/2018/01/ERP106131/version_5.0/ERR223/003/ERR2237853_MERGED_FASTQ"),
-        ("ERZ782882", "assembly", "ASSEMBLY", "5.0",
+        ("ERZ782882", "assembly", "5.0",
          "sanity_check/version_5.0/assembly/ERZ782882_FASTA"),
-        ("ERR3506532", "wgs", "WGS", "4.1",
+        ("ERR3506532", "wgs", "4.1",
          "results/2019/09/ERP117125/version_4.1/ERR350/002/ERR3506532_MERGED_FASTQ"),
         ("ERR1697182", "wgs", "5.0", "sanity_check/version_4.1/wgs/ERR1697182_MERGED_FASTQ")
     ])
-    def test_coverage_check_succeeds(self, accession, experiment_type, amplicon_type, version,
-                                     result_folder):
+    def test_coverage_check_succeeds(self, accession, experiment_type, version, result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir, result_folder)
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
