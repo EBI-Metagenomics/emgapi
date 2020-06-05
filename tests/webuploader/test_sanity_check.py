@@ -62,7 +62,7 @@ class TestSanityCheck:
     @patch("os.path.basename")
     @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
         ("ERR2985769", "wgs", "1.0", "no-results"),
-        # FIXME: ("ERR2985769", "wgs", "5.0", "/tmp")
+        ("ERR2985769", "wgs", "5.0", "/tmp")
     ])
     def test_check_initialisation_should_raise_exception(self, mock_dir, accession, experiment_type, version,
                                                          result_folder):
