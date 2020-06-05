@@ -144,7 +144,7 @@ class TestSanityCheck:
 
     @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
         ("ERR1913139", "wgs", "4.1", "sanity_check/version_4.1/wgs/ERR1913139_FASTQ"),
-        ("ERR1697182", "wgs", "5.0", "sanity_check/version_4.1/wgs/ERR1697182_MERGED_FASTQ")
+        ("ERR1697182", "wgs", "5.0", "sanity_check/version_5.0/wgs/ERR1697182_MERGED_FASTQ")
     ])
     def test_check_file_existence_wgs_v4_v5_results_succeeds(self, accession, experiment_type, version, result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
@@ -179,7 +179,7 @@ class TestSanityCheck:
          "results/2019/02/ERP000001/version_4.1/ERR0000001_FASTQ"),
         ("ERR3506531", "amplicon", "4.1",
          "results/2019/09/ERP117125/version_4.1/ERR350/001/ERR3506531_MERGED_FASTQ"),
-        ("ERR1697183", "wgs", "5.0", "sanity_check/version_4.1/wgs/ERR1697183_MERGED_FASTQ")
+        ("ERR1697183", "wgs", "5.0", "sanity_check/version_5.0/wgs/ERR1697183_MERGED_FASTQ")
     ])
     def test_check_file_existence_should_raise_file_not_found_error(self, accession, experiment_type, version,
                                                                     result_folder):
@@ -198,7 +198,7 @@ class TestSanityCheck:
          "sanity_check/version_5.0/assembly/ERZ782882_FASTA"),
         ("ERR3506532", "wgs", "4.1",
          "results/2019/09/ERP117125/version_4.1/ERR350/002/ERR3506532_MERGED_FASTQ"),
-        ("ERR1697182", "wgs", "5.0", "sanity_check/version_4.1/wgs/ERR1697182_MERGED_FASTQ")
+        ("ERR1697182", "wgs", "5.0", "sanity_check/version_5.0/wgs/ERR1697182_MERGED_FASTQ")
     ])
     def test_coverage_check_succeeds(self, accession, experiment_type, version, result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
@@ -216,7 +216,7 @@ class TestSanityCheck:
          "sanity_check/version_5.0/assembly/ERZ782883_FASTA"),
         ("ERR1864826", "amplicon", "4.1",
          "results/2019/02/ERP021864/version_4.1/ERR1864826_FASTQ"),
-        ("ERR1697183", "wgs", "5.0", "sanity_check/version_4.1/wgs/ERR1697183_MERGED_FASTQ")
+        ("ERR1697183", "wgs", "5.0", "sanity_check/version_5.0/wgs/ERR1697183_MERGED_FASTQ")
     ])
     def test_coverage_check_should_raise_coverage_check_exception(self, accession, experiment_type, version,
                                                                     result_folder):
