@@ -138,12 +138,8 @@ class Command(EMGBaseCommand):
                             var_name = "Predicted CDS"
                         elif row[0] == "Contigs with predicted CDS":
                             var_name = "Contigs with predicted CDS"
-                        elif row[0] == "Nucleotide sequences with predicted CDS":
-                            var_name = "Nucleotide sequences with predicted CDS"
                         elif row[0] in ["Contigs with predicted rRNA", "Contigs with predicted with rRNA"]:
                             var_name = "Contigs with predicted rRNA"
-                        elif row[0] == "Nucleotide sequences with predicted rRNA":
-                            var_name = "Nucleotide sequences with predicted rRNA"
                         elif row[0] == "Reads with predicted CDS":
                             var_name = "Reads with predicted CDS"
                         elif row[0] == "Reads with predicted rRNA":
