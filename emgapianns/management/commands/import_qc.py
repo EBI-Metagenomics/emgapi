@@ -140,9 +140,9 @@ class Command(EMGBaseCommand):
                             var_name = "Contigs with predicted CDS"
                         elif row[0] in ["Contigs with predicted rRNA", "Contigs with predicted with rRNA"]:
                             var_name = "Contigs with predicted rRNA"
-                        elif row[0] == "Reads with predicted CDS":
+                        elif row[0] in ["Reads with predicted CDS", "Nucleotide sequences with predicted CDS"]:
                             var_name = "Reads with predicted CDS"
-                        elif row[0] == "Reads with predicted rRNA":
+                        elif row[0] in ["Reads with predicted rRNA", "Nucleotide sequences with predicted rRNA"]:
                             var_name = "Reads with predicted rRNA"
                         else:
                             logging.error("Unsupported variable name {}".format(row[0]))
