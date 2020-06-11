@@ -413,28 +413,30 @@ class AnalysisJobContig(mongoengine.Document):
     has_antismash = mongoengine.BooleanField(default=False)
     has_kegg_module = mongoengine.BooleanField(default=False)
 
-    meta = {
-        'indexes': [
-            'contig_id',
-            'analysis_id',
-            'accession',
-            'job_id',
-            'pipeline_version',
-            'length',  # ordering
-            'coverage',  # ordering
-            'cogs.cog',
-            'keggs.ko',
-            'gos.go_term',
-            'pfams.pfam_entry',
-            'interpros.interpro_identifier',
-            'as_geneclusters.gene_cluster',
-            'kegg_modules.module',
-            'has_cog',
-            'has_kegg',
-            'has_go',
-            'has_pfam',
-            'has_interpro',
-            'has_antismash',
-            'has_kegg_module',
-        ]
-    }
+    # FIXME: this is breaking the API
+    #        it's trying to create the indexes each time.
+    # meta = {
+    #     'indexes': [
+    #         'contig_id',
+    #         'analysis_id',
+    #         'accession',
+    #         'job_id',
+    #         'pipeline_version',
+    #         'length',  # ordering
+    #         'coverage',  # ordering
+    #         'cogs.cog',
+    #         'keggs.ko',
+    #         'gos.go_term',
+    #         'pfams.pfam_entry',
+    #         'interpros.interpro_identifier',
+    #         'as_geneclusters.gene_cluster',
+    #         'kegg_modules.module',
+    #         'has_cog',
+    #         'has_kegg',
+    #         'has_go',
+    #         'has_pfam',
+    #         'has_interpro',
+    #         'has_antismash',
+    #         'has_kegg_module',
+    #     ]
+    # }
