@@ -386,8 +386,9 @@ class AnalysisJobContig(mongoengine.Document):
     """An analysis job contig, this is used on assemblies
     """
 
-    contig_id = mongoengine.StringField(required=True,
-                                        unique_with=['accession', 'pipeline_version'])
+    contig_id = mongoengine.StringField(required=True)
+    # FIXME: this is breaking the API - unique_with=['accession', 'pipeline_version'])
+
     length = mongoengine.IntField()
     coverage = mongoengine.FloatField()
 
