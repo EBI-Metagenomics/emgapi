@@ -815,7 +815,7 @@
       "description_label": "eggNOG seed orthologs",
       "format_name": "TSV",
       "group_type": "Functional analysis",
-      "real_name": ".emapper.seed_orthologs.gz",
+      "real_name": "{}.emapper.seed_orthologs.gz",
       "subdir": "functional-annotation"
     },
     {
