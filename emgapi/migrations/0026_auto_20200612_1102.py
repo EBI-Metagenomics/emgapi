@@ -9,7 +9,6 @@ def create_download_description(apps, schema_editor):
     DownloadDescriptionLabel = apps.get_model("emgapi", "DownloadDescriptionLabel")
     downloads = (
         ("Combined (eggNOG, InterPro, antiSMASH) annotation", "Combined (eggNOG, InterPro, antiSMASH) annotation"),
-        ("TSV formatted file containing eggNOG annotation", "eggNOG annotation"),
         ("TSV formatted file containing eggNOG seed orthologs", "eggNOG seed orthologs"),
     )
     _downloads = list()
