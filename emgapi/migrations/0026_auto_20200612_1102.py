@@ -3,6 +3,23 @@
 from __future__ import unicode_literals
 
 from django.db import migrations
+from django.db import transaction
+
+
+def rename_eggnog_description_labels(apps, schema_editor):
+    DownloadDescriptionLabel = apps.get_model("emgapi", "DownloadDescriptionLabel")
+
+    new_eggnog_description_labels = (
+        ("EggNog annotation", "eggNOG annotation"),
+        ("EggNog annotation (core and accessory)", "eggNOG annotation (core and accessory)"),
+    )
+
+    with transaction.atomic():
+        for v in new_eggnog_description_labels:
+            obj = DownloadDescriptionLabel.objects.get(
+                description_label=v[0])
+            obj.description_label = v[1]
+            obj.save()
 
 
 def create_download_description(apps, schema_editor):
@@ -29,4 +46,5 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(create_download_description),
+        migrations.RunPython(rename_eggnog_description_labels),
     ]
