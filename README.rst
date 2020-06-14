@@ -1,8 +1,8 @@
 EMG API
 =======
 
-.. image:: https://travis-ci.org/EBI-Metagenomics/emgapi.svg?branch=master
-    :target: https://travis-ci.org/EBI-Metagenomics/emgapi
+.. image:: https://travis-ci.com/EBI-Metagenomics/emgapi.svg?branch=master
+    :target: https://travis-ci.com/EBI-Metagenomics/emgapi
 
 Metagenomics service is a large-scale platform for analyzing and archiving metagenomic and metatranscriptome data. It provides a standardized analysis workflow, capable of producing rich taxonomic diversity and functional annotations, and allows analysis results to be compared within and across projects on a broad level, and across different data types (e.g. metagenomic and metatranscriptomic).
 
