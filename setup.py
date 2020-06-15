@@ -7,7 +7,7 @@ _base = os.path.dirname(os.path.abspath(__file__))
 _requirements = os.path.join(_base, 'requirements.txt')
 _requirements_test = os.path.join(_base, 'requirements-test.txt')
 
-version = "1.6.11"
+version = "1.6.12"
 
 install_requirements = []
 with open(_requirements) as f:
