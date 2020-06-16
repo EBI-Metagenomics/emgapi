@@ -414,6 +414,7 @@ class AnalysisJobContig(mongoengine.Document):
     has_kegg_module = mongoengine.BooleanField(default=False)
 
     meta = {
+        'auto_create_index': False,
         'indexes': [
             'contig_id',
             'analysis_id',
