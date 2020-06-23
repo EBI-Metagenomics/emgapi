@@ -11,6 +11,20 @@ from django import forms
 from . import models as emg_models
 
 
+class AccessionSearch:
+    prefix = ''
+    filter_property = None
+
+    def get_search_results(self, request, queryset, search_term):
+        """Allow users to search using Mgnify accession prefix (i.e. MGSYS)
+        """
+        if search_term and search_term.startswith(self.prefix):
+            clean_id = int(search_term.lstrip(self.prefix) or 0)
+            return self.model.objects.filter(**{self.filter_property: [clean_id]}), False
+        else:
+            return super().get_search_results(request, queryset, search_term)
+
+
 @admin.register(emg_models.Biome)
 class Biome(admin.ModelAdmin):
     search_fields = [
@@ -119,7 +133,9 @@ class SampleAdmin(admin.ModelAdmin):
 
 
 @admin.register(emg_models.Run)
-class RunAdmin(admin.ModelAdmin):
+class RunAdmin(admin.ModelAdmin, AccessionSearch):
+
+    ordering = ['-run_id']
 
     readonly_fields = (
         'run_id',
@@ -128,7 +144,6 @@ class RunAdmin(admin.ModelAdmin):
         'sample',
         'study',
     )
-    ordering = ['-run_id']
     search_fields = [
         'run_id',
         'secondary_accession',
@@ -146,14 +161,8 @@ class RunAdmin(admin.ModelAdmin):
         'status'
     )
 
-    def get_search_results(self, request, queryset, search_term):
-        """For searches that start with MGYS will only search on samples
-        """
-        if search_term and search_term.startswith('MGYS'):
-            study_id = int(search_term.lstrip('MGYS') or 0)
-            return self.model.objects.filter(study=study_id), False
-        else:
-            return super().get_search_results(request, queryset, search_term)
+    filter_property = 'study'
+    prefix = 'MGYS'
 
 
 @admin.register(emg_models.Publication)
@@ -166,9 +175,144 @@ class PublicationAdmin(admin.ModelAdmin):
         'pub_url',
         'pub_type',
     ]
-    list_display = (
+    list_display = [
         'pub_id',
         'pub_title',
         'pub_url',
         'pub_type',
+    ]
+
+
+class AssemblyRunInline(admin.TabularInline):
+    model = emg_models.Assembly.runs.through
+
+
+class AssemblySampleInline(admin.TabularInline):
+    model = emg_models.Assembly.samples.through
+
+
+@admin.register(emg_models.Assembly)
+class AssemblyAdmin(admin.ModelAdmin, AccessionSearch):
+    readonly_fields = [
+        'assembly_id',
+        'accession'
+    ]
+    search_fields = [
+        'assembly_id',
+        'accession',
+        'wgs_accession',
+        'legacy_accession',
+        'experiment_type'
+    ]
+    list_filter = [
+        'experiment_type',
+        'status_id'
+    ]
+    inlines = [
+        AssemblyRunInline,
+        AssemblySampleInline
+    ]
+
+
+@admin.register(emg_models.AnalysisJob)
+class AnalysisJobAdmin(admin.ModelAdmin):
+    ordering = ['-submit_time']
+    readonly_fields = (
+        'job_id',
+        'accession',
+        'secondary_accession',
+        'run',
+        'sample',
+        'study',
+        'assembly'
+    )
+    search_fields = [
+        'job_id',
+        'accession',
+        'secondary_accession',
+        'run__accession',
+        'sample__accession',
+        'study__accession',
+        'assembly__accession',
+        'instrument_platform',
+        'instrument_model'
+    ]
+    list_filter = ['status', 'pipeline']
+    list_display = [
+        'job_id',
+        'accession',
+        'secondary_accession',
+        'run',
+        'sample',
+        'study',
+        'assembly'
+    ]
+
+
+@admin.register(emg_models.StudyErrorType)
+class StudyErrorTypeAdmin(admin.ModelAdmin):
+    readonly_fields = [
+        'error_id',
+        'error_type',
+        'description'
+    ]
+
+
+@admin.register(emg_models.BlacklistedStudy)
+class BlacklistedStudyAdmin(admin.ModelAdmin):
+    readonly_fields = (
+        'ext_study_id',
+        'error_type',
+        'analyzer',
+        'pipeline_id',
+        'date_blacklisted',
+        'comments'
+    )
+    list_filter = ['pipeline_id', ]
+    list_display = [
+        'ext_study_id',
+        'error_type',
+        'analyzer',
+        'date_blacklisted'
+    ]
+
+
+@admin.register(emg_models.VariableNames)
+class VariableNamesAdmin(admin.ModelAdmin):
+    readonly_fields = [
+        'id',
+        'var_name'
+    ]
+    search_fields = [
+        'var_name',
+        'alias',
+        'definition',
+        'authority',
+        'comments',
+    ]
+    list_filter = (
+        'authority',
+        'required_for_mimarks_complianc',
+        'required_for_mims_compliance'
+    )
+    list_display = (
+        'var_name',
+        'alias',
+        'authority'
+    )
+
+
+@admin.register(emg_models.SampleAnn)
+class SampleAnnAdmin(admin.ModelAdmin):
+    readonly_fields = [
+        'id',
+        'sample',
+    ]
+    search_fields = [
+        'sample'
+    ]
+    list_display = (
+        'sample',
+        'units',
+        'var'
     )
