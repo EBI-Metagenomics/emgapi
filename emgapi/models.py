@@ -1058,6 +1058,7 @@ class Assembly(models.Model):
             ('assembly_id', 'accession'),
             ('accession', 'wgs_accession', 'legacy_accession')
         )
+        verbose_name_plural = 'assemblies'
 
     def __str__(self):
         return self.accession
@@ -1249,6 +1250,8 @@ class BlacklistedStudy(models.Model):
     class Meta:
         managed = False
         db_table = 'BLACKLISTED_STUDY'
+        verbose_name_plural = 'blacklisted study'
+        verbose_name_plural = 'blacklisted studies'
 
     def __str__(self):
         return self.ext_study_id
@@ -1285,6 +1288,7 @@ class VariableNames(models.Model):
     class Meta:
         db_table = 'VARIABLE_NAMES'
         unique_together = (('var_id', 'var_name'), ('var_id', 'var_name'),)
+        verbose_name = 'variable name'                
 
     def __str__(self):
         return self.var_name
@@ -1334,6 +1338,7 @@ class AnalysisMetadataVariableNames(models.Model):
     class Meta:
         db_table = 'SUMMARY_VARIABLE_NAMES'
         unique_together = (('var_name', 'description'),)
+        verbose_name = 'analysis meta variable name'
 
     def __str__(self):
         return self.var_name
@@ -1368,6 +1373,7 @@ class CogCat(models.Model):
 
     class Meta:
         db_table = 'COG'
+        verbose_name_plural = 'COG categories'
 
 
 class AntiSmashGC(models.Model):
@@ -1376,6 +1382,7 @@ class AntiSmashGC(models.Model):
 
     class Meta:
         db_table = 'ANTISMASH_GENECLUSTER'
+        verbose_name_plural = 'antiSMASH clusters'
 
 
 class GeographicLocation(models.Model):
@@ -1392,6 +1399,9 @@ class GenomeSet(models.Model):
 
     class Meta:
         db_table = 'GENOME_SET'
+
+    def __str__(self):
+        return self.name
 
 
 class Genome(models.Model):
@@ -1528,6 +1538,9 @@ class Release(models.Model):
     class Meta:
         db_table = 'RELEASE'
 
+    def __str__(self):
+        return self.version
+
 
 class ReleaseGenomes(models.Model):
 
@@ -1615,7 +1628,7 @@ class GenomeAntiSmashGCCounts(models.Model):
 
 
 class GenomeDownloadManager(models.Manager):
-    
+
     def get_queryset(self):
         return BaseQuerySet(self.model, using=self._db) \
             .select_related(

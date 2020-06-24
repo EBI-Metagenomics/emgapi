@@ -168,10 +168,15 @@ try:
 except KeyError:
     DEBUG = False
 
+# Admin panel
+try:
+    ADMIN = EMG_CONF['emg']['admin']
+except KeyError:
+    ADMIN = False
+
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -193,6 +198,16 @@ INSTALLED_APPS = [
     'emgena',
     'emgapianns',
 ]
+
+if ADMIN:
+    # django admin panel
+    INSTALLED_APPS.insert(2, 'django.contrib.admin')
+    INSTALLED_APPS.insert(2, 'grappelli')
+    INSTALLED_APPS.insert(2, 'grappelli.dashboard')
+
+    GRAPPELLI_ADMIN_TITLE = 'MGnify admin'
+
+    GRAPPELLI_INDEX_DASHBOARD = 'emgcli.dashboard.MgnifyDashboard'
 
 if DEBUG:
     INSTALLED_APPS.extend([

@@ -11,6 +11,14 @@ from django import forms
 from . import models as emg_models
 
 
+# utilities
+class NoRemoveMixin:
+    """Disable delete permissions
+    """
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
 class AccessionSearch:
     prefix = ''
     filter_property = None
@@ -35,7 +43,7 @@ class Biome(admin.ModelAdmin):
 
 
 @admin.register(emg_models.Study)
-class Study(admin.ModelAdmin):
+class Study(admin.ModelAdmin, NoRemoveMixin):
     ordering = ['-last_update']
     search_fields = [
         'study_id',
@@ -96,8 +104,7 @@ class SuperStudyAdmin(admin.ModelAdmin):
 
 
 @admin.register(emg_models.Sample)
-class SampleAdmin(admin.ModelAdmin):
-
+class SampleAdmin(admin.ModelAdmin, NoRemoveMixin):
     readonly_fields = (
         'sample_id',
         'accession',
@@ -113,14 +120,17 @@ class SampleAdmin(admin.ModelAdmin):
         'species',
         'biome__biome_name'
     ]
-    list_filter = ('is_public', )
-    list_display = (
+    change_list_template = "admin/change_list_filter_sidebar.html"
+    list_filter = [
+        'is_public',
+    ]
+    list_display = [
         'accession',
         'primary_accession',
         'sample_name',
         'sample_desc',
         'is_public',
-    )
+    ]
 
     def get_search_results(self, request, queryset, search_term):
         """For searches that start with MGYS will only search on samples
@@ -134,16 +144,16 @@ class SampleAdmin(admin.ModelAdmin):
 
 @admin.register(emg_models.Run)
 class RunAdmin(admin.ModelAdmin, AccessionSearch):
-
-    ordering = ['-run_id']
-
-    readonly_fields = (
+    ordering = [
+        '-run_id'
+    ]
+    readonly_fields = [
         'run_id',
         'accession',
         'secondary_accession',
         'sample',
         'study',
-    )
+    ]
     search_fields = [
         'run_id',
         'secondary_accession',
@@ -151,15 +161,17 @@ class RunAdmin(admin.ModelAdmin, AccessionSearch):
         'instrument_platform',
         'instrument_model'
     ]
-    list_filter = ('status', )
-    list_display = (
+    list_filter = [
+        'status_id',
+    ]
+    list_display = [
         'run_id',
         'accession',
         'secondary_accession',
         'sample',
         'study',
-        'status'
-    )
+        'status_id'
+    ]
 
     filter_property = 'study'
     prefix = 'MGYS'
@@ -167,7 +179,12 @@ class RunAdmin(admin.ModelAdmin, AccessionSearch):
 
 @admin.register(emg_models.Publication)
 class PublicationAdmin(admin.ModelAdmin):
-    ordering = ['-published_year']
+    ordering = [
+        '-published_year'
+    ]
+    readonly_fields = [
+        'pub_id'
+    ]
     search_fields = [
         'pub_title',
         'authors',
@@ -176,7 +193,6 @@ class PublicationAdmin(admin.ModelAdmin):
         'pub_type',
     ]
     list_display = [
-        'pub_id',
         'pub_title',
         'pub_url',
         'pub_type',
@@ -192,7 +208,7 @@ class AssemblySampleInline(admin.TabularInline):
 
 
 @admin.register(emg_models.Assembly)
-class AssemblyAdmin(admin.ModelAdmin, AccessionSearch):
+class AssemblyAdmin(admin.ModelAdmin):
     readonly_fields = [
         'assembly_id',
         'accession'
@@ -215,20 +231,18 @@ class AssemblyAdmin(admin.ModelAdmin, AccessionSearch):
 
 
 @admin.register(emg_models.AnalysisJob)
-class AnalysisJobAdmin(admin.ModelAdmin):
+class AnalysisJobAdmin(admin.ModelAdmin, AccessionSearch, NoRemoveMixin):
     ordering = ['-submit_time']
-    readonly_fields = (
+    readonly_fields = [
         'job_id',
-        'accession',
         'secondary_accession',
         'run',
         'sample',
         'study',
-        'assembly'
-    )
+        'assembly',
+    ]
     search_fields = [
         'job_id',
-        'accession',
         'secondary_accession',
         'run__accession',
         'sample__accession',
@@ -237,16 +251,23 @@ class AnalysisJobAdmin(admin.ModelAdmin):
         'instrument_platform',
         'instrument_model'
     ]
-    list_filter = ['status', 'pipeline']
+    change_list_template = 'admin/filter_listing.html'
+    list_filter = [
+        'analysis_status',
+        'pipeline__release_version',
+    ]
     list_display = [
         'job_id',
-        'accession',
         'secondary_accession',
+        'experiment_type',
+        'analysis_status',
         'run',
         'sample',
         'study',
         'assembly'
     ]
+    prefix = 'MGYA'
+    filter_property = 'job_id'
 
 
 @admin.register(emg_models.StudyErrorType)
@@ -262,13 +283,11 @@ class StudyErrorTypeAdmin(admin.ModelAdmin):
 class BlacklistedStudyAdmin(admin.ModelAdmin):
     readonly_fields = (
         'ext_study_id',
-        'error_type',
-        'analyzer',
-        'pipeline_id',
-        'date_blacklisted',
-        'comments'
     )
-    list_filter = ['pipeline_id', ]
+    change_list_template = "admin/change_list_filter_sidebar.html"
+    list_filter = [
+        'pipeline_id',
+    ]
     list_display = [
         'ext_study_id',
         'error_type',
@@ -280,8 +299,7 @@ class BlacklistedStudyAdmin(admin.ModelAdmin):
 @admin.register(emg_models.VariableNames)
 class VariableNamesAdmin(admin.ModelAdmin):
     readonly_fields = [
-        'id',
-        'var_name'
+        'var_id',
     ]
     search_fields = [
         'var_name',
@@ -290,16 +308,17 @@ class VariableNamesAdmin(admin.ModelAdmin):
         'authority',
         'comments',
     ]
-    list_filter = (
+    change_list_template = "admin/change_list_filter_sidebar.html"
+    list_filter = [
         'authority',
         'required_for_mimarks_complianc',
         'required_for_mims_compliance'
-    )
-    list_display = (
+    ]
+    list_display = [
         'var_name',
         'alias',
         'authority'
-    )
+    ]
 
 
 @admin.register(emg_models.SampleAnn)
@@ -316,3 +335,291 @@ class SampleAnnAdmin(admin.ModelAdmin):
         'units',
         'var'
     )
+
+
+@admin.register(emg_models.AnalysisMetadataVariableNames)
+class AnalysisMetadataVariableNamesAdmin(admin.ModelAdmin):
+    list_display = [
+        'var_name',
+        'description'
+    ]
+    search_fields = [
+        'var_name',
+        'description'
+    ]
+
+
+@admin.register(emg_models.AnalysisJobAnn)
+class AnalysisJobAnnAdmin(admin.ModelAdmin):
+    readonly_fields = [
+        'job',
+        'var',
+    ]
+    list_display = [
+        'job',
+        'var'
+    ]
+    search_fields = [
+        'job__accession',
+        'var'
+    ]
+
+
+@admin.register(emg_models.CogCat)
+class CogCategoryAdmin(admin.ModelAdmin):
+    list_display = [
+        'name',
+        'description'
+    ]
+    search_fields = [
+        'name',
+        'description'
+    ]
+
+
+@admin.register(emg_models.AntiSmashGC)
+class AntiSmashGCAdmin(admin.ModelAdmin):
+    list_display = [
+        'name',
+        'description'
+    ]
+    search_fields = [
+        'name',
+        'description'
+    ]
+
+
+@admin.register(emg_models.GeographicLocation)
+class GeographicLocationAdmin(admin.ModelAdmin):
+    list_display = [
+        'name',
+    ]
+    search_fields = [
+        'name'
+    ]
+
+
+@admin.register(emg_models.GenomeSet)
+class GenomeSetAdmin(admin.ModelAdmin):
+    list_display = [
+        'name'
+    ]
+    search_fields = [
+        'name',
+    ]
+
+
+class GenomeReleasesInline(admin.TabularInline):
+    model = emg_models.Genome.releases.through
+
+
+@admin.register(emg_models.Genome)
+class GenomeAdmin(admin.ModelAdmin):
+    readonly_fields = [
+        'genome_id',
+        'accession',
+    ]
+    list_display = [
+        'accession',
+        'type',
+        'ena_genome_accession',
+        'ncbi_genome_accession',
+        'img_genome_accession',
+        'patric_genome_accession',
+        'genome_set'
+    ]
+    search_fields = [
+        'accession',
+        'type',
+        'ena_genome_accession',
+        'ena_sample_accession',
+        'ena_study_accession',
+        'ncbi_genome_accession',
+        'ncbi_sample_accession',
+        'ncbi_study_accession',
+        'img_genome_accession',
+        'patric_genome_accession',
+        'biome'
+    ]
+    change_list_template = "admin/change_list_filter_sidebar.html"
+    list_filter = [
+        'genome_set',
+        'releases',
+        'completeness',
+        'contamination',
+        'num_contigs',
+        'n_50'
+    ]
+    # TODO: find a pagination inline tool or write one
+    exclude = [
+        'cog_matches',
+        'kegg_classes',
+        'kegg_modules',
+        'antismash_geneclusters'
+    ]
+    inlines = [
+        GenomeReleasesInline
+    ]
+
+
+@admin.register(emg_models.Release)
+class GenomeReleaseAdmin(admin.ModelAdmin):
+    readonly_fields = [
+        'id'
+    ]
+    list_display = [
+        'version',
+        'first_created',
+        'last_update'
+    ]
+    exclude = [
+        'genomes'
+    ]
+
+
+@admin.register(emg_models.KeggClass)
+class KeggClassAdmin(admin.ModelAdmin):
+    list_display = [
+        'class_id',
+        'name',
+        'parent'
+    ]
+    search_fields = [
+        'class_id',
+        'name',
+        'parent__class_id',
+        'parent__name'
+    ]
+
+
+@admin.register(emg_models.KeggModule)
+class KeggModuleAdmin(admin.ModelAdmin):
+    list_display = [
+        'name',
+        'description'
+    ]
+    search_fields = [
+        'name',
+        'description'
+    ]
+
+
+class PipelineToolInlineAdmin(admin.TabularInline):
+    model = emg_models.Pipeline.tools.through
+
+
+@admin.register(emg_models.Pipeline)
+class PipelineAdmin(admin.ModelAdmin, NoRemoveMixin):
+    readonly_fields = [
+        'pipeline_id'
+    ]
+    list_display = [
+        'release_version',
+        'release_date'
+    ]
+    search_fields = [
+        'pipeline_id',
+        'release_version',
+        'release_date',
+    ]
+    inlines = [
+        PipelineToolInlineAdmin
+    ]
+
+
+@admin.register(emg_models.PipelineTool)
+class PipelineTool(admin.ModelAdmin):
+    readonly_fields = [
+        'tool_id'
+    ]
+    list_display = [
+        'tool_name',
+        'version'
+    ]
+    search_fields = [
+        'tool_name',
+        'description',
+        'web_link',
+        'version',
+        'exe_command',
+        'installation_dir',
+        'configuration_file',
+        'notes'
+    ]
+
+
+@admin.register(emg_models.FileFormat)
+class FileFormatAdmin(admin.ModelAdmin):
+    readonly_fields = [
+        'format_id'
+    ]
+    list_filter = [
+        'compression'
+    ]
+    search_fields = [
+        'format_name',
+        'format_extension',
+    ]
+    list_display = [
+        'format_name',
+        'format_extension',
+        'compression'
+    ]
+
+
+class BaseDownloadAdmin:
+    readonly_fields = [
+        'id'
+    ]
+    list_display = [
+        'realname',
+        'parent_id',
+        'alias',
+        'group_type',
+        'subdir',
+        'file_format'
+    ]
+    list_filter = [
+        'file_format__format_name',
+        'file_format__compression',
+        'group_type'
+    ]
+    search_fields = [
+        'realname',
+        'alias',
+        'group_type',
+        'subdir',
+        'file_format__format_name'
+    ]
+
+
+@admin.register(emg_models.AnalysisJobDownload)
+class AnalysisJobDownloadAdmin(admin.ModelAdmin,
+                               BaseDownloadAdmin):
+    list_display = BaseDownloadAdmin.list_display + [
+        'job'
+    ]
+    search_fields = BaseDownloadAdmin.search_fields + [
+        'job__accession'
+    ]
+
+
+@admin.register(emg_models.GenomeDownload)
+class GenomeDownloadAdmin(admin.ModelAdmin, BaseDownloadAdmin):
+    list_display = BaseDownloadAdmin.list_display + [
+        'genome'
+    ]
+    search_fields = BaseDownloadAdmin.search_fields + [
+        'genome__accession',
+        'genome__ena_genome_accession',
+        'genome__ncbi_genome_accession',
+        'genome__img_genome_accession',
+        'genome__patric_genome_accession',
+    ]
+
+
+@admin.register(emg_models.ReleaseDownload)
+class ReleaseDownloadAdmin(admin.ModelAdmin, BaseDownloadAdmin):
+    list_display = BaseDownloadAdmin.list_display + [
+        'release'
+    ]
