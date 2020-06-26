@@ -438,6 +438,13 @@ class BaseDownload(models.Model):
     file_format = models.ForeignKey(
         'FileFormat', db_column='FORMAT_ID',
         on_delete=models.CASCADE, blank=True, null=True)
+    file_checksum = models.CharField(
+        db_column='CHECKSUM', max_length=255,
+        null=False, blank=True)
+    checksum_algorithm = models.ForeignKey(
+        'ChecksumAlgorithm', db_column='CHECKSUM_ALGORITHM',
+        blank=True, null=True
+    )
 
     class Meta:
         abstract = True
@@ -456,6 +463,43 @@ class BaseAnnotationPipelineDownload(BaseDownload):
         abstract = True
 
 
+class ChecksumAlgorithm(models.Model):
+    """Checksum for download files
+    """
+    name = models.CharField(
+        db_column='NAME',
+        max_length=255)
+
+    class Meta:
+        db_table = 'CHECKSUM_ALGORITHM'
+
+    def __str__(self):
+        return self.name
+
+
+class BaseDownloadManager(models.Manager):
+
+    select_related = []
+    default_select_related = [
+        'group_type',
+        'subdir',
+        'file_format',
+        'description',
+        'checksum_algorithm',
+    ]
+
+    def __init__(self, select_related, *args, **kwargs):
+        self.select_related = self.default_select_related + select_related or []
+        super(BaseDownloadManager, self).__init__(*args, **kwargs)
+
+    def get_queryset(self):
+        return BaseQuerySet(self.model, using=self._db) \
+            .select_related(*self.select_related)
+
+    def available(self, request):
+        return self.get_queryset().available(request)
+
+
 class AnalysisJobDownloadQuerySet(BaseQuerySet):
     pass
 
@@ -465,7 +509,15 @@ class AnalysisJobDownloadManager(models.Manager):
         return AnalysisJobDownloadQuerySet(self.model, using=self._db)
 
     def available(self, request):
-        return self.get_queryset().available(request)
+        return self.get_queryset()\
+            .select_related(
+                'group_type',
+                'subdir',
+                'file_format',
+                'description',
+                'checksum_algorithm',
+                'job') \
+            .available(request)
 
 
 class AnalysisJobDownload(BaseAnnotationPipelineDownload):
@@ -499,6 +551,7 @@ class StudyDownloadManager(models.Manager):
             'description',
             'pipeline',
             'study',
+            'checksum_algorithm'
         )
 
     def available(self, request):
@@ -1614,20 +1667,6 @@ class GenomeAntiSmashGCCounts(models.Model):
         unique_together = ('genome', 'antismash_genecluster')
 
 
-class GenomeDownloadManager(models.Manager):
-    
-    def get_queryset(self):
-        return BaseQuerySet(self.model, using=self._db) \
-            .select_related(
-                'group_type',
-                'subdir',
-                'file_format',
-                'description')
-
-    def available(self, request):
-        return self.get_queryset().available(request)
-
-
 class GenomeDownload(BaseDownload):
     genome = models.ForeignKey(
         'Genome', db_column='GENOME_ID',
@@ -1637,26 +1676,12 @@ class GenomeDownload(BaseDownload):
     def accession(self):
         return self.genome.accession
 
-    objects = GenomeDownloadManager()
+    objects = BaseDownloadManager(['genome'])
 
     class Meta:
         db_table = 'GENOME_DOWNLOAD'
         unique_together = (('realname', 'alias', 'genome'),)
         ordering = ('group_type', 'alias')
-
-
-class ReleaseDownloadManager(models.Manager):
-
-    def get_queryset(self):
-        return BaseQuerySet(self.model, using=self._db) \
-            .select_related(
-                'group_type',
-                'subdir',
-                'file_format',
-                'description')
-
-    def available(self, request):
-        return self.get_queryset().available(request)
 
 
 class ReleaseDownload(BaseDownload):
@@ -1668,7 +1693,7 @@ class ReleaseDownload(BaseDownload):
     def accession(self):
         return self.release.version
 
-    objects = ReleaseDownloadManager()
+    objects = BaseDownloadManager(['release'])
 
     class Meta:
         db_table = 'RELEASE_DOWNLOAD'

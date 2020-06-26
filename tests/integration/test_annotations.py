@@ -41,7 +41,7 @@ class TestAnnotations:
             ['emgapi_v1:analysis-kegg-modules-list', 'kegg-module'],
             ['emgapi_v1:analysis-antismash-gene-clusters-list', 'antismash']
         ]
-    
+
     @property
     def _import_suffixes(self): 
         return ['.ipr', '.go', '.go_slim',

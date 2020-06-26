@@ -634,6 +634,14 @@ class BaseDownloadSerializer(ExplicitFieldsModelSerializer,
             }
         return None
 
+    file_checksum = serializers.SerializerMethodField()
+
+    def get_file_checksum(self, obj):
+        return {
+            'checksum': obj.file_checksum,
+            'checksum_algorithm': obj.checksum_algorithm.name if obj.checksum_algorithm else ''
+        }
+
 
 class BasePipelineDownloadSerializer(BaseDownloadSerializer):
     pipeline = serializers.HyperlinkedRelatedField(
@@ -650,12 +658,6 @@ class StudyDownloadSerializer(BasePipelineDownloadSerializer):
         lookup_field='alias',
     )
 
-    # study = serializers.HyperlinkedRelatedField(
-    #     read_only=True,
-    #     view_name='emgapi_v1:studies-detail',
-    #     lookup_field='accession'
-    # )
-
     class Meta:
         model = emg_models.StudyDownload
         fields = (
@@ -666,7 +668,7 @@ class StudyDownloadSerializer(BasePipelineDownloadSerializer):
             'description',
             'group_type',
             'pipeline',
-            # 'study',
+            'file_checksum'
         )
 
 
@@ -676,13 +678,6 @@ class AnalysisJobDownloadSerializer(BasePipelineDownloadSerializer):
         view_name='emgapi_v1:analysisdownload-detail',
         lookup_field='alias',
     )
-
-    # analyses = emg_fields.AnalysisJobHyperlinkedRelatedField(
-    #     source='job',
-    #     read_only=True,
-    #     view_name='emgapi_v1:analyses-detail',
-    #     lookup_field='accession'
-    # )
 
     class Meta:
         model = emg_models.AnalysisJobDownload
@@ -694,7 +689,7 @@ class AnalysisJobDownloadSerializer(BasePipelineDownloadSerializer):
             'description',
             'group_type',
             'pipeline',
-            # 'analyses',
+            'file_checksum'
         )
 
 
@@ -1619,6 +1614,7 @@ class GenomeDownloadSerializer(BaseDownloadSerializer):
             'file_format',
             'description',
             'group_type',
+            'file_checksum'
         )
 
 
@@ -1636,7 +1632,8 @@ class ReleaseDownloadSerializer(BaseDownloadSerializer):
             'alias',
             'file_format',
             'description',
-            'group_type'
+            'group_type',
+            'file_checksum'
         )
 
 
