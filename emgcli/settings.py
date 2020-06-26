@@ -210,7 +210,7 @@ if ADMIN:
     GRAPPELLI_INDEX_DASHBOARD = 'emgcli.dashboard.MgnifyDashboard'
 
     try:
-        BIOME_PREDICTION_URL = EMG_CONF['emg']['caches']
+        BIOME_PREDICTION_URL = EMG_CONF['emg']['biome_prediction_url']
     except KeyError:
         BIOME_PREDICTION_URL = ''
 
