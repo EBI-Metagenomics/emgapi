@@ -217,15 +217,21 @@ class Command(BaseCommand):
                                                'analysis_alias,analysis_accession')
             if 'sample_accession' in assembly:
                 del assembly['sample_accession']
+            # Try to parse out the run accession from the analysis alias
+            # This generally works for most MGnify produced assemblies
+            # Please note: external assemblies might not have this!
             if 'analysis_alias' in assembly:
                 pattern = re.compile(r'([EDS]RR\d{6,})')
                 search_string = assembly['analysis_alias']
                 match = re.search(pattern, search_string)
-                if len(match.groups())>0:
-                    run_accession = match.group(1)
+                if match:
+                    if len(match.groups()) > 0:
+                        run_accession = match.group(1)
+                    else:
+                        run_accession = assembly['analysis_alias']
+                    assembly['run_accession'] = run_accession
                 else:
-                    run_accession = assembly['analysis_alias']
-                assembly['run_accession'] = run_accession
+                    assembly['run_accession'] = None
                 del assembly['analysis_alias']
             analysis = Assembly(**assembly)
         else:  # Run accession detected
@@ -295,16 +301,19 @@ class Command(BaseCommand):
             defaults['experiment_type'] = run.experiment_type
             defaults['run_status_id'] = run.status_id.pk
         else:
-            run = self.get_emg_run(metadata.run_accession)
             assembly = self.get_emg_assembly(metadata.analysis_accession)
             comp_key.update({
                 'external_run_ids': assembly.accession,
                 'assembly': assembly,
             })
             defaults['experiment_type'] = self.get_experiment_type('assembly')
-            defaults['instrument_model'] = run.instrument_model
-            defaults['instrument_platform'] = run.instrument_platform
-            defaults['run_status_id'] = run.status_id.pk
+            # TODO: run_status_id should be renamed to status_id
+            defaults['run_status_id'] = assembly.status_id.pk
+            if metadata.run_accession:
+                run = self.get_emg_run(metadata.run_accession)
+                defaults['instrument_model'] = run.instrument_model
+                defaults['instrument_platform'] = run.instrument_platform
+
         analysis, _ = emg_models.AnalysisJob.objects.using(self.emg_db) \
             .update_or_create(**comp_key, defaults=defaults)
         logging.info("Analysis job successfully created.")

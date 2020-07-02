@@ -137,7 +137,7 @@ class Command(BaseCommand):
     def tag_optional_run(self, assembly, name):
         logging.info("Retrieving run accession from assembly name {}".format(name))
         run_accession = utils.get_run_accession(name)
-        if is_run_accession(run_accession):
+        if run_accession and is_run_accession(run_accession):
             self.tag_run(assembly, run_accession)
         else:
             logging.warning("Could not retrieve run accession from assembly name!")

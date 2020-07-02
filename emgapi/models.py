@@ -1171,7 +1171,7 @@ class AnalysisJob(models.Model):
         related_name='analyses',
         on_delete=models.CASCADE)
     run_status_id = models.IntegerField(
-        db_column='RUN_STATUS_ID', blank=True, null=True)
+        db_column='RUN_STATUS_ID', blank=True, null=True)  # TODO: Should be renamed to status_id
     instrument_platform = models.CharField(
         db_column='INSTRUMENT_PLATFORM', max_length=50,
         blank=True, null=True)
