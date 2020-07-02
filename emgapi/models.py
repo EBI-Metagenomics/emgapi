@@ -57,9 +57,6 @@ class BaseQuerySet(models.QuerySet):
 
     def available(self, request=None):
 
-        if request and request.user.is_staff:
-            return self
-
         _query_filters = {
             'StudyQuerySet': {
                 'all': [Q(is_public=1), ],
