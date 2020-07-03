@@ -38,7 +38,7 @@ class AccessionSearch:
     filter_property = None
 
     def get_search_results(self, request, queryset, search_term):
-        """Allow users to search using Mgnify accession prefix (i.e. MGSYS)
+        """Allow users to search using Mgnify accession prefix (i.e. MGYS)
         """
         if search_term and search_term.startswith(self.prefix):
             clean_id = int(search_term.lstrip(self.prefix) or 0)
