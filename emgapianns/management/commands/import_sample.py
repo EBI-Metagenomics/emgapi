@@ -172,7 +172,10 @@ class Command(BaseCommand):
 
     @staticmethod
     def get_sample_studies(sample):
-        return ena.get_sample_studies(sample.primary_accession)
+        try:
+            return ena.get_sample_studies(sample.primary_accession)
+        except ValueError:
+            return ena.get_sample_studies(primary_sample_accession=sample.primary_accession, result="analysis")
 
     def tag_study(self, sample):
         study_accessions = self.get_sample_studies(sample)

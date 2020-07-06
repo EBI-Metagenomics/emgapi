@@ -62,6 +62,15 @@ class Command(EMGBaseCommand):
         for row in reader:
             var = None
             try:
+                # The following if else case are a fix for older v4.1 uploads after we changed the labels
+                # Could be removed when no more v4.1 results for uploading available
+                if row[0] == "Nucleotide sequences with InterProScan match":
+                    row[0] = "Reads with InterProScan match"
+                elif row[0] == "Nucleotide sequences with predicted CDS":
+                    row[0] = "Reads with predicted CDS"
+                elif row[0] in ["Nucleotide sequences with predicted rRNA", "Nucleotide sequences with predicted RNA"]:
+                    row[0] = "Reads with predicted rRNA"
+                #     End v4.1 fix
                 var = emg_models.AnalysisMetadataVariableNames.objects.using(emg_db) \
                     .get(var_name=row[0])
             except emg_models.AnalysisMetadataVariableNames.DoesNotExist:
@@ -70,11 +79,13 @@ class Command(EMGBaseCommand):
                 # because PK is not AutoField
                 var = emg_models.AnalysisMetadataVariableNames.objects.using(emg_db) \
                     .get(var_name=row[0])
-            job_ann, created = emg_models.AnalysisJobAnn.objects.using(emg_db).update_or_create(
-                job=job, var=var,
-                defaults={'var_val_ucv': row[1]}
-            )
-            anns.append(job_ann)
+            if var is not None:
+                job_ann, created = emg_models.AnalysisJobAnn.objects.using(emg_db).update_or_create(
+                    job=job, var=var,
+                    defaults={'var_val_ucv': row[1]}
+                )
+
+                anns.append(job_ann)
         logger.info("Total %d Annotations for Run: %s" % (len(anns), job))
 
     @staticmethod
@@ -85,7 +96,7 @@ class Command(EMGBaseCommand):
             with open(res) as tsvfile:
                 reader = csv.reader(tsvfile, delimiter='\t')
                 for row in reader:
-                    if not row:  # skip empty lines at the end of the file
+                    if not row: # skip empty lines at the end of the file
                         continue
                     try:
                         if row[0] == 'SSU count':
@@ -93,7 +104,7 @@ class Command(EMGBaseCommand):
                         elif row[0] == 'LSU count':
                             var_name = 'Predicted LSU sequences'
                         elif not row[0]:
-                            continue  # Skip empty value rows
+                            continue # Skip empty value rows
                         else:
                             logging.error("Unsupported variable name {}".format(row[0]))
                             raise UnexpectedVariableName
@@ -109,7 +120,7 @@ class Command(EMGBaseCommand):
 
                     except emg_models.AnalysisMetadataVariableNames.DoesNotExist:
                         logging.error("Could not find variable name {} in the database even "
-                                      "though it should be supported!".format(row[0]))
+                                        "though it should be supported!".format(row[0]))
                         raise UnexpectedVariableName
         else:
             logging.warning("RNA counts file does not exist: {}".format(res))
@@ -127,12 +138,12 @@ class Command(EMGBaseCommand):
                             var_name = "Predicted CDS"
                         elif row[0] == "Contigs with predicted CDS":
                             var_name = "Contigs with predicted CDS"
-                        elif row[0] == "Nucleotide sequences with predicted CDS":
-                            var_name = "Nucleotide sequences with predicted CDS"
                         elif row[0] in ["Contigs with predicted rRNA", "Contigs with predicted with rRNA"]:
                             var_name = "Contigs with predicted rRNA"
-                        elif row[0] == "Nucleotide sequences with predicted rRNA":
-                            var_name = "Nucleotide sequences with predicted rRNA"
+                        elif row[0] in ["Reads with predicted CDS", "Nucleotide sequences with predicted CDS"]:
+                            var_name = "Reads with predicted CDS"
+                        elif row[0] in ["Reads with predicted rRNA", "Nucleotide sequences with predicted rRNA"]:
+                            var_name = "Reads with predicted rRNA"
                         else:
                             logging.error("Unsupported variable name {}".format(row[0]))
                             raise UnexpectedVariableName

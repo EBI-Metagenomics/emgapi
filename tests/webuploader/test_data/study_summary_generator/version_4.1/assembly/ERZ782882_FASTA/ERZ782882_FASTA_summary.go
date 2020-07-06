@@ -1,0 +1,5 @@
+"GO:0055114","oxidation-reduction process","biological_process","903"
+"GO:0008152","metabolic process","biological_process","522"
+"GO:0055085","transmembrane transport","biological_process","410"
+"GO:0006810","transport","biological_process","377"
+"GO:0006355","regulation of transcription, DNA-templated","biological_process","374"

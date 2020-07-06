@@ -39,11 +39,15 @@ def is_study_accession(accession):
 def get_run_accession(path):
     pattern = re.compile(run_accession_re)
     match = re.search(pattern, path)
-    if len(match.groups()) > 0:
-        end_pos = match.end()
-        return path[0:end_pos]
+    if match:
+        if len(match.groups()) > 0:
+            end_pos = match.end()
+            return path[0:end_pos]
+        else:
+            raise Exception("Could not identify run accession from {}".format(path))
     else:
-        raise Exception("Could not identify run accession from {}".format(path))
+        logging.warning("Could not find any run accession in assembly name {}".format(path))
+        return None
 
 
 def is_run_accession(accession):
