@@ -964,7 +964,7 @@ class PipelineViewSet(mixins.RetrieveModelMixin,
                       emg_mixins.ListModelMixin,
                       viewsets.GenericViewSet):
     serializer_class = emg_serializers.PipelineSerializer
-    queryset = emg_models.Pipeline.objects.all()
+    queryset = emg_models.Pipeline.objects_annotated.all()
 
     filter_backends = (
         filters.OrderingFilter,
@@ -1514,3 +1514,27 @@ class EBISearchCSVDownload(APIView):
                                            content_type="text/csv")
         stream_res["Content-Disposition"] = "attachment; filename=search_download.csv"
         return stream_res
+
+
+class BiomePrediction(APIView):
+
+    def get(self, request):
+        url = settings.BIOME_PREDICTION_URL
+        response = requests.get(url, params={"text":  request.GET.get("text", "")})
+        if not response.ok:
+            raise Exception("Error with the biome prediction API." +
+                            "Status Code: " + str(response.status_code))
+        predicted_biomes = response.json()
+        biomes_results = []
+        for hit in predicted_biomes:
+            try:
+                biome = emg_models.Biome.objects.get(lineage=hit.get("biome"))
+                biomes_results.append({
+                    "biome_id": biome.pk,
+                    "lineage": biome.lineage,
+                    "score": hit.get("score")
+                })
+            except emg_models.Biome.DoesNotExist:
+                logger.error("Biome prediction match is not a valid: " + str(hit))
+                pass
+        return Response(biomes_results)
