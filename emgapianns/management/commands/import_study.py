@@ -72,6 +72,6 @@ class Command(BaseCommand):
             result_dir = utils.retrieve_existing_result_dir(rootpath, ['2*', '*', secondary_study_accession])
 
         if not result_dir:
-            raise ValueError("Could not find any result directory for this study. Program will exit now!")
+            logging.warning("Could not find any result directory for this study. Study has not been analysed yet!")
 
         return result_dir

@@ -30,7 +30,6 @@ from __future__ import unicode_literals
 import os
 
 from django.conf import settings
-from enum import Enum
 
 from django.db import models
 from django.db.models import Count
@@ -57,6 +56,7 @@ class BaseQuerySet(models.QuerySet):
     """
 
     def available(self, request=None):
+
         _query_filters = {
             'StudyQuerySet': {
                 'all': [Q(is_public=1), ],
@@ -172,13 +172,14 @@ class PipelineTool(models.Model):
         return "%s/%s" % (self.tool_name, self.version)
 
 
-class PipelineQuerySet(BaseQuerySet):
-    pass
-
-
 class PipelineManager(models.Manager):
     def get_queryset(self):
-        return PipelineQuerySet(self.model, using=self._db) \
+        return BaseQuerySet(self.model, using=self._db)
+
+
+class PipelineAnnotatedManager(models.Manager):
+    def get_queryset(self):
+        return BaseQuerySet(self.model, using=self._db) \
             .annotate(
             analyses_count=Count(
                 'analyses', filter=(
@@ -211,6 +212,7 @@ class Pipeline(models.Model):
         PipelineTool, through='PipelineReleaseTool', related_name='pipelines')
 
     objects = PipelineManager()
+    objects_annotated = PipelineAnnotatedManager()
 
     class Meta:
         db_table = 'PIPELINE_RELEASE'
@@ -357,7 +359,7 @@ class Publication(models.Model):
         ordering = ('pubmed_id',)
 
     def __str__(self):
-        return self.pubmed_id
+        return str(self.pubmed_id)
 
 
 class DownloadGroupType(models.Model):
@@ -438,6 +440,13 @@ class BaseDownload(models.Model):
     file_format = models.ForeignKey(
         'FileFormat', db_column='FORMAT_ID',
         on_delete=models.CASCADE, blank=True, null=True)
+    file_checksum = models.CharField(
+        db_column='CHECKSUM', max_length=255,
+        null=False, blank=True)
+    checksum_algorithm = models.ForeignKey(
+        'ChecksumAlgorithm', db_column='CHECKSUM_ALGORITHM',
+        blank=True, null=True
+    )
 
     class Meta:
         abstract = True
@@ -456,16 +465,69 @@ class BaseAnnotationPipelineDownload(BaseDownload):
         abstract = True
 
 
+class ChecksumAlgorithm(models.Model):
+    """Checksum for download files
+    """
+    name = models.CharField(
+        db_column='NAME',
+        max_length=255,
+        unique=True)
+
+    class Meta:
+        db_table = 'CHECKSUM_ALGORITHM'
+
+    def __str__(self):
+        return self.name
+
+
+class BaseDownloadManager(models.Manager):
+
+    select_related = []
+    default_select_related = [
+        'group_type',
+        'subdir',
+        'file_format',
+        'description',
+        'checksum_algorithm',
+    ]
+
+    def __init__(self, select_related, *args, **kwargs):
+        self.select_related = self.default_select_related + select_related or []
+        super(BaseDownloadManager, self).__init__(*args, **kwargs)
+
+    def get_queryset(self):
+        return BaseQuerySet(self.model, using=self._db) \
+            .select_related(*self.select_related)
+
+    def available(self, request):
+        return self.get_queryset().available(request)
+
+
 class AnalysisJobDownloadQuerySet(BaseQuerySet):
     pass
 
 
 class AnalysisJobDownloadManager(models.Manager):
     def get_queryset(self):
-        return AnalysisJobDownloadQuerySet(self.model, using=self._db)
+        return BaseQuerySet(self.model, using=self._db).\
+            select_related(
+                'job',
+                'pipeline',
+                'group_type',
+                'subdir',
+                'file_format',
+                'description')
 
     def available(self, request):
-        return self.get_queryset().available(request)
+        return self.get_queryset()\
+            .select_related(
+                'group_type',
+                'subdir',
+                'file_format',
+                'description',
+                'checksum_algorithm',
+                'job') \
+            .available(request)
 
 
 class AnalysisJobDownload(BaseAnnotationPipelineDownload):
@@ -499,6 +561,7 @@ class StudyDownloadManager(models.Manager):
             'description',
             'pipeline',
             'study',
+            'checksum_algorithm'
         )
 
     def available(self, request):
@@ -754,7 +817,10 @@ class SampleQuerySet(BaseQuerySet):
 
 class SampleManager(models.Manager):
     def get_queryset(self):
-        return SampleQuerySet(self.model, using=self._db)
+        return SampleQuerySet(self.model, using=self._db) \
+            .select_related(
+                'biome'
+            )
 
     def available(self, request, prefetch=False):
         queryset = self.get_queryset().available(request)
@@ -953,20 +1019,18 @@ class Status(models.Model):
         return self.status
 
 
-class RunQuerySet(BaseQuerySet):
-    pass
-
-
 class RunManager(models.Manager):
     def get_queryset(self):
-        return RunQuerySet(self.model, using=self._db)
+        return BaseQuerySet(self.model, using=self._db) \
+            .select_related(
+                'status_id',
+                'sample',
+                'study',
+                'experiment_type'
+            )
 
     def available(self, request):
-        return self.get_queryset().available(request) \
-            .select_related(
-            'experiment_type',
-            'study', 'sample'
-        )
+        return self.get_queryset().available(request)
 
 
 class Run(models.Model):
@@ -985,7 +1049,7 @@ class Run(models.Model):
     study = models.ForeignKey(
         'Study', db_column='STUDY_ID', related_name='runs',
         on_delete=models.CASCADE, blank=True, null=True)
-    # TODO: not consistant, schema changes may be needed
+    # TODO: not consistent, schema changes may be needed
     experiment_type = models.ForeignKey(
         ExperimentType, db_column='EXPERIMENT_TYPE_ID',
         related_name='runs',
@@ -1058,6 +1122,7 @@ class Assembly(models.Model):
             ('assembly_id', 'accession'),
             ('accession', 'wgs_accession', 'legacy_accession')
         )
+        verbose_name_plural = 'assemblies'
 
     def __str__(self):
         return self.accession
@@ -1072,6 +1137,10 @@ class AssemblyRun(models.Model):
     class Meta:
         db_table = 'ASSEMBLY_RUN'
         unique_together = (('assembly', 'run'),)
+        verbose_name_plural = 'assembly runs'
+
+    def __str__(self):
+        return 'Assembly:{} - Run: {}'.format(self.assembly, self.run)
 
 
 class AssemblySample(models.Model):
@@ -1083,25 +1152,27 @@ class AssemblySample(models.Model):
     class Meta:
         db_table = 'ASSEMBLY_SAMPLE'
         unique_together = (('assembly', 'sample'),)
+        verbose_name_plural = 'assembly samples'
 
-
-class AnalysisJobQuerySet(BaseQuerySet):
-    pass
+    def __str__(self):
+        return 'Assembly:{} - Sample:{}'.format(self.assembly, self.sample)
 
 
 class AnalysisJobManager(models.Manager):
     def get_queryset(self):
         _qs = AnalysisJobAnn.objects.all() \
             .select_related('var')
-        return AnalysisJobQuerySet(self.model, using=self._db) \
+        return BaseQuerySet(self.model, using=self._db) \
             .select_related(
-            'pipeline',
-            'analysis_status',
-            'experiment_type',
-        ) \
+                'pipeline',
+                'analysis_status',
+                'experiment_type',
+                'run',
+                'study',
+                'assembly',
+                'sample') \
             .prefetch_related(
-            Prefetch('analysis_metadata', queryset=_qs),
-        )
+                Prefetch('analysis_metadata', queryset=_qs),)
 
     def available(self, request):
         return self.get_queryset().available(request) \
@@ -1179,7 +1250,7 @@ class AnalysisJob(models.Model):
         related_name='analyses',
         on_delete=models.CASCADE)
     run_status_id = models.IntegerField(
-        db_column='RUN_STATUS_ID', blank=True, null=True)
+        db_column='RUN_STATUS_ID', blank=True, null=True)  # TODO: Should be renamed to status_id
     instrument_platform = models.CharField(
         db_column='INSTRUMENT_PLATFORM', max_length=50,
         blank=True, null=True)
@@ -1205,6 +1276,7 @@ class AnalysisJob(models.Model):
         return self.analysis_download.all()
 
     objects = AnalysisJobManager()
+    objects_admin = models.Manager()
 
     class Meta:
         db_table = 'ANALYSIS_JOB'
@@ -1249,6 +1321,8 @@ class BlacklistedStudy(models.Model):
     class Meta:
         managed = False
         db_table = 'BLACKLISTED_STUDY'
+        verbose_name_plural = 'blacklisted study'
+        verbose_name_plural = 'blacklisted studies'
 
     def __str__(self):
         return self.ext_study_id
@@ -1285,6 +1359,7 @@ class VariableNames(models.Model):
     class Meta:
         db_table = 'VARIABLE_NAMES'
         unique_together = (('var_id', 'var_name'), ('var_id', 'var_name'),)
+        verbose_name = 'variable name'                
 
     def __str__(self):
         return self.var_name
@@ -1297,7 +1372,7 @@ class SampleAnnQuerySet(BaseQuerySet):
 class SampleAnnManager(models.Manager):
     def get_queryset(self):
         return SampleAnnQuerySet(self.model, using=self._db) \
-            .select_related('var')
+            .select_related('sample', 'var')
 
 
 class SampleAnn(models.Model):
@@ -1334,9 +1409,16 @@ class AnalysisMetadataVariableNames(models.Model):
     class Meta:
         db_table = 'SUMMARY_VARIABLE_NAMES'
         unique_together = (('var_name', 'description'),)
+        verbose_name = 'analysis meta variable name'
 
     def __str__(self):
         return self.var_name
+
+
+class AnalysisJobAnnManager(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().select_related('job', 'var')
 
 
 class AnalysisJobAnn(models.Model):
@@ -1344,6 +1426,8 @@ class AnalysisJobAnn(models.Model):
     units = models.CharField(db_column='UNITS', max_length=25, blank=True, null=True)
     var = models.ForeignKey(AnalysisMetadataVariableNames)
     var_val_ucv = models.CharField(db_column='VAR_VAL_UCV', max_length=4000, blank=True, null=True)
+
+    objects = AnalysisJobAnnManager()
 
     class Meta:
         db_table = 'ANALYSIS_JOB_ANN'
@@ -1356,11 +1440,6 @@ class AnalysisJobAnn(models.Model):
         return '%s/%s' % (self.var.var_name, self.var_val_ucv)
 
 
-class GenomeTypes(Enum):
-    ISOLATE = 'isolate'
-    MAG = 'mag'
-
-
 class CogCat(models.Model):
 
     name = models.CharField(db_column='NAME', max_length=80, unique=True)
@@ -1368,6 +1447,7 @@ class CogCat(models.Model):
 
     class Meta:
         db_table = 'COG'
+        verbose_name_plural = 'COG categories'
 
 
 class AntiSmashGC(models.Model):
@@ -1376,6 +1456,7 @@ class AntiSmashGC(models.Model):
 
     class Meta:
         db_table = 'ANTISMASH_GENECLUSTER'
+        verbose_name_plural = 'antiSMASH clusters'
 
 
 class GeographicLocation(models.Model):
@@ -1385,6 +1466,9 @@ class GeographicLocation(models.Model):
     class Meta:
         db_table = 'GEOGRAPHIC_RANGE'
 
+    def __str__(self):
+        return self.name
+
 
 class GenomeSet(models.Model):
 
@@ -1393,24 +1477,38 @@ class GenomeSet(models.Model):
     class Meta:
         db_table = 'GENOME_SET'
 
+    def __str__(self):
+        return self.name
+
 
 class Genome(models.Model):
+
+    ISOLATE = 'isolate'
+    MAG = 'mag'
+    TYPE_CHOICES = (
+        (MAG, 'MAG'),
+        (ISOLATE, 'Isolate'),
+    )
 
     genome_id = models.AutoField(
         db_column='GENOME_ID', primary_key=True)
     accession = models.CharField(db_column='GENOME_ACCESSION', max_length=40, unique=True)
 
-    ena_genome_accession = models.CharField(db_column='ENA_GENOME_ACCESSION', max_length=20, unique=True, null=True)
-    ena_sample_accession = models.CharField(db_column='ENA_SAMPLE_ACCESSION', max_length=20, null=True)
+    ena_genome_accession = models.CharField(db_column='ENA_GENOME_ACCESSION',
+                                            max_length=20, unique=True, null=True, blank=True)
+    ena_sample_accession = models.CharField(db_column='ENA_SAMPLE_ACCESSION', max_length=20,
+                                            null=True, blank=True)
     ena_study_accession = models.CharField(db_column='ENA_STUDY_ACCESSION', max_length=20, null=True)
 
-    ncbi_genome_accession = models.CharField(db_column='NCBI_GENOME_ACCESSION', max_length=20, unique=True, null=True)
-    ncbi_sample_accession = models.CharField(db_column='NCBI_SAMPLE_ACCESSION', max_length=20, null=True)
-    ncbi_study_accession = models.CharField(db_column='NCBI_STUDY_ACCESSION', max_length=20, null=True)
+    ncbi_genome_accession = models.CharField(db_column='NCBI_GENOME_ACCESSION',
+                                             max_length=20, unique=True, null=True, blank=True)
+    ncbi_sample_accession = models.CharField(db_column='NCBI_SAMPLE_ACCESSION', max_length=20, null=True, blank=True)
+    ncbi_study_accession = models.CharField(db_column='NCBI_STUDY_ACCESSION', max_length=20, null=True, blank=True)
 
-    img_genome_accession = models.CharField(db_column='IMG_GENOME_ACCESSION', max_length=20, unique=True, null=True)
+    img_genome_accession = models.CharField(db_column='IMG_GENOME_ACCESSION', max_length=20,
+                                            unique=True, null=True, blank=True)
     patric_genome_accession = models.CharField(db_column='PATRIC_GENOME_ACCESSION', max_length=20, unique=True,
-                                               null=True)
+                                               blank=True, null=True)
 
     genome_set = models.ForeignKey(GenomeSet,
                                    db_column='GENOME_SET_ID',
@@ -1424,7 +1522,7 @@ class Genome(models.Model):
     n_50 = models.IntegerField(db_column='N50')
     gc_content = models.FloatField(db_column='GC_CONTENT')
     type = models.CharField(db_column='TYPE',
-                            choices=[(tag, tag.value) for tag in GenomeTypes],
+                            choices=TYPE_CHOICES,
                             max_length=80)
     completeness = models.FloatField(db_column='COMPLETENESS')
     contamination = models.FloatField(db_column='CONTAMINATION')
@@ -1437,21 +1535,21 @@ class Genome(models.Model):
     eggnog_coverage = models.FloatField(db_column='EGGNOG_COVERAGE')
     ipr_coverage = models.FloatField(db_column='IPR_COVERAGE')
     taxon_lineage = models.CharField(db_column='TAXON_LINEAGE', max_length=400)
-    cmseq = models.FloatField(db_column='CMSEQ', null=True)
+    cmseq = models.FloatField(db_column='CMSEQ', null=True, )
     taxincons = models.FloatField(db_column='TAXINCONS')
 
-    num_genomes_total = models.IntegerField(db_column='PANGENOME_TOTAL_GENOMES', null=True)
-    num_genomes_non_redundant = models.IntegerField(db_column='PANGENOME_NON_RED_GENOMES', null=True)
-    pangenome_size = models.IntegerField(db_column='PANGENOME_SIZE', null=True)
-    pangenome_core_size = models.IntegerField(db_column='PANGENOME_CORE_PROP', null=True)
-    pangenome_accessory_size = models.IntegerField(db_column='PANGENOME_ACCESSORY_PROP', null=True)
-    pangenome_eggnog_coverage = models.FloatField(db_column='PANGENOME_EGGNOG_COV', null=True)
-    pangenome_ipr_coverage = models.FloatField(db_column='PANGENOME_IPR_COV', null=True)
+    num_genomes_total = models.IntegerField(db_column='PANGENOME_TOTAL_GENOMES', null=True, blank=True)
+    num_genomes_non_redundant = models.IntegerField(db_column='PANGENOME_NON_RED_GENOMES', null=True, blank=True)
+    pangenome_size = models.IntegerField(db_column='PANGENOME_SIZE', null=True, blank=True)
+    pangenome_core_size = models.IntegerField(db_column='PANGENOME_CORE_PROP', null=True, blank=True)
+    pangenome_accessory_size = models.IntegerField(db_column='PANGENOME_ACCESSORY_PROP', null=True, blank=True)
+    pangenome_eggnog_coverage = models.FloatField(db_column='PANGENOME_EGGNOG_COV', null=True, blank=True)
+    pangenome_ipr_coverage = models.FloatField(db_column='PANGENOME_IPR_COV', null=True, blank=True)
 
     last_update = models.DateTimeField(db_column='LAST_UPDATE', auto_now=True)
     first_created = models.DateTimeField(db_column='FIRST_CREATED', auto_now_add=True)
 
-    geo_origin = models.ForeignKey('GeographicLocation', db_column='GEOGRAPHIC_ORIGIN', null=True)
+    geo_origin = models.ForeignKey('GeographicLocation', db_column='GEOGRAPHIC_ORIGIN', null=True, blank=True)
 
     pangenome_geographic_range = models.ManyToManyField('GeographicLocation',
                                                         db_table='GENOME_PANGENOME_GEOGRAPHIC_RANGE',
@@ -1528,6 +1626,9 @@ class Release(models.Model):
     class Meta:
         db_table = 'RELEASE'
 
+    def __str__(self):
+        return self.version
+
 
 class ReleaseGenomes(models.Model):
 
@@ -1563,6 +1664,9 @@ class KeggClass(models.Model):
     class Meta:
         db_table = 'KEGG_CLASS'
 
+    def __str__(self):
+        return self.name
+
 
 class GenomeKeggClassCounts(models.Model):
 
@@ -1586,6 +1690,9 @@ class KeggModule(models.Model):
 
     class Meta:
         db_table = 'KEGG_MODULE'
+
+    def __str__(self):
+        return self.name
 
 
 class GenomeKeggModuleCounts(models.Model):
@@ -1614,20 +1721,6 @@ class GenomeAntiSmashGCCounts(models.Model):
         unique_together = ('genome', 'antismash_genecluster')
 
 
-class GenomeDownloadManager(models.Manager):
-    
-    def get_queryset(self):
-        return BaseQuerySet(self.model, using=self._db) \
-            .select_related(
-                'group_type',
-                'subdir',
-                'file_format',
-                'description')
-
-    def available(self, request):
-        return self.get_queryset().available(request)
-
-
 class GenomeDownload(BaseDownload):
     genome = models.ForeignKey(
         'Genome', db_column='GENOME_ID',
@@ -1637,26 +1730,12 @@ class GenomeDownload(BaseDownload):
     def accession(self):
         return self.genome.accession
 
-    objects = GenomeDownloadManager()
+    objects = BaseDownloadManager(['genome'])
 
     class Meta:
         db_table = 'GENOME_DOWNLOAD'
         unique_together = (('realname', 'alias', 'genome'),)
         ordering = ('group_type', 'alias')
-
-
-class ReleaseDownloadManager(models.Manager):
-
-    def get_queryset(self):
-        return BaseQuerySet(self.model, using=self._db) \
-            .select_related(
-                'group_type',
-                'subdir',
-                'file_format',
-                'description')
-
-    def available(self, request):
-        return self.get_queryset().available(request)
 
 
 class ReleaseDownload(BaseDownload):
@@ -1668,7 +1747,7 @@ class ReleaseDownload(BaseDownload):
     def accession(self):
         return self.release.version
 
-    objects = ReleaseDownloadManager()
+    objects = BaseDownloadManager(['release'])
 
     class Meta:
         db_table = 'RELEASE_DOWNLOAD'

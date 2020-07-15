@@ -1,0 +1,104 @@
+{
+    "qc-status": {
+        "checksum": "sha1$da39a3ee5e6b4b0d3255bfef95601890afd80709", 
+        "basename": "QC-PASSED", 
+        "nameext": "", 
+        "nameroot": "QC-PASSED", 
+        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_1/QC-PASSED", 
+        "class": "File", 
+        "size": 0
+    }, 
+    "qc_summary": {
+        "checksum": "sha1$2f96f537325faaca163845c9c1749b6a86f5ad94", 
+        "basename": "qc_summary", 
+        "nameext": "", 
+        "nameroot": "qc_summary", 
+        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_1/qc_summary", 
+        "class": "File", 
+        "size": 213
+    }, 
+    "qc-statistics_folder": {
+        "basename": "qc-statistics", 
+        "nameext": "", 
+        "nameroot": "qc-statistics", 
+        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_1/qc-statistics", 
+        "listing": [
+            {
+                "checksum": "sha1$8fdd43b4c32527615b6389d538028a0714daca0d", 
+                "basename": "GC-distribution.out.full", 
+                "size": 5203, 
+                "class": "File", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_1/qc-statistics/GC-distribution.out.full"
+            }, 
+            {
+                "checksum": "sha1$a9e8e8778750c577a6bec682a6b0f705f04c1be6", 
+                "basename": "summary.out", 
+                "size": 330, 
+                "class": "File", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_1/qc-statistics/summary.out"
+            }, 
+            {
+                "checksum": "sha1$6b4ee5ccbc8d91392acf83cfcf471b6cdca5c684", 
+                "basename": "seq-length.out.full_bin", 
+                "size": 115, 
+                "class": "File", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_1/qc-statistics/seq-length.out.full_bin"
+            }, 
+            {
+                "checksum": "sha1$1ff49d177ed02fa055371ba8d2ce13769d7e2292", 
+                "basename": "GC-distribution.out.full_bin", 
+                "size": 122, 
+                "class": "File", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_1/qc-statistics/GC-distribution.out.full_bin"
+            }, 
+            {
+                "checksum": "sha1$0e22fd60bf2b9891b80616c838a1bd435d815df0", 
+                "basename": "GC-distribution.out.full_pcbin", 
+                "size": 117, 
+                "class": "File", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_1/qc-statistics/GC-distribution.out.full_pcbin"
+            }, 
+            {
+                "checksum": "sha1$98ec113373d2ce91cddc545d1ca6237e518cc0b8", 
+                "basename": "seq-length.out.full", 
+                "size": 86832, 
+                "class": "File", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_1/qc-statistics/seq-length.out.full"
+            }, 
+            {
+                "checksum": "sha1$a980da9ef8931f72610816436a7a99bb2b176745", 
+                "basename": "nucleotide-distribution.out.full", 
+                "size": 16098, 
+                "class": "File", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_1/qc-statistics/nucleotide-distribution.out.full"
+            }, 
+            {
+                "checksum": "sha1$731465d9f537e6b6493a0b417a2868338c674274", 
+                "basename": "seq-length.out.full_pcbin", 
+                "size": 131, 
+                "class": "File", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_1/qc-statistics/seq-length.out.full_pcbin"
+            }
+        ], 
+        "class": "Directory"
+    }, 
+    "filtered_fasta": {
+        "format": "http://edamontology.org/format_1929", 
+        "checksum": "sha1$9553c431b17ddab26f571801014bd5ef16226c41", 
+        "basename": "ERZ1292616_FASTA.fasta", 
+        "nameroot": "ERZ1292616_FASTA", 
+        "nameext": ".fasta", 
+        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_1/ERZ1292616_FASTA.fasta", 
+        "class": "File", 
+        "size": 388701868
+    }, 
+    "hashsum_input": {
+        "checksum": "sha1$17d589b88379f878c91a9da82feadf5ca410859b", 
+        "basename": "ERZ1292616.fasta.gz.sha1", 
+        "nameext": ".sha1", 
+        "nameroot": "ERZ1292616.fasta.gz", 
+        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_1/ERZ1292616.fasta.gz.sha1", 
+        "class": "File", 
+        "size": 62
+    }
+}

@@ -83,8 +83,6 @@ urlpatterns = [
 # API authentication routing.
 urlpatterns += [
 
-    # url(r'^admin/', admin.site.urls),
-
     url(r'^schema/$', schema_view, name="schema_view"),
 
     url(r'^docs/',
@@ -112,9 +110,11 @@ urlpatterns += mongo_urlpatterns
 urlpatterns += emgapi_urlpatterns
 
 # admin
-urlpatterns += [
-    url('admin/', admin.site.urls),
-]
+if settings.ADMIN:
+    urlpatterns += [
+        url('grappelli/', include('grappelli.urls')),
+        url('admin/', admin.site.urls),
+    ]
 
 if settings.DEBUG:
     import debug_toolbar

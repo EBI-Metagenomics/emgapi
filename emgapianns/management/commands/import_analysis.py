@@ -46,6 +46,18 @@ ena = ena_handler.EnaApiHandler()
 """
 
 
+def setup_logging(options):
+    verbosity = options.get('verbosity', None)
+    log_level = logging.WARN
+    if verbosity:
+        if verbosity > 1:
+            log_level = logging.DEBUG
+        else:
+            log_level = logging.INFO
+    logging.basicConfig(format='%(levelname)s %(asctime)s - %(message)s', datefmt='%Y/%m/%d %I:%M:%S %p',
+                        level=log_level)
+
+
 class Command(BaseCommand):
     help = 'Imports new run and assembly annotation objects into EMG. The tool will import all associated objects like' \
            'studies, samples and assemblies as well. It will also populate MongoDB.'
@@ -61,7 +73,11 @@ class Command(BaseCommand):
     library_strategy = None
     no_study_summary = False
 
+    def __init__(self):
+        super().__init__()
+
     def add_arguments(self, parser):
+        super(Command, self).add_arguments(parser)
         parser.add_argument('--rootpath',
                             help="NFS root path of the results archive.",
                             default="/nfs/production/interpro/metagenomics/results/")
@@ -80,6 +96,7 @@ class Command(BaseCommand):
         parser.set_defaults(no_study_summary=False)
 
     def handle(self, *args, **options):
+        setup_logging(options)
         self.emg_db = options['database']
         self.rootpath = os.path.abspath(options['rootpath'])
         self.accession = options['accession']
@@ -97,12 +114,11 @@ class Command(BaseCommand):
         input_file_name = os.path.basename(self.result_dir)
 
         sanity_checker = SanityCheck(self.accession, self.result_dir, self.library_strategy, self.version)
+        sanity_checker.check_file_existence()
 
-        if not sanity_checker.passed_quality_control():
-            raise QCNotPassedException("{} did not pass QC step!".format(self.accession))
+        sanity_checker.run_quality_control_check()
 
-        if not sanity_checker.passed_coverage_check():
-            raise CoverageCheckException("{} did not pass coverage check step!".format(self.accession))
+        sanity_checker.run_coverage_check()
 
         self.call_import_study(secondary_study_accession)
 
@@ -126,7 +142,8 @@ class Command(BaseCommand):
             logging.info("Skipping the import of functional and pathway annotations!")
 
         if self.version in ['5.0'] and metadata.experiment_type == ExperimentType.ASSEMBLY:
-            self.import_contigs()
+            logger.info('Importing contigs...')
+            call_command('import_contigs', self.accession, self.rootpath, '--pipeline', self.version)
         else:
             logging.info("Skipping the import procedure for the contig viewer!")
 
@@ -170,7 +187,7 @@ class Command(BaseCommand):
         call_command('import_run', run_accession, '--biome', self.biome, '--library_strategy', self.library_strategy)
 
     def call_import_assembly(self, analysis_accession):
-        call_command('import_assembly', analysis_accession, '--result_dir', self.result_dir, '--biome', self.biome)
+        call_command('import_assembly', analysis_accession, '--biome', self.biome)
 
     def __call_generate_study_summary(self, secondary_study_accession):
         """
@@ -200,15 +217,21 @@ class Command(BaseCommand):
                                                'analysis_alias,analysis_accession')
             if 'sample_accession' in assembly:
                 del assembly['sample_accession']
+            # Try to parse out the run accession from the analysis alias
+            # This generally works for most MGnify produced assemblies
+            # Please note: external assemblies might not have this!
             if 'analysis_alias' in assembly:
                 pattern = re.compile(r'([EDS]RR\d{6,})')
                 search_string = assembly['analysis_alias']
                 match = re.search(pattern, search_string)
-                if len(match.groups())>0:
-                    run_accession = match.group(1)
+                if match:
+                    if len(match.groups()) > 0:
+                        run_accession = match.group(1)
+                    else:
+                        run_accession = assembly['analysis_alias']
+                    assembly['run_accession'] = run_accession
                 else:
-                    run_accession = assembly['analysis_alias']
-                assembly['run_accession'] = run_accession
+                    assembly['run_accession'] = None
                 del assembly['analysis_alias']
             analysis = Assembly(**assembly)
         else:  # Run accession detected
@@ -276,18 +299,21 @@ class Command(BaseCommand):
             defaults['instrument_model'] = run.instrument_model
             defaults['instrument_platform'] = run.instrument_platform
             defaults['experiment_type'] = run.experiment_type
-            defaults['run_status_id'] = run.status_id
+            defaults['run_status_id'] = run.status_id.pk
         else:
-            run = self.get_emg_run(metadata.run_accession)
             assembly = self.get_emg_assembly(metadata.analysis_accession)
             comp_key.update({
                 'external_run_ids': assembly.accession,
                 'assembly': assembly,
             })
             defaults['experiment_type'] = self.get_experiment_type('assembly')
-            defaults['instrument_model'] = run.instrument_model
-            defaults['instrument_platform'] = run.instrument_platform
-            defaults['run_status_id'] = run.status_id
+            # TODO: run_status_id should be renamed to status_id
+            defaults['run_status_id'] = assembly.status_id.pk
+            if metadata.run_accession:
+                run = self.get_emg_run(metadata.run_accession)
+                defaults['instrument_model'] = run.instrument_model
+                defaults['instrument_platform'] = run.instrument_platform
+
         analysis, _ = emg_models.AnalysisJob.objects.using(self.emg_db) \
             .update_or_create(**comp_key, defaults=defaults)
         logging.info("Analysis job successfully created.")
@@ -317,12 +343,8 @@ class Command(BaseCommand):
 
     def populate_mongodb_function_and_pathways(self):
         logger.info('Importing functional and pathway data...')
-        for sum_type in ['.ipr', '.go', '.go_slim', '.paths.kegg', '.pfam', '.ko', '.paths.gprops', '.antismash']:
+        for sum_type in ['.ips', '.ipr', '.go', '.go_slim', '.pfam', '.ko', '.gprops', '.antismash', '.kegg_pathways']:
             call_command('import_summary', self.accession, self.rootpath, sum_type, '--pipeline', self.version)
-
-    def import_contigs(self):
-        logger.info('Importing contigs...')
-        call_command('import_contigs', self.accession, '--pipeline', self.version, '--faix')
 
     def __find_folder(self, directory, search_pattern, maxdepth=2, recursive=False):
         """

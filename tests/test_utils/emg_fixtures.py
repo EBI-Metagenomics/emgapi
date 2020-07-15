@@ -25,7 +25,7 @@ __all__ = ['apiclient', 'api_version', 'biome', 'biome_human', 'super_study', 's
            'run_status', 'analysis_status',
            'pipeline', 'pipelines', 'experiment_type',
            'runs', 'run', 'run_v5', 'runjob_pipeline_v1', 'run_emptyresults', 'run_with_sample',
-           'analysis_results', 'run_multiple_analysis', 'var_names']
+           'analysis_results', 'run_multiple_analysis', 'var_names', 'analysis_metadata_variable_names']
 
 
 @pytest.fixture
@@ -290,7 +290,7 @@ def runs(study, samples, run_status, analysis_status, pipeline,
             pipeline=pipeline,
             analysis_status=analysis_status,
             input_file_name='ABC_FASTQ',
-            result_directory='path/version_1.0/ABC_FASTQ',
+            result_directory='test_data/version_1.0/ABC_FASTQ',
             submit_time='1970-01-01 00:00:00',
         )
         jobs.append(_aj)
@@ -317,7 +317,7 @@ def run(study, sample, run_status, analysis_status, pipeline, experiment_type):
         pipeline=pipeline,
         analysis_status=analysis_status,
         input_file_name='ABC_FASTQ',
-        result_directory='path/version_1.0/ABC_FASTQ',
+        result_directory='test_data/version_1.0/ABC_FASTQ',
         submit_time='1970-01-01 00:00:00'
     )
     return run
@@ -344,7 +344,7 @@ def run_v5(study, sample, run_status, analysis_status, pipelines, experiment_typ
         pipeline=p5,
         analysis_status=analysis_status,
         input_file_name='ABC_FASTQ',
-        result_directory='path/version_5.0/ABC_FASTQ',
+        result_directory='test_data/version_5.0/ABC_FASTQ',
         submit_time='1970-01-01 00:00:00'
     )
     return run
@@ -362,7 +362,7 @@ def runjob_pipeline_v1(run, sample, study, experiment_type, analysis_status, pip
         pipeline=pipelines.filter(release_version='1.0').first(),
         analysis_status=analysis_status,
         input_file_name='ABC_FASTQ',
-        result_directory='path/version_1.0/ABC_FASTQ',
+        result_directory='test_data/version_1.0/ABC_FASTQ',
         submit_time='1970-01-01 00:00:00'
     )
 
@@ -379,6 +379,11 @@ def run_multiple_analysis(study, sample, run_status, analysis_status,
         pk=4,
         release_version='4.0',
         release_date='1970-01-01',
+    )
+    pipeline5, created5 = emg_models.Pipeline.objects.get_or_create(
+        pk=5,
+        release_version='5.0',
+        release_date='2020-01-01',
     )
     run = emg_models.Run.objects.create(
         run_id=1234,
@@ -398,7 +403,7 @@ def run_multiple_analysis(study, sample, run_status, analysis_status,
         pipeline=pipeline,
         analysis_status=analysis_status,
         input_file_name='ABC_FASTQ',
-        result_directory='path/version_1.0/ABC_FASTQ',
+        result_directory='test_data/version_1.0/ABC_FASTQ',
         submit_time='1970-01-01 00:00:00',
     )
     _anl4 = emg_models.AnalysisJob.objects.create(
@@ -411,10 +416,23 @@ def run_multiple_analysis(study, sample, run_status, analysis_status,
         pipeline=pipeline4,
         analysis_status=analysis_status,
         input_file_name='ABC_FASTQ',
-        result_directory='path/version_4.0/ABC_FASTQ',
+        result_directory='test_data/version_4.0/ABC_FASTQ',
         submit_time='1970-01-01 00:00:00',
     )
-    return (_anl1, _anl4)
+    _anl5 = emg_models.AnalysisJob.objects.create(
+        job_id=466090,
+        sample=sample,
+        study=study,
+        run=run,
+        run_status_id=4,
+        experiment_type=experiment_type,
+        pipeline=pipeline5,
+        analysis_status=analysis_status,
+        input_file_name='ABC_FASTQ',
+        result_directory='test_data/version_5.0/ABC_FASTQ',
+        submit_time='2020-01-01 00:00:00',
+    )
+    return (_anl1, _anl4, _anl5)
 
 
 @pytest.fixture
@@ -438,7 +456,7 @@ def run_emptyresults(study, sample, run_status, analysis_status, pipeline,
         pipeline=pipeline,
         analysis_status=analysis_status,
         input_file_name='EMPTY_ABC_FASTQ',
-        result_directory='emptypath/version_1.0/EMPTY_ABC_FASTQ',
+        result_directory='test_data/version_1.0/EMPTY_ABC_FASTQ',
         submit_time='1970-01-01 00:00:00',
     )
 
@@ -464,7 +482,7 @@ def run_with_sample(study, sample, run_status, analysis_status, pipeline,
         pipeline=pipeline,
         analysis_status=analysis_status,
         input_file_name='ABC_FASTQ',
-        result_directory='path/version_1.0/ABC_FASTQ',
+        result_directory='test_data/version_1.0/ABC_FASTQ',
         submit_time='1970-01-01 00:00:00'
     )
 
@@ -492,7 +510,7 @@ def analysis_results(study, sample, run_status, analysis_status,
             pipeline=pipe,
             analysis_status=analysis_status,
             input_file_name='ABC_FASTQ',
-            result_directory='path/version_{}/ABC_FASTQ'.format(pipe.release_version),
+            result_directory='test_data/version_{}/ABC_FASTQ'.format(pipe.release_version),
             submit_time='1970-01-01 00:00:00',
         )
     return res
@@ -512,3 +530,32 @@ def var_names():
     for i, name in enumerate(data):
         variable_names.append(emg_models.VariableNames(var_id=i, var_name=name))
     emg_models.VariableNames.objects.bulk_create(variable_names)
+
+
+@pytest.fixture
+def analysis_metadata_variable_names():
+    variable_names = (
+        ("Submitted nucleotide sequences", "n/a"),
+        ("Nucleotide sequences after format-specific filtering", "n/a"),
+        ("Nucleotide sequences after length filtering", "n/a"),
+        ("Nucleotide sequences after undetermined bases filtering", "n/a"),
+        ("Total InterProScan matches", "n/a"),
+        ("Predicted CDS with InterProScan match", "n/a"),
+        ("Contigs with InterProScan match", "n/a"),
+        ("Predicted CDS", "n/a"),
+        ("Contigs with predicted CDS", "n/a"),
+        ("Nucleotide sequences with predicted CDS", "n/a"),
+        ("Contigs with predicted rRNA", "n/a"),
+        ("Nucleotide sequences with predicted rRNA", "n/a"),
+        ("Predicted SSU sequences", "n/a"),
+        ("Predicted LSU sequences", "n/a"),
+    )
+    _variable_names = list()
+    for v in variable_names:
+        _variable_names.append(
+            emg_models.AnalysisMetadataVariableNames(
+                var_name=v[0],
+                description=v[1]
+            )
+        )
+    emg_models.AnalysisMetadataVariableNames.objects.bulk_create(_variable_names)

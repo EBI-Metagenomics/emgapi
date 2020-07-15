@@ -6,6 +6,8 @@ var
 dist
 .eggs
 emgcli.egg-info/
+.pytest_cache/
+
 
 staticfiles/
 media/

@@ -16,7 +16,6 @@ from emgapianns.management.lib.utils import DownloadFileDatabaseHandler
 
 
 class StudySummaryGenerator(object):
-
     def __init__(self, accession, pipeline, rootpath, nfs_public_rootpath, database):
         self.study_accession = accession
         self.pipeline = pipeline
@@ -60,9 +59,9 @@ class StudySummaryGenerator(object):
         if len(experiment_types) == 1 and 'amplicon' in experiment_types:
             logging.info("AMPLICON datasets only! Skipping the generation of the functional matrix files!")
         else:
-            self.generate_ipr_summary(analysis_jobs, 'IPR_abundances_v{}.tsv'.format(self.pipeline))
-            self.generate_go_summary(analysis_jobs, 'slim')
-            self.generate_go_summary(analysis_jobs, 'full')
+            self.generate_ipr_summary(analysis_jobs, 'IPR_abundances_v{}.tsv'.format(self.pipeline), self.pipeline)
+            self.generate_go_summary(analysis_jobs, 'slim', self.pipeline)
+            self.generate_go_summary(analysis_jobs, 'full', self.pipeline)
 
         self.sync_study_summary_files()
 
@@ -266,20 +265,56 @@ class StudySummaryGenerator(object):
             data[counter] = [unassigned, unassigned, unassigned, num_unassigned_seqs]
         return data
 
-    def generate_ipr_summary(self, analysis_result_dirs, filename):
-        res_files = self.get_ipr_result_files(analysis_result_dirs)
+    def generate_go_summary_v4(self, analysis_result_dirs, mode):
+        res_files = self.get_go_v4_result_files(analysis_result_dirs, mode)
         study_df = self.merge_dfs(res_files, delimiter=',',
-                                  key=['IPR', 'description'],
-                                  raw_cols=['IPR', 'description', 'count'])
+                                  key=['GO', 'description', 'category'],
+                                  raw_cols=['GO', 'description', 'category', 'count'])
+        study_df['description'] = study_df['description'].str.replace(',', '@')
+        study_df['category'] = study_df['category'].str.replace('_', ' ')
+        return study_df
 
-        if len(study_df.index) > 0:
+    def generate_go_summary_v5(self, analysis_result_dirs, mode):
+        res_files = self.get_go_v5_result_files(analysis_result_dirs, mode)
+        study_df = self.merge_dfs(res_files, delimiter=',',
+                                  key=['GO', 'description', 'category'],
+                                  raw_cols=['GO', 'description', 'category', 'count'])
+        study_df['description'] = study_df['description'].str.replace(',', '@')
+        study_df['category'] = study_df['category'].str.replace('_', ' ')
+        return study_df
+
+    def generate_ips_summary_v4(self, analysis_result_dirs):
+        res_files = self.get_ipr_v4_result_files(analysis_result_dirs)
+
+        return self.merge_dfs(res_files, delimiter=',',
+                              key=['IPR', 'description'],
+                              raw_cols=['IPR', 'description', 'count'])
+
+    def generate_ips_summary_v5(self, analysis_result_dirs):
+        res_files = self.get_ipr_v5_result_files(analysis_result_dirs)
+
+        return self.merge_dfs(res_files, delimiter=',',
+                              key=['IPR', 'description'],
+                              raw_cols=['count', 'IPR', 'description'])
+
+    def generate_ipr_summary(self, analysis_jobs, filename, version):
+
+        study_df = None
+        if version == '4.1':
+            study_df = self.generate_ips_summary_v4(analysis_jobs)
+        elif version == '5.0':
+            study_df = self.generate_ips_summary_v5(analysis_jobs)
+        else:
+            logging.warning("Pipeline version {} not supported yet!".format(version))
+
+        if not study_df.empty:
             self.write_results_file(study_df, filename)
 
             alias = '{}_IPR_abundances_v{}.tsv'.format(self.study_accession, self.pipeline)
             description = 'InterPro matches'
             self.upload_study_file(filename, alias, description, 'Functional analysis')
 
-    def generate_go_summary(self, analysis_result_dirs, mode):
+    def generate_go_summary(self, analysis_jobs, mode, version):
         if mode == 'slim':
             sum_file = 'GO-slim'
             description = 'GO slim annotation'
@@ -287,30 +322,31 @@ class StudySummaryGenerator(object):
             sum_file = 'GO'
             description = 'Complete GO annotation'
 
-        res_files = self.get_go_result_files(analysis_result_dirs, mode)
-        study_df = self.merge_dfs(res_files, delimiter=',',
-                                  key=['GO', 'description', 'category'],
-                                  raw_cols=['GO', 'description', 'category', 'count'])
-        study_df['description'] = study_df['description'].str.replace(',', '@')
-        study_df['category'] = study_df['category'].str.replace('_', ' ')
-        realname = sum_file + '_abundances_v{}.tsv'.format(self.pipeline)
+        study_df = None
+        if version == '4.1':
+            study_df = self.generate_go_summary_v4(analysis_jobs, mode)
+        elif version == '5.0':
+            study_df = self.generate_go_summary_v5(analysis_jobs, mode)
+        else:
+            logging.warning("Pipeline version {} not supported yet!".format(version))
 
-        if len(study_df.index) > 0:
+        if not study_df.empty:
+            realname = sum_file + '_abundances_v{}.tsv'.format(version)
             self.write_results_file(study_df, realname)
 
             self.generate_filtered_go_summary(study_df,
                                               'category == "cellular component"',
-                                              'CC_{}_abundances_v{}.tsv'.format(sum_file, self.pipeline))
+                                              'CC_{}_abundances_v{}.tsv'.format(sum_file, version))
 
             self.generate_filtered_go_summary(study_df,
                                               'category == "biological process"',
-                                              'BP_{}_abundances_v{}.tsv'.format(sum_file, self.pipeline))
+                                              'BP_{}_abundances_v{}.tsv'.format(sum_file, version))
 
             self.generate_filtered_go_summary(study_df,
                                               'category not in ["biological process", "cellular component"]',
-                                              'MF_{}_abundances_v{}.tsv'.format(sum_file, self.pipeline))
+                                              'MF_{}_abundances_v{}.tsv'.format(sum_file, version))
 
-            alias = '{}_{}_abundances_v{}.tsv'.format(self.study_accession, sum_file, self.pipeline)
+            alias = '{}_{}_abundances_v{}.tsv'.format(self.study_accession, sum_file, version)
             self.upload_study_file(realname, alias, description, 'Functional analysis')
             return study_df
 
@@ -406,7 +442,7 @@ class StudySummaryGenerator(object):
         return result
 
     @staticmethod
-    def get_ipr_result_files(analysis_result_dirs):
+    def get_ipr_v4_result_files(analysis_result_dirs):
         result = []
         for input_file_name, dir in analysis_result_dirs.items():
             res_file_re = os.path.join(dir, '{}_summary.ipr'.format(input_file_name))
@@ -417,11 +453,34 @@ class StudySummaryGenerator(object):
         return result
 
     @staticmethod
-    def get_go_result_files(analysis_result_dirs, mode):
+    def get_ipr_v5_result_files(analysis_result_dirs):
+        result = []
+        for input_file_name, dir in analysis_result_dirs.items():
+            res_file_re = os.path.join(dir, 'functional-annotation', '{}.summary.ips'.format(input_file_name))
+            if os.path.exists(res_file_re):
+                result.append(res_file_re)
+            else:
+                logging.warning("Result file does not exist:\n{}".format(res_file_re))
+        return result
+
+    @staticmethod
+    def get_go_v4_result_files(analysis_result_dirs, mode):
         result = []
         for input_file_name, dir in analysis_result_dirs.items():
             file_name = '{}_summary.go' if mode == 'full' else '{}_summary.go_slim'
             res_file_re = os.path.join(dir, file_name.format(input_file_name))
+            if os.path.exists(res_file_re):
+                result.append(res_file_re)
+            else:
+                logging.warning("Result file does not exist:\n{}".format(res_file_re))
+        return result
+
+    @staticmethod
+    def get_go_v5_result_files(analysis_result_dirs, mode):
+        result = []
+        for input_file_name, dir in analysis_result_dirs.items():
+            file_name = '{}.summary.go' if mode == 'full' else '{}.summary.go_slim'
+            res_file_re = os.path.join(dir, 'functional-annotation', file_name.format(input_file_name))
             if os.path.exists(res_file_re):
                 result.append(res_file_re)
             else:

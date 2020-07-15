@@ -1,0 +1,918 @@
+{
+    "chunking_proteins": [
+        {
+            "checksum": "sha1$af6362865ea29c64c7b99f2fb9eb0020e65a8107", 
+            "basename": "ERZ1292616_FASTA_CDS.faa.chunks", 
+            "nameext": ".chunks", 
+            "nameroot": "ERZ1292616_FASTA_CDS.faa", 
+            "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/ERZ1292616_FASTA_CDS.faa.chunks", 
+            "class": "File", 
+            "size": 27
+        }, 
+        {
+            "checksum": "sha1$734cceca64038922d9b3efe232f66071ad20662a", 
+            "basename": "ERZ1292616_FASTA_CDS.faa.gz", 
+            "nameext": ".gz", 
+            "nameroot": "ERZ1292616_FASTA_CDS.faa", 
+            "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/ERZ1292616_FASTA_CDS.faa.gz", 
+            "class": "File", 
+            "size": 84140822
+        }, 
+        {
+            "checksum": "sha1$e5fd9cfe0e8039111d54b588e77b2bb0cad41c3a", 
+            "basename": "from_chunking_ERZ1292616_FASTA_CDS.faa", 
+            "nameext": ".faa", 
+            "nameroot": "from_chunking_ERZ1292616_FASTA_CDS", 
+            "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/from_chunking_ERZ1292616_FASTA_CDS.faa", 
+            "class": "File", 
+            "size": 4
+        }
+    ], 
+    "compressed_files": [
+        {
+            "checksum": "sha1$2f6782432d9b7bfba0efed185716d780dcd68b57", 
+            "basename": "ERZ1292616_FASTA.cmsearch.all.tblout.deoverlapped.gz", 
+            "nameext": ".gz", 
+            "nameroot": "ERZ1292616_FASTA.cmsearch.all.tblout.deoverlapped", 
+            "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/ERZ1292616_FASTA.cmsearch.all.tblout.deoverlapped.gz", 
+            "class": "File", 
+            "size": 329040
+        }, 
+        {
+            "checksum": "sha1$181ab67c35351b84326be1b858c6239fc7a1d9ea", 
+            "basename": "ERZ1292616_FASTA.cmsearch.all.tblout.gz", 
+            "nameext": ".gz", 
+            "nameroot": "ERZ1292616_FASTA.cmsearch.all.tblout", 
+            "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/ERZ1292616_FASTA.cmsearch.all.tblout.gz", 
+            "class": "File", 
+            "size": 483039
+        }
+    ], 
+    "stats": {
+        "basename": "functional-annotation", 
+        "nameext": "", 
+        "nameroot": "functional-annotation", 
+        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation", 
+        "listing": [
+            {
+                "class": "Directory", 
+                "basename": "stats", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/stats", 
+                "listing": [
+                    {
+                        "checksum": "sha1$b0dba7f1e0fa1275c31e3b75deb9362503244497", 
+                        "basename": "antismash.stats", 
+                        "size": 102, 
+                        "class": "File", 
+                        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/stats/antismash.stats"
+                    }, 
+                    {
+                        "checksum": "sha1$322cbce7ce3ede683de39ae042b3718621032b98", 
+                        "basename": "ko.stats", 
+                        "size": 86, 
+                        "class": "File", 
+                        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/stats/ko.stats"
+                    }, 
+                    {
+                        "checksum": "sha1$950f1c035646b827bf1438520582e38154066d8b", 
+                        "basename": "pfam.stats", 
+                        "size": 93, 
+                        "class": "File", 
+                        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/stats/pfam.stats"
+                    }, 
+                    {
+                        "checksum": "sha1$8d8468d5850079f4269f415cf8700a495c5f512f", 
+                        "basename": "go.stats", 
+                        "size": 86, 
+                        "class": "File", 
+                        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/stats/go.stats"
+                    }, 
+                    {
+                        "checksum": "sha1$0f820d19ef3f788f8745a29fff066324881b7eb7", 
+                        "basename": "interproscan.stats", 
+                        "size": 117, 
+                        "class": "File", 
+                        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/stats/interproscan.stats"
+                    }, 
+                    {
+                        "checksum": "sha1$a2b65ef14f212d413a388d6bebbda555afe5fe1e", 
+                        "basename": "orf.stats", 
+                        "size": 92, 
+                        "class": "File", 
+                        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/stats/orf.stats"
+                    }
+                ]
+            }
+        ], 
+        "class": "Directory"
+    }, 
+    "index_fasta_file": {
+        "checksum": "sha1$3dcfd4e30254ce311c27030adaa39b67883025e1", 
+        "basename": "ERZ1292616_FASTA.fasta.bgz.fai", 
+        "nameext": ".fai", 
+        "nameroot": "ERZ1292616_FASTA.fasta.bgz", 
+        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/ERZ1292616_FASTA.fasta.bgz.fai", 
+        "class": "File", 
+        "size": 19251552
+    }, 
+    "bgzip_fasta_file": {
+        "checksum": "sha1$5782ed507f0337c30c5390389b3fda0e6701aafe", 
+        "basename": "ERZ1292616_FASTA.fasta.bgz", 
+        "nameext": ".bgz", 
+        "nameroot": "ERZ1292616_FASTA.fasta", 
+        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/ERZ1292616_FASTA.fasta.bgz", 
+        "class": "File", 
+        "size": 121110424
+    }, 
+    "pathways_systems_folder": {
+        "basename": "pathways-systems", 
+        "listing": [
+            {
+                "format": "http://edamontology.org/format_3475", 
+                "checksum": "sha1$a9a0e5690fff28c37dc8e4e73df91130b22dcb5b", 
+                "basename": "ERZ1292616_FASTA.summary.kegg_contigs.tsv", 
+                "nameroot": "ERZ1292616_FASTA.summary.kegg_contigs", 
+                "nameext": ".tsv", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/pathways-systems/ERZ1292616_FASTA.summary.kegg_contigs.tsv", 
+                "class": "File", 
+                "size": 7157864
+            }, 
+            {
+                "format": "http://edamontology.org/format_3752", 
+                "checksum": "sha1$00313f2f8b9221f0711937c9c223dd6c7f5b0ab8", 
+                "basename": "ERZ1292616_FASTA.summary.kegg_pathways", 
+                "nameroot": "ERZ1292616_FASTA.summary", 
+                "nameext": ".kegg_pathways", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/pathways-systems/ERZ1292616_FASTA.summary.kegg_pathways", 
+                "class": "File", 
+                "size": 47377
+            }, 
+            {
+                "format": "http://edamontology.org/format_3752", 
+                "checksum": "sha1$48ac85841c890f819477be2983b03bfd7f71c7c8", 
+                "basename": "ERZ1292616_FASTA.summary.gprops", 
+                "nameroot": "ERZ1292616_FASTA.summary", 
+                "nameext": ".gprops", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/pathways-systems/ERZ1292616_FASTA.summary.gprops", 
+                "class": "File", 
+                "size": 72082
+            }
+        ], 
+        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/pathways-systems", 
+        "class": "Directory"
+    }, 
+    "pathways_systems_folder_antismash": {
+        "basename": "pathways-systems", 
+        "nameext": "", 
+        "nameroot": "pathways-systems", 
+        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/pathways-systems", 
+        "listing": [
+            {
+                "checksum": "sha1$1af7ee6b008ee8462529cc07fd8a3e422ba30301", 
+                "basename": "ERZ1292616_FASTA_antismash_final.embl.gz", 
+                "size": 254001653, 
+                "class": "File", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/pathways-systems/ERZ1292616_FASTA_antismash_final.embl.gz"
+            }, 
+            {
+                "checksum": "sha1$4383508f414f8d3eb540f156236b20bed0c09edd", 
+                "basename": "ERZ1292616_FASTA_antismash_geneclusters.txt", 
+                "size": 469018, 
+                "class": "File", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/pathways-systems/ERZ1292616_FASTA_antismash_geneclusters.txt"
+            }, 
+            {
+                "checksum": "sha1$69e1add7da7be10f7a87a4d241c8d45d6e1bdd08", 
+                "basename": "ERZ1292616_FASTA_antismash_final.gbk.gz", 
+                "size": 250454241, 
+                "class": "File", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/pathways-systems/ERZ1292616_FASTA_antismash_final.gbk.gz"
+            }, 
+            {
+                "checksum": "sha1$fceabeec83ff50871c249d87cc38c5986efb34ba", 
+                "basename": "ERZ1292616_FASTA.antismash.gff.gz", 
+                "size": 419146, 
+                "class": "File", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/pathways-systems/ERZ1292616_FASTA.antismash.gff.gz"
+            }, 
+            {
+                "checksum": "sha1$ca80bab5db5b0273014fa7cbed8f3d7cf2bf521c", 
+                "basename": "ERZ1292616_FASTA.antismash.gff.gz.tbi", 
+                "size": 32192, 
+                "class": "File", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/pathways-systems/ERZ1292616_FASTA.antismash.gff.gz.tbi"
+            }
+        ], 
+        "class": "Directory"
+    }, 
+    "functional_annotation_folder": {
+        "class": "Directory", 
+        "basename": "functional-annotation", 
+        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation", 
+        "listing": [
+            {
+                "format": "http://edamontology.org/format_2306", 
+                "checksum": "sha1$6056cb1e19892dbe2de6b7aa06efd072e9c0725f", 
+                "basename": "ERZ1292616_FASTA.contigs.annotations.gff.gz", 
+                "nameroot": "ERZ1292616_FASTA.contigs.annotations.gff", 
+                "nameext": ".gz", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/ERZ1292616_FASTA.contigs.annotations.gff.gz", 
+                "class": "File", 
+                "size": 40776391
+            }, 
+            {
+                "checksum": "sha1$1467db46cde4dd7f89fd811339b6398c81034461", 
+                "basename": "ERZ1292616_FASTA.contigs.annotations.gff.gz.tbi", 
+                "nameext": ".tbi", 
+                "nameroot": "ERZ1292616_FASTA.contigs.annotations.gff.gz", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/ERZ1292616_FASTA.contigs.annotations.gff.gz.tbi", 
+                "class": "File", 
+                "size": 3433477
+            }, 
+            {
+                "checksum": "sha1$40dce214f72af8e02145e2e03fe288de33124d13", 
+                "basename": "ERZ1292616_FASTA.emapper.annotations.gz", 
+                "nameext": ".gz", 
+                "nameroot": "ERZ1292616_FASTA.emapper.annotations", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/ERZ1292616_FASTA.emapper.annotations.gz", 
+                "class": "File", 
+                "size": 37607135
+            }, 
+            {
+                "checksum": "sha1$e61d7b81180b9ab2728fd06967f6b8a54c72760a", 
+                "basename": "ERZ1292616_FASTA.emapper.seed_orthologs.gz", 
+                "nameext": ".gz", 
+                "nameroot": "ERZ1292616_FASTA.emapper.seed_orthologs", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/ERZ1292616_FASTA.emapper.seed_orthologs.gz", 
+                "class": "File", 
+                "size": 6848215
+            }, 
+            {
+                "checksum": "sha1$b493797d6f84e1c63d1ab1d9c1d3df6cc7b53b0d", 
+                "basename": "ERZ1292616_FASTA.summary.ips", 
+                "nameext": ".ips", 
+                "nameroot": "ERZ1292616_FASTA.summary", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/ERZ1292616_FASTA.summary.ips", 
+                "class": "File", 
+                "size": 517397
+            }, 
+            {
+                "checksum": "sha1$c3f1ef0f07337eb2362143b8798bdc1352ce56fa", 
+                "basename": "ERZ1292616_FASTA.summary.ko", 
+                "nameext": ".ko", 
+                "nameroot": "ERZ1292616_FASTA.summary", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/ERZ1292616_FASTA.summary.ko", 
+                "class": "File", 
+                "size": 247117
+            }, 
+            {
+                "checksum": "sha1$4035fa9e3f98f6836f0253f72b8c0f23107bf01b", 
+                "basename": "ERZ1292616_FASTA.summary.pfam", 
+                "nameext": ".pfam", 
+                "nameroot": "ERZ1292616_FASTA.summary", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/ERZ1292616_FASTA.summary.pfam", 
+                "class": "File", 
+                "size": 301397
+            }, 
+            {
+                "format": "http://edamontology.org/format_3752", 
+                "checksum": "sha1$1f1aafcdb77a61e393b24a7e1c1d392e06c18d40", 
+                "basename": "ERZ1292616_FASTA.summary.go", 
+                "nameroot": "ERZ1292616_FASTA.summary", 
+                "nameext": ".go", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/ERZ1292616_FASTA.summary.go", 
+                "class": "File", 
+                "size": 150236
+            }, 
+            {
+                "format": "http://edamontology.org/format_3752", 
+                "checksum": "sha1$9326636458a818bef1ab90914345c7665b46880a", 
+                "basename": "ERZ1292616_FASTA.summary.go_slim", 
+                "nameroot": "ERZ1292616_FASTA.summary", 
+                "nameext": ".go_slim", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/ERZ1292616_FASTA.summary.go_slim", 
+                "class": "File", 
+                "size": 7555
+            }, 
+            {
+                "checksum": "sha1$872f7ac28c89709c121847ae681bc340540ccd02", 
+                "basename": "ERZ1292616_FASTA.I5.tsv.chunks", 
+                "nameext": ".chunks", 
+                "nameroot": "ERZ1292616_FASTA.I5.tsv", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/ERZ1292616_FASTA.I5.tsv.chunks", 
+                "class": "File", 
+                "size": 26
+            }, 
+            {
+                "checksum": "sha1$666c4805a3abb41183cbfa902b11920f9cdd7827", 
+                "basename": "ERZ1292616_FASTA.I5.tsv.gz", 
+                "nameext": ".gz", 
+                "nameroot": "ERZ1292616_FASTA.I5.tsv", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/ERZ1292616_FASTA.I5.tsv.gz", 
+                "class": "File", 
+                "size": 40717559
+            }, 
+            {
+                "checksum": "sha1$9b92b63bd6f87bc22dbdb3d987983bedd69e2242", 
+                "basename": "ERZ1292616_FASTA.hmm.tsv.chunks", 
+                "nameext": ".chunks", 
+                "nameroot": "ERZ1292616_FASTA.hmm.tsv", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/ERZ1292616_FASTA.hmm.tsv.chunks", 
+                "class": "File", 
+                "size": 27
+            }, 
+            {
+                "checksum": "sha1$5d5c39086b5a68e0d472b162f01ebb078428e0f6", 
+                "basename": "ERZ1292616_FASTA.hmm.tsv.gz", 
+                "nameext": ".gz", 
+                "nameroot": "ERZ1292616_FASTA.hmm.tsv", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/ERZ1292616_FASTA.hmm.tsv.gz", 
+                "class": "File", 
+                "size": 5945404
+            }, 
+            {
+                "checksum": "sha1$c95e666e1f3dc80ceeecfcd097650c0e49602516", 
+                "basename": "ERZ1292616_FASTA_summary.diamond.chunks", 
+                "nameext": ".chunks", 
+                "nameroot": "ERZ1292616_FASTA_summary.diamond", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/ERZ1292616_FASTA_summary.diamond.chunks", 
+                "class": "File", 
+                "size": 35
+            }, 
+            {
+                "checksum": "sha1$abd908e4e3d63045814ae7325dd875e2b199a640", 
+                "basename": "ERZ1292616_FASTA_summary.diamond.gz", 
+                "nameext": ".gz", 
+                "nameroot": "ERZ1292616_FASTA_summary.diamond", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/ERZ1292616_FASTA_summary.diamond.gz", 
+                "class": "File", 
+                "size": 19687669
+            }, 
+            {
+                "checksum": "sha1$e5fd9cfe0e8039111d54b588e77b2bb0cad41c3a", 
+                "basename": "from_chunking_ERZ1292616_FASTA.I5.tsv", 
+                "nameext": ".tsv", 
+                "nameroot": "from_chunking_ERZ1292616_FASTA.I5", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/from_chunking_ERZ1292616_FASTA.I5.tsv", 
+                "class": "File", 
+                "size": 4
+            }, 
+            {
+                "checksum": "sha1$e5fd9cfe0e8039111d54b588e77b2bb0cad41c3a", 
+                "basename": "from_chunking_ERZ1292616_FASTA.hmm.tsv", 
+                "nameext": ".tsv", 
+                "nameroot": "from_chunking_ERZ1292616_FASTA.hmm", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/from_chunking_ERZ1292616_FASTA.hmm.tsv", 
+                "class": "File", 
+                "size": 4
+            }, 
+            {
+                "checksum": "sha1$e5fd9cfe0e8039111d54b588e77b2bb0cad41c3a", 
+                "basename": "from_chunking_ERZ1292616_FASTA_summary.diamond", 
+                "nameext": ".diamond", 
+                "nameroot": "from_chunking_ERZ1292616_FASTA_summary", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/functional-annotation/from_chunking_ERZ1292616_FASTA_summary.diamond", 
+                "class": "File", 
+                "size": 4
+            }
+        ]
+    }, 
+    "chunking_nucleotides": [
+        {
+            "checksum": "sha1$8e562874a655836dfaa0d066b466348e641b88b2", 
+            "basename": "ERZ1292616_FASTA.fasta.chunks", 
+            "nameext": ".chunks", 
+            "nameroot": "ERZ1292616_FASTA.fasta", 
+            "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/ERZ1292616_FASTA.fasta.chunks", 
+            "class": "File", 
+            "size": 25
+        }, 
+        {
+            "checksum": "sha1$b5ed67c93c7610058611b33ccab0782a21354f9f", 
+            "basename": "ERZ1292616_FASTA.fasta.gz", 
+            "nameext": ".gz", 
+            "nameroot": "ERZ1292616_FASTA.fasta", 
+            "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/ERZ1292616_FASTA.fasta.gz", 
+            "class": "File", 
+            "size": 119277504
+        }, 
+        {
+            "checksum": "sha1$2f6901a3169a23ea9b3254908ffc36c6580b7049", 
+            "basename": "ERZ1292616_FASTA_CDS.ffn.chunks", 
+            "nameext": ".chunks", 
+            "nameroot": "ERZ1292616_FASTA_CDS.ffn", 
+            "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/ERZ1292616_FASTA_CDS.ffn.chunks", 
+            "class": "File", 
+            "size": 27
+        }, 
+        {
+            "checksum": "sha1$64324346acdf5b05425c12b81c5aba7ad8489b44", 
+            "basename": "ERZ1292616_FASTA_CDS.ffn.gz", 
+            "nameext": ".gz", 
+            "nameroot": "ERZ1292616_FASTA_CDS.ffn", 
+            "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/ERZ1292616_FASTA_CDS.ffn.gz", 
+            "class": "File", 
+            "size": 121845550
+        }, 
+        {
+            "checksum": "sha1$e5fd9cfe0e8039111d54b588e77b2bb0cad41c3a", 
+            "basename": "from_chunking_ERZ1292616_FASTA.fasta", 
+            "nameext": ".fasta", 
+            "nameroot": "from_chunking_ERZ1292616_FASTA", 
+            "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/from_chunking_ERZ1292616_FASTA.fasta", 
+            "class": "File", 
+            "size": 4
+        }, 
+        {
+            "checksum": "sha1$e5fd9cfe0e8039111d54b588e77b2bb0cad41c3a", 
+            "basename": "from_chunking_ERZ1292616_FASTA_CDS.ffn", 
+            "nameext": ".ffn", 
+            "nameroot": "from_chunking_ERZ1292616_FASTA_CDS", 
+            "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/from_chunking_ERZ1292616_FASTA_CDS.ffn", 
+            "class": "File", 
+            "size": 4
+        }
+    ], 
+    "taxonomy-summary_folder": {
+        "basename": "taxonomy-summary", 
+        "listing": [
+            {
+                "basename": "SSU", 
+                "listing": [
+                    {
+                        "checksum": "sha1$de37276bca84ec25391b7b2e480dad25022981c0", 
+                        "basename": "ERZ1292616_FASTA_SSU.fasta.mseq.gz", 
+                        "nameext": ".gz", 
+                        "nameroot": "ERZ1292616_FASTA_SSU.fasta.mseq", 
+                        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/taxonomy-summary/SSU/ERZ1292616_FASTA_SSU.fasta.mseq.gz", 
+                        "class": "File", 
+                        "size": 25020
+                    }, 
+                    {
+                        "format": "http://edamontology.org/format_3746", 
+                        "checksum": "sha1$3b22dcbb056eb1080f61861fdd8bed0414aa94a1", 
+                        "basename": "ERZ1292616_FASTA_SSU.fasta.mseq.tsv", 
+                        "nameroot": "ERZ1292616_FASTA_SSU.fasta.mseq", 
+                        "nameext": ".tsv", 
+                        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/taxonomy-summary/SSU/ERZ1292616_FASTA_SSU.fasta.mseq.tsv", 
+                        "class": "File", 
+                        "size": 7323
+                    }, 
+                    {
+                        "format": "https://www.iana.org/assignments/media-types/text/tab-separated-values", 
+                        "checksum": "sha1$a0ea6abb5172904f66f5b3960d69493ec09c701f", 
+                        "basename": "ERZ1292616_FASTA_SSU.fasta.mseq.txt", 
+                        "nameroot": "ERZ1292616_FASTA_SSU.fasta.mseq", 
+                        "nameext": ".txt", 
+                        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/taxonomy-summary/SSU/ERZ1292616_FASTA_SSU.fasta.mseq.txt", 
+                        "class": "File", 
+                        "size": 5852
+                    }, 
+                    {
+                        "format": "https://www.iana.org/assignments/media-types/text/html", 
+                        "checksum": "sha1$33d43e6f9edc63bf3880ae908796041d4e66858c", 
+                        "basename": "krona.html", 
+                        "nameroot": "krona", 
+                        "nameext": ".html", 
+                        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/taxonomy-summary/SSU/krona.html", 
+                        "class": "File", 
+                        "size": 241791
+                    }, 
+                    {
+                        "checksum": "sha1$fdc10fee205568a789823631b146d6abbe8adb42", 
+                        "basename": "ERZ1292616_FASTA_SSU.fasta.mseq_hdf5.biom", 
+                        "nameext": ".biom", 
+                        "nameroot": "ERZ1292616_FASTA_SSU.fasta.mseq_hdf5", 
+                        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/taxonomy-summary/SSU/ERZ1292616_FASTA_SSU.fasta.mseq_hdf5.biom", 
+                        "class": "File", 
+                        "size": 41136
+                    }, 
+                    {
+                        "checksum": "sha1$e936c1403d1b238b361dfd219f9e7ccc24439819", 
+                        "basename": "ERZ1292616_FASTA_SSU.fasta.mseq_json.biom", 
+                        "nameext": ".biom", 
+                        "nameroot": "ERZ1292616_FASTA_SSU.fasta.mseq_json", 
+                        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/taxonomy-summary/SSU/ERZ1292616_FASTA_SSU.fasta.mseq_json.biom", 
+                        "class": "File", 
+                        "size": 11089
+                    }
+                ], 
+                "class": "Directory", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/taxonomy-summary/SSU"
+            }, 
+            {
+                "basename": "LSU", 
+                "listing": [
+                    {
+                        "checksum": "sha1$be6fe8c35337396f6bf750c25a710bc2eab5c9b6", 
+                        "basename": "ERZ1292616_FASTA_LSU.fasta.mseq.gz", 
+                        "nameext": ".gz", 
+                        "nameroot": "ERZ1292616_FASTA_LSU.fasta.mseq", 
+                        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/taxonomy-summary/LSU/ERZ1292616_FASTA_LSU.fasta.mseq.gz", 
+                        "class": "File", 
+                        "size": 46093
+                    }, 
+                    {
+                        "format": "http://edamontology.org/format_3746", 
+                        "checksum": "sha1$7298b00129dce6b0986ae74a297bcbba47eee350", 
+                        "basename": "ERZ1292616_FASTA_LSU.fasta.mseq.tsv", 
+                        "nameroot": "ERZ1292616_FASTA_LSU.fasta.mseq", 
+                        "nameext": ".tsv", 
+                        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/taxonomy-summary/LSU/ERZ1292616_FASTA_LSU.fasta.mseq.tsv", 
+                        "class": "File", 
+                        "size": 10425
+                    }, 
+                    {
+                        "format": "https://www.iana.org/assignments/media-types/text/tab-separated-values", 
+                        "checksum": "sha1$780463d8ae63049e3df35a10f761bc144c9282bf", 
+                        "basename": "ERZ1292616_FASTA_LSU.fasta.mseq.txt", 
+                        "nameroot": "ERZ1292616_FASTA_LSU.fasta.mseq", 
+                        "nameext": ".txt", 
+                        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/taxonomy-summary/LSU/ERZ1292616_FASTA_LSU.fasta.mseq.txt", 
+                        "class": "File", 
+                        "size": 8635
+                    }, 
+                    {
+                        "format": "https://www.iana.org/assignments/media-types/text/html", 
+                        "checksum": "sha1$9f18c9170b5127f451e87ef28bae7c1b55cadf35", 
+                        "basename": "krona.html", 
+                        "nameroot": "krona", 
+                        "nameext": ".html", 
+                        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/taxonomy-summary/LSU/krona.html", 
+                        "class": "File", 
+                        "size": 250712
+                    }, 
+                    {
+                        "checksum": "sha1$872bbab198bd67368aac50b856de367968af6921", 
+                        "basename": "ERZ1292616_FASTA_LSU.fasta.mseq_hdf5.biom", 
+                        "nameext": ".biom", 
+                        "nameroot": "ERZ1292616_FASTA_LSU.fasta.mseq_hdf5", 
+                        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/taxonomy-summary/LSU/ERZ1292616_FASTA_LSU.fasta.mseq_hdf5.biom", 
+                        "class": "File", 
+                        "size": 41136
+                    }, 
+                    {
+                        "checksum": "sha1$317cfe04e2c269d1ba6f93b09e3056441a721d44", 
+                        "basename": "ERZ1292616_FASTA_LSU.fasta.mseq_json.biom", 
+                        "nameext": ".biom", 
+                        "nameroot": "ERZ1292616_FASTA_LSU.fasta.mseq_json", 
+                        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/taxonomy-summary/LSU/ERZ1292616_FASTA_LSU.fasta.mseq_json.biom", 
+                        "class": "File", 
+                        "size": 15262
+                    }
+                ], 
+                "class": "Directory", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/taxonomy-summary/LSU"
+            }
+        ], 
+        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/taxonomy-summary", 
+        "class": "Directory"
+    }, 
+    "sequence-categorisation_folder": {
+        "basename": "sequence-categorisation", 
+        "listing": [
+            {
+                "checksum": "sha1$77c26fd0c07ecf2141c1d6474d0ea421ced6a7ed", 
+                "basename": "LSU.fasta.chunks", 
+                "nameext": ".chunks", 
+                "nameroot": "LSU.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/LSU.fasta.chunks", 
+                "class": "File", 
+                "size": 12
+            }, 
+            {
+                "checksum": "sha1$5a04fde85ef68f1fb748f398e68895fe4722053b", 
+                "basename": "LSU.fasta.gz", 
+                "nameext": ".gz", 
+                "nameroot": "LSU.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/LSU.fasta.gz", 
+                "class": "File", 
+                "size": 148534
+            }, 
+            {
+                "checksum": "sha1$e8350a233281602dde29cfa42682a23c76ec6676", 
+                "basename": "SSU.fasta.chunks", 
+                "nameext": ".chunks", 
+                "nameroot": "SSU.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/SSU.fasta.chunks", 
+                "class": "File", 
+                "size": 12
+            }, 
+            {
+                "checksum": "sha1$f64c935f5ff39503531b06451d55683515ace936", 
+                "basename": "SSU.fasta.gz", 
+                "nameext": ".gz", 
+                "nameroot": "SSU.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/SSU.fasta.gz", 
+                "class": "File", 
+                "size": 55368
+            }, 
+            {
+                "checksum": "sha1$e5fd9cfe0e8039111d54b588e77b2bb0cad41c3a", 
+                "basename": "from_chunking_LSU.fasta", 
+                "nameext": ".fasta", 
+                "nameroot": "from_chunking_LSU", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/from_chunking_LSU.fasta", 
+                "class": "File", 
+                "size": 4
+            }, 
+            {
+                "checksum": "sha1$e5fd9cfe0e8039111d54b588e77b2bb0cad41c3a", 
+                "basename": "from_chunking_SSU.fasta", 
+                "nameext": ".fasta", 
+                "nameroot": "from_chunking_SSU", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/from_chunking_SSU.fasta", 
+                "class": "File", 
+                "size": 4
+            }, 
+            {
+                "checksum": "sha1$6d9b80196dae2d7b3d2181d95f37ba12ffde4131", 
+                "basename": "5S.fa.gz", 
+                "nameext": ".gz", 
+                "nameroot": "5S.fa", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/5S.fa.gz", 
+                "class": "File", 
+                "size": 139
+            }, 
+            {
+                "checksum": "sha1$dfa528b1cced966b32e4d8c2b43b614e3ca01268", 
+                "basename": "5_8S.fa.gz", 
+                "nameext": ".gz", 
+                "nameroot": "5_8S.fa", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/5_8S.fa.gz", 
+                "class": "File", 
+                "size": 790
+            }, 
+            {
+                "checksum": "sha1$f64fd17b3ff0f0b745f32354fbb6173f3b759c86", 
+                "basename": "LSU_rRNA_archaea.RF02540.fa.gz", 
+                "nameext": ".gz", 
+                "nameroot": "LSU_rRNA_archaea.RF02540.fa", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/LSU_rRNA_archaea.RF02540.fa.gz", 
+                "class": "File", 
+                "size": 15014
+            }, 
+            {
+                "checksum": "sha1$72d860530f051eb60cf9a2d43761fa12fdb05464", 
+                "basename": "LSU_rRNA_bacteria.RF02541.fa.gz", 
+                "nameext": ".gz", 
+                "nameroot": "LSU_rRNA_bacteria.RF02541.fa", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/LSU_rRNA_bacteria.RF02541.fa.gz", 
+                "class": "File", 
+                "size": 128667
+            }, 
+            {
+                "checksum": "sha1$03bfa3b7222836819c6a7fade0775bb4607d86d0", 
+                "basename": "LSU_rRNA_eukarya.RF02543.fa.gz", 
+                "nameext": ".gz", 
+                "nameroot": "LSU_rRNA_eukarya.RF02543.fa", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/LSU_rRNA_eukarya.RF02543.fa.gz", 
+                "class": "File", 
+                "size": 3798
+            }, 
+            {
+                "checksum": "sha1$e1f81af8ef60315878135770574e1634f639ec8d", 
+                "basename": "SSU_rRNA_archaea.RF01959.fa.gz", 
+                "nameext": ".gz", 
+                "nameroot": "SSU_rRNA_archaea.RF01959.fa", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/SSU_rRNA_archaea.RF01959.fa.gz", 
+                "class": "File", 
+                "size": 7153
+            }, 
+            {
+                "checksum": "sha1$d6720b3b12ca3e8bacdcab754363ecadad01b9cd", 
+                "basename": "SSU_rRNA_bacteria.RF00177.fa.gz", 
+                "nameext": ".gz", 
+                "nameroot": "SSU_rRNA_bacteria.RF00177.fa", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/SSU_rRNA_bacteria.RF00177.fa.gz", 
+                "class": "File", 
+                "size": 45778
+            }, 
+            {
+                "checksum": "sha1$0654807defbc1599feffd0c2d31dd8eb4dd7aee4", 
+                "basename": "SSU_rRNA_eukarya.RF01960.fa.gz", 
+                "nameext": ".gz", 
+                "nameroot": "SSU_rRNA_eukarya.RF01960.fa", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/SSU_rRNA_eukarya.RF01960.fa.gz", 
+                "class": "File", 
+                "size": 1364
+            }, 
+            {
+                "checksum": "sha1$2d1eefa4609e71fc555e34741a975750ae5211ff", 
+                "basename": "Archaea_SRP.RF01857.fasta.gz", 
+                "nameext": ".gz", 
+                "nameroot": "Archaea_SRP.RF01857.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/Archaea_SRP.RF01857.fasta.gz", 
+                "class": "File", 
+                "size": 918
+            }, 
+            {
+                "checksum": "sha1$7e3bd3e871806da768e582b8022bd7b4d241688c", 
+                "basename": "Bacteria_large_SRP.RF01854.fasta.gz", 
+                "nameext": ".gz", 
+                "nameroot": "Bacteria_large_SRP.RF01854.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/Bacteria_large_SRP.RF01854.fasta.gz", 
+                "class": "File", 
+                "size": 1384
+            }, 
+            {
+                "checksum": "sha1$b7c558c91b15a18caf870378a1f9d8872339805b", 
+                "basename": "Bacteria_small_SRP.RF01854.fasta.gz", 
+                "nameext": ".gz", 
+                "nameroot": "Bacteria_small_SRP.RF01854.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/Bacteria_small_SRP.RF01854.fasta.gz", 
+                "class": "File", 
+                "size": 1218
+            }, 
+            {
+                "checksum": "sha1$b208e4bc222b3d774d632bbb0ac0e0761a48767c", 
+                "basename": "Dictyostelium_SRP.RF01570.fasta.gz", 
+                "nameext": ".gz", 
+                "nameroot": "Dictyostelium_SRP.RF01570.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/Dictyostelium_SRP.RF01570.fasta.gz", 
+                "class": "File", 
+                "size": 936
+            }, 
+            {
+                "checksum": "sha1$3814ce21234e705e0e2f2bc87176f2cb750d8680", 
+                "basename": "Fungi_SRP.RF01502.fasta.gz", 
+                "nameext": ".gz", 
+                "nameroot": "Fungi_SRP.RF01502.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/Fungi_SRP.RF01502.fasta.gz", 
+                "class": "File", 
+                "size": 256
+            }, 
+            {
+                "checksum": "sha1$f47b6d4ba77c29e2a2cd7b6ebcedded5f509a165", 
+                "basename": "Metazoa_SRP.RF00017.fasta.gz", 
+                "nameext": ".gz", 
+                "nameroot": "Metazoa_SRP.RF00017.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/Metazoa_SRP.RF00017.fasta.gz", 
+                "class": "File", 
+                "size": 566
+            }, 
+            {
+                "checksum": "sha1$dd4a8de554197790056d789c0825ea9739b701a9", 
+                "basename": "Plant_SRP.RF01855.fasta.gz", 
+                "nameext": ".gz", 
+                "nameroot": "Plant_SRP.RF01855.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/Plant_SRP.RF01855.fasta.gz", 
+                "class": "File", 
+                "size": 398
+            }, 
+            {
+                "checksum": "sha1$59755f61a7fc1da0bee9c16444b8387f0bc94794", 
+                "basename": "Protozoa_SRP.RF01856.fasta.gz", 
+                "nameext": ".gz", 
+                "nameroot": "Protozoa_SRP.RF01856.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/Protozoa_SRP.RF01856.fasta.gz", 
+                "class": "File", 
+                "size": 382
+            }, 
+            {
+                "checksum": "sha1$f84af396b3ee402b1ff7c2d7dd4c34b792a1aab6", 
+                "basename": "RNaseP_arch.RF00373.fasta.gz", 
+                "nameext": ".gz", 
+                "nameroot": "RNaseP_arch.RF00373.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/RNaseP_arch.RF00373.fasta.gz", 
+                "class": "File", 
+                "size": 4835
+            }, 
+            {
+                "checksum": "sha1$e712a8eb2021ec5f9293ed48499d272ad739cd63", 
+                "basename": "RNaseP_bact_a.RF00010.fasta.gz", 
+                "nameext": ".gz", 
+                "nameroot": "RNaseP_bact_a.RF00010.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/RNaseP_bact_a.RF00010.fasta.gz", 
+                "class": "File", 
+                "size": 20703
+            }, 
+            {
+                "checksum": "sha1$386e34fc1b2106b95ce54e516a7346ef93f70be2", 
+                "basename": "RNaseP_bact_b.RF00011.fasta.gz", 
+                "nameext": ".gz", 
+                "nameroot": "RNaseP_bact_b.RF00011.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/RNaseP_bact_b.RF00011.fasta.gz", 
+                "class": "File", 
+                "size": 1319
+            }, 
+            {
+                "checksum": "sha1$d2b09acf32b0f24e2da20442dc45a8af4f039170", 
+                "basename": "RNaseP_nuc.RF00009.fasta.gz", 
+                "nameext": ".gz", 
+                "nameroot": "RNaseP_nuc.RF00009.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/RNaseP_nuc.RF00009.fasta.gz", 
+                "class": "File", 
+                "size": 891
+            }, 
+            {
+                "checksum": "sha1$afcea90d1694122d8efa150ba468f4aabf8f10a6", 
+                "basename": "RNase_MRP.RF00030.fasta.gz", 
+                "nameext": ".gz", 
+                "nameroot": "RNase_MRP.RF00030.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/RNase_MRP.RF00030.fasta.gz", 
+                "class": "File", 
+                "size": 481
+            }, 
+            {
+                "checksum": "sha1$8bb47dbe7db5d8af73e3dbcba697d5c8db057460", 
+                "basename": "RNase_P.RF01577.fasta.gz", 
+                "nameext": ".gz", 
+                "nameroot": "RNase_P.RF01577.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/RNase_P.RF01577.fasta.gz", 
+                "class": "File", 
+                "size": 37965
+            }, 
+            {
+                "checksum": "sha1$846dee603b7b8f2f400a6b02558bb9c26938e51f", 
+                "basename": "alpha_tmRNA.RF01849.fasta.gz", 
+                "nameext": ".gz", 
+                "nameroot": "alpha_tmRNA.RF01849.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/alpha_tmRNA.RF01849.fasta.gz", 
+                "class": "File", 
+                "size": 1352
+            }, 
+            {
+                "checksum": "sha1$718b7708a1571e64a5ac8848db7ab7497513e8e7", 
+                "basename": "beta_tmRNA.RF01850.fasta.gz", 
+                "nameext": ".gz", 
+                "nameroot": "beta_tmRNA.RF01850.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/beta_tmRNA.RF01850.fasta.gz", 
+                "class": "File", 
+                "size": 3025
+            }, 
+            {
+                "checksum": "sha1$6d6485ce1cbbb0e98ba009d404460bbf85c9f405", 
+                "basename": "cyano_tmRNA.RF01851.fasta.gz", 
+                "nameext": ".gz", 
+                "nameroot": "cyano_tmRNA.RF01851.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/cyano_tmRNA.RF01851.fasta.gz", 
+                "class": "File", 
+                "size": 966
+            }, 
+            {
+                "checksum": "sha1$cf57c9774e9d478547236e4313ecf57ed9ecf2ce", 
+                "basename": "mt-tmRNA.RF02544.fasta.gz", 
+                "nameext": ".gz", 
+                "nameroot": "mt-tmRNA.RF02544.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/mt-tmRNA.RF02544.fasta.gz", 
+                "class": "File", 
+                "size": 2035
+            }, 
+            {
+                "checksum": "sha1$94d638da568d04b1756a30d26f07a41c1b18ce9d", 
+                "basename": "tRNA-Sec.RF01852.fasta.gz", 
+                "nameext": ".gz", 
+                "nameroot": "tRNA-Sec.RF01852.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/tRNA-Sec.RF01852.fasta.gz", 
+                "class": "File", 
+                "size": 5155
+            }, 
+            {
+                "checksum": "sha1$aa060e42375af9387eb05f50aebd622e8920fb02", 
+                "basename": "tRNA.RF00005.fasta.gz", 
+                "nameext": ".gz", 
+                "nameroot": "tRNA.RF00005.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/tRNA.RF00005.fasta.gz", 
+                "class": "File", 
+                "size": 292079
+            }, 
+            {
+                "checksum": "sha1$81648bf9722fb6fc4c2a0167a07667bdcf78fde9", 
+                "basename": "tmRNA.RF00023.fasta.gz", 
+                "nameext": ".gz", 
+                "nameroot": "tmRNA.RF00023.fasta", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation/tmRNA.RF00023.fasta.gz", 
+                "class": "File", 
+                "size": 38085
+            }
+        ], 
+        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/sequence-categorisation", 
+        "class": "Directory"
+    }, 
+    "pathways_systems_folder_antismash_summary": {
+        "basename": "pathways-systems", 
+        "nameext": "", 
+        "nameroot": "pathways-systems", 
+        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/pathways-systems", 
+        "listing": [
+            {
+                "checksum": "sha1$2399705a3fe067d69159c5ae393809a31d0fcc28", 
+                "basename": "ERZ1292616_FASTA.summary.antismash", 
+                "size": 903, 
+                "class": "File", 
+                "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/pathways-systems/ERZ1292616_FASTA.summary.antismash"
+            }
+        ], 
+        "class": "Directory"
+    }, 
+    "rna-count": {
+        "checksum": "sha1$605bae538810ab7ed16f161f443689321df6a057", 
+        "basename": "RNA-counts", 
+        "nameext": "", 
+        "nameroot": "RNA-counts", 
+        "location": "file:///hps/nobackup2/production/metagenomics/results/automated_jobs/ERP1197/ERP119724/results/version_5.0/ERZ1292616_FASTA_2/RNA-counts", 
+        "class": "File", 
+        "size": 27
+    }
+}
