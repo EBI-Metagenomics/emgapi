@@ -76,7 +76,9 @@ class Command(BaseCommand):
 
         for job in jobs:
             logger.info("Cleaning job {}".format(job))
-            downloads = AnalysisJobDownload.objects.filter(job=job, group_type__in=groups)
+            downloads = AnalysisJobDownload.objects.filter(
+                job=job, group_type__in=groups,
+                pipeline__release_version=pipeline_version)
 
             if downloads:
                 logger.info("Found {} downloads for job: {}".format(len(downloads), job))
@@ -89,6 +91,8 @@ class Command(BaseCommand):
 
             taxonomy_annotations = AnalysisJobTaxonomy.objects.\
                 filter(job_id=job.job_id, pipeline_version=pipeline_version)
+
+            logger.info("Getting mongo annotations.")
 
             if taxonomy_annotations:
                 for tax_ann in taxonomy_annotations:
@@ -114,7 +118,7 @@ class Command(BaseCommand):
                             logger.info("Removing {} LSU annotations from {}".format(len(lsu), job))
                             tax_ann.taxonomy_lsu = []
 
-                        tax_ann.save()
+                    tax_ann.save()
             else:
                 logger.info("No annotations to remove.")
             logger.info("Job {} is squeaky clean now".format(job))
