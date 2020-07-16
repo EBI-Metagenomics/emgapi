@@ -159,7 +159,7 @@ class TestCLI:
                     "value": "6043"
                 },
                 {
-                    "key": "Contigs with predicted rRNA",
+                    "key": "Contigs with predicted RNA",
                     "value": "152"
                 },
                 {

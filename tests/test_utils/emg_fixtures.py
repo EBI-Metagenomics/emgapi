@@ -545,7 +545,7 @@ def analysis_metadata_variable_names():
         ("Predicted CDS", "n/a"),
         ("Contigs with predicted CDS", "n/a"),
         ("Nucleotide sequences with predicted CDS", "n/a"),
-        ("Contigs with predicted rRNA", "n/a"),
+        ("Contigs with predicted RNA", "n/a"),
         ("Nucleotide sequences with predicted rRNA", "n/a"),
         ("Predicted SSU sequences", "n/a"),
         ("Predicted LSU sequences", "n/a"),

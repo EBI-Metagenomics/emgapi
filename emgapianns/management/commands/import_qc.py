@@ -69,7 +69,7 @@ class Command(EMGBaseCommand):
                 elif row[0] == "Nucleotide sequences with predicted CDS":
                     row[0] = "Reads with predicted CDS"
                 elif row[0] in ["Nucleotide sequences with predicted rRNA", "Nucleotide sequences with predicted RNA"]:
-                    row[0] = "Reads with predicted rRNA"
+                    row[0] = "Reads with predicted RNA"
                 #     End v4.1 fix
                 var = emg_models.AnalysisMetadataVariableNames.objects.using(emg_db) \
                     .get(var_name=row[0])
@@ -138,12 +138,14 @@ class Command(EMGBaseCommand):
                             var_name = "Predicted CDS"
                         elif row[0] == "Contigs with predicted CDS":
                             var_name = "Contigs with predicted CDS"
-                        elif row[0] in ["Contigs with predicted rRNA", "Contigs with predicted with rRNA"]:
-                            var_name = "Contigs with predicted rRNA"
+                        elif row[0] in ["Contigs with predicted rRNA", "Contigs with predicted with rRNA",
+                                        "Contigs with predicted RNA"]:
+                            var_name = "Contigs with predicted RNA"
                         elif row[0] in ["Reads with predicted CDS", "Nucleotide sequences with predicted CDS"]:
                             var_name = "Reads with predicted CDS"
-                        elif row[0] in ["Reads with predicted rRNA", "Nucleotide sequences with predicted rRNA"]:
-                            var_name = "Reads with predicted rRNA"
+                        elif row[0] in ["Reads with predicted rRNA", "Nucleotide sequences with predicted rRNA",
+                                        "Reads with predicted RNA"]:
+                            var_name = "Reads with predicted RNA"
                         else:
                             logging.error("Unsupported variable name {}".format(row[0]))
                             raise UnexpectedVariableName
