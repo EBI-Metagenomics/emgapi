@@ -127,7 +127,7 @@ class Command(BaseCommand):
             ('host taxid', 'host_tax_id'),
             ('host sex', 'host_sex'),
             ('body site', 'host_body_site'),
-            ('body gravidity', 'host_gravidity'),
+            ('gravidity', 'host_gravidity'),
             ('host genotype', 'host_genotype'),
             ('host phenotype', 'host_phenotype'),
             ('host growth conditions', 'host_growth_conditions'),
