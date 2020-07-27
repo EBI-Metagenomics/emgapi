@@ -18,6 +18,7 @@ import logging
 
 from django.db.models import Q
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 from ena_portal_api import ena_handler
 
 from emgapi import models as emg_models
@@ -30,7 +31,7 @@ from emgena.models import RunStudy, AssemblyStudy
 ena = ena_handler.EnaApiHandler()
 
 
-class StudyImporter(object):
+class StudyImporter:
     """
         Creates a new study object in EMG or updates an existing one.
     """
@@ -156,11 +157,12 @@ class StudyImporter(object):
         # self._lookup_publication_by_project_id(ena_study.project_id)
 
         project_id = ena_study.project_id
-        if secondary_study_accession.startswith('SRP'):
+        try:
             project = self._get_ena_project(ena_db, project_id)
             center_name = project.center_name
-        else:
+        except ObjectDoesNotExist:
             center_name = ena_study.center_name
+            pass
 
         defaults = {'centre_name': center_name,
                     'is_public': is_public,
