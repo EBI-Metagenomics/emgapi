@@ -31,7 +31,7 @@ from emgena.models import RunStudy, AssemblyStudy
 ena = ena_handler.EnaApiHandler()
 
 
-class StudyImporter(object):
+class StudyImporter:
     """
         Creates a new study object in EMG or updates an existing one.
     """
@@ -160,7 +160,7 @@ class StudyImporter(object):
         try:
             project = self._get_ena_project(ena_db, project_id)
             center_name = project.center_name
-        except ObjectDoesNotExist as DoesNotExist:
+        except ObjectDoesNotExist:
             center_name = ena_study.center_name
             pass
 
