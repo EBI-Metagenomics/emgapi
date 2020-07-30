@@ -71,7 +71,7 @@ class Command(BaseCommand):
     version = None
     result_dir = None
     library_strategy = None
-    no_study_summary = False
+    force_study_summary = False
 
     def __init__(self):
         super().__init__()
@@ -92,8 +92,8 @@ class Command(BaseCommand):
                             help='Target emg_db_name alias',
                             choices=['default', 'dev', 'prod'],
                             default='default')
-        parser.add_argument('--no-study-summary', dest='no_study_summary', action='store_true')
-        parser.set_defaults(no_study_summary=False)
+        parser.add_argument('--force-study-summary', dest='force_study_summary', action='store_true')
+        parser.set_defaults(force_study_summary=False)
 
     def handle(self, *args, **options):
         setup_logging(options)
@@ -103,7 +103,7 @@ class Command(BaseCommand):
         self.biome = options['biome']
         self.library_strategy = options['library_strategy']
         self.version = options['pipeline']
-        self.no_study_summary = options['no_study_summary']
+        self.force_study_summary = options['force_study_summary']
         logger.info("CLI %r" % options)
 
         metadata = self.retrieve_metadata()
@@ -147,9 +147,7 @@ class Command(BaseCommand):
         else:
             logging.info("Skipping the import procedure for the contig viewer!")
 
-        if self.no_study_summary:
-            logging.info("Skipping the study summary generation steps as requested!")
-        else:
+        if self.force_study_summary:
             self.__call_generate_study_summary(secondary_study_accession)
 
         logger.info("The upload of the run/assembly {} finished successfully.".format(self.accession))
