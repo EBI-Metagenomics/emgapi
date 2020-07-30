@@ -17,6 +17,7 @@
 from unittest.mock import patch
 
 import pytest
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 
 from emgapi import models as emg_models
@@ -117,9 +118,10 @@ def insert_biome(biome_id, biome_name, left, right, depth, lineage):
 @pytest.mark.django_db(reset_sequences=True, transaction=True)
 class TestImportStudyTransactions:
 
+    @patch('emgapianns.management.lib.create_or_update_study.StudyImporter._get_ena_project')
     @patch('emgapianns.management.commands.import_study.Command.get_study_dir')
     @patch('emgapianns.management.lib.create_or_update_study.StudyImporter._fetch_study_metadata')
-    def test_import_ena_study_should_succeed(self, mock_db, mock_study_dir):
+    def test_import_ena_study_should_succeed(self, mock_db, mock_study_dir, mock_ena_project):
         """
         :param mock_db:
         :param mock_study_dir:
@@ -129,12 +131,13 @@ class TestImportStudyTransactions:
         lineage = 'root:Host-associated:Mammals:Digestive system:Fecal'
         biome_name = 'Fecal'
 
-        mock_study_dir.return_value = "2019/09/ERP117125"
         mock_db.return_value = expected = mock_ena_run_study()
+        mock_study_dir.return_value = "2019/09/ERP117125"
+        mock_ena_project.return_value = get_ena_project_mock('UNIVERSITY OF CAMBRIDGE')
 
         insert_biome(422, biome_name, 841, 844, 5, lineage)
 
-        with mock_db, mock_study_dir:
+        with mock_db, mock_study_dir, mock_ena_project:
             cmd = Command()
             cmd.run_from_argv(
                 argv=['manage.py', 'import_study', accession, lineage])
