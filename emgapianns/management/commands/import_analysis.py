@@ -92,8 +92,7 @@ class Command(BaseCommand):
                             help='Target emg_db_name alias',
                             choices=['default', 'dev', 'prod'],
                             default='default')
-        parser.add_argument('--force-study-summary', dest='force_study_summary', action='store_true')
-        parser.set_defaults(force_study_summary=False)
+        parser.add_argument('--force-study-summary', dest='force_study_summary', action='store_true', default=False)
 
     def handle(self, *args, **options):
         setup_logging(options)
