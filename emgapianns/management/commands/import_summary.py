@@ -303,6 +303,10 @@ class Command(EMGBaseCommand):
         new_entities = []
         annotations = []
 
+        # drop previous annotations
+        setattr(analysis, analysis_field, [])
+        analysis.save()
+
         # next(reader)  # skip header
 
         for count, model_id, description in reader:
@@ -333,6 +337,7 @@ class Command(EMGBaseCommand):
 
         analysis.save()
         logger.info('Saved {}'.format(analysis_field))
+
 
     def load_genome_properties(self, reader,  obj):
         """Genome properties import, using the output summary from GP
