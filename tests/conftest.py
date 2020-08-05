@@ -29,6 +29,14 @@ def pytest_configure():
     settings.DEBUG = False
     settings.ALLOWED_HOSTS = ["*"]
     settings.REST_FRAMEWORK['TEST_REQUEST_DEFAULT_FORMAT'] = 'vnd.api+json'
+    settings.RT = {
+        "url": "https://fake.helpdesk.ebi.ac.uk/REST/1.0/ticket/new",
+        "user": "metagenomics-help-api-user",
+        "pass": "secret-password",
+        "emg_queue": "EMG_Q",
+        "emg_email": "EMG@mail.com",
+        "ena_queue": "ENA_Q"
+    }
     # TODO: backend mock to replace FakeEMGBackend
     # settings.EMG_BACKEND_AUTH_URL = 'http://fake_backend/auth'
     settings.AUTHENTICATION_BACKENDS = ('test_utils.FakeEMGBackend',)

@@ -48,6 +48,7 @@ def biome():
         lineage='root:foo:bar',
     )
 
+
 @pytest.fixture
 def biome_human():
     return emg_models.Biome.objects.create(
