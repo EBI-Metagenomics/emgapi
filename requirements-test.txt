@@ -9,3 +9,4 @@ jsonapi-client==0.9.8
 pytest-cov==2.8.1
 # For testing webuploader features (under emgapianns/management/commands/...)
 pandas==0.25.2
+responses==0.10.15
