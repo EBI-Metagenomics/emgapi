@@ -62,19 +62,37 @@ class NotifySerializer(serializers.Serializer):
     from_email = serializers.EmailField(max_length=200, required=True)
     subject = serializers.CharField(max_length=500, required=True)
     message = serializers.CharField(max_length=1000, required=True)
+    is_consent = serializers.BooleanField(default=False, required=False)
 
     def create(self, validated_data):
+        """Create an RT ticket.
+        If this is a consent approval then the procedure is:
+        - create ticket in ENA-MG queue
+        - add EMG email in CC (to link the tickets)
+        otherwise:
+        - create ticket in EMG queue
+        """
         import requests
         n = ena_models.Notify(**validated_data)
 
+        emg_queue = settings.RT["emg_queue"]
+        emg_email = settings.RT["emg_email"]
+        ena_queue = settings.RT["ena_queue"]
+
         ticket = {
             "id": "ticket/new",
-            "Queue": settings.RT['queue'],
             "Requestor": n.from_email,
             "Priority": "4",
             "Subject": n.subject,
             "Text": n.message.replace("\n", ';')
         }
+
+        if n.is_consent:
+            ticket["Queue"] = ena_queue
+            ticket["CC"] = emg_email
+        else:
+            ticket["Queue"] = emg_queue
+
         logger.info("Ticket %r" % ticket)
 
         content = [
