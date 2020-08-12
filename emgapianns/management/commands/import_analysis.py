@@ -350,6 +350,8 @@ class Command(BaseCommand):
         :return: e.g. 2017/11/ERP104174/
         """
         study_folder = self.__call_find(directory, "{}*".format(search_pattern), maxdepth)
+        #omit any assembly result folders
+        study_folder = [x for x in study_folder if 'assemblies' not in x]
 
         if study_folder:
             if len(study_folder) > 1:
