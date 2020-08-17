@@ -195,7 +195,7 @@
       "downloadable": true,
       "alias": "{}_LSU_OTU.tsv",
       "compression": false,
-      "description_label": "OTUs, counts and taxonomic assignments for LSU rRNAs",
+      "description_label": "OTUs, counts and taxonomic assignments for LSU rRNA",
       "format_name": "TSV",
       "group_type": "Taxonomic analysis LSU rRNA",
       "real_name": "{}_LSU.fasta.mseq.tsv",
