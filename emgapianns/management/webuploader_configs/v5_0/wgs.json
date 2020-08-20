@@ -308,7 +308,7 @@
     {
       "_accession_substitution": "full",
       "_chunked": true,
-      "chunk_file": "SSU.fasta.chunks",
+      "chunk_file": "SSU.fasta.gz.chunks",
       "_required": false,
       "downloadable": true,
       "alias": "{}_SSU.fasta.gz",
@@ -322,7 +322,7 @@
     {
       "_accession_substitution": "full",
       "_chunked": true,
-      "chunk_file": "LSU.fasta.chunks",
+      "chunk_file": "LSU.fasta.gz.chunks",
       "_required": true,
       "downloadable": true,
       "alias": "{}_LSU.fasta.gz",
