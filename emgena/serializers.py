@@ -68,7 +68,7 @@ class NotifySerializer(serializers.Serializer):
         """Create an RT ticket.
         If this is a consent approval then the procedure is:
         - create ticket in ENA-MG queue
-        - add EMG email in CC (to link the tickets)
+        - add EMG email in Bcc (to link the tickets)
         otherwise:
         - create ticket in EMG queue
         """
@@ -89,7 +89,7 @@ class NotifySerializer(serializers.Serializer):
 
         if n.is_consent:
             ticket["Queue"] = ena_queue
-            ticket["CC"] = emg_email
+            ticket["Bcc"] = emg_email
         else:
             ticket["Queue"] = emg_queue
 
