@@ -97,7 +97,7 @@ class TestNotify(APITestCase):
                 "Subject: Test email subject",
                 "Text: Hi this is just an example",
                 "Queue: " + settings.RT["ena_queue"],
-                "CC: " + settings.RT["emg_email"]
+                "Bcc: " + settings.RT["emg_email"]
             ])
         }
 
