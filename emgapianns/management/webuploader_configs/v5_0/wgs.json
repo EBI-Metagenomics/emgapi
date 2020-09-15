@@ -782,7 +782,7 @@
     {
       "_accession_substitution": "full",
       "_chunked": false,
-      "_required": true,
+      "_required": false,
       "downloadable": true,
       "alias": "{}.mOTUs.tsv",
       "compression": false,
