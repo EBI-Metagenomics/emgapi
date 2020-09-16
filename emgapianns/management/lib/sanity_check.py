@@ -209,13 +209,18 @@ class SanityCheck:
 
     def run_coverage_check_wgs(self):
         """
-            For WGS / metaT, I’d do ’do proteins exist? If not, quit with error.
+            For WGS / metaT, we do 'check for taxonomy output folder' If not, quit with error.
+            If so, check ’do proteins exist? check.
             If so, check for functional annotations.
             If functional annotations, proceed with upload.
             if no functional annotations - throw a warning / require manual intervention before upload.
         :return:
         """
         logging.info("Running coverage check for wgs data.")
+        taxa_folder = os.path.join(self.dir, "taxonomy-summary")
+        if not os.path.exists(taxa_folder):
+            raise CoverageCheckException("Could not find the taxonomy output folder: {}!".format(taxa_folder))
+            
         for f in self.config:
             if 'coverage_check' in f:
                 try:

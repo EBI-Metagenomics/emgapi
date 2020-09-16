@@ -174,7 +174,6 @@
       "subdir": "taxonomy-summary/LSU"
     },
     {
-      "coverage_check": true,
       "_accession_substitution": "full",
       "_chunked": false,
       "_required": false,
@@ -188,7 +187,6 @@
       "subdir": "taxonomy-summary/SSU"
     },
     {
-      "coverage_check": true,
       "_accession_substitution": "full",
       "_chunked": false,
       "_required": false,
@@ -323,7 +321,7 @@
       "_accession_substitution": "full",
       "_chunked": true,
       "chunk_file": "LSU.fasta.chunks",
-      "_required": true,
+      "_required": false,
       "downloadable": true,
       "alias": "{}_LSU.fasta.gz",
       "compression": true,
