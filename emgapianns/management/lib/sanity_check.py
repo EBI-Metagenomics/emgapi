@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class SanityCheck:
     QC_NOT_PASSED = 'no-seqs-passed-qc-flag'
-    EXPECTED_LIBRARY_STRATEGIES = ['amplicon', 'wgs', 'assembly', 'rna-seq']
+    EXPECTED_LIBRARY_STRATEGIES = ['amplicon', 'wgs', 'assembly', 'rna-seq', 'wga']
     MIN_NUM_SEQS = 1
     MIN_NUM_LINES = 3
 
