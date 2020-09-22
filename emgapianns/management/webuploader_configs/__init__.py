@@ -5,7 +5,8 @@ import json
 DIR_NAME = os.path.dirname(__file__)
 
 library_strategy_remapping = {
-    'rna-seq': 'wgs'
+    'rna-seq': 'wgs',
+    'wga': 'wgs'
 }
 
 

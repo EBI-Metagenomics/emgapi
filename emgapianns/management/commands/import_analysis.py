@@ -85,7 +85,7 @@ class Command(BaseCommand):
         parser.add_argument('biome', help='Lineage of GOLD biome')
         parser.add_argument('library_strategy',
                             help='Library strategy',
-                            choices=['AMPLICON', 'WGS', 'ASSEMBLY', 'RNA-Seq'])
+                            choices=['AMPLICON', 'WGS', 'ASSEMBLY', 'RNA-Seq', 'WGA'])
         parser.add_argument('--pipeline', help='Pipeline version',
                             choices=['4.1', '5.0'], default='4.1')
         parser.add_argument('--database',

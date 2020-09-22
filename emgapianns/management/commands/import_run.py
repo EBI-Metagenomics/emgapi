@@ -57,7 +57,7 @@ class Command(BaseCommand):
         parser.add_argument('--result_dir', help="Result dir folder - absolute path.")
         parser.add_argument('--biome', help='Lineage of GOLD biome')
         parser.add_argument('--library_strategy', help='Library strategy',
-                            choices=['AMPLICON', 'WGS', 'ASSEMBLY', 'RNA-Seq'])
+                            choices=['AMPLICON', 'WGS', 'ASSEMBLY', 'RNA-Seq', 'WGA'])
 
     def handle(self, *args, **options):
         logger.info("CLI %r" % options)
