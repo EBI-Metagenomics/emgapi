@@ -51,6 +51,8 @@ class TestSanityCheck:
         ("ERRXXXXXX", "wgs", "5.0", "/tmp"),
         ("ERRXXXXXX", "rna-seq", "4.1", "/tmp"),
         ("ERRXXXXXX", "rna-seq", "5.0", "/tmp"),
+        ("ERRXXXXXX", "wga", "4.1", "/tmp"),
+        ("ERRXXXXXX", "wga", "5.0", "/tmp"),
         ("ERZXXXXXX", "ASSEMBLY", "4.1", "/tmp"),
         ("ERRXXXXXX", "WGS", "4.1", "/tmp"),
         ("ERRXXXXXX", "AMPLICON", "4.1", "/tmp")
