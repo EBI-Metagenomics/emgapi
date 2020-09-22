@@ -85,7 +85,7 @@ class TestSanityCheck:
     @patch("os.path.basename")
     @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
         ("ERR2985769", "other", "4.1", "/tmp"),
-        ("ERR2985769", "WGA", "4.1", "/tmp"),
+        ("ERR2985769", "WXS", "4.1", "/tmp"),
     ])
     def test_check_init_should_raise_unexpected_library_strategy_exception(self, mock_dir, accession,
                                                                            experiment_type, version,
