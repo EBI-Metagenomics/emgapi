@@ -239,10 +239,10 @@ class StudySummaryGenerator(object):
         column_name = self.MAPSEQ_COLUMN_MAPPER.get(rna_type)
         # Fixme: Replace pandas dataframe read csv function by pure python and introduce buffered reading
         df = pd.read_csv(mapseq_file, compression=compression, header=header, sep=delimiter)
-
+        filtered_df = df.dropna(subset=[column_name])
         taxonomies = list()
-        for i, row in df.iterrows():
-            value = df.at[i, column_name]
+        for i, row in filtered_df.iterrows():
+            value = filtered_df.at[i, column_name]
             index = value.find(";c__")
             if index > 0:
                 value = value[0:index]
@@ -259,11 +259,12 @@ class StudySummaryGenerator(object):
             data[counter] = new_columns
             counter += 1
 
-        num_assigned_seqs = df[column_name].count()
+        num_assigned_seqs = filtered_df[column_name].count()
         num_unassigned_seqs = num_rna_seqs - num_assigned_seqs
         if num_unassigned_seqs > 0:
             data[counter] = [unassigned, unassigned, unassigned, num_unassigned_seqs]
         return data
+
 
     def generate_go_summary_v4(self, analysis_result_dirs, mode):
         res_files = self.get_go_v4_result_files(analysis_result_dirs, mode)
