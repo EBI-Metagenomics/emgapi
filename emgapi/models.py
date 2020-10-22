@@ -639,7 +639,7 @@ class Study(models.Model):
     study_abstract = models.TextField(
         db_column='STUDY_ABSTRACT', blank=True, null=True)
     study_name = models.CharField(
-        db_column='STUDY_NAME', max_length=255, blank=True, null=True)
+        db_column='STUDY_NAME', max_length=4000, blank=True, null=True)
     study_status = models.CharField(
         db_column='STUDY_STATUS', max_length=30, blank=True, null=True)
     data_origination = models.CharField(
