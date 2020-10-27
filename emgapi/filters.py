@@ -799,3 +799,249 @@ class AssemblyFilter(django_filters.FilterSet):
             'sample_accession',
             'include',
         )
+
+
+class GenomeFilter(django_filters.FilterSet):
+
+    length__gte = django_filters.NumberFilter(
+        field_name="length",
+        lookup_expr="gte",
+        help_text="Length (bp) greater/equal value",
+    )
+    length__lte = django_filters.NumberFilter(
+        field_name="length", lookup_expr="lte", help_text="Length (bp) less/equal value"
+    )
+
+    num_contigs__gte = django_filters.NumberFilter(
+        field_name="num_contigs",
+        label="Number of contigs",
+        lookup_expr="gte",
+        help_text="Number of contigs greater/equal value",
+    )
+    num_contigs__lte = django_filters.NumberFilter(
+        field_name="num_contigs",
+        label="Number of contigs",
+        lookup_expr="lte",
+        help_text="Number of contigs greater/equal value",
+    )
+
+    n_50__gte = django_filters.NumberFilter(
+        field_name="n_50",
+        label="N50",
+        lookup_expr="gte",
+        help_text="N50 greater/equal value",
+    )
+    n_50__lte = django_filters.NumberFilter(
+        field_name="n_50",
+        label="N50",
+        lookup_expr="lte",
+        help_text="N50 less/equal value",
+    )
+
+    gc_content__gte = django_filters.NumberFilter(
+        field_name="gc_content",
+        label="GC%",
+        lookup_expr="gte",
+        help_text="GC% greater/equal value",
+    )
+    gc_content__lte = django_filters.NumberFilter(
+        field_name="gc_content",
+        label="GC%",
+        lookup_expr="lte",
+        help_text="GC% less/equal value",
+    )
+
+    completeness__gte = django_filters.NumberFilter(
+        field_name="completeness",
+        label="Completeness",
+        lookup_expr="gte",
+        help_text="Completeness greater/equal value",
+    )
+    completeness__lte = django_filters.NumberFilter(
+        field_name="completeness",
+        label="Completeness",
+        lookup_expr="lte",
+        help_text="Completeness less/equal value",
+    )
+
+    # TODO: use Range instead
+    contamination__gte = django_filters.NumberFilter(
+        field_name="contamination",
+        label="Contamination",
+        lookup_expr="gte",
+        help_text="Contamination greater/equal value",
+    )
+    contamination__lte = django_filters.NumberFilter(
+        field_name="contamination",
+        label="Contamination",
+        lookup_expr="lte",
+        help_text="Contamination less/equal value",
+    )
+
+    num_proteins__gte = django_filters.NumberFilter(
+        field_name="num_proteins",
+        label="Number of proteins",
+        lookup_expr="gte",
+        help_text="Number of proteins greater/equal value",
+    )
+    num_proteins__lte = django_filters.NumberFilter(
+        field_name="num_proteins",
+        label="Number of proteins",
+        lookup_expr="lte",
+        help_text="Number of proteins less/equal value",
+    )
+
+    cmseq__gte = django_filters.NumberFilter(
+        field_name="cmseq",
+        label="Strain heterogeneity (CMseq)",
+        lookup_expr="gte",
+        help_text="Strain heterogeneity (CMseq) greater/equal value",
+    )
+    cmseq__lte = django_filters.NumberFilter(
+        field_name="cmseq",
+        label="Strain heterogeneity (CMseq)",
+        lookup_expr="lte",
+        help_text="Strain heterogeneity (CMseq) less/equal value",
+    )
+
+    num_genomes_total__gte = django_filters.NumberFilter(
+        field_name="num_genomes_total",
+        label="Total number of genomes in species",
+        lookup_expr="gte",
+        help_text="Total number of genomes in species greater/equal value",
+    )
+    num_genomes_total__lte = django_filters.NumberFilter(
+        field_name="num_genomes_total",
+        label="Total number of genomes in species",
+        lookup_expr="lte",
+        help_text="Total number of genomes in species less/equal value",
+    )
+
+    num_genomes_non_redundant__gte = django_filters.NumberFilter(
+        field_name="num_genomes_non_redundant",
+        label="Non-redundant number of genomes in species",
+        lookup_expr="gte",
+        help_text="Non-redundant number of genomes in species greater/equal value",
+    )
+    num_genomes_non_redundant__lte = django_filters.NumberFilter(
+        field_name="num_genomes_non_redundant",
+        label="Non-redundant number of genomes in species",
+        lookup_expr="gte",
+        help_text="Non-redundant number of genomes in species greater/equal value",
+    )
+
+    pangenome_size__gte = django_filters.NumberFilter(
+        field_name="pangenome_size",
+        label="Pan-genome size",
+        lookup_expr="gte",
+        help_text="Pan-genome size greater/equal value",
+    )
+    pangenome_size__lte = django_filters.NumberFilter(
+        field_name="pangenome_size",
+        label="Pan-genome size",
+        lookup_expr="lte",
+        help_text="Pan-genome size less/equal value",
+    )
+
+    pangenome_core_size__gte = django_filters.NumberFilter(
+        field_name="pangenome_core_size",
+        label="Pan-genome core size",
+        lookup_expr="gte",
+        help_text="Pan-genome core size greater/equal value",
+    )
+    pangenome_core___lte = django_filters.NumberFilter(
+        field_name="pangenome_core_size",
+        label="Pan-genome core size",
+        lookup_expr="lte",
+        help_text="Pan-genome core size less/equal value",
+    )
+
+    pangenome_accessory_size__gte = django_filters.NumberFilter(
+        field_name="pangenome_accessory_size",
+        label="Pan-genome core size",
+        lookup_expr="gte",
+        help_text="Pan-genome accessory size greater/equal value",
+    )
+
+    pangenome_accessory_size__lte = django_filters.NumberFilter(
+        field_name="pangenome_accessory_size",
+        label="Pan-genome core size",
+        lookup_expr="lte",
+        help_text="Pan-genome accessory size less/equal value",
+    )
+
+    accession = filters.ModelMultipleChoiceFilter(
+        queryset=emg_models.Genome.objects,
+        to_field_name="accession",
+        method="filter_accession",
+        distinct=True,
+        label="Accession",
+        help_text="Select by MGnify, NCBI, IMG or Patric accession",
+        widget=QueryArrayWidget,
+    )
+
+    def filter_accession(self, qs, name, values):
+        """Filter by any accession:
+        - MGnify accession
+        - ENA genome, sample or study accession
+        - NCBI genome, sample or study accession
+        - IMG genome accession
+        - PATRIC genome accesssion
+        """
+        if values:
+            qs = qs.filter(
+                Q(accession__in=values)
+                | Q(ena_genome_accession__in=values)
+                | Q(ena_sample_accession__in=values)
+                | Q(ena_study_accession__in=values)
+                | Q(ncbi_genome_accession__in=values)
+                | Q(ncbi_sample_accession__in=values)
+                | Q(ncbi_study_accession__in=values)
+                | Q(img_genome_accession__in=values)
+                | Q(patric_genome_accession__in=values)
+            )
+        return qs
+
+    taxon_lineage = django_filters.CharFilter(
+        field_name="taxon_lineage",
+        lookup_expr="contains",
+        help_text="Taxon lineage",
+        label="Taxon lineage",
+    )
+
+    mag_type = django_filters.ChoiceFilter(
+        field_name="type",
+        help_text="MAG or isolate",
+        label="Type",
+        choices=emg_models.Genome.TYPE_CHOICES
+    )
+
+    class Meta:
+        model = emg_models.Genome
+        fields = (
+            "accession",
+            "taxon_lineage",
+            "mag_type",
+            "length__gte",
+            "length__lte",
+            "num_contigs__gte",
+            "num_contigs__lte",
+            "n_50__gte",
+            "n_50__lte",
+            "gc_content__gte",
+            "gc_content__lte",
+            "completeness__gte",
+            "completeness__lte",
+            "contamination__gte",
+            "contamination__lte",
+            "num_proteins__gte",
+            "num_proteins__lte",
+            "cmseq__gte",
+            "cmseq__lte",
+            "num_genomes_total__gte",
+            "num_genomes_total__lte",
+            "pangenome_size__gte",
+            "pangenome_size__lte",
+            "pangenome_accessory_size__gte",
+            "pangenome_accessory_size__lte",
+        )

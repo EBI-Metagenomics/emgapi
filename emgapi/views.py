@@ -46,6 +46,7 @@ from . import permissions as emg_perms
 from . import viewsets as emg_viewsets
 from . import utils as emg_utils
 from . import renderers as emg_renderers
+from . import filters as emg_filters
 
 from emgcli.pagination import FasterCountPagination
 
@@ -1150,14 +1151,16 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
 class GenomeViewSet(mixins.RetrieveModelMixin,
                     emg_mixins.ListModelMixin,
                     viewsets.GenericViewSet):
+    
     serializer_class = emg_serializers.GenomeSerializer
+    filter_class = emg_filters.GenomeFilter
 
     lookup_field = 'accession'
     lookup_value_regex = '[^/]+'
 
     filter_backends = (
-        filters.SearchFilter,
         DjangoFilterBackend,
+        filters.SearchFilter,
         filters.OrderingFilter,
     )
 
@@ -1175,14 +1178,6 @@ class GenomeViewSet(mixins.RetrieveModelMixin,
     ordering = ('-accession',)
 
     search_fields = (
-        'accession',
-        'taxon_lineage',
-        'type',
-        'genome_set__name',
-        'release__version'
-    )
-
-    filter_fields = (
         'accession',
         'taxon_lineage',
         'type',
