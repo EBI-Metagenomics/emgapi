@@ -1016,12 +1016,26 @@ class GenomeFilter(django_filters.FilterSet):
         choices=emg_models.Genome.TYPE_CHOICES
     )
 
+    geo_origin = django_filters.filters.ModelMultipleChoiceFilter(
+        field_name="geo_origin__name",
+        to_field_name="name",
+        queryset=emg_models.GeographicLocation.objects.all(),
+    )
+
+    pangenome_geographic_range = django_filters.filters.ModelMultipleChoiceFilter(
+        field_name="pangenome_geographic_range__name",
+        to_field_name="name",
+        queryset=emg_models.GeographicLocation.objects.all(),
+    )
+
     class Meta:
         model = emg_models.Genome
         fields = (
             "accession",
             "taxon_lineage",
             "mag_type",
+            "geo_origin",
+            "pangenome_geographic_range",
             "length__gte",
             "length__lte",
             "num_contigs__gte",
