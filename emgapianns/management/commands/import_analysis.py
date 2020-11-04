@@ -166,10 +166,9 @@ class Command(BaseCommand):
         result_folder = []
         if len(study_folder) == 0:
             sys.exit('Could not find result directory for: {}'.format(secondary_study_accession))
-        else:
-            for cur_study_folder in study_folder:
-                directory = os.path.join(cur_study_folder, 'version_{}/'.format(version))
-                result_folder += self.__find_folder(directory, search_pattern=run_accession, maxdepth=3)
+        for cur_study_folder in study_folder:
+            directory = os.path.join(cur_study_folder, 'version_{}/'.format(version))
+            result_folder += self.__find_folder(directory, search_pattern=run_accession, maxdepth=3)
 
         # if len(result_folder) > 1: take the latest created version_{} folder
         if len(result_folder) == 0:
@@ -368,10 +367,9 @@ class Command(BaseCommand):
         if study_folder:
             if len(study_folder) > 1:
                 logging.info(f'Found more than 1 result directory: {study_folder}')
-                return study_folder
             else:
                 logging.info(f'Found result dir: {study_folder}')
-                return study_folder[0]
+            return study_folder
 
         elif recursive:
             return self.__find_folder(self.rootpath, search_pattern, maxdepth=3)
