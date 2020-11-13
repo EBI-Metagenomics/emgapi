@@ -95,12 +95,10 @@ class StudyAdmin(admin.ModelAdmin, NoRemoveMixin):
     raw_id_fields = ('biome',)
 
     def save_model(self, request, obj, form, change):
-        """Save the Study and cascade the biome to the Runs
+        """Save the Study and cascade the biome to the Samples
         """
         super().save_model(request, obj, form, change)
-        runs = emg_models.Run.objects. \
-            filter(study__secondary_accession=obj.study_id)
-        runs.update(biome=obj.biome)
+        obj.samples.update(biome=obj.biome)
 
 
 class SuperStudyStudiesInline(admin.TabularInline):
