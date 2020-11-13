@@ -392,6 +392,6 @@ class Command(BaseCommand):
             stdout = stdout.decode('utf-8').rstrip("\n\r")
             return stdout.splitlines()
         except subprocess.CalledProcessError:
-            raise FindResultFolderException
+            return []  #  raise FindResultFolderException
         except UnicodeError:
             raise FindResultFolderException
