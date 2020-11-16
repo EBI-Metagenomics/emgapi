@@ -133,7 +133,7 @@ class Command(BaseCommand):
                 for tax_ann in taxonomy_annotations:
 
                     its_onedb = tax_ann.taxonomy_itsonedb
-                    if its_onedb and len(its_onedb):
+                    if its_onedb:
                         logger.info(
                             "Removing {} ITS ONE annotations from {}".format(
                                 len(its_onedb), job
@@ -142,7 +142,7 @@ class Command(BaseCommand):
                         tax_ann.taxonomy_itsonedb = []
 
                     its_unite = tax_ann.taxonomy_itsunite
-                    if len(its_unite):
+                    if its_unite:
                         logger.info(
                             "Removing {} ITS Unite annotations from {}".format(
                                 len(its_unite), job
@@ -151,14 +151,14 @@ class Command(BaseCommand):
                         tax_ann.taxonomy_itsunite = []
 
                     ssu = tax_ann.taxonomy_ssu
-                    if ssu and len(ssu):
+                    if ssu:
                         logger.info(
                             "Removing {} SSU annotations from {}".format(len(ssu), job)
                         )
                         tax_ann.taxonomy_ssu = []
 
                     lsu = tax_ann.taxonomy_lsu
-                    if lsu and len(lsu):
+                    if lsu:
                         logger.info(
                             "Removing {} LSU annotations from {}".format(len(lsu), job)
                         )
