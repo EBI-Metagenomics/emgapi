@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 EMBL - European Bioinformatics Institute
+# Copyright 2017-2020 EMBL - European Bioinformatics Institute
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,13 +30,10 @@ from __future__ import unicode_literals
 import os
 
 from django.conf import settings
-
 from django.db import models
-from django.db.models import Count
-from django.db.models import CharField, Value
-from django.db.models.functions import Concat, Cast
-from django.db.models import Q
-from django.db.models import Prefetch
+from django.db.models import (CharField, Count, OuterRef, Prefetch, Q,
+                              Subquery, Value, Count)
+from django.db.models.functions import Cast, Concat
 
 
 class Resource(object):
@@ -600,9 +597,12 @@ class StudyQuerySet(BaseQuerySet):
 class StudyManager(models.Manager):
     def get_queryset(self):
         # TODO: remove biome when schema updated
+        study_samples = StudySample.objects.filter(study=OuterRef('study_id'))
+        samples_count_subq = study_samples.values('study') \
+            .annotate(samples_count=Count('study_id')).values('samples_count')
         return StudyQuerySet(self.model, using=self._db) \
-            .defer('biome') \
-            .annotate(samples_count=Count('samples'))
+            .annotate(samples_count=Subquery(samples_count_subq)) \
+            .defer('biome')
 
     def available(self, request):
         return self.get_queryset().available(request)
