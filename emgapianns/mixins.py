@@ -53,7 +53,7 @@ class AnalysisJobAnnotationMixin:
         except self.annotation_model.DoesNotExist:
             # Return an empty list, the entity exists
             # but it doesn't have annotations
-            return []
+            return self.annotation_model.objects.none()
 
         if hasattr(self, "annotation_model_property_resolver"):
             return self.annotation_model_property_resolver(analysis)
