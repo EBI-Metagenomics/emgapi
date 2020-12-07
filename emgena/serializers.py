@@ -89,7 +89,7 @@ class NotifySerializer(serializers.Serializer):
 
         if n.is_consent:
             ticket["Queue"] = ena_queue
-            ticket["Bcc"] = emg_email
+            ticket["CC"] = emg_email
         else:
             ticket["Queue"] = emg_queue
 

@@ -521,7 +521,7 @@ class AnalysisKeggOrthologsRelationshipViewSet(  # NOQA
     Retrieves Kegg Orthologs for the given accession
     Example:
     ---
-    `/analyses/MGYA00102827/kos`
+    /analyses/MGYA00102827/kegg-orthologs
     """
 
     serializer_class = m_serializers.KeggOrthologRetrieveSerializer
@@ -710,7 +710,7 @@ class AnalysisOrganismRelationshipViewSet(m_mixins.AnalysisJobAnnotationMixin,
             values = getattr(analysis, alt, [])
             if values:
                 return values
-        return []
+        return analysis.objects.none()
 
 
 class AnalysisOrganismSSURelationshipViewSet(  # NOQA
