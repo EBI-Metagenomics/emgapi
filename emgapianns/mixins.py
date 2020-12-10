@@ -18,6 +18,8 @@ from django.http import Http404
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
+from mongoengine.base.datastructures import EmbeddedDocumentList
+
 from emgapi import models as emg_models
 
 
@@ -51,14 +53,14 @@ class AnalysisJobAnnotationMixin:
             analysis = self.annotation_model.objects \
                     .get(analysis_id=str(job.job_id))
         except self.annotation_model.DoesNotExist:
-            # Return an empty list, the entity exists
+            # Return an empty EmbeddedDocumentList, the entity exists
             # but it doesn't have annotations
-            return self.annotation_model.objects.none()
+            return EmbeddedDocumentList([], self.annotation_model, self.annotation_model_property)
 
         if hasattr(self, "annotation_model_property_resolver"):
             return self.annotation_model_property_resolver(analysis)
 
-        return getattr(analysis, self.annotation_model_property, [])
+        return getattr(analysis, self.annotation_model_property)
 
 
 class AnnotationRetrivalMixin:

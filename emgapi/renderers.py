@@ -25,6 +25,8 @@ from rest_framework_csv.renderers import CSVRenderer
 from rest_framework_csv.misc import Echo
 from rest_framework.utils.serializer_helpers import ReturnDict
 
+from mongoengine.base.datastructures import BaseList
+
 
 class DefaultJSONRenderer(JSONRenderer):
     media_type = 'application/json'
@@ -59,6 +61,21 @@ class CSVStreamingRenderer(CSVRenderer):
             context = data['context']
         except KeyError:
             return None
+
+        if isinstance(queryset, BaseList):
+            # Handle SortedListField in the AnnotationModels
+            # TODO: pending review as this has no pagination at the moment
+            if not queryset:
+                return None
+
+            header_fields = list(serializer(queryset[0], context=context).fields)
+            yield csv_writer.writerow(header_fields)
+
+            for item in queryset:
+                items = serializer(item, context=context).data
+                ordered = [items[column] for column in header_fields]
+                yield csv_writer.writerow(self.flatten(ordered))
+            return
 
         total = queryset.count()
         page_size = 25

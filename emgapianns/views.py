@@ -38,6 +38,8 @@ from rest_framework.settings import api_settings
 from rest_framework import viewsets, status
 from rest_framework.exceptions import NotFound
 
+from mongoengine.base.datastructures import EmbeddedDocumentList
+
 from emgapi import serializers as emg_serializers
 from emgapi import models as emg_models
 from emgapi import filters as emg_filters
@@ -667,7 +669,7 @@ class OrganismTreeViewSet(m_viewsets.ListReadOnlyModelViewSet):
 
 class AnalysisOrganismRelationshipViewSet(m_mixins.AnalysisJobAnnotationMixin,
                                           m_viewsets.ListReadOnlyModelViewSet):
-    """Retrieves 16SrRNA Taxonomic analysis for the given accession
+    """Retrieves Taxonomic analysis for the given accession
     Example:
     ---
     `/analyses/MGYA00102827/taxonomy`
@@ -692,7 +694,7 @@ class AnalysisOrganismRelationshipViewSet(m_mixins.AnalysisJobAnnotationMixin,
     annotation_model = m_models.AnalysisJobTaxonomy
 
     def annotation_model_property_resolver(self, analysis):
-        """Get the taxonomic annotations using the following rules:
+        """Get the taxonomic annotations using the following order:
         - SSU -> version <= 5.0 of pipeline
         - SSU >= 5.0 of pipeline
         - ITS OneDB {}
@@ -706,11 +708,14 @@ class AnalysisOrganismRelationshipViewSet(m_mixins.AnalysisJobAnnotationMixin,
             "taxonomy_unite"
             "taxonomy_lsu",
         ]
+ 
         for alt in alternatives:
-            values = getattr(analysis, alt, [])
-            if values:
-                return values
-        return analysis.objects.none()
+            try:
+                return getattr(analysis, alt)
+            except AttributeError:
+                pass
+
+        return EmbeddedDocumentList([], self.annotation_model, "taxonomy")
 
 
 class AnalysisOrganismSSURelationshipViewSet(  # NOQA
