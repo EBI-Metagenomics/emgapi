@@ -39,7 +39,7 @@ class TestAPISurface:
         expected = {
             'biomes': '/biomes',
             'studies': '/studies',
-            "super-studies": '/super-studies',
+            'super-studies': '/super-studies',
             'samples': '/samples',
             'runs': '/runs',
             'analyses': '/analyses',
