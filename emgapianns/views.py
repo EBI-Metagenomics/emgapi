@@ -37,6 +37,7 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework import viewsets, status
 from rest_framework.exceptions import NotFound
+from rest_framework.pagination import CursorPagination
 
 from mongoengine.base.datastructures import EmbeddedDocumentList
 
@@ -47,7 +48,7 @@ from emgapi import utils as emg_utils
 
 from . import serializers as m_serializers
 from . import models as m_models
-from . import pagination as m_page
+from . import pagination as m_pagination
 from . import viewsets as m_viewsets
 from . import mixins as m_mixins
 
@@ -419,7 +420,7 @@ class AnalysisGoTermRelationshipViewSet(m_mixins.AnalysisJobAnnotationMixin,
     """
     serializer_class = m_serializers.GoTermRetriveSerializer
 
-    pagination_class = m_page.MaxSetPagination
+    pagination_class = m_pagination.MaxSetPagination
 
     lookup_field = 'accession'
 
@@ -440,7 +441,7 @@ class AnalysisGoSlimRelationshipViewSet(m_mixins.AnalysisJobAnnotationMixin,
     """
     serializer_class = m_serializers.GoTermRetriveSerializer
 
-    pagination_class = m_page.MaxSetPagination
+    pagination_class = m_pagination.MaxSetPagination
 
     lookup_field = 'accession'
 
@@ -463,7 +464,7 @@ class AnalysisInterproIdentifierRelationshipViewSet(  # NOQA
 
     serializer_class = m_serializers.InterproIdentifierRetriveSerializer
 
-    pagination_class = m_page.MaxSetPagination
+    pagination_class = m_pagination.MaxSetPagination
 
     lookup_field = 'accession'
 
@@ -486,7 +487,7 @@ class AnalysisPfamRelationshipViewSet(  # NOQA
 
     serializer_class = m_serializers.PfamRetrieveSerializer
 
-    pagination_class = m_page.MaxSetPagination
+    pagination_class = m_pagination.MaxSetPagination
 
     lookup_field = 'accession'
 
@@ -507,7 +508,7 @@ class AnalysisKeggModulesRelationshipViewSet(  # NOQA
 
     serializer_class = m_serializers.KeggModuleRetrieveSerializer
 
-    pagination_class = m_page.MaxSetPagination
+    pagination_class = m_pagination.MaxSetPagination
 
     lookup_field = 'accession'
 
@@ -528,7 +529,7 @@ class AnalysisKeggOrthologsRelationshipViewSet(  # NOQA
 
     serializer_class = m_serializers.KeggOrthologRetrieveSerializer
 
-    pagination_class = m_page.MaxSetPagination
+    pagination_class = m_pagination.MaxSetPagination
 
     lookup_field = 'accession'
 
@@ -549,7 +550,7 @@ class AnalysisGenomePropertiesRelationshipViewSet(  # NOQA
 
     serializer_class = m_serializers.GenomePropertyRetrieveSerializer
 
-    pagination_class = m_page.MaxSetPagination
+    pagination_class = m_pagination.MaxSetPagination
 
     lookup_field = 'accession'
 
@@ -568,7 +569,7 @@ class AnalysisAntiSmashGeneClustersRelationshipViewSet(m_mixins.AnalysisJobAnnot
 
     serializer_class = m_serializers.AntiSmashGeneClusterRetrieveSerializer
 
-    pagination_class = m_page.MaxSetPagination
+    pagination_class = m_pagination.MaxSetPagination
 
     lookup_field = 'accession'
 
@@ -677,7 +678,7 @@ class AnalysisOrganismRelationshipViewSet(m_mixins.AnalysisJobAnnotationMixin,
     """
     serializer_class = m_serializers.OrganismRetriveSerializer
 
-    pagination_class = m_page.MaxSetPagination
+    pagination_class = m_pagination.MaxSetPagination
 
     filter_backends = (
         filters.OrderingFilter,
@@ -729,7 +730,7 @@ class AnalysisOrganismSSURelationshipViewSet(  # NOQA
     """
     serializer_class = m_serializers.OrganismRetriveSerializer
 
-    pagination_class = m_page.MaxSetPagination
+    pagination_class = m_pagination.MaxSetPagination
 
     filter_backends = (
         filters.OrderingFilter,
@@ -759,7 +760,7 @@ class AnalysisOrganismLSURelationshipViewSet(  # NOQA
     """
     serializer_class = m_serializers.OrganismRetriveSerializer
 
-    pagination_class = m_page.MaxSetPagination
+    pagination_class = m_pagination.MaxSetPagination
 
     filter_backends = (
         filters.OrderingFilter,
@@ -789,7 +790,7 @@ class AnalysisOrganismITSOneDBRelationshipViewSet(  # NOQA
     """
     serializer_class = m_serializers.OrganismRetriveSerializer
 
-    pagination_class = m_page.MaxSetPagination
+    pagination_class = m_pagination.MaxSetPagination
 
     filter_backends = (
         filters.OrderingFilter,
@@ -819,7 +820,7 @@ class AnalysisOrganismITSUniteRelationshipViewSet(  # NOQA
     """
     serializer_class = m_serializers.OrganismRetriveSerializer
 
-    pagination_class = m_page.MaxSetPagination
+    pagination_class = m_pagination.MaxSetPagination
 
     filter_backends = (
         filters.OrderingFilter,
@@ -935,15 +936,10 @@ class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
         filters.OrderingFilter,
     )
 
-    ordering_fields = (
-        'contig_id',
-        'length',
-        'coverage',
-    )
-    ordering = ('-length',)
+    ordering = ('id',)
 
     serializer_class = m_serializers.AnalysisJobContigSerializer
-    pagination_class = api_settings.DEFAULT_PAGINATION_CLASS
+    pagination_class = m_pagination.CursorPagination
 
     def get_object(self, ):
         try:
