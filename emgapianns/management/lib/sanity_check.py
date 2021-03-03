@@ -6,19 +6,23 @@ import logging
 
 from emgapianns.management.lib.uploader_exceptions import NoAnnotationsFoundException, \
     UnexpectedLibraryStrategyException, QCNotPassedException, CoverageCheckException
-from emgapianns.management.lib.utils import read_chunkfile
+#from emgapianns.management.lib.utils import read_chunkfile
 from emgapianns.management.webuploader_configs import get_downloadset_config
+from backlog.models import Run, Assembly
 
 logger = logging.getLogger(__name__)
 
 
 class SanityCheck:
-    QC_NOT_PASSED = 'no-seqs-passed-qc-flag'
+    QC_NOT_PASSED_V4 = 'no-seqs-passed-qc-flag'
+    QC_NOT_PASSED_V5 = 'QC-FAILED'
     EXPECTED_LIBRARY_STRATEGIES = ['amplicon', 'wgs', 'assembly', 'rna-seq', 'wga']
     MIN_NUM_SEQS = 1
     MIN_NUM_LINES = 3
+    statuses = ['no-cds', 'no-tax', 'QC-FAILED']
 
-    def __init__(self, accession, d, library_strategy, version):
+    def __init__(self, accession, d, library_strategy, version, database):
+        self.emg_db = database
         self.dir = d
         self.prefix = os.path.basename(d)
         self.accession = accession
@@ -27,7 +31,20 @@ class SanityCheck:
         if self.library_strategy not in self.EXPECTED_LIBRARY_STRATEGIES:
             raise UnexpectedLibraryStrategyException(
                 'Unexpected library_strategy specified: {}'.format(self.library_strategy))
-        self.config = get_downloadset_config(version, library_strategy)
+        self.result_status = self.get_result_status()
+        self.config = get_downloadset_config(version, library_strategy, self.result_status)
+
+    def get_result_status(self):
+        result_status = Run.objects.using(self.emg_db).get(primary_accession=self.accession).values('result_status')
+        #get result status by filesystem
+        #get_result_status = [s for s in self.statuses if os.path.exists(os.path.join(self.dir, s))]
+        #if len(get_result_status) == 1:
+        #    result_status = ','.join(get_result_status)
+            #print(result_status)
+            #config = get_downloadset_config(self.version, self.library_strategy, result_status)
+        return result_status
+        #elif len(get_result_status) > 1:
+        #    logging.error('Too many statuses for uploader to handle {}'.format(','.join(get_result_status)))
 
     def check_file_existence(self):
         skip_antismash_check = False
@@ -48,10 +65,15 @@ class SanityCheck:
                     raise e
 
     def run_quality_control_check(self):
-        file_path = os.path.join(self.dir, self.QC_NOT_PASSED)
+        if self.version == '5.0':
+            file_path = os.path.join(self.dir, self.QC_NOT_PASSED_V5)
+        elif self.version == '4.1':
+            file_path = os.path.join(self.dir, self.QC_NOT_PASSED_V4)
+
         try:
             self.__check_exists(file_path)
-            raise QCNotPassedException("{} did not pass QC step!".format(self.accession))
+            logging.warning("{} did not pass QC step!".format(self.accession))
+            #raise QCNotPassedException("{} did not pass QC step!".format(self.accession))
         except FileNotFoundError:
             pass  # QC not passed file does not exist, so all fine
 
@@ -65,10 +87,12 @@ class SanityCheck:
             For Amplicon I do 'do LSU or SSU or ITS exist' If not quit with error
         :return:
         """
-        # For amplicons the requirement is that only of the files need to exist
-        if self.library_strategy == "amplicon":
-            self.run_coverage_check_amplicon()
+        #skip coverage check for no-tax, no-cds and qc-failed
+        if self.result_status:
+            logging.info('{} found. Skipping coverage check'.format(self.result_status))
+            return
 
+        # For amplicons the requirement is that only of the files need to exist
         elif self.library_strategy == "assembly":  # assembly
             return self.run_coverage_check_assembly()
         else: # wgs or rna-seq

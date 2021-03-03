@@ -25,6 +25,7 @@ from emgapianns.management.lib.downloadable_files import ChunkedDownloadFiles, U
 from emgapianns.management.lib.import_analysis_model import Assembly, Run
 from emgapianns.management.lib.uploader_exceptions import \
     AccessionNotRecognised
+from emgapianns.management.lib.sanity_check import SanityCheck
 from emgapianns.management.webuploader_configs import get_downloadset_config
 
 study_accssion_re = r'([ESD]RP\d{6,})'
@@ -353,13 +354,16 @@ class DownloadSet:
 
 
 def get_conf_downloadset(rootpath, input_file_name, emg_db_name, library_strategy, version):
-    config = get_downloadset_config(version, library_strategy)
+    accession = input_file_name.split('_')[0]
+    print('ACCESSION IS ' + accession)
+    sc = SanityCheck(accession, rootpath, library_strategy, version)
+    result_status = sc.get_result_status()
+    config = get_downloadset_config(version, library_strategy, result_status)
     return DownloadSet(rootpath, input_file_name, emg_db_name, config)
 
 
 def get_result_dir(result_dir, substring="results/"):
     """
-
     :param result_dir:
     :param substring:
     :return:
