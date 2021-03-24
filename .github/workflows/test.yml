@@ -17,17 +17,17 @@ jobs:
       uses: supercharge/mongodb-github-action@1.3.0
       with:
         mongodb-version: 4.0
-#    - name: Start MySQL 8.0
-#      uses: mirromutth/mysql-action@master
-#      with:
-#        host port: 3800
-#        mysql version: 8.0
-#        mysql database: emg
-#        mysql user: root
+    - name: Start MySQL 8.0
+      uses: mirromutth/mysql-action@master
+      with:
+        host port: 3800
+        mysql version: 8.0
+        mysql database: emg
+        mysql user: root
     - name: ⚙️ - Configure environment
       run: |
         EMG_CONFIG=$TRAVIS_BUILD_DIR/travis/configuration.yaml
-        mysql -e "SET GLOBAL sql_mode = 'STRICT_TRANS_TABLES'"
+#        mysql -e "SET GLOBAL sql_mode = 'STRICT_TRANS_TABLES'"
         python -V
     - name: 🔧 - Install Dependencies
       run: |

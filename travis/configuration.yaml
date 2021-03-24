@@ -6,7 +6,7 @@ emg:
       USER: 'root'
       # PASSWORD: 'secret'
       HOST: 127.0.0.1
-      PORT: 3306
+      PORT: 3800
     era:
       ENGINE: 'django.db.backends.oracle'
       NAME: testdb
