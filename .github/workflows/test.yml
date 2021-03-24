@@ -27,7 +27,7 @@ jobs:
         mysql password: secret
     - name: ⚙️ - Configure environment
       run: |
-        EMG_CONFIG=$TRAVIS_BUILD_DIR/travis/configuration.yaml
+        EMG_CONFIG=./ci/configuration.yaml
         python -V
     - name: 🔧 - Install Dependencies
       run: |
