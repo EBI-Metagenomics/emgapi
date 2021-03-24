@@ -1,0 +1,62 @@
+name: Testing
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: 🐍 - Set up Python 3.6
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.6'
+    - name: 💾 Start MongoDB
+      uses: supercharge/mongodb-github-action@1.3.0
+      with:
+        mongodb-version: 4.0
+#    - name: Start MySQL 8.0
+#      uses: mirromutth/mysql-action@master
+#      with:
+#        host port: 3800
+#        mysql version: 8.0
+#        mysql database: emg
+#        mysql user: root
+    - name: ⚙️ - Configure environment
+      run: |
+        EMG_CONFIG=$TRAVIS_BUILD_DIR/travis/configuration.yaml
+        mysql -e "SET GLOBAL sql_mode = 'STRICT_TRANS_TABLES'"
+        python -V
+    - name: 🔧 - Install Dependencies
+      run: |
+        pip install -U git+git://github.com/EBI-Metagenomics/emg-backlog-schema.git
+        pip install -U git+git://github.com/EBI-Metagenomics/ena-api-handler.git
+        pip install -U -r requirements-test.txt
+        pip install "flake8==3.4" "pycodestyle==2.3.1" pep8-naming
+        pip install "git+git://github.com/EBI-Metagenomics/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
+        python setup.py sdist
+    - name: 🔧 - Install .
+      run: |
+        pip install -U .
+        pip freeze
+    - name: 🧪 - Testing
+      run: |
+        python setup.py test
+    - name: Flake
+      run: |
+        flake8 --version
+        flake8 -v .
+#    - name: 📮 - Slack Notification
+#      uses: rtCamp/action-slack-notify@v2
+#      continue-on-error: true
+#      if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev'
+#      env:
+#        SLACK_COLOR: "${{ job.status == 'success' && 'good' || 'danger' }}"
+#        SLACK_USERNAME: "Github Actions API"
+#        SLACK_ICON_EMOJI: ":octocat:"
+#        SLACK_TITLE: "CI API results in GitHub Actions"
+#        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+#        SLACK_CHANNEL: "#interpro7"
+#        MSG_MINIMAL: Actions URL
