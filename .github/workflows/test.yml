@@ -27,7 +27,7 @@ jobs:
         mysql password: secret
     - name: ⚙️ - Configure environment
       run: |
-        EMG_CONFIG=./ci/configuration.yaml
+        export EMG_CONFIG=./ci/configuration.yaml
         python -V
     - name: 🔧 - Install Dependencies
       run: |
@@ -43,6 +43,8 @@ jobs:
         pip freeze
     - name: 🧪 - Testing
       run: |
+        echo $EMG_CONFIG
+        cat $EMG_CONFIG
         python setup.py test
     - name: Flake
       run: |
