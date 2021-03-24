@@ -24,6 +24,7 @@ jobs:
         mysql version: 8.0
         mysql database: emg
         mysql user: root
+        mysql password: secret
     - name: ⚙️ - Configure environment
       run: |
         EMG_CONFIG=$TRAVIS_BUILD_DIR/travis/configuration.yaml
