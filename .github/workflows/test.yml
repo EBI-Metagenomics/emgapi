@@ -27,7 +27,6 @@ jobs:
     - name: ⚙️ - Configure environment
       run: |
         EMG_CONFIG=$TRAVIS_BUILD_DIR/travis/configuration.yaml
-#        mysql -e "SET GLOBAL sql_mode = 'STRICT_TRANS_TABLES'"
         python -V
     - name: 🔧 - Install Dependencies
       run: |
