@@ -15,7 +15,7 @@ jobs:
                 MYSQL_ALLOW_EMPTY_PASSWORD: yes
                 MYSQL_DATABASE: emg
             ports:
-                - 3306
+                - '3306:3306'
             options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
@@ -40,6 +40,7 @@ jobs:
       run: |
         python -V
         mysql --version
+        mysql -e "SET GLOBAL sql_mode = 'STRICT_TRANS_TABLES'"
     - name: 🔧 - Install Dependencies
       run: |
         pip install -U git+git://github.com/EBI-Metagenomics/emg-backlog-schema.git
