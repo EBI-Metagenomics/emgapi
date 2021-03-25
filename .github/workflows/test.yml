@@ -4,8 +4,6 @@ on: [push, pull_request]
 
 jobs:
   build:
-    env:
-      EMG_CONFIG: ${{env.GITHUB_WORKFLOW}}/ci/configuration.yaml
 
     runs-on: ubuntu-latest
 
@@ -31,6 +29,8 @@ jobs:
       run: |
         python -V
     - name: 🔧 - Install Dependencies
+      env:
+        EMG_CONFIG: ${{env.GITHUB_WORKFLOW}}/ci/configuration.yaml
       run: |
         pip install -U git+git://github.com/EBI-Metagenomics/emg-backlog-schema.git
         pip install -U git+git://github.com/EBI-Metagenomics/ena-api-handler.git
@@ -38,11 +38,11 @@ jobs:
         pip install "flake8==3.4" "pycodestyle==2.3.1" pep8-naming
         pip install "git+git://github.com/EBI-Metagenomics/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi"
         python setup.py sdist
-    - name: 🔧 - Install .
-      run: |
         pip install -U .
         pip freeze
     - name: 🧪 - Testing
+      env:
+        EMG_CONFIG: ${{env.GITHUB_WORKFLOW}}/ci/configuration.yaml
       run: |
         echo "config path: ${EMG_CONFIG}"
         cat $EMG_CONFIG
