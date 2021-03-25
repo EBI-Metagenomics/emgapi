@@ -2,6 +2,8 @@ name: Testing
 
 on: [push, pull_request]
 
+env:
+  EMG_CONFIG: "${GITHUB_WORKFLOW}ci/configuration.yaml"
 jobs:
   build:
 
@@ -27,7 +29,6 @@ jobs:
         mysql password: secret
     - name: ⚙️ - Configure environment
       run: |
-        export EMG_CONFIG=./ci/configuration.yaml
         python -V
     - name: 🔧 - Install Dependencies
       run: |
@@ -43,7 +44,7 @@ jobs:
         pip freeze
     - name: 🧪 - Testing
       run: |
-        echo $EMG_CONFIG
+        echo "config path: ${EMG_CONFIG}"
         cat $EMG_CONFIG
         python setup.py test
     - name: Flake
