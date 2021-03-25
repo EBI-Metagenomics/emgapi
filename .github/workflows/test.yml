@@ -2,10 +2,10 @@ name: Testing
 
 on: [push, pull_request]
 
-env:
-  EMG_CONFIG: ${{env.GITHUB_WORKFLOW}}/ci/configuration.yaml
 jobs:
   build:
+    env:
+      EMG_CONFIG: ${{env.GITHUB_WORKFLOW}}/ci/configuration.yaml
 
     runs-on: ubuntu-latest
 
