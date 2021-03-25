@@ -8,15 +8,15 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    services:
-        mysql:
-            image: mysql:5.7
-            env:
-                MYSQL_ALLOW_EMPTY_PASSWORD: yes
-                MYSQL_DATABASE: emg
-            ports:
-                - '3306:3306'
-            options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3 --sql-mode="STRICT_TRANS_TABLES"
+#    services:
+#        mysql:
+#            image: mysql:5.7
+#            env:
+#                MYSQL_ALLOW_EMPTY_PASSWORD: yes
+#                MYSQL_DATABASE: emg
+#            ports:
+#                - '3306:3306'
+#            options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3 --sql-mode="STRICT_TRANS_TABLES"
 
     steps:
     - uses: actions/checkout@v2
@@ -31,7 +31,11 @@ jobs:
     - name: ⚙️ - Checking environment
       run: |
         python -V
+        sudo systemctl start mysql
         mysql --version
+        mysql -e 'CREATE DATABASE emg;'
+        mysql -e "SET GLOBAL sql_mode = 'STRICT_TRANS_TABLES'"
+
     - name: 🔧 - Install Dependencies
       run: |
         pip install -U git+git://github.com/EBI-Metagenomics/emg-backlog-schema.git
