@@ -17,7 +17,7 @@ requests==2.23.0; python_version > '3.4'
 
 yamjam==0.1.7
 # python 3.4
-PyYAML==3.13
+PyYAML==5.4
 
 django-slack~=5.13.0
 
