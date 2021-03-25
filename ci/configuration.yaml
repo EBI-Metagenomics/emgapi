@@ -4,9 +4,9 @@ emg:
       ENGINE: 'django.db.backends.mysql'
       NAME: 'emg'
       USER: 'root'
-      PASSWORD: 'secret'
+#      PASSWORD: 'secret'
       HOST: 127.0.0.1
-      PORT: 3800
+      PORT: 3306
     era:
       ENGINE: 'django.db.backends.oracle'
       NAME: testdb

@@ -1,17 +1,26 @@
 name: Testing
 
 on: [push, pull_request]
+env:
+  EMG_CONFIG: ${{ github.workspace }}/ci/configuration.yaml
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
+    services:
+        mysql:
+            image: mysql:5.7
+            env:
+                MYSQL_ALLOW_EMPTY_PASSWORD: yes
+                MYSQL_DATABASE: emg
+            ports:
+                - 3306
+            options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
     - uses: actions/checkout@v2
     - name: 🐍 - Set up Python 3.6
-      env:
-        EMG_CONFIG: ${{ github.workspace }}/ci/configuration.yaml
       uses: actions/setup-python@v2
       with:
         python-version: '3.6'
@@ -19,20 +28,19 @@ jobs:
       uses: supercharge/mongodb-github-action@1.3.0
       with:
         mongodb-version: 4.0
-    - name: Start MySQL 8.0
-      uses: mirromutth/mysql-action@master
-      with:
-        host port: 3800
-        mysql version: 8.0
-        mysql database: emg
-        mysql user: root
-        mysql password: secret
-    - name: ⚙️ - Configure environment
+#    - name: Start MySQL 8.0
+#      uses: mirromutth/mysql-action@master
+#      with:
+#        host port: 3800
+#        mysql version: 8.0
+#        mysql database: emg
+#        mysql user: root
+#        mysql password: secret
+    - name: ⚙️ - Checking environment
       run: |
         python -V
+        mysql --version
     - name: 🔧 - Install Dependencies
-      env:
-        EMG_CONFIG: ${{ github.workspace }}/ci/configuration.yaml
       run: |
         pip install -U git+git://github.com/EBI-Metagenomics/emg-backlog-schema.git
         pip install -U git+git://github.com/EBI-Metagenomics/ena-api-handler.git
@@ -46,7 +54,6 @@ jobs:
       env:
         EMG_CONFIG: ${{ github.workspace }}/ci/configuration.yaml
       run: |
-        echo "config path: ${EMG_CONFIG}"
         cat $EMG_CONFIG
         python setup.py test
     - name: Flake
