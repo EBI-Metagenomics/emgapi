@@ -11,7 +11,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: 🐍 - Set up Python 3.6
       env:
-        EMG_CONFIG: ${{env.GITHUB_WORKSPACE}}/ci/configuration.yaml
+        EMG_CONFIG: ${{ github.workspace }}/ci/configuration.yaml
       uses: actions/setup-python@v2
       with:
         python-version: '3.6'
@@ -32,7 +32,7 @@ jobs:
         python -V
     - name: 🔧 - Install Dependencies
       env:
-        EMG_CONFIG: ${{env.GITHUB_WORKSPACE}}/ci/configuration.yaml
+        EMG_CONFIG: ${{ github.workspace }}/ci/configuration.yaml
       run: |
         pip install -U git+git://github.com/EBI-Metagenomics/emg-backlog-schema.git
         pip install -U git+git://github.com/EBI-Metagenomics/ena-api-handler.git
@@ -44,7 +44,7 @@ jobs:
         pip freeze
     - name: 🧪 - Testing
       env:
-        EMG_CONFIG: ${{env.GITHUB_WORKSPACE}}/ci/configuration.yaml
+        EMG_CONFIG: ${{ github.workspace }}/ci/configuration.yaml
       run: |
         echo "config path: ${EMG_CONFIG}"
         cat $EMG_CONFIG
