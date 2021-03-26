@@ -62,7 +62,11 @@ class TestCLI:
                 "value": "12345678"
             }
         ]
-        assert rsp["data"]["attributes"]["analysis-summary"] == expected
+
+        summary = rsp["data"]["attributes"]["analysis-summary"]
+        summary.sort(key=lambda i: i['key'])
+        expected.sort(key=lambda i: i['key'])
+        assert summary == expected
 
     @pytest.mark.parametrize(
         "results",
