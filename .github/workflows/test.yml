@@ -55,15 +55,15 @@ jobs:
       run: |
         flake8 --version
         flake8 -v .
-#    - name: 📮 - Slack Notification
-#      uses: rtCamp/action-slack-notify@v2
-#      continue-on-error: true
-#      if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev'
-#      env:
-#        SLACK_COLOR: "${{ job.status == 'success' && 'good' || 'danger' }}"
-#        SLACK_USERNAME: "Github Actions API"
-#        SLACK_ICON_EMOJI: ":octocat:"
-#        SLACK_TITLE: "CI API results in GitHub Actions"
-#        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-#        SLACK_CHANNEL: "#interpro7"
-#        MSG_MINIMAL: Actions URL
+    - name: 📮 - Slack Notification
+      uses: rtCamp/action-slack-notify@v2
+      continue-on-error: true
+      if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev'  || github.ref == 'refs/heads/gh_actions'
+      env:
+        SLACK_COLOR: "${{ job.status == 'success' && 'good' || 'danger' }}"
+        SLACK_USERNAME: "Github Actions API"
+        SLACK_ICON_EMOJI: ":octocat:"
+        SLACK_TITLE: "CI API results in GitHub Actions"
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        SLACK_CHANNEL: "#metagenomics-notify"
+        MSG_MINIMAL: Actions URL
