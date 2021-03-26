@@ -51,6 +51,7 @@ jobs:
         cat $EMG_CONFIG
         python setup.py test
     - name: Flake
+      continue-on-error: true
       run: |
         flake8 --version
         flake8 -v .
