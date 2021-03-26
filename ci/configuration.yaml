@@ -7,13 +7,13 @@ emg:
       PASSWORD: 'root'
       HOST: 127.0.0.1
       PORT: 3306
-    era:
-      ENGINE: 'django.db.backends.oracle'
-      NAME: testdb
-      USER: test
-      PASSWORD: test
-      HOST: 127.0.0.1
-      PORT: 3306
+#    era:
+#      ENGINE: 'django.db.backends.oracle'
+#      NAME: testdb
+#      USER: test
+#      PASSWORD: test
+#      HOST: 127.0.0.1
+#      PORT: 3306
   session_engine: 'django.contrib.sessions.backends.cache'
   # caches:
   #   default:
