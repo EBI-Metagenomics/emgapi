@@ -4,14 +4,14 @@ on: [push, pull_request]
 env:
   EMG_CONFIG: ${{ github.workspace }}/ci/configuration.yaml
 
-strategy:
-  matrix:
-    python-version: [3.4, 3.5, 3.6]
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.4, 3.5, 3.6]
     steps:
     - uses: actions/checkout@v2
     - name: 🐍 - Set up Python ${{ matrix.python-version }}
