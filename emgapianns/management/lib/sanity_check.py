@@ -52,9 +52,6 @@ class SanityCheck:
         self.result_status = get_result_status(self.accession)
         self.config = get_downloadset_config(version, library_strategy, self.result_status)
 
-        #elif len(get_result_status) > 1:
-        #    logging.error('Too many statuses for uploader to handle {}'.format(','.join(get_result_status)))
-
     def check_file_existence(self):
         skip_antismash_check = False
         if os.path.exists(os.path.join(self.dir, "pathways-systems", "no-antismash")):
@@ -97,7 +94,7 @@ class SanityCheck:
         :return:
         """
         #skip coverage check for no-tax, no-cds and qc-failed
-        if self.result_status:
+        if self.result_status != 'full':
             logging.info('{} found. Skipping coverage check'.format(self.result_status))
             return
 
