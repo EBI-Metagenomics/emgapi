@@ -589,6 +589,6 @@
       "description_label": "Predicted tRNA-Sec",
       "alias": "{}_tRNA-Sec.RF01852.fasta.gz",
       "real_name": "tRNA-Sec.RF01852.fasta.gz"
-    },
+    }
   ]
 }

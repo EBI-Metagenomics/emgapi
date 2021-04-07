@@ -10,7 +10,7 @@ library_strategy_remapping = {
 }
 
 #No config for no-tax. Just skip the coverage check in sanity check.
-config_statuses = ['no-cds', 'QC-FAILED']
+config_statuses = ['no_cds', 'no_qc']
 
 
 def get_downloadset_config(version, library_strategy, result_status=None):
@@ -18,14 +18,11 @@ def get_downloadset_config(version, library_strategy, result_status=None):
     version_dir_name = 'v' + str(version).replace('.', '_')
     if _library_strategy in library_strategy_remapping:
         _library_strategy = library_strategy_remapping[_library_strategy]
-    print(result_status)
     if result_status in config_statuses:
         config_file = os.path.join(DIR_NAME, version_dir_name, result_status + '.json')
     else:
         config_file = os.path.join(DIR_NAME, version_dir_name, _library_strategy + '.json')
     logging.info("Loading config file {}".format(config_file))
-    print('config file is ')
-    print(config_file)
     result = read_config(config_file)
     logging.info("Config file {} successfully loaded!".format(config_file))
     return result
@@ -33,5 +30,5 @@ def get_downloadset_config(version, library_strategy, result_status=None):
 
 def read_config(config_file):
     with open(config_file) as f:
-        print(f)
         return json.load(f)['files']
+

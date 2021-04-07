@@ -6,11 +6,29 @@ import logging
 
 from emgapianns.management.lib.uploader_exceptions import NoAnnotationsFoundException, \
     UnexpectedLibraryStrategyException, QCNotPassedException, CoverageCheckException
-#from emgapianns.management.lib.utils import read_chunkfile
+from emgapianns.management.lib import utils
 from emgapianns.management.webuploader_configs import get_downloadset_config
-from backlog.models import Run, Assembly
+from backlog import models as backlog_models
 
 logger = logging.getLogger(__name__)
+
+
+def get_result_status(accession):
+    """
+    no_qc: upload qc results only. No downloads
+    no_cds: upload qc and taxonomy only
+    no_tax: standard upload (tax files are optional)
+    no_tax and no_cds: upload qc. processed reads and other ncRNA downloadable
+
+    :param accession:
+    :return: result status
+    """
+    result_status = backlog_models.AnnotationJob.objects.using('backlog_dev').all().filter(
+        runs__primary_accession=accession).values_list('result_status', flat=True)
+    #return as no_qc if no_cds and no_tax. Upload only qc results and processed fasta sequence file
+    if 'no_cds' in result_status and 'no_tax' in result_status:
+        return 'no_qc'
+    return result_status[0]
 
 
 class SanityCheck:
@@ -19,7 +37,7 @@ class SanityCheck:
     EXPECTED_LIBRARY_STRATEGIES = ['amplicon', 'wgs', 'assembly', 'rna-seq', 'wga']
     MIN_NUM_SEQS = 1
     MIN_NUM_LINES = 3
-    statuses = ['no-cds', 'no-tax', 'QC-FAILED']
+    statuses = ['no_cds', 'no_tax', 'no_qc']
 
     def __init__(self, accession, d, library_strategy, version, database):
         self.emg_db = database
@@ -31,18 +49,9 @@ class SanityCheck:
         if self.library_strategy not in self.EXPECTED_LIBRARY_STRATEGIES:
             raise UnexpectedLibraryStrategyException(
                 'Unexpected library_strategy specified: {}'.format(self.library_strategy))
-        self.result_status = self.get_result_status()
+        self.result_status = get_result_status(self.accession)
         self.config = get_downloadset_config(version, library_strategy, self.result_status)
 
-    def get_result_status(self):
-        result_status = Run.objects.using(self.emg_db).get(primary_accession=self.accession).values('result_status')
-        #get result status by filesystem
-        #get_result_status = [s for s in self.statuses if os.path.exists(os.path.join(self.dir, s))]
-        #if len(get_result_status) == 1:
-        #    result_status = ','.join(get_result_status)
-            #print(result_status)
-            #config = get_downloadset_config(self.version, self.library_strategy, result_status)
-        return result_status
         #elif len(get_result_status) > 1:
         #    logging.error('Too many statuses for uploader to handle {}'.format(','.join(get_result_status)))
 
@@ -132,7 +141,8 @@ class SanityCheck:
         if '{}' in chunk_file:
             chunk_file = chunk_file.format(self.prefix)
         chunk_filepath = self.get_filepath(file_config, chunk_file)
-        chunks = read_chunkfile(chunk_filepath)
+        chunks = utils.read_chunkfile(chunk_filepath)
+        #chunks = read_chunkfile(chunk_filepath)
         for f in chunks:
             filepath = self.get_filepath(file_config, f)
             self.__check_exists(filepath)
