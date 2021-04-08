@@ -18,7 +18,7 @@ import pytest
 
 from model_bakery import baker
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.urls.exceptions import NoReverseMatch
 
 from rest_framework import status
@@ -93,9 +93,11 @@ class TestAPISurface:
     def test_empty_list(self, client, _view):
         view_name = '{}-list'.format(_view)
         url = reverse(view_name)
+        print(url)
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
+        print(rsp)
         assert rsp['meta']['pagination']['page'] == 1
         assert rsp['meta']['pagination']['pages'] == 1
         assert rsp['meta']['pagination']['count'] == 0

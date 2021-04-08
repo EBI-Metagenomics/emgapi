@@ -34,7 +34,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
 
 from rest_framework import filters, viewsets, mixins, permissions, renderers, status
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.decorators import action
 from rest_framework.views import APIView
 
 from rest_framework_csv.misc import Echo
@@ -62,7 +62,8 @@ class UtilsViewSet(viewsets.GenericViewSet):
     def get_queryset(self):
         return ()
 
-    @list_route(
+    @action(
+        detail=False,
         methods=['get', ],
         serializer_class=emg_serializers.TokenSerializer
     )
@@ -75,7 +76,8 @@ class UtilsViewSet(viewsets.GenericViewSet):
         serializer = self.get_serializer(csrf_token)
         return Response(serializer.data)
 
-    @list_route(
+    @action(
+        detail=False,
         methods=['get', ],
         serializer_class=emg_serializers.ResourceSerializer
     )
@@ -97,7 +99,8 @@ class UtilsViewSet(viewsets.GenericViewSet):
         serializer = self.get_serializer(stats, many=True)
         return Response(serializer.data)
 
-    @list_route(
+    @action(
+        detail=False,
         methods=['get', ],
         serializer_class=ena_serializers.SubmitterSerializer,
         permission_classes=[permissions.IsAuthenticated, emg_perms.IsSelf]
@@ -113,7 +116,8 @@ class UtilsViewSet(viewsets.GenericViewSet):
         serializer = self.get_serializer(submitter, many=True)
         return Response(serializer.data)
 
-    @list_route(
+    @action(
+        detail=False,
         methods=['get', 'post', ],
         serializer_class=ena_serializers.NotifySerializer,
         permission_classes=[permissions.IsAuthenticated, emg_perms.IsSelf]
@@ -135,7 +139,8 @@ class UtilsViewSet(viewsets.GenericViewSet):
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @list_route(
+    @action(
+        detail=False,
         methods=['get', 'post', ],
         serializer_class=ena_serializers.EmailSerializer,
         permission_classes=[permissions.IsAuthenticated, emg_perms.IsSelf]
@@ -254,7 +259,8 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         """
         return super(BiomeViewSet, self).retrieve(request, *args, **kwargs)
 
-    @list_route(
+    @action(
+        detail=False,
         methods=['get', ],
         serializer_class=emg_serializers.Top10BiomeSerializer
     )
@@ -366,7 +372,8 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         """
         return super(StudyViewSet, self).retrieve(request, *args, **kwargs)
 
-    @list_route(
+    @action(
+        detail=False,
         methods=['get', ],
         serializer_class=emg_serializers.StudySerializer
     )
@@ -387,7 +394,8 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
-    @detail_route(
+    @action(
+        detail=True,
         methods=['get', ],
         url_name='biomes-list',
         serializer_class=emg_serializers.BiomeSerializer
@@ -498,7 +506,8 @@ class SuperStudyViewSet(mixins.RetrieveModelMixin,
         """
         return super(SuperStudyViewSet, self).retrieve(request, *args, **kwargs)
 
-    @detail_route(
+    @action(
+        detail=True,
         methods=['get', ],
         url_name='biomes-list',
         serializer_class=emg_serializers.BiomeSerializer

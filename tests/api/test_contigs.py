@@ -17,7 +17,7 @@
 import random
 
 import pytest
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from emgapianns import models as m_models
 from rest_framework import status
 from test_utils.emg_fixtures import *  # noqa

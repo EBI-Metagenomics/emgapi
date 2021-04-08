@@ -41,7 +41,7 @@ def pytest_configure():
     # settings.EMG_BACKEND_AUTH_URL = 'http://fake_backend/auth'
     settings.AUTHENTICATION_BACKENDS = ('test_utils.FakeEMGBackend',)
     # disconnect main database
-    mongoengine.connection.disconnect()
+    # mongoengine.connection.disconnect()
 
 
 # List  of DB configs which should NOT be migrated by django-pytest
@@ -72,8 +72,8 @@ def django_db_setup(hide_ena_config, django_db_setup):
 def mongodb(request):
     """On the EMG_CONFIG use 'testdb' on the mongo configuration
     """
-    db = mongoengine.connect('testdb')
-
+    db = mongoengine.connect('testdb', host='localhost:27017', alias='test')
+    print("mongodb test func")
     def finalizer():
         db.drop_database('testdb')
         db.close()

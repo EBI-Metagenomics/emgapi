@@ -15,12 +15,13 @@
 # limitations under the License.
 
 import mongoengine
-
+from django.conf import settings
+# mongoengine = settings.MONGO_ENGINE
 
 # Annotations model
 
 class BaseAnnotation(mongoengine.DynamicDocument):
-
+    mongoengine.connect(**settings.MONGO_CONF)
     accession = mongoengine.StringField(primary_key=True, required=True)
     description = mongoengine.StringField(required=True)
 

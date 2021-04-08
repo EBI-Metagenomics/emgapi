@@ -22,6 +22,7 @@ from collections import OrderedDict
 from django.db.models import Q
 
 from rest_framework import serializers as drf_serializers
+from rest_framework.fields import SkipField
 
 from rest_framework_json_api import serializers
 from rest_framework_json_api import relations
@@ -53,6 +54,7 @@ class ExplicitFieldsModelSerializer(serializers.ModelSerializer):
             existing = set(self.fields.keys())
             for field_name in existing - allowed:
                 self.fields.pop(field_name)
+
 
 
 # Serializers
@@ -816,6 +818,9 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
         related_link_lookup_field='accession'
     )
 
+    def get_taxonomy_itsunite(self, obj):
+        return None
+
     def get_taxonomy_unite(self, obj):
         return None
 
@@ -829,7 +834,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
         related_link_lookup_field='accession'
     )
 
-    def get_goterms(self, obj):
+    def get_go_terms(self, obj):
         return None
 
     go_slim = relations.SerializerMethodResourceRelatedField(
@@ -842,7 +847,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
         related_link_lookup_field='accession'
     )
 
-    def get_goslim(self, obj):
+    def get_go_slim(self, obj):
         return None
 
     interpro_identifiers = relations.SerializerMethodResourceRelatedField(  # NOQA
@@ -855,7 +860,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
         related_link_lookup_field='accession'
     )
 
-    def get_interproidentifier(self, obj):
+    def get_interpro_identifiers(self, obj):
         return None
 
     antismash_gene_clusters = relations.SerializerMethodResourceRelatedField(  # NOQA
@@ -868,7 +873,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
         related_link_lookup_field='accession'
     )
 
-    def get_antismashgeneclusters(self, obj):
+    def get_antismash_gene_clusters(self, obj):
         return None
 
     genome_properties = relations.SerializerMethodResourceRelatedField(  # NOQA
@@ -881,7 +886,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
         related_link_lookup_field='accession'
     )
 
-    def get_genomeproperties(self, obj):
+    def get_genome_properties(self, obj):
         return None
 
     class Meta:
@@ -1043,7 +1048,8 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession',
         related_link_self_view_name='emgapi_v1:studies-detail',
-        related_link_self_lookup_field='accession'
+        related_link_self_lookup_field='accession',
+        allow_null=False
     )
 
     def get_studies(self, obj):
@@ -1139,6 +1145,7 @@ class SuperStudySerializer(ExplicitFieldsModelSerializer,
     def get_flagship_studies(self, obj):
         return None
 
+
     # related studies are inferred from the biomes of the Super Sample
     related_studies = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
         many=True,
@@ -1183,7 +1190,6 @@ class SuperStudySerializer(ExplicitFieldsModelSerializer,
             'flagship_studies',
             'related_studies',
         )
-
 
 class StudySerializer(ExplicitFieldsModelSerializer,
                       serializers.HyperlinkedModelSerializer):
@@ -1537,7 +1543,7 @@ class GenomeSerializer(ExplicitFieldsModelSerializer):
         related_link_lookup_field='accession',
     )
 
-    def get_kegg_module_matches(self, obj):
+    def get_kegg_modules_matches(self, obj):
         return None
 
     cog_matches = relations.SerializerMethodResourceRelatedField(
