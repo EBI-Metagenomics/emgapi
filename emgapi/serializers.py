@@ -93,7 +93,7 @@ class BiomeSerializer(ExplicitFieldsModelSerializer,
     )
 
     # relationships
-    studies = relations.SerializerMethodResourceRelatedField(
+    studies = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_studies',
         model=emg_models.Biome,
         many=True,
@@ -106,7 +106,7 @@ class BiomeSerializer(ExplicitFieldsModelSerializer,
     def get_studies(self, obj):
         return None
 
-    samples = relations.SerializerMethodResourceRelatedField(
+    samples = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_samples',
         model=emg_models.Biome,
         many=True,
@@ -119,7 +119,7 @@ class BiomeSerializer(ExplicitFieldsModelSerializer,
     def get_samples(self, obj):
         return None
 
-    children = relations.SerializerMethodResourceRelatedField(
+    children = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_children',
         model=emg_models.Biome,
         many=True,
@@ -135,7 +135,7 @@ class BiomeSerializer(ExplicitFieldsModelSerializer,
     # counters
     samples_count = serializers.IntegerField()
 
-    genomes = relations.SerializerMethodResourceRelatedField(
+    genomes = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_genomes',
         model=emg_models.Genome,
         many=True,
@@ -183,7 +183,7 @@ class PublicationSerializer(ExplicitFieldsModelSerializer,
     )
 
     # relationships
-    studies = relations.SerializerMethodResourceRelatedField(
+    studies = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_studies',
         model=emg_models.Publication,
         many=True,
@@ -196,7 +196,7 @@ class PublicationSerializer(ExplicitFieldsModelSerializer,
     def get_studies(self, obj):
         return None
 
-    samples = relations.SerializerMethodResourceRelatedField(
+    samples = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_samples',
         model=emg_models.Publication,
         many=True,
@@ -296,7 +296,7 @@ class PipelineSerializer(ExplicitFieldsModelSerializer,
     )
 
     # relationships
-    # studies = relations.SerializerMethodResourceRelatedField(
+    # studies = relations.SerializerMethodHyperlinkedRelatedField(
     #     source='get_studies',
     #     model=emg_models.Study,
     #     many=True,
@@ -309,7 +309,7 @@ class PipelineSerializer(ExplicitFieldsModelSerializer,
     # def get_studies(self, obj):
     #     return None
 
-    samples = relations.SerializerMethodResourceRelatedField(
+    samples = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_samples',
         model=emg_models.Sample,
         many=True,
@@ -322,7 +322,7 @@ class PipelineSerializer(ExplicitFieldsModelSerializer,
     def get_samples(self, obj):
         return None
 
-    analyses = relations.SerializerMethodResourceRelatedField(
+    analyses = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_analyses',
         model=emg_models.AnalysisJob,
         many=True,
@@ -372,7 +372,7 @@ class ExperimentTypeSerializer(ExplicitFieldsModelSerializer,
     )
 
     # relationships
-    samples = relations.SerializerMethodResourceRelatedField(
+    samples = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_samples',
         model=emg_models.Sample,
         many=True,
@@ -385,7 +385,7 @@ class ExperimentTypeSerializer(ExplicitFieldsModelSerializer,
     def get_samples(self, obj):
         return None
 
-    runs = relations.SerializerMethodResourceRelatedField(
+    runs = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_runs',
         model=emg_models.Run,
         many=True,
@@ -398,7 +398,7 @@ class ExperimentTypeSerializer(ExplicitFieldsModelSerializer,
     def get_runs(self, obj):
         return None
 
-    analyses = relations.SerializerMethodResourceRelatedField(
+    analyses = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_analyses',
         model=emg_models.AnalysisJob,
         many=True,
@@ -486,7 +486,7 @@ class RunSerializer(ExplicitFieldsModelSerializer,
         return emg_models.Pipeline.objects \
             .filter(analyses__run=obj)
 
-    analyses = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+    analyses = emg_relations.HyperlinkedSerializerMethodResourceRelatedFieldWithoutData(
         many=True,
         read_only=True,
         source='get_analyses',
@@ -743,7 +743,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
         lookup_field='accession'
     )
 
-    downloads = relations.SerializerMethodResourceRelatedField(
+    downloads = relations.SerializerMethodHyperlinkedRelatedField(
         many=True,
         read_only=True,
         source='get_downloads',
@@ -756,7 +756,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     def get_downloads(self, obj):
         return None
 
-    taxonomy = relations.SerializerMethodResourceRelatedField(
+    taxonomy = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_taxonomy',
         model=m_models.Organism,
         many=True,
@@ -769,7 +769,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     def get_taxonomy(self, obj):
         return None
 
-    taxonomy_lsu = relations.SerializerMethodResourceRelatedField(
+    taxonomy_lsu = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_taxonomy_lsu',
         model=m_models.Organism,
         many=True,
@@ -782,7 +782,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     def get_taxonomy_lsu(self, obj):
         return None
 
-    taxonomy_ssu = relations.SerializerMethodResourceRelatedField(
+    taxonomy_ssu = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_taxonomy_ssu',
         model=m_models.Organism,
         many=True,
@@ -795,7 +795,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     def get_taxonomy_ssu(self, obj):
         return None
 
-    taxonomy_itsonedb = relations.SerializerMethodResourceRelatedField(
+    taxonomy_itsonedb = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_taxonomy_itsonedb',
         model=m_models.Organism,
         many=True,
@@ -808,7 +808,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     def get_taxonomy_itsonedb(self, obj):
         return None
 
-    taxonomy_itsunite = relations.SerializerMethodResourceRelatedField(
+    taxonomy_itsunite = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_taxonomy_unite',
         model=m_models.Organism,
         many=True,
@@ -824,7 +824,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     def get_taxonomy_unite(self, obj):
         return None
 
-    go_terms = relations.SerializerMethodResourceRelatedField(
+    go_terms = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_goterms',
         model=m_models.GoTerm,
         many=True,
@@ -837,7 +837,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     def get_go_terms(self, obj):
         return None
 
-    go_slim = relations.SerializerMethodResourceRelatedField(
+    go_slim = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_goslim',
         model=m_models.GoTerm,
         many=True,
@@ -850,7 +850,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     def get_go_slim(self, obj):
         return None
 
-    interpro_identifiers = relations.SerializerMethodResourceRelatedField(  # NOQA
+    interpro_identifiers = relations.SerializerMethodHyperlinkedRelatedField(  # NOQA
         source='get_interproidentifier',
         model=m_models.InterproIdentifier,
         many=True,
@@ -863,7 +863,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     def get_interpro_identifiers(self, obj):
         return None
 
-    antismash_gene_clusters = relations.SerializerMethodResourceRelatedField(  # NOQA
+    antismash_gene_clusters = relations.SerializerMethodHyperlinkedRelatedField(  # NOQA
         source='get_antismashgeneclusters',
         model=m_models.AntiSmashGeneCluster,
         many=True,
@@ -876,7 +876,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     def get_antismash_gene_clusters(self, obj):
         return None
 
-    genome_properties = relations.SerializerMethodResourceRelatedField(  # NOQA
+    genome_properties = relations.SerializerMethodHyperlinkedRelatedField(  # NOQA
         source='get_genomeproperties',
         model=m_models.GenomeProperty,
         many=True,
@@ -1020,7 +1020,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
     sample_metadata = serializers.ListField()
 
     # relationships
-    # metadata = relations.SerializerMethodResourceRelatedField(
+    # metadata = relations.SerializerMethodHyperlinkedRelatedField(
     #     source='get_metadata',
     #     model=emg_models.SampleAnn,
     #     many=True,
@@ -1055,7 +1055,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
     def get_studies(self, obj):
         return obj.studies.available(self.context['request'])
 
-    runs = relations.SerializerMethodResourceRelatedField(
+    runs = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_runs',
         model=emg_models.Run,
         many=True,
@@ -1130,7 +1130,7 @@ class SuperStudySerializer(ExplicitFieldsModelSerializer,
         lookup_field='super_study_id',
     )
 
-    flagship_studies = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+    flagship_studies = emg_relations.HyperlinkedSerializerMethodResourceRelatedFieldWithoutData(
         many=True,
         read_only=True,
         source='get_flagship_studies',
@@ -1147,7 +1147,7 @@ class SuperStudySerializer(ExplicitFieldsModelSerializer,
 
 
     # related studies are inferred from the biomes of the Super Sample
-    related_studies = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+    related_studies = emg_relations.HyperlinkedSerializerMethodResourceRelatedFieldWithoutData(
         many=True,
         read_only=True,
         source='get_related_studies',
@@ -1162,7 +1162,7 @@ class SuperStudySerializer(ExplicitFieldsModelSerializer,
     def get_related_studies(self, obj):
         return None
 
-    biomes = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+    biomes = emg_relations.HyperlinkedSerializerMethodResourceRelatedFieldWithoutData(
         many=True,
         read_only=True,
         source='get_biomes',
@@ -1224,7 +1224,8 @@ class StudySerializer(ExplicitFieldsModelSerializer,
         related_link_url_kwarg='accession',
         related_link_lookup_field='accession',
         related_link_self_view_name='emgapi_v1:biomes-detail',
-        related_link_self_lookup_field='lineage'
+        related_link_self_lookup_field='lineage',
+        # include_data=True,
     )
 
     def get_biomes(self, obj):
@@ -1234,7 +1235,7 @@ class StudySerializer(ExplicitFieldsModelSerializer,
         return emg_models.Biome.objects \
             .filter(pk__in=biomes)
 
-    publications = relations.SerializerMethodResourceRelatedField(
+    publications = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_publications',
         model=emg_models.Publication,
         many=True,
@@ -1247,7 +1248,7 @@ class StudySerializer(ExplicitFieldsModelSerializer,
     def get_publications(self, obj):
         return None
 
-    downloads = relations.SerializerMethodResourceRelatedField(
+    downloads = relations.SerializerMethodHyperlinkedRelatedField(
         many=True,
         read_only=True,
         source='get_downloads',
@@ -1260,7 +1261,7 @@ class StudySerializer(ExplicitFieldsModelSerializer,
     def get_downloads(self, obj):
         return None
 
-    samples = relations.SerializerMethodResourceRelatedField(
+    samples = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_samples',
         model=emg_models.Sample,
         many=True,
@@ -1286,7 +1287,7 @@ class StudySerializer(ExplicitFieldsModelSerializer,
     def get_analyses(self, obj):
         return None
 
-    geocoordinates = relations.SerializerMethodResourceRelatedField(
+    geocoordinates = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_geocoordinates',
         model=emg_models.SampleGeoCoordinate,
         many=True,
@@ -1507,7 +1508,7 @@ class GenomeSerializer(ExplicitFieldsModelSerializer):
         lookup_field='accession',
     )
 
-    downloads = relations.SerializerMethodResourceRelatedField(
+    downloads = relations.SerializerMethodHyperlinkedRelatedField(
         many=True,
         read_only=True,
         source='get_downloads',
@@ -1520,7 +1521,7 @@ class GenomeSerializer(ExplicitFieldsModelSerializer):
     def get_downloads(self, obj):
         return None
 
-    kegg_class_matches = relations.SerializerMethodResourceRelatedField(
+    kegg_class_matches = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_kegg_class_matches',
         model=emg_models.KeggClass,
         many=True,
@@ -1533,7 +1534,7 @@ class GenomeSerializer(ExplicitFieldsModelSerializer):
     def get_kegg_class_matches(self, obj):
         return None
 
-    kegg_modules_matches = relations.SerializerMethodResourceRelatedField(
+    kegg_modules_matches = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_kegg_module_matches',
         model=emg_models.KeggModule,
         many=True,
@@ -1546,7 +1547,7 @@ class GenomeSerializer(ExplicitFieldsModelSerializer):
     def get_kegg_modules_matches(self, obj):
         return None
 
-    cog_matches = relations.SerializerMethodResourceRelatedField(
+    cog_matches = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_cog_matches',
         model=emg_models.CogCat,
         many=True,
@@ -1559,7 +1560,7 @@ class GenomeSerializer(ExplicitFieldsModelSerializer):
     def get_cog_matches(self, obj):
         return None
 
-    antismash_geneclusters = relations.SerializerMethodResourceRelatedField(
+    antismash_geneclusters = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_antismash_geneclusters',
         model=emg_models.AntiSmashGC,
         many=True,
@@ -1655,7 +1656,7 @@ class ReleaseSerializer(ExplicitFieldsModelSerializer,
         lookup_field='version',
     )
 
-    genomes = relations.SerializerMethodResourceRelatedField(
+    genomes = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_genomes',
         model=emg_models.Genome,
         many=True,
@@ -1671,7 +1672,7 @@ class ReleaseSerializer(ExplicitFieldsModelSerializer,
     # counters
     genome_count = serializers.IntegerField()
 
-    downloads = relations.SerializerMethodResourceRelatedField(
+    downloads = relations.SerializerMethodHyperlinkedRelatedField(
         many=True,
         read_only=True,
         source='get_downloads',
@@ -1708,7 +1709,7 @@ class GenomeSetSerializer(ExplicitFieldsModelSerializer,
         lookup_field='name',
     )
 
-    genomes = relations.SerializerMethodResourceRelatedField(
+    genomes = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_genomes',
         model=emg_models.Genome,
         many=True,

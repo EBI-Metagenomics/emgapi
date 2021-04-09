@@ -70,6 +70,7 @@ class TestTokenAuthAPI(APITestCase):
                     'pointer': '/data'
                 },
                 'status': '401',
+                'code': 'authentication_failed',
             }
         ]
 
