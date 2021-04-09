@@ -641,7 +641,7 @@ class BaseDownloadSerializer(ExplicitFieldsModelSerializer,
     def get_file_checksum(self, obj):
         return {
             'checksum': obj.file_checksum,
-            'checksum_algorithm': obj.checksum_algorithm.name if obj.checksum_algorithm else ''
+            'checksum-algorithm': obj.checksum_algorithm.name if obj.checksum_algorithm else ''
         }
 
 
