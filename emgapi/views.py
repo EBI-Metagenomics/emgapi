@@ -182,8 +182,8 @@ class MyDataViewSet(emg_mixins.ListModelMixin,
     ordering = ('-last_update',)
 
     search_fields = (
-        '@study_name',
-        '@study_abstract',
+        'study_name',
+        'study_abstract',
         'centre_name',
         'project_id',
     )
@@ -217,7 +217,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     )
 
     search_fields = (
-        '@biome_name',
+        'biome_name',
         'lineage',
     )
 
