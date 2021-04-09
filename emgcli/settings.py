@@ -380,6 +380,7 @@ REST_FRAMEWORK = {
 JSON_API_FORMAT_KEYS = 'dasherize'
 JSON_API_FORMAT_TYPES = 'dasherize'
 JSON_API_PLURALIZE_TYPES = True
+JSON_API_FORMAT_FIELD_NAMES = 'dasherize'
 
 # Swagger auth
 # Toggles the use of Django Auth as an authentication mechanism.
