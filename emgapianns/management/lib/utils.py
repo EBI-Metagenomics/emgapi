@@ -355,7 +355,6 @@ class DownloadSet:
 
 def get_conf_downloadset(rootpath, input_file_name, emg_db_name, library_strategy, version):
     accession = input_file_name.split('_')[0]
-    print('ACCESSION IS ' + accession)
     result_status = sanity.get_result_status(accession)
     config = get_downloadset_config(version, library_strategy, result_status)
     return DownloadSet(rootpath, input_file_name, emg_db_name, config)

@@ -26,7 +26,7 @@ def get_result_status(accession):
     result_status = backlog_models.AnnotationJob.objects.using('backlog_dev').all().filter(
         runs__primary_accession=accession).values_list('result_status', flat=True)
     #return as no_qc if no_cds and no_tax. Upload only qc results and processed fasta sequence file
-    if 'no_cds' in result_status and 'no_tax' in result_status:
+    if 'no_cds_tax' in result_status:
         return 'no_qc'
     return result_status[0]
 
@@ -37,7 +37,7 @@ class SanityCheck:
     EXPECTED_LIBRARY_STRATEGIES = ['amplicon', 'wgs', 'assembly', 'rna-seq', 'wga']
     MIN_NUM_SEQS = 1
     MIN_NUM_LINES = 3
-    statuses = ['no_cds', 'no_tax', 'no_qc']
+    statuses = ['no_cds', 'no_tax', 'no_qc', 'no_cds_tax']
 
     def __init__(self, accession, d, library_strategy, version, database):
         self.emg_db = database
