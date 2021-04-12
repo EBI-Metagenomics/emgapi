@@ -26,7 +26,7 @@ def get_result_status(accession):
     result_status = backlog_models.AnnotationJob.objects.using('backlog_dev').all().filter(
         runs__primary_accession=accession).values_list('result_status', flat=True)
     #return as no_qc if no_cds and no_tax. Upload only qc results and processed fasta sequence file
-    if 'no_cds_tax' in result_status:
+    if result_status[0] == 'no_cds_tax':
         return 'no_qc'
     return result_status[0]
 
