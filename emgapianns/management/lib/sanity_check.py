@@ -39,8 +39,7 @@ class SanityCheck:
     MIN_NUM_LINES = 3
     statuses = ['no_cds', 'no_tax', 'no_qc', 'no_cds_tax']
 
-    def __init__(self, accession, d, library_strategy, version, database):
-        self.emg_db = database
+    def __init__(self, accession, d, library_strategy, version):
         self.dir = d
         self.prefix = os.path.basename(d)
         self.accession = accession
