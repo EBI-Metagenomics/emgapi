@@ -171,7 +171,7 @@ class StudySummaryGenerator(object):
 
             job_df = self.__build_dataframe(phylum_count_data)
             job_data_frames[acc] = job_df
-
+        print(job_data_frames)
         study_df = self.merge_dfs_v5(job_data_frames, key=['superkingdom', 'kingdom', 'phylum'])
 
         return study_df
