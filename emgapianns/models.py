@@ -322,7 +322,11 @@ class Organism(mongoengine.Document):
     pipeline_version = mongoengine.StringField(required=True)
 
     meta = {
-        'ordering': ['lineage']
+        'ordering': ['lineage'],
+        'auto_create_index': True,
+        'indexes': [
+            'lineage',
+        ]
     }
 
 
