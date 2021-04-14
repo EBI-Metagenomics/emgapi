@@ -58,6 +58,7 @@ class TestSanityCheck:
     def test_check_initialisations(self, mock_dir, expected_accession, experiment_type, version,
                                    expected_result_dir):
         mock_dir.return_value = "test"
+        sanity_check.SanityCheck.result_status = 'full'
         test_instance = sanity_check.SanityCheck(expected_accession, expected_result_dir, experiment_type, version)
         self.run_init_tests(test_instance, expected_accession, expected_result_dir, mock_dir.return_value)
 
