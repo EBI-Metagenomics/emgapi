@@ -39,7 +39,7 @@ class SanityCheck:
     MIN_NUM_LINES = 3
     statuses = ['no_cds', 'no_tax', 'no_qc', 'no_cds_tax']
 
-    def __init__(self, accession, d, library_strategy, version):
+    def __init__(self, accession, d, library_strategy, version, result_status=None):
         self.dir = d
         self.prefix = os.path.basename(d)
         self.accession = accession
@@ -48,7 +48,10 @@ class SanityCheck:
         if self.library_strategy not in self.EXPECTED_LIBRARY_STRATEGIES:
             raise UnexpectedLibraryStrategyException(
                 'Unexpected library_strategy specified: {}'.format(self.library_strategy))
-        self.result_status = get_result_status(self.accession)
+        if result_status:
+            self.result_status = result_status
+        else:
+            self.result_status = get_result_status(self.accession)
         self.config = get_downloadset_config(version, library_strategy, self.result_status)
 
     def check_file_existence(self):

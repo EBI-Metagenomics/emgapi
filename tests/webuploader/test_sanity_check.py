@@ -58,8 +58,7 @@ class TestSanityCheck:
     def test_check_initialisations(self, mock_dir, expected_accession, experiment_type, version,
                                    expected_result_dir):
         mock_dir.return_value = "test"
-        sanity_check.SanityCheck.result_status = 'full'
-        test_instance = sanity_check.SanityCheck(expected_accession, expected_result_dir, experiment_type, version)
+        test_instance = sanity_check.SanityCheck(expected_accession, expected_result_dir, experiment_type, version, result_status='full')
         self.run_init_tests(test_instance, expected_accession, expected_result_dir, mock_dir.return_value)
 
     @patch("os.path.basename")
@@ -81,7 +80,7 @@ class TestSanityCheck:
                                                          result_folder):
         mock_dir.return_value = "test"
         with pytest.raises(FileNotFoundError):
-            sanity_check.SanityCheck(accession, result_folder, experiment_type, version)
+            sanity_check.SanityCheck(accession, result_folder, experiment_type, version, result_status=full)
 
     @patch("os.path.basename")
     @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
@@ -93,7 +92,7 @@ class TestSanityCheck:
                                                                            result_folder):
         mock_dir.return_value = "test"
         with pytest.raises(UnexpectedLibraryStrategyException):
-            sanity_check.SanityCheck(accession, result_folder, experiment_type, version)
+            sanity_check.SanityCheck(accession, result_folder, experiment_type, version, result_status='full')
 
     @pytest.mark.parametrize("accession, experiment_type, amplicon_type, version, result_folder", [
         ("ERR3506537", "amplicon", "SSU", "4.1",
@@ -105,7 +104,7 @@ class TestSanityCheck:
                                                     result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir, result_folder)
-        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status='full')
         test_instance.check_file_existence()
 
     def test_check_amplicon_ssu_v5_results_succeeds(self):
@@ -116,7 +115,7 @@ class TestSanityCheck:
         result_dir = os.path.join(root_dir,
                                   "results/2018/01/ERP106131/version_{}/ERR223/003/{}_MERGED_FASTQ".format(version,
                                                                                                            accession))
-        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status='full')
         test_instance.check_file_existence()
 
     @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
@@ -125,7 +124,7 @@ class TestSanityCheck:
     def test_check_amplicon_v4_results_raise_exception(self, accession, experiment_type, version, result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir, result_folder)
-        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status='full')
         with pytest.raises(FileNotFoundError):
             test_instance.check_file_existence()
 
@@ -140,7 +139,7 @@ class TestSanityCheck:
     def test_check_assemblies_v4_v5_results_succeeds(self, accession, experiment_type, version, result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir, result_folder)
-        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status='full')
         test_instance.check_file_existence()
 
     @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
@@ -150,7 +149,7 @@ class TestSanityCheck:
     def test_check_file_existence_wgs_v4_v5_results_succeeds(self, accession, experiment_type, version, result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir, result_folder)
-        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status='full')
         test_instance.check_file_existence()
 
     @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
@@ -160,7 +159,7 @@ class TestSanityCheck:
     def test_check_qc_not_passed_raise_exception(self, accession, experiment_type, version, result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir, result_folder)
-        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status='full')
         with pytest.raises(QCNotPassedException):
             test_instance.run_quality_control_check()
 
@@ -171,7 +170,7 @@ class TestSanityCheck:
     def test_check_qc_not_passed_do_not_raise_exception(self, accession, experiment_type, version, result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir, result_folder)
-        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status='full')
         test_instance.run_quality_control_check()
         assert True
 
@@ -186,7 +185,7 @@ class TestSanityCheck:
                                                                     result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir, result_folder)
-        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status='full')
         with pytest.raises(FileNotFoundError):
             test_instance.check_file_existence()
 
@@ -204,7 +203,7 @@ class TestSanityCheck:
     def test_coverage_check_succeeds(self, accession, experiment_type, version, result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir, result_folder)
-        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status='full')
         test_instance.run_coverage_check()
         assert True
 
@@ -223,6 +222,6 @@ class TestSanityCheck:
                                                                     result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir, result_folder)
-        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status='full')
         with pytest.raises(CoverageCheckException):
             test_instance.run_coverage_check()
