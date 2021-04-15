@@ -42,23 +42,24 @@ class TestSanityCheck:
         assert "blah" not in file
 
     @patch("os.path.basename")
-    @pytest.mark.parametrize("expected_accession, experiment_type, version, expected_result_dir", [
-        ("ERRXXXXXX", "amplicon", "4.1", "/tmp"),
-        ("ERRXXXXXX", "amplicon", "5.0", "/tmp"),
-        ("ERZXXXXXX", "assembly", "4.1", "/tmp"),
-        ("ERZXXXXXX", "assembly", "5.0", "/tmp"),
-        ("ERRXXXXXX", "wgs", "4.1", "/tmp"),
-        ("ERRXXXXXX", "wgs", "5.0", "/tmp"),
-        ("ERRXXXXXX", "rna-seq", "4.1", "/tmp"),
-        ("ERRXXXXXX", "rna-seq", "5.0", "/tmp"),
-        ("ERZXXXXXX", "ASSEMBLY", "4.1", "/tmp"),
-        ("ERRXXXXXX", "WGS", "4.1", "/tmp"),
-        ("ERRXXXXXX", "AMPLICON", "4.1", "/tmp")
+    @pytest.mark.parametrize("expected_accession, experiment_type, version, expected_result_dir, result_status", [
+        ("ERRXXXXXX", "amplicon", "4.1", "/tmp", None),
+        ("ERRXXXXXX", "amplicon", "5.0", "/tmp", "full"),
+        ("ERZXXXXXX", "assembly", "4.1", "/tmp", None),
+        ("ERZXXXXXX", "assembly", "5.0", "/tmp", "full"),
+        ("ERRXXXXXX", "wgs", "4.1", "/tmp", None),
+        ("ERRXXXXXX", "wgs", "5.0", "/tmp", "full"),
+        ("ERRXXXXXX", "rna-seq", "4.1", "/tmp", None),
+        ("ERRXXXXXX", "rna-seq", "5.0", "/tmp", "full"),
+        ("ERZXXXXXX", "ASSEMBLY", "4.1", "/tmp", None),
+        ("ERRXXXXXX", "WGS", "4.1", "/tmp", None),
+        ("ERRXXXXXX", "AMPLICON", "4.1", "/tmp", None)
     ])
     def test_check_initialisations(self, mock_dir, expected_accession, experiment_type, version,
-                                   expected_result_dir):
+                                   expected_result_dir, result_status):
         mock_dir.return_value = "test"
-        test_instance = sanity_check.SanityCheck(expected_accession, expected_result_dir, experiment_type, version, result_status='full')
+        test_instance = sanity_check.SanityCheck(expected_accession, expected_result_dir, experiment_type,
+                                                 version, result_status)
         self.run_init_tests(test_instance, expected_accession, expected_result_dir, mock_dir.return_value)
 
     @patch("os.path.basename")
@@ -80,31 +81,31 @@ class TestSanityCheck:
                                                          result_folder):
         mock_dir.return_value = "test"
         with pytest.raises(FileNotFoundError):
-            sanity_check.SanityCheck(accession, result_folder, experiment_type, version, result_status=full)
+            sanity_check.SanityCheck(accession, result_folder, experiment_type, version)
 
     @patch("os.path.basename")
     @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
         ("ERR2985769", "other", "4.1", "/tmp"),
-        ("ERR2985769", "WGA", "4.1", "/tmp"),
+        ("ERR2985769", "WGT", "4.1", "/tmp"),
     ])
     def test_check_init_should_raise_unexpected_library_strategy_exception(self, mock_dir, accession,
                                                                            experiment_type, version,
                                                                            result_folder):
         mock_dir.return_value = "test"
         with pytest.raises(UnexpectedLibraryStrategyException):
-            sanity_check.SanityCheck(accession, result_folder, experiment_type, version, result_status='full')
+            sanity_check.SanityCheck(accession, result_folder, experiment_type, version)
 
-    @pytest.mark.parametrize("accession, experiment_type, amplicon_type, version, result_folder", [
+    @pytest.mark.parametrize("accession, experiment_type, amplicon_type, version, result_folder, result_status", [
         ("ERR3506537", "amplicon", "SSU", "4.1",
-         "results/2019/09/ERP117125/version_4.1/ERR350/007/ERR3506537_MERGED_FASTQ"),
+         "results/2019/09/ERP117125/version_4.1/ERR350/007/ERR3506537_MERGED_FASTQ", None),
         ("ERR2237853", "amplicon", "ITS", "5.0",
-         "results/2018/01/ERP106131/version_5.0/ERR223/003/ERR2237853_MERGED_FASTQ")
+         "results/2018/01/ERP106131/version_5.0/ERR223/003/ERR2237853_MERGED_FASTQ", "full")
     ])
     def test_check_amplicons_v4_v5_results_succeeds(self, accession, experiment_type, amplicon_type, version,
-                                                    result_folder):
+                                                    result_folder, result_status):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir, result_folder)
-        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status='full')
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status)
         test_instance.check_file_existence()
 
     def test_check_amplicon_ssu_v5_results_succeeds(self):
@@ -124,44 +125,57 @@ class TestSanityCheck:
     def test_check_amplicon_v4_results_raise_exception(self, accession, experiment_type, version, result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir, result_folder)
-        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status='full')
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
         with pytest.raises(FileNotFoundError):
             test_instance.check_file_existence()
 
-    @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
+    @pytest.mark.parametrize("accession, experiment_type, version, result_folder, result_status", [
         ("ERZ477576", "assembly", "4.1",
-         "results/2017/11/ERP104174/version_4.1/ERZ477/006/ERZ477576_FASTA"),
+         "results/2017/11/ERP104174/version_4.1/ERZ477/006/ERZ477576_FASTA", None),
         ("ERZ782882", "assembly", "5.0",
-         "sanity_check/version_5.0/assembly/ERZ782882_FASTA"),
+         "sanity_check/version_5.0/assembly/ERZ782882_FASTA", "full"),
         ("ERZ782883", "assembly", "5.0",
-         "sanity_check/version_5.0/assembly/ERZ782883_FASTA")
+         "sanity_check/version_5.0/assembly/ERZ782883_FASTA", "full")
     ])
-    def test_check_assemblies_v4_v5_results_succeeds(self, accession, experiment_type, version, result_folder):
+    def test_check_assemblies_v4_v5_results_succeeds(self, accession, experiment_type, version,
+                                                     result_folder, result_status):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir, result_folder)
-        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status='full')
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status)
         test_instance.check_file_existence()
 
-    @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
-        ("ERR1913139", "wgs", "4.1", "sanity_check/version_4.1/wgs/ERR1913139_FASTQ"),
-        ("ERR1697182", "wgs", "5.0", "sanity_check/version_5.0/wgs/ERR1697182_MERGED_FASTQ")
+    @pytest.mark.parametrize("accession, experiment_type, version, result_folder, result_status", [
+        ("ERR1913139", "wgs", "4.1", "sanity_check/version_4.1/wgs/ERR1913139_FASTQ", None),
+        ("ERR1697182", "wgs", "5.0", "sanity_check/version_5.0/wgs/ERR1697182_MERGED_FASTQ", "full")
     ])
-    def test_check_file_existence_wgs_v4_v5_results_succeeds(self, accession, experiment_type, version, result_folder):
+    def test_check_file_existence_wgs_v4_v5_results_succeeds(self, accession, experiment_type, version,
+                                                             result_folder, result_status):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir, result_folder)
-        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status='full')
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status)
         test_instance.check_file_existence()
 
     @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
         ("ERR1864826", "amplicon", "4.1",
          "results/2019/02/ERP021864/version_4.1/ERR1864826_FASTQ")
     ])
-    def test_check_qc_not_passed_raise_exception(self, accession, experiment_type, version, result_folder):
+    def test_v4_check_qc_not_passed_raise_exception(self, accession, experiment_type, version, result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir, result_folder)
-        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status='full')
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
         with pytest.raises(QCNotPassedException):
             test_instance.run_quality_control_check()
+
+    @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
+        ("ERR2223219", "amplicon", "5.0",
+         "results/2021/03/ERP105692/version_5.0/ERR222/009/ERR2223219_MERGED_FASTQ")
+    ])
+    def test_v5_check_qc_not_passed_select_no_qc_config(self, accession, experiment_type, version, result_folder,
+                                                        caplog):
+        root_dir = os.path.join(os.path.dirname(__file__), "test_data")
+        result_dir = os.path.join(root_dir, result_folder)
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status='no_qc')
+        assert 'no_qc' in caplog.text
 
     @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
         ("ERR1913139", "wgs", "4.1",
@@ -170,58 +184,58 @@ class TestSanityCheck:
     def test_check_qc_not_passed_do_not_raise_exception(self, accession, experiment_type, version, result_folder):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir, result_folder)
-        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status='full')
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version)
         test_instance.run_quality_control_check()
         assert True
 
-    @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
+    @pytest.mark.parametrize("accession, experiment_type, version, result_folder, result_status", [
         ("ERR0000001", "amplicon", "4.1",
-         "results/2019/02/ERP000001/version_4.1/ERR0000001_FASTQ"),
+         "results/2019/02/ERP000001/version_4.1/ERR0000001_FASTQ", None),
         ("ERR3506531", "amplicon", "4.1",
-         "results/2019/09/ERP117125/version_4.1/ERR350/001/ERR3506531_MERGED_FASTQ"),
-        ("ERR1697183", "wgs", "5.0", "sanity_check/version_5.0/wgs/ERR1697183_MERGED_FASTQ")
+         "results/2019/09/ERP117125/version_4.1/ERR350/001/ERR3506531_MERGED_FASTQ", None),
+        ("ERR1697183", "wgs", "5.0", "sanity_check/version_5.0/wgs/ERR1697183_MERGED_FASTQ", "full")
     ])
     def test_check_file_existence_should_raise_file_not_found_error(self, accession, experiment_type, version,
-                                                                    result_folder):
+                                                                    result_folder, result_status):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir, result_folder)
-        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status='full')
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status)
         with pytest.raises(FileNotFoundError):
             test_instance.check_file_existence()
 
-    @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
+    @pytest.mark.parametrize("accession, experiment_type, version, result_folder, result_status", [
         ("ERR3506537", "amplicon", "4.1",
-         "results/2019/09/ERP117125/version_4.1/ERR350/007/ERR3506537_MERGED_FASTQ"),
+         "results/2019/09/ERP117125/version_4.1/ERR350/007/ERR3506537_MERGED_FASTQ", None),
         ("ERR2237853", "amplicon", "5.0",
-         "results/2018/01/ERP106131/version_5.0/ERR223/003/ERR2237853_MERGED_FASTQ"),
+         "results/2018/01/ERP106131/version_5.0/ERR223/003/ERR2237853_MERGED_FASTQ", "full"),
         ("ERZ782882", "assembly", "5.0",
-         "sanity_check/version_5.0/assembly/ERZ782882_FASTA"),
+         "sanity_check/version_5.0/assembly/ERZ782882_FASTA", "full"),
         ("ERR3506532", "wgs", "4.1",
-         "results/2019/09/ERP117125/version_4.1/ERR350/002/ERR3506532_MERGED_FASTQ"),
-        ("ERR1697182", "wgs", "5.0", "sanity_check/version_5.0/wgs/ERR1697182_MERGED_FASTQ")
+         "results/2019/09/ERP117125/version_4.1/ERR350/002/ERR3506532_MERGED_FASTQ", None),
+        ("ERR1697182", "wgs", "5.0", "sanity_check/version_5.0/wgs/ERR1697182_MERGED_FASTQ", "full")
     ])
-    def test_coverage_check_succeeds(self, accession, experiment_type, version, result_folder):
+    def test_coverage_check_succeeds(self, accession, experiment_type, version, result_folder, result_status):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir, result_folder)
-        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status='full')
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status)
         test_instance.run_coverage_check()
         assert True
 
-    @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
+    @pytest.mark.parametrize("accession, experiment_type, version, result_folder, result_status", [
         ("ERR3506531", "amplicon", "4.1",
-         "results/2019/09/ERP117125/version_4.1/ERR350/001/ERR3506531_MERGED_FASTQ"),
+         "results/2019/09/ERP117125/version_4.1/ERR350/001/ERR3506531_MERGED_FASTQ", None),
         ("ERR1913139", "wgs", "4.1",
-         "sanity_check/version_4.1/wgs/ERR1913139_FASTQ"),
+         "sanity_check/version_4.1/wgs/ERR1913139_FASTQ", None),
         ("ERZ782883", "assembly", "5.0",
-         "sanity_check/version_5.0/assembly/ERZ782883_FASTA"),
+         "sanity_check/version_5.0/assembly/ERZ782883_FASTA", "full"),
         ("ERR1864826", "amplicon", "4.1",
-         "results/2019/02/ERP021864/version_4.1/ERR1864826_FASTQ"),
-        ("ERR1697183", "wgs", "5.0", "sanity_check/version_5.0/wgs/ERR1697183_MERGED_FASTQ")
+         "results/2019/02/ERP021864/version_4.1/ERR1864826_FASTQ", None),
+        ("ERR1697183", "wgs", "5.0", "sanity_check/version_5.0/wgs/ERR1697183_MERGED_FASTQ", "full")
     ])
     def test_coverage_check_should_raise_coverage_check_exception(self, accession, experiment_type, version,
-                                                                    result_folder):
+                                                                    result_folder, result_status):
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir, result_folder)
-        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status='full')
+        test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status)
         with pytest.raises(CoverageCheckException):
             test_instance.run_coverage_check()

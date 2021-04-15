@@ -18,17 +18,17 @@ def get_result_status(accession):
     no_qc: upload qc results only. No downloads
     no_cds: upload qc and taxonomy only
     no_tax: standard upload (tax files are optional)
-    no_tax and no_cds: upload qc. processed reads and other ncRNA downloadable
+    no_cds_tax: use no_qc config. Upload qc. Processed reads and other ncRNA downloadable
 
     :param accession:
     :return: result status
     """
-    result_status = backlog_models.AnnotationJob.objects.using('backlog_dev').all().filter(
+    result_status = backlog_models.AnnotationJob.objects.using('backlog_dev').filter(
         runs__primary_accession=accession).values_list('result_status', flat=True)
-    #return as no_qc if no_cds and no_tax. Upload only qc results and processed fasta sequence file
-    if result_status[0] == 'no_cds_tax':
-        return 'no_qc'
-    return result_status[0]
+    if len(result_status):
+        if result_status[0] == 'no_cds_tax':
+            return 'no_qc'
+        return result_status[0]
 
 
 class SanityCheck:
@@ -37,7 +37,7 @@ class SanityCheck:
     EXPECTED_LIBRARY_STRATEGIES = ['amplicon', 'wgs', 'assembly', 'rna-seq', 'wga']
     MIN_NUM_SEQS = 1
     MIN_NUM_LINES = 3
-    statuses = ['no_cds', 'no_tax', 'no_qc', 'no_cds_tax']
+    failed_statuses = ['no_cds', 'no_tax', 'no_qc', 'no_cds_tax']
 
     def __init__(self, accession, d, library_strategy, version, result_status=None):
         self.dir = d
@@ -45,10 +45,13 @@ class SanityCheck:
         self.accession = accession
         self.library_strategy = library_strategy.lower()
         self.version = version
+        print(self.library_strategy)
         if self.library_strategy not in self.EXPECTED_LIBRARY_STRATEGIES:
             raise UnexpectedLibraryStrategyException(
                 'Unexpected library_strategy specified: {}'.format(self.library_strategy))
-        if result_status:
+        if version != '5.0':
+            self.result_status = None
+        elif version == '5.0' and result_status:
             self.result_status = result_status
         else:
             self.result_status = get_result_status(self.accession)
@@ -80,8 +83,10 @@ class SanityCheck:
 
         try:
             self.__check_exists(file_path)
-            logging.warning("{} did not pass QC step!".format(self.accession))
-            #raise QCNotPassedException("{} did not pass QC step!".format(self.accession))
+            if self.version == '4.1':
+                raise QCNotPassedException("{} did not pass QC step!".format(self.accession))
+            elif self.version == '5.0':
+                logging.warning("{} did not pass QC step!".format(self.accession))
         except FileNotFoundError:
             pass  # QC not passed file does not exist, so all fine
 
@@ -95,8 +100,8 @@ class SanityCheck:
             For Amplicon I do 'do LSU or SSU or ITS exist' If not quit with error
         :return:
         """
-        #skip coverage check for no-tax, no-cds and qc-failed
-        if self.result_status != 'full':
+        #skip coverage check qc-failed
+        if self.result_status == 'no_qc':
             logging.info('{} found. Skipping coverage check'.format(self.result_status))
             return
 
@@ -160,14 +165,19 @@ class SanityCheck:
         if '{}' in file_name:
             file_name = file_name.format(self.prefix)
         filepath = self.get_filepath(file_config, file_name)
-        self.__check_exists(filepath)
-        if coverage_check:
+        file_exists = self.__check_exists(filepath, file_config['_required'])
+        if coverage_check and file_exists:
             self.__check_file_content(filepath)
 
     @staticmethod
-    def __check_exists(filepath):
-        if not glob.glob(filepath):
+    def __check_exists(filepath, required=True):
+        found_file = glob.glob(filepath)
+        if not found_file and required:
             raise FileNotFoundError('{} is missing'.format(filepath))
+        elif found_file:
+            return True
+        elif not found_file:
+            return False
 
     def __check_file_content(self, filepath):
         logging.info("Checking content of file {}".format(filepath))
@@ -219,7 +229,7 @@ class SanityCheck:
         """
         logging.info("Running coverage check for assembly data.")
         taxa_folder = os.path.join(self.dir, "taxonomy-summary")
-        if not os.path.exists(taxa_folder):
+        if not os.path.exists(taxa_folder) and self.result_status not in ['no_tax', 'no_cds_tax']:
             raise CoverageCheckException("Could not find the taxonomy output folder: {}!".format(taxa_folder))
 
         for f in self.config:
@@ -251,7 +261,7 @@ class SanityCheck:
         """
         logging.info("Running coverage check for wgs data.")
         taxa_folder = os.path.join(self.dir, "taxonomy-summary")
-        if not os.path.exists(taxa_folder):
+        if not os.path.exists(taxa_folder) and self.result_status not in ['no_tax', 'no_cds_tax']:
             raise CoverageCheckException("Could not find the taxonomy output folder: {}!".format(taxa_folder))
             
         for f in self.config:
