@@ -17,6 +17,7 @@
 import os
 from unittest.mock import patch
 import pytest
+import logging
 
 from emgapianns.management.lib import sanity_check  # noqa: E402
 from emgapianns.management.lib.uploader_exceptions import (NoAnnotationsFoundException,
@@ -175,6 +176,7 @@ class TestSanityCheck:
         root_dir = os.path.join(os.path.dirname(__file__), "test_data")
         result_dir = os.path.join(root_dir, result_folder)
         test_instance = sanity_check.SanityCheck(accession, result_dir, experiment_type, version, result_status='no_qc')
+        caplog.set_level(logging.INFO)
         assert 'no_qc' in caplog.text
 
     @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
