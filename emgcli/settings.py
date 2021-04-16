@@ -270,6 +270,7 @@ WSGI_APPLICATION = 'emgcli.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 try:
     DATABASES = EMG_CONF['emg']['databases']
 except KeyError:
