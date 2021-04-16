@@ -357,7 +357,13 @@ def get_conf_downloadset(rootpath, input_file_name, emg_db_name, library_strateg
     accession = input_file_name.split('_')[0]
     result_status = sanity.get_result_status(accession)
     config = get_downloadset_config(version, library_strategy, result_status)
-    return DownloadSet(rootpath, input_file_name, emg_db_name, config)
+    #SSU.fasta and LSU.fasta could still be present. Do not upload for no_tax
+    if result_status == 'no_tax':
+        tax_fasta = ['Contigs encoding SSU rRNA', 'Contigs encoding LSU rRNA']
+        filtered_config = [f for f in config if f['description_label'] not in tax_fasta]
+    else:
+        filtered_config = config
+    return DownloadSet(rootpath, input_file_name, emg_db_name, filtered_config)
 
 
 def get_result_dir(result_dir, substring="results/"):

@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 def get_result_status(accession):
     """
     no_qc: upload qc results only. No downloads
-    no_cds: upload qc and taxonomy only
+    no_cds: upload qc and taxonomy. Antismash tab optional if files present.
     no_tax: standard upload (tax files are optional)
     no_cds_tax: use no_qc config. Upload qc. Processed reads and other ncRNA downloadable
 
