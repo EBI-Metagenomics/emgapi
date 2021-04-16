@@ -45,7 +45,7 @@ class TestSanityCheck:
     @patch("os.path.basename")
     @pytest.mark.parametrize("expected_accession, experiment_type, version, expected_result_dir, result_status", [
         ("ERRXXXXXX", "amplicon", "4.1", "/tmp", None),
-        ("ERRXXXXXX", "amplicon", "5.0", "/tmp" "full"),
+        ("ERRXXXXXX", "amplicon", "5.0", "/tmp", "full"),
         ("ERZXXXXXX", "assembly", "4.1", "/tmp", None),
         ("ERZXXXXXX", "assembly", "5.0", "/tmp", "full"),
         ("ERRXXXXXX", "wgs", "4.1", "/tmp", None),
