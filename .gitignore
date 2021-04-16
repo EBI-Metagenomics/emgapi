@@ -21,3 +21,5 @@ results/
 *.iml
 *.xml
 .idea/
+
+.coverage

@@ -9,6 +9,7 @@ from subprocess import check_output, CalledProcessError
 import numpy as np
 import pandas as pd
 from django.db.models import Q
+from django.db import close_old_connections
 
 from emgapi import models as emg_models
 from emgapianns.management.lib import utils
@@ -239,10 +240,10 @@ class StudySummaryGenerator(object):
         column_name = self.MAPSEQ_COLUMN_MAPPER.get(rna_type)
         # Fixme: Replace pandas dataframe read csv function by pure python and introduce buffered reading
         df = pd.read_csv(mapseq_file, compression=compression, header=header, sep=delimiter)
-
+        filtered_df = df.dropna(subset=[column_name])
         taxonomies = list()
-        for i, row in df.iterrows():
-            value = df.at[i, column_name]
+        for i, row in filtered_df.iterrows():
+            value = filtered_df.at[i, column_name]
             index = value.find(";c__")
             if index > 0:
                 value = value[0:index]
@@ -259,11 +260,12 @@ class StudySummaryGenerator(object):
             data[counter] = new_columns
             counter += 1
 
-        num_assigned_seqs = df[column_name].count()
+        num_assigned_seqs = filtered_df[column_name].count()
         num_unassigned_seqs = num_rna_seqs - num_assigned_seqs
         if num_unassigned_seqs > 0:
             data[counter] = [unassigned, unassigned, unassigned, num_unassigned_seqs]
         return data
+
 
     def generate_go_summary_v4(self, analysis_result_dirs, mode):
         res_files = self.get_go_v4_result_files(analysis_result_dirs, mode)
@@ -381,6 +383,14 @@ class StudySummaryGenerator(object):
             os.makedirs(self.summary_dir, exist_ok=True)
 
     def upload_study_file(self, realname, alias, description, group):
+        """Store the study file in the DB
+        """
+        # Close any obsolete connections to the db for studies with > 100 analysis
+        # this is required as django doesn't close/re-open the connection 
+        # and it will results in django.db.utils.OperationalError: (2006, 'MySQL server has gone away')
+        # CONN_MAX_AGE doesn't work for shell commands
+        close_old_connections()
+
         file_config = {
             'alias': alias,
             'compression': False,

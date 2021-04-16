@@ -45,13 +45,15 @@ class TestSanityCheck:
     @patch("os.path.basename")
     @pytest.mark.parametrize("expected_accession, experiment_type, version, expected_result_dir, result_status", [
         ("ERRXXXXXX", "amplicon", "4.1", "/tmp", None),
-        ("ERRXXXXXX", "amplicon", "5.0", "/tmp", "full"),
+        ("ERRXXXXXX", "amplicon", "5.0", "/tmp" "full"),
         ("ERZXXXXXX", "assembly", "4.1", "/tmp", None),
         ("ERZXXXXXX", "assembly", "5.0", "/tmp", "full"),
         ("ERRXXXXXX", "wgs", "4.1", "/tmp", None),
         ("ERRXXXXXX", "wgs", "5.0", "/tmp", "full"),
         ("ERRXXXXXX", "rna-seq", "4.1", "/tmp", None),
         ("ERRXXXXXX", "rna-seq", "5.0", "/tmp", "full"),
+        ("ERRXXXXXX", "wga", "4.1", "/tmp", None),
+        ("ERRXXXXXX", "wga", "5.0", "/tmp", "full"),
         ("ERZXXXXXX", "ASSEMBLY", "4.1", "/tmp", None),
         ("ERRXXXXXX", "WGS", "4.1", "/tmp", None),
         ("ERRXXXXXX", "AMPLICON", "4.1", "/tmp", None)
@@ -87,7 +89,7 @@ class TestSanityCheck:
     @patch("os.path.basename")
     @pytest.mark.parametrize("accession, experiment_type, version, result_folder", [
         ("ERR2985769", "other", "4.1", "/tmp"),
-        ("ERR2985769", "WGT", "4.1", "/tmp"),
+        ("ERR2985769", "WXS", "4.1", "/tmp"),
     ])
     def test_check_init_should_raise_unexpected_library_strategy_exception(self, mock_dir, accession,
                                                                            experiment_type, version,

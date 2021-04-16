@@ -162,10 +162,21 @@ class Command(BaseCommand):
         directory = os.path.join(self.rootpath, '2019')
         study_folder = self.__find_folder(directory, search_pattern=secondary_study_accession, recursive=True)
 
-        directory = os.path.join(study_folder, 'version_{}/'.format(version))
-        result_folder = self.__find_folder(directory, search_pattern=run_accession, maxdepth=3)
-        logging.info("Found the following result folder:\n{}".format(result_folder))
-        return result_folder
+        # find version_{} folder
+        result_folder = []
+        if len(study_folder) == 0:
+            sys.exit('Could not find result directory for: {}'.format(secondary_study_accession))
+        for cur_study_folder in study_folder:
+            directory = os.path.join(cur_study_folder, 'version_{}/'.format(version))
+            result_folder += self.__find_folder(directory, search_pattern=run_accession, maxdepth=3)
+
+        # if len(result_folder) > 1: take the latest created version_{} folder
+        if len(result_folder) == 0:
+            sys.exit('Could not find result directory for: {}'.format(run_accession))
+        else:
+            latest_folder = max(result_folder, key=os.path.getctime)
+            logging.info("Found the following result folder:\n{}".format(latest_folder))
+            return latest_folder
 
     def call_import_study(self, secondary_study_accession):
         study_dir = utils.get_result_dir(utils.get_study_dir(self.result_dir))
@@ -355,15 +366,16 @@ class Command(BaseCommand):
 
         if study_folder:
             if len(study_folder) > 1:
-                sys.exit(f'Found more than 1 result directory: {study_folder}')
+                logging.info(f'Found more than 1 result directory: {study_folder}')
             else:
                 logging.info(f'Found result dir: {study_folder}')
-                return study_folder[0]
+            return study_folder
 
         elif recursive:
             return self.__find_folder(self.rootpath, search_pattern, maxdepth=3)
         else:
-            sys.exit('Could not find result directory for: {}'.format(search_pattern))
+            logging.info('Could not find result directory for: {}'.format(search_pattern))
+            return []
 
     @staticmethod
     def __call_find(directory, name, maxdepth=2):
@@ -380,6 +392,6 @@ class Command(BaseCommand):
             stdout = stdout.decode('utf-8').rstrip("\n\r")
             return stdout.splitlines()
         except subprocess.CalledProcessError:
-            raise FindResultFolderException
+            return []  #  raise FindResultFolderException
         except UnicodeError:
             raise FindResultFolderException
