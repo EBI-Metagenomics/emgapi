@@ -110,6 +110,6 @@ class TSVRenderer(CSVRenderer):
     charset = 'iso-8859-1'
 
     def render(self, data, media_type=None, renderer_context=None):
-        # if isinstance(data, six.text_type):
+        if type(data) == str:
             return data.encode(self.charset)
-        # return ''
+        return ''
