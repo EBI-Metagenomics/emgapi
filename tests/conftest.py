@@ -19,6 +19,7 @@ import os
 import pytest
 
 import mongoengine
+import mongomock
 
 from django.conf import settings
 
@@ -72,6 +73,14 @@ def django_db_setup(hide_ena_config, django_db_setup):
 def mongodb(request):
     """On the EMG_CONFIG use 'testdb' on the mongo configuration
     """
+    if os.environ.get("JENKINS", False):
+        # TEMP py3.4
+        # patch to run a fake mongo db on
+        # Jenkins, we don't have a running mongo
+        # instance there yet.
+        # This will be removed when we drop support for py3.4
+        return mongomock.MongoClient()
+    
     db = mongoengine.connect('testdb')
 
     def finalizer():
