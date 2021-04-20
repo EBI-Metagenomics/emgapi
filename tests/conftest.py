@@ -80,7 +80,7 @@ def mongodb(request):
         # instance there yet.
         # This will be removed when we drop support for py3.4
         db = mongomock.MongoClient()
-    else
+    else:
         # real mongo connection
         db = mongoengine.connect('testdb')
 
