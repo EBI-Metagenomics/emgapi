@@ -78,7 +78,7 @@ def mongodb(request):
         # Jenkins, we don't have a running mongo
         # instance there yet.
         # This will be removed when we drop support for py3.4
-        db = monoengine.connect('testdb', host='mongomock://localhost')
+        db = mongoengine.connect('testdb', host='mongomock://localhost')
     else:
         # real mongo connection
         db = mongoengine.connect('testdb')
