@@ -79,9 +79,10 @@ def mongodb(request):
         # Jenkins, we don't have a running mongo
         # instance there yet.
         # This will be removed when we drop support for py3.4
-        return mongomock.MongoClient()
-    
-    db = mongoengine.connect('testdb')
+        db = mongomock.MongoClient()
+    else
+        # real mongo connection
+        db = mongoengine.connect('testdb')
 
     def finalizer():
         db.drop_database('testdb')
