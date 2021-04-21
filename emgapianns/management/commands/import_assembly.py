@@ -42,7 +42,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("accessions", help="ENA analysis accessions", nargs="+")
         parser.add_argument("--ena_db",
-                            help="ENA"s production database enapro",
+                            help="ENA's production database enapro",
                             default="ena")
         parser.add_argument("--emg_db",
                             help="Target emg_db_name alias",
