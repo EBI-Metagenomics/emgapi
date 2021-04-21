@@ -24,6 +24,8 @@ from rest_framework.views import Response
 
 class MaxSetPagination(pagination.JsonApiPageNumberPagination):
 
+    page_query_param = "page"
+    page_size_query_param = "page_size"
     page_size = 1000
     max_page_size = 1000
 
