@@ -22,7 +22,7 @@ from rest_framework import pagination as rf_pagination
 from rest_framework.views import Response
 
 
-class MaxSetPagination(pagination.PageNumberPagination):
+class MaxSetPagination(pagination.JsonApiPageNumberPagination):
 
     page_size = 1000
     max_page_size = 1000
