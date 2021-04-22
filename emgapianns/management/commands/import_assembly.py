@@ -29,7 +29,7 @@ ena = ena_handler.EnaApiHandler()
 
 
 class Command(BaseCommand):
-    help = 'Imports new objects into EMG.'
+    help = "Imports new objects into EMG."
 
     obj_list = list()
     rootpath = None
@@ -40,24 +40,24 @@ class Command(BaseCommand):
     biome = None
 
     def add_arguments(self, parser):
-        parser.add_argument('accessions', help='ENA analysis accessions', nargs='+')
-        parser.add_argument('--ena_db',
+        parser.add_argument("accessions", help="ENA analysis accessions", nargs="+")
+        parser.add_argument("--ena_db",
                             help="ENA's production database enapro",
-                            default='ena')
-        parser.add_argument('--emg_db',
-                            help='Target emg_db_name alias',
-                            choices=['default', 'dev', 'prod'],
-                            default='default')
-        parser.add_argument('--biome', help='Lineage of GOLD biome')
+                            default="ena")
+        parser.add_argument("--emg_db",
+                            help="Target emg_db_name alias",
+                            choices=["default", "dev", "prod"],
+                            default="default")
+        parser.add_argument("--biome", help="Lineage of GOLD biome")
 
     def handle(self, *args, **options):
         logger.info("CLI %r" % options)
-        self.emg_db = options['emg_db']
-        self.ena_db = options['ena_db']
-        self.biome = options['biome']
+        self.emg_db = options["emg_db"]
+        self.ena_db = options["ena_db"]
+        self.biome = options["biome"]
 
-        for acc in options['accessions']:
-            logger.info('Importing assembly {}'.format(acc))
+        for acc in options["accessions"]:
+            logger.info("Importing assembly {}".format(acc))
             self.import_assembly(acc)
             logger.info("Assembly import finished successfully.")
 
@@ -68,26 +68,28 @@ class Command(BaseCommand):
         self.tag_study(assembly, db_assembly_data.primary_study_accession, sample)
 
         if assembly.study.is_public:
-            assembly = self.update_assembly_status(db_assembly_data.assembly_id, 'public')
+            assembly = self.update_assembly_status(db_assembly_data.assembly_id, "public")
 
-        self.tag_experiment_type(assembly, 'assembly')
+        self.tag_experiment_type(assembly, "assembly")
         self.tag_optional_run(assembly, db_assembly_data.name)
 
         assembly.save(using=self.emg_db)
 
     def get_ena_db_assembly(self, accession):
-        logger.info('Fetching assembly {} from ena oracle DB'.format(accession))
+        logger.info("Fetching assembly {} from ena oracle DB".format(accession))
         return ena_models.Assembly.objects.using(self.ena_db).filter(assembly_id=accession).first()
 
-    def create_or_update_assembly(self, era_db_data):
-        accession = era_db_data.assembly_id
+    def create_or_update_assembly(self, ena_assembly):
+        accession = ena_assembly.assembly_id
 
-        logger.info('Creating assembly {}'.format(accession))
-        status = emg_models.Status.objects.using(self.emg_db).get(status_id=era_db_data.status_id)
+        logger.info("Creating assembly {}".format(accession))
+        status = emg_models.Status.objects.using(self.emg_db).get(status_id=ena_assembly.status_id)
         defaults = sanitise_fields({
-            'status_id': status,
-            'wgs_accession': era_db_data.wgs_accession,
-            'legacy_accession': era_db_data.gc_id,
+            "status_id": status,
+            "wgs_accession": ena_assembly.wgs_accession,
+            "legacy_accession": ena_assembly.gc_id,
+            "coverage": ena_assembly.coverage,
+            "min_gap_length": ena_assembly.min_gap_length
         })
         assembly, created = emg_models.Assembly.objects.using(self.emg_db).update_or_create(
             accession=accession,
@@ -97,10 +99,10 @@ class Command(BaseCommand):
 
     def update_assembly_status(self, accession, status):
 
-        logger.info('Updating assembly {} to {}'.format(accession, status))
+        logger.info("Updating assembly {} to {}".format(accession, status))
         status = emg_models.Status.objects.using(self.emg_db).get(status=status)
         defaults = sanitise_fields({
-            'status_id': status,
+            "status_id": status,
         })
         assembly, created = emg_models.Assembly.objects.using(self.emg_db).update_or_create(
             accession=accession,
@@ -115,7 +117,7 @@ class Command(BaseCommand):
             assembly.study = _study
             emg_models.StudySample.objects.using(self.emg_db).get_or_create(study=_study, sample=sample)
         except emg_models.Study.DoesNotExist:
-            raise emg_models.Study.DoesNotExist('Study {} does not exist in emg DB'.format(study_accession))
+            raise emg_models.Study.DoesNotExist("Study {} does not exist in emg DB".format(study_accession))
 
     def tag_sample(self, assembly, sample_accession):
         try:
@@ -124,7 +126,7 @@ class Command(BaseCommand):
             emg_models.AssemblySample.objects.using(self.emg_db).get_or_create(assembly=assembly, sample=sample)
             return sample
         except emg_models.Sample.DoesNotExist:
-            raise emg_models.Sample.DoesNotExist('Sample {} does not exist in emg DB'.format(sample_accession))
+            raise emg_models.Sample.DoesNotExist("Sample {} does not exist in emg DB".format(sample_accession))
 
     def tag_experiment_type(self, assembly, experiment_type):
         try:
@@ -132,7 +134,7 @@ class Command(BaseCommand):
                 .get(experiment_type=experiment_type.lower())
         except emg_models.ExperimentType.DoesNotExist:
             raise emg_models.ExperimentType \
-                .DoesNotExist('Experiment type {} does not exist in database'.format(experiment_type))
+                .DoesNotExist("Experiment type {} does not exist in database".format(experiment_type))
 
     def tag_optional_run(self, assembly, name):
         logging.info("Retrieving run accession from assembly name {}".format(name))
@@ -144,10 +146,10 @@ class Command(BaseCommand):
 
     def tag_run(self, assembly, run_accession):
         try:
-            call_command('import_run', run_accession, '--biome', self.biome)
+            call_command("import_run", run_accession, "--biome", self.biome)
             run = emg_models.Run.objects.using(self.emg_db) \
                 .get(accession=run_accession)
             emg_models.AssemblyRun.objects.using(self.emg_db).get_or_create(assembly=assembly, run=run)
         except emg_models.Run.DoesNotExist:
             raise emg_models.Run \
-                .DoesNotExist('Run {} does not exist in database'.format(run_accession))
+                .DoesNotExist("Run {} does not exist in database".format(run_accession))

@@ -580,6 +580,7 @@ class AssemblySerializer(ExplicitFieldsModelSerializer,
         model = emg_models.Assembly
         exclude = (
             'status_id',
+            'study',
         )
 
 

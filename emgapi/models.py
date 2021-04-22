@@ -1091,6 +1091,7 @@ class AssemblyManager(models.Manager):
 
 
 class Assembly(models.Model):
+
     assembly_id = models.BigAutoField(
         db_column='ASSEMBLY_ID', primary_key=True)
     accession = models.CharField(
@@ -1106,12 +1107,16 @@ class Assembly(models.Model):
         ExperimentType, db_column='EXPERIMENT_TYPE_ID',
         related_name='assemblies',
         on_delete=models.CASCADE, blank=True, null=True)
-
     runs = models.ManyToManyField(
         'Run', through='AssemblyRun', related_name='assemblies', blank=True)
     samples = models.ManyToManyField(
         'Sample', through='AssemblySample', related_name='assemblies',
         blank=True)
+    study = models.ForeignKey("emgapi.Study", db_column="STUDY_ID",
+        on_delete=models.SET_NULL, null=True, blank=True)
+
+    coverage = models.IntegerField(db_column="COVERAGE", null=True, blank=True)
+    min_gap_length = models.IntegerField(db_column="MIN_GAP_LENGTH", null=True, blank=True)
 
     objects = AssemblyManager()
 
