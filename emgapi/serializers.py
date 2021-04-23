@@ -22,10 +22,8 @@ from collections import OrderedDict
 from django.db.models import Q
 
 from rest_framework import serializers as drf_serializers
-from rest_framework.fields import SkipField
 
-from rest_framework_json_api import serializers
-from rest_framework_json_api import relations
+from rest_framework_json_api import serializers, relations, utils
 
 from . import models as emg_models
 from . import relations as emg_relations
@@ -743,7 +741,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
         lookup_field='accession'
     )
 
-    downloads = relations.SerializerMethodHyperlinkedRelatedField(
+    downloads = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
         many=True,
         read_only=True,
         source='get_downloads',
@@ -754,6 +752,8 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
     )
 
     def get_downloads(self, obj):
+        if 'downloads' in utils.get_included_resources(self.context['request']):
+            return obj.downloads
         return None
 
     taxonomy = relations.SerializerMethodHyperlinkedRelatedField(

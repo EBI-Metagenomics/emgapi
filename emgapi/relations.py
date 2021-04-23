@@ -32,8 +32,7 @@ LINKS_PARAMS.append('related_link_self_lookup_fields')
 
 
 
-class HyperlinkedSerializerMethodResourceRelatedField(
-    SkipDataMixin,SerializerMethodResourceRelatedField):  # noqa
+class HyperlinkedSerializerMethodResourceRelatedField(SerializerMethodResourceRelatedField):  # noqa
 
     related_link_self_view_name = None
     related_link_self_lookup_field = 'pk'
@@ -80,7 +79,7 @@ class HyperlinkedSerializerMethodResourceRelatedField(
             return self._to_representation(value)
 
 
-class HyperlinkedSerializerMethodResourceRelatedFieldWithoutData(HyperlinkedSerializerMethodResourceRelatedField):
+class HyperlinkedSerializerMethodResourceRelatedFieldWithoutData(SkipDataMixin, HyperlinkedSerializerMethodResourceRelatedField):
     many_cls = ManySerializerMethodHyperlinkedRelatedField
 
 # TODO: clean up below
