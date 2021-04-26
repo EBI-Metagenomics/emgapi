@@ -1,5 +1,7 @@
-multidict==5.1.0
-pytest==6.2.3
+multidict==4.5.2; python_version < '3.5'
+multidict==5.1.0; python_version > '3.4'
+pytest==4.6.11; python_version < '3.5'
+pytest==6.2.3; python_version > '3.4'
 pytest-django==4.2.0
 pytest-xdist==2.2.1
 model_bakery==1.2.1
@@ -8,6 +10,7 @@ mongomock==3.22.1
 jsonapi-client==0.9.9
 pytest-cov==2.11.1
 # For testing webuploader features (under emgapianns/management/commands/...)
-pandas==0.25.3; python_version < '3.7'
 pandas==1.2.3; python_version > '3.6'
-responses==0.13.2
+pandas==0.25.3; python_version < '3.7'
+responses==0.10.15; python_version < '3.5'
+responses==0.13.2; python_version > '3.4'
