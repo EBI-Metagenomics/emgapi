@@ -9,6 +9,7 @@ from subprocess import check_output, CalledProcessError
 import numpy as np
 import pandas as pd
 from django.db.models import Q
+from django.db import close_old_connections
 
 from emgapi import models as emg_models
 from emgapianns.management.lib import utils
@@ -382,6 +383,14 @@ class StudySummaryGenerator(object):
             os.makedirs(self.summary_dir, exist_ok=True)
 
     def upload_study_file(self, realname, alias, description, group):
+        """Store the study file in the DB
+        """
+        # Close any obsolete connections to the db for studies with > 100 analysis
+        # this is required as django doesn't close/re-open the connection 
+        # and it will results in django.db.utils.OperationalError: (2006, 'MySQL server has gone away')
+        # CONN_MAX_AGE doesn't work for shell commands
+        close_old_connections()
+
         file_config = {
             'alias': alias,
             'compression': False,
