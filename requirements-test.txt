@@ -12,8 +12,8 @@ mock_services==0.3.1
 mongomock==3.19.0
 jsonapi-client==0.9.8
 pytest-cov==2.8.1
-# For testing webuploader features (under emgapianns/management/commands/...)
-# web uploader not tested for python 3.4
-pandas==0.25.2; python_version > '3.4'
+
+pandas==0.25.2; python_version < '3.7'
+pandas==1.2.3; python_version > '3.6'
 responses==0.10.15; python_version > '3.4'
 jsonapi-client==0.9.8; python_version > '3.4'
