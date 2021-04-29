@@ -98,7 +98,7 @@ class TestPermissionsAPI:
         # public run (needeed for auth filtering)
         public_status = baker.make(
             "emgapi.Status",
-            pk=4,
+            pk=emg_models.Status.PUBLIC,
             status="public",
         )
         public_run = baker.make(
@@ -112,7 +112,7 @@ class TestPermissionsAPI:
         # private (needeed for auth filtering)
         private_status = baker.make(
             "emgapi.Status",
-            pk=2,
+            pk=emg_models.Status.PRIVATE,
             status="private",
         )
         run_private = baker.make(
