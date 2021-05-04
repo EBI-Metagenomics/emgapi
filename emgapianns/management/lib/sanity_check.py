@@ -45,7 +45,6 @@ class SanityCheck:
         self.accession = accession
         self.library_strategy = library_strategy.lower()
         self.version = version
-        print(self.library_strategy)
         if self.library_strategy not in self.EXPECTED_LIBRARY_STRATEGIES:
             raise UnexpectedLibraryStrategyException(
                 'Unexpected library_strategy specified: {}'.format(self.library_strategy))
