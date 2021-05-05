@@ -1,6 +1,7 @@
 import glob
 import os
 from subprocess import check_output, CalledProcessError
+import mysql.connector
 
 import logging
 
@@ -11,9 +12,10 @@ from emgapianns.management.webuploader_configs import get_downloadset_config
 from backlog import models as backlog_models
 
 logger = logging.getLogger(__name__)
+BACKLOG_CONFIG = os.environ.get('BACKLOG_CONFIG')
 
 
-def get_result_status(accession):
+def get_result_status(db_name, accession):
     """
     no_qc: upload qc results only. No downloads
     no_cds: upload qc and taxonomy. Antismash tab optional if files present.
@@ -23,12 +25,23 @@ def get_result_status(accession):
     :param accession:
     :return: result status
     """
-    result_status = backlog_models.AnnotationJob.objects.using('backlog_dev').filter(
-        runs__primary_accession=accession).values_list('result_status', flat=True)
+    config = utils.read_config(BACKLOG_CONFIG, db_name)
+    cnx = mysql.connector.connect(**config)
+    cursor = cnx.cursor()
+    command = "SELECT `result_status` FROM `emg_backlog_2`.`AnnotationJob` " \
+              "INNER JOIN `emg_backlog_2`.`RunAnnotationJob` " \
+              "ON `AnnotationJob`.`id` = `RunAnnotationJob`.`annotation_job_id` " \
+              "INNER JOIN `emg_backlog_2`.`Run` " \
+              "ON `Run`.`id` = `RunAnnotationJob`.`run_id` " \
+              "WHERE `Run`.`primary_accession` = '{run_accession}'".format(run_accession=accession)
+    cursor.execute(command)
+    result_status = cursor.fetchall()
+    cursor.close()
+    cnx.close()
     if len(result_status):
-        if result_status[0] == 'no_cds_tax':
+        if result_status[0][0] == 'no_cds_tax':
             return 'no_qc'
-        return result_status[0]
+        return result_status[0][0]
 
 
 class SanityCheck:
@@ -39,12 +52,13 @@ class SanityCheck:
     MIN_NUM_LINES = 3
     failed_statuses = ['no_cds', 'no_tax', 'no_qc', 'no_cds_tax']
 
-    def __init__(self, accession, d, library_strategy, version, result_status=None):
+    def __init__(self, accession, d, library_strategy, version, result_status=None, emg_db='default'):
         self.dir = d
         self.prefix = os.path.basename(d)
         self.accession = accession
         self.library_strategy = library_strategy.lower()
         self.version = version
+        self.emg_db = emg_db
         if self.library_strategy not in self.EXPECTED_LIBRARY_STRATEGIES:
             raise UnexpectedLibraryStrategyException(
                 'Unexpected library_strategy specified: {}'.format(self.library_strategy))
@@ -53,7 +67,7 @@ class SanityCheck:
         elif version == '5.0' and result_status:
             self.result_status = result_status
         else:
-            self.result_status = get_result_status(self.accession)
+            self.result_status = get_result_status(self.emg_db, self.accession)
         self.config = get_downloadset_config(version, library_strategy, self.result_status)
 
     def check_file_existence(self):

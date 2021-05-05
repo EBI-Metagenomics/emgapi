@@ -19,6 +19,7 @@ import os
 import re
 import sys
 import unicodedata
+import json
 
 from emgapi import models as emg_models
 from emgapianns.management.lib.downloadable_files import ChunkedDownloadFiles, UnchunkedDownloadFile
@@ -355,7 +356,7 @@ class DownloadSet:
 
 def get_conf_downloadset(rootpath, input_file_name, emg_db_name, library_strategy, version):
     accession = input_file_name.split('_')[0]
-    result_status = sanity.get_result_status(accession)
+    result_status = sanity.get_result_status(emg_db_name, accession)
     config = get_downloadset_config(version, library_strategy, result_status)
     #SSU.fasta and LSU.fasta could still be present. Do not upload for no_tax
     if result_status == 'no_tax':
@@ -374,3 +375,14 @@ def get_result_dir(result_dir, substring="results/"):
     """
     pos = result_dir.find(substring)
     return result_dir[pos + len(substring):]
+
+
+def read_config(config_path, db):
+    with open(config_path, 'r') as json_config:
+        whole_config = json.load(json_config)
+        config = whole_config[db]
+        config["raise_on_warnings"] = True
+        config["autocommit"] = True
+        config["port"] = int(config["port"])
+    return config
+
