@@ -76,7 +76,7 @@ class TestDownloadFileChecksums:
 
     @pytest.mark.django_db
     def test_import_checksums(self, client, pipelines, analysis_results):
-        """Assert tha the import worked for genome ""
+        """Assert that the import worked for genome
         """
         fasta_gz, _ = emg_models.FileFormat.objects.get_or_create(format_name="FASTA", compression=True)
         tsv, _ = emg_models.FileFormat.objects.get_or_create(format_name="TSV", compression=False)

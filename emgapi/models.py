@@ -51,9 +51,23 @@ class Token(object):
 class BaseQuerySet(models.QuerySet):
     """Auth mechanism to filter private models
     """
+    # TODO: the QuerySet should not have to handle the request
+    #       if should recieve the username
+    #       move the requests bits to the filters and serializers as needed
 
     def available(self, request=None):
-
+        """
+        Filter data based on the status or other properties.
+        Status table:
+        1	draft
+        2	private
+        3	cancelled
+        4	public
+        5	suppressed
+        6	killed
+        7	temporary_suppressed
+        8	temporary_killed
+        """
         _query_filters = {
             'StudyQuerySet': {
                 'all': [Q(is_public=1), ],
@@ -74,18 +88,11 @@ class BaseQuerySet(models.QuerySet):
                     Q(status_id=4),
                 ],
             },
-            'AnalysisJobQuerySet': {
-                'all': [
-                    # TMP: IS_PUBLIC = 5 is suppressed
-                    ~Q(sample__is_public=5),
-                    Q(run__status_id=4) | Q(assembly__status_id=4),
-                    Q(analysis_status_id=3) | Q(analysis_status_id=6)
-                ],
-            },
             'AnalysisJobDownloadQuerySet': {
                 'all': [
                     # TMP: IS_PUBLIC = 5 is suppressed
                     ~Q(job__sample__is_public=5),
+                    Q(job__study__is_public=1),
                     Q(job__run__status_id=4) | Q(job__assembly__status_id=4),
                     Q(job__analysis_status_id=3) | Q(job__analysis_status_id=6)
                 ],
@@ -108,12 +115,6 @@ class BaseQuerySet(models.QuerySet):
                 [Q(samples__studies__submission_account_id=_username,
                    status_id=2) |
                  Q(status_id=4)]
-            _query_filters['AnalysisJobQuerySet']['authenticated'] = \
-                [Q(study__submission_account_id=_username,
-                   run__status_id=2) |
-                 Q(study__submission_account_id=_username,
-                   assembly__status_id=2) |
-                 Q(run__status_id=4) | Q(assembly__status_id=4)]
             _query_filters['AnalysisJobDownloadQuerySet']['authenticated'] = \
                 [Q(job__study__submission_account_id=_username,
                    job__run__status_id=2) |
@@ -121,20 +122,22 @@ class BaseQuerySet(models.QuerySet):
                    job__assembly__status_id=2) |
                  Q(job__run__status_id=4) | Q(job__assembly__status_id=4)]
 
-        q = list()
-        try:
-            _instance = _query_filters[self.__class__.__name__]
-            if isinstance(self, self.__class__):
-                if request is not None and request.user.is_authenticated:
-                    if not request.user.is_superuser:
-                        q.extend(_instance['authenticated'])
-                else:
-                    q.extend(_instance['all'])
-            return self.distinct().filter(*q)
-        except KeyError:
-            pass
-        # TODO: should return nothing
+        filters = _query_filters.get(self.__class__.__name__)
+
+        if filters:
+            return self._apply_filters(filters, request)
         return self
+
+    def _apply_filters(self, filters, request):
+        """Apply the QS filters for "all" and "authenticated" users
+        """
+        q = list()
+        if request is not None and request.user.is_authenticated:
+            if not request.user.is_superuser:
+                q.extend(filters['authenticated'])
+        else:
+            q.extend(filters['all'])
+        return self.distinct().filter(*q)
 
 
 class PipelineTool(models.Model):
