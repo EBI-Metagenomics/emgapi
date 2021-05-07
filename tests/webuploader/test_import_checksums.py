@@ -17,7 +17,7 @@
 import pytest
 import os
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.management import call_command
 
 from rest_framework import status
@@ -64,7 +64,8 @@ class TestDownloadFileChecksums:
             rf["id"]: [
                 rf["attributes"]["file-format"]["name"],
                 rf["attributes"]["file-checksum"]["checksum"],
-                rf["attributes"]["file-checksum"]["checksum-algorithm"]] for rf in res_files
+                rf["attributes"]["file-checksum"]["checksum-algorithm"]
+            ] for rf in res_files
         }
 
         for file_name, file_format in files:

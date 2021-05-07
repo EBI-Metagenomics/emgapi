@@ -21,7 +21,7 @@ from django.db.models import Q
 from django.db.models import FloatField
 from django.db.models.functions import Cast
 from django.utils.datastructures import MultiValueDict
-from django.utils.six import string_types
+# from django.utils.six import string_types
 
 import django_filters
 from django_filters import filters
@@ -213,9 +213,9 @@ class QueryArrayWidget(widgets.BaseCSVWidget, forms.TextInput):
             data = data.copy()
         for key, value in data.items():
             # treat value as csv string: ?foo=1,2
-            if isinstance(value, string_types):
-                data[key] = [
-                    x.strip() for x in value.rstrip(',').split(',') if x]
+            # if isinstance(value, string_types):
+            data[key] = [
+                x.strip() for x in value.rstrip(',').split(',') if x]
         data = MultiValueDict(data)
 
         if not isinstance(data, MultiValueDict):

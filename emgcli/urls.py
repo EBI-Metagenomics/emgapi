@@ -97,7 +97,7 @@ urlpatterns += [
     url(r'^$', RedirectView.as_view(
         pattern_name='emgapi_v1:api-root', permanent=False)),
 
-    url(r'^v1/', include(router.urls, namespace='emgapi_v1')),
+    url(r'^v1/', include((router.urls, 'emgapi_v1'), namespace='emgapi_v1')),
 
     url(r'^v1/utils/token/obtain', obtain_jwt_token,
         name='obtain_jwt_token_v1'),

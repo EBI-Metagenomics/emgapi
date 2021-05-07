@@ -16,7 +16,7 @@
 
 
 import pytest
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from emgapi import models as emg_models
 from model_bakery import baker
 from rest_framework import status

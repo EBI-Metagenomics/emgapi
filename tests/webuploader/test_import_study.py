@@ -148,8 +148,8 @@ class TestImportStudyTransactions:
             assert None is actual_study.experimental_factor
             assert True is actual_study.is_public
             assert None is actual_study.public_release_date
-            assert expected[0].study_description == actual_study.study_abstract
-            assert expected[0].study_title == actual_study.study_name
+            assert expected[0].study_description in actual_study.study_abstract
+            assert expected[0].study_title in actual_study.study_name
             assert 'FINISHED' == actual_study.study_status
             assert 'SUBMITTED' == actual_study.data_origination
             assert None is actual_study.author_email
@@ -192,8 +192,8 @@ class TestImportStudyTransactions:
             assert None is actual_study.experimental_factor
             assert True is actual_study.is_public
             assert None is actual_study.public_release_date
-            assert expected[0].study_description == actual_study.study_abstract
-            assert expected[0].study_title == actual_study.study_name
+            assert expected[0].study_description in actual_study.study_abstract
+            assert expected[0].study_title in actual_study.study_name
             assert 'FINISHED' == actual_study.study_status
             assert 'HARVESTED' == actual_study.data_origination
             assert None is actual_study.author_email
@@ -236,8 +236,8 @@ class TestImportStudyTransactions:
             assert None is actual_study.experimental_factor
             assert True is actual_study.is_public
             assert None is actual_study.public_release_date
-            assert expected[0].study_description == actual_study.study_abstract
-            assert expected[0].study_title == actual_study.study_name
+            assert expected[0].study_description in actual_study.study_abstract
+            assert expected[0].study_title in actual_study.study_name
             assert 'FINISHED' == actual_study.study_status
             assert 'HARVESTED' == actual_study.data_origination
             assert None is actual_study.author_email

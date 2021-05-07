@@ -81,7 +81,7 @@ def mongodb(request):
         db = mongoengine.connect('testdb', host='mongomock://localhost')
     else:
         # real mongo connection
-        db = mongoengine.connect('testdb')
+        db = mongoengine.connect('testdb', host='localhost:27017', alias='test')
 
     def finalizer():
         db.drop_database('testdb')

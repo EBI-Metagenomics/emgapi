@@ -887,7 +887,7 @@ class OrganismAnalysisRelationshipViewSet(m_viewsets.ListReadOnlyModelViewSet):
     ordering = ('-job_id',)
 
     search_fields = (
-        '@sample__metadata__var_val_ucv',
+        'sample__metadata__var_val_ucv',
     )
 
     lookup_field = 'lineage'

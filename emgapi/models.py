@@ -99,7 +99,7 @@ class BaseQuerySet(models.QuerySet):
             },
         }
 
-        if request is not None and request.user.is_authenticated():
+        if request is not None and request.user.is_authenticated:
             _username = request.user.username
             _query_filters['StudyQuerySet']['authenticated'] = \
                 [Q(submission_account_id=_username) | Q(is_public=1)]
@@ -121,9 +121,9 @@ class BaseQuerySet(models.QuerySet):
                  Q(job__study__submission_account_id=_username,
                    job__assembly__status_id=2) |
                  Q(job__run__status_id=4) | Q(job__assembly__status_id=4)]
-        
+
         filters = _query_filters.get(self.__class__.__name__)
-        
+
         if filters:
             return self._apply_filters(filters, request)
         return self
@@ -132,7 +132,7 @@ class BaseQuerySet(models.QuerySet):
         """Apply the QS filters for "all" and "authenticated" users
         """
         q = list()
-        if request is not None and request.user.is_authenticated():
+        if request is not None and request.user.is_authenticated:
             if not request.user.is_superuser:
                 q.extend(filters['authenticated'])
         else:
@@ -444,7 +444,7 @@ class DownloadDescriptionLabel(models.Model):
 class BaseDownload(models.Model):
     parent_id = models.ForeignKey(
         'self', db_column='PARENT_DOWNLOAD_ID', related_name='parent',
-        blank=True, null=True)
+        blank=True, null=True, on_delete=models.CASCADE)
     realname = models.CharField(
         db_column='REAL_NAME', max_length=255)
     alias = models.CharField(
@@ -466,7 +466,7 @@ class BaseDownload(models.Model):
         null=False, blank=True)
     checksum_algorithm = models.ForeignKey(
         'ChecksumAlgorithm', db_column='CHECKSUM_ALGORITHM',
-        blank=True, null=True
+        blank=True, null=True, on_delete=models.CASCADE
     )
 
     class Meta:
@@ -608,7 +608,7 @@ class StudyDownload(BaseAnnotationPipelineDownload):
 
 class StudyQuerySet(BaseQuerySet):
     def mydata(self, request):
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             _username = request.user.username
             return self.distinct() \
                 .filter(Q(submission_account_id=_username))
@@ -868,7 +868,7 @@ class Sample(models.Model):
     PUBLIC = 1
     PRIVATE = 0
     SUPPRESSED = 5 # TODO: this should not be in is_public
-    
+
     sample_id = models.AutoField(
         db_column='SAMPLE_ID', primary_key=True)
     accession = models.CharField(
@@ -1215,7 +1215,7 @@ class AnalysisJobQuerySet(BaseQuerySet):
         Use cases
         - all           | has access to public analyses
         - authenticated | has access to public and private analyses they own
-        
+
         Filtered out analyses for SUPPRESSED samples
         """
         query_filters = {
@@ -1228,7 +1228,7 @@ class AnalysisJobQuerySet(BaseQuerySet):
             ],
         }
 
-        if request is not None and request.user.is_authenticated():
+        if request is not None and request.user.is_authenticated:
             username = request.user.username
             query_filters["authenticated"] = [
                 ~Q(sample__is_public=Sample.SUPPRESSED),
@@ -1465,11 +1465,11 @@ class SampleAnn(models.Model):
     id = models.AutoField(primary_key=True)
     sample = models.ForeignKey(
         Sample, db_column='SAMPLE_ID',
-        related_name="metadata")
+        related_name="metadata", on_delete=models.CASCADE)
     units = models.CharField(
         db_column='UNITS', max_length=25, blank=True, null=True)
     var = models.ForeignKey(
-        'VariableNames', db_column='VAR_ID')
+        'VariableNames', db_column='VAR_ID', on_delete=models.CASCADE)
     var_val_ucv = models.CharField(
         db_column='VAR_VAL_UCV', max_length=4000, blank=True, null=True)
 
@@ -1508,9 +1508,9 @@ class AnalysisJobAnnManager(models.Manager):
 
 
 class AnalysisJobAnn(models.Model):
-    job = models.ForeignKey(AnalysisJob, db_column='JOB_ID', related_name='analysis_metadata')
+    job = models.ForeignKey(AnalysisJob, db_column='JOB_ID', related_name='analysis_metadata', on_delete=models.CASCADE)
     units = models.CharField(db_column='UNITS', max_length=25, blank=True, null=True)
-    var = models.ForeignKey(AnalysisMetadataVariableNames)
+    var = models.ForeignKey(AnalysisMetadataVariableNames, on_delete=models.CASCADE)
     var_val_ucv = models.CharField(db_column='VAR_VAL_UCV', max_length=4000, blank=True, null=True)
 
     objects = AnalysisJobAnnManager()
@@ -1635,7 +1635,7 @@ class Genome(models.Model):
     last_update = models.DateTimeField(db_column='LAST_UPDATE', auto_now=True)
     first_created = models.DateTimeField(db_column='FIRST_CREATED', auto_now_add=True)
 
-    geo_origin = models.ForeignKey('GeographicLocation', db_column='GEOGRAPHIC_ORIGIN', null=True, blank=True)
+    geo_origin = models.ForeignKey('GeographicLocation', db_column='GEOGRAPHIC_ORIGIN', null=True, blank=True, on_delete=models.CASCADE)
 
     pangenome_geographic_range = models.ManyToManyField('GeographicLocation',
                                                         db_table='GENOME_PANGENOME_GEOGRAPHIC_RANGE',
@@ -1722,8 +1722,8 @@ class Release(models.Model):
 
 class ReleaseGenomes(models.Model):
 
-    genome = models.ForeignKey('Genome', db_column='GENOME_ID')
-    release = models.ForeignKey('Release', db_column='RELEASE_ID')
+    genome = models.ForeignKey('Genome', db_column='GENOME_ID', on_delete=models.CASCADE)
+    release = models.ForeignKey('Release', db_column='RELEASE_ID', on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'RELEASE_GENOMES'
@@ -1749,7 +1749,7 @@ class KeggClass(models.Model):
     class_id = models.CharField(db_column='CLASS_ID', max_length=10,
                                 unique=True)
     name = models.CharField(db_column='NAME', max_length=80)
-    parent = models.ForeignKey('self', db_column='PARENT', null=True)
+    parent = models.ForeignKey('self', db_column='PARENT', null=True, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'KEGG_CLASS'
