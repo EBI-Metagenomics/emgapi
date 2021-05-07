@@ -174,12 +174,13 @@ class PipelineTool(models.Model):
 
 class PipelineManager(models.Manager):
     def get_queryset(self):
-        return BaseQuerySet(self.model, using=self._db)
+        return super().get_queryset()
 
 
 class PipelineAnnotatedManager(models.Manager):
     def get_queryset(self):
-        return BaseQuerySet(self.model, using=self._db) \
+        return super() \
+            .get_queryset() \
             .annotate(
             analyses_count=Count(
                 'analyses', filter=(
@@ -243,6 +244,26 @@ class PipelineReleaseTool(models.Model):
 
 
 class AnalysisStatus(models.Model):
+    """
+    Current values:
+        1	scheduled
+        2	running
+        3	completed
+        4	failed
+        5	suppressed
+        6	QC not passed
+        7	Unable to process
+        8	unknown
+    """
+    SCHEDULED = 1
+    RUNNING = 2
+    COMPLETED = 3
+    FAILED = 4
+    SUPPRESSED = 5
+    QC_NOT_PASSED = 6
+    UNABLE_TO_PROCESS = 7
+    UNKNOWN = 8
+
     analysis_status_id = models.AutoField(
         db_column='ANALYSIS_STATUS_ID', primary_key=True)
     analysis_status = models.CharField(
@@ -509,7 +530,7 @@ class AnalysisJobDownloadQuerySet(BaseQuerySet):
 
 class AnalysisJobDownloadManager(models.Manager):
     def get_queryset(self):
-        return BaseQuerySet(self.model, using=self._db).\
+        return AnalysisJobDownloadQuerySet(self.model, using=self._db).\
             select_related(
                 'job',
                 'pipeline',
@@ -843,6 +864,11 @@ class SampleManager(models.Manager):
 
 
 class Sample(models.Model):
+    # is_public possible values
+    PUBLIC = 1
+    PRIVATE = 0
+    SUPPRESSED = 5 # TODO: this should not be in is_public
+
     sample_id = models.AutoField(
         db_column='SAMPLE_ID', primary_key=True)
     accession = models.CharField(
@@ -1009,6 +1035,19 @@ class ExperimentType(models.Model):
 
 
 class Status(models.Model):
+    """Status
+    Current values as constants to make
+    the code easier to read
+    """
+    DRAFT = 1
+    PRIVATE = 2
+    CANCELLED = 3
+    PUBLIC = 4
+    SUPRESSED = 5
+    KILLED = 6
+    TEMPORARY_SUPPRESSED = 7
+    TEMPORARY_KILLED = 8
+
     status_id = models.SmallIntegerField(
         db_column='STATUS_ID', primary_key=True)
     status = models.CharField(
@@ -1022,9 +1061,13 @@ class Status(models.Model):
         return self.status
 
 
+class RunQuerySet(BaseQuerySet):
+    pass
+
+
 class RunManager(models.Manager):
     def get_queryset(self):
-        return BaseQuerySet(self.model, using=self._db) \
+        return RunQuerySet(self.model, using=self._db) \
             .select_related(
                 'status_id',
                 'sample',
@@ -1166,11 +1209,46 @@ class AssemblySample(models.Model):
         return 'Assembly:{} - Sample:{}'.format(self.assembly, self.sample)
 
 
+class AnalysisJobQuerySet(BaseQuerySet):
+    def available(self, request=None):
+        """Override BaseQuerySet with the AnalysisJob auth rules
+        Use cases
+        - all           | has access to public analyses
+        - authenticated | has access to public and private analyses they own
+
+        Filtered out analyses for SUPPRESSED samples
+        """
+        query_filters = {
+            "all": [
+                Q(study__is_public=1),
+                ~Q(sample__is_public=Sample.SUPPRESSED),
+                Q(run__status_id=Status.PUBLIC) | Q(assembly__status_id=Status.PUBLIC),
+                Q(analysis_status_id=AnalysisStatus.COMPLETED)
+                | Q(analysis_status_id=AnalysisStatus.QC_NOT_PASSED),
+            ],
+        }
+
+        if request is not None and request.user.is_authenticated:
+            username = request.user.username
+            query_filters["authenticated"] = [
+                ~Q(sample__is_public=Sample.SUPPRESSED),
+                Q(study__submission_account_id=username, run__status_id=Status.PRIVATE)
+                | Q(
+                    study__submission_account_id=username,
+                    assembly__status_id=Status.PRIVATE,
+                )
+                | Q(run__status_id=Status.PUBLIC)
+                | Q(assembly__status_id=Status.PUBLIC)
+            ]
+
+        return self._apply_filters(query_filters, request)
+
+
 class AnalysisJobManager(models.Manager):
     def get_queryset(self):
         _qs = AnalysisJobAnn.objects.all() \
             .select_related('var')
-        return BaseQuerySet(self.model, using=self._db) \
+        return AnalysisJobQuerySet(self.model, using=self._db) \
             .select_related(
                 'pipeline',
                 'analysis_status',
@@ -1609,10 +1687,14 @@ class GenomeGeographicLocation(models.Model):
         db_table = 'GENOME_GEOGRAPHIC_RANGE'
 
 
+class ReleaseManagerQuerySet(BaseQuerySet):
+    pass
+
+
 class ReleaseManager(models.Manager):
 
     def get_queryset(self):
-        qs = BaseQuerySet(self.model, using=self._db)
+        qs = ReleaseManagerQuerySet(self.model, using=self._db)
         return qs.annotate(genome_count=Count('genomes'))
 
     def available(self, request):
