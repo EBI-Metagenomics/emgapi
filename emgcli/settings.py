@@ -564,14 +564,7 @@ except KeyError:
     EMG_DESC = 'MGnify API'
 
 # MongoDB
-# import mongoengine
-
 MONGO_CONF = EMG_CONF['emg']['mongodb']
-# MONGO_CONN = mongoengine.connect(**MONGO_CONF)
-# MONGO_ENGINE=mongoengine
-# print(mongodb)
-# print(MONGO_CONN)
-
 
 # TODO: fix warnings
 SILENCED_SYSTEM_CHECKS = ["fields.W342"]

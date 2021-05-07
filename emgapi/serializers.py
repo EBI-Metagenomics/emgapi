@@ -293,20 +293,6 @@ class PipelineSerializer(ExplicitFieldsModelSerializer,
         lookup_field='release_version',
     )
 
-    # relationships
-    # studies = relations.SerializerMethodHyperlinkedRelatedField(
-    #     source='get_studies',
-    #     model=emg_models.Study,
-    #     many=True,
-    #     read_only=True,
-    #     related_link_view_name='emgapi_v1:pipelines-studies-list',
-    #     related_link_url_kwarg='release_version',
-    #     related_link_lookup_field='release_version',
-    # )
-    #
-    # def get_studies(self, obj):
-    #     return None
-
     samples = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_samples',
         model=emg_models.Sample,
@@ -972,12 +958,6 @@ class BaseMetadataSerializer(ExplicitFieldsModelSerializer,
 class SampleAnnSerializer(BaseMetadataSerializer):
 
     # attributes
-    # sample_accession = serializers.SerializerMethodField()
-    #
-    # def get_sample_accession(self, obj):
-    #     return obj.sample.accession
-
-    # relationships
     sample = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name='emgapi_v1:samples-detail',
@@ -991,7 +971,6 @@ class SampleAnnSerializer(BaseMetadataSerializer):
             'key',
             'value',
             'unit',
-            # 'sample_accession',
             'sample',
         )
 
@@ -1000,7 +979,6 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
                        serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
-        # 'studies': 'emgapi.serializers.StudySerializer',
         'biome': 'emgapi.serializers.BiomeSerializer',
         'runs': 'emgapi.serializers.RunSerializer',
         'analyses': 'emgapi.serializers.AnalysisSerializer',
@@ -1021,19 +999,6 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
     sample_metadata = serializers.ListField()
 
     # relationships
-    # metadata = relations.SerializerMethodHyperlinkedRelatedField(
-    #     source='get_metadata',
-    #     model=emg_models.SampleAnn,
-    #     many=True,
-    #     read_only=True,
-    #     related_link_view_name='emgapi_v1:samples-metadata-list',
-    #     related_link_url_kwarg='accession',
-    #     related_link_lookup_field='accession'
-    # )
-    #
-    # def get_metadata(self, obj):
-    #     return None
-
     biome = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name='emgapi_v1:biomes-detail',
@@ -1069,9 +1034,6 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
     def get_runs(self, obj):
         return None
 
-    # counters
-    # runs_count = serializers.IntegerField()
-
     class Meta:
         model = emg_models.Sample
         exclude = (
@@ -1088,7 +1050,6 @@ class RetrieveSampleSerializer(SampleSerializer):
 
     included_serializers = {
         'biome': 'emgapi.serializers.BiomeSerializer',
-        # 'studies': 'emgapi.serializers.StudySerializer',
         'runs': 'emgapi.serializers.RunSerializer',
         'analyses': 'emgapi.serializers.AnalysisSerializer',
     }
@@ -1109,7 +1070,6 @@ class SampleGeoCoordinateSerializer(ExplicitFieldsModelSerializer,
         unique_together = (('latitude', 'longitude'),)
         fields = (
             'id',
-            # 'url',
             'longitude',
             'latitude',
             'samples_count'
@@ -1226,7 +1186,6 @@ class StudySerializer(ExplicitFieldsModelSerializer,
         related_link_lookup_field='accession',
         related_link_self_view_name='emgapi_v1:biomes-detail',
         related_link_self_lookup_field='lineage',
-        # include_data=True,
     )
 
     def get_biomes(self, obj):
