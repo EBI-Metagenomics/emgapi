@@ -17,6 +17,7 @@
 
 import pytest
 from django.urls import reverse
+from emgapi import models as emg_models
 from model_bakery import baker
 from rest_framework import status
 from test_utils.emg_fixtures import *  # noqa
