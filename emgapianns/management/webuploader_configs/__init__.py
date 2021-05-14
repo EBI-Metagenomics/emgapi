@@ -32,21 +32,44 @@ def filter_config(config, result_status=None):
     :return: original or filtered config
     """
     final_config = []
-    no_qc_filter = ['Sequence data', 'Taxonomic analysis mOTU', 'Functional analysis', 'functional-annotation/stats',
-                    'Taxonomic analysis LSU rRNA', 'Taxonomic analysis SSU rRNA', 'Taxonomic analysis UNITE',
-                    'Taxonomic analysis ITSoneDB', 'krona.html', 'pathways-systems', 'functional-annotation',
-                    'qc-statistics', '{}.cmsearch.all.tblout.gz', '{}.cmsearch.all.tblout.deoverlapped.gz',
-                    'RNA-counts']
-    no_cds_filter = ['functional-annotation/stats', 'Pathways and Systems', 'pathways-systems', 'Functional analysis',
-                     'functional-annotation', '{}_CDS.faa.gz', '{}_CDS.ffn.gz']
-    no_filter = ['full', 'no_tax']
+    filters = {
+        "no_qc_filter": [
+            "Sequence data",
+            "Taxonomic analysis mOTU",
+            "Functional analysis",
+            "functional-annotation/stats",
+            "Taxonomic analysis LSU rRNA",
+            "Taxonomic analysis SSU rRNA",
+            "Taxonomic analysis UNITE",
+            "Taxonomic analysis ITSoneDB",
+            "krona.html",
+            "pathways-systems",
+            "functional-annotation",
+            "qc-statistics",
+            "{}.cmsearch.all.tblout.gz",
+            "{}.cmsearch.all.tblout.deoverlapped.gz",
+            "RNA-counts",
+        ],
+        "no_cds_filter": [
+            "functional-annotation/stats",
+            "Pathways and Systems",
+            "pathways-systems",
+            "Functional analysis",
+            "functional-annotation",
+            "{}_CDS.faa.gz",
+            "{}_CDS.ffn.gz",
+        ],
+    }
+    no_filter = ["full", "no_tax"]
     if not result_status or result_status in no_filter:
         return read_config(config)
-    filter = eval(result_status + '_filter')
+    filter = filters.get(result_status + '_filter')
+    if filter is None:
+        raise UnexpectedResultStatusException('Invalid result status {} has no config filter'.format(result_status))
     for file in read_config(config):
-        if 'antismash' in file['real_name'] or 'summary.out' in file['real_name']:
+        if file['real_name'] in ['antismash', 'summary.out']:
             final_config.append(file)
-        elif file['group_type'] in filter or file['subdir'] in filter or file['real_name'] in filter:
+        elif file['real_name'] or file['group_type'] or file['subdir'] in filter:
             continue
         else:
             final_config.append(file)
