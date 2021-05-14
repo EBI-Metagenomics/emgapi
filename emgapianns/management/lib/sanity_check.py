@@ -17,24 +17,33 @@ BACKLOG_CONFIG = os.environ.get('BACKLOG_CONFIG')
 
 def get_result_status(db_name, accession):
     """
-    no_qc: upload qc results only. No downloads
-    no_cds: upload qc and taxonomy. Antismash tab optional if files present.
-    no_tax: standard upload (tax files are optional)
-    no_cds_tax: use no_qc config. Upload qc. Processed reads and other ncRNA downloadable
-
-    :param accession:
+    Get the results status for an AnnotationJob in EMG-Backlog
+    Possible return values:
+        no_qc: upload qc results only. No downloads
+        no_cds: upload qc and taxonomy. Antismash tab optional if files present.
+        no_tax: standard upload (tax files are optional)
+        no_cds_tax: use no_qc config. Upload qc. Processed reads and other ncRNA downloadable
+    :param db_name: EMG-Backlog DB
+    :param accession: Run accession (SRSXXX or ERRXXX)
     :return: result status
     """
     config = utils.read_config(BACKLOG_CONFIG, db_name)
     cnx = mysql.connector.connect(**config)
     cursor = cnx.cursor()
-    command = "SELECT `result_status` FROM `emg_backlog_2`.`AnnotationJob` " \
-              "INNER JOIN `emg_backlog_2`.`RunAnnotationJob` " \
-              "ON `AnnotationJob`.`id` = `RunAnnotationJob`.`annotation_job_id` " \
-              "INNER JOIN `emg_backlog_2`.`Run` " \
-              "ON `Run`.`id` = `RunAnnotationJob`.`run_id` " \
-              "WHERE `Run`.`primary_accession` = '{run_accession}'".format(run_accession=accession)
-    cursor.execute(command)
+    command = (
+        "SELECT result_status FROM emg_backlog_2.AnnotationJob "
+        "INNER JOIN emg_backlog_2.RunAnnotationJob "
+        "ON AnnotationJob.id = RunAnnotationJob.annotation_job_id "
+        "INNER JOIN emg_backlog_2.Run ON "
+        "Run.id = RunAnnotationJob.run_id WHERE Run.primary_accession = %s"
+    )
+    cursor.execute(command, (accession,))
+    #command = "SELECT `result_status` FROM `emg_backlog_2`.`AnnotationJob` " \
+    #          "INNER JOIN `emg_backlog_2`.`RunAnnotationJob` " \
+    #          "ON `AnnotationJob`.`id` = `RunAnnotationJob`.`annotation_job_id` " \
+    #          "INNER JOIN `emg_backlog_2`.`Run` " \
+    #          "ON `Run`.`id` = `RunAnnotationJob`.`run_id` " \
+    #          "WHERE `Run`.`primary_accession` = '{run_accession}'".format(run_accession=accession)
     result_status = cursor.fetchall()
     cursor.close()
     cnx.close()
@@ -159,7 +168,6 @@ class SanityCheck:
             chunk_file = chunk_file.format(self.prefix)
         chunk_filepath = self.get_filepath(file_config, chunk_file)
         chunks = utils.read_chunkfile(chunk_filepath)
-        #chunks = read_chunkfile(chunk_filepath)
         for f in chunks:
             filepath = self.get_filepath(file_config, f)
             self.__check_exists(filepath)
@@ -187,10 +195,7 @@ class SanityCheck:
         found_file = glob.glob(filepath)
         if not found_file and required:
             raise FileNotFoundError('{} is missing'.format(filepath))
-        elif found_file:
-            return True
-        elif not found_file:
-            return False
+        return len(found_file) > 0
 
     def __check_file_content(self, filepath):
         logging.info("Checking content of file {}".format(filepath))
