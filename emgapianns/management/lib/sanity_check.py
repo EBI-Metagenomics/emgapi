@@ -38,12 +38,6 @@ def get_result_status(db_name, accession):
         "Run.id = RunAnnotationJob.run_id WHERE Run.primary_accession = %s"
     )
     cursor.execute(command, (accession,))
-    #command = "SELECT `result_status` FROM `emg_backlog_2`.`AnnotationJob` " \
-    #          "INNER JOIN `emg_backlog_2`.`RunAnnotationJob` " \
-    #          "ON `AnnotationJob`.`id` = `RunAnnotationJob`.`annotation_job_id` " \
-    #          "INNER JOIN `emg_backlog_2`.`Run` " \
-    #          "ON `Run`.`id` = `RunAnnotationJob`.`run_id` " \
-    #          "WHERE `Run`.`primary_accession` = '{run_accession}'".format(run_accession=accession)
     result_status = cursor.fetchall()
     cursor.close()
     cnx.close()
