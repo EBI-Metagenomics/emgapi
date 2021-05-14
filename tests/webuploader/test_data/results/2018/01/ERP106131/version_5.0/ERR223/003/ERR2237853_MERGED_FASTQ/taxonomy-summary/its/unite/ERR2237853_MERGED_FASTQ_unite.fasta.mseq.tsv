@@ -1,0 +1,6 @@
+# Constructed from biom file
+# OTU ID        UNITE   taxonomy
+2       635.0   sk__Eukaryota
+3       386.0   sk__Eukaryota;k__Alveolata
+6       15.0    sk__Eukaryota;k__Alveolata;p__Alveolata_phy_Incertae_sedis;c__Alveolata_cls_Incertae_sedis;o__Alveolata_ord_Incertae_sedis
+10      11.0    sk__Eukaryota;k__Alveolata;p__Alveolata_phy_Incertae_sedis;c__Alveolata_cls_Incertae_sedis;o__Alveolata_ord_Incertae_sedis;f__Colpodellidae
