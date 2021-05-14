@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from rest_framework import status
 from rest_framework.test import APITestCase

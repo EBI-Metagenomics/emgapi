@@ -17,7 +17,7 @@ import sys
 
 from urllib.parse import urlencode
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.conf import settings
 
 from rest_framework.test import APITestCase

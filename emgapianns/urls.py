@@ -29,104 +29,104 @@ mongo_router = m_routers.DefaultRouter(trailing_slash=False)
 mongo_router.register(
     r'annotations/go-terms',
     m_views.GoTermViewSet,
-    base_name='goterms'
+    basename='goterms'
 )
 
 mongo_router.register(
     r'annotations/interpro-identifiers',
     m_views.InterproIdentifierViewSet,
-    base_name='interproidentifier'
+    basename='interproidentifier'
 )
 
 mongo_router.register(
     r'annotations/kegg-modules',
     m_views.KeggModuleViewSet,
-    base_name='keggmodules'
+    basename='keggmodules'
 )
 
 mongo_router.register(
     r'annotations/pfam-entries',
     m_views.PfamEntryViewSet,
-    base_name='pfam'
+    basename='pfam'
 )
 
 mongo_router.register(
     r'annotations/kegg-orthologs',
     m_views.KeggOrthologViewSet,
-    base_name='kegg-orthologs'
+    basename='kegg-orthologs'
 )
 
 mongo_router.register(
     r'annotations/genome-properties',
     m_views.GenomePropViewSet,
-    base_name='genome-properties'
+    basename='genome-properties'
 )
 
 mongo_router.register(
     r'annotations/antismash-gene-clusters',
     m_views.AntiSmashGeneClusterViewSet,
-    base_name='antismash-gene-clusters'
+    basename='antismash-gene-clusters'
 )
 
 mongo_router.register(
     r'annotations/go-terms/(?P<accession>[a-zA-Z0-9\:]+)/analyses',
     m_views.GoTermAnalysisRelationshipViewSet,
-    base_name='goterms-analyses'
+    basename='goterms-analyses'
 )
 
 mongo_router.register(
     r'annotations/interpro-identifiers/(?P<accession>[a-zA-Z0-9\:]+)/analyses',
     m_views.InterproIdentifierAnalysisRelationshipViewSet,
-    base_name='interproidentifier-analyses'
+    basename='interproidentifier-analyses'
 )
 
 mongo_router.register(
     r'annotations/kegg-modules/(?P<accession>[a-zA-Z0-9\:]+)/analyses',
     m_views.KeggModuleAnalysisRelationshipViewSet,
-    base_name='keggmodule-analyses'
+    basename='keggmodule-analyses'
 )
 
 mongo_router.register(
     r'annotations/pfam-entries/(?P<accession>[a-zA-Z0-9\:]+)/analyses',
     m_views.PfamAnalysisRelationshipViewSet,
-    base_name='pfam-analyses'
+    basename='pfam-analyses'
 )
 
 mongo_router.register(
     r'annotations/kegg-orthologs/(?P<accession>[a-zA-Z0-9\:]+)/analyses',
     m_views.KeggOrthologRelationshipViewSet,
-    base_name='kegg-orthologs-analyses'
+    basename='kegg-orthologs-analyses'
 )
 
 mongo_router.register(
     r'annotations/genome-properties/(?P<accession>[a-zA-Z0-9\:]+)/analyses',
     m_views.GenomePropertyAnalysisRelationshipViewSet,
-    base_name='genome-properties-analyses'
+    basename='genome-properties-analyses'
 )
 
 mongo_router.register(
     r'annotations/antismash-gene-clusters/(?P<accession>[a-zA-Z0-9\:]+)/analyses',
     m_views.AntiSmashGeneClusterAnalysisRelationshipViewSet,
-    base_name='antismash-gene-clusters-analyses'
+    basename='antismash-gene-clusters-analyses'
 )
 
 mongo_router.register(
     r'annotations/organisms',
     m_views.OrganismViewSet,
-    base_name='organisms'
+    basename='organisms'
 )
 
 mongo_router.register(
     r'annotations/organisms/(?P<lineage>[^/]+)',
     m_views.OrganismTreeViewSet,
-    base_name='organisms-children'
+    basename='organisms-children'
 )
 
 mongo_router.register(
     (r'annotations/organisms/(?P<lineage>[^/]+)/'
      r'analyses'),
     m_views.OrganismAnalysisRelationshipViewSet,
-    base_name='organisms-analyses'
+    basename='organisms-analyses'
 )
 
 router = routers.DefaultRouter(trailing_slash=False)
@@ -134,85 +134,85 @@ router = routers.DefaultRouter(trailing_slash=False)
 router.register(
     r'analyses/(?P<accession>[^/]+)/contigs',
     m_views.AnalysisContigViewSet,
-    base_name='analysis-contigs'
+    basename='analysis-contigs'
 )
 
 router.register(
     r'analyses/(?P<accession>[^/]+)/go-terms',
     m_views.AnalysisGoTermRelationshipViewSet,
-    base_name='analysis-goterms'
+    basename='analysis-goterms'
 )
 
 router.register(
     r'analyses/(?P<accession>[^/]+)/go-slim',
     m_views.AnalysisGoSlimRelationshipViewSet,
-    base_name='analysis-goslim'
+    basename='analysis-goslim'
 )
 
 router.register(
     r'analyses/(?P<accession>[^/]+)/interpro-identifiers',
     m_views.AnalysisInterproIdentifierRelationshipViewSet,
-    base_name='analysis-interpro'
+    basename='analysis-interpro'
 )
 
 router.register(
     r'analyses/(?P<accession>[^/]+)/kegg-modules',
     m_views.AnalysisKeggModulesRelationshipViewSet,
-    base_name='analysis-kegg-modules'
+    basename='analysis-kegg-modules'
 )
 
 router.register(
     r'analyses/(?P<accession>[^/]+)/pfam-entries',
     m_views.AnalysisPfamRelationshipViewSet,
-    base_name='analysis-pfam-entries'
+    basename='analysis-pfam-entries'
 )
 
 router.register(
     r'analyses/(?P<accession>[^/]+)/kegg-orthologs',
     m_views.AnalysisKeggOrthologsRelationshipViewSet,
-    base_name='analysis-kegg-orthologs'
+    basename='analysis-kegg-orthologs'
 )
 
 router.register(
     r'analyses/(?P<accession>[^/]+)/genome-properties',
     m_views.AnalysisGenomePropertiesRelationshipViewSet,
-    base_name='analysis-genome-properties'
+    basename='analysis-genome-properties'
 )
 
 router.register(
     r'analyses/(?P<accession>[^/]+)/antismash-gene-clusters',
     m_views.AnalysisAntiSmashGeneClustersRelationshipViewSet,
-    base_name='analysis-antismash-gene-clusters'
+    basename='analysis-antismash-gene-clusters'
 )
 
 router.register(
     r'analyses/(?P<accession>[^/]+)/taxonomy',
     m_views.AnalysisOrganismRelationshipViewSet,
-    base_name='analysis-taxonomy'
+    basename='analysis-taxonomy'
 )
 
 router.register(
     r'analyses/(?P<accession>[^/]+)/taxonomy/ssu',
     m_views.AnalysisOrganismSSURelationshipViewSet,
-    base_name='analysis-taxonomy-ssu'
+    basename='analysis-taxonomy-ssu'
 )
 
 router.register(
     r'analyses/(?P<accession>[^/]+)/taxonomy/lsu',
     m_views.AnalysisOrganismLSURelationshipViewSet,
-    base_name='analysis-taxonomy-lsu'
+    basename='analysis-taxonomy-lsu'
 )
 
 router.register(
     r'analyses/(?P<accession>[^/]+)/taxonomy/itsonedb',
     m_views.AnalysisOrganismITSOneDBRelationshipViewSet,
-    base_name='analysis-taxonomy-itsonedb'
+    basename='analysis-taxonomy-itsonedb'
 )
 
 router.register(
     r'analyses/(?P<accession>[^/]+)/taxonomy/unite',
     m_views.AnalysisOrganismITSUniteRelationshipViewSet,
-    base_name='analysis-taxonomy-unite'
+    basename='analysis-taxonomy-unite'
 )
 
 urlpatterns = [

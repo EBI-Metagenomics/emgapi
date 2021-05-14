@@ -56,10 +56,6 @@ def is_run_accession(accession):
     return re.match(run_accession_re, accession)
 
 
-def is_assembly_accession(accession):
-    return re.match(assembly_accession_re, accession)
-
-
 def retrieve_existing_result_dir(rootpath, dest_pattern):
     """
         Searches file system for existing result folder.
@@ -134,7 +130,7 @@ def is_assembly(accession):
     :param accession:
     :return:
     """
-    if is_assembly_accession(accession):
+    if re.match(assembly_accession_re, accession):
         return True
     elif is_run_accession(accession):
         return False

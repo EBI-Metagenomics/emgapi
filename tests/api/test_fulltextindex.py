@@ -24,7 +24,7 @@ except ImportError:
 
 from model_bakery import baker
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from rest_framework import status
 

@@ -19,8 +19,10 @@ from django.core.paginator import Paginator
 from django.utils.functional import cached_property
 
 
-class DefaultPagination(pagination.PageNumberPagination):
+class DefaultPagination(pagination.JsonApiPageNumberPagination):
 
+    page_query_param = "page"
+    page_size_query_param = "page_size"
     page_size = 25
     max_page_size = 250
 
@@ -32,6 +34,8 @@ class FasterDjangoPaginator(Paginator):
     this makes the count faster as it doesn't need to fetch all
     the cols just to do a count.
     """
+    page_query_param = "page"
+    page_size_query_param = "page_size"
 
     @cached_property
     def count(self):
@@ -39,8 +43,10 @@ class FasterDjangoPaginator(Paginator):
         return self.object_list.values('pk').count()
 
 
-class FasterCountPagination(pagination.PageNumberPagination):
+class FasterCountPagination(pagination.JsonApiPageNumberPagination):
 
+    page_query_param = "page"
+    page_size_query_param = "page_size"
     page_size = 25
     max_page_size = 250
     django_paginator_class = FasterDjangoPaginator
