@@ -161,8 +161,9 @@ class Command(EMGBaseCommand):
                         logging.info("{} successfully loaded into the database.".format(row[0]))
 
                     except emg_models.AnalysisMetadataVariableNames.DoesNotExist:
-                        msg = "Could not find variable name {} in the database even though it should be supported!" \
-                            .format(row[0])
+                        msg = "Could not find variable name [{}|{}] in the database even though it should be supported!\n" \
+                              "There are {} variables registered" \
+                            .format(row[0], var_name, emg_models.AnalysisMetadataVariableNames.objects.count())
                         logging.error(msg)
                         raise UnexpectedVariableName(msg)
         else:
