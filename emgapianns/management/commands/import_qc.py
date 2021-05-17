@@ -147,8 +147,9 @@ class Command(EMGBaseCommand):
                                         "Reads with predicted RNA"]:
                             var_name = "Reads with predicted RNA"
                         else:
-                            logging.error("Unsupported variable name {}".format(row[0]))
-                            raise UnexpectedVariableName
+                            msg = "Unsupported variable name {}".format(row[0])
+                            logging.error(msg)
+                            raise UnexpectedVariableName("Unsupported variable name {}".format(row[0]))
 
                         var = emg_models.AnalysisMetadataVariableNames.objects.using(emg_db) \
                             .get(var_name=var_name)
