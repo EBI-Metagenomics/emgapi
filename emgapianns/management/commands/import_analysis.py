@@ -112,7 +112,7 @@ class Command(BaseCommand):
 
         input_file_name = os.path.basename(self.result_dir)
 
-        sanity_checker = SanityCheck(self.accession, self.result_dir, self.library_strategy, self.version)
+        sanity_checker = SanityCheck(self.accession, self.result_dir, self.library_strategy, self.version, emg_db=self.emg_db)
         sanity_checker.check_file_existence()
 
         sanity_checker.run_quality_control_check()
