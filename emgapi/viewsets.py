@@ -61,7 +61,7 @@ class BaseStudyGenericViewSet(viewsets.GenericViewSet):
     filter_backends = (
         DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter,
+        emg_filters.getUnambiguousOrderingFilterByField('study_id'),
     )
 
     ordering_fields = (

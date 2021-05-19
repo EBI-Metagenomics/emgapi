@@ -30,6 +30,8 @@ from django_filters import widgets
 from . import models as emg_models
 from . import utils as emg_utils
 
+from rest_framework import filters as drf_filters
+
 
 WORD_MATCH_REGEX = r"{0}"
 FLOAT_MATCH_REGEX = r"^[0-9 \.\,]+$"
@@ -1059,3 +1061,17 @@ class GenomeFilter(django_filters.FilterSet):
             "pangenome_accessory_size__gte",
             "pangenome_accessory_size__lte",
         )
+
+def getUnambiguousOrderingFilterByField(field):
+    class UnambiguousOrderingFilter(drf_filters.OrderingFilter):
+        def filter_queryset(self, request, queryset, view):
+            ordering = self.get_ordering(request, queryset, view)
+
+            if ordering:
+                if field in ordering:
+                    return queryset.order_by(*ordering)
+                else:
+                    return queryset.order_by(*ordering, field)
+
+            return queryset
+    return UnambiguousOrderingFilter
