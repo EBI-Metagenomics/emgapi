@@ -73,7 +73,7 @@ custom_login_view = views.LoginView
 custom_login_view.form_class = CustomAuthenticationForm
 
 urlpatterns = [
-    url(r'^http-auth/login_form$', custom_login_view.as_view(
+    url('http-auth/login_form', custom_login_view.as_view(
         template_name='rest_framework/login_form.html'), {}),
 
     url(r'^http-auth/', include('rest_framework.urls',
