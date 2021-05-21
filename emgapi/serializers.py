@@ -1195,7 +1195,7 @@ class StudySerializer(ExplicitFieldsModelSerializer,
         return emg_models.Biome.objects \
             .filter(pk__in=biomes)
 
-    publications = relations.SerializerMethodHyperlinkedRelatedField(
+    publications = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
         source='get_publications',
         model=emg_models.Publication,
         many=True,
@@ -1206,6 +1206,8 @@ class StudySerializer(ExplicitFieldsModelSerializer,
     )
 
     def get_publications(self, obj):
+        if 'publications' in utils.get_included_resources(self.context['request']):
+            return obj.publications.all()
         return None
 
     downloads = relations.SerializerMethodHyperlinkedRelatedField(
