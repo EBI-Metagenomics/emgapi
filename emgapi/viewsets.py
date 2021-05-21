@@ -92,7 +92,7 @@ class BaseSampleGenericViewSet(viewsets.GenericViewSet):
     filter_backends = (
         DjangoFilterBackend,
         filters.SearchFilter,
-        emg_filters.getUnambiguousOrderingFilterByField('sample_id'),
+        emg_filters.getUnambiguousOrderingFilterByField('accession'),
     )
 
     ordering_fields = (
