@@ -36,7 +36,7 @@ class BaseSuperStudyViewSet(viewsets.GenericViewSet):
     filter_backends = (
         DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter,
+        emg_filters.getUnambiguousOrderingFilterByField('super_study_id'),
     )
 
     ordering_fields = (
@@ -61,7 +61,7 @@ class BaseStudyGenericViewSet(viewsets.GenericViewSet):
     filter_backends = (
         DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter,
+        emg_filters.getUnambiguousOrderingFilterByField('study_id'),
     )
 
     ordering_fields = (
@@ -92,7 +92,7 @@ class BaseSampleGenericViewSet(viewsets.GenericViewSet):
     filter_backends = (
         DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter,
+        emg_filters.getUnambiguousOrderingFilterByField('accession'),
     )
 
     ordering_fields = (
@@ -127,7 +127,7 @@ class BaseRunGenericViewSet(viewsets.GenericViewSet):
     filter_backends = (
         DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter,
+        emg_filters.getUnambiguousOrderingFilterByField('run_id'),
     )
 
     ordering_fields = (
@@ -155,7 +155,7 @@ class BaseAssemblyGenericViewSet(viewsets.GenericViewSet):
     filter_backends = (
         DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter,
+        emg_filters.getUnambiguousOrderingFilterByField('assembly_id'),
     )
 
     ordering_fields = (
@@ -181,7 +181,7 @@ class BaseAnalysisGenericViewSet(viewsets.GenericViewSet):
     filter_backends = (
         DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter,
+        emg_filters.getUnambiguousOrderingFilterByField('job_id'),
     )
 
     ordering_fields = (
@@ -214,7 +214,7 @@ class BasePublicationGenericViewSet(viewsets.GenericViewSet):
     filter_backends = (
         DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter,
+        emg_filters.getUnambiguousOrderingFilterByField('pubmed_id'),
     )
 
     ordering_fields = (
@@ -242,7 +242,7 @@ class BaseGenomeGenericViewSet(viewsets.GenericViewSet):
 
     filter_backends = (
         filters.SearchFilter,
-        filters.OrderingFilter,
+        emg_filters.getUnambiguousOrderingFilterByField('accession'),
     )
 
     ordering_fields = (

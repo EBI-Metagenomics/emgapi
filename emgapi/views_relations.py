@@ -318,7 +318,7 @@ class StudyAnalysisResultViewSet(emg_mixins.ListModelMixin,
 
     filter_backends = (
         DjangoFilterBackend,
-        filters.OrderingFilter,
+        emg_filters.getUnambiguousOrderingFilterByField('job_id'),
     )
 
     ordering_fields = (
