@@ -1,30 +1,18 @@
 FROM centos:centos7
-MAINTAINER EBI Metagenomics Team <olat@ebi.ac.uk>
 
+RUN yum -y update && \
+    yum clean all && \
+    yum -y install epel-release gcc bzip2 git wget && \
+    yum clean all
 
-RUN yum -y update; yum clean all
+RUN yum -y install python3 python3-devel python3-setuptools mysql-devel && \
+    pip3 install -U pip setuptools
 
-RUN yum -y install epel-release gcc bzip2 git wget; yum clean all
+RUN mkdir /opt/emgapi && mkdir -p /opt/staticfiles && mkdir -p /opt/results 
 
-RUN yum -y install python34 python34-devel python34-setuptools
-RUN easy_install-3.4 pip
-RUN pip3 install -U pip virtualenv setuptools
+COPY requirements* /opt/emgapi/
 
-# Install mysql tools
-RUN yum -y install mysql mysql-devel
+RUN pip3 install "git+git://github.com/EBI-Metagenomics/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi" && \
+    pip3 install -r /opt/emgapi/requirements-dev.txt
 
-# Add user
-RUN useradd emg
-
-ADD run.sh /tmp/docker/run.sh
-RUN chmod a+x /tmp/docker/run.sh
-RUN chown emg:emg /tmp/docker/run.sh
-
-USER emg
-
-ENV HOME /home/emg
-WORKDIR /home/emg
-
-RUN mkdir -p $HOME/emg
-
-ENTRYPOINT ["/tmp/docker/run.sh"]
+CMD ["tail", "-f", "/dev/null"]
