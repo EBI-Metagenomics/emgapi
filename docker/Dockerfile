@@ -15,4 +15,6 @@ COPY requirements* /opt/emgapi/
 RUN pip3 install "git+git://github.com/EBI-Metagenomics/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi" && \
     pip3 install -r /opt/emgapi/requirements-dev.txt
 
+ENV PYTHONPATH="${PYTHONPATH}:/opt/emgapi/emgcli"
+
 CMD ["tail", "-f", "/dev/null"]
