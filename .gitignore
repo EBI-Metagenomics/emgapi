@@ -14,7 +14,6 @@ media/
 venv/
 database/
 results/
-genomes/
 
 .vscode/
 
