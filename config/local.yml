@@ -7,7 +7,7 @@ emg:
       HOST: mysql
       PORT: 3306
 
-  admin: False
+  admin: True
   auth_backends: 
     - 'emgapi.backends.EMGBackend'
     - 'django.contrib.auth.backends.ModelBackend'
