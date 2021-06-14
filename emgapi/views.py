@@ -467,6 +467,7 @@ class SuperStudyViewSet(mixins.RetrieveModelMixin,
     serializer_class = emg_serializers.SuperStudySerializer
 
     lookup_field = 'super_study_id'
+    lookup_url_kwarg = 'super_study_id'
 
     def get_queryset(self):
         return emg_models.SuperStudy.objects.available(self.request)
@@ -504,7 +505,11 @@ class SuperStudyViewSet(mixins.RetrieveModelMixin,
         ---
         `/super-studies/1`
         """
-        return super(SuperStudyViewSet, self).retrieve(request, *args, **kwargs)
+        instance = emg_models.SuperStudy.get_by_id_or_slug_or_404(
+            kwargs.get(self.lookup_url_kwarg)
+        )
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
     @action(
         detail=True,
@@ -520,7 +525,9 @@ class SuperStudyViewSet(mixins.RetrieveModelMixin,
         `/super-studies/1/biomes` retrieve linked biomes
         """
 
-        obj = self.get_object()
+        obj = emg_models.SuperStudy.get_by_id_or_slug_or_404(
+            super_study_id
+        )
         biomes = obj.biomes.all()
         page = self.paginate_queryset(biomes)
         if page is not None:

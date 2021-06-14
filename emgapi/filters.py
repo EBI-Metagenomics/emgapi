@@ -251,6 +251,7 @@ class SuperStudyFilter(django_filters.FilterSet):
         fields = (
             'super_study_id',
             'title',
+            'url_slug',
             'description',
             'biome_name',
         )

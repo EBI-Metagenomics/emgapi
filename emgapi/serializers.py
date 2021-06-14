@@ -1143,6 +1143,7 @@ class SuperStudySerializer(ExplicitFieldsModelSerializer,
         fields = (
             'super_study_id',
             'title',
+            'url_slug',
             'description',
             'url',
             'image_url',
