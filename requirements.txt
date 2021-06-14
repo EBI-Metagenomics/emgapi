@@ -25,7 +25,7 @@ django-slack==5.16.0
 # log handler
 ConcurrentLogHandler~=0.9.1
 
-Django==3.2
+Django==3.2.4
 djangorestframework==3.12.4
 django-filter==2.4.0
 djangorestframework-jwt~=1.11.0
@@ -33,14 +33,14 @@ django-cors-headers==3.7.0
 openapi-codec
 cx_Oracle~=6.2.1
 
-djangorestframework-csv~=2.1.0
+djangorestframework-csv==2.1.1
 
 # schema
 coreapi~=2.3.0
 
 # mongo
-mongoengine==0.23.0
-pymongo==3.11.3
+mongoengine==0.23.1
+pymongo==3.11.4
 django-rest-framework-mongoengine==3.4.1
 
 # assembly viewer
