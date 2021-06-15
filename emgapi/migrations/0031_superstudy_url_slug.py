@@ -25,5 +25,10 @@ class Migration(migrations.Migration):
             name='url_slug',
             field=models.SlugField(db_column='URL_SLUG', default=uuid.uuid4, max_length=100),
         ),
-        migrations.RunPython(add_url_slug_to_super_studies, reverse_code=migrations.RunPython.noop)
+        migrations.RunPython(add_url_slug_to_super_studies, reverse_code=migrations.RunPython.noop),
+        migrations.AlterField(
+            model_name='superstudy',
+            name='url_slug',
+            field=models.SlugField(db_column='URL_SLUG', max_length=100),
+        ),
     ]
