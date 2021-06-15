@@ -777,7 +777,7 @@ class SuperStudy(models.Model):
         'Biome', through='SuperStudyBiome', related_name='super_studies', blank=True
     )
 
-    image = models.CharField(db_column='IMAGE', max_length=100, blank=True, null=True)
+    logo = models.CharField(db_column='LOGO', max_length=100000, blank=True, null=True)
 
     objects = SuperStudyManager()
 
@@ -786,10 +786,9 @@ class SuperStudy(models.Model):
 
     @property
     def image_url(self):
-        if self.image:
-            return os.path.join(settings.IMG_FOLDER, str(self.image))
-        else:
-            return ''
+        if self.logo:
+            return self.logo
+        return ''
 
     @classmethod
     def get_by_id_or_slug_or_404(cls, id_or_slug):
