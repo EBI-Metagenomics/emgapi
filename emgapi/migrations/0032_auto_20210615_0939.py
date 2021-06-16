@@ -17,6 +17,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='superstudy',
             name='logo',
-            field=models.CharField(blank=True, db_column='LOGO', max_length=100000, null=True),
+            field=models.TextField(blank=True, db_column='LOGO', max_length=100000, null=True),
         ),
     ]

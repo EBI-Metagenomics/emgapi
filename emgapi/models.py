@@ -777,7 +777,7 @@ class SuperStudy(models.Model):
         'Biome', through='SuperStudyBiome', related_name='super_studies', blank=True
     )
 
-    logo = models.CharField(db_column='LOGO', max_length=100000, blank=True, null=True)
+    logo = models.TextField(db_column='LOGO', max_length=100000, blank=True, null=True)
 
     objects = SuperStudyManager()
 
