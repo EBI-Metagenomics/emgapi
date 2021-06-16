@@ -309,6 +309,11 @@ router.register(
     views.GenomeViewSet,
     basename='genomes'
 )
+router.register(
+    r'genomes-search/gather',
+    views.GenomeSearchGatherViewSet,
+    basename='genomes-gather'
+)
 
 router.register(
     r'genomes/(?P<accession>[^/]+)/cogs',
@@ -410,7 +415,13 @@ urlpatterns = [
         name='banner-message'),
     url(r'^v1/ebi-search-download/(?P<domain>[^/]+)',
         views.EBISearchCSVDownload.as_view(),
-        name='ebi-search-download')
+        name='ebi-search-download'),
+    url(r'^v1/genomes-search/status/(?P<job_id>[^/]+)',
+        views.GenomeSearchStatusView.as_view(),
+        name='genomes-status'),
+    url(r'^v1/genomes-search/results/(?P<job_id>[^/]+)',
+        views.GenomeSearchResultsView.as_view(),
+        name='genomes-results')
 ]
 
 if settings.ADMIN:

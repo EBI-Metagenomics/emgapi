@@ -22,6 +22,7 @@ from collections import OrderedDict
 from django.db.models import Q
 
 from rest_framework import serializers as drf_serializers
+from rest_framework.serializers import FileField
 
 from rest_framework_json_api import serializers, relations, utils
 
@@ -1585,6 +1586,13 @@ class GenomeDownloadSerializer(BaseDownloadSerializer):
             'group_type',
             'file_checksum'
         )
+
+
+class GenomeUploadSearchSerializer(drf_serializers.Serializer):
+    file_uploaded = FileField()
+
+    class Meta:
+        fields = ['file_uploaded']
 
 
 class ReleaseDownloadSerializer(BaseDownloadSerializer):

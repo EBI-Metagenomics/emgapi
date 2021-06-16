@@ -23,3 +23,9 @@ emg:
   mongodb:
     db: emg
     host: mongodb
+
+  sourmash:
+    signatures_path: '/tmp/signatures'
+    results_path: '/tmp/results'
+    celery_broker: 'redis://localhost:6379/0'
+    celery_backend: 'redis://localhost:6379/1'

@@ -32,12 +32,14 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 
 from rest_framework import filters, viewsets, mixins, permissions, renderers, status
 from rest_framework.decorators import action
 from rest_framework.views import APIView
-
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework_csv.misc import Echo
+from rest_framework.reverse import reverse
 
 from . import models as emg_models
 from . import serializers as emg_serializers
@@ -47,11 +49,13 @@ from . import viewsets as emg_viewsets
 from . import utils as emg_utils
 from . import renderers as emg_renderers
 from . import filters as emg_filters
+from .sourmash import validate_sourmash_signature, save_signature, send_sourmash_job, get_sourmash_job_satus, get_result_file
 
 from emgcli.pagination import FasterCountPagination
 
 from emgena import models as ena_models
 from emgena import serializers as ena_serializers
+
 
 logger = logging.getLogger(__name__)
 
@@ -1197,6 +1201,55 @@ class GenomeViewSet(mixins.RetrieveModelMixin,
     queryset = emg_models.Genome.objects.all() \
         .prefetch_related('releases') \
         .select_related('biome', 'geo_origin')
+
+
+
+
+class GenomeSearchGatherViewSet(viewsets.GenericViewSet):
+    serializer_class = emg_serializers.GenomeUploadSearchSerializer
+    permission_classes = [AllowAny]
+    parser_classes = [FormParser, MultiPartParser]
+
+    def list(self, request):
+        return Response("You need to use the POST method to submit a sourmash job")
+
+    def create(self, request):
+        file_uploaded = request.FILES.get('file_uploaded')
+        content_type = file_uploaded.content_type
+        try:
+            validate_sourmash_signature(
+                file_uploaded.file.read().decode('utf-8')
+            )
+        except Exception:
+            raise Exception("Unable to parse the uploaded file")
+
+        name = save_signature(file_uploaded)
+        job_id = send_sourmash_job(name)
+        response = {
+            "message": "Your file {}[{}] was successfully uploaded. "
+                       "Use the given URL to check the status of the new job".format(file_uploaded.name, content_type),
+            "job_id": job_id,
+            "status_URL": reverse('genomes-status', args=[job_id], request=request)
+        }
+        return Response(response)
+
+
+class GenomeSearchStatusView(APIView):
+
+    def get(self, request, job_id):
+        response = get_sourmash_job_satus(job_id)
+        if response['status'] == "SUCCESS":
+            response['results_url'] = reverse('genomes-results', args=[job_id], request=request)
+        return Response(response)
+
+
+class GenomeSearchResultsView(APIView):
+
+    def get(self, request, job_id):
+        file = get_result_file(job_id)
+        response = HttpResponse(file, content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename={job_id}.csv'
+        return response
 
 
 class GenomeDownloadViewSet(emg_mixins.ListModelMixin,
