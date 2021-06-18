@@ -38,11 +38,12 @@ class TestSuperStudyAPI:
         assert rsp['data']['type'] == 'super-studies'
         assert rsp['data']['id'] == '1'
         _attr = rsp['data']['attributes']
-        assert len(_attr) == 5
+        assert len(_attr) == 6
         assert _attr['super-study-id'] == 1
         assert _attr['title'] == 'Human Microbiome'
         assert _attr['description'] == 'Just a test description'
         assert _attr['biomes-count'] == 1
+        assert _attr['url-slug'] == 'human-micro'
 
     def test_public(self, client, super_study):
         url = reverse('emgapi_v1:super-studies-list')
@@ -62,8 +63,9 @@ class TestSuperStudyAPI:
         assert d['type'] == 'super-studies'
         assert d['id'] == '1'
         _attr = d['attributes']
-        assert len(_attr) == 5
+        assert len(_attr) == 6
         assert _attr['super-study-id'] == 1
         assert _attr['title'] == 'Human Microbiome'
         assert _attr['description'] == 'Just a test description'
         assert _attr['biomes-count'] == 1
+        assert _attr['url-slug'] == 'human-micro'
