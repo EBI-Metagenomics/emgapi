@@ -506,7 +506,7 @@ class SuperStudyViewSet(mixins.RetrieveModelMixin,
         `/super-studies/1`
         `/super-studies/tara`
         """
-        instance = emg_models.SuperStudy.get_by_id_or_slug_or_404(
+        instance = emg_models.SuperStudy.objects.get_by_id_or_slug_or_404(
             kwargs.get(self.lookup_url_kwarg)
         )
         serializer = self.get_serializer(instance)
@@ -526,7 +526,7 @@ class SuperStudyViewSet(mixins.RetrieveModelMixin,
         `/super-studies/1/biomes` retrieve linked biomes
         """
 
-        obj = emg_models.SuperStudy.get_by_id_or_slug_or_404(
+        obj = emg_models.SuperStudy.objects.get_by_id_or_slug_or_404(
             super_study_id
         )
         biomes = obj.biomes.all()

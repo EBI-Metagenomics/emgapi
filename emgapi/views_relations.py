@@ -358,7 +358,7 @@ class SuperStudyFlagshipStudiesViewSet(emg_mixins.ListModelMixin,
     lookup_field = 'super_study_id'
 
     def get_queryset(self):
-        super_study = emg_models.SuperStudy.get_by_id_or_slug_or_404(
+        super_study = emg_models.SuperStudy.objects.get_by_id_or_slug_or_404(
             id_or_slug=self.kwargs['super_study_id']
         )
         return super_study.flagship_studies.available(self.request)
@@ -380,7 +380,7 @@ class SuperStudyRelatedStudiesViewSet(emg_mixins.ListModelMixin,
     lookup_field = 'super_study_id'
 
     def get_queryset(self):
-        super_study = emg_models.SuperStudy.get_by_id_or_slug_or_404(
+        super_study = emg_models.SuperStudy.objects.get_by_id_or_slug_or_404(
             id_or_slug=self.kwargs['super_study_id']
         )
         biomes = super_study.biomes.all() \

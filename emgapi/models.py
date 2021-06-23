@@ -756,6 +756,11 @@ class SuperStudyManager(models.Manager):
             )
         return queryset
 
+    def get_by_id_or_slug_or_404(self, id_or_slug):
+        if type(id_or_slug) is int or (type(id_or_slug) is str and id_or_slug.isnumeric()):
+            return get_object_or_404(self.get_queryset(), super_study_id=int(id_or_slug))
+        return get_object_or_404(self.get_queryset(), url_slug=id_or_slug)
+
 class SuperStudy(models.Model):
     """
     Aggregation of studies.
@@ -789,12 +794,6 @@ class SuperStudy(models.Model):
         if self.logo:
             return self.logo
         return ''
-
-    @classmethod
-    def get_by_id_or_slug_or_404(cls, id_or_slug):
-        if type(id_or_slug) is int or (type(id_or_slug) is str and id_or_slug.isnumeric()):
-            return get_object_or_404(cls.objects, super_study_id=int(id_or_slug))
-        return get_object_or_404(cls.objects, url_slug=id_or_slug)
 
 
     class Meta:
