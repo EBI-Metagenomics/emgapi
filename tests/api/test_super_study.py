@@ -46,7 +46,7 @@ class TestSuperStudyAPI:
         assert _attr['url-slug'] == 'human-micro'
 
     def test_details_by_slug(self, client, super_study):
-        url = reverse('emgapi_v1:super-studies-detail', args=['human-micro'])
+        url = reverse('emgapi_v1:super-studies-detail', args=['human-microbiome'])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
@@ -61,7 +61,7 @@ class TestSuperStudyAPI:
         assert _attr['title'] == 'Human Microbiome'
         assert _attr['description'] == 'Just a test description'
         assert _attr['biomes-count'] == 1
-        assert _attr['url-slug'] == 'human-micro'
+        assert _attr['url-slug'] == 'human-microbiome'
 
     def test_public(self, client, super_study):
         url = reverse('emgapi_v1:super-studies-list')
@@ -86,4 +86,4 @@ class TestSuperStudyAPI:
         assert _attr['title'] == 'Human Microbiome'
         assert _attr['description'] == 'Just a test description'
         assert _attr['biomes-count'] == 1
-        assert _attr['url-slug'] == 'human-micro'
+        assert _attr['url-slug'] == 'human-microbiome'

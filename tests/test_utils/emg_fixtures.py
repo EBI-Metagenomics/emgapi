@@ -65,7 +65,7 @@ def super_study(study, study_private, biome):
         super_study_id=1,
         title='Human Microbiome',
         description='Just a test description',
-        url_slug='human-micro',
+        url_slug='human-microbiome',
     )
     emg_models.SuperStudyBiome.objects.create(biome=biome,
                                               super_study=ss)
