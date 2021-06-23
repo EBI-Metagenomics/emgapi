@@ -27,8 +27,26 @@ from test_utils.emg_fixtures import *  # noqa
 @pytest.mark.django_db
 class TestSuperStudyAPI:
 
-    def test_details(self, client, super_study):
+    def test_details_by_id(self, client, super_study):
         url = reverse('emgapi_v1:super-studies-detail', args=['1'])
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        rsp = response.json()
+
+        # Data
+        assert len(rsp) == 1
+        assert rsp['data']['type'] == 'super-studies'
+        assert rsp['data']['id'] == '1'
+        _attr = rsp['data']['attributes']
+        assert len(_attr) == 6
+        assert _attr['super-study-id'] == 1
+        assert _attr['title'] == 'Human Microbiome'
+        assert _attr['description'] == 'Just a test description'
+        assert _attr['biomes-count'] == 1
+        assert _attr['url-slug'] == 'human-micro'
+
+    def test_details_by_slug(self, client, super_study):
+        url = reverse('emgapi_v1:super-studies-detail', args=['human-micro'])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
