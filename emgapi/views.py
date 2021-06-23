@@ -504,6 +504,7 @@ class SuperStudyViewSet(mixins.RetrieveModelMixin,
         Example:
         ---
         `/super-studies/1`
+        `/super-studies/tara`
         """
         instance = emg_models.SuperStudy.get_by_id_or_slug_or_404(
             kwargs.get(self.lookup_url_kwarg)
