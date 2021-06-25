@@ -556,7 +556,7 @@ class AssemblySerializer(ExplicitFieldsModelSerializer,
 
     def get_pipelines(self, obj):
         # TODO: push that to queryset
-        return emg_models.Pipeline.objects_annotated \
+        return emg_models.Pipeline.objects \
             .filter(analyses__assembly=obj)
 
     def get_analyses(self, obj):
