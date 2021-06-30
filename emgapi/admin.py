@@ -13,11 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-
-from django.conf import settings
 from django.contrib import admin
-from django.utils.safestring import mark_safe
 from django import forms
 
 from .widgets import BiomePredictionWidget
@@ -110,34 +106,23 @@ class SuperStudyBiomesInline(admin.TabularInline):
     model = emg_models.SuperStudyBiome
     raw_id_fields = ('biome',)
 
+class Base64FileInput(forms.TextInput):
+    template_name = 'admin/base64_image.html'
 
 class SuperStudyAdminForm(forms.ModelForm):
     class Meta:
         model = emg_models.SuperStudy
         fields = '__all__'
-        if os.path.isdir(settings.IMG_DIR):
-            _options = [(fname, fname) for fname in os.listdir(settings.IMG_DIR)]
-            _options.insert(0, ('', ''))
-            widgets = {
-                'image': forms.Select(choices=_options)
-            }
+        widgets = {
+            'logo': Base64FileInput
+        }
 
 
 @admin.register(emg_models.SuperStudy)
 class SuperStudyAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('image_tag',)
     inlines = [SuperStudyStudiesInline, SuperStudyBiomesInline]
     form = SuperStudyAdminForm
-
-    def image_tag(self, obj):
-        if obj.image:
-            return mark_safe(
-                '<img src="{}/{}" width="150" height="150" />'.format(settings.IMG_FOLDER, obj.image)
-            )
-        else:
-            return 'No image selected'
-    image_tag.short_description = 'Image'
 
 
 class SampleAdminForm(BiomePredictorAdminForm):

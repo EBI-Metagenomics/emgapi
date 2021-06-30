@@ -49,6 +49,7 @@ class BaseSuperStudyViewSet(viewsets.GenericViewSet):
     search_fields = (
         'title',
         'description',
+        'url_slug'
     )
 
 
