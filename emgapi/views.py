@@ -49,13 +49,13 @@ from . import viewsets as emg_viewsets
 from . import utils as emg_utils
 from . import renderers as emg_renderers
 from . import filters as emg_filters
-from .sourmash import validate_sourmash_signature, save_signature, send_sourmash_job, get_sourmash_job_satus, get_result_file
+from .sourmash import validate_sourmash_signature, save_signature, send_sourmash_jobs, get_sourmash_job_status, \
+    get_result_file
 
 from emgcli.pagination import FasterCountPagination
 
 from emgena import models as ena_models
 from emgena import serializers as ena_serializers
-
 
 logger = logging.getLogger(__name__)
 
@@ -1164,7 +1164,6 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
 class GenomeViewSet(mixins.RetrieveModelMixin,
                     emg_mixins.ListModelMixin,
                     viewsets.GenericViewSet):
-    
     serializer_class = emg_serializers.GenomeSerializer
     filter_class = emg_filters.GenomeFilter
 
@@ -1203,8 +1202,6 @@ class GenomeViewSet(mixins.RetrieveModelMixin,
         .select_related('biome', 'geo_origin')
 
 
-
-
 class GenomeSearchGatherViewSet(viewsets.GenericViewSet):
     serializer_class = emg_serializers.GenomeUploadSearchSerializer
     permission_classes = [AllowAny]
@@ -1214,21 +1211,22 @@ class GenomeSearchGatherViewSet(viewsets.GenericViewSet):
         return Response("You need to use the POST method to submit a sourmash job")
 
     def create(self, request):
-        file_uploaded = request.FILES.get('file_uploaded')
-        content_type = file_uploaded.content_type
-        try:
-            validate_sourmash_signature(
-                file_uploaded.file.read().decode('utf-8')
-            )
-        except Exception:
-            raise Exception("Unable to parse the uploaded file")
+        names = {}
+        for file_uploaded in request.FILES.getlist('file_uploaded'):
+            try:
+                validate_sourmash_signature(
+                    file_uploaded.file.read().decode('utf-8')
+                )
+            except Exception:
+                raise Exception("Unable to parse the uploaded file")
 
-        name = save_signature(file_uploaded)
-        job_id = send_sourmash_job(name)
+            names[file_uploaded.name] = save_signature(file_uploaded)
+        job_id = send_sourmash_jobs(names)
         response = {
-            "message": "Your file {}[{}] was successfully uploaded. "
-                       "Use the given URL to check the status of the new job".format(file_uploaded.name, content_type),
+            "message": "Your files {} were successfully uploaded. "
+                       "Use the given URL to check the status of the new job".format(names.keys()),
             "job_id": job_id,
+            "signatures_received": len(names),
             "status_URL": reverse('genomes-status', args=[job_id], request=request)
         }
         return Response(response)
@@ -1237,9 +1235,7 @@ class GenomeSearchGatherViewSet(viewsets.GenericViewSet):
 class GenomeSearchStatusView(APIView):
 
     def get(self, request, job_id):
-        response = get_sourmash_job_satus(job_id)
-        if response['status'] == "SUCCESS":
-            response['results_url'] = reverse('genomes-results', args=[job_id], request=request)
+        response = get_sourmash_job_status(job_id, request)
         return Response(response)
 
 
@@ -1577,7 +1573,7 @@ class BiomePrediction(APIView):
 
     def get(self, request):
         url = settings.BIOME_PREDICTION_URL
-        response = requests.get(url, params={"text":  request.GET.get("text", "")})
+        response = requests.get(url, params={"text": request.GET.get("text", "")})
         if not response.ok:
             raise Exception("Error with the biome prediction API." +
                             "Status Code: " + str(response.status_code))
