@@ -1572,6 +1572,16 @@ class GenomeSet(models.Model):
     def __str__(self):
         return self.name
 
+class GenomeCatalogue(models.Model):
+    catalogue_id = models.SlugField(
+        db_column='CATALOGUE_ID', primary_key=True, max_length=100)
+    name = models.CharField(db_column='NAME', max_length=100, unique=True)
+    description = models.TextField(db_column='DESCRIPTION', null=True, blank=True)
+    last_update = models.DateTimeField(db_column='LAST_UPDATE', auto_now=True)
+    biome = models.ForeignKey(
+        Biome, db_column='BIOME_ID',
+        on_delete=models.CASCADE)
+
 
 class Genome(models.Model):
 
@@ -1660,6 +1670,8 @@ class Genome(models.Model):
 
     releases = models.ManyToManyField('Release', through='ReleaseGenomes')
 
+    catalogues = models.ManyToManyField('GenomeCatalogue', through='GenomeCatalogueGenomes')
+
     @property
     def geographic_range(self):
         """TODO: improve this, this is making len(pangenome_geographic_range) queries each time
@@ -1691,6 +1703,15 @@ class GenomeGeographicLocation(models.Model):
 
     class Meta:
         db_table = 'GENOME_GEOGRAPHIC_RANGE'
+
+class GenomeCatalogueGenomes(models.Model):
+
+    genome = models.ForeignKey('Genome', db_column='GENOME_ID', on_delete=models.CASCADE)
+    genome_catalogue = models.ForeignKey('GenomeCatalogue', db_column='CATALOGUE_ID', on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'GENOME_CATALOGUE_GENOMES'
+        unique_together = ('genome', 'genome_catalogue')
 
 
 class ReleaseManagerQuerySet(BaseQuerySet):
