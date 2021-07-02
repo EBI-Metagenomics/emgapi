@@ -45,14 +45,14 @@ def save_signature(file):
     return name
 
 
-def send_sourmash_jobs(names):
+def send_sourmash_jobs(names, mag_catalog):
     app = Celery('tasks', broker=settings.SOURMASH['celery_broker'], backend=settings.SOURMASH['celery_backend'])
     # r = app.send_task('tasks.run_gather', (name,))
     # return r.id
     job = group([
         app.signature(
             'tasks.run_gather',
-            args=(names[name], name),
+            args=(names[name], name, mag_catalog),
         ) for name in names
     ], app=app)
     result = job.apply_async()
@@ -73,7 +73,7 @@ def get_sourmash_job_status(job_id, request):
             signature['result'] = result.result
             signature['results_url'] = reverse('genomes-results', args=[result.id], request=request)
         if result.status == 'FAILURE':
-            signature['reason'] = str(r.result)
+            signature['reason'] = str(result.result)
 
         signatures.append(signature)
     return {
