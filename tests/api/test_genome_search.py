@@ -6,7 +6,9 @@ from django.conf import settings
 from django.urls import reverse
 
 from rest_framework import status
-from celery import Celery
+from celery import Celery, group
+from celery.result import GroupResult
+
 
 SIGNATURE_FILE_NAME = ""
 MOCKED_JOB_ID = "MOCKED_JOB_ID"
@@ -20,10 +22,23 @@ def create_file_object(text):
 
 def mock_get_celery_task(*args, **kwargs):
     obj = type('', (), {})()
-    obj.id = "MOCKED_JOB_ID"
+    obj.id = MOCKED_JOB_ID
     obj.status = "SUCCESS"
+    obj.result = {
+        "match": "80%"
+    }
     return obj
 
+class ResultMock:
+    id = MOCKED_JOB_ID
+    results= [
+        mock_get_celery_task()
+    ]
+    def save(self):
+        pass
+
+def mock_group_result(*args, **kwargs):
+    return ResultMock()
 
 class TestStudyAPI:
     def test_genome_search_get(self, client):
@@ -37,17 +52,26 @@ class TestStudyAPI:
 
     def test_genome_search_post_with_non_valid_files(self, client):
         url = reverse("emgapi_v1:genomes-gather-list")
-        data = {'file_uploaded': create_file_object('x')}
+        data = {
+            'file_uploaded': create_file_object('x'),
+            'mag_catalog': 'HGUT',
+        }
         with pytest.raises(Exception, match='Unable to parse the uploaded file'):
             client.post(url, data, format='multipart')
-        data = {'file_uploaded': create_file_object('{"type": "a json that is not a signature"}')}
+        data = {
+            'file_uploaded': create_file_object('{"type": "a json that is not a signature"}'),
+            'mag_catalog': 'HGUT',
+        }
         with pytest.raises(Exception, match='Unable to parse the uploaded file'):
             client.post(url, data, format='multipart')
 
     def test_genome_search_post_with_valid_file(self, client, monkeypatch):
-        monkeypatch.setattr(Celery, "send_task", mock_get_celery_task)
+        monkeypatch.setattr(group, "apply_async", mock_group_result)
         url = reverse("emgapi_v1:genomes-gather-list")
-        data = {'file_uploaded': create_file_object('{"molecule": "dna"}')}
+        data = {
+            'file_uploaded': create_file_object('{"molecule": "dna"}'),
+            'mag_catalog': 'HGUT',
+        }
         response = client.post(url, data, format='multipart')
         assert response.status_code == status.HTTP_200_OK
         # Checks that the signature file was created in the `signatures_path`
@@ -57,14 +81,15 @@ class TestStudyAPI:
         assert MOCKED_JOB_ID in rsp["data"]["job_id"]
 
     def test_genome_search_status(self, client, monkeypatch):
-        monkeypatch.setattr(Celery, "AsyncResult", mock_get_celery_task)
+        monkeypatch.setattr(GroupResult, "restore", mock_group_result)
         url = reverse("genomes-status", args=[MOCKED_JOB_ID])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
-        assert "job_id" in rsp["data"]
-        assert MOCKED_JOB_ID == rsp["data"]["job_id"]
-        assert "SUCCESS" == rsp["data"]["status"]
+        assert "group_id" in rsp["data"]
+        assert "signatures" in rsp["data"]
+        assert MOCKED_JOB_ID == rsp["data"]["group_id"]
+        assert "SUCCESS" == rsp["data"]["signatures"][0]['status']
 
     def test_genome_search_get_result(self, client, monkeypatch):
         monkeypatch.setattr(Celery, "AsyncResult", mock_get_celery_task)
