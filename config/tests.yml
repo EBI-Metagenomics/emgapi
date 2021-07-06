@@ -1,0 +1,22 @@
+emg:
+  databases:
+    default:
+      ENGINE: 'django.db.backends.mysql'
+      NAME: emg_tests
+      USER: root
+      HOST: mysql
+      PORT: 3306
+
+  session_engine: 'django.contrib.sessions.backends.cache'
+  emg_backend_auth: "https://backend"
+  auth_backends:
+    - 'emgapi.backends.EMGBackend'
+    - 'django.contrib.auth.backends.ModelBackend'
+
+  cors_origin_allow_all: true
+  results_dir: '/opt/results'
+  static_root: '/opt/staticfiles'
+
+  mongodb:
+    db: emg_tests
+    host: mongodb

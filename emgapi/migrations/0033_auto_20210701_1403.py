@@ -13,7 +13,10 @@ def catalogue_hgut_genomes(apps, schema_editor):
     gut_biome = Biome.objects.filter(lineage='root:Host-associated:Human:Digestive system:Large intestine').first()
     genomes = Genome.objects.filter(accession__startswith='MGYG_HGUT')
 
-    if not gut_biome and genomes.exists():
+    if not genomes.exists():
+        return
+
+    if not gut_biome:
         logging.warning('No gut biome with lineage [root:Host-associated:Human:Digestive system:Large intestine] found;'
                         'not migrating existing genomes into a HGUT catalogue.')
         return
