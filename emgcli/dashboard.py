@@ -26,6 +26,7 @@ class MgnifyDashboard(Dashboard):
             collapsible=False,
             models=(
                 'emgapi.models.Genome',
+                'emgapi.models.GenomeCatalogue',
                 'emgapi.models.GenomeDownload',
                 'emgapi.models.GenomeSet',
                 'emgapi.models.Release',

@@ -1063,6 +1063,19 @@ class GenomeFilter(django_filters.FilterSet):
             "pangenome_accessory_size__lte",
         )
 
+
+class GenomeCatalogueFilter(django_filters.FilterSet):
+    class Meta:
+        model = emg_models.GenomeCatalogue
+        fields = {
+            'catalogue_id': ['exact'],
+            'name': ['exact', 'icontains'],
+            'description': ['exact', 'icontains'],
+            'biome__biome_name': ['exact', 'icontains'],
+            'last_update': ['exact', 'lt', 'gt'],
+        }
+
+
 def getUnambiguousOrderingFilterByField(field):
     class UnambiguousOrderingFilter(drf_filters.OrderingFilter):
         def filter_queryset(self, request, queryset, view):

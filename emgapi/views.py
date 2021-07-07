@@ -1165,6 +1165,59 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         return super(PublicationViewSet, self).list(request, *args, **kwargs)
 
 
+class GenomeCatalogueViewSet(mixins.RetrieveModelMixin,
+                             emg_mixins.ListModelMixin,
+                             emg_viewsets.BaseGenomeCatalogueGenericViewSet):
+
+    filter_class = emg_filters.GenomeCatalogueFilter
+
+    lookup_field = 'catalogue_id'
+    lookup_value_regex = '[^/]+'
+
+    def get_serializer_class(self):
+        return super(GenomeCatalogueViewSet, self).get_serializer_class()
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves Genome Catalogues for the given Catalogue ID
+        Example:
+        ---
+        `/genome-catalogues/{catalogue_id}`
+        """
+        return super(GenomeCatalogueViewSet, self) \
+            .retrieve(request, *args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of genome catalogues
+        Example:
+        ---
+        `/genome-catalogues` retrieves list of all genome catalogues
+
+        `/genome-catalogues?ordering=last_update` ordered by age of catalogue
+
+        Filter by:
+        ---
+        `/genome-catalogues?last_update__gt=2021-01-01`
+
+        `/genome-catalogues?biome__biome_name=root:Environmental:Aquatic:Marine`
+
+        Case-insensitive search of biome name:
+        `/genome-catalogues?biome__biome_name__icontains=marine`
+
+        `/genome-catalogues?description__icontains=arctic`
+
+        Search for:
+        ---
+        name, description, biome name, etc.
+
+        `/genome-catalogues?search=intestine`
+        """
+        return super(GenomeCatalogueViewSet, self).list(request, *args, **kwargs)
+
+    queryset = emg_models.GenomeCatalogue.objects.all()
+
+
 class GenomeViewSet(mixins.RetrieveModelMixin,
                     emg_mixins.ListModelMixin,
                     viewsets.GenericViewSet):

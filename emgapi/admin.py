@@ -509,6 +509,13 @@ class GenomeDownloads(admin.TabularInline):
     ]
 
 
+class GenomeCatalogueGenomesInline(admin.TabularInline):
+    model = emg_models.Genome.catalogues.through
+    verbose_name = 'Genome — Catalogue relationship'
+    verbose_name_plural = 'Genome — Catalogue relationships'
+    extra = 1
+
+
 @admin.register(emg_models.Genome)
 class GenomeAdmin(admin.ModelAdmin):
     change_list_template = "admin/change_list_filter_sidebar.html"
@@ -527,6 +534,7 @@ class GenomeAdmin(admin.ModelAdmin):
     ]
     search_fields = [
         'accession',
+        'catalogues',
         'type',
         'ena_genome_accession',
         'ena_sample_accession',
@@ -540,6 +548,7 @@ class GenomeAdmin(admin.ModelAdmin):
     ]
     list_filter = [
         'genome_set',
+        'catalogues',
         'releases',
         'type',
     ]
@@ -553,10 +562,26 @@ class GenomeAdmin(admin.ModelAdmin):
         'antismash_geneclusters'
     ]
     inlines = [
+        GenomeCatalogueGenomesInline,
         GenomeReleasesInline,
         GenomeDownloads
     ]
 
+
+@admin.register(emg_models.GenomeCatalogue)
+class GenomeCatalogueAdmin(admin.ModelAdmin):
+    list_display = [
+        'catalogue_id',
+        'name',
+        'biome',
+        'last_update'
+    ]
+    raw_id_fields = [
+        'biome',
+    ]
+    inlines = [
+        GenomeCatalogueGenomesInline
+    ]
 
 @admin.register(emg_models.Release)
 class GenomeReleaseAdmin(admin.ModelAdmin):

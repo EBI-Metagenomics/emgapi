@@ -684,6 +684,55 @@ class BiomeGenomeRelationshipViewSet(emg_mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
+class BiomeGenomeCatalogueRelationshipViewSet(emg_mixins.ListModelMixin,
+                                              emg_viewsets.BaseGenomeCatalogueGenericViewSet):
+    lookup_field = 'lineage'
+
+    def get_queryset(self):
+        lineage = self.kwargs[self.lookup_field]
+        obj = get_object_or_404(emg_models.Biome, lineage=lineage)
+        queryset = emg_models.GenomeCatalogue.objects.filter(biome=obj)
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of genome catalogues for the given biome
+        Example:
+        ---
+        `/biomes/root:Environmental:Aquatic/genome-catalogues` retrieve genome
+        catalogues for the aquatic biome
+
+        Filter by:
+        ---
+        `/biomes/root:Environmental:Aquatic/genome-catalogues?name=fishes`
+        filtered by catalogue name
+
+        """
+        return super(BiomeGenomeCatalogueRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class GenomeCatalogueGenomesRelationshipViewSet(emg_mixins.ListModelMixin,
+                                                emg_viewsets.BaseGenomeGenericViewSet):  # noqa
+    lookup_field = 'catalogue_id'
+
+    def get_queryset(self):
+        catalogue_id = self.kwargs[self.lookup_field]
+        if catalogue_id == 'all':
+            genomes = emg_models.Genome.objects.all()
+        else:
+
+            catalogue = get_object_or_404(
+                emg_models.GenomeCatalogue,
+                catalogue_id=catalogue_id)
+            genomes = catalogue.genome_set.all()
+        return genomes
+
+    def list(self, request, *args, **kwargs):
+        return super(GenomeCatalogueGenomesRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
 class PublicationSampleRelationshipViewSet(emg_mixins.ListModelMixin,
                                            emg_viewsets.BaseSampleGenericViewSet):  # noqa
 

@@ -1555,6 +1555,18 @@ class GenomeSerializer(ExplicitFieldsModelSerializer):
         lookup_field='lineage',
     )
 
+    catalogues = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        source='get_catalogues',
+        model=emg_models.GenomeCatalogue,
+        many=True,
+        read_only=True,
+        related_link_self_view_name='emgapi_v1:genome-catalogues-detail',
+        related_link_self_lookup_field='catalogue_id',
+    )
+
+    def get_catalogues(self, obj: emg_models.Genome):
+        return obj.catalogues.all()
+
     geographic_range = serializers.ListField()
 
     geographic_origin = serializers.CharField()
@@ -1690,6 +1702,47 @@ class GenomeSetSerializer(ExplicitFieldsModelSerializer,
         fields = (
             'url',
             'name',
+            'genomes',
+        )
+
+
+class GenomeCatalogueSerializer(ExplicitFieldsModelSerializer,
+                                serializers.HyperlinkedModelSerializer):
+    included_serializers = {
+        'genomes': 'emgapi.serializers.GenomeSerializer'
+    }
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi_v1:genome-catalogues-detail',
+        lookup_field='catalogue_id',
+    )
+
+    genomes = relations.SerializerMethodHyperlinkedRelatedField(
+        source='get_genomes',
+        model=emg_models.Genome,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:genome-catalogue-genomes-list',
+        related_link_url_kwarg='catalogue_id',
+        related_link_lookup_field='catalogue_id',
+    )
+
+    biome = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emgapi_v1:biomes-detail',
+        lookup_field='lineage',
+    )
+
+    def get_genomes(self, obj):
+        return None
+
+    class Meta:
+        model = emg_models.GenomeCatalogue
+        fields = (
+            'url',
+            'name',
+            'biome',
+            'description',
             'genomes',
         )
 
