@@ -11,6 +11,12 @@ def is_signature_valid(signature):
     return True
 
 
+app = Celery('tasks', broker=settings.SOURMASH['celery_broker'], backend=settings.SOURMASH['celery_backend'])
+app.conf.update(
+    result_extended=True
+)
+
+
 def validate_sourmash_signature(json_str):
     signature = json.loads(json_str)
     if type(signature) == list:
@@ -46,9 +52,6 @@ def save_signature(file):
 
 
 def send_sourmash_jobs(names, mag_catalog):
-    app = Celery('tasks', broker=settings.SOURMASH['celery_broker'], backend=settings.SOURMASH['celery_backend'])
-    # r = app.send_task('tasks.run_gather', (name,))
-    # return r.id
     job = group([
         app.signature(
             'tasks.run_gather',
@@ -57,17 +60,22 @@ def send_sourmash_jobs(names, mag_catalog):
     ], app=app)
     result = job.apply_async()
     result.save()
-    return result.id
+    children_ids = {
+        r.args[1]: r.id
+        for r in result.results
+    }
+
+    return result.id, children_ids
 
 
 def get_sourmash_job_status(job_id, request):
-    app = Celery('tasks', broker=settings.SOURMASH['celery_broker'], backend=settings.SOURMASH['celery_backend'])
     group_result = app.GroupResult.restore(job_id, app=app)
     signatures = []
     for result in group_result.results:
         signature = {
             "job_id": result.id,
             "status": result.status,
+            "filename": result.args[1]
         }
         if result.status == 'SUCCESS':
             signature['result'] = result.result
@@ -80,16 +88,6 @@ def get_sourmash_job_status(job_id, request):
         'group_id': job_id,
         'signatures': signatures
     }
-    # r = app.AsyncResult(job_id)
-    # response = {
-    #     'job_id': job_id,
-    #     'status': r.status
-    # }
-    # if r.status == 'SUCCESS':
-    #     response['result'] = r.result
-    # if r.status == 'FAILURE':
-    #     response['reason'] = str(r.result)
-    # return response
 
 
 def get_result_file(job_id):

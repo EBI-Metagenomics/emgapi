@@ -57,7 +57,6 @@ from emgcli.pagination import FasterCountPagination
 from emgena import models as ena_models
 from emgena import serializers as ena_serializers
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -1226,12 +1225,13 @@ class GenomeSearchGatherViewSet(viewsets.GenericViewSet):
                 raise Exception("Unable to parse the uploaded file")
 
             names[file_uploaded.name] = save_signature(file_uploaded)
-        job_id = send_sourmash_jobs(names, mag_catalog)
+        job_id, children_ids = send_sourmash_jobs(names, mag_catalog)
         response = {
             "message": "Your files {} were successfully uploaded. "
-                       "Use the given URL to check the status of the new job".format(names.keys()),
+                       "Use the given URL to check the status of the new job".format(",".join(names.keys())),
             "job_id": job_id,
-            "signatures_received": len(names),
+            "children_ids": children_ids,
+            "signatures_received": names.keys(),
             "status_URL": reverse('genomes-status', args=[job_id], request=request)
         }
         return Response(response)
