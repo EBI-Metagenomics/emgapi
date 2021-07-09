@@ -34,6 +34,7 @@ from django.db import models
 from django.db.models import (CharField, Count, OuterRef, Prefetch, Q,
                               Subquery, Value, Count)
 from django.db.models.functions import Cast, Concat
+from rest_framework.generics import get_object_or_404
 
 
 class Resource(object):
@@ -755,6 +756,10 @@ class SuperStudyManager(models.Manager):
             )
         return queryset
 
+    def get_by_id_or_slug_or_404(self, id_or_slug):
+        if type(id_or_slug) is int or (type(id_or_slug) is str and id_or_slug.isnumeric()):
+            return get_object_or_404(self.get_queryset(), super_study_id=int(id_or_slug))
+        return get_object_or_404(self.get_queryset(), url_slug=id_or_slug)
 
 class SuperStudy(models.Model):
     """
@@ -766,6 +771,7 @@ class SuperStudy(models.Model):
     super_study_id = models.AutoField(db_column='STUDY_ID',
                                       primary_key=True)
     title = models.CharField(db_column='TITLE', max_length=100)
+    url_slug = models.SlugField(db_column='URL_SLUG', max_length=100)
     description = models.TextField(db_column='DESCRIPTION', blank=True, null=True)
 
     flagship_studies = models.ManyToManyField(
@@ -776,7 +782,7 @@ class SuperStudy(models.Model):
         'Biome', through='SuperStudyBiome', related_name='super_studies', blank=True
     )
 
-    image = models.CharField(db_column='IMAGE', max_length=100, blank=True, null=True)
+    logo = models.TextField(db_column='LOGO', max_length=100000, blank=True, null=True)
 
     objects = SuperStudyManager()
 
@@ -785,10 +791,10 @@ class SuperStudy(models.Model):
 
     @property
     def image_url(self):
-        if self.image:
-            return os.path.join(settings.IMG_FOLDER, str(self.image))
-        else:
-            return ''
+        if self.logo:
+            return self.logo
+        return ''
+
 
     class Meta:
         db_table = 'SUPER_STUDY'

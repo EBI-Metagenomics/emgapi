@@ -134,13 +134,13 @@ router.register(
 )
 
 router.register(
-    r'super-studies/(?P<super_study_id>[0-9\.]+)/flagship-studies',
+    r'super-studies/(?P<super_study_id>[^/]+)/flagship-studies',
     views_relations.SuperStudyFlagshipStudiesViewSet,
     basename='super-studies-flagship-studies'
 )
 
 router.register(
-    r'super-studies/(?P<super_study_id>[0-9\.]+)/related-studies',
+    r'super-studies/(?P<super_study_id>[^/]+)/related-studies',
     views_relations.SuperStudyRelatedStudiesViewSet,
     basename='super-studies-related-studies'
 )
