@@ -25,8 +25,9 @@ def mock_get_celery_task(*args, **kwargs):
     obj.id = MOCKED_JOB_ID
     obj.status = "SUCCESS"
     obj.result = {
-        "match": "80%"
+        "match": "80%",
     }
+    obj.args = ['md5', 'name', 'HGUT']
     return obj
 
 class ResultMock:
