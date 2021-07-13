@@ -66,7 +66,6 @@ class TestStudyAPI:
         with pytest.raises(Exception, match='Unable to parse the uploaded file'):
             client.post(url, data, format='multipart')
 
-    @pytest.mark.skip(reason="No sure why this is failing at the moment")
     def test_genome_search_post_with_valid_file(self, client, monkeypatch):
         monkeypatch.setattr(group, "apply_async", mock_group_result)
         url = reverse("emgapi_v1:genomes-gather-list")
