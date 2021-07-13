@@ -8,6 +8,7 @@ from django.urls import reverse
 from rest_framework import status
 from celery import Celery, group
 from celery.result import GroupResult
+from celery.app.control import Control
 
 
 SIGNATURE_FILE_NAME = ""
@@ -37,6 +38,13 @@ class ResultMock:
     ]
     def save(self):
         pass
+
+class InspectMock:
+    def ping(self):
+        return "pong"
+
+def mock_inspect(*args, **kwargs):
+    return InspectMock()
 
 def mock_group_result(*args, **kwargs):
     return ResultMock()
@@ -81,9 +89,9 @@ class TestStudyAPI:
         assert "job_id" in rsp["data"]
         assert MOCKED_JOB_ID in rsp["data"]["job_id"]
 
-    @pytest.mark.skip(reason="No sure why this is failing at the moment")
     def test_genome_search_status(self, client, monkeypatch):
         monkeypatch.setattr(GroupResult, "restore", mock_group_result)
+        monkeypatch.setattr(Control, "inspect", mock_inspect)
         url = reverse("genomes-status", args=[MOCKED_JOB_ID])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
