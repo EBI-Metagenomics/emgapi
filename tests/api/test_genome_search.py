@@ -81,7 +81,6 @@ class TestStudyAPI:
         assert "job_id" in rsp["data"]
         assert MOCKED_JOB_ID in rsp["data"]["job_id"]
 
-    @pytest.mark.skip(reason="No sure why this is failing at the moment")
     def test_genome_search_status(self, client, monkeypatch):
         monkeypatch.setattr(GroupResult, "restore", mock_group_result)
         url = reverse("genomes-status", args=[MOCKED_JOB_ID])
