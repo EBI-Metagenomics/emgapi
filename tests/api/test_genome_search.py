@@ -41,7 +41,6 @@ class ResultMock:
 def mock_group_result(*args, **kwargs):
     return ResultMock()
 
-@pytest.mark.skip(reason="No sure why this is failing at the moment")
 class TestStudyAPI:
     def test_genome_search_get(self, client):
         url = reverse("emgapi_v1:genomes-gather-list")
@@ -53,6 +52,7 @@ class TestStudyAPI:
         assert "data" in rsp
         assert "sourmash" in rsp["data"]
 
+    @pytest.mark.skip(reason="No sure why this is failing at the moment")
     def test_genome_search_post_with_non_valid_files(self, client):
         url = reverse("emgapi_v1:genomes-gather-list")
         print(url)
@@ -69,6 +69,7 @@ class TestStudyAPI:
         with pytest.raises(Exception, match='Unable to parse the uploaded file'):
             client.post(url, data, format='multipart')
 
+    @pytest.mark.skip(reason="No sure why this is failing at the moment")
     def test_genome_search_post_with_valid_file(self, client, monkeypatch):
         monkeypatch.setattr(group, "apply_async", mock_group_result)
         url = reverse("emgapi_v1:genomes-gather-list")
@@ -85,6 +86,7 @@ class TestStudyAPI:
         assert "job_id" in rsp["data"]
         assert MOCKED_JOB_ID in rsp["data"]["job_id"]
 
+    @pytest.mark.skip(reason="No sure why this is failing at the moment")
     def test_genome_search_status(self, client, monkeypatch):
         monkeypatch.setattr(GroupResult, "restore", mock_group_result)
         url = reverse("genomes-status", args=[MOCKED_JOB_ID])
@@ -97,6 +99,7 @@ class TestStudyAPI:
         assert MOCKED_JOB_ID == rsp["data"]["group_id"]
         assert "SUCCESS" == rsp["data"]["signatures"][0]['status']
 
+    @pytest.mark.skip(reason="No sure why this is failing at the moment")
     def test_genome_search_get_result(self, client, monkeypatch):
         monkeypatch.setattr(Celery, "AsyncResult", mock_get_celery_task)
         url = reverse("genomes-results", args=[MOCKED_JOB_ID])
