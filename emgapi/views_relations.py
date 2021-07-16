@@ -318,7 +318,7 @@ class StudyAnalysisResultViewSet(emg_mixins.ListModelMixin,
 
     filter_backends = (
         DjangoFilterBackend,
-        filters.OrderingFilter,
+        emg_filters.getUnambiguousOrderingFilterByField('job_id'),
     )
 
     ordering_fields = (
@@ -358,9 +358,8 @@ class SuperStudyFlagshipStudiesViewSet(emg_mixins.ListModelMixin,
     lookup_field = 'super_study_id'
 
     def get_queryset(self):
-        super_study = get_object_or_404(
-            emg_models.SuperStudy,
-            pk=self.kwargs['super_study_id']
+        super_study = emg_models.SuperStudy.objects.get_by_id_or_slug_or_404(
+            id_or_slug=self.kwargs['super_study_id']
         )
         return super_study.flagship_studies.available(self.request)
 
@@ -381,9 +380,8 @@ class SuperStudyRelatedStudiesViewSet(emg_mixins.ListModelMixin,
     lookup_field = 'super_study_id'
 
     def get_queryset(self):
-        super_study = get_object_or_404(
-            emg_models.SuperStudy,
-            pk=self.kwargs['super_study_id']
+        super_study = emg_models.SuperStudy.objects.get_by_id_or_slug_or_404(
+            id_or_slug=self.kwargs['super_study_id']
         )
         biomes = super_study.biomes.all() \
                                    .values('biome_id')
@@ -819,7 +817,7 @@ class BiomeTreeViewSet(mixins.ListModelMixin,
     )
 
     search_fields = (
-        '@biome_name',
+        'biome_name',
         'lineage',
     )
 

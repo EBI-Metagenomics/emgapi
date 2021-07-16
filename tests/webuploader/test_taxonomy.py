@@ -18,7 +18,7 @@ import os
 
 import pytest
 from django.core.management import call_command
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from rest_framework import status
 
 from test_utils.emg_fixtures import *  # noqa

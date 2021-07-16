@@ -18,8 +18,10 @@ import collections
 
 from rest_framework_json_api.relations import (
     SerializerMethodResourceRelatedField,
+    SerializerMethodHyperlinkedRelatedField,
+    ManySerializerMethodHyperlinkedRelatedField,
+    SkipDataMixin,
 )
-
 from rest_framework_json_api.utils import get_resource_type_from_instance
 
 from rest_framework_json_api.relations import LINKS_PARAMS
@@ -28,8 +30,9 @@ LINKS_PARAMS.append('related_link_self_lookup_field')
 LINKS_PARAMS.append('related_link_self_lookup_fields')
 
 
-class HyperlinkedSerializerMethodResourceRelatedField(
-    SerializerMethodResourceRelatedField):  # noqa
+
+
+class HyperlinkedSerializerMethodResourceRelatedField(SerializerMethodResourceRelatedField):  # noqa
 
     related_link_self_view_name = None
     related_link_self_lookup_field = 'pk'
@@ -70,8 +73,14 @@ class HyperlinkedSerializerMethodResourceRelatedField(
         return relation_data
 
     def to_representation(self, value):
-        return [self._to_representation(x) for x in value]
+        try:
+            return [self._to_representation(x) for x in value]
+        except TypeError:
+            return self._to_representation(value)
 
+
+class HyperlinkedSerializerMethodResourceRelatedFieldWithoutData(SkipDataMixin, HyperlinkedSerializerMethodResourceRelatedField):
+    many_cls = ManySerializerMethodHyperlinkedRelatedField
 
 # TODO: clean up below
 class AnalysisJobSerializerMethodResourceRelatedField(SerializerMethodResourceRelatedField):  # NOQA

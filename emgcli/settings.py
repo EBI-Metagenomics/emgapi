@@ -270,6 +270,7 @@ WSGI_APPLICATION = 'emgcli.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 try:
     DATABASES = EMG_CONF['emg']['databases']
 except KeyError:
@@ -380,6 +381,7 @@ REST_FRAMEWORK = {
 JSON_API_FORMAT_KEYS = 'dasherize'
 JSON_API_FORMAT_TYPES = 'dasherize'
 JSON_API_PLURALIZE_TYPES = True
+JSON_API_FORMAT_FIELD_NAMES = 'dasherize'
 
 # Swagger auth
 # Toggles the use of Django Auth as an authentication mechanism.
@@ -453,12 +455,13 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 
 try:
     ALLOWED_HOSTS = EMG_CONF['emg']['allowed_host']
-    CORS_ORIGIN_WHITELIST = ALLOWED_HOSTS
-    logger.info("ALLOWED_HOSTS %r" % CORS_ORIGIN_WHITELIST)
+    CORS_ORIGIN_WHITELIST = \
+        [f'http://{h}' for h in ALLOWED_HOSTS] + \
+        [f'https://{h}' for h in ALLOWED_HOSTS]
+    logger.info("ALLOWED_HOSTS %r" % ALLOWED_HOSTS)
 except KeyError:
     warnings.warn("ALLOWED_HOSTS not configured using wildecard",
                   RuntimeWarning)
-
 try:
     CORS_ORIGIN_ALLOW_ALL = EMG_CONF['emg']['cors_origin_allow_all']
 except KeyError:
@@ -561,11 +564,7 @@ except KeyError:
     EMG_DESC = 'MGnify API'
 
 # MongoDB
-import mongoengine
-
-mongodb = EMG_CONF['emg']['mongodb']
-MONGO_CONN = mongoengine.connect(**mongodb)
-
+MONGO_CONF = EMG_CONF['emg']['mongodb']
 
 # TODO: fix warnings
 SILENCED_SYSTEM_CHECKS = ["fields.W342"]

@@ -147,8 +147,9 @@ class Command(EMGBaseCommand):
                                         "Reads with predicted RNA"]:
                             var_name = "Reads with predicted RNA"
                         else:
-                            logging.error("Unsupported variable name {}".format(row[0]))
-                            raise UnexpectedVariableName
+                            msg = "Unsupported variable name {}".format(row[0])
+                            logging.error(msg)
+                            raise UnexpectedVariableName(msg)
 
                         var = emg_models.AnalysisMetadataVariableNames.objects.using(emg_db) \
                             .get(var_name=var_name)
@@ -160,8 +161,10 @@ class Command(EMGBaseCommand):
                         logging.info("{} successfully loaded into the database.".format(row[0]))
 
                     except emg_models.AnalysisMetadataVariableNames.DoesNotExist:
-                        logging.error("Could not find variable name {} in the database even "
-                                        "though it should be supported!".format(row[0]))
-                        raise UnexpectedVariableName
+                        msg = "Could not find variable name [{}|{}] in the database even though it should be supported!\n" \
+                              "There are {} variables registered" \
+                            .format(row[0], var_name, emg_models.AnalysisMetadataVariableNames.objects.count())
+                        logging.error(msg)
+                        raise UnexpectedVariableName(msg)
         else:
             logging.warning("orf.stats file does not exist: {}".format(res))

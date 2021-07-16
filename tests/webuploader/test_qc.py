@@ -17,7 +17,7 @@
 import pytest
 import os
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.management import call_command
 
 from rest_framework import status
@@ -62,7 +62,11 @@ class TestCLI:
                 "value": "12345678"
             }
         ]
-        assert rsp["data"]["attributes"]["analysis-summary"] == expected
+
+        summary = rsp["data"]["attributes"]["analysis-summary"]
+        summary.sort(key=lambda i: i['key'])
+        expected.sort(key=lambda i: i['key'])
+        assert summary == expected
 
     @pytest.mark.parametrize(
         "results",

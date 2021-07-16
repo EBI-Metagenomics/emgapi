@@ -53,3 +53,8 @@ class UnexpectedLibraryStrategyException(Exception):
 class UnexpectedVariableName(Exception):
     """Raised when unexpected variable name found."""
     pass
+
+
+class UnexpectedResultStatusException(Exception):
+    """Raised when unexpected result status found"""
+    pass

@@ -1,0 +1,14 @@
+emg:
+  databases:
+    default:
+      ENGINE: 'django.db.backends.mysql'
+      NAME: 'emg'
+      USER: 'root'
+      PASSWORD: 'root'
+      HOST: 127.0.0.1
+      PORT: 3306
+  session_engine: 'django.contrib.sessions.backends.cache'
+  emg_backend_auth: "https://backend"
+  mongodb:
+      db: 'testdb'
+      host: '127.0.0.1'

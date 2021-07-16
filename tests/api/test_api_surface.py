@@ -18,7 +18,7 @@ import pytest
 
 from model_bakery import baker
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.urls.exceptions import NoReverseMatch
 
 from rest_framework import status

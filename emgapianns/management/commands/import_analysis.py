@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-import getpass
 # Copyright 2019 EMBL - European Bioinformatics Institute
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,11 +12,13 @@ import getpass
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import logging
 import os
 import re
 import subprocess
 import sys
+import getpass
 
 from django.core.management import BaseCommand, call_command
 from django.utils import timezone
@@ -112,21 +112,28 @@ class Command(BaseCommand):
 
         input_file_name = os.path.basename(self.result_dir)
 
-        sanity_checker = SanityCheck(self.accession, self.result_dir, self.library_strategy, self.version)
+        sanity_checker = SanityCheck(self.accession, self.result_dir, self.library_strategy, self.version, emg_db=self.emg_db)
         sanity_checker.check_file_existence()
 
         sanity_checker.run_quality_control_check()
 
         sanity_checker.run_coverage_check()
 
-        self.call_import_study(secondary_study_accession)
+        study_dir = utils.get_result_dir(utils.get_study_dir(self.result_dir))
 
-        self.call_import_sample(metadata)
+        call_command('import_study',
+                     secondary_study_accession,
+                     self.biome,
+                     '--study_dir', study_dir)
+
+        call_command('import_sample',
+                     metadata.sample_accession,
+                     '--biome', self.biome)
 
         if isinstance(metadata, Run):
-            self.call_import_run(metadata.run_accession)
+            call_command('import_run', metadata.run_accession, '--biome', self.biome, '--library_strategy', self.library_strategy)
         else:
-            self.call_import_assembly(metadata.analysis_accession)
+            call_command('import_assembly', metadata.analysis_accession, '--biome', self.biome)
 
         analysis = self.create_or_update_analysis(metadata, input_file_name)
         self.upload_analysis_files(self.library_strategy, analysis, input_file_name)
@@ -178,25 +185,6 @@ class Command(BaseCommand):
             logging.info("Found the following result folder:\n{}".format(latest_folder))
             return latest_folder
 
-    def call_import_study(self, secondary_study_accession):
-        study_dir = utils.get_result_dir(utils.get_study_dir(self.result_dir))
-        call_command('import_study',
-                     secondary_study_accession,
-                     self.biome,
-                     '--study_dir', study_dir)
-        return study_dir
-
-    def call_import_sample(self, metadata):
-        call_command('import_sample',
-                     metadata.sample_accession,
-                     '--biome', self.biome)
-
-    def call_import_run(self, run_accession):
-        call_command('import_run', run_accession, '--biome', self.biome, '--library_strategy', self.library_strategy)
-
-    def call_import_assembly(self, analysis_accession):
-        call_command('import_assembly', analysis_accession, '--biome', self.biome)
-
     def __call_generate_study_summary(self, secondary_study_accession):
         """
             Example call:
@@ -211,7 +199,7 @@ class Command(BaseCommand):
 
     def retrieve_metadata(self):
         """
-            Please note: Overwrite library strategy. Use library strategy given as a program argument.
+        Please note: Overwrite library strategy. Use library strategy given as a program argument.
         :return:
         """
         logger.info("Retrieving metadata...")
@@ -219,10 +207,20 @@ class Command(BaseCommand):
         logger.info("Identified assembly accession: {0}".format(is_assembly))
 
         if is_assembly:
-            # assembly = ena.get_assembly(assembly_name=self.accession)
-            assembly = ena.get_assembly(assembly_name=self.accession,
-                                        fields='secondary_study_accession,secondary_sample_accession,'
-                                               'analysis_alias,analysis_accession')
+            assembly_fields = ",".join([
+                "secondary_study_accession",
+                "secondary_sample_accession",
+                "analysis_alias",
+                "analysis_accession",
+                # the following fields are not
+                # currently in use but I left them there
+                # because they could be useful in the future
+                "sequencing_method",
+                "assembly_software",
+                "assembly_quality",
+                "description"
+            ])
+            assembly = ena.get_assembly(assembly_name=self.accession, fields=assembly_fields)
             if 'sample_accession' in assembly:
                 del assembly['sample_accession']
             # Try to parse out the run accession from the analysis alias
@@ -336,8 +334,8 @@ class Command(BaseCommand):
 
     def upload_statistics(self):
         """
-            Please note that the name of the import module is misleading as this is not just about QC stats but also
-            about functional stats
+        Please note that the name of the import module is misleading as this is not just about QC stats but also
+        about functional stats
         :return:
         """
         logger.info('Importing statistics...')
@@ -356,7 +354,7 @@ class Command(BaseCommand):
 
     def __find_folder(self, directory, search_pattern, maxdepth=2, recursive=False):
         """
-
+        Find a folder.
         :param dest_pattern:
         :return: e.g. 2017/11/ERP104174/
         """
@@ -380,7 +378,7 @@ class Command(BaseCommand):
     @staticmethod
     def __call_find(directory, name, maxdepth=2):
         """
-
+        Call the find unix tool
         :param dest_pattern:
         :return: e.g. 2017/11/ERP104174/
         """

@@ -1,8 +1,7 @@
+[![Testing](https://github.com/EBI-Metagenomics/emgapi/actions/workflows/test.yml/badge.svg)](https://github.com/EBI-Metagenomics/emgapi/actions/workflows/test.yml)
+
 EMG API
 =======
-
-.. image:: https://travis-ci.com/EBI-Metagenomics/emgapi.svg?branch=master
-    :target: https://travis-ci.com/EBI-Metagenomics/emgapi
 
 Metagenomics service is a large-scale platform for analyzing and archiving metagenomic and metatranscriptome data. It provides a standardized analysis workflow, capable of producing rich taxonomic diversity and functional annotations, and allows analysis results to be compared within and across projects on a broad level, and across different data types (e.g. metagenomic and metatranscriptomic).
 
@@ -81,7 +80,7 @@ Create a virtual environment::
     
     `virtualenv -p python3 venv`
 
-Activate and install the dependencies `source venv/bin/activate && pip install -r requirements-local-dev.txt`.
+Activate and install the dependencies `source venv/bin/activate && pip install -r requirements-dev.txt`.
 
 Start containers using::
 

@@ -19,12 +19,14 @@ import os
 import re
 import sys
 import unicodedata
+import json
 
 from emgapi import models as emg_models
 from emgapianns.management.lib.downloadable_files import ChunkedDownloadFiles, UnchunkedDownloadFile
 from emgapianns.management.lib.import_analysis_model import Assembly, Run
 from emgapianns.management.lib.uploader_exceptions import \
     AccessionNotRecognised
+import emgapianns.management.lib.sanity_check as sanity
 from emgapianns.management.webuploader_configs import get_downloadset_config
 
 study_accssion_re = r'([ESD]RP\d{6,})'
@@ -52,10 +54,6 @@ def get_run_accession(path):
 
 def is_run_accession(accession):
     return re.match(run_accession_re, accession)
-
-
-def is_assembly_accession(accession):
-    return re.match(assembly_accession_re, accession)
 
 
 def retrieve_existing_result_dir(rootpath, dest_pattern):
@@ -132,7 +130,7 @@ def is_assembly(accession):
     :param accession:
     :return:
     """
-    if is_assembly_accession(accession):
+    if re.match(assembly_accession_re, accession):
         return True
     elif is_run_accession(accession):
         return False
@@ -353,16 +351,34 @@ class DownloadSet:
 
 
 def get_conf_downloadset(rootpath, input_file_name, emg_db_name, library_strategy, version):
-    config = get_downloadset_config(version, library_strategy)
-    return DownloadSet(rootpath, input_file_name, emg_db_name, config)
+    accession = input_file_name.split('_')[0]
+    result_status = sanity.get_result_status(emg_db_name, accession)
+    config = get_downloadset_config(version, library_strategy, result_status)
+    #SSU.fasta and LSU.fasta could still be present. Do not upload for no_tax
+    if result_status == 'no_tax':
+        tax_fasta = ['Contigs encoding SSU rRNA', 'Contigs encoding LSU rRNA']
+        filtered_config = [f for f in config if f['description_label'] not in tax_fasta]
+    else:
+        filtered_config = config
+    return DownloadSet(rootpath, input_file_name, emg_db_name, filtered_config)
 
 
 def get_result_dir(result_dir, substring="results/"):
     """
-
     :param result_dir:
     :param substring:
     :return:
     """
     pos = result_dir.find(substring)
     return result_dir[pos + len(substring):]
+
+
+def read_config(config_path, db):
+    with open(config_path, 'r') as json_config:
+        whole_config = json.load(json_config)
+        config = whole_config[db]
+        config["raise_on_warnings"] = True
+        config["autocommit"] = True
+        config["port"] = int(config["port"])
+    return config
+

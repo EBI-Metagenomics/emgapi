@@ -12,7 +12,8 @@ from test_utils.emg_fixtures import *  # noqa
 
 
 @pytest.mark.django_db
-@pytest.mark.skipif('TRAVIS' in os.environ and os.environ['TRAVIS'] == 'true',
+@pytest.mark.skipif(('TRAVIS' in os.environ and os.environ['TRAVIS'] == 'true') or
+                    ('CI' in os.environ and os.environ['CI'] == 'true'),
                     reason='Skipping this test on Travis CI as internal databases are '
                            'required for full integration tests')
 class TestImportSample(TransactionTestCase):

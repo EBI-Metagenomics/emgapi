@@ -21,7 +21,7 @@ from django.db.models import Q
 from django.db.models import FloatField
 from django.db.models.functions import Cast
 from django.utils.datastructures import MultiValueDict
-from django.utils.six import string_types
+# from django.utils.six import string_types
 
 import django_filters
 from django_filters import filters
@@ -29,6 +29,8 @@ from django_filters import widgets
 
 from . import models as emg_models
 from . import utils as emg_utils
+
+from rest_framework import filters as drf_filters
 
 
 WORD_MATCH_REGEX = r"{0}"
@@ -213,9 +215,9 @@ class QueryArrayWidget(widgets.BaseCSVWidget, forms.TextInput):
             data = data.copy()
         for key, value in data.items():
             # treat value as csv string: ?foo=1,2
-            if isinstance(value, string_types):
-                data[key] = [
-                    x.strip() for x in value.rstrip(',').split(',') if x]
+            # if isinstance(value, string_types):
+            data[key] = [
+                x.strip() for x in value.rstrip(',').split(',') if x]
         data = MultiValueDict(data)
 
         if not isinstance(data, MultiValueDict):
@@ -249,6 +251,7 @@ class SuperStudyFilter(django_filters.FilterSet):
         fields = (
             'super_study_id',
             'title',
+            'url_slug',
             'description',
             'biome_name',
         )
@@ -1059,3 +1062,17 @@ class GenomeFilter(django_filters.FilterSet):
             "pangenome_accessory_size__gte",
             "pangenome_accessory_size__lte",
         )
+
+def getUnambiguousOrderingFilterByField(field):
+    class UnambiguousOrderingFilter(drf_filters.OrderingFilter):
+        def filter_queryset(self, request, queryset, view):
+            ordering = self.get_ordering(request, queryset, view)
+
+            if ordering:
+                if field in ordering:
+                    return queryset.order_by(*ordering)
+                else:
+                    return queryset.order_by(*ordering, field)
+
+            return queryset
+    return UnambiguousOrderingFilter

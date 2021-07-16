@@ -79,7 +79,7 @@ class AnalysisRelationshipViewSet(ListReadOnlyModelViewSet):
     ordering = ('-accession',)
 
     search_fields = (
-        '@sample__metadata__var_val_ucv',
+        'sample__metadata__var_val_ucv',
     )
 
     lookup_field = 'accession'
