@@ -1197,45 +1197,45 @@ class GenomeAntiSmashGeneClustersRelationshipsViewSet(emg_mixins.ListModelMixin,
         return queryset
 
 
-class ReleaseGenomesViewSet(emg_mixins.ListModelMixin,
-                            emg_viewsets.BaseGenomeGenericViewSet):  # noqa
-    lookup_field = 'version'
+# class ReleaseGenomesViewSet(emg_mixins.ListModelMixin,
+#                             emg_viewsets.BaseGenomeGenericViewSet):  # noqa
+#     lookup_field = 'version'
+#
+#     def get_queryset(self):
+#         genome_version = self.kwargs[self.lookup_field]
+#         if genome_version == 'all':
+#             genomes = emg_models.Genome.objects.all()
+#         else:
+#             if genome_version == 'latest':
+#                 genome_release = emg_models.Release.objects \
+#                     .order_by('-version').last()
+#             else:
+#                 genome_release = get_object_or_404(
+#                     emg_models.Release,
+#                     version=genome_version)
+#             genomes = genome_release.genomes.all()
+#
+#         return genomes
+#
+#     def list(self, request, *args, **kwargs):
+#         return super(ReleaseGenomesViewSet, self) \
+#             .list(request, *args, **kwargs)
 
-    def get_queryset(self):
-        genome_version = self.kwargs[self.lookup_field]
-        if genome_version == 'all':
-            genomes = emg_models.Genome.objects.all()
-        else:
-            if genome_version == 'latest':
-                genome_release = emg_models.Release.objects \
-                    .order_by('-version').last()
-            else:
-                genome_release = get_object_or_404(
-                    emg_models.Release,
-                    version=genome_version)
-            genomes = genome_release.genomes.all()
 
-        return genomes
-
-    def list(self, request, *args, **kwargs):
-        return super(ReleaseGenomesViewSet, self) \
-            .list(request, *args, **kwargs)
-
-
-class GenomeReleasesViewSet(emg_mixins.ListModelMixin,
-                            viewsets.GenericViewSet):
+class GenomeGenomeCataloguesViewSet(emg_mixins.ListModelMixin,
+                                    viewsets.GenericViewSet):
     lookup_field = 'accession'
 
-    serializer_class = emg_serializers.ReleaseSerializer
+    serializer_class = emg_serializers.GenomeCatalogueSerializer
 
     def get_queryset(self):
         genome = get_object_or_404(
             emg_models.Genome,
             accession=self.kwargs[self.lookup_field])
-        return genome.releases.all()
+        return genome.catalogues.all()
 
     def list(self, request, *args, **kwargs):
-        return super(GenomeReleasesViewSet, self) \
+        return super(GenomeGenomeCataloguesViewSet, self) \
             .list(request, *args, **kwargs)
 
 

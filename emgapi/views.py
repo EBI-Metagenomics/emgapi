@@ -1200,7 +1200,8 @@ class GenomeCatalogueViewSet(mixins.RetrieveModelMixin,
         ---
         `/genome-catalogues?last_update__gt=2021-01-01`
 
-        `/genome-catalogues?biome__biome_name=root:Environmental:Aquatic:Marine`
+        Biome lineage:
+        `/genome-catalogues?lineage=root:Environmental:Aquatic:Marine`
 
         Case-insensitive search of biome name:
         `/genome-catalogues?biome__biome_name__icontains=marine`
@@ -1252,11 +1253,11 @@ class GenomeViewSet(mixins.RetrieveModelMixin,
         'taxon_lineage',
         'type',
         'genome_set__name',
-        'release__version'
+        'genome_catalogues__name'
     )
 
     queryset = emg_models.Genome.objects.all() \
-        .prefetch_related('releases') \
+        .prefetch_related('genome_catalogues') \
         .select_related('biome', 'geo_origin')
 
 
@@ -1324,41 +1325,97 @@ class GenomeDownloadViewSet(emg_mixins.ListModelMixin,
         return response
 
 
-class ReleaseViewSet(mixins.RetrieveModelMixin,
-                     emg_mixins.ListModelMixin,
-                     viewsets.GenericViewSet):
-    serializer_class = emg_serializers.ReleaseSerializer
-    queryset = emg_models.Release.objects.all()
+# class ReleaseViewSet(mixins.RetrieveModelMixin,
+#                      emg_mixins.ListModelMixin,
+#                      viewsets.GenericViewSet):
+#     serializer_class = emg_serializers.ReleaseSerializer
+#     queryset = emg_models.Release.objects.all()
+#
+#     filter_backends = (
+#         filters.OrderingFilter,
+#     )
+#
+#     ordering_fields = (
+#         'version',
+#         'genomes_count'
+#     )
+#
+#     ordering = ('-version',)
+#
+#     lookup_field = 'version'
+#     lookup_value_regex = '[0-9.]+'
+#
+#     def get_serializer_class(self):
+#         if self.action == 'retrieve':
+#             return emg_serializers.ReleaseSerializer
+#         return super(ReleaseViewSet, self).get_serializer_class()
+#
+#     def retrieve(self, request, *args, **kwargs):
+#         return super(ReleaseViewSet, self).retrieve(request, *args, **kwargs)
+#
+#     def list(self, request, *args, **kwargs):
+#         return super(ReleaseViewSet, self).list(request, *args, **kwargs)
 
-    filter_backends = (
-        filters.OrderingFilter,
-    )
 
-    ordering_fields = (
-        'version',
-        'genomes_count'
-    )
+# class ReleaseDownloadViewSet(emg_mixins.ListModelMixin,
+#                              viewsets.GenericViewSet):
+#     serializer_class = emg_serializers.ReleaseDownloadSerializer
+#
+#     lookup_field = 'alias'
+#     lookup_value_regex = '[^/]+'
+#
+#     def get_queryset(self):
+#         try:
+#             version = self.kwargs['version']
+#         except ValueError:
+#             raise Http404()
+#         return emg_models.ReleaseDownload.objects.available(self.request) \
+#             .filter(release__version=version)
+#
+#     def get_object(self):
+#         return get_object_or_404(
+#             self.get_queryset(), Q(alias=self.kwargs['alias'])
+#         )
+#
+#     def get_serializer_class(self):
+#         return super(ReleaseDownloadViewSet, self) \
+#             .get_serializer_class()
+#
+#     def list(self, request, *args, **kwargs):
+#         return super(ReleaseDownloadViewSet, self) \
+#             .list(request, *args, **kwargs)
+#
+#     def retrieve(self, request, version, alias,
+#                  *args, **kwargs):
+#         """
+#         Retrieves static summary file
+#         Example:
+#         ---
+#         `
+#         /studies/MGYS00000410/pipelines/2.0/file/
+#         ERP001736_taxonomy_abundances_v2.0.tsv`
+#         """
+#         obj = self.get_object()
+#         response = HttpResponse()
+#         response['Content-Type'] = 'application/octet-stream'
+#         response['Content-Disposition'] = \
+#             'attachment; filename={0}'.format(alias)
+#         if obj.subdir is not None:
+#             response['X-Accel-Redirect'] = \
+#                 '/results/genomes{0}/{1}/{2}'.format(
+#                     obj.release.result_directory, obj.subdir, obj.realname
+#                 )
+#         else:
+#             response['X-Accel-Redirect'] = \
+#                 '/results/genomes{0}/{1}'.format(
+#                     obj.release.result_directory, obj.realname
+#                 )
+#         return response
 
-    ordering = ('-version',)
 
-    lookup_field = 'version'
-    lookup_value_regex = '[0-9.]+'
-
-    def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return emg_serializers.ReleaseSerializer
-        return super(ReleaseViewSet, self).get_serializer_class()
-
-    def retrieve(self, request, *args, **kwargs):
-        return super(ReleaseViewSet, self).retrieve(request, *args, **kwargs)
-
-    def list(self, request, *args, **kwargs):
-        return super(ReleaseViewSet, self).list(request, *args, **kwargs)
-
-
-class ReleaseDownloadViewSet(emg_mixins.ListModelMixin,
-                             viewsets.GenericViewSet):
-    serializer_class = emg_serializers.ReleaseDownloadSerializer
+class GenomeCatalogueDownloadViewSet(emg_mixins.ListModelMixin,
+                                     viewsets.GenericViewSet):
+    serializer_class = emg_serializers.GenomeCatalogueDownloadSerializer
 
     lookup_field = 'alias'
     lookup_value_regex = '[^/]+'
@@ -1368,7 +1425,7 @@ class ReleaseDownloadViewSet(emg_mixins.ListModelMixin,
             version = self.kwargs['version']
         except ValueError:
             raise Http404()
-        return emg_models.ReleaseDownload.objects.available(self.request) \
+        return emg_models.GenomeCatalogueDownload.objects.available(self.request) \
             .filter(release__version=version)
 
     def get_object(self):
@@ -1377,22 +1434,21 @@ class ReleaseDownloadViewSet(emg_mixins.ListModelMixin,
         )
 
     def get_serializer_class(self):
-        return super(ReleaseDownloadViewSet, self) \
+        return super(GenomeCatalogueDownloadViewSet, self) \
             .get_serializer_class()
 
     def list(self, request, *args, **kwargs):
-        return super(ReleaseDownloadViewSet, self) \
+        return super(GenomeCatalogueDownloadViewSet, self) \
             .list(request, *args, **kwargs)
 
     def retrieve(self, request, version, alias,
                  *args, **kwargs):
         """
-        Retrieves static summary file
+        Retrieves a downloadable file for the genome catalogue
         Example:
         ---
         `
-        /studies/MGYS00000410/pipelines/2.0/file/
-        ERP001736_taxonomy_abundances_v2.0.tsv`
+        /genome-catalogues/human-gut-1/file/phylo_tree.json`
         """
         obj = self.get_object()
         response = HttpResponse()
@@ -1402,12 +1458,12 @@ class ReleaseDownloadViewSet(emg_mixins.ListModelMixin,
         if obj.subdir is not None:
             response['X-Accel-Redirect'] = \
                 '/results/genomes{0}/{1}/{2}'.format(
-                    obj.release.result_directory, obj.subdir, obj.realname
+                    obj.genome_catalogue.result_directory, obj.subdir, obj.realname
                 )
         else:
             response['X-Accel-Redirect'] = \
                 '/results/genomes{0}/{1}'.format(
-                    obj.release.result_directory, obj.realname
+                    obj.genome_catalogue.result_directory, obj.realname
                 )
         return response
 

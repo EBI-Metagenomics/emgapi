@@ -1065,6 +1065,26 @@ class GenomeFilter(django_filters.FilterSet):
 
 
 class GenomeCatalogueFilter(django_filters.FilterSet):
+
+    lineage = filters.ModelChoiceFilter(
+        queryset=emg_models.Biome.objects.all(),
+        method='filter_lineage', distinct=True,
+        to_field_name='lineage',
+        label='Biome lineage',
+        help_text='Biome lineage')
+
+    def filter_lineage(self, qs, name, value):
+        try:
+            b = emg_models.Biome.objects.get(lineage=value)
+            catalogues = emg_models.GenomeCatalogue.objects\
+                .filter(
+                biome__lft__gte=b.lft,
+                biome__rgt__lte=b.rgt)
+            qs = qs.filter(pk__in=catalogues)
+        except emg_models.Biome.DoesNotExist:
+            pass
+        return qs
+
     class Meta:
         model = emg_models.GenomeCatalogue
         fields = {

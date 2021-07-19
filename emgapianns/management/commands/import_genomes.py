@@ -6,7 +6,7 @@ from django.db import IntegrityError
 from emgapi import models as emg_models
 
 from ..lib.genome_util import sanity_check_genome_output, \
-    sanity_check_release_dir, find_genome_results, \
+    sanity_check_catalogue_dir, find_genome_results, \
     get_result_path, read_tsv_w_headers, read_json
 
 logger = logging.getLogger(__name__)
@@ -19,13 +19,16 @@ class Command(BaseCommand):
     obj_list = list()
     rootpath = None
     genome_folders = None
-    release_obj = None
+    catalogue_obj = None
+    catalogue_dir = None
 
     database = None
 
     def add_arguments(self, parser):
         parser.add_argument('rootpath', action='store', type=str, )
-        parser.add_argument('version', action='store', type=str)
+        # parser.add_argument('version', action='store', type=str)
+        parser.add_argument('catalogue_series_id', action='store', type=str)
+        parser.add_argument('catalogue_version', action='store', type=str)
         parser.add_argument('--database', type=str,
                             default='default')
 
@@ -35,38 +38,49 @@ class Command(BaseCommand):
             raise FileNotFoundError('Results dir {} does not exist'
                                     .format(self.rootpath))
 
-        version = options['version'].strip()
-        release_dir = os.path.join(self.rootpath, version)
+        series = options['catalogue_series_id'].strip()
+        version = options['catalogue_version'].strip()
+        self.catalogue_dir = os.path.join(self.rootpath, series, version)
 
         self.database = options['database']
-        self.release_obj = self.get_release(version, release_dir)
+        self.catalogue_obj = self.get_catalogue()
 
         logger.info("CLI %r" % options)
 
-        genome_dirs = find_genome_results(release_dir)
+        genome_dirs = find_genome_results(self.catalogue_dir)
         logger.debug(
             'Found {} genome dirs to upload'.format(len(genome_dirs)))
 
         [sanity_check_genome_output(d) for d in genome_dirs]
 
-        sanity_check_release_dir(release_dir)
+        sanity_check_catalogue_dir(self.catalogue_dir)
 
         for d in genome_dirs:
             self.upload_dir(d)
 
-        self.upload_release_files()
+        self.upload_catalogue_files()
 
-    def get_release(self, version, result_dir):
+    def get_catalogue(self, catalogue_series_id, catalogue_version, result_dir):
         base_result_dir = get_result_path(result_dir)
-        return emg_models.Release.objects \
+        series, _ = emg_models.GenomeCatalogueSeries.objects\
+            .using(self.database)\
+            .get_or_create(catalogue_series_id=catalogue_series_id,
+                           defaults={'name': catalogue_series_id})
+        catalogue, _ = emg_models.GenomeCatalogue.objects \
             .using(self.database) \
-            .get_or_create(version=version,
-                           result_directory=base_result_dir)[0]
+            .get_or_create(
+                version=catalogue_version,
+                catalogue_series=series,
+                defaults={
+                    'name': '{0} v{1}'.format(catalogue_series_id, catalogue_version),
+                    'result_directory': base_result_dir
+                })
+        return catalogue
 
     def upload_dir(self, directory):
         logger.info('Uploading dir: {}'.format(directory))
         genome, has_pangenome = self.create_genome(directory)
-        self.set_genome_release(genome)
+        self.set_genome_catalogue(genome)
 
         self.upload_cog_results(genome, directory, has_pangenome)
         self.upload_kegg_class_results(genome, directory, has_pangenome)
@@ -74,9 +88,9 @@ class Command(BaseCommand):
         self.upload_antismash_geneclusters(genome, directory)
         self.upload_genome_files(genome, has_pangenome)
 
-    def set_genome_release(self, genome):
+    def set_genome_catalogue(self, genome):
         try:
-            emg_models.ReleaseGenomes(release=self.release_obj, genome=genome).save(using=self.database)
+            genome.catalogues.add(genome_catalogue=self.catalogue_obj).save(using=self.database)
         except IntegrityError:
             pass
 
@@ -116,16 +130,7 @@ class Command(BaseCommand):
         geo_locations = data.get('geographic_range')
         data.pop('geographic_range', None)
 
-        data['result_directory'] = '/genomes/{}'.format(self.release_obj.version) + get_result_path(genome_dir)
-
-        # TODO: remove after Alex A. regenerates the genomes files.
-        gtype = data.get('genome_set', None)
-        if gtype and gtype.name == 'PATRIC/IMG' and 'genome_accession' in data:
-            ga = data.pop('genome_accession')
-            if '.' in ga:
-                data['patric_genome_accession'] = ga
-            else:
-                data['img_genome_accession'] = ga
+        data['result_directory'] = self.catalogue_dir + get_result_path(genome_dir)
 
         g, created = emg_models.Genome.objects.using(self.database).update_or_create(
             accession=data['accession'],
@@ -370,14 +375,15 @@ class Command(BaseCommand):
                                                                                 alias=defaults['alias'],
                                                                                 defaults=defaults)
 
-    def upload_release_files(self):
-        self.upload_release_file(self.release_obj,
-                                 'Phylogenetic tree of release genomes',
+    def upload_catalogue_files(self):
+        self.upload_catalogue_file(self.catalogue_obj,
+                                 'Phylogenetic tree of catalogue genomes',
                                  'json',
                                  'phylo_tree.json')
 
-    def upload_release_file(self, release, desc_label, file_format, filename):
+    def upload_catalogue_file(self, catalogue, desc_label, file_format, filename):
         defaults = self.prepare_file_upload(desc_label, file_format, filename, None, None)
-        emg_models.ReleaseDownload.objects.using(self.database).update_or_create(release=release,
-                                                                                 alias=defaults['alias'],
-                                                                                 defaults=defaults)
+        emg_models.GenomeCatalogueDownload.objects.using(self.database).update_or_create(
+            genome_catalogue=catalogue,
+            alias=defaults['alias'],
+            defaults=defaults)

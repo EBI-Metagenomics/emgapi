@@ -493,10 +493,6 @@ class GenomeSetAdmin(admin.ModelAdmin):
     ]
 
 
-class GenomeReleasesInline(admin.TabularInline):
-    model = emg_models.Genome.releases.through
-
-
 class GenomeDownloads(admin.TabularInline):
     model = emg_models.GenomeDownload
     raw_id_fields = [
@@ -549,7 +545,6 @@ class GenomeAdmin(admin.ModelAdmin):
     list_filter = [
         'genome_set',
         'catalogues',
-        'releases',
         'type',
     ]
     raw_id_fields = [
@@ -563,7 +558,6 @@ class GenomeAdmin(admin.ModelAdmin):
     ]
     inlines = [
         GenomeCatalogueGenomesInline,
-        GenomeReleasesInline,
         GenomeDownloads
     ]
 
@@ -582,21 +576,6 @@ class GenomeCatalogueAdmin(admin.ModelAdmin):
     inlines = [
         GenomeCatalogueGenomesInline
     ]
-
-@admin.register(emg_models.Release)
-class GenomeReleaseAdmin(admin.ModelAdmin):
-    readonly_fields = [
-        'id'
-    ]
-    list_display = [
-        'version',
-        'first_created',
-        'last_update'
-    ]
-    exclude = [
-        'genomes'
-    ]
-
 
 @admin.register(emg_models.KeggClass)
 class KeggClassAdmin(admin.ModelAdmin):
@@ -781,8 +760,8 @@ class GenomeDownloadAdmin(admin.ModelAdmin, BaseDownloadAdmin):
     ]
 
 
-@admin.register(emg_models.ReleaseDownload)
-class ReleaseDownloadAdmin(admin.ModelAdmin, BaseDownloadAdmin):
+@admin.register(emg_models.GenomeCatalogueDownload)
+class GenomeCatalogueDownloadAdmin(admin.ModelAdmin, BaseDownloadAdmin):
     list_display = BaseDownloadAdmin.list_display + [
-        'release'
+        'genome_catalogue'
     ]

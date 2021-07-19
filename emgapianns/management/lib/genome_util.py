@@ -7,7 +7,7 @@ import csv
 
 logger = logging.getLogger(__name__)
 
-EXPECTED_RELEASE_FILES = {'phylo_tree.json'}
+EXPECTED_CATALOGUE_FILES = {'phylo_tree.json'}
 
 
 def get_expected_genome_files(accession):
@@ -43,20 +43,20 @@ EXPECTED_PANGENOME_FILES = {
 EXPECTED_DIR_CONTENT = {'genome.json', 'genome'}
 
 
-def sanity_check_release_dir(d):
+def sanity_check_catalogue_dir(d):
     errors = set()
-    files = find_release_files(d)
+    files = find_catalogue_files(d)
     for f in files:
         try:
             logging.info('Loading file {}'.format(f))
             f = os.path.basename(f)
-            EXPECTED_RELEASE_FILES.remove(f)
+            EXPECTED_CATALOGUE_FILES.remove(f)
         except KeyError:
             logging.warning(
-                'Unexpected file {} found in release dir'.format(f))
+                'Unexpected file {} found in catalogue dir'.format(f))
 
-    for f in EXPECTED_RELEASE_FILES:
-        errors.add('Release file {} is missing from dir'.format(f))
+    for f in EXPECTED_CATALOGUE_FILES:
+        errors.add('Catalogue file {} is missing from dir'.format(f))
 
     if errors:
         for e in errors:
@@ -189,8 +189,8 @@ def find_genome_results(release_dir):
     return list(filter(os.path.isdir, listdir))
 
 
-def find_release_files(release_dir):
-    listdir = glob.glob(os.path.join(release_dir, '*'))
+def find_catalogue_files(catalogue_dir):
+    listdir = glob.glob(os.path.join(catalogue_dir, '*'))
     return list(filter(os.path.isfile, listdir))
 
 
