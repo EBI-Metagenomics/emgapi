@@ -1413,61 +1413,6 @@ class GenomeDownloadViewSet(emg_mixins.ListModelMixin,
 #         return response
 
 
-class GenomeCatalogueDownloadViewSet(emg_mixins.ListModelMixin,
-                                     viewsets.GenericViewSet):
-    serializer_class = emg_serializers.GenomeCatalogueDownloadSerializer
-
-    lookup_field = 'alias'
-    lookup_value_regex = '[^/]+'
-
-    def get_queryset(self):
-        try:
-            version = self.kwargs['version']
-        except ValueError:
-            raise Http404()
-        return emg_models.GenomeCatalogueDownload.objects.available(self.request) \
-            .filter(release__version=version)
-
-    def get_object(self):
-        return get_object_or_404(
-            self.get_queryset(), Q(alias=self.kwargs['alias'])
-        )
-
-    def get_serializer_class(self):
-        return super(GenomeCatalogueDownloadViewSet, self) \
-            .get_serializer_class()
-
-    def list(self, request, *args, **kwargs):
-        return super(GenomeCatalogueDownloadViewSet, self) \
-            .list(request, *args, **kwargs)
-
-    def retrieve(self, request, version, alias,
-                 *args, **kwargs):
-        """
-        Retrieves a downloadable file for the genome catalogue
-        Example:
-        ---
-        `
-        /genome-catalogues/human-gut-1/file/phylo_tree.json`
-        """
-        obj = self.get_object()
-        response = HttpResponse()
-        response['Content-Type'] = 'application/octet-stream'
-        response['Content-Disposition'] = \
-            'attachment; filename={0}'.format(alias)
-        if obj.subdir is not None:
-            response['X-Accel-Redirect'] = \
-                '/results/genomes{0}/{1}/{2}'.format(
-                    obj.genome_catalogue.result_directory, obj.subdir, obj.realname
-                )
-        else:
-            response['X-Accel-Redirect'] = \
-                '/results/genomes{0}/{1}'.format(
-                    obj.genome_catalogue.result_directory, obj.realname
-                )
-        return response
-
-
 class GenomeSetViewSet(mixins.RetrieveModelMixin,
                        emg_mixins.ListModelMixin,
                        viewsets.GenericViewSet):

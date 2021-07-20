@@ -15,7 +15,7 @@
 
 import logging
 
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.db.models import Prefetch, Count, F, Q
 from django.shortcuts import get_object_or_404
 
@@ -712,8 +712,8 @@ class BiomeGenomeCatalogueRelationshipViewSet(emg_mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class GenomeCatalogueGenomesRelationshipViewSet(emg_mixins.ListModelMixin,
-                                                emg_viewsets.BaseGenomeGenericViewSet):  # noqa
+class GenomeCatalogueGenomeRelationshipViewSet(emg_mixins.ListModelMixin,
+                                               emg_viewsets.BaseGenomeGenericViewSet):  # noqa
     lookup_field = 'catalogue_id'
 
     def get_queryset(self):
@@ -729,7 +729,7 @@ class GenomeCatalogueGenomesRelationshipViewSet(emg_mixins.ListModelMixin,
         return genomes
 
     def list(self, request, *args, **kwargs):
-        return super(GenomeCatalogueGenomesRelationshipViewSet, self) \
+        return super(GenomeCatalogueGenomeRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
 
 
@@ -1257,3 +1257,58 @@ class GenomeSetGenomes(emg_mixins.ListModelMixin,
     def list(self, request, *args, **kwargs):
         return super(GenomeSetGenomes, self) \
             .list(request, *args, **kwargs)
+
+
+class GenomeCatalogueDownloadRelationshipViewSet(emg_mixins.ListModelMixin,
+                                                 viewsets.GenericViewSet):
+    serializer_class = emg_serializers.GenomeCatalogueDownloadSerializer
+
+    lookup_field = 'alias'
+    lookup_value_regex = '[^/]+'
+
+    def get_queryset(self):
+        try:
+            genome_catalogue = self.kwargs['catalogue_id']
+        except ValueError:
+            raise Http404()
+        return emg_models.GenomeCatalogueDownload.objects \
+            .filter(genome_catalogue__catalogue_id=genome_catalogue)
+
+    def get_object(self):
+        return get_object_or_404(
+            self.get_queryset(), Q(alias=self.kwargs['alias'])
+        )
+
+    def get_serializer_class(self):
+        return super(GenomeCatalogueDownloadRelationshipViewSet, self) \
+            .get_serializer_class()
+
+    def list(self, request, *args, **kwargs):
+        return super(GenomeCatalogueDownloadRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
+
+    def retrieve(self, request, catalogue_id, alias,
+                 *args, **kwargs):
+        """
+        Retrieves a downloadable file for the genome catalogue
+        Example:
+        ---
+        `
+        /genome-catalogues/hgut-v1-0/downloads/phylo_tree.json`
+        """
+        obj = self.get_object()
+        response = HttpResponse()
+        response['Content-Type'] = 'application/octet-stream'
+        response['Content-Disposition'] = \
+            'attachment; filename={0}'.format(alias)
+        if obj.subdir is not None:
+            response['X-Accel-Redirect'] = \
+                '/results/genomes{0}/{1}/{2}'.format(
+                    obj.genome_catalogue.result_directory, obj.subdir, obj.realname
+                )
+        else:
+            response['X-Accel-Redirect'] = \
+                '/results/genomes{0}/{1}'.format(
+                    obj.genome_catalogue.result_directory, obj.realname
+                )
+        return response

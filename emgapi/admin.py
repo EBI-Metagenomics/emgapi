@@ -505,7 +505,7 @@ class GenomeDownloads(admin.TabularInline):
     ]
 
 
-class GenomeCatalogueGenomesInline(admin.TabularInline):
+class GenomeCatalogueGenomeInline(admin.TabularInline):
     model = emg_models.Genome.catalogues.through
     verbose_name = 'Genome — Catalogue relationship'
     verbose_name_plural = 'Genome — Catalogue relationships'
@@ -557,7 +557,7 @@ class GenomeAdmin(admin.ModelAdmin):
         'antismash_geneclusters'
     ]
     inlines = [
-        GenomeCatalogueGenomesInline,
+        GenomeCatalogueGenomeInline,
         GenomeDownloads
     ]
 
@@ -574,7 +574,7 @@ class GenomeCatalogueAdmin(admin.ModelAdmin):
         'biome',
     ]
     inlines = [
-        GenomeCatalogueGenomesInline
+        GenomeCatalogueGenomeInline
     ]
 
 @admin.register(emg_models.KeggClass)

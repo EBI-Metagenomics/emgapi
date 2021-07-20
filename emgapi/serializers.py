@@ -1536,19 +1536,6 @@ class GenomeSerializer(ExplicitFieldsModelSerializer):
     def get_antismash_geneclusters(self, obj):
         return None
 
-    # relationships
-    # releases = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
-    #     many=True,
-    #     read_only=True,
-    #     source='get_releases',
-    #     model=emg_models.Release,
-    #     related_link_self_view_name='emgapi_v1:release-detail',
-    #     related_link_self_lookup_field='version'
-    # )
-    #
-    # def get_releases(self, obj):
-    #     return obj.releases.all()
-
     biome = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name='emgapi_v1:biomes-detail',
@@ -1675,7 +1662,7 @@ class GenomeDownloadSerializer(BaseDownloadSerializer):
 
 class GenomeCatalogueDownloadSerializer(BaseDownloadSerializer):
     url = emg_fields.DownloadHyperlinkedIdentityField(
-        view_name='emgapi_v1:genome-catalogue-download-detail',
+        view_name='emgapi_v1:genome-catalogue-downloads-detail',
         lookup_field='alias',
     )
 
@@ -1763,9 +1750,9 @@ class GenomeCatalogueSerializer(ExplicitFieldsModelSerializer,
         read_only=True,
         source='get_downloads',
         model=emg_models.GenomeCatalogueDownload,
-        related_link_view_name='emgapi_v1:genome-catalogue-download-list',
-        related_link_url_kwarg='version',
-        related_link_lookup_field='version',
+        related_link_view_name='emgapi_v1:genome-catalogue-downloads-list',
+        related_link_url_kwarg='catalogue_id',
+        related_link_lookup_field='catalogue_id',
     )
 
     def get_downloads(self, obj):
@@ -1781,7 +1768,7 @@ class GenomeCatalogueSerializer(ExplicitFieldsModelSerializer,
             'genomes',
             'protein_catalogue_name',
             'protein_catalogue_description',
-            'download',
+            'downloads',
             'genome_count',
             'version'
         )

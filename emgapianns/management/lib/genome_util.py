@@ -195,5 +195,5 @@ def find_catalogue_files(catalogue_dir):
 
 
 def get_result_path(result_dir):
-    sub_path = os.path.normpath(result_dir).split(os.sep)[-1:]
+    sub_path = os.path.normpath(result_dir).split(os.sep)[-2:]
     return os.path.sep + os.path.join(*sub_path)

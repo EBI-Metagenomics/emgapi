@@ -1582,7 +1582,7 @@ class GenomeCatalogueSeries(models.Model):
 
 class GenomeCatalogueManager(models.Manager):
     def get_queryset(self):
-        return super(GenomeCatalogueManager, self).get_queryset().annotate(genome_count=Count('genomecataloguegenomes'))
+        return super(GenomeCatalogueManager, self).get_queryset().annotate(genome_count=Count('genomecataloguegenome'))
 
 
 class GenomeCatalogue(models.Model):
@@ -1608,6 +1608,7 @@ class GenomeCatalogue(models.Model):
 
     class Meta:
         unique_together = ('catalogue_series', 'version')
+        db_table = 'GENOME_CATALOGUE'
 
 
 class Genome(models.Model):
@@ -1695,9 +1696,7 @@ class Genome(models.Model):
     result_directory = models.CharField(
         db_column='RESULT_DIRECTORY', max_length=100, blank=True, null=True)
 
-    # releases = models.ManyToManyField('Release', through='ReleaseGenomes')
-
-    catalogues = models.ManyToManyField('GenomeCatalogue', through='GenomeCatalogueGenomes')
+    catalogues = models.ManyToManyField('GenomeCatalogue', through='GenomeCatalogueGenome')
 
     @property
     def geographic_range(self):
@@ -1732,7 +1731,7 @@ class GenomeGeographicLocation(models.Model):
         db_table = 'GENOME_GEOGRAPHIC_RANGE'
 
 
-class GenomeCatalogueGenomes(models.Model):
+class GenomeCatalogueGenome(models.Model):
 
     genome = models.ForeignKey('Genome', db_column='GENOME_ID', on_delete=models.CASCADE)
     genome_catalogue = models.ForeignKey('GenomeCatalogue', db_column='CATALOGUE_ID', on_delete=models.CASCADE)

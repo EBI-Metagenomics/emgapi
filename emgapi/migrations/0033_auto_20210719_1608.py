@@ -3,6 +3,43 @@
 from django.db import migrations, models
 import django.db.models.deletion
 
+downloads = (
+    ("Protein sequence FASTA file of the species representative", "Predicted CDS",),
+    ("DNA sequence FASTA file of the genome assembly of the species representative", "Nucleic Acid Sequence",),
+    ("DNA sequence FASTA file index of the genome assembly of the species representative", "Nucleic Acid Sequence index",),
+    ("Protein sequence of the accessory genome", "Protein sequence (accessory)",),
+    ("Protein sequence of the core genome", "Protein sequence (core)",),
+    ("eggNOG annotations of the protein coding sequences", "EggNog annotation",),
+    ("eggNOG annotations of the core and accessory genes", "EggNog annotation (core and accessory)",),
+    ("InterProScan annotation of the protein coding sequences", "InterProScan annotation",),
+    ("InterProScan annotations of the core and accessory genes", "InterProScan annotation (core and accessory)",),
+    ("Presence/absence binary matrix of the pan-genome across all conspecific genomes", "Gene Presence / Absence matrix",),
+    ("Protein sequence FASTA file of core genes (>=90% of the " +
+     "genomes with >=90% amino acid identity)", "Core predicted CDS",),
+    ("Protein sequence FASTA file of accessory genes", "Accessory predicted CDS",),
+    ("Protein sequence FASTA file of core and accessory genes", "Core & Accessory predicted CDS",),
+    ("Genome GFF file with various sequence annotations", "Genome Annotation"),
+    ("Phylogenetic tree of release genomes", 'Phylogenetic tree of release genomes')
+)
+
+
+def change_release_to_catalogue_download_description(apps, schema_editor):
+    DownloadDescriptionLabel = apps.get_model("emgapi",
+                                              "DownloadDescriptionLabel")
+    release_genomes_label = DownloadDescriptionLabel.objects.get(description='Phylogenetic tree of release genomes')
+    release_genomes_label.description_label = 'Phylogenetic tree of catalogue genomes'
+    release_genomes_label.description = 'Phylogenetic tree of catalogue genomes'
+    release_genomes_label.save()
+
+
+def unchange_release_to_catalogue_download_description(apps, schema_editor):
+    DownloadDescriptionLabel = apps.get_model("emgapi",
+                                              "DownloadDescriptionLabel")
+    catalogue_genomes_label = DownloadDescriptionLabel.objects.get(description='Phylogenetic tree of catalogue genomes')
+    catalogue_genomes_label.description_label = 'Phylogenetic tree of release genomes'
+    catalogue_genomes_label.description = 'Phylogenetic tree of release genomes'
+    catalogue_genomes_label.save()
+
 
 class Migration(migrations.Migration):
 
@@ -24,6 +61,9 @@ class Migration(migrations.Migration):
                 ('result_directory', models.CharField(db_column='RESULT_DIRECTORY', max_length=100)),
                 ('biome', models.ForeignKey(db_column='BIOME_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.biome')),
             ],
+            options={
+                'db_table': 'GENOME_CATALOGUE',
+            }
         ),
         migrations.CreateModel(
             name='GenomeCatalogueDownload',
@@ -47,7 +87,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='GenomeCatalogueGenomes',
+            name='GenomeCatalogueGenome',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
             ],
@@ -120,12 +160,12 @@ class Migration(migrations.Migration):
             name='ReleaseGenomes',
         ),
         migrations.AddField(
-            model_name='genomecataloguegenomes',
+            model_name='genomecataloguegenome',
             name='genome',
             field=models.ForeignKey(db_column='GENOME_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.genome'),
         ),
         migrations.AddField(
-            model_name='genomecataloguegenomes',
+            model_name='genomecataloguegenome',
             name='genome_catalogue',
             field=models.ForeignKey(db_column='CATALOGUE_ID', on_delete=django.db.models.deletion.CASCADE, to='emgapi.genomecatalogue'),
         ),
@@ -137,14 +177,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='genome',
             name='catalogues',
-            field=models.ManyToManyField(through='emgapi.GenomeCatalogueGenomes', to='emgapi.GenomeCatalogue'),
+            field=models.ManyToManyField(through='emgapi.GenomeCatalogueGenome', to='emgapi.GenomeCatalogue'),
         ),
         migrations.AlterUniqueTogether(
-            name='genomecataloguegenomes',
+            name='genomecataloguegenome',
             unique_together={('genome', 'genome_catalogue')},
         ),
         migrations.AlterUniqueTogether(
             name='genomecatalogue',
             unique_together={('catalogue_series', 'version')},
         ),
+        migrations.RunPython(
+            change_release_to_catalogue_download_description,
+            reverse_code=unchange_release_to_catalogue_download_description),
     ]

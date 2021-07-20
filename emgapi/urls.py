@@ -366,14 +366,14 @@ router.register(
 
 router.register(
     r'genome-catalogues/(?P<catalogue_id>[^/]+)/genomes',
-    views_relations.GenomeCatalogueGenomesRelationshipViewSet,
+    views_relations.GenomeCatalogueGenomeRelationshipViewSet,
     basename='genome-catalogue-genomes'
 )
 
 router.register(
     r'genome-catalogues/(?P<catalogue_id>[^/]+)/downloads',
-    views.GenomeCatalogueDownloadViewSet,
-    basename='genome-catalogue-download'
+    views_relations.GenomeCatalogueDownloadRelationshipViewSet,
+    basename='genome-catalogue-downloads'
 )
 
 router.register(
