@@ -164,8 +164,8 @@ router.register(
 )
 
 router.register(
-    r'studies/(?P<accession>[^/]+)'
-    r'/pipelines/(?P<release_version>[0-9\.]+)/file',
+    r'studies/<str:accession>'
+    r'/pipelines/<int:release_version>/file',
     views_relations.StudiesDownloadViewSet,
     basename='studydownload'
 )
