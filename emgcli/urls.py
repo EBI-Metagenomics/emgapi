@@ -17,7 +17,6 @@
 from django.contrib import admin
 
 from django.urls import include, path
-from django.conf.urls import url
 from django.conf import settings
 from django.contrib.auth import views
 from django.views.generic import RedirectView
