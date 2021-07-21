@@ -22,3 +22,12 @@ emg:
   mongodb:
     db: emg
     host: mongodb
+
+  documentation:
+    title: 'MGnify API'
+    external_docs_url: 'https://emg-docs.readthedocs.io/en/latest/api.html'
+    external_docs_description: 'MGnify documentation – API section'
+    description:
+      >
+      General MGnify documentation is available on Read the Docs:
+      https://emg-docs.readthedocs.io/

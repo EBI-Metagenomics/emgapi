@@ -39,6 +39,8 @@ from rest_framework.views import APIView
 
 from rest_framework_csv.misc import Echo
 
+from drf_spectacular.views import extend_schema
+
 from . import models as emg_models
 from . import serializers as emg_serializers
 from . import mixins as emg_mixins
