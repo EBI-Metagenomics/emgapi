@@ -25,7 +25,7 @@ from django.views.generic.base import TemplateView
 from rest_framework_jwt.views import obtain_jwt_token
 from rest_framework_jwt.views import verify_jwt_token
 
-from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from emgapi.urls import router as emg_router
 from emgapi.urls import mydata_router, utils_router, urlpatterns as emgapi_urlpatterns 

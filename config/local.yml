@@ -29,5 +29,5 @@ emg:
     external_docs_description: 'MGnify documentation – API section'
     description:
       >
-      General MGnify documentation is available on Read the Docs:
-      https://emg-docs.readthedocs.io/
+        General MGnify documentation is available on Read the Docs:
+        https://emg-docs.readthedocs.io/
