@@ -16,7 +16,7 @@
 
 from django.contrib import admin
 
-from django.urls import include, path
+from django.urls import include, path, re_path
 from django.conf import settings
 from django.contrib.auth import views
 from django.views.generic import RedirectView
@@ -68,10 +68,10 @@ urlpatterns += [
 # API URL routing.
 urlpatterns += [
 
-    path(r'', RedirectView.as_view(
+    re_path(r'^$', RedirectView.as_view(
         pattern_name='emgapi_v1:api-root', permanent=False)),
 
-    path(r'v1/', include((router.urls, 'emgapi_v1'), namespace='emgapi_v1')),
+    re_path(r'^v1/', include((router.urls, 'emgapi_v1'), namespace='emgapi_v1')),
 
     path(r'v1/utils/token/obtain', obtain_jwt_token,
         name='obtain_jwt_token_v1'),
@@ -83,7 +83,7 @@ urlpatterns += [
 urlpatterns += mongo_urlpatterns
 urlpatterns += emgapi_urlpatterns
 urlpatterns += [
-    path(r'schema/', SpectacularAPIView.as_view(), name='schema'),
+    path(r'schema/', SpectacularAPIView.as_view(api_version='emgapi_v1'), name='schema'),
     path(r'docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]
 

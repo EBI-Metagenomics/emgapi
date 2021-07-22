@@ -90,37 +90,37 @@ router.register(
 )
 
 router.register(
-    r'pipeline-tools/<str:tool_name>',
+    r'pipeline-tools/(?P<tool_name>[^/]+)',
     views.PipelineToolVersionViewSet,
     basename='pipeline-tools-version'
 )
 
 router.register(
-    r'analyses/<str:accession>',
+    r'analyses/(?P<accession>[^/]+)',
     views.AnalysisQCChartViewSet,
     basename='analysis-qcchart'
 )
 
 router.register(
-    r'analyses/<str:accession>/krona',
+    r'analyses/(?P<accession>[^/]+)/krona',
     views.KronaViewSet,
     basename='analysis-krona'
 )
 
 router.register(
-    r'analyses/<str:accession>/downloads',
+    r'analyses/(?P<accession>[^/]+)/downloads',
     views.AnalysisResultDownloadsViewSet,
     basename='analysisdownload'
 )
 
 router.register(
-    r'analyses/<str:accession>/file',
+    r'analyses/(?P<accession>[^/]+)/file',
     views.AnalysisResultDownloadViewSet,
     basename='analysisdownload'
 )
 
 router.register(
-    r'studies/<str:accession>/downloads',
+    r'studies/(?P<accession>[^/]+)/downloads',
     views.StudiesDownloadsViewSet,
     basename='studydownload'
 )
@@ -128,98 +128,98 @@ router.register(
 
 # relationship views
 router.register(
-    r'studies/<str:accession>/analyses',
+    r'studies/(?P<accession>[^/]+)/analyses',
     views_relations.StudyAnalysisResultViewSet,
     basename='studies-analyses'
 )
 
 router.register(
-    r'super-studies/<slug:super_study_id>/flagship-studies',
+    r'super-studies/(?P<super_study_id>[^/]+)/flagship-studies',
     views_relations.SuperStudyFlagshipStudiesViewSet,
     basename='super-studies-flagship-studies'
 )
 
 router.register(
-    r'super-studies/<slug:super_study_id>/related-studies',
+    r'super-studies/(?P<super_study_id>[^/]+)/related-studies',
     views_relations.SuperStudyRelatedStudiesViewSet,
     basename='super-studies-related-studies'
 )
 
 router.register(
-    r'runs/<str:accession>/analyses',
+    r'runs/(?P<accession>[^/]+)/analyses',
     views_relations.RunAnalysisViewSet,
     basename='runs-analyses'
 )
 
 router.register(
-    r'runs/<str:accession>/assemblies',
+    r'runs/(?P<accession>[^/]+)/assemblies',
     views_relations.RunAssemblyViewSet,
     basename='runs-assemblies'
 )
 
 router.register(
-    r'assemblies/<str:accession>/analyses',
+    r'assemblies/(?P<accession>[^/]+)/analyses',
     views_relations.AssemblyAnalysisViewSet,
     basename='assemblies-analyses'
 )
 
 router.register(
-    r'studies/<str:accession>'
-    r'/pipelines/<int:release_version>/file',
+    r'studies/(?P<accession>[^/]+)'
+    r'/pipelines/(?P<release_version>[0-9\.]+)/file',
     views_relations.StudiesDownloadViewSet,
     basename='studydownload'
 )
 
 router.register(
-    r'biomes/<str:lineage>/children',
+    r'biomes/(?P<lineage>[^/]+)/children',
     views_relations.BiomeTreeViewSet,
     basename='biomes-children'
 )
 
 router.register(
-    r'biomes/<str:lineage>/studies',
+    r'biomes/(?P<lineage>[^/]+)/studies',
     views_relations.BiomeStudyRelationshipViewSet,
     basename='biomes-studies'
 )
 
 router.register(
-    r'biomes/<str:lineage>/samples',
+    r'biomes/(?P<lineage>[^/]+)/samples',
     views_relations.BiomeSampleRelationshipViewSet,
     basename='biomes-samples'
 )
 
 router.register(
-    r'biomes/<str:lineage>/genomes',
+    r'biomes/(?P<lineage>[^/]+)/genomes',
     views_relations.BiomeGenomeRelationshipViewSet,
     basename='biomes-genomes'
 )
 
 router.register(
-    r'publications/<int:pubmed_id>/studies',
+    r'publications/(?P<pubmed_id>[0-9\.]+)/studies',
     views_relations.PublicationStudyRelationshipViewSet,
     basename='publications-studies'
 )
 
 router.register(
-    r'studies/<str:accession>/geocoordinates',
+    r'studies/(?P<accession>[^/]+)/geocoordinates',
     views_relations.StudyGeoCoordinateRelationshipViewSet,
     basename='studies-geoloc'
 )
 
 router.register(
-    r'studies/<str:accession>/studies',
+    r'studies/(?P<accession>[a-zA-Z0-9]+)/studies',
     views_relations.StudyStudyRelationshipViewSet,
     basename='studies-studies'
 )
 
 router.register(
-    r'studies/<str:accession>/samples',
+    r'studies/(?P<accession>[^/]+)/samples',
     views_relations.StudySampleRelationshipViewSet,
     basename='studies-samples'
 )
 
 router.register(
-    r'studies/<str:accession>/publications',
+    r'studies/(?P<accession>[^/]+)/publications',
     views_relations.StudyPublicationRelationshipViewSet,
     basename='studies-publications'
 )
@@ -231,61 +231,61 @@ router.register(
 # )
 
 router.register(
-    r'pipelines/<int:release_version>/samples',
+    r'pipelines/(?P<release_version>[0-9\.]+)/samples',
     views_relations.PipelineSampleRelationshipViewSet,
     basename='pipelines-samples'
 )
 
 router.register(
-    r'pipelines/<int:release_version>/analyses',
+    r'pipelines/(?P<release_version>[0-9\.]+)/analyses',
     views_relations.PipelineAnalysisRelationshipViewSet,
     basename='pipelines-analyses'
 )
 
 router.register(
-    r'pipelines/<int:release_version>/tools',
+    r'pipelines/(?P<release_version>[0-9\.]+)/tools',
     views_relations.PipelinePipelineToolRelationshipViewSet,
     basename='pipelines-pipeline-tools'
 )
 
 router.register(
-    r'experiment-types/<str:experiment_type>/samples',
+    r'experiment-types/(?P<experiment_type>[^/]+)/samples',
     views_relations.ExperimentTypeSampleRelationshipViewSet,
     basename='experiment-types-samples'
 )
 
 router.register(
-    r'publications/<int:pubmed_id>/samples',
+    r'publications/(?P<pubmed_id>[0-9\.]+)/samples',
     views_relations.PublicationSampleRelationshipViewSet,
     basename='publications-samples'
 )
 
 router.register(
-    r'samples/<str:accession>/runs',
+    r'samples/(?P<accession>[^/]+)/runs',
     views_relations.SampleRunRelationshipViewSet,
     basename='samples-runs'
 )
 
 router.register(
-    r'experiment-types/<str:experiment_type>/runs',
+    r'experiment-types/(?P<experiment_type>[^/]+)/runs',
     views_relations.ExperimentTypeRunRelationshipViewSet,
     basename='experiment-types-runs'
 )
 
 router.register(
-    r'experiment-types/<str:experiment_type>/analyses',
+    r'experiment-types/(?P<experiment_type>[^/]+)/analyses',
     views_relations.ExperimentTypeAnalysisRelationshipViewSet,
     basename='experiment-types-analyses'
 )
 
 router.register(
-    r'samples/<str:accession>/studies',
+    r'samples/(?P<accession>[^/]+)/studies',
     views_relations.SampleStudiesRelationshipViewSet,
     basename='samples-studies'
 )
 
 router.register(
-    r'samples/<str:accession>/metadata',
+    r'samples/(?P<accession>[^/]+)/metadata',
     views_relations.SampleMetadataRelationshipViewSet,
     basename='samples-metadata'
 )
@@ -311,43 +311,43 @@ router.register(
 )
 
 router.register(
-    r'genomes/<str:accession>/cogs',
+    r'genomes/(?P<accession>[^/]+)/cogs',
     views_relations.GenomeCogsRelationshipsViewSet,
     basename='genome-cog'
 )
 
 router.register(
-    r'genomes/<str:accession>/kegg-class',
+    r'genomes/(?P<accession>[^/]+)/kegg-class',
     views_relations.GenomeKeggClassRelationshipsViewSet,
     basename='genome-kegg-class'
 )
 
 router.register(
-    r'genomes/<str:accession>/kegg-module',
+    r'genomes/(?P<accession>[^/]+)/kegg-module',
     views_relations.GenomeKeggModuleRelationshipsViewSet,
     basename='genome-kegg-module'
 )
 
 router.register(
-    r'genomes/<str:accession>/kegg-class',
+    r'genomes/(?P<accession>[^/]+)/kegg-class',
     views_relations.GenomeKeggClassRelationshipsViewSet,
     basename='genome-kegg-class'
 )
 
 router.register(
-    r'genomes/<str:accession>/antismash-genecluster',
+    r'genomes/(?P<accession>[^/]+)/antismash-genecluster',
     views_relations.GenomeAntiSmashGeneClustersRelationshipsViewSet,
     basename='genome-antismash-genecluster'
 )
 
 router.register(
-    r'genomes/<str:accession>/downloads',
+    r'genomes/(?P<accession>[^/]+)/downloads',
     views.GenomeDownloadViewSet,
     basename='genome-download'
 )
 
 router.register(
-    r'genomes/<str:accession>/releases',
+    r'genomes/(?P<accession>[^/]+)/releases',
     views_relations.GenomeReleasesViewSet,
     basename='genome-releases'
 )
@@ -357,13 +357,13 @@ router.register(
     basename='release'
 )
 router.register(
-    r'release/<str:version>/genomes',
+    r'release/(?P<version>[^/]+)/genomes',
     views_relations.ReleaseGenomesViewSet,
     basename='release-genomes'
 )
 
 router.register(
-    r'release/<str:version>/downloads',
+    r'release/(?P<version>[^/]+)/downloads',
     views.ReleaseDownloadViewSet,
     basename='release-download'
 )
@@ -375,7 +375,7 @@ router.register(
 )
 
 router.register(
-    r'genomeset/<str:name>/genomes',
+    r'genomeset/(?P<name>[^/]+)/genomes',
     views_relations.GenomeSetGenomes,
     basename='genomeset-genomes'
 )
@@ -408,7 +408,7 @@ urlpatterns = [
     path(r'v1/banner-message',
         views.BannerMessageView.as_view(),
         name='banner-message'),
-    path('v1/ebi-search-download/<str:domain>',
+    path(r'v1/ebi-search-download/<str:domain>',
         views.EBISearchCSVDownload.as_view(),
         name='ebi-search-download')
 ]
