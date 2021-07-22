@@ -2,7 +2,7 @@ emg:
   databases:
     default:
       ENGINE: 'django.db.backends.mysql'
-      NAME: 'emg'
+      NAME: 'emg_tests'
       USER: 'root'
       HOST: mysql
       PORT: 3306
