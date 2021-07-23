@@ -15,9 +15,7 @@ COPY requirements* /opt/emgapi/
 RUN pip3 install "git+git://github.com/EBI-Metagenomics/django-rest-framework-json-api@develop#egg=djangorestframework-jsonapi" && \
     pip3 install -r /opt/emgapi/requirements-dev.txt && \
     pip3 install -r /opt/emgapi/requirements-test.txt && \
-    pip3 install -r /opt/emgapi/requirements-admin.txt && \
-    pip3 install -U git+git://github.com/EBI-Metagenomics/emg-backlog-schema.git && \
-	pip3 install -U git+git://github.com/EBI-Metagenomics/ena-api-handler.git
+    pip3 install -r /opt/emgapi/requirements-admin.txt
 
 ENV PYTHONPATH="${PYTHONPATH}:/opt/emgapi/emgcli"
 

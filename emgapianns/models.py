@@ -322,8 +322,8 @@ class Organism(mongoengine.Document):
     pipeline_version = mongoengine.StringField(required=True)
 
     meta = {
+        'auto_create_index': False,
         'ordering': ['lineage'],
-        'auto_create_index': True,
         'indexes': [
             'lineage',
         ]

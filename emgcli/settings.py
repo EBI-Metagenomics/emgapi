@@ -197,6 +197,8 @@ INSTALLED_APPS = [
     'emgapi',
     'emgena',
     'emgapianns',
+    # schema
+    'drf_spectacular',
 ]
 
 if ADMIN:
@@ -374,8 +376,9 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
-   ],
-
+    ],
+    'DEFAULT_SCHEMA_CLASS':
+        'drf_spectacular.openapi.AutoSchema',
 }
 
 JSON_API_FORMAT_KEYS = 'dasherize'
@@ -562,6 +565,17 @@ try:
     EMG_DESC = EMG_CONF['emg']['documentation']['description']
 except KeyError:
     EMG_DESC = 'MGnify API'
+
+SPECTACULAR_SETTINGS = {
+    'SCHEMA_PATH_PREFIX': '/v1/',
+    'TITLE': EMG_TITLE,
+    'DESCRIPTION': EMG_DESC,
+    'VERSION': 'v1',
+    'EXTERNAL_DOCS': {
+        'description': EMG_CONF.get('emg', {}).get('documentation', {}).get('external_docs_description'),
+        'url': EMG_CONF.get('emg', {}).get('documentation', {}).get('external_docs_url')
+    },
+}
 
 # MongoDB
 MONGO_CONF = EMG_CONF['emg']['mongodb']

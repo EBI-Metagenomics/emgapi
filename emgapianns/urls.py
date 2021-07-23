@@ -13,9 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from django.conf.urls import url
-
+from django.urls import re_path
 from rest_framework import routers
 
 from rest_framework_mongoengine import routers as m_routers
@@ -216,7 +214,7 @@ router.register(
 )
 
 urlpatterns = [
-    url(r'^v1/analyses/(?P<accession>[^/]+)/taxonomy/overview',
+    re_path(r'v1/analyses/(?P<accession>[^/]+)/taxonomy/overview',
         m_views.AnalysisTaxonomyOverview.as_view(),
         name='analysis-taxonomy-overview'),
 ]
