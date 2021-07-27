@@ -1313,15 +1313,19 @@ class GenomeDownloadViewSet(emg_mixins.ListModelMixin,
         response['Content-Disposition'] = \
             'attachment; filename={0}'.format(alias)
         if obj.subdir is not None:
-            response['X-Accel-Redirect'] = \
-                '/results{0}/{1}/{2}'.format(
-                    obj.genome.result_directory, obj.subdir, obj.realname
-                )
+            path_from_results = '{0}/{1}/{2}'.format(
+                obj.genome.result_directory, obj.subdir, obj.realname
+            )
         else:
-            response['X-Accel-Redirect'] = \
-                '/results{0}/{1}'.format(
-                    obj.genome.result_directory, obj.realname
-                )
+            path_from_results = '{0}/{1}'.format(
+                obj.genome.result_directory, obj.realname
+            )
+        response['X-Accel-Redirect'] = '/results{0}'.format(path_from_results)
+
+        # Workaround for non-nginx hosts, like running locally in docker
+        if settings.DOWNLOADS_BYPASS_NGINX:
+            with open(path_from_results, 'r') as file:
+                response.content = file.read()
         return response
 
 

@@ -168,6 +168,12 @@ try:
 except KeyError:
     DEBUG = False
 
+# Serve downloads via Django when running locally in docker (without Nginx)
+try:
+    DOWNLOADS_BYPASS_NGINX = EMG_CONF['emg']['downloads_bypass_nginx']
+except KeyError:
+    DOWNLOADS_BYPASS_NGINX = False
+
 # Admin panel
 try:
     ADMIN = EMG_CONF['emg']['admin']
