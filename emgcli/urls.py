@@ -84,7 +84,7 @@ urlpatterns += mongo_urlpatterns
 urlpatterns += emgapi_urlpatterns
 urlpatterns += [
     path(r'schema/', SpectacularAPIView.as_view(api_version='emgapi_v1'), name='schema'),
-    path(r'docs/', SpectacularSwaggerView.as_view(url_name='schema', url=settings.EMG_URL), name='swagger-ui'),
+    path(r'docs/', SpectacularSwaggerView.as_view(url_name='schema', url=settings.EMG_URL + '/schema'), name='swagger-ui'),
 ]
 
 # admin
