@@ -14,6 +14,7 @@
 # limitations under the License.
 from django.conf.urls import url
 from django.conf import settings
+from django.urls import path
 
 from rest_framework import routers
 
@@ -410,10 +411,10 @@ router.register(
 )
 
 urlpatterns = [
-    url(r'^v1/banner-message',
+    path(r'v1/banner-message',
         views.BannerMessageView.as_view(),
         name='banner-message'),
-    url(r'^v1/ebi-search-download/(?P<domain>[^/]+)',
+    path(r'v1/ebi-search-download/<str:domain>',
         views.EBISearchCSVDownload.as_view(),
         name='ebi-search-download'),
     url(r'^v1/genomes-search/status/(?P<job_id>[^/]+)',
@@ -426,7 +427,7 @@ urlpatterns = [
 
 if settings.ADMIN:
     urlpatterns += [
-        url(r'^v1/biom-prediction',
+        path(r'v1/biom-prediction',
             views.BiomePrediction.as_view(),
             name='biom-prediction')
     ]

@@ -30,13 +30,12 @@ djangorestframework==3.12.4
 django-filter==2.4.0
 djangorestframework-jwt~=1.11.0
 django-cors-headers==3.7.0
-openapi-codec
 cx_Oracle~=6.2.1
 
 djangorestframework-csv==2.1.1
 
 # schema
-coreapi~=2.3.0
+drf-spectacular==0.17.2
 
 # mongo
 mongoengine==0.23.1
