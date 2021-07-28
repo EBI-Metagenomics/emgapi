@@ -1745,45 +1745,6 @@ class ReleaseManagerQuerySet(BaseQuerySet):
     pass
 
 
-# class ReleaseManager(models.Manager):
-#
-#     def get_queryset(self):
-#         qs = ReleaseManagerQuerySet(self.model, using=self._db)
-#         return qs.annotate(genome_count=Count('genomes'))
-#
-#     def available(self, request):
-#         return self.get_queryset().available(request)
-
-#
-# class Release(models.Model):
-#     """Genome (MAGs) Release
-#     """
-#     version = models.CharField(db_column='VERSION', max_length=20)
-#     last_update = models.DateTimeField(db_column='LAST_UPDATE', auto_now=True)
-#     first_created = models.DateTimeField(db_column='FIRST_CREATED', auto_now_add=True)
-#
-#     genomes = models.ManyToManyField(Genome, through='ReleaseGenomes')
-#     result_directory = models.CharField(db_column='RESULT_DIRECTORY', max_length=100)
-#
-#     objects = ReleaseManager()
-#
-#     class Meta:
-#         db_table = 'RELEASE'
-#
-#     def __str__(self):
-#         return self.version
-
-#
-# class ReleaseGenomes(models.Model):
-#
-#     genome = models.ForeignKey('Genome', db_column='GENOME_ID', on_delete=models.CASCADE)
-#     release = models.ForeignKey('Release', db_column='RELEASE_ID', on_delete=models.CASCADE)
-#
-#     class Meta:
-#         db_table = 'RELEASE_GENOMES'
-#         unique_together = ('genome', 'release')
-
-
 class GenomeCogCounts(models.Model):
 
     genome = models.ForeignKey(Genome, db_column='GENOME_ID',
@@ -1880,23 +1841,6 @@ class GenomeDownload(BaseDownload):
         db_table = 'GENOME_DOWNLOAD'
         unique_together = (('realname', 'alias', 'genome'),)
         ordering = ('group_type', 'alias')
-
-
-# class ReleaseDownload(BaseDownload):
-#     release = models.ForeignKey('Release',
-#                                 db_column='RELEASE_ID',
-#                                 on_delete=models.CASCADE)
-#
-#     @property
-#     def accession(self):
-#         return self.release.version
-#
-#     objects = BaseDownloadManager(['release'])
-#
-#     class Meta:
-#         db_table = 'RELEASE_DOWNLOAD'
-#         unique_together = (('realname', 'alias'),)
-#         ordering = ('group_type', 'alias')
 
 
 class GenomeCatalogueDownload(BaseDownload):

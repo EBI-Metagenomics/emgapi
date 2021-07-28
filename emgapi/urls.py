@@ -372,7 +372,7 @@ router.register(
 
 router.register(
     r'genome-catalogues/(?P<catalogue_id>[^/]+)/downloads',
-    views_relations.GenomeCatalogueDownloadRelationshipViewSet,
+    views.GenomeCatalogueDownloadViewSet,
     basename='genome-catalogue-downloads'
 )
 

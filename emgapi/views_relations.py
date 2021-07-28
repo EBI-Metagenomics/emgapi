@@ -15,8 +15,8 @@
 
 import logging
 
-from django.http import HttpResponse, Http404
-from django.db.models import Prefetch, Count, F, Q
+from django.http import HttpResponse
+from django.db.models import Prefetch, Count, Q
 from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -545,33 +545,6 @@ class ExperimentTypeAnalysisRelationshipViewSet(  # noqa
         """
         return super(ExperimentTypeAnalysisRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
-
-
-# class PipelineStudyRelationshipViewSet(emg_mixins.ListModelMixin,
-#                                        emg_viewsets.BaseStudyGenericViewSet):  # noqa
-#
-#     lookup_field = 'release_version'
-#
-#     def get_queryset(self):
-#         pipeline = get_object_or_404(
-#             emg_models.Pipeline,
-#             release_version=self.kwargs[self.lookup_field])
-#         queryset = emg_models.Study.objects \
-#             .available(self.request) \
-#             .filter(samples__analysis__pipeline=pipeline)
-#         return queryset
-#
-#     def list(self, request, *args, **kwargs):
-#         """
-#         Retrieves list of samples for the given pipeline version
-#         Example:
-#         ---
-#         `/pipeline/3.0/studies` retrieve linked studies
-#
-#         `/pipeline/3.0/studies?include=samples` with samples
-#         """
-#         return super(PipelineStudyRelationshipViewSet, self) \
-#             .list(request, *args, **kwargs)
 
 
 class ExperimentTypeSampleRelationshipViewSet(emg_mixins.ListModelMixin,
@@ -1197,31 +1170,6 @@ class GenomeAntiSmashGeneClustersRelationshipsViewSet(emg_mixins.ListModelMixin,
         return queryset
 
 
-# class ReleaseGenomesViewSet(emg_mixins.ListModelMixin,
-#                             emg_viewsets.BaseGenomeGenericViewSet):  # noqa
-#     lookup_field = 'version'
-#
-#     def get_queryset(self):
-#         genome_version = self.kwargs[self.lookup_field]
-#         if genome_version == 'all':
-#             genomes = emg_models.Genome.objects.all()
-#         else:
-#             if genome_version == 'latest':
-#                 genome_release = emg_models.Release.objects \
-#                     .order_by('-version').last()
-#             else:
-#                 genome_release = get_object_or_404(
-#                     emg_models.Release,
-#                     version=genome_version)
-#             genomes = genome_release.genomes.all()
-#
-#         return genomes
-#
-#     def list(self, request, *args, **kwargs):
-#         return super(ReleaseGenomesViewSet, self) \
-#             .list(request, *args, **kwargs)
-
-
 class GenomeGenomeCataloguesViewSet(emg_mixins.ListModelMixin,
                                     viewsets.GenericViewSet):
     lookup_field = 'accession'
@@ -1259,56 +1207,3 @@ class GenomeSetGenomes(emg_mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class GenomeCatalogueDownloadRelationshipViewSet(emg_mixins.ListModelMixin,
-                                                 viewsets.GenericViewSet):
-    serializer_class = emg_serializers.GenomeCatalogueDownloadSerializer
-
-    lookup_field = 'alias'
-    lookup_value_regex = '[^/]+'
-
-    def get_queryset(self):
-        try:
-            genome_catalogue = self.kwargs['catalogue_id']
-        except ValueError:
-            raise Http404()
-        return emg_models.GenomeCatalogueDownload.objects \
-            .filter(genome_catalogue__catalogue_id=genome_catalogue)
-
-    def get_object(self):
-        return get_object_or_404(
-            self.get_queryset(), Q(alias=self.kwargs['alias'])
-        )
-
-    def get_serializer_class(self):
-        return super(GenomeCatalogueDownloadRelationshipViewSet, self) \
-            .get_serializer_class()
-
-    def list(self, request, *args, **kwargs):
-        return super(GenomeCatalogueDownloadRelationshipViewSet, self) \
-            .list(request, *args, **kwargs)
-
-    def retrieve(self, request, catalogue_id, alias,
-                 *args, **kwargs):
-        """
-        Retrieves a downloadable file for the genome catalogue
-        Example:
-        ---
-        `
-        /genome-catalogues/hgut-v1-0/downloads/phylo_tree.json`
-        """
-        obj = self.get_object()
-        response = HttpResponse()
-        response['Content-Type'] = 'application/octet-stream'
-        response['Content-Disposition'] = \
-            'attachment; filename={0}'.format(alias)
-        if obj.subdir is not None:
-            response['X-Accel-Redirect'] = \
-                '/results/genomes{0}/{1}/{2}'.format(
-                    obj.genome_catalogue.result_directory, obj.subdir, obj.realname
-                )
-        else:
-            response['X-Accel-Redirect'] = \
-                '/results/genomes{0}/{1}'.format(
-                    obj.genome_catalogue.result_directory, obj.realname
-                )
-        return response

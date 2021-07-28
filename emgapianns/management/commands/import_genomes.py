@@ -9,7 +9,8 @@ from emgapi import models as emg_models
 
 from ..lib.genome_util import sanity_check_genome_output, \
     sanity_check_catalogue_dir, find_genome_results, \
-    get_result_path, read_tsv_w_headers, read_json
+    get_genome_result_path, get_catalogue_result_path, \
+    read_tsv_w_headers, read_json
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +73,7 @@ class Command(BaseCommand):
         self.upload_catalogue_files()
 
     def get_catalogue(self, catalogue_series_id, catalogue_version, gold_biome):
-        base_result_dir = get_result_path(self.catalogue_dir)
+        base_result_dir = get_catalogue_result_path(self.catalogue_dir)
         series, _ = emg_models.GenomeCatalogueSeries.objects\
             .using(self.database)\
             .get_or_create(catalogue_series_id=catalogue_series_id,
@@ -145,7 +146,7 @@ class Command(BaseCommand):
         geo_locations = data.get('geographic_range')
         data.pop('geographic_range', None)
 
-        data['result_directory'] = self.catalogue_dir + get_result_path(genome_dir)
+        data['result_directory'] = get_genome_result_path(genome_dir)
 
         g, created = emg_models.Genome.objects.using(self.database).update_or_create(
             accession=data['accession'],

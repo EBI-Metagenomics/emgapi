@@ -194,6 +194,13 @@ def find_catalogue_files(catalogue_dir):
     return list(filter(os.path.isfile, listdir))
 
 
-def get_result_path(result_dir):
-    sub_path = os.path.normpath(result_dir).split(os.sep)[-2:]
+def get_catalogue_result_path(result_dir):
+    # genomes folder + catalogue series identifier + version label
+    sub_path = os.path.normpath(result_dir).split(os.sep)[-3:]
+    return os.path.sep + os.path.join(*sub_path)
+
+
+def get_genome_result_path(result_dir):
+    # genomes folder + catalogue series identifier + version label + genome identifier
+    sub_path = os.path.normpath(result_dir).split(os.sep)[-4:]
     return os.path.sep + os.path.join(*sub_path)

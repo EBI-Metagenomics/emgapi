@@ -24,7 +24,7 @@ import requests
 
 from django.conf import settings
 from django.db.models import Prefetch, Count, Q
-from django.http import Http404, HttpResponseBadRequest, HttpResponse, StreamingHttpResponse
+from django.http import Http404, HttpResponseBadRequest, StreamingHttpResponse
 from django.middleware import csrf
 from django.shortcuts import get_object_or_404
 from django.views.decorators.clickjacking import xframe_options_exempt
@@ -961,21 +961,17 @@ class AnalysisResultDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
         ERR1701760_MERGED_FASTQ_otu_table_hdf5.biom`
         """
         obj = self.get_object()
-        response = HttpResponse()
-        response['Content-Type'] = 'application/octet-stream'
-        response['Content-Disposition'] = \
-            'attachment; filename={0}'.format(alias)
         if obj.subdir is not None:
-            response['X-Accel-Redirect'] = \
+            file_path = \
                 '/results{0}/{1}/{2}'.format(
                     obj.job.result_directory, obj.subdir, obj.realname
                 )
         else:
-            response['X-Accel-Redirect'] = \
+            file_path = \
                 '/results{0}/{1}'.format(
                     obj.job.result_directory, obj.realname
                 )
-        return response
+        return emg_utils.prepare_results_file_download_response(file_path, alias)
 
 
 class PipelineViewSet(mixins.RetrieveModelMixin,
@@ -1297,7 +1293,7 @@ class GenomeDownloadViewSet(emg_mixins.ListModelMixin,
 
     def list(self, request, *args, **kwargs):
         """
-        Retrieves list of static summary files
+        Retrieves list of genome downloads
         Example:
         ---
         `/biomes`
@@ -1308,25 +1304,15 @@ class GenomeDownloadViewSet(emg_mixins.ListModelMixin,
     def retrieve(self, request, accession, alias,
                  *args, **kwargs):
         obj = self.get_object()
-        response = HttpResponse()
-        response['Content-Type'] = 'application/octet-stream'
-        response['Content-Disposition'] = \
-            'attachment; filename={0}'.format(alias)
         if obj.subdir is not None:
-            path_from_results = '{0}/{1}/{2}'.format(
+            file_path = '{0}/{1}/{2}'.format(
                 obj.genome.result_directory, obj.subdir, obj.realname
             )
         else:
-            path_from_results = '{0}/{1}'.format(
+            file_path = '{0}/{1}'.format(
                 obj.genome.result_directory, obj.realname
             )
-        response['X-Accel-Redirect'] = '/results{0}'.format(path_from_results)
-
-        # Workaround for non-nginx hosts, like running locally in docker
-        if settings.DOWNLOADS_BYPASS_NGINX:
-            with open(path_from_results, 'r') as file:
-                response.content = file.read()
-        return response
+        return emg_utils.prepare_results_file_download_response(file_path, alias)
 
 
 class GenomeSetViewSet(mixins.RetrieveModelMixin,
@@ -1361,6 +1347,65 @@ class GenomeSetViewSet(mixins.RetrieveModelMixin,
         if self.action == 'retrieve':
             return emg_serializers.GenomeSetSerializer
         return super(GenomeSetViewSet, self).get_serializer_class()
+
+
+class GenomeCatalogueDownloadViewSet(emg_mixins.ListModelMixin,
+                                     viewsets.GenericViewSet):
+    serializer_class = emg_serializers.GenomeCatalogueDownloadSerializer
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'alias',
+    )
+
+    ordering = ('alias',)
+
+    lookup_field = 'alias'
+    lookup_value_regex = '[^/]+'
+
+    def get_queryset(self):
+        try:
+            genome_catalogue = self.kwargs['catalogue_id']
+        except ValueError:
+            raise Http404()
+        return emg_models.GenomeCatalogueDownload.objects \
+            .filter(genome_catalogue__catalogue_id=genome_catalogue)
+
+    def get_object(self):
+        return get_object_or_404(
+            self.get_queryset(), Q(alias=self.kwargs['alias'])
+        )
+
+    def get_serializer_class(self):
+        return super(GenomeCatalogueDownloadViewSet, self) \
+            .get_serializer_class()
+
+    def list(self, request, *args, **kwargs):
+        return super(GenomeCatalogueDownloadViewSet, self) \
+            .list(request, *args, **kwargs)
+
+    def retrieve(self, request, catalogue_id, alias,
+                 *args, **kwargs):
+        """
+        Retrieves a downloadable file for the genome catalogue
+        Example:
+        ---
+        `
+        /genome-catalogues/hgut-v1-0/downloads/phylo_tree.json`
+        """
+        obj = self.get_object()
+        if obj.subdir is not None:
+            file_path = '{0}/{1}/{2}'.format(
+                obj.genome_catalogue.result_directory, obj.subdir, obj.realname
+            )
+        else:
+            file_path = '{0}/{1}'.format(
+                obj.genome_catalogue.result_directory, obj.realname
+            )
+        return emg_utils.prepare_results_file_download_response(file_path, alias)
 
 
 class CogCatViewSet(mixins.RetrieveModelMixin,
