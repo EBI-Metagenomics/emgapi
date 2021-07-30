@@ -1,0 +1,28 @@
+{% load static %}
+  <style>
+    pre.version, pre.version-stamp {
+        line-height: 1em;
+    }
+    body {
+      margin:0;
+      background: #fafafa;
+    }
+    div#local-masthead {
+      background-image: url(/metagenomics/api/static/ui/images/embl-ebi-background-4.jpg) !important;
+      background-color: #000 !important;
+      background-repeat: no-repeat;
+      background-position: 100% 100%;
+      background-size: 115%;
+    }
+
+    .header-logo {
+        height: 80px;
+    }
+
+    code {
+        all: unset;
+    }
+
+  </style>
+
+  <link rel="stylesheet" type="text/css" href="{% static "rest_framework/css/elixir-banner.css" %}"/>
