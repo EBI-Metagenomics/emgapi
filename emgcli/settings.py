@@ -574,6 +574,7 @@ except KeyError:
 
 SPECTACULAR_SETTINGS = {
     'SCHEMA_PATH_PREFIX': '/v1/',
+    'SERVERS': [{'url': EMG_URL, 'description': 'MGnify API'}],
     'TITLE': EMG_TITLE,
     'DESCRIPTION': EMG_DESC,
     'VERSION': 'v1',
