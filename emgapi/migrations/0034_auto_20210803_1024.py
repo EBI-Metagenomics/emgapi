@@ -11,11 +11,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name='genome',
-            name='is_sentinel',
-            field=models.BooleanField(db_column='IS_SENTINEL', default=False, help_text='Sentinel genomes are used to block accession number ranges'),
-        ),
-        migrations.AddField(
             model_name='genomecatalogue',
             name='intended_genome_count',
             field=models.IntegerField(blank=True, db_column='INTENDED_GENOME_COUNT', help_text='How many genomes are expected to need an accession number when later added to the catalogue.', null=True),
