@@ -582,6 +582,9 @@ SPECTACULAR_SETTINGS = {
         'description': EMG_CONF.get('emg', {}).get('documentation', {}).get('external_docs_description'),
         'url': EMG_CONF.get('emg', {}).get('documentation', {}).get('external_docs_url')
     },
+    "SWAGGER_UI_SETTINGS": {
+        "docExpansion": None,
+    }
 }
 
 # MongoDB
