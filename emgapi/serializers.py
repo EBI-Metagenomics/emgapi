@@ -1705,6 +1705,14 @@ class GenomeCatalogueSerializer(ExplicitFieldsModelSerializer,
         )
 
 
+class GenomeCatalogueCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = emg_models.GenomeCatalogue
+        fields = (
+            '__all__'
+        )
+
+
 class CogCatSerializer(ExplicitFieldsModelSerializer):
     class Meta:
         model = emg_models.CogCat

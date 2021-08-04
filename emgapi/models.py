@@ -27,13 +27,11 @@
 
 from __future__ import unicode_literals
 
-import os
-
-from django.conf import settings
 from django.db import models
 from django.db.models import (CharField, Count, OuterRef, Prefetch, Q,
-                              Subquery, Value, Count)
+                              Subquery, Value, signals)
 from django.db.models.functions import Cast, Concat
+from django.dispatch import receiver
 from rest_framework.generics import get_object_or_404
 
 
@@ -1579,7 +1577,6 @@ class GenomeCatalogueSeries(models.Model):
     name = models.CharField(db_column='NAME', max_length=100, unique=True)
 
 
-
 class GenomeCatalogueManager(models.Manager):
     def get_queryset(self):
         return super(GenomeCatalogueManager, self).get_queryset().annotate(genome_count=Count('genomecataloguegenome'))
@@ -1599,16 +1596,55 @@ class GenomeCatalogue(models.Model):
                                    help_text=MARKDOWN_HELP)
     protein_catalogue_name = models.CharField(db_column='PROTEIN_CATALOGUE_NAME', max_length=100, null=True, blank=True)
     protein_catalogue_description = models.TextField(db_column='PROTEIN_CATALOGUE_DESCRIPTION', null=True, blank=True,
-                                   help_text=MARKDOWN_HELP)
+                                                     help_text=MARKDOWN_HELP)
     last_update = models.DateTimeField(db_column='LAST_UPDATE', auto_now=True)
-    result_directory = models.CharField(db_column='RESULT_DIRECTORY', max_length=100)
+    result_directory = models.CharField(db_column='RESULT_DIRECTORY', max_length=100, null=True, blank=True)
     biome = models.ForeignKey(
         Biome, db_column='BIOME_ID',
         on_delete=models.CASCADE)
+    intended_genome_count = models.IntegerField(
+        db_column='INTENDED_GENOME_COUNT', null=True, blank=True,
+        help_text="How many genomes are expected to need an accession number when later added to the catalogue.")
+    suggested_min_accession_number = models.IntegerField(
+        db_column='SUGGESTED_MIN_ACCESSION_NUMBER', null=True, blank=True,
+        help_text='The minimum accession number suggested for use by the catalogue’s genomes'
+    )
+    suggested_max_accession_number = models.IntegerField(
+        db_column='SUGGESTED_MAX_ACCESSION_NUMBER', null=True, blank=True,
+        help_text='The maximum accession number suggested for use by the catalogue’s genomes'
+    )
 
     class Meta:
         unique_together = ('catalogue_series', 'version')
         db_table = 'GENOME_CATALOGUE'
+
+
+@receiver(signals.post_save, sender=GenomeCatalogue)
+def post_save_genome_catalogue_calculate_intended_accessions(sender, instance: GenomeCatalogue, created, **kwargs):
+    """
+    If the catalogue is created with an `intended_genome_count` field,
+    calculate the minimum and maximum accession numbers that the catalogue's
+    genomes are expected to occupy.
+    """
+    if created and instance.intended_genome_count:
+        next_accession_number = 0
+        last_genome = Genome.objects.order_by('-accession').first()
+        if last_genome:
+            if '-' in last_genome.accession:
+                next_accession_number = int(last_genome.accession.split('-')[-1])
+            else:
+                next_accession_number = int(last_genome.accession.lstrip('MYGY'))
+        highest_accessioned_catalogue = GenomeCatalogue.objects\
+            .filter(suggested_max_accession_number__isnull=False)\
+            .filter(suggested_max_accession_number__gt=next_accession_number)\
+            .order_by('-suggested_max_accession_number').first()
+        if highest_accessioned_catalogue:
+            next_accession_number = highest_accessioned_catalogue.suggested_max_accession_number
+        next_accession_number += 1
+        instance.suggested_min_accession_number = next_accession_number
+        instance.suggested_max_accession_number = next_accession_number + instance.intended_genome_count
+        instance.intended_genome_count = None
+        instance.save()
 
 
 class Genome(models.Model):

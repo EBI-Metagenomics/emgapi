@@ -17,6 +17,7 @@
 import pytest
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 
 from emgapi import models as emg_models
 
@@ -25,7 +26,8 @@ __all__ = ['apiclient', 'api_version', 'biome', 'biome_human', 'super_study', 's
            'run_status', 'analysis_status',
            'pipeline', 'pipelines', 'experiment_type',
            'runs', 'run', 'run_v5', 'runjob_pipeline_v1', 'run_emptyresults', 'run_with_sample',
-           'analysis_results', 'run_multiple_analysis', 'var_names', 'analysis_metadata_variable_names']
+           'analysis_results', 'run_multiple_analysis', 'var_names', 'analysis_metadata_variable_names',
+           'genome_catalogue_series', 'genome_catalogue', 'genome', 'staff_user', 'public_user']
 
 
 @pytest.fixture
@@ -56,6 +58,67 @@ def biome_human():
         biome_name='Human',
         lft=0, rgt=1, depth=2,
         lineage='root:Host-associated:Human',
+    )
+
+
+@pytest.fixture
+def public_user():
+    return get_user_model().objects.create(
+        username='public',
+        password='secret',
+    )
+
+
+@pytest.fixture
+def staff_user():
+    return get_user_model().objects.create(
+        username='emgstaff',
+        password='secret',
+        is_staff=True
+    )
+
+
+@pytest.fixture
+def genome_catalogue_series():
+    return emg_models.GenomeCatalogueSeries.objects.create(
+        catalogue_series_id='mandalorians',
+        name='Mandalorian Genome Project'
+    )
+
+
+@pytest.fixture
+def genome_catalogue(biome_human, genome_catalogue_series):
+    return emg_models.GenomeCatalogue.objects.create(
+        biome=biome_human,
+        catalogue_series=genome_catalogue_series,
+        name='Mandalorian Genomes v1.0',
+        catalogue_id='mandalor-1-0',
+        version='1.0'
+    )
+
+
+@pytest.fixture
+def genome(biome_human):
+    return emg_models.Genome.objects.create(
+        accession='MGYG00000001',
+        biome=biome_human,
+        length=1,
+        num_contigs=1,
+        n_50=1,
+        gc_content=1.0,
+        type=emg_models.Genome.MAG,
+        completeness=1.0,
+        contamination=1.0,
+        rna_5s=1.0,
+        rna_16s=1.0,
+        rna_23s=1.0,
+        trnas=1.0,
+        nc_rnas=1,
+        num_proteins=1,
+        eggnog_coverage=1.0,
+        ipr_coverage=1.0,
+        taxon_lineage='d__Test;',
+        taxincons=1.0
     )
 
 

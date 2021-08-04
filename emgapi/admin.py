@@ -577,6 +577,17 @@ class GenomeCatalogueAdmin(admin.ModelAdmin):
         GenomeCatalogueGenomeInline
     ]
 
+    readonly_fields = [
+        'suggested_min_accession_number',
+        'suggested_max_accession_number'
+    ]
+
+    def get_readonly_fields(self, request, obj=None):
+        if not obj:
+            return self.readonly_fields
+        return self.readonly_fields + ['intended_genome_count']
+
+
 @admin.register(emg_models.KeggClass)
 class KeggClassAdmin(admin.ModelAdmin):
     list_display = [
