@@ -68,3 +68,14 @@ class TestStudyAPI:
         assert d['type'] == "studies"
         assert d['id'] == "MGYS00001234"
         assert d['attributes']['accession'] == "MGYS00001234"
+
+    def test_csv(self, client, studies):
+        url = reverse("emgapi_v1:studies-list", kwargs={'format': 'csv'})
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.get('Content-Disposition') == 'attachment; filename="Study.csv"'
+        content = b''.join(response.streaming_content).decode('utf-8')
+        assert 'accession' in content
+        assert '00001' in content
+        assert '00049' in content
+        assert content.count('HARVESTED') == 49
