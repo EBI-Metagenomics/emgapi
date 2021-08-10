@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import pytest
 
 from django.urls import reverse
@@ -68,3 +67,50 @@ class TestStudyAPI:
         assert d['type'] == "studies"
         assert d['id'] == "MGYS00001234"
         assert d['attributes']['accession'] == "MGYS00001234"
+
+    def test_csv(self, client, studies):
+        url = reverse("emgapi_v1:studies-list", kwargs={'format': 'csv'})
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.get('Content-Disposition') == 'attachment; filename="Study.csv"'
+        content = b''.join(response.streaming_content).decode('utf-8')
+
+        expected_header = ",".join([
+            "accession",
+            "analyses",
+            "bioproject",
+            "centre_name",
+            "data_origination",
+            "is_public",
+            "last_update",
+            "public_release_date",
+            "publications",
+            "samples_count",
+            "secondary_accession",
+            "study_abstract",
+            "study_name",
+            "url"
+        ])
+        first_row = ",".join([
+            "MGYS00000001",
+            "",
+            "PRJDB0001",
+            "Centre Name",
+            "HARVESTED",
+            "True",
+            "1970-01-01T00:00:00",
+            "",
+            "",
+            "",
+            "SRP0001",
+            "",
+            "Example study name 1",
+            "http://testserver/v1/studies/MGYS00000001.csv"
+        ])
+
+        rows = content.splitlines()
+
+        assert len(rows) == 50
+
+        assert expected_header == rows[0]
+        assert first_row == rows[1]
