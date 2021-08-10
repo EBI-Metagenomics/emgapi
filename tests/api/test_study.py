@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import pytest
 
 from django.urls import reverse
@@ -75,7 +74,43 @@ class TestStudyAPI:
         assert response.status_code == status.HTTP_200_OK
         assert response.get('Content-Disposition') == 'attachment; filename="Study.csv"'
         content = b''.join(response.streaming_content).decode('utf-8')
-        assert 'accession' in content
-        assert '00001' in content
-        assert '00049' in content
-        assert content.count('HARVESTED') == 49
+
+        expected_header = ",".join([
+            "accession",
+            "analyses",
+            "bioproject",
+            "centre_name",
+            "data_origination",
+            "is_public",
+            "last_update",
+            "public_release_date",
+            "publications",
+            "samples_count",
+            "secondary_accession",
+            "study_abstract",
+            "study_name",
+            "url"
+        ])
+        first_row = ",".join([
+            "MGYS00000001",
+            "",
+            "PRJDB0001",
+            "Centre Name",
+            "HARVESTED",
+            "True",
+            "1970-01-01T00:00:00",
+            "",
+            "",
+            "",
+            "SRP0001",
+            "",
+            "Example study name 1",
+            "http://testserver/v1/studies/MGYS00000001.csv"
+        ])
+
+        rows = content.splitlines()
+
+        assert len(rows) == 50
+
+        assert expected_header == rows[0]
+        assert first_row == rows[1]
