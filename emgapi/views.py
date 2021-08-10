@@ -1228,6 +1228,7 @@ class GenomeCatalogueViewSet(mixins.RetrieveModelMixin,
         Example:
         ---
         POST to `/genome-catalogues` with
+        ```
         {
             "biome": {"id": 2, "type": "biomes"},
             "catalogue_id": "mandalorian-gut-1-0",
@@ -1236,6 +1237,7 @@ class GenomeCatalogueViewSet(mixins.RetrieveModelMixin,
             "version": "1.0",
             "intended_genome_count": 1000
         }
+        ```
         If no GenomeCatalogueSeries exists for `catalogue_series`, it will be created.
 
         Response will include `catalogue_id`, `suggested_min_accession_number`, `suggested_max_accession_number`.
