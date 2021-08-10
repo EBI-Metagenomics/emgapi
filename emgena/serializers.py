@@ -19,6 +19,8 @@ import logging
 
 from django.conf import settings
 from django.core.mail import send_mail
+from django.core.validators import validate_email
+from rest_framework.exceptions import ValidationError
 
 from rest_framework_json_api import serializers
 
@@ -59,10 +61,19 @@ class EmailSerializer(serializers.Serializer):
 
 class NotifySerializer(serializers.Serializer):
 
-    from_email = serializers.EmailField(max_length=200, required=True)
+    from_email = serializers.CharField(max_length=200, required=True)
     subject = serializers.CharField(max_length=500, required=True)
     message = serializers.CharField(max_length=1000, required=True)
     is_consent = serializers.BooleanField(default=False, required=False)
+
+    def is_valid(self):
+        for email in self.initial_data['from_email'].split(','):
+            try:
+                validate_email(email)
+            except ValidationError as exc:
+                self.errors.append(exc.detail)
+                return False
+        return super().is_valid()
 
     def create(self, validated_data):
         """Create an RT ticket.
