@@ -76,36 +76,36 @@ class TestStudyAPI:
         content = b''.join(response.streaming_content).decode('utf-8')
 
         expected_header = ",".join([
-            "accession",
-            "analyses",
-            "bioproject",
-            "centre_name",
-            "data_origination",
-            "is_public",
-            "last_update",
-            "public_release_date",
-            "publications",
-            "samples_count",
-            "secondary_accession",
-            "study_abstract",
-            "study_name",
-            "url"
+            "\"accession\"",
+            "\"analyses\"",
+            "\"bioproject\"",
+            "\"centre_name\"",
+            "\"data_origination\"",
+            "\"is_public\"",
+            "\"last_update\"",
+            "\"public_release_date\"",
+            "\"publications\"",
+            "\"samples_count\"",
+            "\"secondary_accession\"",
+            "\"study_abstract\"",
+            "\"study_name\"",
+            "\"url\""
         ])
         first_row = ",".join([
-            "MGYS00000001",
-            "",
-            "PRJDB0001",
-            "Centre Name",
-            "HARVESTED",
+            "\"MGYS00000001\"",
+            "\"\"",
+            "\"PRJDB0001\"",
+            "\"Centre Name\"",
+            "\"HARVESTED\"",
             "True",
-            "1970-01-01T00:00:00",
-            "",
-            "",
-            "",
-            "SRP0001",
-            "",
-            "Example study name 1",
-            "http://testserver/v1/studies/MGYS00000001.csv"
+            "\"1970-01-01T00:00:00\"",
+            "\"\"",
+            "\"\"",
+            "\"\"",
+            "\"SRP0001\"",
+            "\"\"",
+            "\"Example study name 1\"",
+            "\"http://testserver/v1/studies/MGYS00000001.csv\""
         ])
 
         rows = content.splitlines()
