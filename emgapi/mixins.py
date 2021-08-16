@@ -10,7 +10,6 @@ from emgapi.renderers import CSVStreamingRenderer
 
 
 class MultipleFieldLookupMixin(object):
-
     """
     Apply this mixin to any view or viewset to get multiple field filtering
     based on a `lookup_fields` attribute, instead of the default single field
@@ -35,14 +34,7 @@ class ListModelMixin(object):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-
         if isinstance(request.accepted_renderer, CSVStreamingRenderer):
-            response = StreamingHttpResponse(
-                request.accepted_renderer.render({
-                    'queryset': queryset,
-                    'serializer': self.get_serializer_class(),
-                    'context': {'request': request},
-                }), content_type='text/csv')
             try:
                 filename = queryset.model.__name__
             except AttributeError:
@@ -50,6 +42,8 @@ class ListModelMixin(object):
                     filename = queryset._name
                 except AttributeError:
                     filename = queryset._document.__name__
+            serializer = self.get_serializer(queryset, many=True)
+            response = StreamingHttpResponse(request.accepted_renderer.render(serializer.data), content_type='text/csv')
             response['Content-Disposition'] = \
                 'attachment; filename="{}.csv"'.format(filename)
             return response
