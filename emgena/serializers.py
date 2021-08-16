@@ -61,13 +61,14 @@ class EmailSerializer(serializers.Serializer):
 
 class NotifySerializer(serializers.Serializer):
 
-    from_email = serializers.CharField(max_length=200, required=True)
+    from_email = serializers.EmailField(max_length=200, required=True)
+    cc = serializers.CharField(max_length=200, required=True)
     subject = serializers.CharField(max_length=500, required=True)
     message = serializers.CharField(max_length=1000, required=True)
     is_consent = serializers.BooleanField(default=False, required=False)
 
     def is_valid(self):
-        for email in self.initial_data['from_email'].split(','):
+        for email in self.initial_data['cc'].split(','):
             try:
                 validate_email(email)
             except ValidationError as exc:
@@ -95,6 +96,8 @@ class NotifySerializer(serializers.Serializer):
             "Subject": n.subject,
             "Text": n.message.replace("\n", ';')
         }
+        if n.cc != '':
+            ticket["Cc"] = n.cc
 
         if n.is_consent:
             ticket["Queue"] = ena_queue
