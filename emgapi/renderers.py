@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import csv
 
 from rest_framework import renderers
 from rest_framework_json_api.renderers import JSONRenderer
@@ -35,11 +36,19 @@ class CSVStreamingRenderer(BaseCSVStreamingRenderer):
     combined with rest_framework_csv.renderers.PaginatedCSVRenderer
     """
     results_field = 'results'
+    writer_opts = {'quoting': csv.QUOTE_NONNUMERIC}
 
     def render(self, data, *args, **kwargs):
         if not isinstance(data, list):
             data = data.get(self.results_field, [])
         return super(CSVStreamingRenderer, self).render(data, *args, **kwargs)
+
+    def flatten_item(self, item):
+        flat_item = super(CSVStreamingRenderer, self).flatten_item(item)
+        for k, v in flat_item.items():
+            if type(v) is str:
+                flat_item[k] = v.replace('\n', ' ').replace('\r', ' ')
+        return flat_item
 
 
 class TSVRenderer(CSVRenderer):
