@@ -59,7 +59,7 @@ class EmailSerializer(serializers.Serializer):
 
 class NotifySerializer(serializers.Serializer):
     from_email = serializers.CharField(max_length=200, required=True)
-    cc = serializers.CharField(max_length=200, allow_blank=True)
+    cc = serializers.CharField(max_length=200, allow_blank=True, required=False)
     subject = serializers.CharField(max_length=500, required=True)
     message = serializers.CharField(max_length=1000, required=True)
     is_consent = serializers.BooleanField(default=False, required=False)
@@ -98,7 +98,7 @@ class NotifySerializer(serializers.Serializer):
             "Subject": n.subject,
             "Text": n.message.replace("\n", ';')
         }
-        if n.cc != '':
+        if n.cc != '' and n.cc is not None:
             ticket["Cc"] = n.cc
 
         if n.is_consent:
