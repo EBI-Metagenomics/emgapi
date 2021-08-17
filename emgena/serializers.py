@@ -61,19 +61,22 @@ class EmailSerializer(serializers.Serializer):
 
 class NotifySerializer(serializers.Serializer):
 
-    from_email = serializers.EmailField(max_length=200, required=True)
-    cc = serializers.CharField(max_length=200, required=True)
+    from_email = serializers.CharField(max_length=200, required=True)
+    cc = serializers.CharField(max_length=200, allow_blank=True)
     subject = serializers.CharField(max_length=500, required=True)
     message = serializers.CharField(max_length=1000, required=True)
     is_consent = serializers.BooleanField(default=False, required=False)
 
     def is_valid(self):
-        for email in self.initial_data['cc'].split(','):
-            try:
-                validate_email(email)
-            except ValidationError as exc:
-                self.errors.append(exc.detail)
-                return False
+        for field in ['from_email', 'cc']:
+            for email in self.initial_data[field].split(','):
+                if email=='':
+                    continue
+                try:
+                    validate_email(email)
+                except ValidationError as exc:
+                    self.errors.append(exc.detail)
+                    return False
         return super().is_valid()
 
     def create(self, validated_data):
