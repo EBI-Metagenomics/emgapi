@@ -30,7 +30,6 @@ logger = logging.getLogger(__name__)
 
 
 class SubmitterSerializer(serializers.Serializer):
-
     first_name = serializers.CharField(max_length=30)
     surname = serializers.CharField(max_length=50)
     email_address = serializers.CharField(max_length=200)
@@ -44,7 +43,6 @@ class SubmitterSerializer(serializers.Serializer):
 
 
 class EmailSerializer(serializers.Serializer):
-
     from_email = serializers.EmailField(required=True)
     subject = serializers.CharField(required=True)
     message = serializers.CharField(required=True)
@@ -60,7 +58,6 @@ class EmailSerializer(serializers.Serializer):
 
 
 class NotifySerializer(serializers.Serializer):
-
     from_email = serializers.CharField(max_length=200, required=True)
     cc = serializers.CharField(max_length=200, allow_blank=True)
     subject = serializers.CharField(max_length=500, required=True)
@@ -69,8 +66,10 @@ class NotifySerializer(serializers.Serializer):
 
     def is_valid(self):
         for field in ['from_email', 'cc']:
+            if field not in self.initial_data:
+                continue
             for email in self.initial_data[field].split(','):
-                if email=='':
+                if email == '':
                     continue
                 try:
                     validate_email(email)
