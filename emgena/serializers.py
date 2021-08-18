@@ -69,6 +69,7 @@ class NotifySerializer(serializers.Serializer):
             if field not in self.initial_data:
                 continue
             for email in self.initial_data[field].split(','):
+                email = email.strip()
                 if email == '':
                     continue
                 try:
