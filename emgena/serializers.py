@@ -98,7 +98,7 @@ class NotifySerializer(serializers.Serializer):
             "Subject": n.subject,
             "Text": n.message.replace("\n", ';')
         }
-        if n.cc != '' and n.cc is not None:
+        if n.cc:
             ticket["Cc"] = n.cc
 
         if n.is_consent:
