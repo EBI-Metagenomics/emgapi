@@ -83,7 +83,7 @@ class SubmitterContact(models.Model):
 
 class Notify(object):
     def __init__(self, **kwargs):
-        for field in ('id', 'from_email', 'message', 'subject', 'is_consent'):
+        for field in ('id', 'from_email', 'message', 'subject', 'is_consent', 'cc'):
             setattr(self, field, kwargs.get(field, None))
 
 
