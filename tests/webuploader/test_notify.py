@@ -64,7 +64,6 @@ class TestNotify(APITestCase):
             responses.POST,
             settings.RT["url"],
             status=200)
-
         post_data = {
             "from_email": "fake@email.com",
             "subject": "Test email subject",
