@@ -1581,7 +1581,7 @@ class GenomeCatalogue(models.Model):
 
     MARKDOWN_HELP = 'Use <a href="https://commonmark.org/help/" target="_newtab">markdown</a> for links and rich text.'
     catalogue_id = models.SlugField(
-        db_column='CATALOGUE_ID', primary_key=True, max_length=100)
+        db_column='CATALOGUE_ID', max_length=100)
     version = models.CharField(db_column='VERSION', max_length=20)
     name = models.CharField(db_column='NAME', max_length=100, unique=True)
     description = models.TextField(db_column='DESCRIPTION', null=True, blank=True,
@@ -1593,7 +1593,8 @@ class GenomeCatalogue(models.Model):
     result_directory = models.CharField(db_column='RESULT_DIRECTORY', max_length=100, null=True, blank=True)
     biome = models.ForeignKey(
         Biome, db_column='BIOME_ID',
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE,
+        null=True, blank=True)
 
     class Meta:
         unique_together = ('biome', 'version')
@@ -1826,7 +1827,7 @@ class GenomeCatalogueDownload(BaseDownload):
 
     @property
     def accession(self):
-        return '{c}-{v}'.format(c=self.genome_catalogue.catalogue_id, v=self.genome_catalogue.version)
+        return self.genome_catalogue.catalogue_id
 
     objects = BaseDownloadManager(['genome_catalogue'])
 

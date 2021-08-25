@@ -1246,12 +1246,11 @@ class GenomeViewSet(mixins.RetrieveModelMixin,
         'taxon_lineage',
         'type',
         'genome_set__name',
-        'catalogues__name'
+        'catalogue__name'
     )
 
     queryset = emg_models.Genome.objects.all() \
-        .prefetch_related('catalogues') \
-        .select_related('biome', 'geo_origin')
+        .select_related('biome', 'geo_origin', 'catalogue')
 
 
 class GenomeDownloadViewSet(emg_mixins.ListModelMixin,

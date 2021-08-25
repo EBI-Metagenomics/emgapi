@@ -698,7 +698,7 @@ class GenomeCatalogueGenomeRelationshipViewSet(emg_mixins.ListModelMixin,
             catalogue = get_object_or_404(
                 emg_models.GenomeCatalogue,
                 catalogue_id=catalogue_id)
-            genomes = catalogue.genome_set.all()
+            genomes = catalogue.genomes.all()
         return genomes
 
     def list(self, request, *args, **kwargs):

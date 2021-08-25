@@ -184,20 +184,14 @@ def read_sep_f(fs, sep=None):
         return data
 
 
-def find_genome_results(release_dir):
-    listdir = glob.glob(os.path.join(release_dir, '*'))
+def find_genome_results(catalogue_dir):
+    listdir = glob.glob(os.path.join(catalogue_dir, '*'))
     return list(filter(os.path.isdir, listdir))
 
 
 def find_catalogue_files(catalogue_dir):
     listdir = glob.glob(os.path.join(catalogue_dir, '*'))
     return list(filter(os.path.isfile, listdir))
-
-
-def get_catalogue_result_path(result_dir):
-    # genomes folder + catalogue series identifier + version label
-    sub_path = os.path.normpath(result_dir).split(os.sep)[-3:]
-    return os.path.sep + os.path.join(*sub_path)
 
 
 def get_genome_result_path(result_dir):

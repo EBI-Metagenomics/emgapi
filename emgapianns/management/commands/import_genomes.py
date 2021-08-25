@@ -9,7 +9,7 @@ from emgapi import models as emg_models
 
 from ..lib.genome_util import sanity_check_genome_output, \
     sanity_check_catalogue_dir, find_genome_results, \
-    get_genome_result_path, get_catalogue_result_path, \
+    get_genome_result_path, \
     read_tsv_w_headers, read_json
 
 logger = logging.getLogger(__name__)
@@ -29,16 +29,15 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('rootpath', action='store', type=str, )
-        parser.add_argument('catalogue_series_id', action='store', type=str,
-                            help='The short identified for the catalogue. '
-                                 'This is the catalogue folder name e.g. /genomes/<catalogue_series_id>,'
-                                 'and is used as the genome catalogues database ID.'
-                                 'E.g. "hgut" or "human-oral"')
+        parser.add_argument('catalogue_directory', action='store', type=str,
+                            help='The folder within `rootpath` where the results files are. e.g. "genomes/skin/1.0/"')
+        parser.add_argument('catalogue_name', action='store', type=str,
+                            help='The name of this catalogue (without any version label), e.g. "Human Skin"')
         parser.add_argument('catalogue_version', action='store', type=str,
-                            help='E.g. "1.0" or "2021-01"')
+                            help='The version label. E.g. "1.0" or "2021-01"')
         parser.add_argument('gold_biome', action='store', type=str,
-                            help="Primary biome for the catalogue, as a GOLD lineage. Use _ instead of spaces."
-                                 "E.g. root:Host-Associated:Human:Digestive_System:Large_intestine")
+                            help="Primary biome for the catalogue, as a GOLD lineage. "
+                                 "E.g. root:Host-Associated:Human:Digestive\ System:Large\ intestine")
         parser.add_argument('--database', type=str,
                             default='default')
 
@@ -48,14 +47,14 @@ class Command(BaseCommand):
             raise FileNotFoundError('Results dir {} does not exist'
                                     .format(self.rootpath))
 
-        series = options['catalogue_series_id'].strip()
+        catalogue_name = options['catalogue_name'].strip()
         version = options['catalogue_version'].strip()
-        gold_biome = options['gold_biome'].strip().replace("_", " ")
-        self.catalogue_dir = os.path.join(self.rootpath, series, version)
-        logger.warning('CAT' + self.catalogue_dir)
+        catalogue_dir = options['catalogue_directory'].strip()
+        gold_biome = options['gold_biome'].strip()
+        self.catalogue_dir = os.path.join(self.rootpath, catalogue_dir)
 
         self.database = options['database']
-        self.catalogue_obj = self.get_catalogue(series, version, gold_biome)
+        self.catalogue_obj = self.get_catalogue(catalogue_name, version, gold_biome, catalogue_dir)
 
         logger.info("CLI %r" % options)
 
@@ -72,43 +71,31 @@ class Command(BaseCommand):
 
         self.upload_catalogue_files()
 
-    def get_catalogue(self, catalogue_series_id, catalogue_version, gold_biome):
-        base_result_dir = get_catalogue_result_path(self.catalogue_dir)
-        series, _ = emg_models.GenomeCatalogueSeries.objects\
-            .using(self.database)\
-            .get_or_create(catalogue_series_id=catalogue_series_id,
-                           defaults={'name': catalogue_series_id})
+    def get_catalogue(self, catalogue_name, catalogue_version, gold_biome, catalogue_dir):
+        logging.warning('GOLD')
+        logging.warning(gold_biome)
         biome = self.get_gold_biome(gold_biome)
+
         catalogue, _ = emg_models.GenomeCatalogue.objects \
             .using(self.database) \
             .get_or_create(
-                catalogue_id = slugify('{0}-v{1}'.format(catalogue_series_id, catalogue_version).replace('.', '-')),
+                catalogue_id=slugify('{0}-v{1}'.format(catalogue_name, catalogue_version).replace('.', '-')),
                 defaults={
                     'version': catalogue_version,
-                    'catalogue_series': series,
-                    'name': '{0} v{1}'.format(catalogue_series_id, catalogue_version),
+                    'name': '{0} v{1}'.format(catalogue_name, catalogue_version),
                     'biome': biome,
-                    'result_directory': base_result_dir
+                    'result_directory': catalogue_dir
                 })
         return catalogue
 
     def upload_dir(self, directory):
         logger.info('Uploading dir: {}'.format(directory))
         genome, has_pangenome = self.create_genome(directory)
-        self.set_genome_catalogue(genome)
-
         self.upload_cog_results(genome, directory, has_pangenome)
         self.upload_kegg_class_results(genome, directory, has_pangenome)
         self.upload_kegg_module_results(genome, directory, has_pangenome)
         self.upload_antismash_geneclusters(genome, directory)
         self.upload_genome_files(genome, has_pangenome)
-
-    def set_genome_catalogue(self, genome):
-        try:
-            emg_models.GenomeCatalogueGenome.objects.using(self.database).create(
-                genome=genome, genome_catalogue=self.catalogue_obj)
-        except IntegrityError:
-            pass
 
     def get_gold_biome(self, lineage):
         return emg_models.Biome.objects.using(self.database).get(lineage=lineage)
@@ -147,6 +134,7 @@ class Command(BaseCommand):
         data.pop('geographic_range', None)
 
         data['result_directory'] = get_genome_result_path(genome_dir)
+        data['catalogue'] = self.catalogue_obj
 
         g, created = emg_models.Genome.objects.using(self.database).update_or_create(
             accession=data['accession'],

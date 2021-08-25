@@ -239,9 +239,8 @@ class TestAPISurface:
                 baker.make('emgapi.Genome', pk=pk, biome=_biome)
             elif _model in ('GenomeCatalogue', ):
                 _biome = baker.make('emgapi.Biome', pk=pk)
-                _series = baker.make('emgapi.GenomeCatalogueSeries', pk=pk)
                 # _genome = baker.make('emgapi.Genome', pk=pk, biome=_biome)
-                baker.make('emgapi.GenomeCatalogue', pk=pk, biome=_biome, catalogue_series=_series)
+                baker.make('emgapi.GenomeCatalogue', pk=pk, biome=_biome, catalogue_id='dummy')
             else:
                 baker.make(model_name, pk=pk)
 

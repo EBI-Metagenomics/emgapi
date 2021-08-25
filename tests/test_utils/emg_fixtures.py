@@ -89,10 +89,11 @@ def genome_catalogue(biome_human):
 
 
 @pytest.fixture
-def genome(biome_human):
+def genome(biome_human, genome_catalogue):
     return emg_models.Genome.objects.create(
         accession='MGYG00000001',
         biome=biome_human,
+        catalogue=genome_catalogue,
         length=1,
         num_contigs=1,
         n_50=1,

@@ -52,7 +52,6 @@ class TestGenomesAPI:
         assert rsp['data']['relationships']['biome']['data']['id'] == 'root:Host-associated:Human'
 
     def test_catalogue_genomes(self, client, genome_catalogue, genome):
-        genome.catalogue = genome_catalogue
         url = reverse('emgapi_v1:genome-catalogue-genomes-list', args=('mandalor-1-0',))
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
