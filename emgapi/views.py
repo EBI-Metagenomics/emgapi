@@ -1162,22 +1162,15 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
 
 
 class GenomeCatalogueViewSet(mixins.RetrieveModelMixin,
-                             mixins.CreateModelMixin,
                              emg_mixins.ListModelMixin,
                              emg_viewsets.BaseGenomeCatalogueGenericViewSet):
 
     filter_class = emg_filters.GenomeCatalogueFilter
-    permission_classes = [emg_perms.IsStaffOrReadOnly]
 
     lookup_field = 'catalogue_id'
     lookup_value_regex = '[^/]+'
 
     queryset = emg_models.GenomeCatalogue.objects.all()
-
-    def get_serializer_class(self):
-        if hasattr(self, 'action') and self.action == 'create':
-            return emg_serializers.GenomeCatalogueCreateSerializer
-        return super(GenomeCatalogueViewSet, self).get_serializer_class()
 
     def retrieve(self, request, *args, **kwargs):
         """
@@ -1217,55 +1210,6 @@ class GenomeCatalogueViewSet(mixins.RetrieveModelMixin,
         `/genome-catalogues?search=intestine`
         """
         return super(GenomeCatalogueViewSet, self).list(request, *args, **kwargs)
-
-    def create(self, request, *args, **kwargs):
-        """
-        Creates a new genome catalogue.
-        This endpoint requires a staff user account.
-        This blocks a range of MGYG accessions for the catalogue's genomes.
-        The emgcli's `import_genomes` must then be used to fill the catalogue.
-
-        Example:
-        ---
-        POST to `/genome-catalogues` with
-        ```
-        {
-            "biome": {"id": 2, "type": "biomes"},
-            "catalogue_id": "mandalorian-gut-1-0",
-            "catalogue_series": {"id": "mandalorian-gut", "type": "genome-catalogue-series"},
-            "name": "Mandalorian Gut v1.0",
-            "version": "1.0",
-            "intended_genome_count": 1000
-        }
-        ```
-        If no GenomeCatalogueSeries exists for `catalogue_series`, it will be created.
-
-        Response will include `catalogue_id`, `suggested_min_accession_number`, `suggested_max_accession_number`.
-        These suggested accession number ranges will be non-null if `intended_genome_count` was provided.
-        Accessions within this suggested range can be assigned to genomes to be later added to the catalogue.
-        This accession range will not be suggested for other new catalogues, in case multiple MAG catalogues are being
-        created in parallel.
-        NB: The accession range is not limited to or guaranteed to be used by genomes that link to this catalogue.
-        """
-        serializer = self.get_serializer(data=request.data)
-        is_valid = serializer.is_valid(raise_exception=False)
-        if (
-                (not is_valid)
-                and len(serializer.errors) == 1
-                and 'catalogue_series' in serializer.errors
-                and serializer.data.get('catalogue_series', {}).get("id")
-                and serializer.errors['catalogue_series'][0].code == "does_not_exist"
-        ):
-            catalogue_series = serializer.data['catalogue_series']['id']
-            catalogue_series, _ = emg_models.GenomeCatalogueSeries.objects.get_or_create(
-                catalogue_series_id=catalogue_series,
-                defaults={'name': catalogue_series.replace('-', ' ').title()}
-            )
-            serializer.run_validation()
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class GenomeViewSet(mixins.RetrieveModelMixin,

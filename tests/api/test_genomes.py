@@ -27,67 +27,6 @@ from test_utils.emg_fixtures import *  # noqa
 
 @pytest.mark.django_db
 class TestGenomesAPI:
-    def test_catalogue_creation(self, apiclient, biome_human, genome_catalogue_series, staff_user, public_user):
-        # Fails if unauthenticated
-        url = reverse('emgapi_v1:genome-catalogues-list')
-        response = apiclient.post(url)
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
-
-        # Fails for non-staff user
-        apiclient.force_authenticate(public_user)
-        response = apiclient.post(url)
-        assert response.status_code == status.HTTP_403_FORBIDDEN
-
-        # Doesn't fail for auth reasons for staff user
-        apiclient.force_authenticate(staff_user)
-        response = apiclient.post(url)
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-        # Can create new catalogue
-        response = apiclient.post(url, data={
-            'biome': {'id': biome_human.biome_id, 'type': 'biomes'},
-            'catalogue_id': 'new-cat-1-1',
-            'catalogue_series': {'id': genome_catalogue_series.catalogue_series_id, 'type': 'genome-catalogue-series'},
-            'name': 'New Cat v1.1',
-            'version': '1.1',
-        }, format='json')
-        assert response.status_code == status.HTTP_201_CREATED
-        assert emg_models.GenomeCatalogue.objects.filter(catalogue_id='new-cat-1-1').exists()
-
-    def test_catalogue_creation_accession_numbers(self, apiclient, biome_human, genome_catalogue_series, staff_user):
-        url = reverse('emgapi_v1:genome-catalogues-list')
-        apiclient.force_authenticate(staff_user)
-
-        # Can create new catalogue and get suggested accession numbers
-        response = apiclient.post(url, data={
-            'biome': {'id': biome_human.biome_id, 'type': 'biomes'},
-            'catalogue_id': 'new-cat-1-2',
-            'catalogue_series': {'id': genome_catalogue_series.catalogue_series_id, 'type': 'genome-catalogue-series'},
-            'name': 'New Cat v1.2',
-            'version': '1.2',
-            'intended_genome_count': 1000
-        }, format='json')
-        assert response.status_code == status.HTTP_201_CREATED
-        assert emg_models.GenomeCatalogue.objects.filter(catalogue_id='new-cat-1-2').exists()
-        rsp = response.json()
-        assert rsp['data']['attributes']['suggested-min-accession-number'] == 1
-        assert rsp['data']['attributes']['suggested-max-accession-number'] == 1001
-
-        # Next catalogue gets non-overlapping accessions even though no genomes present yet
-        response = apiclient.post(url, data={
-            'biome': {'id': biome_human.biome_id, 'type': 'biomes'},
-            'catalogue_id': 'new-cat-1-3',
-            'catalogue_series': {'id': genome_catalogue_series.catalogue_series_id, 'type': 'genome-catalogue-series'},
-            'name': 'New Cat v1.3',
-            'version': '1.3',
-            'intended_genome_count': 500
-        }, format='json')
-        assert response.status_code == status.HTTP_201_CREATED
-        assert emg_models.GenomeCatalogue.objects.filter(catalogue_id='new-cat-1-3').exists()
-        rsp = response.json()
-        assert rsp['data']['attributes']['suggested-min-accession-number'] == 1002
-        assert rsp['data']['attributes']['suggested-max-accession-number'] == 1502
-
     def test_catalogue_list(self, client, genome_catalogue):
         url = reverse('emgapi_v1:genome-catalogues-list')
         response = client.get(url)
@@ -113,7 +52,7 @@ class TestGenomesAPI:
         assert rsp['data']['relationships']['biome']['data']['id'] == 'root:Host-associated:Human'
 
     def test_catalogue_genomes(self, client, genome_catalogue, genome):
-        genome.catalogues.add(genome_catalogue)
+        genome.catalogue = genome_catalogue
         url = reverse('emgapi_v1:genome-catalogue-genomes-list', args=('mandalor-1-0',))
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK

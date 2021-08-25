@@ -1571,15 +1571,9 @@ class GenomeSet(models.Model):
         return self.name
 
 
-class GenomeCatalogueSeries(models.Model):
-    catalogue_series_id = models.SlugField(
-        db_column='CATALOGUE_SERIES_ID', primary_key=True, max_length=100)
-    name = models.CharField(db_column='NAME', max_length=100, unique=True)
-
-
 class GenomeCatalogueManager(models.Manager):
     def get_queryset(self):
-        return super(GenomeCatalogueManager, self).get_queryset().annotate(genome_count=Count('genomecataloguegenome'))
+        return super(GenomeCatalogueManager, self).get_queryset().annotate(genome_count=Count('genomes'))
 
 
 class GenomeCatalogue(models.Model):
@@ -1588,8 +1582,6 @@ class GenomeCatalogue(models.Model):
     MARKDOWN_HELP = 'Use <a href="https://commonmark.org/help/" target="_newtab">markdown</a> for links and rich text.'
     catalogue_id = models.SlugField(
         db_column='CATALOGUE_ID', primary_key=True, max_length=100)
-    catalogue_series = models.ForeignKey(GenomeCatalogueSeries, db_column='GENOME_CATALOGUE_SERIES_ID',
-                                         on_delete=models.CASCADE, related_name='versions')
     version = models.CharField(db_column='VERSION', max_length=20)
     name = models.CharField(db_column='NAME', max_length=100, unique=True)
     description = models.TextField(db_column='DESCRIPTION', null=True, blank=True,
@@ -1602,49 +1594,10 @@ class GenomeCatalogue(models.Model):
     biome = models.ForeignKey(
         Biome, db_column='BIOME_ID',
         on_delete=models.CASCADE)
-    intended_genome_count = models.IntegerField(
-        db_column='INTENDED_GENOME_COUNT', null=True, blank=True,
-        help_text="How many genomes are expected to need an accession number when later added to the catalogue.")
-    suggested_min_accession_number = models.IntegerField(
-        db_column='SUGGESTED_MIN_ACCESSION_NUMBER', null=True, blank=True,
-        help_text='The minimum accession number suggested for use by the catalogue’s genomes'
-    )
-    suggested_max_accession_number = models.IntegerField(
-        db_column='SUGGESTED_MAX_ACCESSION_NUMBER', null=True, blank=True,
-        help_text='The maximum accession number suggested for use by the catalogue’s genomes'
-    )
 
     class Meta:
-        unique_together = ('catalogue_series', 'version')
+        unique_together = ('biome', 'version')
         db_table = 'GENOME_CATALOGUE'
-
-
-@receiver(signals.post_save, sender=GenomeCatalogue)
-def post_save_genome_catalogue_calculate_intended_accessions(sender, instance: GenomeCatalogue, created, **kwargs):
-    """
-    If the catalogue is created with an `intended_genome_count` field,
-    calculate the minimum and maximum accession numbers that the catalogue's
-    genomes are expected to occupy.
-    """
-    if created and instance.intended_genome_count:
-        next_accession_number = 0
-        last_genome = Genome.objects.order_by('-accession').first()
-        if last_genome:
-            if '-' in last_genome.accession:
-                next_accession_number = int(last_genome.accession.split('-')[-1])
-            else:
-                next_accession_number = int(last_genome.accession.lstrip('MYGY'))
-        highest_accessioned_catalogue = GenomeCatalogue.objects\
-            .filter(suggested_max_accession_number__isnull=False)\
-            .filter(suggested_max_accession_number__gt=next_accession_number)\
-            .order_by('-suggested_max_accession_number').first()
-        if highest_accessioned_catalogue:
-            next_accession_number = highest_accessioned_catalogue.suggested_max_accession_number
-        next_accession_number += 1
-        instance.suggested_min_accession_number = next_accession_number
-        instance.suggested_max_accession_number = next_accession_number + instance.intended_genome_count
-        instance.intended_genome_count = None
-        instance.save()
 
 
 class Genome(models.Model):
@@ -1732,7 +1685,8 @@ class Genome(models.Model):
     result_directory = models.CharField(
         db_column='RESULT_DIRECTORY', max_length=100, blank=True, null=True)
 
-    catalogues = models.ManyToManyField('GenomeCatalogue', through='GenomeCatalogueGenome')
+    catalogue = models.ForeignKey('GenomeCatalogue', db_column='GENOME_CATALOGUE', on_delete=models.CASCADE,
+                                  related_name='genomes')
 
     @property
     def geographic_range(self):
@@ -1765,20 +1719,6 @@ class GenomeGeographicLocation(models.Model):
 
     class Meta:
         db_table = 'GENOME_GEOGRAPHIC_RANGE'
-
-
-class GenomeCatalogueGenome(models.Model):
-
-    genome = models.ForeignKey('Genome', db_column='GENOME_ID', on_delete=models.CASCADE)
-    genome_catalogue = models.ForeignKey('GenomeCatalogue', db_column='CATALOGUE_ID', on_delete=models.CASCADE)
-
-    class Meta:
-        db_table = 'GENOME_CATALOGUE_GENOMES'
-        unique_together = ('genome', 'genome_catalogue')
-
-
-class ReleaseManagerQuerySet(BaseQuerySet):
-    pass
 
 
 class GenomeCogCounts(models.Model):

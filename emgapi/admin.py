@@ -505,11 +505,11 @@ class GenomeDownloads(admin.TabularInline):
     ]
 
 
-class GenomeCatalogueGenomeInline(admin.TabularInline):
-    model = emg_models.Genome.catalogues.through
-    verbose_name = 'Genome — Catalogue relationship'
-    verbose_name_plural = 'Genome — Catalogue relationships'
-    extra = 1
+# class GenomeCatalogueGenomeInline(admin.TabularInline):
+#     model = emg_models.Genome.catalogue
+#     verbose_name = 'Genome — Catalogue relationship'
+#     verbose_name_plural = 'Genome — Catalogue relationships'
+#     extra = 1
 
 
 @admin.register(emg_models.Genome)
@@ -530,7 +530,7 @@ class GenomeAdmin(admin.ModelAdmin):
     ]
     search_fields = [
         'accession',
-        'catalogues',
+        'catalogue',
         'type',
         'ena_genome_accession',
         'ena_sample_accession',
@@ -544,7 +544,7 @@ class GenomeAdmin(admin.ModelAdmin):
     ]
     list_filter = [
         'genome_set',
-        'catalogues',
+        'catalogue',
         'type',
     ]
     raw_id_fields = [
@@ -557,7 +557,6 @@ class GenomeAdmin(admin.ModelAdmin):
         'antismash_geneclusters'
     ]
     inlines = [
-        GenomeCatalogueGenomeInline,
         GenomeDownloads
     ]
 
@@ -568,24 +567,24 @@ class GenomeCatalogueAdmin(admin.ModelAdmin):
         'catalogue_id',
         'name',
         'biome',
-        'last_update'
+        'last_update',
     ]
     raw_id_fields = [
         'biome',
     ]
-    inlines = [
-        GenomeCatalogueGenomeInline
-    ]
+    # inlines = [
+    #     GenomeCatalogueGenomeInline
+    # ]
 
-    readonly_fields = [
-        'suggested_min_accession_number',
-        'suggested_max_accession_number'
-    ]
+    # readonly_fields = [
+    #     'suggested_min_accession_number',
+    #     'suggested_max_accession_number'
+    # ]
 
-    def get_readonly_fields(self, request, obj=None):
-        if not obj:
-            return self.readonly_fields
-        return self.readonly_fields + ['intended_genome_count']
+    # def get_readonly_fields(self, request, obj=None):
+    #     if not obj:
+    #         return self.readonly_fields
+    #     return self.readonly_fields + ['intended_genome_count']
 
 
 @admin.register(emg_models.KeggClass)

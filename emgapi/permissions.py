@@ -20,15 +20,3 @@ from rest_framework.permissions import BasePermission, SAFE_METHODS
 class IsSelf(BasePermission):
     def has_object_permission(self, request, view, obj):
         return obj.user == request.user
-
-
-class IsStaffOrReadOnly(BasePermission):
-    """
-    Permission to only allow Staff accounts to write (create/update), but anybody to read.
-    Assumes the model instance has an `owner` attribute.
-    """
-    def has_permission(self, request, view):
-        if request.method in SAFE_METHODS:
-            return True
-
-        return request.user.is_staff

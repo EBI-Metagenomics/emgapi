@@ -353,12 +353,6 @@ router.register(
 )
 
 router.register(
-    r'genomes/(?P<accession>[^/]+)/genome-catalogues',
-    views_relations.GenomeGenomeCataloguesViewSet,
-    basename='genome-genome-catalogues'
-)
-
-router.register(
     r'genome-catalogues',
     views.GenomeCatalogueViewSet,
     basename='genome-catalogues'

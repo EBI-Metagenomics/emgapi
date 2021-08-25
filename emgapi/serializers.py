@@ -1465,7 +1465,7 @@ class AntiSmashCountSerializer(ExplicitFieldsModelSerializer):
 class GenomeSerializer(ExplicitFieldsModelSerializer):
     included_serializers = {
         'download': 'emgapi.serializers.GenomeDownloadSerializer',
-        'catalogues': 'emgapi.serializers.GenomeCatalogueSerializer'
+        'catalogue': 'emgapi.serializers.GenomeCatalogueSerializer'
     }
     url = serializers.HyperlinkedIdentityField(
         view_name='emgapi_v1:genomes-detail',
@@ -1543,20 +1543,11 @@ class GenomeSerializer(ExplicitFieldsModelSerializer):
         lookup_field='lineage',
     )
 
-    catalogues = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
-        source='get_catalogues',
-        model=emg_models.GenomeCatalogue,
-        many=True,
+    catalogue = serializers.HyperlinkedRelatedField(
         read_only=True,
-        related_link_view_name='emgapi_v1:genome-genome-catalogues-list',
-        related_link_url_kwarg='accession',
-        related_link_lookup_field='accession',
-        related_link_self_view_name='emgapi_v1:genome-catalogues-detail',
-        related_link_self_lookup_field='catalogue_id',
+        view_name='emgapi_v1:genome-catalogues-detail',
+        lookup_field='catalogue_id'
     )
-
-    def get_catalogues(self, obj):
-        return emg_models.GenomeCatalogue.objects.filter(catalogue_id__in=obj.catalogues.values('catalogue_id').distinct())
 
     geographic_range = serializers.ListField()
 
@@ -1704,14 +1695,6 @@ class GenomeCatalogueSerializer(ExplicitFieldsModelSerializer,
             'genome_count',
             'version',
             'last_update'
-        )
-
-
-class GenomeCatalogueCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = emg_models.GenomeCatalogue
-        fields = (
-            '__all__'
         )
 
 

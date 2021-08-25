@@ -1170,23 +1170,6 @@ class GenomeAntiSmashGeneClustersRelationshipsViewSet(emg_mixins.ListModelMixin,
         return queryset
 
 
-class GenomeGenomeCataloguesViewSet(emg_mixins.ListModelMixin,
-                                    viewsets.GenericViewSet):
-    lookup_field = 'accession'
-
-    serializer_class = emg_serializers.GenomeCatalogueSerializer
-
-    def get_queryset(self):
-        genome = get_object_or_404(
-            emg_models.Genome,
-            accession=self.kwargs[self.lookup_field])
-        return genome.catalogues.all()
-
-    def list(self, request, *args, **kwargs):
-        return super(GenomeGenomeCataloguesViewSet, self) \
-            .list(request, *args, **kwargs)
-
-
 class GenomeSetGenomes(emg_mixins.ListModelMixin,
                        emg_viewsets.BaseGenomeGenericViewSet):  # noqa
     lookup_field = 'name'

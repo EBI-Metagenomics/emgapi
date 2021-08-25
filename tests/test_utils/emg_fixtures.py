@@ -27,7 +27,7 @@ __all__ = ['apiclient', 'api_version', 'biome', 'biome_human', 'super_study', 's
            'pipeline', 'pipelines', 'experiment_type',
            'runs', 'run', 'run_v5', 'runjob_pipeline_v1', 'run_emptyresults', 'run_with_sample',
            'analysis_results', 'run_multiple_analysis', 'var_names', 'analysis_metadata_variable_names',
-           'genome_catalogue_series', 'genome_catalogue', 'genome', 'staff_user', 'public_user']
+           'genome_catalogue', 'genome', 'staff_user', 'public_user']
 
 
 @pytest.fixture
@@ -79,18 +79,9 @@ def staff_user():
 
 
 @pytest.fixture
-def genome_catalogue_series():
-    return emg_models.GenomeCatalogueSeries.objects.create(
-        catalogue_series_id='mandalorians',
-        name='Mandalorian Genome Project'
-    )
-
-
-@pytest.fixture
-def genome_catalogue(biome_human, genome_catalogue_series):
+def genome_catalogue(biome_human):
     return emg_models.GenomeCatalogue.objects.create(
         biome=biome_human,
-        catalogue_series=genome_catalogue_series,
         name='Mandalorian Genomes v1.0',
         catalogue_id='mandalor-1-0',
         version='1.0'
