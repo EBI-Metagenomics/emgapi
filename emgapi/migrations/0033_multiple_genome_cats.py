@@ -45,12 +45,28 @@ def give_catalogues_an_id(apps, schema_editor):
     for catalogue in GenomeCatalogue.objects.all():
         catalogue.catalogue_id = catalogue.version
         catalogue.name = catalogue.version
+        catalogue.save()
 
 
 def make_first_release_for_genome_be_only_genome_catalogue(apps, schema_editor):
     Genome = apps.get_model("emgapi", "Genome")
     for genome in Genome.objects.all():
         genome.catalogue_id = genome.releases.first().id
+        genome.save()
+
+
+def add_genomes_prefix_to_genome_cat_results_dir(apps, schema_editor):
+    GenomeCatalogue = apps.get_model("emgapi", "GenomeCatalogue")
+    for catalogue in GenomeCatalogue.objects.all():
+        catalogue.result_directory = 'genomes/' + catalogue.result_directory.lstrip('/')
+        catalogue.save()
+
+
+def unadd_genomes_prefix_to_genome_cat_results_dir(apps, schema_editor):
+    GenomeCatalogue = apps.get_model("emgapi", "GenomeCatalogue")
+    for catalogue in GenomeCatalogue.objects.all():
+        catalogue.result_directory = '/' + catalogue.result_directory.lstrip('/').lstrip('genomes').lstrip('/')
+        catalogue.save()
 
 
 class Migration(migrations.Migration):
@@ -79,10 +95,14 @@ class Migration(migrations.Migration):
             give_catalogues_an_id,
             migrations.RunPython.noop
         ),
+        migrations.RunPython(
+            add_genomes_prefix_to_genome_cat_results_dir,
+            unadd_genomes_prefix_to_genome_cat_results_dir
+        ),
         migrations.AlterField(
             model_name="genomecatalogue",
             name="catalogue_id",
-            field=models.SlugField(db_column='CATALOGUE_ID', max_length=100, null=False)
+            field=models.SlugField(db_column='CATALOGUE_ID', max_length=100)
         ),
         migrations.AlterField(
             model_name="genomecatalogue",
@@ -112,18 +132,14 @@ class Migration(migrations.Migration):
 
         migrations.RunPython(
             change_release_to_catalogue_download_description,
-            reverse_code=unchange_release_to_catalogue_download_description),
+            reverse_code=unchange_release_to_catalogue_download_description
+        ),
 
         migrations.AlterField(
             model_name='genome',
             name='catalogue',
             field=models.ForeignKey(db_column='GENOME_CATALOGUE', on_delete=django.db.models.deletion.CASCADE,
                                     related_name='genomes', to='emgapi.genomecatalogue'),
-        ),
-        migrations.AlterField(
-            model_name='genomecatalogue',
-            name='catalogue_id',
-            field=models.SlugField(db_column='CATALOGUE_ID', max_length=100, serialize=False),
         ),
 
         migrations.RenameModel(

@@ -503,13 +503,7 @@ class GenomeDownloads(admin.TabularInline):
         'description',
         'file_format'
     ]
-
-
-# class GenomeCatalogueGenomeInline(admin.TabularInline):
-#     model = emg_models.Genome.catalogue
-#     verbose_name = 'Genome — Catalogue relationship'
-#     verbose_name_plural = 'Genome — Catalogue relationships'
-#     extra = 1
+    extra = 0
 
 
 @admin.register(emg_models.Genome)
@@ -530,7 +524,7 @@ class GenomeAdmin(admin.ModelAdmin):
     ]
     search_fields = [
         'accession',
-        'catalogue',
+        'catalogue__name',
         'type',
         'ena_genome_accession',
         'ena_sample_accession',
@@ -540,11 +534,11 @@ class GenomeAdmin(admin.ModelAdmin):
         'ncbi_study_accession',
         'img_genome_accession',
         'patric_genome_accession',
-        'biome'
+        'biome__lineage'
     ]
     list_filter = [
         'genome_set',
-        'catalogue',
+        'catalogue__catalogue_id',
         'type',
     ]
     raw_id_fields = [
@@ -561,6 +555,19 @@ class GenomeAdmin(admin.ModelAdmin):
     ]
 
 
+class GenomeCatalogueDownloads(admin.TabularInline):
+    model = emg_models.GenomeCatalogueDownload
+    raw_id_fields = [
+        'genome_catalogue',
+        'parent_id',
+        'group_type',
+        'subdir',
+        'description',
+        'file_format'
+    ]
+    extra = 0
+
+
 @admin.register(emg_models.GenomeCatalogue)
 class GenomeCatalogueAdmin(admin.ModelAdmin):
     list_display = [
@@ -572,19 +579,9 @@ class GenomeCatalogueAdmin(admin.ModelAdmin):
     raw_id_fields = [
         'biome',
     ]
-    # inlines = [
-    #     GenomeCatalogueGenomeInline
-    # ]
-
-    # readonly_fields = [
-    #     'suggested_min_accession_number',
-    #     'suggested_max_accession_number'
-    # ]
-
-    # def get_readonly_fields(self, request, obj=None):
-    #     if not obj:
-    #         return self.readonly_fields
-    #     return self.readonly_fields + ['intended_genome_count']
+    inlines = [
+        GenomeCatalogueDownloads
+    ]
 
 
 @admin.register(emg_models.KeggClass)

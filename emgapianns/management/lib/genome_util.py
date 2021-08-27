@@ -5,6 +5,8 @@ import sys
 import json
 import csv
 
+from django.conf import settings
+
 logger = logging.getLogger(__name__)
 
 EXPECTED_CATALOGUE_FILES = {'phylo_tree.json'}
@@ -195,6 +197,4 @@ def find_catalogue_files(catalogue_dir):
 
 
 def get_genome_result_path(result_dir):
-    # genomes folder + catalogue series identifier + version label + genome identifier
-    sub_path = os.path.normpath(result_dir).split(os.sep)[-4:]
-    return os.path.sep + os.path.join(*sub_path)
+    return os.path.relpath(result_dir, settings.RESULTS_DIR)

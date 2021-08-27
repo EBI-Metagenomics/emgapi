@@ -26,11 +26,10 @@ class MgnifyDashboard(Dashboard):
             collapsible=False,
             models=(
                 'emgapi.models.Genome',
-                'emgapi.models.GenomeCatalogue',
                 'emgapi.models.GenomeDownload',
+                'emgapi.models.GenomeCatalogue',
+                'emgapi.models.GenomeCatalogueDownload',
                 'emgapi.models.GenomeSet',
-                'emgapi.models.Release',
-                'emgapi.models.ReleaseDownload',
                 'emgapi.models.GeographicLocation'
             ),
         ))

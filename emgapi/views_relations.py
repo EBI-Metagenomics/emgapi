@@ -1188,5 +1188,3 @@ class GenomeSetGenomes(emg_mixins.ListModelMixin,
     def list(self, request, *args, **kwargs):
         return super(GenomeSetGenomes, self) \
             .list(request, *args, **kwargs)
-
-

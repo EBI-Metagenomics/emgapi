@@ -963,12 +963,12 @@ class AnalysisResultDownloadViewSet(emg_mixins.MultipleFieldLookupMixin,
         obj = self.get_object()
         if obj.subdir is not None:
             file_path = \
-                '/results{0}/{1}/{2}'.format(
+                '{0}/{1}/{2}'.format(
                     obj.job.result_directory, obj.subdir, obj.realname
                 )
         else:
             file_path = \
-                '/results{0}/{1}'.format(
+                '{0}/{1}'.format(
                     obj.job.result_directory, obj.realname
                 )
         return emg_utils.prepare_results_file_download_response(file_path, alias)

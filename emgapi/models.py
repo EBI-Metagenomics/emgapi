@@ -29,9 +29,8 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.db.models import (CharField, Count, OuterRef, Prefetch, Q,
-                              Subquery, Value, signals)
+                              Subquery, Value)
 from django.db.models.functions import Cast, Concat
-from django.dispatch import receiver
 from rest_framework.generics import get_object_or_404
 
 

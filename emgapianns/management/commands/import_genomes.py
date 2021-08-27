@@ -2,7 +2,6 @@ import logging
 import os
 
 from django.core.management import BaseCommand
-from django.db import IntegrityError
 from django.utils.text import slugify
 
 from emgapi import models as emg_models
@@ -20,7 +19,7 @@ ipr_cache = {}
 
 class Command(BaseCommand):
     obj_list = list()
-    rootpath = None
+    results_directory = None
     genome_folders = None
     catalogue_obj = None
     catalogue_dir = None
@@ -28,30 +27,31 @@ class Command(BaseCommand):
     database = None
 
     def add_arguments(self, parser):
-        parser.add_argument('rootpath', action='store', type=str, )
+        parser.add_argument('results_directory', action='store', type=str, )
         parser.add_argument('catalogue_directory', action='store', type=str,
-                            help='The folder within `rootpath` where the results files are. e.g. "genomes/skin/1.0/"')
+                            help='The folder within `results_directory` where the results files are. '
+                                 'e.g. "genomes/skin/1.0/"')
         parser.add_argument('catalogue_name', action='store', type=str,
                             help='The name of this catalogue (without any version label), e.g. "Human Skin"')
         parser.add_argument('catalogue_version', action='store', type=str,
                             help='The version label. E.g. "1.0" or "2021-01"')
         parser.add_argument('gold_biome', action='store', type=str,
                             help="Primary biome for the catalogue, as a GOLD lineage. "
-                                 "E.g. root:Host-Associated:Human:Digestive\ System:Large\ intestine")
+                                 "E.g. root:Host-Associated:Human:Digestive\\ System:Large\\ intestine")
         parser.add_argument('--database', type=str,
                             default='default')
 
     def handle(self, *args, **options):
-        self.rootpath = os.path.realpath(options.get('rootpath').strip())
-        if not os.path.exists(self.rootpath):
+        self.results_directory = os.path.realpath(options.get('results_directory').strip())
+        if not os.path.exists(self.results_directory):
             raise FileNotFoundError('Results dir {} does not exist'
-                                    .format(self.rootpath))
+                                    .format(self.results_directory))
 
         catalogue_name = options['catalogue_name'].strip()
         version = options['catalogue_version'].strip()
         catalogue_dir = options['catalogue_directory'].strip()
         gold_biome = options['gold_biome'].strip()
-        self.catalogue_dir = os.path.join(self.rootpath, catalogue_dir)
+        self.catalogue_dir = os.path.join(self.results_directory, catalogue_dir)
 
         self.database = options['database']
         self.catalogue_obj = self.get_catalogue(catalogue_name, version, gold_biome, catalogue_dir)

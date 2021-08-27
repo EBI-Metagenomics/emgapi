@@ -1601,39 +1601,6 @@ class GenomeCatalogueDownloadSerializer(BaseDownloadSerializer):
         )
 
 
-class GenomeSetSerializer(ExplicitFieldsModelSerializer,
-                          serializers.HyperlinkedModelSerializer):
-    included_serializers = {
-        'genomes': 'emgapi.serializers.GenomeSerializer'
-    }
-
-    url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi_v1:genomeset-detail',
-        lookup_field='name',
-    )
-
-    genomes = relations.SerializerMethodHyperlinkedRelatedField(
-        source='get_genomes',
-        model=emg_models.Genome,
-        many=True,
-        read_only=True,
-        related_link_view_name='emgapi_v1:genomeset-genomes-list',
-        related_link_url_kwarg='name',
-        related_link_lookup_field='name',
-    )
-
-    def get_genomes(self, obj):
-        return None
-
-    class Meta:
-        model = emg_models.GenomeSet
-        fields = (
-            'url',
-            'name',
-            'genomes',
-        )
-
-
 class GenomeCatalogueSerializer(ExplicitFieldsModelSerializer,
                                 serializers.HyperlinkedModelSerializer):
     included_serializers = {
@@ -1695,6 +1662,39 @@ class GenomeCatalogueSerializer(ExplicitFieldsModelSerializer,
             'genome_count',
             'version',
             'last_update'
+        )
+
+
+class GenomeSetSerializer(ExplicitFieldsModelSerializer,
+                          serializers.HyperlinkedModelSerializer):
+    included_serializers = {
+        'genomes': 'emgapi.serializers.GenomeSerializer'
+    }
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='emgapi_v1:genomeset-detail',
+        lookup_field='name',
+    )
+
+    genomes = relations.SerializerMethodHyperlinkedRelatedField(
+        source='get_genomes',
+        model=emg_models.Genome,
+        many=True,
+        read_only=True,
+        related_link_view_name='emgapi_v1:genomeset-genomes-list',
+        related_link_url_kwarg='name',
+        related_link_lookup_field='name',
+    )
+
+    def get_genomes(self, obj):
+        return None
+
+    class Meta:
+        model = emg_models.GenomeSet
+        fields = (
+            'url',
+            'name',
+            'genomes',
         )
 
 

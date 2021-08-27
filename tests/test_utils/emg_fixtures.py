@@ -27,7 +27,7 @@ __all__ = ['apiclient', 'api_version', 'biome', 'biome_human', 'super_study', 's
            'pipeline', 'pipelines', 'experiment_type',
            'runs', 'run', 'run_v5', 'runjob_pipeline_v1', 'run_emptyresults', 'run_with_sample',
            'analysis_results', 'run_multiple_analysis', 'var_names', 'analysis_metadata_variable_names',
-           'genome_catalogue', 'genome', 'staff_user', 'public_user']
+           'genome_catalogue', 'genome']
 
 
 @pytest.fixture
@@ -58,23 +58,6 @@ def biome_human():
         biome_name='Human',
         lft=0, rgt=1, depth=2,
         lineage='root:Host-associated:Human',
-    )
-
-
-@pytest.fixture
-def public_user():
-    return get_user_model().objects.create(
-        username='public',
-        password='secret',
-    )
-
-
-@pytest.fixture
-def staff_user():
-    return get_user_model().objects.create(
-        username='emgstaff',
-        password='secret',
-        is_staff=True
     )
 
 
