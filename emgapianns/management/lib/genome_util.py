@@ -197,4 +197,4 @@ def find_catalogue_files(catalogue_dir):
 
 
 def get_genome_result_path(result_dir):
-    return os.path.relpath(result_dir, settings.RESULTS_DIR)
+    return os.path.join('genomes', result_dir.split('genomes/')[-1])
