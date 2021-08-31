@@ -48,6 +48,15 @@ def give_catalogues_an_id(apps, schema_editor):
         catalogue.save()
 
 
+def set_catalogue_biome(apps, schema_editor):
+    GenomeCatalogue = apps.get_model("emgapi", "GenomeCatalogue")
+    for catalogue in GenomeCatalogue.objects.all():
+        first_genome = catalogue.genomes.first()
+        if first_genome:
+            catalogue.biome = first_genome.biome
+        catalogue.save()
+
+
 def make_first_release_for_genome_be_only_genome_catalogue(apps, schema_editor):
     Genome = apps.get_model("emgapi", "Genome")
     for genome in Genome.objects.all():
@@ -229,5 +238,9 @@ class Migration(migrations.Migration):
         migrations.AlterModelTable(
             name='genomecataloguedownload',
             table='GENOME_CATALOGUE_DOWNLOAD',
+        ),
+        migrations.RunPython(
+            set_catalogue_biome,
+            migrations.RunPython.noop
         ),
     ]

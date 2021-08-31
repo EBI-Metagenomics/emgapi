@@ -1599,6 +1599,9 @@ class GenomeCatalogue(models.Model):
         unique_together = ('biome', 'version')
         db_table = 'GENOME_CATALOGUE'
 
+    def __str__(self):
+        return self.name
+
 
 class Genome(models.Model):
 
