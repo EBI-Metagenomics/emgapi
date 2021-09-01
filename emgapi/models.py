@@ -1570,14 +1570,7 @@ class GenomeSet(models.Model):
         return self.name
 
 
-class GenomeCatalogueManager(models.Manager):
-    def get_queryset(self):
-        return super(GenomeCatalogueManager, self).get_queryset().annotate(genome_count=Count('genomes'))
-
-
 class GenomeCatalogue(models.Model):
-    objects = GenomeCatalogueManager()
-
     MARKDOWN_HELP = 'Use <a href="https://commonmark.org/help/" target="_newtab">markdown</a> for links and rich text.'
     catalogue_id = models.SlugField(
         db_column='CATALOGUE_ID', max_length=100)
@@ -1594,6 +1587,7 @@ class GenomeCatalogue(models.Model):
         Biome, db_column='BIOME_ID',
         on_delete=models.CASCADE,
         null=True, blank=True)
+    genome_count = models.IntegerField(db_column='GENOME_COUNT', null=True, blank=True)
 
     class Meta:
         unique_together = ('biome', 'version')
@@ -1601,6 +1595,10 @@ class GenomeCatalogue(models.Model):
 
     def __str__(self):
         return self.name
+
+    def calculate_genome_count(self):
+        self.genome_count = self.genomes.count()
+        self.save()
 
 
 class Genome(models.Model):
