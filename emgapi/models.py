@@ -27,12 +27,9 @@
 
 from __future__ import unicode_literals
 
-import os
-
-from django.conf import settings
 from django.db import models
 from django.db.models import (CharField, Count, OuterRef, Prefetch, Q,
-                              Subquery, Value, Count)
+                              Subquery, Value)
 from django.db.models.functions import Cast, Concat
 from rest_framework.generics import get_object_or_404
 
@@ -1573,6 +1570,39 @@ class GenomeSet(models.Model):
         return self.name
 
 
+class GenomeCatalogueManager(models.Manager):
+    def get_queryset(self):
+        return super(GenomeCatalogueManager, self).get_queryset().annotate(genome_count=Count('genomes'))
+
+
+class GenomeCatalogue(models.Model):
+    objects = GenomeCatalogueManager()
+
+    MARKDOWN_HELP = 'Use <a href="https://commonmark.org/help/" target="_newtab">markdown</a> for links and rich text.'
+    catalogue_id = models.SlugField(
+        db_column='CATALOGUE_ID', max_length=100)
+    version = models.CharField(db_column='VERSION', max_length=20)
+    name = models.CharField(db_column='NAME', max_length=100, unique=True)
+    description = models.TextField(db_column='DESCRIPTION', null=True, blank=True,
+                                   help_text=MARKDOWN_HELP)
+    protein_catalogue_name = models.CharField(db_column='PROTEIN_CATALOGUE_NAME', max_length=100, null=True, blank=True)
+    protein_catalogue_description = models.TextField(db_column='PROTEIN_CATALOGUE_DESCRIPTION', null=True, blank=True,
+                                                     help_text=MARKDOWN_HELP)
+    last_update = models.DateTimeField(db_column='LAST_UPDATE', auto_now=True)
+    result_directory = models.CharField(db_column='RESULT_DIRECTORY', max_length=100, null=True, blank=True)
+    biome = models.ForeignKey(
+        Biome, db_column='BIOME_ID',
+        on_delete=models.CASCADE,
+        null=True, blank=True)
+
+    class Meta:
+        unique_together = ('biome', 'version')
+        db_table = 'GENOME_CATALOGUE'
+
+    def __str__(self):
+        return self.name
+
+
 class Genome(models.Model):
 
     ISOLATE = 'isolate'
@@ -1658,7 +1688,8 @@ class Genome(models.Model):
     result_directory = models.CharField(
         db_column='RESULT_DIRECTORY', max_length=100, blank=True, null=True)
 
-    releases = models.ManyToManyField('Release', through='ReleaseGenomes')
+    catalogue = models.ForeignKey('GenomeCatalogue', db_column='GENOME_CATALOGUE', on_delete=models.CASCADE,
+                                  related_name='genomes')
 
     @property
     def geographic_range(self):
@@ -1691,49 +1722,6 @@ class GenomeGeographicLocation(models.Model):
 
     class Meta:
         db_table = 'GENOME_GEOGRAPHIC_RANGE'
-
-
-class ReleaseManagerQuerySet(BaseQuerySet):
-    pass
-
-
-class ReleaseManager(models.Manager):
-
-    def get_queryset(self):
-        qs = ReleaseManagerQuerySet(self.model, using=self._db)
-        return qs.annotate(genome_count=Count('genomes'))
-
-    def available(self, request):
-        return self.get_queryset().available(request)
-
-
-class Release(models.Model):
-    """Genome (MAGs) Release
-    """
-    version = models.CharField(db_column='VERSION', max_length=20)
-    last_update = models.DateTimeField(db_column='LAST_UPDATE', auto_now=True)
-    first_created = models.DateTimeField(db_column='FIRST_CREATED', auto_now_add=True)
-
-    genomes = models.ManyToManyField(Genome, through='ReleaseGenomes')
-    result_directory = models.CharField(db_column='RESULT_DIRECTORY', max_length=100)
-
-    objects = ReleaseManager()
-
-    class Meta:
-        db_table = 'RELEASE'
-
-    def __str__(self):
-        return self.version
-
-
-class ReleaseGenomes(models.Model):
-
-    genome = models.ForeignKey('Genome', db_column='GENOME_ID', on_delete=models.CASCADE)
-    release = models.ForeignKey('Release', db_column='RELEASE_ID', on_delete=models.CASCADE)
-
-    class Meta:
-        db_table = 'RELEASE_GENOMES'
-        unique_together = ('genome', 'release')
 
 
 class GenomeCogCounts(models.Model):
@@ -1834,18 +1822,18 @@ class GenomeDownload(BaseDownload):
         ordering = ('group_type', 'alias')
 
 
-class ReleaseDownload(BaseDownload):
-    release = models.ForeignKey('Release',
-                                db_column='RELEASE_ID',
-                                on_delete=models.CASCADE)
+class GenomeCatalogueDownload(BaseDownload):
+    genome_catalogue = models.ForeignKey('GenomeCatalogue',
+                                         db_column='GENOME_CATALOGUE_ID',
+                                         on_delete=models.CASCADE)
 
     @property
     def accession(self):
-        return self.release.version
+        return self.genome_catalogue.catalogue_id
 
-    objects = BaseDownloadManager(['release'])
+    objects = BaseDownloadManager(['genome_catalogue'])
 
     class Meta:
-        db_table = 'RELEASE_DOWNLOAD'
+        db_table = 'GENOME_CATALOGUE_DOWNLOAD'
         unique_together = (('realname', 'alias'),)
         ordering = ('group_type', 'alias')

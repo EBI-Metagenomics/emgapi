@@ -2,12 +2,14 @@ import logging
 import os
 
 from django.core.management import BaseCommand
-from django.db import IntegrityError
+from django.utils.text import slugify
+
 from emgapi import models as emg_models
 
 from ..lib.genome_util import sanity_check_genome_output, \
-    sanity_check_release_dir, find_genome_results, \
-    get_result_path, read_tsv_w_headers, read_json
+    sanity_check_catalogue_dir, find_genome_results, \
+    get_genome_result_path, \
+    read_tsv_w_headers, read_json
 
 logger = logging.getLogger(__name__)
 
@@ -17,68 +19,83 @@ ipr_cache = {}
 
 class Command(BaseCommand):
     obj_list = list()
-    rootpath = None
+    results_directory = None
     genome_folders = None
-    release_obj = None
+    catalogue_obj = None
+    catalogue_dir = None
 
     database = None
 
     def add_arguments(self, parser):
-        parser.add_argument('rootpath', action='store', type=str, )
-        parser.add_argument('version', action='store', type=str)
+        parser.add_argument('results_directory', action='store', type=str, )
+        parser.add_argument('catalogue_directory', action='store', type=str,
+                            help='The folder within `results_directory` where the results files are. '
+                                 'e.g. "genomes/skin/1.0/"')
+        parser.add_argument('catalogue_name', action='store', type=str,
+                            help='The name of this catalogue (without any version label), e.g. "Human Skin"')
+        parser.add_argument('catalogue_version', action='store', type=str,
+                            help='The version label. E.g. "1.0" or "2021-01"')
+        parser.add_argument('gold_biome', action='store', type=str,
+                            help="Primary biome for the catalogue, as a GOLD lineage. "
+                                 "E.g. root:Host-Associated:Human:Digestive\\ System:Large\\ intestine")
         parser.add_argument('--database', type=str,
                             default='default')
 
     def handle(self, *args, **options):
-        self.rootpath = os.path.realpath(options.get('rootpath').strip())
-        if not os.path.exists(self.rootpath):
+        self.results_directory = os.path.realpath(options.get('results_directory').strip())
+        if not os.path.exists(self.results_directory):
             raise FileNotFoundError('Results dir {} does not exist'
-                                    .format(self.rootpath))
+                                    .format(self.results_directory))
 
-        version = options['version'].strip()
-        release_dir = os.path.join(self.rootpath, version)
+        catalogue_name = options['catalogue_name'].strip()
+        version = options['catalogue_version'].strip()
+        catalogue_dir = options['catalogue_directory'].strip()
+        gold_biome = options['gold_biome'].strip()
+        self.catalogue_dir = os.path.join(self.results_directory, catalogue_dir)
 
         self.database = options['database']
-        self.release_obj = self.get_release(version, release_dir)
+        self.catalogue_obj = self.get_catalogue(catalogue_name, version, gold_biome, catalogue_dir)
 
         logger.info("CLI %r" % options)
 
-        genome_dirs = find_genome_results(release_dir)
+        genome_dirs = find_genome_results(self.catalogue_dir)
         logger.debug(
             'Found {} genome dirs to upload'.format(len(genome_dirs)))
 
         [sanity_check_genome_output(d) for d in genome_dirs]
 
-        sanity_check_release_dir(release_dir)
+        sanity_check_catalogue_dir(self.catalogue_dir)
 
         for d in genome_dirs:
             self.upload_dir(d)
 
-        self.upload_release_files()
+        self.upload_catalogue_files()
 
-    def get_release(self, version, result_dir):
-        base_result_dir = get_result_path(result_dir)
-        return emg_models.Release.objects \
+    def get_catalogue(self, catalogue_name, catalogue_version, gold_biome, catalogue_dir):
+        logging.warning('GOLD')
+        logging.warning(gold_biome)
+        biome = self.get_gold_biome(gold_biome)
+
+        catalogue, _ = emg_models.GenomeCatalogue.objects \
             .using(self.database) \
-            .get_or_create(version=version,
-                           result_directory=base_result_dir)[0]
+            .get_or_create(
+                catalogue_id=slugify('{0}-v{1}'.format(catalogue_name, catalogue_version).replace('.', '-')),
+                defaults={
+                    'version': catalogue_version,
+                    'name': '{0} v{1}'.format(catalogue_name, catalogue_version),
+                    'biome': biome,
+                    'result_directory': catalogue_dir
+                })
+        return catalogue
 
     def upload_dir(self, directory):
         logger.info('Uploading dir: {}'.format(directory))
         genome, has_pangenome = self.create_genome(directory)
-        self.set_genome_release(genome)
-
         self.upload_cog_results(genome, directory, has_pangenome)
         self.upload_kegg_class_results(genome, directory, has_pangenome)
         self.upload_kegg_module_results(genome, directory, has_pangenome)
         self.upload_antismash_geneclusters(genome, directory)
         self.upload_genome_files(genome, has_pangenome)
-
-    def set_genome_release(self, genome):
-        try:
-            emg_models.ReleaseGenomes(release=self.release_obj, genome=genome).save(using=self.database)
-        except IntegrityError:
-            pass
 
     def get_gold_biome(self, lineage):
         return emg_models.Biome.objects.using(self.database).get(lineage=lineage)
@@ -116,16 +133,8 @@ class Command(BaseCommand):
         geo_locations = data.get('geographic_range')
         data.pop('geographic_range', None)
 
-        data['result_directory'] = '/genomes/{}'.format(self.release_obj.version) + get_result_path(genome_dir)
-
-        # TODO: remove after Alex A. regenerates the genomes files.
-        gtype = data.get('genome_set', None)
-        if gtype and gtype.name == 'PATRIC/IMG' and 'genome_accession' in data:
-            ga = data.pop('genome_accession')
-            if '.' in ga:
-                data['patric_genome_accession'] = ga
-            else:
-                data['img_genome_accession'] = ga
+        data['result_directory'] = get_genome_result_path(genome_dir)
+        data['catalogue'] = self.catalogue_obj
 
         g, created = emg_models.Genome.objects.using(self.database).update_or_create(
             accession=data['accession'],
@@ -370,14 +379,15 @@ class Command(BaseCommand):
                                                                                 alias=defaults['alias'],
                                                                                 defaults=defaults)
 
-    def upload_release_files(self):
-        self.upload_release_file(self.release_obj,
-                                 'Phylogenetic tree of release genomes',
+    def upload_catalogue_files(self):
+        self.upload_catalogue_file(self.catalogue_obj,
+                                 'Phylogenetic tree of catalogue genomes',
                                  'json',
                                  'phylo_tree.json')
 
-    def upload_release_file(self, release, desc_label, file_format, filename):
+    def upload_catalogue_file(self, catalogue, desc_label, file_format, filename):
         defaults = self.prepare_file_upload(desc_label, file_format, filename, None, None)
-        emg_models.ReleaseDownload.objects.using(self.database).update_or_create(release=release,
-                                                                                 alias=defaults['alias'],
-                                                                                 defaults=defaults)
+        emg_models.GenomeCatalogueDownload.objects.using(self.database).update_or_create(
+            genome_catalogue=catalogue,
+            alias=defaults['alias'],
+            defaults=defaults)

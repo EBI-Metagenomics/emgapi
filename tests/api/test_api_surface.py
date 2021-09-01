@@ -64,7 +64,7 @@ class TestAPISurface:
             'genomeset': '/genomeset',
             'kegg-classes': '/kegg-classes',
             'kegg-modules': '/kegg-modules',
-            'release': '/release'
+            'genome-catalogues': '/genome-catalogues'
         }
 
         for k in expected:
@@ -87,7 +87,8 @@ class TestAPISurface:
             'emgapi_v1:goterms',
             'emgapi_v1:interproidentifier',
             'emgapi_v1:organisms',
-            'emgapi_v1:genomes'
+            'emgapi_v1:genomes',
+            'emgapi_v1:genome-catalogues',
         ]
     )
     @pytest.mark.django_db
@@ -153,6 +154,9 @@ class TestAPISurface:
               'study', 'run', 'assembly', 'downloads', 'taxonomy-ssu',
               'taxonomy-lsu', 'taxonomy-itsunite', 'taxonomy-itsonedb',
               'taxonomy', 'antismash-gene-clusters', 'genome-properties']),
+            ('GenomeCatalogue', 'genome-catalogues', 'emgapi_v1:genome-catalogues', [],
+             ['name', 'description', 'downloads',
+              'genomes', 'biome', 'version']),
         ]
     )
     @pytest.mark.django_db
@@ -231,6 +235,13 @@ class TestAPISurface:
                 baker.make('emgapi.SuperStudyStudy',
                            study=_study, super_study=_ss)
                 baker.make('emgapi.SuperStudyBiome', super_study=_ss, biome=_biome)
+            elif _model in ('Genome', ):
+                _biome = baker.make('emgapi.Biome', pk=pk)
+                baker.make('emgapi.Genome', pk=pk, biome=_biome)
+            elif _model in ('GenomeCatalogue', ):
+                _biome = baker.make('emgapi.Biome', pk=pk)
+                # _genome = baker.make('emgapi.Genome', pk=pk, biome=_biome)
+                baker.make('emgapi.GenomeCatalogue', pk=pk, biome=_biome, catalogue_id='dummy')
             else:
                 baker.make(model_name, pk=pk)
 

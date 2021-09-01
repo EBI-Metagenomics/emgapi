@@ -168,6 +168,12 @@ try:
 except KeyError:
     DEBUG = False
 
+# Serve downloads via Django when running locally in docker (without Nginx)
+try:
+    DOWNLOADS_BYPASS_NGINX = EMG_CONF['emg']['downloads_bypass_nginx']
+except KeyError:
+    DOWNLOADS_BYPASS_NGINX = False
+
 # Admin panel
 try:
     ADMIN = EMG_CONF['emg']['admin']
@@ -576,6 +582,9 @@ SPECTACULAR_SETTINGS = {
         'description': EMG_CONF.get('emg', {}).get('documentation', {}).get('external_docs_description'),
         'url': EMG_CONF.get('emg', {}).get('documentation', {}).get('external_docs_url')
     },
+    "SWAGGER_UI_SETTINGS": {
+        "docExpansion": None,
+    }
 }
 
 # MongoDB

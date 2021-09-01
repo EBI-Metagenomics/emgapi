@@ -493,10 +493,6 @@ class GenomeSetAdmin(admin.ModelAdmin):
     ]
 
 
-class GenomeReleasesInline(admin.TabularInline):
-    model = emg_models.Genome.releases.through
-
-
 class GenomeDownloads(admin.TabularInline):
     model = emg_models.GenomeDownload
     raw_id_fields = [
@@ -507,6 +503,7 @@ class GenomeDownloads(admin.TabularInline):
         'description',
         'file_format'
     ]
+    extra = 0
 
 
 @admin.register(emg_models.Genome)
@@ -527,6 +524,7 @@ class GenomeAdmin(admin.ModelAdmin):
     ]
     search_fields = [
         'accession',
+        'catalogue__name',
         'type',
         'ena_genome_accession',
         'ena_sample_accession',
@@ -536,11 +534,11 @@ class GenomeAdmin(admin.ModelAdmin):
         'ncbi_study_accession',
         'img_genome_accession',
         'patric_genome_accession',
-        'biome'
+        'biome__lineage'
     ]
     list_filter = [
         'genome_set',
-        'releases',
+        'catalogue__catalogue_id',
         'type',
     ]
     raw_id_fields = [
@@ -553,23 +551,36 @@ class GenomeAdmin(admin.ModelAdmin):
         'antismash_geneclusters'
     ]
     inlines = [
-        GenomeReleasesInline,
         GenomeDownloads
     ]
 
 
-@admin.register(emg_models.Release)
-class GenomeReleaseAdmin(admin.ModelAdmin):
-    readonly_fields = [
-        'id'
+class GenomeCatalogueDownloads(admin.TabularInline):
+    model = emg_models.GenomeCatalogueDownload
+    raw_id_fields = [
+        'genome_catalogue',
+        'parent_id',
+        'group_type',
+        'subdir',
+        'description',
+        'file_format'
     ]
+    extra = 0
+
+
+@admin.register(emg_models.GenomeCatalogue)
+class GenomeCatalogueAdmin(admin.ModelAdmin):
     list_display = [
-        'version',
-        'first_created',
-        'last_update'
+        'catalogue_id',
+        'name',
+        'biome',
+        'last_update',
     ]
-    exclude = [
-        'genomes'
+    raw_id_fields = [
+        'biome',
+    ]
+    inlines = [
+        GenomeCatalogueDownloads
     ]
 
 
@@ -756,8 +767,8 @@ class GenomeDownloadAdmin(admin.ModelAdmin, BaseDownloadAdmin):
     ]
 
 
-@admin.register(emg_models.ReleaseDownload)
-class ReleaseDownloadAdmin(admin.ModelAdmin, BaseDownloadAdmin):
+@admin.register(emg_models.GenomeCatalogueDownload)
+class GenomeCatalogueDownloadAdmin(admin.ModelAdmin, BaseDownloadAdmin):
     list_display = BaseDownloadAdmin.list_display + [
-        'release'
+        'genome_catalogue'
     ]
