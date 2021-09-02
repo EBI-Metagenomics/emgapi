@@ -10,6 +10,7 @@ from celery import Celery, group
 from celery.result import GroupResult
 from celery.app.control import Control
 
+from test_utils.emg_fixtures import *  # noqa
 
 SIGNATURE_FILE_NAME = ""
 MOCKED_JOB_ID = "MOCKED_JOB_ID"
@@ -49,6 +50,7 @@ def mock_inspect(*args, **kwargs):
 def mock_group_result(*args, **kwargs):
     return ResultMock()
 
+@pytest.mark.django_db
 class TestStudyAPI:
     def test_genome_search_get(self, client):
         url = reverse("emgapi_v1:genomes-gather-list")
