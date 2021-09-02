@@ -1267,7 +1267,7 @@ class GenomeSearchGatherViewSet(viewsets.GenericViewSet):
     def create(self, request):
         names = {}
         mag_catalog = self.request.POST.get('mag_catalog', None)
-        mag_choices = dict(emg_serializers.MAG_CATALOG_CHOICES)
+        mag_choices = dict(emg_serializers.get_MAG_choices())
         if mag_catalog not in mag_choices:
             raise Exception(f"The provided mag_catalog is not valid, it should be one of {mag_choices.keys()}")
         for file_uploaded in request.FILES.getlist('file_uploaded'):
