@@ -61,7 +61,7 @@ class TestStudyAPI:
         assert "data" in rsp
         assert "sourmash" in rsp["data"]
 
-    def test_genome_search_post_with_non_valid_files(self, client):
+    def test_genome_search_post_with_non_valid_files(self, client, genome_catalogue):
         url = reverse("emgapi_v1:genomes-gather-list")
         data = {
             'file_uploaded': create_file_object('x'),
@@ -76,7 +76,7 @@ class TestStudyAPI:
         with pytest.raises(Exception, match='Unable to parse the uploaded file'):
             client.post(url, data, format='multipart')
 
-    def test_genome_search_post_with_valid_file(self, client, monkeypatch):
+    def test_genome_search_post_with_valid_file(self, client, monkeypatch, genome_catalogue):
         monkeypatch.setattr(group, "apply_async", mock_group_result)
         url = reverse("emgapi_v1:genomes-gather-list")
         data = {

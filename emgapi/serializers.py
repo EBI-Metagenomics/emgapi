@@ -1584,7 +1584,6 @@ class GenomeDownloadSerializer(BaseDownloadSerializer):
 
 
 def get_MAG_choices():
-    print('MAG-Size', emg_models.GenomeCatalogue.objects.count())
     return [
         (cat.catalogue_id, cat.name,)
         for cat in emg_models.GenomeCatalogue.objects.all()
