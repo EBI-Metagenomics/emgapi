@@ -1295,16 +1295,28 @@ class GenomeSearchStatusView(APIView):
 
     def get(self, request, job_id):
         response = get_sourmash_job_status(job_id, request)
+        if response is None:
+            raise Http404()
         return Response(response)
 
 
 class GenomeSearchResultsView(APIView):
 
     def get(self, request, job_id):
-        file = get_result_file(job_id)
-        response = HttpResponse(file, content_type='text/csv')
-        response['Content-Disposition'] = f'attachment; filename={job_id}.csv'
-        return response
+        file, content_type = get_result_file(job_id)
+        if file is None:
+            raise Http404()
+        if content_type == 'text/csv':
+            return HttpResponse(file, headers={
+                'Content-Type': content_type,
+                'Content-Disposition': f'attachment; filename={job_id}.csv',
+            })
+        if content_type == 'application/gzip':
+            return HttpResponse(file, headers={
+                'Content-Type': content_type,
+                'Content-Disposition': f'attachment; filename={job_id}.tgz',
+            })
+        return None
 
 
 class GenomeDownloadViewSet(emg_mixins.ListModelMixin,

@@ -1,10 +1,13 @@
 import json
+import tarfile
+import hashlib
+import os.path
+
 from django.conf import settings
 from rest_framework.reverse import reverse
 from celery import Celery, group
 from celery.app.control import Control
 
-import hashlib
 
 
 def is_signature_valid(signature):
@@ -99,7 +102,10 @@ def get_sourmash_job_status(job_id, request):
     ping = inspect.ping()
     reserved = None
     group_result = app.GroupResult.restore(job_id, app=app)
+    if group_result is None:
+        return None
     signatures = []
+    has_results = False
     for result in group_result.results:
         signature = {
             "job_id": result.id,
@@ -112,6 +118,7 @@ def get_sourmash_job_status(job_id, request):
         if result.status == 'SUCCESS':
             signature['result'] = result.result
             signature['results_url'] = reverse('genomes-results', args=[result.id], request=request)
+            has_results = True
         elif result.status == 'FAILURE':
             signature['reason'] = str(result.result)
         elif result.status == 'PENDING' and ping is not None:
@@ -125,10 +132,36 @@ def get_sourmash_job_status(job_id, request):
     return {
         'group_id': job_id,
         'signatures': signatures,
+        'results_url': reverse('genomes-results', args=[job_id], request=request) if has_results else None,
         'worker_status': "OFFLINE" if ping is None else "OK"
     }
 
+def generate_tgz_from_group_id(group_id):
+    group_result = app.GroupResult.restore(group_id, app=app)
+    if group_result is None:
+        return None
+    tar = tarfile.open(f"{settings.SOURMASH['results_path']}/{group_id}.tgz", "w:gz")
+    for result in group_result.results:
+        if result.status == "SUCCESS":
+            tar.add(
+                f"{settings.SOURMASH['results_path']}/{result.id}.csv",
+                arcname=f"{result.id}.csv",
+            )
+    tar.close()
 
 def get_result_file(job_id):
     path = f"{settings.SOURMASH['results_path']}/{job_id}.csv"
-    return open(path, 'r')
+    try:
+        return open(path, 'r'), 'text/csv'
+    except FileNotFoundError:
+        gzpath = f"{settings.SOURMASH['results_path']}/{job_id}.tgz"
+        try:
+            return open(gzpath, 'rb'), 'application/gzip'
+        except FileNotFoundError:
+            generate_tgz_from_group_id(job_id)
+            try:
+                return open(gzpath, 'rb'), 'application/gzip'
+            except FileNotFoundError:
+                return None, None
+
+
