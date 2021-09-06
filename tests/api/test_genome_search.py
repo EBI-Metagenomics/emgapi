@@ -112,3 +112,5 @@ class TestStudyAPI:
         lines = response.content.decode('utf8').split('\n')
         assert len(lines) > 1
         assert "intersect_bp" in lines[0]
+
+# ⚠️ Add tests to get results of a group (i.e. getting a .tgz)

@@ -1,13 +1,14 @@
 import json
 import tarfile
 import hashlib
-import os.path
 
 from django.conf import settings
 from rest_framework.reverse import reverse
 from celery import Celery, group
 from celery.app.control import Control
 
+
+RESULTS_EXPIRE = 60 * 60 * 24 * 30  # 30 days
 
 
 def is_signature_valid(signature):
@@ -18,7 +19,8 @@ def is_signature_valid(signature):
 
 app = Celery('tasks', broker=settings.SOURMASH['celery_broker'], backend=settings.SOURMASH['celery_backend'])
 app.conf.update(
-    result_extended=True
+    result_extended=True,
+    result_expires=RESULTS_EXPIRE,
 )
 control = Control(app=app)
 
