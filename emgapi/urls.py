@@ -195,6 +195,12 @@ router.register(
 )
 
 router.register(
+    r'biomes/(?P<lineage>[^/]+)/genome-catalogues',
+    views_relations.BiomeGenomeCatalogueRelationshipViewSet,
+    basename='biomes-genome-catalogues'
+)
+
+router.register(
     r'publications/(?P<pubmed_id>[0-9\.]+)/studies',
     views_relations.PublicationStudyRelationshipViewSet,
     basename='publications-studies'
@@ -347,25 +353,21 @@ router.register(
 )
 
 router.register(
-    r'genomes/(?P<accession>[^/]+)/releases',
-    views_relations.GenomeReleasesViewSet,
-    basename='genome-releases'
-)
-router.register(
-    r'release',
-    views.ReleaseViewSet,
-    basename='release'
-)
-router.register(
-    r'release/(?P<version>[^/]+)/genomes',
-    views_relations.ReleaseGenomesViewSet,
-    basename='release-genomes'
+    r'genome-catalogues',
+    views.GenomeCatalogueViewSet,
+    basename='genome-catalogues'
 )
 
 router.register(
-    r'release/(?P<version>[^/]+)/downloads',
-    views.ReleaseDownloadViewSet,
-    basename='release-download'
+    r'genome-catalogues/(?P<catalogue_id>[^/]+)/genomes',
+    views_relations.GenomeCatalogueGenomeRelationshipViewSet,
+    basename='genome-catalogue-genomes'
+)
+
+router.register(
+    r'genome-catalogues/(?P<catalogue_id>[^/]+)/downloads',
+    views.GenomeCatalogueDownloadViewSet,
+    basename='genome-catalogue-downloads'
 )
 
 router.register(

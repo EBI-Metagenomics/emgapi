@@ -27,9 +27,9 @@ class MgnifyDashboard(Dashboard):
             models=(
                 'emgapi.models.Genome',
                 'emgapi.models.GenomeDownload',
+                'emgapi.models.GenomeCatalogue',
+                'emgapi.models.GenomeCatalogueDownload',
                 'emgapi.models.GenomeSet',
-                'emgapi.models.Release',
-                'emgapi.models.ReleaseDownload',
                 'emgapi.models.GeographicLocation'
             ),
         ))

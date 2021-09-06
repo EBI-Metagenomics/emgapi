@@ -14,9 +14,12 @@
 # limitations under the License.
 
 import logging
+import os
 import re
 
+from django.conf import settings
 from django.db.models import Q
+from django.http import HttpResponse
 
 logger = logging.getLogger(__name__)
 
@@ -98,3 +101,27 @@ def parse_ebi_search_entry(entry, fields):
         if value:
             row.append(value[0] if len(value) else "")
     return row
+
+
+def prepare_results_file_download_response(path_in_results, alias):
+    """Create a response with NGINX redirect header set,
+    or attach content if DOWNLOADS_BYPASS_NGINX is set.
+
+    :param path_in_results: file path relative to RESULTS_DIR
+    :param alias: filename alias for response
+    :return: Http Response
+    """
+    response = HttpResponse()
+    response['Content-Type'] = 'application/octet-stream'
+    response['Content-Disposition'] = \
+        'attachment; filename={0}'.format(alias)
+
+    # Workaround for non-nginx hosts, like running locally in docker
+    if settings.DOWNLOADS_BYPASS_NGINX:
+        logger.warning('DOWNLOADS_BYPASS_NGINX is true, so serving download directly as Django response '
+                       '(not via NGINX redirect)')
+        with open(os.path.join(settings.RESULTS_DIR, path_in_results.lstrip('/')), 'r') as file:
+            response.content = file.read()
+    else:
+        response['X-Accel-Redirect'] = '/results/{0}'.format(path_in_results.lstrip('/'))
+    return response

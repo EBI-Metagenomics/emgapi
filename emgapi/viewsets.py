@@ -253,12 +253,38 @@ class BaseGenomeGenericViewSet(viewsets.GenericViewSet):
         'completeness',
         'contamination',
         'num_genomes',
+        'num_genomes_total',
         'num_proteins',
         'last_update',
     )
 
-    ordering = ('-accession',)
+    ordering = ('accession',)
 
     search_fields = (
         'accession',
+    )
+
+
+class BaseGenomeCatalogueGenericViewSet(viewsets.GenericViewSet):
+    serializer_class = emg_serializers.GenomeCatalogueSerializer
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+        emg_filters.getUnambiguousOrderingFilterByField('catalogue_id'),
+    )
+
+    ordering_fields = (
+        'catalogue_id',
+        'name',
+        'last_update',
+    )
+
+    ordering = ('catalogue_id',)
+
+    search_fields = (
+        'catalogue_id',
+        'name',
+        'biome__biome_name',
     )
