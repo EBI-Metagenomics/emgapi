@@ -19,6 +19,8 @@ import logging
 
 from django.conf import settings
 from django.core.mail import send_mail
+from django.core.validators import validate_email
+from rest_framework.exceptions import ValidationError
 
 from rest_framework_json_api import serializers
 
@@ -28,7 +30,6 @@ logger = logging.getLogger(__name__)
 
 
 class SubmitterSerializer(serializers.Serializer):
-
     first_name = serializers.CharField(max_length=30)
     surname = serializers.CharField(max_length=50)
     email_address = serializers.CharField(max_length=200)
@@ -42,7 +43,6 @@ class SubmitterSerializer(serializers.Serializer):
 
 
 class EmailSerializer(serializers.Serializer):
-
     from_email = serializers.EmailField(required=True)
     subject = serializers.CharField(required=True)
     message = serializers.CharField(required=True)
@@ -58,11 +58,26 @@ class EmailSerializer(serializers.Serializer):
 
 
 class NotifySerializer(serializers.Serializer):
-
-    from_email = serializers.EmailField(max_length=200, required=True)
+    from_email = serializers.CharField(max_length=200, required=True)
+    cc = serializers.CharField(max_length=200, allow_blank=True, required=False)
     subject = serializers.CharField(max_length=500, required=True)
     message = serializers.CharField(max_length=1000, required=True)
     is_consent = serializers.BooleanField(default=False, required=False)
+
+    def is_valid(self):
+        for field in ['from_email', 'cc']:
+            if field not in self.initial_data:
+                continue
+            for email in self.initial_data[field].split(','):
+                email = email.strip()
+                if email == '':
+                    continue
+                try:
+                    validate_email(email)
+                except ValidationError as exc:
+                    self.errors.append(exc.detail)
+                    return False
+        return super().is_valid()
 
     def create(self, validated_data):
         """Create an RT ticket.
@@ -84,6 +99,8 @@ class NotifySerializer(serializers.Serializer):
             "Subject": n.subject,
             "Text": n.message.replace("\n", ';')
         }
+        if n.cc:
+            ticket["Cc"] = n.cc
 
         if n.is_consent:
             ticket["Queue"] = ena_queue
