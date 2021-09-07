@@ -61,7 +61,8 @@ def set_catalogue_biome(apps, schema_editor):
 def calculate_genomes_count(apps, schema_editor):
     GenomeCatalogue = apps.get_model("emgapi", "GenomeCatalogue")
     for catalogue in GenomeCatalogue.objects.all():
-        catalogue.calculate_genome_count()
+        catalogue.genome_count = catalogue.genomes.count()
+        catalogue.save()
 
 
 def make_first_release_for_genome_be_only_genome_catalogue(apps, schema_editor):
