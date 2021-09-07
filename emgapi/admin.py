@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from django.contrib import admin
+from django.contrib import admin, messages
 from django import forms
 
 from .widgets import BiomePredictionWidget
@@ -568,6 +568,16 @@ class GenomeCatalogueDownloads(admin.TabularInline):
     extra = 0
 
 
+def recalculate_genome_count(modeladmin, request, queryset):
+    for catalogue in queryset:
+        catalogue.calculate_genome_count()
+        messages.add_message(request, messages.SUCCESS, f'Catalogue {catalogue.catalogue_id} saved '
+                                                        f'with genome_count={catalogue.genome_count}')
+
+
+recalculate_genome_count.short_description = 'Recalculate genome count'
+
+
 @admin.register(emg_models.GenomeCatalogue)
 class GenomeCatalogueAdmin(admin.ModelAdmin):
     list_display = [
@@ -582,6 +592,8 @@ class GenomeCatalogueAdmin(admin.ModelAdmin):
     inlines = [
         GenomeCatalogueDownloads
     ]
+    readonly_fields = ['genome_count']
+    actions = [recalculate_genome_count, ]
 
 
 @admin.register(emg_models.KeggClass)

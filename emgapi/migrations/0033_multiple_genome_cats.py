@@ -58,6 +58,12 @@ def set_catalogue_biome(apps, schema_editor):
         catalogue.save()
 
 
+def calculate_genomes_count(apps, schema_editor):
+    GenomeCatalogue = apps.get_model("emgapi", "GenomeCatalogue")
+    for catalogue in GenomeCatalogue.objects.all():
+        catalogue.calculate_genome_count()
+
+
 def make_first_release_for_genome_be_only_genome_catalogue(apps, schema_editor):
     Genome = apps.get_model("emgapi", "Genome")
     for genome in Genome.objects.all():
@@ -240,8 +246,17 @@ class Migration(migrations.Migration):
             name='genomecataloguedownload',
             table='GENOME_CATALOGUE_DOWNLOAD',
         ),
+        migrations.AddField(
+            model_name='genomecatalogue',
+            name='genome_count',
+            field=models.IntegerField(blank=True, db_column='GENOME_COUNT', null=True),
+        ),
         migrations.RunPython(
             set_catalogue_biome,
+            migrations.RunPython.noop
+        ),
+        migrations.RunPython(
+            calculate_genomes_count,
             migrations.RunPython.noop
         ),
     ]

@@ -253,11 +253,12 @@ class BaseGenomeGenericViewSet(viewsets.GenericViewSet):
         'completeness',
         'contamination',
         'num_genomes',
+        'num_genomes_total',
         'num_proteins',
         'last_update',
     )
 
-    ordering = ('-accession',)
+    ordering = ('accession',)
 
     search_fields = (
         'accession',

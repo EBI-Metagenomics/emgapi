@@ -70,6 +70,7 @@ class Command(BaseCommand):
             self.upload_dir(d)
 
         self.upload_catalogue_files()
+        self.catalogue_obj.calculate_genome_count()
 
     def get_catalogue(self, catalogue_name, catalogue_version, gold_biome, catalogue_dir):
         logging.warning('GOLD')

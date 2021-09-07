@@ -123,5 +123,5 @@ def prepare_results_file_download_response(path_in_results, alias):
         with open(os.path.join(settings.RESULTS_DIR, path_in_results.lstrip('/')), 'r') as file:
             response.content = file.read()
     else:
-        response['X-Accel-Redirect'] = '/results{0}'.format(path_in_results)
+        response['X-Accel-Redirect'] = '/results/{0}'.format(path_in_results.lstrip('/'))
     return response
