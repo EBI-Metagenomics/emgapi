@@ -624,3 +624,13 @@ try:
     EBI_SEARCH_URL = EMG_CONF['emg']['ebi_search_url']
 except KeyError:
     EBI_SEARCH_URL = 'https://wwwdev.ebi.ac.uk/ebisearch/ws/rest/'
+
+try:
+    SOURMASH = EMG_CONF['emg']['sourmash']
+except KeyError:
+    SOURMASH = {
+        "signatures_path": "/tmp/signatures",
+        "results_path": "/tmp/results",
+        "celery_broker": "redis://localhost:6379/0",
+        "celery_backend": "redis://localhost:6379/0",
+    }

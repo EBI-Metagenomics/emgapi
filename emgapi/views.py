@@ -24,7 +24,7 @@ import requests
 
 from django.conf import settings
 from django.db.models import Prefetch, Count, Q
-from django.http import Http404, HttpResponseBadRequest, StreamingHttpResponse
+from django.http import Http404, HttpResponseBadRequest, HttpResponse, StreamingHttpResponse
 from django.middleware import csrf
 from django.shortcuts import get_object_or_404
 from django.views.decorators.clickjacking import xframe_options_exempt
@@ -32,12 +32,14 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 
 from rest_framework import filters, viewsets, mixins, permissions, renderers, status
 from rest_framework.decorators import action
 from rest_framework.views import APIView
-
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework_csv.misc import Echo
+from rest_framework.reverse import reverse
 
 from . import models as emg_models
 from . import serializers as emg_serializers
@@ -47,6 +49,8 @@ from . import viewsets as emg_viewsets
 from . import utils as emg_utils
 from . import renderers as emg_renderers
 from . import filters as emg_filters
+from .sourmash import validate_sourmash_signature, save_signature, send_sourmash_jobs, get_sourmash_job_status, \
+    get_result_file
 
 from emgcli.pagination import FasterCountPagination
 
@@ -1215,7 +1219,6 @@ class GenomeCatalogueViewSet(mixins.RetrieveModelMixin,
 class GenomeViewSet(mixins.RetrieveModelMixin,
                     emg_mixins.ListModelMixin,
                     viewsets.GenericViewSet):
-    
     serializer_class = emg_serializers.GenomeSerializer
     filter_class = emg_filters.GenomeFilter
 
@@ -1251,6 +1254,69 @@ class GenomeViewSet(mixins.RetrieveModelMixin,
 
     queryset = emg_models.Genome.objects.all() \
         .select_related('biome', 'geo_origin', 'catalogue')
+
+
+class GenomeSearchGatherViewSet(viewsets.GenericViewSet):
+    serializer_class = emg_serializers.GenomeUploadSearchSerializer
+    permission_classes = [AllowAny]
+    parser_classes = [FormParser, MultiPartParser]
+
+    def list(self, request):
+        return Response("You need to use the POST method to submit a sourmash job")
+
+    def create(self, request):
+        names = {}
+        mag_catalog = self.request.POST.get('mag_catalog', None)
+        mag_choices = dict(emg_serializers.get_MAG_choices())
+        if mag_catalog not in mag_choices:
+            raise Exception(f"The provided mag_catalog is not valid, it should be one of {mag_choices.keys()}")
+        for file_uploaded in request.FILES.getlist('file_uploaded'):
+            try:
+                validate_sourmash_signature(
+                    file_uploaded.file.read().decode('utf-8')
+                )
+            except Exception:
+                raise Exception("Unable to parse the uploaded file")
+
+            names[file_uploaded.name] = save_signature(file_uploaded)
+        job_id, children_ids = send_sourmash_jobs(names, mag_catalog)
+        response = {
+            "message": "Your files {} were successfully uploaded. "
+                       "Use the given URL to check the status of the new job".format(",".join(names.keys())),
+            "job_id": job_id,
+            "children_ids": children_ids,
+            "signatures_received": names.keys(),
+            "status_URL": reverse('genomes-status', args=[job_id], request=request)
+        }
+        return Response(response)
+
+
+class GenomeSearchStatusView(APIView):
+
+    def get(self, request, job_id):
+        response = get_sourmash_job_status(job_id, request)
+        if response is None:
+            raise Http404()
+        return Response(response)
+
+
+class GenomeSearchResultsView(APIView):
+
+    def get(self, request, job_id):
+        file, content_type = get_result_file(job_id)
+        if file is None:
+            raise Http404()
+        if content_type == 'text/csv':
+            return HttpResponse(file, headers={
+                'Content-Type': content_type,
+                'Content-Disposition': f'attachment; filename={job_id}.csv',
+            })
+        if content_type == 'application/gzip':
+            return HttpResponse(file, headers={
+                'Content-Type': content_type,
+                'Content-Disposition': f'attachment; filename={job_id}.tgz',
+            })
+        return None
 
 
 class GenomeDownloadViewSet(emg_mixins.ListModelMixin,
@@ -1543,7 +1609,7 @@ class BiomePrediction(APIView):
 
     def get(self, request):
         url = settings.BIOME_PREDICTION_URL
-        response = requests.get(url, params={"text":  request.GET.get("text", "")})
+        response = requests.get(url, params={"text": request.GET.get("text", "")})
         if not response.ok:
             raise Exception("Error with the biome prediction API." +
                             "Status Code: " + str(response.status_code))

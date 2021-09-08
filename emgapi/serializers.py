@@ -22,6 +22,7 @@ from collections import OrderedDict
 from django.db.models import Q
 
 from rest_framework import serializers as drf_serializers
+from rest_framework.serializers import FileField, ChoiceField
 
 from rest_framework_json_api import serializers, relations, utils
 
@@ -1580,6 +1581,21 @@ class GenomeDownloadSerializer(BaseDownloadSerializer):
             'group_type',
             'file_checksum'
         )
+
+
+def get_MAG_choices():
+    return [
+        (cat.catalogue_id, cat.name,)
+        for cat in emg_models.GenomeCatalogue.objects.all()
+    ]
+
+
+class GenomeUploadSearchSerializer(drf_serializers.Serializer):
+    file_uploaded = FileField()
+    mag_catalog = ChoiceField(get_MAG_choices())
+
+    class Meta:
+        fields = ['file_uploaded', 'mag_catalog']
 
 
 class GenomeCatalogueDownloadSerializer(BaseDownloadSerializer):

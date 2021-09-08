@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from django.conf.urls import url
 from django.conf import settings
 from django.urls import path
 
@@ -315,6 +316,11 @@ router.register(
     views.GenomeViewSet,
     basename='genomes'
 )
+router.register(
+    r'genomes-search/gather',
+    views.GenomeSearchGatherViewSet,
+    basename='genomes-gather'
+)
 
 router.register(
     r'genomes/(?P<accession>[^/]+)/cogs',
@@ -412,7 +418,13 @@ urlpatterns = [
         name='banner-message'),
     path(r'v1/ebi-search-download/<str:domain>',
         views.EBISearchCSVDownload.as_view(),
-        name='ebi-search-download')
+        name='ebi-search-download'),
+    url(r'^v1/genomes-search/status/(?P<job_id>[^/]+)',
+        views.GenomeSearchStatusView.as_view(),
+        name='genomes-status'),
+    url(r'^v1/genomes-search/results/(?P<job_id>[^/]+)',
+        views.GenomeSearchResultsView.as_view(),
+        name='genomes-results')
 ]
 
 if settings.ADMIN:

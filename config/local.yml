@@ -24,6 +24,11 @@ emg:
     db: emg
     host: mongodb
 
+  sourmash:
+    signatures_path: '/tmp/signatures'
+    results_path: '/tmp/results'
+    celery_broker: 'redis://localhost:6379/0'
+    celery_backend: 'redis://localhost:6379/1'
   documentation:
     title: 'MGnify API'
     external_docs_url: 'https://emg-docs.readthedocs.io/en/latest/api.html'
