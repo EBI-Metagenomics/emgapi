@@ -839,7 +839,7 @@ class BiomeTreeViewSet(mixins.ListModelMixin,
     )
 
     search_fields = (
-        'biome_name',
+        '@biome_name',
         'lineage',
     )
 
