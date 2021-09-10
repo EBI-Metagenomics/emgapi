@@ -517,6 +517,9 @@ class AssemblySerializer(ExplicitFieldsModelSerializer,
         read_only=True,
         source='get_runs',
         model=emg_models.Run,
+        related_link_view_name='emgapi_v1:assemblies-runs-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
         related_link_self_view_name='emgapi_v1:runs-detail',
         related_link_self_lookup_field='accession'
     )
@@ -688,6 +691,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
         'sample': 'emgapi.serializers.SampleSerializer',
         'study': 'emgapi.serializers.StudySerializer',
         'downloads': 'emgapi.serializers.AnalysisJobDownloadSerializer',
+        'assembly': 'emgapi.serializers.AssemblySerializer',
     }
 
     url = serializers.HyperlinkedIdentityField(
