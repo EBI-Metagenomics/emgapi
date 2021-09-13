@@ -23,7 +23,7 @@ PyYAML==5.4.1
 django-slack==5.16.0
 
 # log handler
-ConcurrentLogHandler~=0.9.1
+concurrent-log-handler~=0.9.19
 
 Django==3.2.4
 djangorestframework==3.12.4

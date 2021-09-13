@@ -59,7 +59,7 @@ except KeyError:
 if not os.path.exists(LOGDIR):
     os.makedirs(LOGDIR)
 
-LOGGING_CLASS = 'cloghandler.ConcurrentRotatingFileHandler'
+LOGGING_CLASS = 'concurrent_log_handler.ConcurrentRotatingFileHandler'
 LOGGING_FORMATER = (
     '%(asctime)s %(levelname)5.5s [%(name)30.30s]'
     ' (proc.%(process)5.5d) %(funcName)s:%(lineno)d %(message)s')
