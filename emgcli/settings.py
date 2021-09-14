@@ -174,6 +174,8 @@ try:
 except KeyError:
     DOWNLOADS_BYPASS_NGINX = False
 
+GENOME_SEARCH_PROXY = 'http://gs-mgnify2.ebi.ac.uk:8001/search' if DOWNLOADS_BYPASS_NGINX else 'http://nosearch'  # uses nginx on prod
+
 # Admin panel
 try:
     ADMIN = EMG_CONF['emg']['admin']
