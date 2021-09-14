@@ -99,3 +99,9 @@ if settings.DEBUG:
     urlpatterns = [
         path(r'__debug__/', include(debug_toolbar.urls)),
     ] + urlpatterns
+
+if settings.DOWNLOADS_BYPASS_NGINX:
+    from emgapi.utils import GenomeSearchProxyView
+    urlpatterns += [
+        path(r'v1/genome-search', GenomeSearchProxyView.as_view(), name='genome-search')  # proxied by nginx on prod
+    ]

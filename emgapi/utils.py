@@ -17,9 +17,13 @@ import logging
 import os
 import re
 
+import requests
 from django.conf import settings
 from django.db.models import Q
 from django.http import HttpResponse
+from rest_framework.parsers import FormParser
+from rest_framework.permissions import AllowAny
+from rest_framework.views import APIView
 
 logger = logging.getLogger(__name__)
 
@@ -125,3 +129,12 @@ def prepare_results_file_download_response(path_in_results, alias):
     else:
         response['X-Accel-Redirect'] = '/results/{0}'.format(path_in_results.lstrip('/'))
     return response
+
+
+class GenomeSearchProxyView(APIView):
+    permission_classes = [AllowAny]
+    parser_classes = [FormParser]
+
+    def post(self, request):
+        response = requests.post(settings.GENOME_SEARCH_PROXY, data=request.data)
+        return HttpResponse(response.text, content_type='application/json')
