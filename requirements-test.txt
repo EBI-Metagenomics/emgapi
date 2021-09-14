@@ -3,10 +3,10 @@ multidict==4.5.2; python_version < '3.5'
 pytest==4.6.11; python_version < '3.5'
 
 multidict==5.1.0; python_version > '3.4'
-pytest==6.2.4; python_version > '3.4'
+pytest==6.2.5; python_version > '3.4'
 
 pytest-django==4.4.0
-pytest-xdist==2.2.1
+pytest-xdist==2.3.0
 model_bakery==1.3.2
 mock_services==0.3.1
 mongomock==3.23.0
@@ -14,7 +14,7 @@ jsonapi-client==0.9.9
 pytest-cov==2.12.1
 
 pandas==0.25.3; python_version < '3.7'
-pandas==1.2.3; python_version > '3.6'
+pandas==1.3.2; python_version > '3.6'
 
 responses==0.10.15; python_version < '3.5'
-responses==0.13.3; python_version > '3.4'
+responses==0.13.4; python_version > '3.4'
