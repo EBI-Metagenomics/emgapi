@@ -1023,7 +1023,7 @@ class ExperimentTypeManager(models.Manager):
 
 class ExperimentType(models.Model):
     experiment_type_id = models.SmallIntegerField(
-        db_column='EXPERIMENT_TYPE_ID', primary_key=True, )
+        db_column='EXPERIMENT_TYPE_ID', primary_key=True)
     experiment_type = models.CharField(
         db_column='EXPERIMENT_TYPE', max_length=30,
         help_text="Experiment type, e.g. metagenomic")
@@ -1165,6 +1165,7 @@ class Assembly(models.Model):
         on_delete=models.SET_NULL, null=True, blank=True)
 
     coverage = models.IntegerField(db_column="COVERAGE", null=True, blank=True)
+
     min_gap_length = models.IntegerField(db_column="MIN_GAP_LENGTH", null=True, blank=True)
 
     objects = AssemblyManager()

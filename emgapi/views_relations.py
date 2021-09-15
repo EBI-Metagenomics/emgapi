@@ -416,7 +416,6 @@ class RunAnalysisViewSet(emg_mixins.ListModelMixin,
 
     ordering_fields = (
         'pipeline',
-        # 'accession',
     )
 
     ordering = ('-pipeline',)
@@ -1004,7 +1003,6 @@ class AssemblyAnalysisViewSet(emg_mixins.ListModelMixin,
 
     ordering_fields = (
         'pipeline',
-        # 'accession',
     )
 
     ordering = ('-pipeline',)
@@ -1037,6 +1035,52 @@ class AssemblyAnalysisViewSet(emg_mixins.ListModelMixin,
         return super(AssemblyAnalysisViewSet, self) \
             .list(request, *args, **kwargs)
 
+
+class AssemblyRunsViewSet(emg_mixins.ListModelMixin,
+                          viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.RunSerializer
+
+    filter_class = emg_filters.RunFilter
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'accession',
+    )
+
+    ordering = ('-accession',)
+
+    lookup_field = 'accession'
+    lookup_value_regex = '[^/]+'
+
+    def get_serializer_class(self):
+        return super(AssemblyRunsViewSet, self).get_serializer_class()
+
+    def get_queryset(self):
+        assembly = get_object_or_404(
+            emg_models.Assembly,
+            Q(accession=self.kwargs['accession']) |
+            Q(wgs_accession=self.kwargs['accession']) |
+            Q(legacy_accession=self.kwargs['accession'])
+        )
+        queryset = emg_models.Run.objects \
+            .available(self.request) \
+            .filter(assemblies__in=[assembly])
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves the runs for the given accession
+        Example:
+        ---
+        `/assemblies/ERZ1385375/runs`
+        """
+        return super(AssemblyRunsViewSet, self) \
+            .list(request, *args, **kwargs)
 
 class GenomeCogsRelationshipsViewSet(emg_mixins.ListModelMixin,
                                      viewsets.GenericViewSet):
