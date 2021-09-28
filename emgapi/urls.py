@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from django.conf.urls import url
 from django.conf import settings
 from django.urls import path
 
@@ -164,6 +165,12 @@ router.register(
 )
 
 router.register(
+    r'assemblies/(?P<accession>[^/]+)/runs',
+    views_relations.AssemblyRunsViewSet,
+    basename='assemblies-runs'
+)
+
+router.register(
     r'studies/(?P<accession>[^/]+)'
     r'/pipelines/(?P<release_version>[0-9\.]+)/file',
     views_relations.StudiesDownloadViewSet,
@@ -192,6 +199,12 @@ router.register(
     r'biomes/(?P<lineage>[^/]+)/genomes',
     views_relations.BiomeGenomeRelationshipViewSet,
     basename='biomes-genomes'
+)
+
+router.register(
+    r'biomes/(?P<lineage>[^/]+)/genome-catalogues',
+    views_relations.BiomeGenomeCatalogueRelationshipViewSet,
+    basename='biomes-genome-catalogues'
 )
 
 router.register(
@@ -309,6 +322,11 @@ router.register(
     views.GenomeViewSet,
     basename='genomes'
 )
+router.register(
+    r'genomes-search/gather',
+    views.GenomeSearchGatherViewSet,
+    basename='genomes-gather'
+)
 
 router.register(
     r'genomes/(?P<accession>[^/]+)/cogs',
@@ -347,25 +365,21 @@ router.register(
 )
 
 router.register(
-    r'genomes/(?P<accession>[^/]+)/releases',
-    views_relations.GenomeReleasesViewSet,
-    basename='genome-releases'
-)
-router.register(
-    r'release',
-    views.ReleaseViewSet,
-    basename='release'
-)
-router.register(
-    r'release/(?P<version>[^/]+)/genomes',
-    views_relations.ReleaseGenomesViewSet,
-    basename='release-genomes'
+    r'genome-catalogues',
+    views.GenomeCatalogueViewSet,
+    basename='genome-catalogues'
 )
 
 router.register(
-    r'release/(?P<version>[^/]+)/downloads',
-    views.ReleaseDownloadViewSet,
-    basename='release-download'
+    r'genome-catalogues/(?P<catalogue_id>[^/]+)/genomes',
+    views_relations.GenomeCatalogueGenomeRelationshipViewSet,
+    basename='genome-catalogue-genomes'
+)
+
+router.register(
+    r'genome-catalogues/(?P<catalogue_id>[^/]+)/downloads',
+    views.GenomeCatalogueDownloadViewSet,
+    basename='genome-catalogue-downloads'
 )
 
 router.register(
@@ -410,7 +424,13 @@ urlpatterns = [
         name='banner-message'),
     path(r'v1/ebi-search-download/<str:domain>',
         views.EBISearchCSVDownload.as_view(),
-        name='ebi-search-download')
+        name='ebi-search-download'),
+    url(r'^v1/genomes-search/status/(?P<job_id>[^/]+)',
+        views.GenomeSearchStatusView.as_view(),
+        name='genomes-status'),
+    url(r'^v1/genomes-search/results/(?P<job_id>[^/]+)',
+        views.GenomeSearchResultsView.as_view(),
+        name='genomes-results')
 ]
 
 if settings.ADMIN:

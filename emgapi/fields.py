@@ -40,9 +40,9 @@ class DownloadHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
             kwargs = {
                 'accession': obj.genome.accession
             }
-        elif hasattr(obj, 'release'):
+        elif hasattr(obj, 'genome_catalogue'):
             kwargs = {
-                'version': obj.release.version
+                'catalogue_id': obj.genome_catalogue.catalogue_id,
             }
         kwargs['alias'] = obj.alias
 

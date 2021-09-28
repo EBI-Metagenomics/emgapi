@@ -49,7 +49,7 @@ class TestGenomes:
             ("Protein sequence FASTA file of accessory genes", "Accessory predicted CDS",),
             ("Protein sequence FASTA file of core and accessory genes", "Core & Accessory predicted CDS",),
             ("Genome GFF file with various sequence annotations", "Genome Annotation"),
-            ("Phylogenetic tree of release genomes", 'Phylogenetic tree of release genomes'),
+            ("Phylogenetic tree of catalogue genomes", 'Phylogenetic tree of catalogue genomes'),
             ("Genome GFF file with antiSMASH geneclusters annotations", "Genome antiSMASH Annotation"),
             ("Tree generated from the pairwise Mash distances of conspecific genomes",
              "Pairwise Mash distances of conspecific genomes")
@@ -76,13 +76,14 @@ class TestGenomes:
 
     @pytest.mark.django_db
     def test_import_genomes(self, client):
-        """Assert tha the import worked for genome 'MGYG-HGUT-00776'
+        """Assert that the import worked for genome 'MGYG-HGUT-00776'
         """
         self._setup()
         baker.make('emgapi.Biome',
                    lineage='root:Host-Associated:Human:Digestive System:Large intestine')
         path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test_data/genomes/')
-        call_command('import_genomes', path, '1.0')
+        call_command('import_genomes', path, 'hgut/1.0', 'UHGG', '1.0',
+                     'root:Host-Associated:Human:Digestive System:Large intestine')
 
         genome = emg_models.Genome.objects.get(accession='MGYG-HGUT-00776')
 

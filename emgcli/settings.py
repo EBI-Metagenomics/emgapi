@@ -59,7 +59,7 @@ except KeyError:
 if not os.path.exists(LOGDIR):
     os.makedirs(LOGDIR)
 
-LOGGING_CLASS = 'cloghandler.ConcurrentRotatingFileHandler'
+LOGGING_CLASS = 'concurrent_log_handler.ConcurrentRotatingFileHandler'
 LOGGING_FORMATER = (
     '%(asctime)s %(levelname)5.5s [%(name)30.30s]'
     ' (proc.%(process)5.5d) %(funcName)s:%(lineno)d %(message)s')
@@ -167,6 +167,14 @@ try:
     DEBUG = EMG_CONF['emg']['debug']
 except KeyError:
     DEBUG = False
+
+# Serve downloads via Django when running locally in docker (without Nginx)
+try:
+    DOWNLOADS_BYPASS_NGINX = EMG_CONF['emg']['downloads_bypass_nginx']
+except KeyError:
+    DOWNLOADS_BYPASS_NGINX = False
+
+GENOME_SEARCH_PROXY = 'http://gs-mgnify2.ebi.ac.uk:8001/search' if DOWNLOADS_BYPASS_NGINX else 'http://nosearch'  # uses nginx on prod
 
 # Admin panel
 try:
@@ -576,6 +584,9 @@ SPECTACULAR_SETTINGS = {
         'description': EMG_CONF.get('emg', {}).get('documentation', {}).get('external_docs_description'),
         'url': EMG_CONF.get('emg', {}).get('documentation', {}).get('external_docs_url')
     },
+    "SWAGGER_UI_SETTINGS": {
+        "docExpansion": None,
+    }
 }
 
 # MongoDB
@@ -615,3 +626,13 @@ try:
     EBI_SEARCH_URL = EMG_CONF['emg']['ebi_search_url']
 except KeyError:
     EBI_SEARCH_URL = 'https://wwwdev.ebi.ac.uk/ebisearch/ws/rest/'
+
+try:
+    SOURMASH = EMG_CONF['emg']['sourmash']
+except KeyError:
+    SOURMASH = {
+        "signatures_path": "/tmp/signatures",
+        "results_path": "/tmp/results",
+        "celery_broker": "redis://localhost:6379/0",
+        "celery_backend": "redis://localhost:6379/0",
+    }

@@ -16,7 +16,7 @@
 import logging
 
 from django.http import HttpResponse
-from django.db.models import Prefetch, Count, F, Q
+from django.db.models import Prefetch, Count, Q
 from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -416,7 +416,6 @@ class RunAnalysisViewSet(emg_mixins.ListModelMixin,
 
     ordering_fields = (
         'pipeline',
-        # 'accession',
     )
 
     ordering = ('-pipeline',)
@@ -547,33 +546,6 @@ class ExperimentTypeAnalysisRelationshipViewSet(  # noqa
             .list(request, *args, **kwargs)
 
 
-# class PipelineStudyRelationshipViewSet(emg_mixins.ListModelMixin,
-#                                        emg_viewsets.BaseStudyGenericViewSet):  # noqa
-#
-#     lookup_field = 'release_version'
-#
-#     def get_queryset(self):
-#         pipeline = get_object_or_404(
-#             emg_models.Pipeline,
-#             release_version=self.kwargs[self.lookup_field])
-#         queryset = emg_models.Study.objects \
-#             .available(self.request) \
-#             .filter(samples__analysis__pipeline=pipeline)
-#         return queryset
-#
-#     def list(self, request, *args, **kwargs):
-#         """
-#         Retrieves list of samples for the given pipeline version
-#         Example:
-#         ---
-#         `/pipeline/3.0/studies` retrieve linked studies
-#
-#         `/pipeline/3.0/studies?include=samples` with samples
-#         """
-#         return super(PipelineStudyRelationshipViewSet, self) \
-#             .list(request, *args, **kwargs)
-
-
 class ExperimentTypeSampleRelationshipViewSet(emg_mixins.ListModelMixin,
                                               emg_viewsets.BaseSampleGenericViewSet):  # noqa
 
@@ -681,6 +653,55 @@ class BiomeGenomeRelationshipViewSet(emg_mixins.ListModelMixin,
 
         """
         return super(BiomeGenomeRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class BiomeGenomeCatalogueRelationshipViewSet(emg_mixins.ListModelMixin,
+                                              emg_viewsets.BaseGenomeCatalogueGenericViewSet):
+    lookup_field = 'lineage'
+
+    def get_queryset(self):
+        lineage = self.kwargs[self.lookup_field]
+        obj = get_object_or_404(emg_models.Biome, lineage=lineage)
+        queryset = emg_models.GenomeCatalogue.objects.filter(biome=obj)
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of genome catalogues for the given biome
+        Example:
+        ---
+        `/biomes/root:Environmental:Aquatic/genome-catalogues` retrieve genome
+        catalogues for the aquatic biome
+
+        Filter by:
+        ---
+        `/biomes/root:Environmental:Aquatic/genome-catalogues?name=fishes`
+        filtered by catalogue name
+
+        """
+        return super(BiomeGenomeCatalogueRelationshipViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class GenomeCatalogueGenomeRelationshipViewSet(emg_mixins.ListModelMixin,
+                                               emg_viewsets.BaseGenomeGenericViewSet):  # noqa
+    lookup_field = 'catalogue_id'
+
+    def get_queryset(self):
+        catalogue_id = self.kwargs[self.lookup_field]
+        if catalogue_id == 'all':
+            genomes = emg_models.Genome.objects.all()
+        else:
+
+            catalogue = get_object_or_404(
+                emg_models.GenomeCatalogue,
+                catalogue_id=catalogue_id)
+            genomes = catalogue.genomes.all()
+        return genomes
+
+    def list(self, request, *args, **kwargs):
+        return super(GenomeCatalogueGenomeRelationshipViewSet, self) \
             .list(request, *args, **kwargs)
 
 
@@ -817,7 +838,7 @@ class BiomeTreeViewSet(mixins.ListModelMixin,
     )
 
     search_fields = (
-        'biome_name',
+        '@biome_name',
         'lineage',
     )
 
@@ -982,7 +1003,6 @@ class AssemblyAnalysisViewSet(emg_mixins.ListModelMixin,
 
     ordering_fields = (
         'pipeline',
-        # 'accession',
     )
 
     ordering = ('-pipeline',)
@@ -1015,6 +1035,52 @@ class AssemblyAnalysisViewSet(emg_mixins.ListModelMixin,
         return super(AssemblyAnalysisViewSet, self) \
             .list(request, *args, **kwargs)
 
+
+class AssemblyRunsViewSet(emg_mixins.ListModelMixin,
+                          viewsets.GenericViewSet):
+
+    serializer_class = emg_serializers.RunSerializer
+
+    filter_class = emg_filters.RunFilter
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'accession',
+    )
+
+    ordering = ('-accession',)
+
+    lookup_field = 'accession'
+    lookup_value_regex = '[^/]+'
+
+    def get_serializer_class(self):
+        return super(AssemblyRunsViewSet, self).get_serializer_class()
+
+    def get_queryset(self):
+        assembly = get_object_or_404(
+            emg_models.Assembly,
+            Q(accession=self.kwargs['accession']) |
+            Q(wgs_accession=self.kwargs['accession']) |
+            Q(legacy_accession=self.kwargs['accession'])
+        )
+        queryset = emg_models.Run.objects \
+            .available(self.request) \
+            .filter(assemblies__in=[assembly])
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves the runs for the given accession
+        Example:
+        ---
+        `/assemblies/ERZ1385375/runs`
+        """
+        return super(AssemblyRunsViewSet, self) \
+            .list(request, *args, **kwargs)
 
 class GenomeCogsRelationshipsViewSet(emg_mixins.ListModelMixin,
                                      viewsets.GenericViewSet):
@@ -1146,48 +1212,6 @@ class GenomeAntiSmashGeneClustersRelationshipsViewSet(emg_mixins.ListModelMixin,
             .selected_related('') \
             .filter(genome=genome)
         return queryset
-
-
-class ReleaseGenomesViewSet(emg_mixins.ListModelMixin,
-                            emg_viewsets.BaseGenomeGenericViewSet):  # noqa
-    lookup_field = 'version'
-
-    def get_queryset(self):
-        genome_version = self.kwargs[self.lookup_field]
-        if genome_version == 'all':
-            genomes = emg_models.Genome.objects.all()
-        else:
-            if genome_version == 'latest':
-                genome_release = emg_models.Release.objects \
-                    .order_by('-version').last()
-            else:
-                genome_release = get_object_or_404(
-                    emg_models.Release,
-                    version=genome_version)
-            genomes = genome_release.genomes.all()
-
-        return genomes
-
-    def list(self, request, *args, **kwargs):
-        return super(ReleaseGenomesViewSet, self) \
-            .list(request, *args, **kwargs)
-
-
-class GenomeReleasesViewSet(emg_mixins.ListModelMixin,
-                            viewsets.GenericViewSet):
-    lookup_field = 'accession'
-
-    serializer_class = emg_serializers.ReleaseSerializer
-
-    def get_queryset(self):
-        genome = get_object_or_404(
-            emg_models.Genome,
-            accession=self.kwargs[self.lookup_field])
-        return genome.releases.all()
-
-    def list(self, request, *args, **kwargs):
-        return super(GenomeReleasesViewSet, self) \
-            .list(request, *args, **kwargs)
 
 
 class GenomeSetGenomes(emg_mixins.ListModelMixin,

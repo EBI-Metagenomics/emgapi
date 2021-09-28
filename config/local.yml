@@ -8,14 +8,15 @@ emg:
       PORT: 3306
 
   admin: True
+  downloads_bypass_nginx: True
   auth_backends: 
     - 'emgapi.backends.EMGBackend'
     - 'django.contrib.auth.backends.ModelBackend'
 
   cors_origin_allow_all: true
   debug: true
-  results_dir: '/opt/results'
-  static_root: '/opt/staticfiles'
+  results_dir: '/opt/emgapi/results'
+  static_root: '/opt/emgapi/staticfiles'
   emg_backend_auth: 'https://www.ebi.ac.uk/ena/auth/login'
   secure_cookies: false
 
@@ -23,6 +24,11 @@ emg:
     db: emg
     host: mongodb
 
+  sourmash:
+    signatures_path: '/tmp/signatures'
+    results_path: '/tmp/results'
+    celery_broker: 'redis://localhost:6379/0'
+    celery_backend: 'redis://localhost:6379/1'
   documentation:
     title: 'MGnify API'
     external_docs_url: 'https://emg-docs.readthedocs.io/en/latest/api.html'

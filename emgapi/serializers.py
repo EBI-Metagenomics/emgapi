@@ -22,6 +22,7 @@ from collections import OrderedDict
 from django.db.models import Q
 
 from rest_framework import serializers as drf_serializers
+from rest_framework.serializers import FileField, ChoiceField
 
 from rest_framework_json_api import serializers, relations, utils
 
@@ -516,6 +517,9 @@ class AssemblySerializer(ExplicitFieldsModelSerializer,
         read_only=True,
         source='get_runs',
         model=emg_models.Run,
+        related_link_view_name='emgapi_v1:assemblies-runs-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
         related_link_self_view_name='emgapi_v1:runs-detail',
         related_link_self_lookup_field='accession'
     )
@@ -687,6 +691,7 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
         'sample': 'emgapi.serializers.SampleSerializer',
         'study': 'emgapi.serializers.StudySerializer',
         'downloads': 'emgapi.serializers.AnalysisJobDownloadSerializer',
+        'assembly': 'emgapi.serializers.AssemblySerializer',
     }
 
     url = serializers.HyperlinkedIdentityField(
@@ -1465,6 +1470,7 @@ class AntiSmashCountSerializer(ExplicitFieldsModelSerializer):
 class GenomeSerializer(ExplicitFieldsModelSerializer):
     included_serializers = {
         'download': 'emgapi.serializers.GenomeDownloadSerializer',
+        'catalogue': 'emgapi.serializers.GenomeCatalogueSerializer'
     }
     url = serializers.HyperlinkedIdentityField(
         view_name='emgapi_v1:genomes-detail',
@@ -1536,23 +1542,16 @@ class GenomeSerializer(ExplicitFieldsModelSerializer):
     def get_antismash_geneclusters(self, obj):
         return None
 
-    # relationships
-    releases = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
-        many=True,
-        read_only=True,
-        source='get_releases',
-        model=emg_models.Release,
-        related_link_self_view_name='emgapi_v1:release-detail',
-        related_link_self_lookup_field='version'
-    )
-
-    def get_releases(self, obj):
-        return obj.releases.all()
-
     biome = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name='emgapi_v1:biomes-detail',
         lookup_field='lineage',
+    )
+
+    catalogue = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emgapi_v1:genome-catalogues-detail',
+        lookup_field='catalogue_id'
     )
 
     geographic_range = serializers.ListField()
@@ -1588,14 +1587,32 @@ class GenomeDownloadSerializer(BaseDownloadSerializer):
         )
 
 
-class ReleaseDownloadSerializer(BaseDownloadSerializer):
+def get_MAG_choices():
+    return [
+        (cat.catalogue_id, cat.name,)
+        for cat in emg_models.GenomeCatalogue.objects.all()
+    ]
+
+
+class GenomeUploadSearchSerializer(drf_serializers.Serializer):
+    def __init__(self, user, *args, **kwargs):
+        super(GenomeUploadSearchSerializer, self).__init__(*args, **kwargs)
+        self.fields['mag_catalogue'] = ChoiceField(get_MAG_choices())
+
+    file_uploaded = FileField()
+
+    class Meta:
+        fields = ['file_uploaded', 'mag_catalog']
+
+
+class GenomeCatalogueDownloadSerializer(BaseDownloadSerializer):
     url = emg_fields.DownloadHyperlinkedIdentityField(
-        view_name='emgapi_v1:release-download-detail',
+        view_name='emgapi_v1:genome-catalogue-downloads-detail',
         lookup_field='alias',
     )
 
     class Meta:
-        model = emg_models.ReleaseDownload
+        model = emg_models.GenomeCatalogueDownload
         fields = (
             'id',
             'url',
@@ -1607,16 +1624,16 @@ class ReleaseDownloadSerializer(BaseDownloadSerializer):
         )
 
 
-class ReleaseSerializer(ExplicitFieldsModelSerializer,
-                        serializers.HyperlinkedModelSerializer):
+class GenomeCatalogueSerializer(ExplicitFieldsModelSerializer,
+                                serializers.HyperlinkedModelSerializer):
     included_serializers = {
         'genomes': 'emgapi.serializers.GenomeSerializer',
-        'download': 'emgapi.serializers.ReleaseDownloadSerializer'
+        'download': 'emgapi.serializers.GenomeCatalogueDownloadSerializer'
     }
 
     url = serializers.HyperlinkedIdentityField(
-        view_name='emgapi_v1:release-detail',
-        lookup_field='version',
+        view_name='emgapi_v1:genome-catalogues-detail',
+        lookup_field='catalogue_id',
     )
 
     genomes = relations.SerializerMethodHyperlinkedRelatedField(
@@ -1624,9 +1641,15 @@ class ReleaseSerializer(ExplicitFieldsModelSerializer,
         model=emg_models.Genome,
         many=True,
         read_only=True,
-        related_link_view_name='emgapi_v1:release-genomes-list',
-        related_link_url_kwarg='version',
-        related_link_lookup_field='version',
+        related_link_view_name='emgapi_v1:genome-catalogue-genomes-list',
+        related_link_url_kwarg='catalogue_id',
+        related_link_lookup_field='catalogue_id',
+    )
+
+    biome = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        view_name='emgapi_v1:biomes-detail',
+        lookup_field='lineage',
     )
 
     def get_genomes(self, obj):
@@ -1639,25 +1662,29 @@ class ReleaseSerializer(ExplicitFieldsModelSerializer,
         many=True,
         read_only=True,
         source='get_downloads',
-        model=emg_models.ReleaseDownload,
-        related_link_view_name='emgapi_v1:release-download-list',
-        related_link_url_kwarg='version',
-        related_link_lookup_field='version',
+        model=emg_models.GenomeCatalogueDownload,
+        related_link_view_name='emgapi_v1:genome-catalogue-downloads-list',
+        related_link_url_kwarg='catalogue_id',
+        related_link_lookup_field='catalogue_id',
     )
 
     def get_downloads(self, obj):
         return None
 
     class Meta:
-        model = emg_models.Release
+        model = emg_models.GenomeCatalogue
         fields = (
-            'version',
-            'last_update',
-            'first_created',
-            'genome_count',
-            'genomes',
             'url',
-            'downloads'
+            'name',
+            'biome',
+            'description',
+            'genomes',
+            'protein_catalogue_name',
+            'protein_catalogue_description',
+            'downloads',
+            'genome_count',
+            'version',
+            'last_update'
         )
 
 
