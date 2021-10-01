@@ -1164,6 +1164,25 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         """
         return super(PublicationViewSet, self).list(request, *args, **kwargs)
 
+    @action(
+        detail=True,
+        methods=['get', ],
+        url_name='europe-pmc-annotations',
+    )
+    def europe_pmc_annotations(self, request, pubmed_id=None):
+        if not pubmed_id:
+            raise Http404
+        annots = requests.get('https://www.ebi.ac.uk/europepmc/annotations_api/annotationsByArticleIds', params={
+            'articleIds': f'MED:{pubmed_id}'
+        })
+        try:
+            assert annots.status_code == 200
+            data = annots.json()[0]['annotations']
+        except (AssertionError, KeyError, IndexError):
+            raise Http404
+        else:
+            return Response(data=data)
+
 
 class GenomeCatalogueViewSet(mixins.RetrieveModelMixin,
                              emg_mixins.ListModelMixin,
