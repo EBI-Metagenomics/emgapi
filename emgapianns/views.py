@@ -34,24 +34,23 @@ from rest_framework import filters
 from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.settings import api_settings
-from rest_framework import viewsets, status
+from rest_framework import status
 from rest_framework.exceptions import NotFound
-from rest_framework.pagination import CursorPagination
 
 from mongoengine.base.datastructures import EmbeddedDocumentList
+from rest_framework_mongoengine.viewsets import ReadOnlyModelViewSet as MongoReadOnlyModelViewSet
 
 from emgapi import serializers as emg_serializers
 from emgapi import models as emg_models
 from emgapi import filters as emg_filters
 from emgapi import utils as emg_utils
+from emgapi.mixins import ExcessiveCSVException
 
 from . import serializers as m_serializers
 from . import models as m_models
 from . import pagination as m_pagination
 from . import viewsets as m_viewsets
 from . import mixins as m_mixins
-
 
 logger = logging.getLogger(__name__)
 
@@ -927,19 +926,16 @@ class OrganismAnalysisRelationshipViewSet(m_viewsets.ListReadOnlyModelViewSet):
             .list(request, *args, **kwargs)
 
 
-class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
+class AnalysisContigViewSet(MongoReadOnlyModelViewSet):
 
     lookup_field = 'contig_id'
     lookup_value_regex = '[^/]+'
-
-    filter_backends = (
-        filters.OrderingFilter,
-    )
 
     ordering = ('id',)
 
     serializer_class = m_serializers.AnalysisJobContigSerializer
     pagination_class = m_pagination.CursorPagination
+    pagination_class.ordering = ordering
 
     def get_object(self, ):
         try:
@@ -956,6 +952,13 @@ class AnalysisContigViewSet(viewsets.ReadOnlyModelViewSet):
 
         queryset = m_models.AnalysisJobContig.objects
         request = self.request
+
+        # Do not paginate CSV
+        if request.accepted_renderer.format == 'csv':
+            if queryset.count() > 50 * settings.EMG_DEFAULT_LIMIT:
+                raise ExcessiveCSVException
+            else:
+                self.pagination_class = None
 
         query_filter = M_Q()
 
