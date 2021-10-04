@@ -13,7 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import itertools
 import os
 import logging
 import inflection
@@ -1172,16 +1172,22 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
     def europe_pmc_annotations(self, request, pubmed_id=None):
         if not pubmed_id:
             raise Http404
-        annots = requests.get('https://www.ebi.ac.uk/europepmc/annotations_api/annotationsByArticleIds', params={
-            'articleIds': f'MED:{pubmed_id}'
+        epmc = requests.get('https://www.ebi.ac.uk/europepmc/annotations_api/annotationsByArticleIds', params={
+            'articleIds': f'MED:{pubmed_id}',
+            'provider': 'Metagenomics'
         })
         try:
-            assert annots.status_code == 200
-            data = annots.json()[0]['annotations']
+            assert epmc.status_code == 200
+            annotations = epmc.json()[0]['annotations']
+            grouped_annotations = {
+                anno_type: sorted([anno for anno in annots], key=lambda anno: anno.get('exact', '').lower())
+                for anno_type, annots
+                in itertools.groupby(annotations, key=lambda annotation: annotation.get('type', 'Other'))
+            }
         except (AssertionError, KeyError, IndexError):
             raise Http404
         else:
-            return Response(data=data)
+            return Response(data={'annotation_types': grouped_annotations})
 
 
 class GenomeCatalogueViewSet(mixins.RetrieveModelMixin,
