@@ -1166,8 +1166,7 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
 
     @action(
         detail=True,
-        methods=['get', ],
-        url_name='europe-pmc-annotations',
+        methods=['get', ]
     )
     def europe_pmc_annotations(self, request, pubmed_id=None):
         if not pubmed_id:
