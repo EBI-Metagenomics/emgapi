@@ -13,7 +13,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import itertools
 import os
 import logging
 import inflection
@@ -49,6 +48,7 @@ from . import viewsets as emg_viewsets
 from . import utils as emg_utils
 from . import renderers as emg_renderers
 from . import filters as emg_filters
+from .europe_pmc import get_publication_annotations
 from .sourmash import validate_sourmash_signature, save_signature, send_sourmash_jobs, get_sourmash_job_status, \
     get_result_file
 
@@ -1172,22 +1172,7 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
     def europe_pmc_annotations(self, request, pubmed_id=None):
         if not pubmed_id:
             raise Http404
-        epmc = requests.get('https://www.ebi.ac.uk/europepmc/annotations_api/annotationsByArticleIds', params={
-            'articleIds': f'MED:{pubmed_id}',
-            'provider': 'Metagenomics'
-        })
-        try:
-            assert epmc.status_code == 200
-            annotations = epmc.json()[0]['annotations']
-            grouped_annotations = {
-                anno_type: sorted([anno for anno in annots], key=lambda anno: anno.get('exact', '').lower())
-                for anno_type, annots
-                in itertools.groupby(annotations, key=lambda annotation: annotation.get('type', 'Other'))
-            }
-        except (AssertionError, KeyError, IndexError):
-            raise Http404
-        else:
-            return Response(data={'annotation_types': grouped_annotations})
+        return Response(data=get_publication_annotations(pubmed_id))
 
 
 class GenomeCatalogueViewSet(mixins.RetrieveModelMixin,
