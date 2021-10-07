@@ -14,6 +14,7 @@ media/
 venv/
 database/
 results/
+fixtures/*.sig
 
 .vscode/
 
