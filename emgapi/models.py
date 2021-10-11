@@ -286,8 +286,8 @@ class BiomeManager(models.Manager):
 
 
 class Biome(models.Model):
-    biome_id = models.SmallIntegerField(
-        db_column='BIOME_ID', primary_key=True)
+    # biome_id = models.SmallIntegerField(
+    #     db_column='BIOME_ID', primary_key=True)
     biome_name = models.CharField(
         db_column='BIOME_NAME', max_length=60,
         help_text="Biome name")
@@ -299,15 +299,15 @@ class Biome(models.Model):
         db_column='DEPTH')
     lineage = models.CharField(
         db_column='LINEAGE', max_length=500,
-        help_text="Biome lineage")
+        help_text="Biome lineage", primary_key=True)
 
     objects = BiomeManager()
 
     class Meta:
         db_table = 'BIOME_HIERARCHY_TREE'
-        ordering = ('biome_id',)
+        ordering = ('lft',)
         unique_together = (
-            ('biome_id', 'biome_name'),
+            ('lineage', 'biome_name'),
         )
 
     def __str__(self):
