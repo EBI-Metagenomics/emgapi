@@ -1,6 +1,7 @@
 import itertools
 
 import requests
+from django.conf import settings
 from django.http import Http404
 
 TITLE = 'title'
@@ -37,9 +38,9 @@ def get_publication_annotations(pubmed_id):
     :param pubmed_id: the publication identified in pubmed
     :return: grouped and sorted annotations, dict of lists of dicts
     """
-    epmc = requests.get('https://www.ebi.ac.uk/europepmc/annotations_api/annotationsByArticleIds', params={
+    epmc = requests.get(settings.EUROPE_PMC['annotations_endpoint'], params={
         'articleIds': f'MED:{pubmed_id}',
-        'provider': 'Metagenomics'
+        'provider': settings.EUROPE_PMC['annotations_provider']
     })
     try:
         assert epmc.status_code == 200
