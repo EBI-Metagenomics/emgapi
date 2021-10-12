@@ -13,7 +13,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import os
 import logging
 import inflection
@@ -49,6 +48,7 @@ from . import viewsets as emg_viewsets
 from . import utils as emg_utils
 from . import renderers as emg_renderers
 from . import filters as emg_filters
+from .europe_pmc import get_publication_annotations
 from .sourmash import validate_sourmash_signature, save_signature, send_sourmash_jobs, get_sourmash_job_status, \
     get_result_file
 
@@ -1163,6 +1163,15 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         `/publications?search=text`
         """
         return super(PublicationViewSet, self).list(request, *args, **kwargs)
+
+    @action(
+        detail=True,
+        methods=['get', ]
+    )
+    def europe_pmc_annotations(self, request, pubmed_id=None):
+        if not pubmed_id:
+            raise Http404
+        return Response(data=get_publication_annotations(pubmed_id))
 
 
 class GenomeCatalogueViewSet(mixins.RetrieveModelMixin,
