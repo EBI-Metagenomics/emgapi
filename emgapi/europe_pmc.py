@@ -1,4 +1,5 @@
 import itertools
+from functools import reduce
 
 import requests
 from django.conf import settings
@@ -7,6 +8,9 @@ from django.http import Http404
 TITLE = 'title'
 DESCRIPTION = 'description'
 ANNOTATIONS = 'annotations'
+MENTIONS = 'mentions'
+ANNOTATION_TYPE = 'annotation_type'
+ANNOTATION_TEXT = 'annotation_text'
 
 # based on http://blog.europepmc.org/2020/11/europe-pmc-publications-metagenomics-annotations.html
 annotation_type_humanize_map = {
@@ -32,9 +36,13 @@ annotation_type_humanize_map = {
 sample_processing_annotation_types = ['Sequencing', 'LS', 'LCM', 'Kit', 'Primer']
 
 
+def icase_annotation_text(annotation):
+    return annotation.get('exact', '').lower()
+
+
 def get_publication_annotations(pubmed_id):
     """
-    Fetch EMERALD-provided Europe PMC metagenomics annotations for a paper, and group them by type.
+    Fetch EMERALD-provided Europe PMC metagenomics annotations for a paper, and group them by type and text.
     :param pubmed_id: the publication identified in pubmed
     :return: grouped and sorted annotations, dict of lists of dicts
     """
@@ -48,29 +56,45 @@ def get_publication_annotations(pubmed_id):
     except (AssertionError, KeyError, IndexError):
         raise Http404
 
-    # Group by annotation type, sort within group by icase annotation text
-    grouped_annotations = {
-        anno_type: sorted([anno for anno in annots], key=lambda anno: anno.get('exact', '').lower())
-        for anno_type, annots
-        in itertools.groupby(annotations, key=lambda annotation: annotation.get('type', 'Other'))
-    }
+    # Group by annotation type, and within type by icase annotation text
+    # Sort within each level by number of annotations inside.
+    annotations.sort(key=lambda annotation: annotation.get('type'))
+    grouped_annotations = sorted(
+        [
+            {
+                ANNOTATION_TYPE: anno_type,
+                ANNOTATIONS: sorted(
+                    [
+                        {
+                            ANNOTATION_TEXT: annot_text_icase,
+                            MENTIONS: list(identical_annots)
+                        }
+                        for annot_text_icase, identical_annots
+                        in itertools.groupby(sorted(annots_of_type, key=icase_annotation_text),
+                                             key=icase_annotation_text)
+                    ],
+                    key=lambda annotation: len(annotation[MENTIONS]), reverse=True
+                ),
+                **annotation_type_humanize_map.get(anno_type, {TITLE: anno_type, DESCRIPTION: ''})
+            }
+            for anno_type, annots_of_type
+            in itertools.groupby(annotations, key=lambda annotation: annotation.get('type', 'Other'))
+        ],
+        key=lambda group: reduce(
+            lambda annot_count_of_type, group: annot_count_of_type + len(group[MENTIONS]),
+            group[ANNOTATIONS],
+            0
+        ), reverse=True
+    )
 
     # Split off special sample processing annotation groups
     sample_processing_annotations = []
     other_annotations = []
 
-    for anno_type, annots in grouped_annotations.items():
-        humanized_annotation_group = {
-            **annotation_type_humanize_map.get(anno_type, {TITLE: anno_type, DESCRIPTION: ''}),
-            ANNOTATIONS: annots
-        }
-        if anno_type in sample_processing_annotation_types:
-            sample_processing_annotations.append(humanized_annotation_group)
+    for group in grouped_annotations:
+        if group[ANNOTATION_TYPE] in sample_processing_annotation_types:
+            sample_processing_annotations.append(group)
         else:
-            other_annotations.append(humanized_annotation_group)
-
-    # Sort each group by highest number of annotations of that type
-    sample_processing_annotations.sort(key=lambda group: len(group.get(ANNOTATIONS, [])), reverse=True)
-    other_annotations.sort(key=lambda group: len(group.get(ANNOTATIONS, [])), reverse=True)
+            other_annotations.append(group)
 
     return {'sample_processing': sample_processing_annotations, 'other': other_annotations}
