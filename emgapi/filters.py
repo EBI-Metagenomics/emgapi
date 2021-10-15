@@ -13,7 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import re
 from decimal import Decimal
 
 from django import forms
@@ -32,6 +32,7 @@ from . import utils as emg_utils
 
 from rest_framework import filters as drf_filters
 
+from rest_framework_json_api import filters as drfja_filters
 
 WORD_MATCH_REGEX = r"{0}"
 FLOAT_MATCH_REGEX = r"^[0-9 \.\,]+$"
@@ -99,6 +100,15 @@ class PublicationFilter(django_filters.FilterSet):
             'published_year',
             'include',
         )
+
+
+class JsonApiPlusSearchQueryParameterValidationFilter(drfja_filters.QueryParameterValidationFilter):
+    """
+    Validate query parameters align to JSON:API standard, but also allow the non-standard ?search= param.
+    """
+    query_regex = re.compile(
+        r"^(sort|include|search)$|^(?P<type>filter|fields|page)(\[[\w\.\-]+\])?$"
+    )
 
 
 class BiomeFilter(django_filters.FilterSet):

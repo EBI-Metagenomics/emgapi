@@ -40,6 +40,9 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework_csv.misc import Echo
 from rest_framework.reverse import reverse
 
+from rest_framework_json_api import filters as drfja_filters
+from rest_framework_json_api.django_filters import DjangoFilterBackend as DRFJADjangoFilterBackend
+
 from . import models as emg_models
 from . import serializers as emg_serializers
 from . import mixins as emg_mixins
@@ -216,8 +219,17 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     serializer_class = emg_serializers.BiomeSerializer
 
     filter_backends = (
+        emg_filters.JsonApiPlusSearchQueryParameterValidationFilter,
+        drfja_filters.OrderingFilter,
+        DRFJADjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter,
+    )
+
+    filterset_fields = (
+        'biome_id',
+        'biome_name',
+        'depth',
+        'lineage',
     )
 
     search_fields = (
@@ -228,8 +240,9 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     ordering_fields = (
         'biome_name',
         'lineage',
-        'samples_count',
+        # 'samples_count',
     )
+
     ordering = ('biome_id',)
 
     lookup_field = 'lineage'

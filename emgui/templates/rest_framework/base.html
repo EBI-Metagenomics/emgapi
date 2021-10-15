@@ -1,266 +1,156 @@
+{% extends "rest_framework/base.html" %}
 {% load static %}
 {% load i18n %}
 {% load rest_framework %}
 
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <title>MGnify API: archiving, analysis and integration of metagenomics data. EMBL-EBI</title>
-  <meta name="description" content="EMBL-EBI" /><!-- Describe what this page is about -->
-  <meta name="keywords" content="bioinformatics, europe, institute" /><!-- A few keywords that relate to the content of THIS PAGE (not the whol project) -->
-  <meta name="author" content="EMBL-EBI" /><!-- Your [project-name] here -->
-  <meta name="HandheldFriendly" content="true" />
-  <meta name="MobileOptimized" content="width" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="theme-color" content="#70BDBD" /> <!-- Android Chrome mobile browser tab color -->
+{% block meta %}
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="description" content="MGnify is a freely available hub for the analysis and exploration of metagenomic, metatranscriptomic, amplicon and assembly data." /><!-- Describe what this page is about -->
+    <meta name="keywords" content="metagenomics, genome assemblies" />
+    <meta name="author" content="EMBL-EBI Metagenomics" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="width" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#70BDBD" />
 
-  <!-- Add information on the life cycle of this page -->
-  <meta name="ebi:owner" content="John Doe" /> <!-- Who should be contacted about changes -->
-  <meta name="ebi:review-cycle" content="30" /> <!-- In days, how often should the content be reviewed -->
-  <meta name="ebi:last-review" content="2015-12-20" /> <!-- The last time the content was reviewed -->
-  <meta name="ebi:expiry" content="2016-01-20" /> <!-- When this content is no longer relevant -->
+    <meta name="ebi:owner" content="Rob Finn" />
+    <meta name="ebi:review-cycle" content="180" />
+    <meta name="ebi:last-review" content="2021-10-15" />
+    <meta name="ebi:expiry" content="2022-01-01" />
 
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:creator" content="@EBImetagenomics">
-  <meta name="twitter:site" content="@EBImetagenomics">
-  <meta name="twitter:title" content="MGnify API">
-  <meta name="twitter:description" content="MGnify is a freely available hub for the analysis and exploration of metagenomic, metatranscriptomic, amplicon and assembly data.">
-  <meta name="twitter:image:src" content="https://avatars1.githubusercontent.com/u/32897658?s=200&v=4">
-  <meta name="twitter:image:width" content="280">
-  <meta name="twitter:image:height" content="150">
-  <!-- End Twitter -->
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:creator" content="@EBImetagenomics">
+    <meta name="twitter:site" content="@EBImetagenomics">
+    <meta name="twitter:title" content="MGnify API">
+    <meta name="twitter:description" content="MGnify is a freely available hub for the analysis and exploration of metagenomic, metatranscriptomic, amplicon and assembly data.">
+    <meta name="twitter:image:src" content="https://avatars1.githubusercontent.com/u/32897658?s=200&v=4">
+    <meta name="twitter:image:width" content="280">
+    <meta name="twitter:image:height" content="150">
+    <!-- End Twitter -->
+{% endblock %}
 
-  <!-- If you link to any other sites frequently, consider optimising performance with a DNS prefetch -->
-  <link rel="dns-prefetch" href="//embl.de" />
+{% block title %}
+    MGnify API: archiving, analysis and integration of metagenomics data. EMBL-EBI
+{% endblock %}
 
-  <!-- Custom EMG CSS files -->
-  {% include "rest_framework/include/drf_css.html" %}
-  <!-- End of Custom EMG CSS files -->
+{% block style %}
+    {{ block.super }}
+    {% block bootstrap_theme %}
+      <link rel="stylesheet" type="text/css" href="{% static "rest_framework/css/bootstrap.min.css" %}"/>
+    {% endblock %}
+    <style>
+        @font-face {
+            font-family:"Glyphicons Halflings";
+            src:url("{% static "rest_framework/fonts/glyphicons-halflings-regular.eot" %}");
+            src:url("{% static "rest_framework/fonts/glyphicons-halflings-regular.eot" %}?#iefix") format("embedded-opentype"),
+            url("{% static "rest_framework/fonts/glyphicons-halflings-regular.woff2" %}") format("woff2"),
+            url("{% static "rest_framework/fonts/glyphicons-halflings-regular.woff" %}") format("woff"),
+            url("{% static "rest_framework/fonts/glyphicons-halflings-regular.ttf" %}") format("truetype"),
+            url("{% static "rest_framework/fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular" %}") format("svg")
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://assets.emblstatic.net/vf/v2.5.2/css/styles.css">
 
-  <!-- If you have custom icon, replace these as appropriate.
-       You can generate them at realfavicongenerator.net -->
-  <link rel="icon" type="image/x-icon" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/favicon.ico" />
-  <link rel="icon" type="image/png" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/favicon-32x32.png" />
-  <link rel="icon" type="image/png" sizes="192×192" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/android-chrome-192x192.png" /> <!-- Android (192px) -->
-  <link rel="apple-touch-icon-precomposed" sizes="114x114" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/apple-icon-114x114.png" /> <!-- For iPhone 4 Retina display (114px) -->
-  <link rel="apple-touch-icon-precomposed" sizes="72x72" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/apple-icon-72x72.png" /> <!-- For iPad (72px) -->
-  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/apple-icon-144x144.png" /> <!-- For iPad retinat (144px) -->
-  <link rel="apple-touch-icon-precomposed" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/apple-icon-57x57.png" /> <!-- For iPhone (57px) -->
-  <link rel="mask-icon" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/safari-pinned-tab.svg" color="#ffffff" /> <!-- Safari icon for pinned tab -->
-  <meta name="msapplication-TileColor" content="#2b5797" /> <!-- MS Icons -->
-  <meta name="msapplication-TileImage" content="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/mstile-144x144.png" />
+    <link rel="icon" type="image/x-icon" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/favicon.ico" />
+    <link rel="icon" type="image/png" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="192×192" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/android-chrome-192x192.png" /> <!-- Android (192px) -->
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/apple-icon-114x114.png" /> <!-- For iPhone 4 Retina display (114px) -->
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/apple-icon-72x72.png" /> <!-- For iPad (72px) -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/apple-icon-144x144.png" /> <!-- For iPad retinat (144px) -->
+    <link rel="apple-touch-icon-precomposed" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/apple-icon-57x57.png" /> <!-- For iPhone (57px) -->
+    <link rel="mask-icon" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/safari-pinned-tab.svg" color="#ffffff" /> <!-- Safari icon for pinned tab -->
+    <meta name="msapplication-TileColor" content="#2b5797" /> <!-- MS Icons -->
+    <meta name="msapplication-TileImage" content="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/mstile-144x144.png" />
 
-  <!-- CSS: implied media=all -->
-  <!-- CSS concatenated and minified via ant build script-->
-  <link rel="stylesheet" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/libraries/foundation-6/css/foundation.css" type="text/css" media="all" />
-  <link rel="stylesheet" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/css/ebi-global.css" type="text/css" media="all" />
-  <link rel="stylesheet" href="https://www.ebi.ac.uk/web_guidelines/EBI-Icon-fonts/v1.1/fonts.css" type="text/css" media="all" />
+{% endblock %}
 
-  <!-- Use this CSS file for any custom styling -->
-  <!--
-    <link rel="stylesheet" href="css/custom.css" type="text/css" media="all" />
-  -->
+{% block bodyclass %}vf-body{% endblock %}
 
-  <!-- If you have a custom header image or colour -->
-  <!--
-  <meta name="ebi:localmasthead-color" content="#000" />
-  <meta name="ebi:localmasthead-image" content="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/images/backgrounds/embl-ebi-background.jpg" />
-  -->
+{% block navbar %}
 
-    <!-- you can replace this with theme-[projectname].css. See http://www.ebi.ac.uk/web/style/colour for details of how to do this -->
-  <!-- also inform ES so we can host your colour palette file -->
-  <link rel="stylesheet" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/css/theme-embl-petrol.css" type="text/css" media="all" />
+    <header id="masthead-black-bar" class="clearfix masthead-black-bar | ebi-header-footer vf-content vf-u-fullbleed"></header>
+    <link rel="import" href="https://www.embl.org/api/v1/pattern.html?filter-content-type=article&filter-id=6682&pattern=node-body&source=contenthub" data-target="self" data-embl-js-content-hub-loader>
+    <link rel="stylesheet" href="//ebi.emblstatic.net/web_guidelines/EBI-Icon-fonts/v1.3/fonts.css" type="text/css" media="all" />
+    <script defer="defer" src="//ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.4/js/script.js"></script>
+    <link rel="stylesheet" href="https://assets.emblstatic.net/vf/v2.4.12/assets/ebi-header-footer/ebi-header-footer.css" type="text/css" media="all" />
 
-  <!-- for production the above can be replaced with -->
-  <!--
-  <link rel="stylesheet" href="//www.ebi.ac.uk/web_guidelines/css/compliance/mini/ebi-fluid-embl.css" />
-  -->
+    <section class="vf-hero vf-hero--1200 | vf-u-fullbleed" style="--vf-hero--bg-image: url(https://acxngcvroo.cloudimg.io/v7/https://www.embl.org/files/wp-content/uploads/EBI_webbanner_test_V4.jpg);">
+      <div class="vf-hero__content | vf-box | vf-stack vf-stack--400">
+        <p class="vf-hero__kicker"><a href="https://ebi.ac.uk">EMBL-EBI</a> | MGnify</p>
+        <h2 class="vf-hero__heading">MGnify</h2>
+        <p class="vf-hero__subheading">Submit, analyse, discover and compare microbiome data</p>
+          <p class="vf-hero__text">
+              Access all the data within MGnify using our <a href="https://jsonapi.org">JSON:API</a> specification API.
+              Browse the API endpoints interactively here, or using your own scripts.
+              We have examples in Python and R.
+          </p><a class="vf-hero__link" href="JavaScript:Void(0);">Browse examples<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 12c0 6.627 5.373 12 12 12s12-5.373 12-12S18.627 0 12 0C5.376.008.008 5.376 0 12zm13.707-5.209l4.5 4.5a1 1 0 010 1.414l-4.5 4.5a1 1 0 01-1.414-1.414l2.366-2.367a.25.25 0 00-.177-.424H6a1 1 0 010-2h8.482a.25.25 0 00.177-.427l-2.366-2.368a1 1 0 011.414-1.414z" fill="" fill-rule="nonzero"></path>
+          </svg>
+        </a>
+      </div>
+    </section>
 
-  <!-- end CSS-->
+    <div style="height: 20px"></div>
 
 
-  <!-- All JavaScript at the bottom, except for Modernizr -->
-  <script src="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/libraries/modernizr/modernizr.custom.49274.js"></script>
+    <nav class="vf-navigation vf-navigation--main | vf-cluster">
+      <ul class="vf-navigation__list | vf-list | vf-cluster__inner">
+        <li class="vf-navigation__item">
+          <a href="/metagenomics" class="vf-navigation__link">MGnify website</a>
+        </li>
+        <li class="vf-navigation__item">
+          <a href="/metagenomics/api" class="vf-navigation__link">API Browser</a>
+        </li>
+        <li class="vf-navigation__item">
+          <a href="/metagenomics/api/docs" class="vf-navigation__link">API Documentation</a>
+        </li>
+        <li class="vf-navigation__item">
+          <a href="/metagenomics/about" class="vf-navigation__link">About</a>
+        </li>
+        <li class="vf-navigation__item">
+          <a href="/metagenomics/help" class="vf-navigation__link">Help</a>
+        </li>
 
-</head>
+      </ul>
+    </nav>
 
-<body class="level2"><!-- add any of your classes or IDs -->
-  <div id="skip-to">
-    <ul>
-      <li><a href="#content">Skip to main content</a></li>
-      <li><a href="#local-nav">Skip to local navigation</a></li>
-      <li><a href="#global-nav">Skip to EBI global navigation menu</a></li>
-      <li><a href="#global-nav-expanded">Skip to expanded EBI global navigation menu (includes all sub-sections)</a></li>
+<div class="navbar navbar-static-top {% block bootstrap_navbar_variant %}navbar{% endblock %}"
+     role="navigation" aria-label="{% trans "navbar" %}">
+  <div class="container">
+    <ul class="nav navbar-nav pull-right">
+      {% block userlinks %}
+        {% if user.is_authenticated %}
+          {% optional_logout request user %}
+        {% else %}
+          {% optional_login request %}
+        {% endif %}
+      {% endblock %}
     </ul>
   </div>
+</div>
+{% endblock %}
 
-  <div data-sticky-container>
-    <div id="local-masthead" data-sticky data-sticky-on="large" data-top-anchor="180" data-btm-anchor="300000">
-      <header>
-
-        <div id="global-masthead" class="clearfix">
-          <!--This has to be one line and no newline characters-->
-          <a href="//www.ebi.ac.uk/" title="Go to the EMBL-EBI homepage"><span class="ebi-logo"></span></a>
-
-          <nav>
-            <div class="row">
-              <ul id="global-nav" class="menu">
-                <!-- set active class as appropriate -->
-                <li id="home-mobile" class=""><a href="//www.ebi.ac.uk"></a></li>
-                <li id="home" class="active"><a href="//www.ebi.ac.uk"><i class="icon icon-generic" data-icon="H"></i> EMBL-EBI</a></li>
-                <li id="services"><a href="//www.ebi.ac.uk/services"><i class="icon icon-generic" data-icon="("></i> Services</a></li>
-                <li id="research"><a href="//www.ebi.ac.uk/research"><i class="icon icon-generic" data-icon=")"></i> Research</a></li>
-                <li id="training"><a href="//www.ebi.ac.uk/training"><i class="icon icon-generic" data-icon="t"></i> Training</a></li>
-                <li id="about"><a href="//www.ebi.ac.uk/about"><i class="icon icon-generic" data-icon="i"></i> About us</a></li>
-                <li id="search">
-                  <a href="#" data-toggle="search-global-dropdown"><i class="icon icon-functional" data-icon="1"></i> <span class="show-for-small-only">Search</span></a>
-                  <div id="search-global-dropdown" class="dropdown-pane" data-dropdown data-options="closeOnClick:true;">
-                    <form id="global-search" name="global-search" action="/ebisearch/search.ebi" method="GET">
-                      <fieldset>
-                        <div class="input-group">
-                          <input type="text" name="query" id="global-searchbox" class="input-group-field" placeholder="Search all of EMBL-EBI">
-                          <div class="input-group-button">
-                            <input type="submit" name="submit" value="Search" class="button">
-                            <input type="hidden" name="db" value="allebi" checked="checked">
-                            <input type="hidden" name="requestFrom" value="global-masthead" checked="checked">
-                          </div>
-                        </div>
-                      </fieldset>
-                    </form>
-                  </div>
-                </li>
-                <li class="float-right show-for-medium embl-selector">
-                  <button class="button float-right" type="button" data-toggle="embl-dropdown">Hinxton</button>
-                  <!-- The dropdown menu will be programatically added by script.js -->
-                </li>
-              </ul>
-            </div>
-          </nav>
-
+{% block content %}
+{{ block.super }}
+    <div class="full-width">
+        <div class="vf-banner-elixir vf-banner"
+             data-vf-js-banner-elixir
+             data-vf-js-banner-elixir-name="MGnify"
+             data-vf-js-banner-elixir-description="Submit, analyse, discover and compare microbiome data"
+             data-vf-js-banner-elixir-link="https://elixir-europe.org/services/elixir-embl-ebi">
         </div>
-
-        <div class="masthead row">
-
-          <!-- local-title -->
-          <div class="columns medium-12" id="local-title">
-            {% include "drf_spectacular/include/header.html" %}
-
-          </div>
-          <!-- /local-title -->
-
-          <!-- local-nav -->
-          <nav>
-              <ul id="local-nav" class="dropdown menu float-left" data-description="navigational" data-dropdown-menu="unlqrb-dropdown-menu" role="menubar">
-                  <li id="overview-nav" role="menuitem"><a href="/metagenomics/">Overview</a></li>
-                  <li id="api-nav" role="menuitem" class="active"><a href="/metagenomics/api/">API</a></li>
-                  <li id="api-nav" role="menuitem"><a href="/metagenomics/api/docs/">API Documentation</a></li>
-                  <li id="about-nav" role="menuitem"><a href="/metagenomics/about">About</a></li>
-                  <li id="help-nav" role="menuitem"><a href="/metagenomics/help">Help</a></li>
-              </ul>
-              <ul class="dropdown menu float-right" data-description="tasks">
-                <li class="">
-                  {% include "rest_framework/include/login.html" %}
-                </li>
-              </ul>
-          </nav>
-          <!-- /local-nav -->
-
-        </div>
-
-      </header>
-
-      </div>
-  </div>
-
-
-  <div id="content" role="main" class="row">
-
-      <!-- Suggested layout containers -->
-      <section>
-
-        <!-- Your menu structure should make a breadcrumb redundant, but if a breadcrump is needed uncomment the below -->
-          <nav aria-label="You are here:" role="navigation">
-            <!-- Your menu structure should make a breadcrumb redundant, but if a breadcrump is needed uncomment the below -->
-            {% include "rest_framework/include/breadcrumbs.html" %}
-          </nav>
-
-          <div id="main-content-area" class="row">
-            <section>
-              {% block content %}
-              <!-- Custom MCP API browser documentation -->
-              {% include "rest_framework/include/content.html" %}
-              <!-- End of Custom MCP API browser documentation -->
-              {% endblock %}
-            </section>
-          </div>
-
-      </section>
-      <!-- End suggested layout containers -->
-
     </div>
+    <div class="full-width">
+        <link rel="import" href="https://www.embl.org/api/v1/pattern.html?filter-content-type=article&filter-id=106902&pattern=node-body&source=contenthub" data-target="self" data-embl-js-content-hub-loader>
+    </div>
+{%  endblock %}
 
-    <footer>
-      <!-- Optional local footer (insert citation / project-specific copyright / etc here -->
-      {% block elixir %}
-      {% include "rest_framework/include/elixir.html" %}
-      {% endblock %}
-      <!-- End optional local footer -->
-
-      <div id="global-footer">
-
-        <nav id="global-nav-expanded" class="row">
-          <!-- Footer will be automatically inserted by footer.js -->
-        </nav>
-
-        <section id="ebi-footer-meta" class="row">
-          <!-- Footer meta will be automatically inserted by footer.js -->
-        </section>
-
-      </div>
-
-    </footer>
-
-
-  <!-- JavaScript -->
-
-  <!-- Grab Google CDN's jQuery, with a protocol relative URL; fall back to local if offline -->
-  <!--
-  <script>window.jQuery || document.write('<script src="../js/libs/jquery-1.10.2.min.js"><\/script>')</script>
-  -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-  <!-- Your custom JavaScript file scan go here... change names accordingly -->
-  <!--
-  <script defer="defer" src="//www.ebi.ac.uk/web_guidelines/js/plugins.js"></script>
-  <script defer="defer" src="//www.ebi.ac.uk/web_guidelines/js/script.js"></script>
-  -->
-  <script defer="defer" src="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/js/cookiebanner.js"></script>
-  <script defer="defer" src="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/js/foot.js"></script>
-  <script defer="defer" src="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/js/script.js"></script>
-
-  <!-- The Foundation theme JavaScript -->
-  <script src="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/libraries/foundation-6/js/foundation.js"></script>
-  <script src="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/js/foundationExtendEBI.js"></script>
-  <script type="text/JavaScript">$(document).foundation();</script>
-  <script type="text/JavaScript">$(document).foundationExtendEBI();</script>
-<!--
-   -->
-
-  <!-- Custom EMG JavaScript files -->
-  {% include "rest_framework/include/drf_js.html" %}
-  <!-- End of Custom EMG JavaScript files -->
-
-  <!-- Google Analytics details... -->
-  <!-- Change UA-XXXXX-X to be your site's ID -->
-  <!--
-  <script>
-    window._gaq = [['_setAccount','UAXXXXXXXX1'],['_trackPageview'],['_trackPageLoadTime']];
-    Modernizr.load({
-      load: ('https:' == location.protocol ? '//ssl' : '//www') + '.google-analytics.com/ga.js'
-    });
-  </script>
-  -->
-
-</body>
-</html>
+{% block script %}
+{{ block.super }}
+    <script src="https://assets.emblstatic.net/vf/v2.5.2/scripts/scripts.js"></script>
+{% endblock %}

@@ -84,7 +84,9 @@ class TokenSerializer(serializers.Serializer):
 class BiomeSerializer(ExplicitFieldsModelSerializer,
                       serializers.HyperlinkedModelSerializer):
 
-    included_serializers = {}
+    included_serializers = {
+        'studies': 'emgapi.serializers.StudySerializer'
+    }
 
     url = serializers.HyperlinkedIdentityField(
         view_name='emgapi_v1:biomes-detail',
@@ -154,6 +156,9 @@ class BiomeSerializer(ExplicitFieldsModelSerializer,
             'rgt',
             'depth',
         )
+
+    class JSONAPIMeta:
+        included_resources = ['studies']
 
 
 class Top10BiomeSerializer(BiomeSerializer):

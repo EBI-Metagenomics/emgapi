@@ -197,11 +197,11 @@ INSTALLED_APPS = [
     'emgui',
     # rest framework
     'rest_framework',
+    'rest_framework_json_api',
     # 'rest_framework.authtoken',
     'rest_framework_mongoengine',
     'rest_framework_jwt',
     'django_filters',
-    'rest_framework_json_api',
     # apps
     'emgapi',
     'emgena',
@@ -359,12 +359,12 @@ REST_FRAMEWORK = {
 
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework_json_api.renderers.JSONRenderer',
-        'emgapi.renderers.DefaultJSONRenderer',
+        # 'emgapi.renderers.DefaultJSONRenderer',
         # 'rest_framework.renderers.JSONRenderer',
-        'emgapi.renderers.JSONLDRenderer',
+        # 'emgapi.renderers.JSONLDRenderer',
         # 'rest_framework_xml.renderers.XMLRenderer',
         # 'rest_framework_yaml.renderers.YAMLRenderer',
-        'emgapi.renderers.CSVStreamingRenderer',
+        # 'emgapi.renderers.CSVStreamingRenderer',
         'rest_framework_json_api.renderers.BrowsableAPIRenderer',
     ),
 
