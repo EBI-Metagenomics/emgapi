@@ -26,10 +26,10 @@ annotation_type_humanize_map = {
     'Treatment': {TITLE: 'Treatment', DESCRIPTION: 'Host/Environment treatments'},
     'Kit': {TITLE: 'Kit', DESCRIPTION: 'Nucleic acid extraction-kit'},
     'Gene': {TITLE: 'Gene', DESCRIPTION: 'Target gene(s) (e.g. hypervariable regions of 16s/18s rRNA gene)'},
-    'Primer': {TITLE: 'Primer', DESCRIPTION: 'PCR primers'},
-    'LS': {TITLE: 'Library strategy', DESCRIPTION: 'e.g. aplicon, whole metagenome'},
+    'Primer': {TITLE: 'Primer', DESCRIPTION: 'PCR primers used'},
+    'LS': {TITLE: 'Library strategy', DESCRIPTION: 'e.g. amplicon, whole metagenome'},
     'LCM': {TITLE: 'Library construction method', DESCRIPTION: 'e.g. paired-end, single-end'},
-    'Sequencing': {TITLE: 'Sequencing platform', DESCRIPTION: ''},
+    'Sequencing': {TITLE: 'Sequencing platform', DESCRIPTION: 'e.g. Illumina'},
 }
 
 # sample processing annotations tend to be more accurate than others.
