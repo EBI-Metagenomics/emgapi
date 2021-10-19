@@ -94,18 +94,18 @@ class BiomeSerializer(ExplicitFieldsModelSerializer,
     )
 
     # relationships
-    studies = relations.SerializerMethodHyperlinkedRelatedField(
-        source='get_studies',
-        model=emg_models.Biome,
-        many=True,
-        read_only=True,
-        related_link_view_name='emgapi_v1:biomes-studies-list',
-        related_link_url_kwarg='lineage',
-        related_link_lookup_field='lineage',
-    )
-
-    def get_studies(self, obj):
-        return None
+    # studies = relations.SerializerMethodHyperlinkedRelatedField(
+    #     source='get_studies',
+    #     model=emg_models.Biome,
+    #     many=True,
+    #     read_only=True,
+    #     related_link_view_name='emgapi_v1:biomes-studies-list',
+    #     related_link_url_kwarg='lineage',
+    #     related_link_lookup_field='lineage',
+    # )
+    #
+    # def get_studies(self, obj):
+    #     return None
 
     samples = relations.SerializerMethodHyperlinkedRelatedField(
         source='get_samples',
