@@ -13,13 +13,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from unittest import mock
 
 import pytest
 
 from django.urls import reverse
+from model_bakery import baker
 
 from rest_framework import status
+from rest_framework.test import APITestCase
 
 from test_utils.emg_fixtures import *  # noqa
 
@@ -73,3 +75,198 @@ class TestSampleAPI(object):
         assert d["type"] == "samples"
         assert d["id"] == "ERS01234"
         assert d["attributes"]["accession"] == "ERS01234"
+
+
+class MockSuccessfulEuropePMCResponse:
+    status_code = 200
+
+    @staticmethod
+    def json():
+        return [
+            {
+                'annotations': [
+                    {
+                        'prefix': 'Love is required whenever he’s ',
+                        'exact': 'sequenced',
+                        'postfix': '. It comes just before the assembly.',
+                        'type': 'LS',
+                    }
+                ]
+            }
+        ]
+
+
+class MockUnsuccessfulEuropePMCResponse:
+    status_code = 404
+
+
+class TestSampleStudiesPublicationsAnnotationsAPI(APITestCase):
+    # def setUp(self):
+    #     # Sample 1 > Study 1 > Pub 1 > Annotations
+    #     baker.make(
+    #         'emgapi.Study',
+    #         pk=1,
+    #         pubmed_id='007',
+    #         pub_title='The man with the golden metagenome',
+    #         authors='Bond, J; Moneypenny, J; et al'
+    #     )
+
+    @mock.patch('emgapi.europe_pmc.requests.get')
+    def test_sample_with_study_with_annotated_pub(self, mock_get):
+        biome = baker.make(
+            'emgapi.Biome',
+            pk=1,
+            biome_id=1,
+            biome_name='bar',
+            lft=0, rgt=1, depth=2,
+            lineage='root:ghosts:ectoplasmic',
+        )
+
+        sample = baker.make(
+            'emgapi.Sample',
+            biome=biome,
+            pk=1,
+            accession='ERS00001',
+            primary_accession='SAMS00001',
+            is_public=1,
+            species='Slimer',
+            sample_name='Ectoplasm 1',
+            sample_desc='ghostbusters',
+            latitude=40.7,
+            longitude=74.0,
+            last_update='1970-01-01 00:00:00',
+            analysis_completed='1970-01-01',
+            collection_date='1970-01-01',
+            environment_feature='gggbbb',
+            environment_material='gggbbb',
+            geo_loc_name='New York',
+            sample_alias='ERS00001',
+        )
+
+        # Sample with no studies
+        url = reverse('emgapi_v1:samples-studies-publications-annotations-existence', args=(sample.accession,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()['data']
+        self.assertTrue(data['query_possible'])
+        self.assertEqual(len(data['study_has_annotations']), 0)
+
+        # Sample with a publicationless study
+        study1 = baker.make(
+            'emgapi.Study',
+            biome=biome,
+            study_id=1,
+            secondary_accession='SRP0001',
+            centre_name='Columbia U',
+            is_public=1,
+            public_release_date=None,
+            study_name='Ghostbusters',
+            study_abstract='Present to rescue the planet recurrently',
+            study_status='FINISHED',
+            data_origination='HARVESTED',
+            submission_account_id='User-123',
+            result_directory='2017/05/SRP00001',
+            last_update='1970-01-01 00:00:00',
+            first_created='1970-01-01 00:00:00',
+            project_id='PRJDB0001',
+        )
+        sample.studies.add(study1)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()['data']
+        self.assertTrue(data['query_possible'])
+        self.assertEqual(len(data['study_has_annotations']), 1)
+        self.assertFalse(data['study_has_annotations'][study1.accession])
+
+        # Sample with a study with a publication with no annotations
+        pub1 = baker.make(
+            'emgapi.Publication',
+            pk=1,
+            pubmed_id='001',
+            pub_title='Ghostbusters',
+            authors='Venkman, P; Spengler, E; Stantz, R'
+        )
+        study1.publications.add(pub1)
+        mock_get.return_value = MockUnsuccessfulEuropePMCResponse()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()['data']
+        self.assertTrue(data['query_possible'])
+        self.assertEqual(len(data['study_has_annotations']), 1)
+        self.assertFalse(data['study_has_annotations'][study1.accession])
+
+        # Sample with a study with a publication with annotations
+        mock_get.return_value = MockSuccessfulEuropePMCResponse()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()['data']
+        self.assertTrue(data['query_possible'])
+        self.assertEqual(len(data['study_has_annotations']), 1)
+        self.assertTrue(data['study_has_annotations'][study1.accession])
+
+        # Sample with a study with multiple pubs
+        more_pubs = [
+            baker.make(
+                'emgapi.Publication',
+                pk=pk,
+                pubmed_id=pk,
+                pub_title=f'{pk} ghosts and a funeral',
+                authors='Venkman, P; Spengler, E; Stantz, R'
+            )
+            for pk in range(2, 5)
+        ]
+        for pub in more_pubs:
+            study1.publications.add(pub)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()['data']
+        self.assertTrue(data['query_possible'])
+        self.assertEqual(len(data['study_has_annotations']), 1)
+        self.assertTrue(all(data['study_has_annotations'].values()))
+
+        # Sample with a study with too many publications for EPMC to query at once
+        even_more_pubs = [
+            baker.make(
+                'emgapi.Publication',
+                pk=pk,
+                pubmed_id=pk,
+                pub_title=f'{pk} ghosts and a funeral',
+                authors='Venkman, P; Spengler, E; Stantz, R'
+            )
+            for pk in range(5, 10)
+        ]
+        for pub in even_more_pubs:
+            study1.publications.add(pub)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()['data']
+        self.assertFalse(data['query_possible'])
+
+        # Sample with too many studies to query
+        more_studies = [
+            baker.make(
+                'emgapi.Study',
+                biome=biome,
+                study_id=pk,
+                secondary_accession=f'SRP000{pk}',
+                centre_name='Columbia U',
+                is_public=1,
+                public_release_date=None,
+                study_name='Ghostbusters',
+                study_abstract='Present to rescue the planet recurrently',
+                study_status='FINISHED',
+                data_origination='HARVESTED',
+                submission_account_id='User-123',
+                result_directory='2017/05/SRP00001',
+                last_update='1970-01-01 00:00:00',
+                first_created='1970-01-01 00:00:00',
+                project_id='PRJDB0001',
+            )
+            for pk in range(2, 10)
+        ]
+        for study in more_studies:
+            sample.studies.add(study)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()['data']
+        self.assertFalse(data['query_possible'])
