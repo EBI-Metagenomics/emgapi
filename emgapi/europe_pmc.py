@@ -3,6 +3,7 @@ from functools import reduce
 
 import requests
 from django.conf import settings
+from django.db.models import Count, Max
 from django.http import Http404
 
 TITLE = 'title'
@@ -98,3 +99,45 @@ def get_publication_annotations(pubmed_id):
             other_annotations.append(group)
 
     return {'sample_processing': sample_processing_annotations, 'other': other_annotations}
+
+
+QUERY_POSSIBLE = 'query_possible'
+STUDY_HAS_ANNOTATIONS = 'study_has_annotations'
+
+
+def get_publication_annotations_existence_for_sample(sample, study_query_limit=8, publication_query_limit=8):
+    """
+    Determine whether any of the studies related to a sample have publications which are annotated by Europe PMC.
+    :param sample: a MGnify Sample model instance.
+    :param study_query_limit: how many studies may be queried per sample (if more are present, do not fetch)
+    :param publication_query_limit: how many publications per study may be queries (limit set by EPMC API)
+    :return: {'query_possible': bool, 'studies': {<study_id>: {'query_possible': bool, 'has_annotations': bool}}}
+    """
+    response = {QUERY_POSSIBLE: False, STUDY_HAS_ANNOTATIONS: {}}
+    studies = sample.studies.annotate(num_pubs=Count('publications'))
+
+    if not studies.exists():
+        response[QUERY_POSSIBLE] = True
+        return response
+
+    if studies.count() > study_query_limit or \
+            studies.aggregate(max_pubs=Max('num_pubs'))['max_pubs'] > publication_query_limit:
+        return response
+
+    for study in studies.all():
+        pubmeds = [f'MED:{pub.pubmed_id}' for pub in study.publications.all()]
+        epmc = requests.get(settings.EUROPE_PMC['annotations_endpoint'], params={
+            'articleIds': ','.join(pubmeds),
+            'provider': settings.EUROPE_PMC['annotations_provider']
+        })
+
+        try:
+            assert epmc.status_code == 200
+            has_annotations = any([len(pub[ANNOTATIONS]) > 0 for pub in epmc.json()])
+        except (AssertionError, KeyError, IndexError):
+            response[STUDY_HAS_ANNOTATIONS][study.accession] = False
+        else:
+            response[STUDY_HAS_ANNOTATIONS][study.accession] = has_annotations
+        response[QUERY_POSSIBLE] = True
+
+    return response
