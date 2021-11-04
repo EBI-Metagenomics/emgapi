@@ -1169,6 +1169,7 @@ class StudySerializer(ExplicitFieldsModelSerializer,
     included_serializers = {
         'biomes': 'emgapi.serializers.BiomeSerializer',
         'downloads': 'emgapi.serializers.StudyDownloadSerializer',
+        'samples': 'emgapi.serializers.SampleSerializer'
     }
 
     url = serializers.HyperlinkedIdentityField(
@@ -1234,7 +1235,7 @@ class StudySerializer(ExplicitFieldsModelSerializer,
     def get_downloads(self, obj):
         return None
 
-    samples = relations.SerializerMethodHyperlinkedRelatedField(
+    samples = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
         source='get_samples',
         model=emg_models.Sample,
         many=True,
@@ -1245,6 +1246,8 @@ class StudySerializer(ExplicitFieldsModelSerializer,
     )
 
     def get_samples(self, obj):
+        if 'samples' in utils.get_included_resources(self.context['request']):
+            return obj.samples.all()
         return None
 
     analyses = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(

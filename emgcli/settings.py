@@ -358,8 +358,8 @@ REST_FRAMEWORK = {
     ),
 
     'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework_json_api.renderers.JSONRenderer',
-        # 'emgapi.renderers.DefaultJSONRenderer',
+        # 'rest_framework_json_api.renderers.JSONRenderer',
+        'emgapi.renderers.DefaultJSONRenderer',
         # 'rest_framework.renderers.JSONRenderer',
         # 'emgapi.renderers.JSONLDRenderer',
         # 'rest_framework_xml.renderers.XMLRenderer',

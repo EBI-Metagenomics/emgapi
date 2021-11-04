@@ -590,6 +590,7 @@ class ExperimentTypeSampleRelationshipViewSet(emg_mixins.ListModelMixin,
 class BiomeSampleRelationshipViewSet(emg_mixins.ListModelMixin,
                                      emg_viewsets.BaseSampleGenericViewSet):
     lookup_field = 'lineage'
+    relationship_lookup_field = 'accession'
 
     def get_queryset(self):
         lineage = self.kwargs[self.lookup_field]

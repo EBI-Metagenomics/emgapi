@@ -24,6 +24,29 @@ class DefaultJSONRenderer(JSONRenderer):
     media_type = 'application/json'
     format = 'json'
 
+    @classmethod
+    def build_json_resource_obj(
+            cls,
+            fields,
+            resource,
+            resource_instance,
+            resource_name,
+            serializer,
+            force_type_resolution=False,
+            **kwargs
+    ):
+        resource_data = super().build_json_resource_obj(fields, resource, resource_instance, resource_name, serializer, force_type_resolution=force_type_resolution)
+        current_serializer = fields.serializer
+        context = current_serializer.context
+        view = context.get("view", None)
+        if hasattr(view, "relationship_lookup_field"):
+            if view.relationship_lookup_field in resource:
+                resource_data['id'] = resource.get(view.relationship_lookup_field, resource_data['id'])
+        elif hasattr(view, 'lookup_field'):
+            if view.lookup_field in resource:
+                resource_data['id'] = resource.get(view.lookup_field, resource_data['id'])
+        return resource_data
+
 
 class JSONLDRenderer(renderers.JSONRenderer):
     media_type = 'application/ld+json'
