@@ -1840,5 +1840,18 @@ class Search(models.Lookup):
         return 'MATCH (%s) AGAINST (%s IN BOOLEAN MODE)' % (lhs, rhs), params
 
 
+class LegacyAssembly(models.Model):
+    legacy_accession = models.ForeignKey(
+        'Legacy assembly', db_column='legacy_accession', on_delete=models.CASCADE)
+    new_accession = models.ForeignKey(
+        'New accession', db_column='new_accession', on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'LEGACY_ASSEMBLY'
+        unique_together = (('legacy_accession', 'new_accession'),)
+
+    def __str__(self):
+        return 'Legacy Assembly:{} - New Accession:{}'.format(self.legacy_accession, self.new_accession)
+
 models.CharField.register_lookup(Search)
 models.TextField.register_lookup(Search)
