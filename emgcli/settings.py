@@ -201,6 +201,7 @@ INSTALLED_APPS = [
     'rest_framework_mongoengine',
     'rest_framework_jwt',
     'django_filters',
+    'rest_framework_json_api',
     # apps
     'emgapi',
     'emgena',
@@ -364,7 +365,7 @@ REST_FRAMEWORK = {
         # 'rest_framework_xml.renderers.XMLRenderer',
         # 'rest_framework_yaml.renderers.YAMLRenderer',
         'emgapi.renderers.CSVStreamingRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',
+        'rest_framework_json_api.renderers.BrowsableAPIRenderer',
     ),
 
     'DEFAULT_FILTER_BACKENDS': (
@@ -635,4 +636,12 @@ except KeyError:
         "results_path": "/tmp/results",
         "celery_broker": "redis://localhost:6379/0",
         "celery_backend": "redis://localhost:6379/0",
+    }
+
+try:
+    EUROPE_PMC = EMG_CONF['emg']['europe_pmc']
+except KeyError:
+    EUROPE_PMC = {
+        "annotations_endpoint": 'https://www.ebi.ac.uk/europepmc/annotations_api/annotationsByArticleIds',
+        "annotations_provider": "Metagenomics"
     }
