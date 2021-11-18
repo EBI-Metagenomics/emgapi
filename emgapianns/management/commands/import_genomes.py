@@ -112,7 +112,7 @@ class Command(BaseCommand):
 
         has_pangenome = 'pangenome' in d
         d['biome'] = self.get_gold_biome(d['gold_biome'])
-        d['genome_set'] = self.get_or_create_genome_set(d.get('genome_set', 'EBI'))
+        d['genome_set'] = self.get_or_create_genome_set(d.get('genome_set', 'NCBI'))
         if has_pangenome:
             d.update(d['pangenome'])
             del d['pangenome']
