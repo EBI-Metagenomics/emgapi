@@ -1270,7 +1270,8 @@ class GenomeViewSet(mixins.RetrieveModelMixin,
         'contamination',
         'num_genomes_total',
         'num_proteins',
-        'last_update'
+        'last_update',
+        'type'
     )
 
     ordering = ('-accession',)
