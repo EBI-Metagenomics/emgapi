@@ -12,17 +12,17 @@ logger = logging.getLogger(__name__)
 EXPECTED_CATALOGUE_FILES = {'phylo_tree.json'}
 
 
-def get_expected_genome_files(accession):
+def get_expected_genome_files(accession, expect_prepended_accession_for_all = False):
+    prefix = (accession + '_') if expect_prepended_accession_for_all else ''
     return {
-        'annotation_coverage.tsv',
-        'cazy_summary.tsv',
-        'cog_summary.tsv',
-        'kegg_classes.tsv',
-        'kegg_modules.tsv',
+        prefix + 'annotation_coverage.tsv',
+        prefix + 'cazy_summary.tsv',
+        prefix + 'cog_summary.tsv',
+        prefix + 'kegg_classes.tsv',
+        prefix + 'kegg_modules.tsv',
         accession + '.faa',
         accession + '.fna',
         accession + '.gff',
-        accession + '.stats',
         accession + '_eggNOG.tsv',
         accession + '_InterProScan.tsv'
     }
@@ -42,7 +42,7 @@ EXPECTED_PANGENOME_FILES = {
     'pan-genome_InterProScan.tsv'
 }
 
-EXPECTED_DIR_CONTENT = {'genome.json', 'genome'}
+EXPECTED_DIR_CONTENT_LEGACY = {'genome.json', 'genome'}
 
 
 def sanity_check_catalogue_dir(d):
@@ -73,7 +73,6 @@ REQUIRED_JSON_FIELDS = {
     'contamination',
     'eggnog_coverage',
     'gc_content',
-    'genome_set',
     'gold_biome',
     'ipr_coverage',
     'length',
@@ -100,7 +99,7 @@ REQUIRED_JSON_PANGENOME_FIELDS = {
 }
 
 
-def sanity_check_genome_json(data):
+def sanity_check_genome_json(data, is_legacy=False):
     keys = data.keys()
     missing_req_keys = set(REQUIRED_JSON_FIELDS).difference(set(keys))
     if len(missing_req_keys):
@@ -117,8 +116,8 @@ def sanity_check_genome_json(data):
                 data['accession'], " ".join(missing_preq_keys)))
 
 
-def sanity_check_genome_dir(accession, d):
-    expected_files = get_expected_genome_files(accession)
+def sanity_check_genome_dir(accession, d, is_legacy=False):
+    expected_files = get_expected_genome_files(accession, expect_prepended_accession_for_all=not is_legacy)
     fs = os.listdir(d)
     missing = expected_files.difference(fs)
     if len(missing):
@@ -138,31 +137,57 @@ def sanity_check_pangenome_dir(d):
                                                        missing_files))
 
 
+def is_genome_dir_legacy_format(d):
+    """
+    Legacy formatted genome directories have a "genome.json" rather then <accession>.json file.
+    :param d: genome directory
+    :return: bool
+    """
+    return os.path.exists(os.path.join(d, 'genome.json'))
+
+
+def apparent_accession_of_genome_dir(d):
+    """
+    Gets the apparent accession of a genome directory, based on the folder name
+    :param d: genome directory
+    :return: e.g. MGYG0000000001
+    """
+    return os.path.basename(os.path.normpath(d))
+
+
 def sanity_check_genome_output(d):
     fs = set(os.listdir(d))
-    missing = EXPECTED_DIR_CONTENT.difference(fs)
-    if len(missing):
-        raise ValueError('Files are missing from {}: {}'
-                         .format(d, " ".join(missing)))
 
-    json_file = os.path.join(d, 'genome.json')
-    json_data = read_json(json_file)
-    sanity_check_genome_json(json_data)
+    is_legacy = is_genome_dir_legacy_format(d)
+    if is_legacy:
+        missing = EXPECTED_DIR_CONTENT_LEGACY.difference(fs)
 
-    genome_dir = os.path.join(d, 'genome')
-    sanity_check_genome_dir(json_data['accession'], genome_dir)
+        if len(missing):
+            raise ValueError('Files are missing from {}: {}'
+                             .format(d, " ".join(missing)))
 
-    if 'pangenome' in json_data:
-        pangenome_dir = os.path.join(d, 'pan-genome')
-        sanity_check_pangenome_dir(pangenome_dir)
+        json_file = os.path.join(d, 'genome.json')
+        json_data = read_json(json_file)
+        sanity_check_genome_json(json_data, is_legacy=True)
 
+        genome_dir = os.path.join(d, 'genome')
+        sanity_check_genome_dir(json_data['accession'], genome_dir, is_legacy=True)
 
-GENOME_STATS_HEADERS = ['accession', 'length', 'num_contigs', 'n_50',
-                        'gc_content', 'type', 'completeness',
-                        'contamination', 'rna_5s', 'rna_16s', 'rna_23s',
-                        'trnas', 'num_genomes', 'num_proteins',
-                        'pangenome_size', 'core_prop', 'accessory_prop',
-                        'eggnog_prop', 'ipr_prop']
+        if 'pangenome' in json_data:
+            pangenome_dir = os.path.join(d, 'pan-genome')
+            sanity_check_pangenome_dir(pangenome_dir)
+    else:
+        apparent_accession = apparent_accession_of_genome_dir(d)
+        if not os.path.isdir(os.path.join(d, 'genome')):
+            raise ValueError(f'genome/ directory missing from {d}')
+        if not os.path.exists(os.path.join(d, f'{apparent_accession}.json')):
+            raise ValueError(f'{apparent_accession}.json missing from {d}')
+        json_file = os.path.join(d, f'{apparent_accession}.json')
+        json_data = read_json(json_file)
+        sanity_check_genome_json(json_data)
+
+        genome_dir = os.path.join(d, 'genome')
+        sanity_check_genome_dir(json_data['accession'], genome_dir, is_legacy=False)
 
 
 def read_json(fs):

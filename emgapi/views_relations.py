@@ -688,6 +688,14 @@ class GenomeCatalogueGenomeRelationshipViewSet(emg_mixins.ListModelMixin,
                                                emg_viewsets.BaseGenomeGenericViewSet):  # noqa
     lookup_field = 'catalogue_id'
 
+    search_fields = (
+        'accession',
+        'taxon_lineage',
+        'type',
+        'genome_set__name',
+        'catalogue__name'
+    )
+
     def get_queryset(self):
         catalogue_id = self.kwargs[self.lookup_field]
         if catalogue_id == 'all':

@@ -1834,7 +1834,7 @@ class GenomeCatalogueDownload(BaseDownload):
 
     class Meta:
         db_table = 'GENOME_CATALOGUE_DOWNLOAD'
-        unique_together = (('realname', 'alias'),)
+        unique_together = (('realname', 'alias', 'genome_catalogue'),)
         ordering = ('group_type', 'alias')
 
 

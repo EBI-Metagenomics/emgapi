@@ -1595,7 +1595,7 @@ def get_MAG_choices():
 
 
 class GenomeUploadSearchSerializer(drf_serializers.Serializer):
-    def __init__(self, user, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(GenomeUploadSearchSerializer, self).__init__(*args, **kwargs)
         self.fields['mag_catalogue'] = ChoiceField(get_MAG_choices())
 

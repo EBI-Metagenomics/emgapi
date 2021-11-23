@@ -9,7 +9,7 @@ from emgapi import models as emg_models
 from ..lib.genome_util import sanity_check_genome_output, \
     sanity_check_catalogue_dir, find_genome_results, \
     get_genome_result_path, \
-    read_tsv_w_headers, read_json
+    read_tsv_w_headers, read_json, is_genome_dir_legacy_format, apparent_accession_of_genome_dir
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +59,7 @@ class Command(BaseCommand):
         logger.info("CLI %r" % options)
 
         genome_dirs = find_genome_results(self.catalogue_dir)
-        logger.debug(
+        logger.info(
             'Found {} genome dirs to upload'.format(len(genome_dirs)))
 
         [sanity_check_genome_output(d) for d in genome_dirs]
@@ -105,11 +105,14 @@ class Command(BaseCommand):
         return emg_models.GenomeSet.objects.using(self.database).get_or_create(name=setname)[0]
 
     def prepare_genome_data(self, genome_dir):
-        d = read_json(os.path.join(genome_dir, 'genome.json'))
+        if (is_genome_dir_legacy_format(genome_dir)):
+            d = read_json(os.path.join(genome_dir, 'genome.json'))
+        else:
+            d = read_json(os.path.join(genome_dir, f'{apparent_accession_of_genome_dir(genome_dir)}.json'))
 
         has_pangenome = 'pangenome' in d
         d['biome'] = self.get_gold_biome(d['gold_biome'])
-        d['genome_set'] = self.get_or_create_genome_set(d['genome_set'])
+        d['genome_set'] = self.get_or_create_genome_set(d.get('genome_set', 'NCBI'))
         if has_pangenome:
             d.update(d['pangenome'])
             del d['pangenome']
@@ -133,10 +136,11 @@ class Command(BaseCommand):
 
         geo_locations = data.get('geographic_range')
         data.pop('geographic_range', None)
+        data.pop('genome_accession', None)
+        data.setdefault('taxincons', 0)
 
         data['result_directory'] = get_genome_result_path(genome_dir)
         data['catalogue'] = self.catalogue_obj
-
         g, created = emg_models.Genome.objects.using(self.database).update_or_create(
             accession=data['accession'],
             defaults=data)
@@ -148,7 +152,10 @@ class Command(BaseCommand):
         return g, has_pangenome
 
     def upload_cog_results(self, genome, d, has_pangenome):
-        genome_cogs = os.path.join(d, 'genome', 'cog_summary.tsv')
+        if is_genome_dir_legacy_format(d):
+            genome_cogs = os.path.join(d, 'genome', 'cog_summary.tsv')
+        else:
+            genome_cogs = os.path.join(d, 'genome', f'{genome.accession}_cog_summary.tsv')
         self.upload_cog_result(genome, genome_cogs, False)
         logger.info('Loaded Genome COG for {}'.format(genome.accession))
 
@@ -187,7 +194,10 @@ class Command(BaseCommand):
             .get_or_create(name=c_name)[0]
 
     def upload_kegg_class_results(self, genome, d, has_pangenome):
-        genome_kegg_classes = os.path.join(d, 'genome', 'kegg_classes.tsv')
+        if is_genome_dir_legacy_format(d):
+            genome_kegg_classes = os.path.join(d, 'genome', 'kegg_classes.tsv')
+        else:
+            genome_kegg_classes = os.path.join(d, 'genome', f'{genome.accession}_kegg_classes.tsv')
         self.upload_kegg_class_result(genome, genome_kegg_classes, False)
         logger.info(
             'Loaded Genome KEGG classes for {}'.format(genome.accession))
@@ -230,7 +240,10 @@ class Command(BaseCommand):
         count.save(using=self.database)
 
     def upload_kegg_module_results(self, genome, d, has_pangenome):
-        genome_kegg_modules = os.path.join(d, 'genome', 'kegg_modules.tsv')
+        if is_genome_dir_legacy_format(d):
+            genome_kegg_modules = os.path.join(d, 'genome', 'kegg_modules.tsv')
+        else:
+            genome_kegg_modules = os.path.join(d, 'genome', f'{genome.accession}_kegg_modules.tsv')
         self.upload_kegg_module_result(genome, genome_kegg_modules, False)
         logger.info(
             'Loaded Genome KEGG modules for {}'.format(genome.accession))
