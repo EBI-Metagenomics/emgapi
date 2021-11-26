@@ -96,7 +96,7 @@ class Command(BaseCommand):
         self.upload_kegg_class_results(genome, directory, has_pangenome)
         self.upload_kegg_module_results(genome, directory, has_pangenome)
         self.upload_antismash_geneclusters(genome, directory)
-        self.upload_genome_files(genome, has_pangenome)
+        self.upload_genome_files(genome, directory, has_pangenome)
 
     def get_gold_biome(self, lineage):
         return emg_models.Biome.objects.using(self.database).get(lineage=lineage)
@@ -312,42 +312,42 @@ class Command(BaseCommand):
             logger.info(
                 'Loaded Genome AntiSMASH geneclusters for {}'.format(genome.accession))
 
-    def upload_genome_files(self, genome, has_pangenome):
+    def upload_genome_files(self, genome, directory, has_pangenome):
         logger.info('Uploading genome files...')
-        self.upload_genome_file(genome, 'Predicted CDS (aa)', 'fasta',
-                                genome.accession + '.faa', 'Genome analysis', 'genome')
-        self.upload_genome_file(genome, 'Nucleic Acid Sequence', 'fasta',
-                                genome.accession + '.fna', 'Genome analysis', 'genome')
-        self.upload_genome_file(genome, 'Nucleic Acid Sequence index', 'fai',
-                                genome.accession + '.fna.fai', 'Genome analysis', 'genome')
-        self.upload_genome_file(genome, 'Genome Annotation', 'gff',
-                                genome.accession + '.gff', 'Genome analysis', 'genome')
-        self.upload_genome_file(genome, 'Genome antiSMASH Annotation', 'gff',
-                                genome.accession + '_antismash.gff', 'Genome analysis', 'genome')
-        self.upload_genome_file(genome, 'EggNog annotation', 'tsv',
-                                genome.accession + '_eggNOG.tsv', 'Genome analysis', 'genome')
-        self.upload_genome_file(genome, 'InterProScan annotation', 'tsv',
-                                genome.accession + '_InterProScan.tsv', 'Genome analysis', 'genome')
+        self.upload_genome_file(genome, directory, 'Predicted CDS (aa)', 'fasta',
+                                genome.accession + '.faa', 'Genome analysis', 'genome', True)
+        self.upload_genome_file(genome, directory, 'Nucleic Acid Sequence', 'fasta',
+                                genome.accession + '.fna', 'Genome analysis', 'genome', True)
+        self.upload_genome_file(genome, directory, 'Nucleic Acid Sequence index', 'fai',
+                                genome.accession + '.fna.fai', 'Genome analysis', 'genome', True, )
+        self.upload_genome_file(genome, directory, 'Genome Annotation', 'gff',
+                                genome.accession + '.gff', 'Genome analysis', 'genome', True)
+        self.upload_genome_file(genome, directory, 'Genome antiSMASH Annotation', 'gff',
+                                genome.accession + '_antismash.gff', 'Genome analysis', 'genome', False)
+        self.upload_genome_file(genome, directory, 'EggNog annotation', 'tsv',
+                                genome.accession + '_eggNOG.tsv', 'Genome analysis', 'genome', False)
+        self.upload_genome_file(genome, directory, 'InterProScan annotation', 'tsv',
+                                genome.accession + '_InterProScan.tsv', 'Genome analysis', 'genome', False)
 
         if has_pangenome:
-            self.upload_genome_file(genome, 'Accessory predicted CDS', 'fasta',
-                                    'accessory_genes.faa', 'Pan-Genome analysis', 'pan-genome')
-            self.upload_genome_file(genome, 'Core predicted CDS', 'fasta',
-                                    'core_genes.faa', 'Pan-Genome analysis', 'pan-genome')
-            self.upload_genome_file(genome, 'Core & Accessory predicted CDS', 'fasta',
-                                    'pan-genome.faa', 'Pan-Genome analysis', 'pan-genome')
-            self.upload_genome_file(genome,
+            self.upload_genome_file(genome, directory, 'Accessory predicted CDS', 'fasta',
+                                    'accessory_genes.faa', 'Pan-Genome analysis', 'pan-genome', False)
+            self.upload_genome_file(genome, directory, 'Core predicted CDS', 'fasta',
+                                    'core_genes.faa', 'Pan-Genome analysis', 'pan-genome', False)
+            self.upload_genome_file(genome, directory, 'Core & Accessory predicted CDS', 'fasta',
+                                    'pan-genome.faa', 'Pan-Genome analysis', 'pan-genome', False )
+            self.upload_genome_file(genome, directory,
                                     'EggNog annotation (core and accessory)', 'tsv',
-                                    'pan-genome_eggNOG.tsv', 'Pan-Genome analysis', 'pan-genome')
-            self.upload_genome_file(genome,
+                                    'pan-genome_eggNOG.tsv', 'Pan-Genome analysis', 'pan-genome', False)
+            self.upload_genome_file(genome, directory,
                                     'InterProScan annotation (core and accessory)',
-                                    'tsv', 'pan-genome_InterProScan.tsv', 'Pan-Genome analysis', 'pan-genome')
-            self.upload_genome_file(genome,
+                                    'tsv', 'pan-genome_InterProScan.tsv', 'Pan-Genome analysis', 'pan-genome', False)
+            self.upload_genome_file(genome, directory,
                                     'Gene Presence / Absence matrix',
-                                    'tsv', 'genes_presence-absence.tsv', 'Pan-Genome analysis', 'pan-genome')
-            self.upload_genome_file(genome,
+                                    'tsv', 'genes_presence-absence.tsv', 'Pan-Genome analysis', 'pan-genome', False)
+            self.upload_genome_file(genome, directory,
                                     'Pairwise Mash distances of conspecific genomes',
-                                    'nwk', 'mashtree.nwk ', 'Pan-Genome analysis', 'pan-genome')
+                                    'nwk', 'mashtree.nwk ', 'Pan-Genome analysis', 'pan-genome', False)
 
     def prepare_file_upload(self, desc_label, file_format, filename, group_name=None, subdir_name=None):
 
@@ -387,8 +387,16 @@ class Command(BaseCommand):
 
         return obj
 
-    def upload_genome_file(self, genome, desc_label, file_format, filename, group_type, subdir):
+    def upload_genome_file(self, genome, directory, desc_label, file_format, filename, group_type, subdir,
+                           require_existent_and_non_empty):
         defaults = self.prepare_file_upload(desc_label, file_format, filename, group_type, subdir)
+        path = os.path.join(directory, subdir, filename)
+        if not (os.path.isfile(path) and os.path.getsize(path) > 0):
+            if require_existent_and_non_empty:
+                raise FileNotFoundError(f"Required file at {path} either missing or empty")
+            else:
+                logger.warning(f"File not found or empty at {path}. This is allowable, but will not be uploaded.")
+                return
         emg_models.GenomeDownload.objects.using(self.database).update_or_create(genome=genome,
                                                                                 alias=defaults['alias'],
                                                                                 defaults=defaults)
