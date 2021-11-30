@@ -48,16 +48,11 @@ class TestNotify(APITestCase):
         """Test notify endpoint for non-consent requests
         """
         expected_body = {
-            "user": "metagenomics-help-api-user",
-            "pass": "secret-password",
-            "content": "\n".join([
-                "id: ticket/new",
-                "Requestor: fake@email.com",
-                "Priority: 4",
-                "Subject: Test email subject",
-                "Text: Hi this is just an example",
-                "Queue: " + settings.RT["emg_queue"]
-            ])
+            "Requestor: fake@email.com",
+            "Priority: 4",
+            "Subject: Test email subject",
+            "Text: Hi this is just an example",
+            "Queue: " + settings.RT["emg_queue"]
         }
 
         responses.add(
@@ -87,16 +82,11 @@ class TestNotify(APITestCase):
         """Test notify endpoint for consent requests
         """
         expected_body = {
-            "user": "metagenomics-help-api-user",
-            "pass": "secret-password",
-            "content": "\n".join([
-                "id: ticket/new",
-                "Requestor: fake@email.com",
-                "Priority: 4",
-                "Subject: Test email subject",
-                "Text: Hi this is just an example",
-                "Queue: " + settings.RT["ena_queue"],
-            ])
+            "Requestor: fake@email.com",
+            "Priority: 4",
+            "Subject: Test email subject",
+            "Text: Hi this is just an example",
+            "Queue: " + settings.RT["ena_queue"],
         }
 
         responses.add(
