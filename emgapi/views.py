@@ -131,7 +131,7 @@ class UtilsViewSet(viewsets.GenericViewSet):
         if serializer.is_valid():
             try:
                 status_code = serializer.save()
-                if status_code == 200:
+                if status_code == 200 or status_code == 201:
                     return Response("Created", status=status.HTTP_201_CREATED)
             except Exception as e:
                 logging.error(e, exc_info=True)
