@@ -1164,6 +1164,9 @@ class Assembly(models.Model):
     study = models.ForeignKey("emgapi.Study", db_column="STUDY_ID",
         on_delete=models.SET_NULL, null=True, blank=True)
 
+    new_accession = models.CharField(
+        'new_accession', through='LegacyAssembly', related_name='assemblies', blank=True)  
+
     coverage = models.IntegerField(db_column="COVERAGE", null=True, blank=True)
 
     min_gap_length = models.IntegerField(db_column="MIN_GAP_LENGTH", null=True, blank=True)
