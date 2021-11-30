@@ -1101,7 +1101,6 @@ class GenomeCogsRelationshipsViewSet(emg_mixins.ListModelMixin,
     ordering_fields = (
         'name',
         'genome_count',
-        'pangenome_count',
         'description'
     )
 
@@ -1133,7 +1132,6 @@ class GenomeKeggClassRelationshipsViewSet(emg_mixins.ListModelMixin,
         'class_id',
         'name',
         'genome_count',
-        'pangenome_count'
     )
 
     ordering = ['-genome_count']
@@ -1149,11 +1147,6 @@ class GenomeKeggClassRelationshipsViewSet(emg_mixins.ListModelMixin,
         queryset = emg_models.GenomeKeggClassCounts.objects \
             .select_related('kegg_class') \
             .filter(genome=genome)
-        filter_param = self.request.GET.get('filter', '').split(',')
-        if 'pangenome' in filter_param:
-            queryset = queryset.filter(pangenome=True)
-        elif 'genome' in filter_param:
-            queryset = queryset.filter(pangenome=False)
         return queryset
 
 
@@ -1169,7 +1162,6 @@ class GenomeKeggModuleRelationshipsViewSet(emg_mixins.ListModelMixin,
         'class_id',
         'name',
         'genome_count',
-        'pangenome_count'
     )
 
     ordering = ['-genome_count']
@@ -1185,11 +1177,6 @@ class GenomeKeggModuleRelationshipsViewSet(emg_mixins.ListModelMixin,
         queryset = emg_models.GenomeKeggModuleCounts.objects \
             .select_related('kegg_module') \
             .filter(genome=genome)
-        filter_param = self.request.GET.get('filter', '').split(',')
-        if 'pangenome' in filter_param:
-            queryset = queryset.filter(pangenome=True)
-        elif 'genome' in filter_param:
-            queryset = queryset.filter(pangenome=False)
         return queryset
 
 

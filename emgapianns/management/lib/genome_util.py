@@ -29,17 +29,8 @@ def get_expected_genome_files(accession, expect_prepended_accession_for_all = Fa
 
 
 EXPECTED_PANGENOME_FILES = {
-    'accessory_genes.faa',
-    'annotation_coverage.tsv',
-    'cazy_summary.tsv',
-    'cog_summary.tsv',
-    'core_genes.faa',
-    'genes_presence-absence.tsv',
-    'kegg_classes.tsv',
-    'kegg_modules.tsv',
-    'pan-genome.faa',
-    'pan-genome_eggNOG.tsv',
-    'pan-genome_InterProScan.tsv'
+    'genes_presence-absence.Rtab',
+    'pan-genome.fna',
 }
 
 EXPECTED_DIR_CONTENT_LEGACY = {'genome.json', 'genome'}
@@ -92,9 +83,7 @@ REQUIRED_JSON_PANGENOME_FIELDS = {
     'pangenome_accessory_size',
     'num_genomes_non_redundant',
     'pangenome_core_size',
-    'pangenome_eggnog_coverage',
     'num_genomes_total',
-    'pangenome_ipr_coverage',
     'pangenome_size'
 }
 
