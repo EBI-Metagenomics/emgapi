@@ -50,7 +50,7 @@ class TestNotify(APITestCase):
             "Requestor": "fake@email.com",
             "Priority": "4",
             "Subject": "Test email subject",
-            "Text": "Hi this is just an example",
+            "Content": "Hi this is just an example",
             "Queue": settings.RT["emg_queue"]
         }
 
@@ -84,7 +84,7 @@ class TestNotify(APITestCase):
             "Requestor": "fake@email.com",
             "Priority": "4",
             "Subject": "Test email subject",
-            "Text": "Hi this is just an example",
+            "Content": "Hi this is just an example",
             "Queue": settings.RT["ena_queue"],
         }
 
