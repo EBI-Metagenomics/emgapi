@@ -52,7 +52,9 @@ class TestGenomes:
             ("Phylogenetic tree of catalogue genomes", 'Phylogenetic tree of catalogue genomes'),
             ("Genome GFF file with antiSMASH geneclusters annotations", "Genome antiSMASH Annotation"),
             ("Tree generated from the pairwise Mash distances of conspecific genomes",
-             "Pairwise Mash distances of conspecific genomes")
+             "Pairwise Mash distances of conspecific genomes"),
+            ("DNA sequence FASTA file of the pangenome", "Pangenome DNA sequence"),
+            ("List of core genes in the entire pangenome", "Pangenome core genes list")
         )
         for d in downloads:
             emg_models.DownloadDescriptionLabel.objects.get_or_create(
