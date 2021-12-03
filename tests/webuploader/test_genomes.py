@@ -76,7 +76,7 @@ class TestGenomes:
 
     @pytest.mark.django_db
     def test_import_genomes(self, client):
-        """Assert that the import worked for genome 'MGYG-HGUT-00776'
+        """Assert that the import worked for genome 'MGYG000000001'
         """
         self._setup()
         baker.make('emgapi.Biome',
