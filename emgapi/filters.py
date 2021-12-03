@@ -894,19 +894,6 @@ class GenomeFilter(django_filters.FilterSet):
         help_text="Number of proteins less/equal value",
     )
 
-    cmseq__gte = django_filters.NumberFilter(
-        field_name="cmseq",
-        label="Strain heterogeneity (CMseq)",
-        lookup_expr="gte",
-        help_text="Strain heterogeneity (CMseq) greater/equal value",
-    )
-    cmseq__lte = django_filters.NumberFilter(
-        field_name="cmseq",
-        label="Strain heterogeneity (CMseq)",
-        lookup_expr="lte",
-        help_text="Strain heterogeneity (CMseq) less/equal value",
-    )
-
     num_genomes_total__gte = django_filters.NumberFilter(
         field_name="num_genomes_total",
         label="Total number of genomes in species",
@@ -1053,8 +1040,6 @@ class GenomeFilter(django_filters.FilterSet):
             "contamination__lte",
             "num_proteins__gte",
             "num_proteins__lte",
-            "cmseq__gte",
-            "cmseq__lte",
             "num_genomes_total__gte",
             "num_genomes_total__lte",
             "pangenome_size__gte",

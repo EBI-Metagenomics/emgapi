@@ -1,0 +1,35 @@
+{
+    "accession": "MGYG000000001",
+    "completeness": 98.59,
+    "contamination": 0.7,
+    "eggnog_coverage": 93.78,
+    "ena_sample_accession": "ERS370061",
+    "ena_study_accession": "ERP105624",
+    "gc_content": 28.26,
+    "genome_accession": "GUT_GENOME000001",
+    "geographic_origin": "Europe",
+    "gold_biome": "root:Host-Associated:Human:Digestive System:Large intestine",
+    "ipr_coverage": 86.42,
+    "length": 3219617,
+    "n_50": 47258,
+    "nc_rnas": 63,
+    "num_contigs": 137,
+    "num_proteins": 3182,
+    "pangenome": {
+        "geographic_range": [
+            "North America",
+            "Europe"
+        ],
+        "num_genomes_non_redundant": 4,
+        "num_genomes_total": 4,
+        "pangenome_accessory_size": 1804,
+        "pangenome_core_size": 1350,
+        "pangenome_size": 3154
+    },
+    "rna_16s": 99.74,
+    "rna_23s": 99.83,
+    "rna_5s": 88.24,
+    "taxon_lineage": "d__Bacteria;p__Firmicutes_A;c__Clostridia;o__Peptostreptococcales;f__Peptostreptococcaceae;g__GCA-900066495;s__GCA-900066495 sp902362365",
+    "trnas": 20,
+    "type": "Isolate"
+}

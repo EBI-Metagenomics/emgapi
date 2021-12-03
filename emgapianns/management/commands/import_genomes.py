@@ -9,7 +9,8 @@ from emgapi import models as emg_models
 from ..lib.genome_util import sanity_check_genome_output, \
     sanity_check_catalogue_dir, find_genome_results, \
     get_genome_result_path, \
-    read_tsv_w_headers, read_json, is_genome_dir_legacy_format, apparent_accession_of_genome_dir
+    read_tsv_w_headers, read_json, \
+    apparent_accession_of_genome_dir
 
 logger = logging.getLogger(__name__)
 
@@ -92,9 +93,9 @@ class Command(BaseCommand):
     def upload_dir(self, directory):
         logger.info('Uploading dir: {}'.format(directory))
         genome, has_pangenome = self.create_genome(directory)
-        self.upload_cog_results(genome, directory, has_pangenome)
-        self.upload_kegg_class_results(genome, directory, has_pangenome)
-        self.upload_kegg_module_results(genome, directory, has_pangenome)
+        self.upload_cog_results(genome, directory)
+        self.upload_kegg_class_results(genome, directory)
+        self.upload_kegg_module_results(genome, directory)
         self.upload_antismash_geneclusters(genome, directory)
         self.upload_genome_files(genome, directory, has_pangenome)
 
@@ -105,10 +106,7 @@ class Command(BaseCommand):
         return emg_models.GenomeSet.objects.using(self.database).get_or_create(name=setname)[0]
 
     def prepare_genome_data(self, genome_dir):
-        if (is_genome_dir_legacy_format(genome_dir)):
-            d = read_json(os.path.join(genome_dir, 'genome.json'))
-        else:
-            d = read_json(os.path.join(genome_dir, f'{apparent_accession_of_genome_dir(genome_dir)}.json'))
+        d = read_json(os.path.join(genome_dir, f'{apparent_accession_of_genome_dir(genome_dir)}.json'))
 
         has_pangenome = 'pangenome' in d
         d['biome'] = self.get_gold_biome(d['gold_biome'])
@@ -137,7 +135,6 @@ class Command(BaseCommand):
         geo_locations = data.get('geographic_range')
         data.pop('geographic_range', None)
         data.pop('genome_accession', None)
-        data.setdefault('taxincons', 0)
 
         data['result_directory'] = get_genome_result_path(genome_dir)
         data['catalogue'] = self.catalogue_obj
@@ -151,80 +148,60 @@ class Command(BaseCommand):
 
         return g, has_pangenome
 
-    def upload_cog_results(self, genome, d, has_pangenome):
-        if is_genome_dir_legacy_format(d):
-            genome_cogs = os.path.join(d, 'genome', 'cog_summary.tsv')
-        else:
-            genome_cogs = os.path.join(d, 'genome', f'{genome.accession}_cog_summary.tsv')
-        self.upload_cog_result(genome, genome_cogs, False)
+    def upload_cog_results(self, genome, d):
+        genome_cogs = os.path.join(d, 'genome', f'{genome.accession}_cog_summary.tsv')
+        self.upload_cog_result(genome, genome_cogs)
         logger.info('Loaded Genome COG for {}'.format(genome.accession))
 
-        pangenome_cogs = os.path.join(d, 'pan-genome', 'cog_summary.tsv')
-        if has_pangenome:
-            self.upload_cog_result(genome, pangenome_cogs, True)
-            logger.info('Loaded PanGenome COG for {}'.format(genome.accession))
-
-    def upload_cog_result(self, genome, f, is_pangenome):
+    def upload_cog_result(self, genome, f):
         counts = read_tsv_w_headers(f)
         for cc in counts:
-            self.upload_cog_count(genome, cc, is_pangenome)
+            self.upload_cog_count(genome, cc)
         logger.info('Loaded Genome COG for {}'.format(genome.accession))
 
-    def upload_cog_count(self, genome, cog_count, is_pangenome):
+    def upload_cog_count(self, genome, cog_count):
         c_name = cog_count['COG_category']
         cog = self.get_cog_cat(c_name)
 
         count_val = int(cog_count['Counts'])
 
-        defaults = {'genome_count': 0, 'pangenome_count': 0}
+        defaults = {'genome_count': 0}
 
         count, created = emg_models.GenomeCogCounts.objects \
             .using(self.database) \
             .get_or_create(genome=genome,
                            cog=cog,
                            defaults=defaults)
-        if is_pangenome:
-            count.pangenome_count = count_val
-        else:
-            count.genome_count = count_val
+
+        count.genome_count = count_val
         count.save(using=self.database)
 
     def get_cog_cat(self, c_name):
         return emg_models.CogCat.objects.using(self.database) \
             .get_or_create(name=c_name)[0]
 
-    def upload_kegg_class_results(self, genome, d, has_pangenome):
-        if is_genome_dir_legacy_format(d):
-            genome_kegg_classes = os.path.join(d, 'genome', 'kegg_classes.tsv')
-        else:
-            genome_kegg_classes = os.path.join(d, 'genome', f'{genome.accession}_kegg_classes.tsv')
-        self.upload_kegg_class_result(genome, genome_kegg_classes, False)
+    def upload_kegg_class_results(self, genome, d):
+        genome_kegg_classes = os.path.join(d, 'genome', f'{genome.accession}_kegg_classes.tsv')
+        self.upload_kegg_class_result(genome, genome_kegg_classes)
         logger.info(
             'Loaded Genome KEGG classes for {}'.format(genome.accession))
 
-        pangenome_kegg_classes = os.path.join(d, 'pan-genome',
-                                              'kegg_classes.tsv')
-        if has_pangenome:
-            self.upload_kegg_class_result(genome, pangenome_kegg_classes, True)
-            logger.info(
-                'Loaded PanGenome KEGG classes for {}'.format(genome.accession))
-
-    def upload_kegg_class_result(self, genome, f, pangenome):
+    def upload_kegg_class_result(self, genome, f):
         kegg_matches = read_tsv_w_headers(f)
         for kegg_match in kegg_matches:
-            self.upload_kegg_class_count(genome, kegg_match, pangenome)
+            self.upload_kegg_class_count(genome, kegg_match)
 
     def get_kegg_class(self, kegg_cls_id):
         return emg_models.KeggClass.objects.using(self.database) \
             .get_or_create(class_id=kegg_cls_id)[0]
 
-    def upload_kegg_class_count(self, genome, kegg_match, is_pangenome):
+    def upload_kegg_class_count(self, genome, kegg_match):
         kegg_id = kegg_match['KEGG_class']
         kegg_class = self.get_kegg_class(kegg_id)
 
         count_val = int(kegg_match['Counts'])
 
-        defaults = {'genome_count': 0, 'pangenome_count': 0}
+        defaults = {'genome_count': 0}
 
         count, created = emg_models.GenomeKeggClassCounts.objects \
             .using(self.database) \
@@ -232,45 +209,31 @@ class Command(BaseCommand):
                            kegg_class=kegg_class,
                            defaults=defaults)
 
-        if is_pangenome:
-            count.pangenome_count = count_val
-        else:
-            count.genome_count = count_val
-
+        count.genome_count = count_val
         count.save(using=self.database)
 
-    def upload_kegg_module_results(self, genome, d, has_pangenome):
-        if is_genome_dir_legacy_format(d):
-            genome_kegg_modules = os.path.join(d, 'genome', 'kegg_modules.tsv')
-        else:
-            genome_kegg_modules = os.path.join(d, 'genome', f'{genome.accession}_kegg_modules.tsv')
-        self.upload_kegg_module_result(genome, genome_kegg_modules, False)
+    def upload_kegg_module_results(self, genome, d):
+        genome_kegg_modules = os.path.join(d, 'genome', f'{genome.accession}_kegg_modules.tsv')
+        self.upload_kegg_module_result(genome, genome_kegg_modules)
         logger.info(
             'Loaded Genome KEGG modules for {}'.format(genome.accession))
 
-        pangenome_kegg_classes = os.path.join(d, 'pan-genome',
-                                              'kegg_modules.tsv')
-        if has_pangenome:
-            self.upload_kegg_module_result(genome, pangenome_kegg_classes, True)
-            logger.info(
-                'Loaded PanGenome KEGG modules for {}'.format(genome.accession))
-
-    def upload_kegg_module_result(self, genome, f, is_pangenome):
+    def upload_kegg_module_result(self, genome, f):
         kegg_matches = read_tsv_w_headers(f)
         for kegg_match in kegg_matches:
-            self.upload_kegg_module_count(genome, kegg_match, is_pangenome)
+            self.upload_kegg_module_count(genome, kegg_match)
 
     def get_kegg_module(self, name):
         return emg_models.KeggModule.objects.using(self.database) \
             .get_or_create(name=name)[0]
 
-    def upload_kegg_module_count(self, genome, kegg_match, is_pangenome):
+    def upload_kegg_module_count(self, genome, kegg_match):
         kegg_module_id = kegg_match['KEGG_module']
         kegg_module = self.get_kegg_module(kegg_module_id)
 
         count_val = int(kegg_match['Counts'])
 
-        defaults = {'genome_count': 0, 'pangenome_count': 0}
+        defaults = {'genome_count': 0}
 
         count, created = emg_models.GenomeKeggModuleCounts.objects \
             .using(self.database) \
@@ -278,11 +241,7 @@ class Command(BaseCommand):
                            kegg_module=kegg_module,
                            defaults=defaults)
 
-        if is_pangenome:
-            count.pangenome_count = count_val
-        else:
-            count.genome_count = count_val
-
+        count.genome_count = count_val
         count.save(using=self.database)
 
     def upload_antismash_geneclusters(self, genome, directory):
@@ -330,24 +289,16 @@ class Command(BaseCommand):
                                 genome.accession + '_InterProScan.tsv', 'Genome analysis', 'genome', False)
 
         if has_pangenome:
-            self.upload_genome_file(genome, directory, 'Accessory predicted CDS', 'fasta',
-                                    'accessory_genes.faa', 'Pan-Genome analysis', 'pan-genome', False)
-            self.upload_genome_file(genome, directory, 'Core predicted CDS', 'fasta',
-                                    'core_genes.faa', 'Pan-Genome analysis', 'pan-genome', False)
-            self.upload_genome_file(genome, directory, 'Core & Accessory predicted CDS', 'fasta',
-                                    'pan-genome.faa', 'Pan-Genome analysis', 'pan-genome', False )
-            self.upload_genome_file(genome, directory,
-                                    'EggNog annotation (core and accessory)', 'tsv',
-                                    'pan-genome_eggNOG.tsv', 'Pan-Genome analysis', 'pan-genome', False)
-            self.upload_genome_file(genome, directory,
-                                    'InterProScan annotation (core and accessory)',
-                                    'tsv', 'pan-genome_InterProScan.tsv', 'Pan-Genome analysis', 'pan-genome', False)
+            self.upload_genome_file(genome, directory, 'Pangenome core genes list', 'tab',
+                                    'core_genes.txt', 'Pan-Genome analysis', 'pan-genome', False)
+            self.upload_genome_file(genome, directory, 'Pangenome DNA sequence', 'fasta',
+                                    'pan-genome.fna', 'Pan-Genome analysis', 'pan-genome', False)
             self.upload_genome_file(genome, directory,
                                     'Gene Presence / Absence matrix',
-                                    'tsv', 'genes_presence-absence.tsv', 'Pan-Genome analysis', 'pan-genome', False)
+                                    'tsv', 'gene_presence_absence.Rtab', 'Pan-Genome analysis', 'pan-genome', False)
             self.upload_genome_file(genome, directory,
                                     'Pairwise Mash distances of conspecific genomes',
-                                    'nwk', 'mashtree.nwk ', 'Pan-Genome analysis', 'pan-genome', False)
+                                    'nwk', 'mashtree.nwk', 'Pan-Genome analysis', 'pan-genome', False)
 
     def prepare_file_upload(self, desc_label, file_format, filename, group_name=None, subdir_name=None):
 

@@ -74,7 +74,7 @@ def genome_catalogue(biome_human):
 @pytest.fixture
 def genome(biome_human, genome_catalogue):
     return emg_models.Genome.objects.create(
-        accession='MGYG00000001',
+        accession='MGYG000000001',
         biome=biome_human,
         catalogue=genome_catalogue,
         length=1,
@@ -93,7 +93,6 @@ def genome(biome_human, genome_catalogue):
         eggnog_coverage=1.0,
         ipr_coverage=1.0,
         taxon_lineage='d__Test;',
-        taxincons=1.0
     )
 
 
