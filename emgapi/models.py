@@ -1656,8 +1656,6 @@ class Genome(models.Model):
     eggnog_coverage = models.FloatField(db_column='EGGNOG_COVERAGE')
     ipr_coverage = models.FloatField(db_column='IPR_COVERAGE')
     taxon_lineage = models.CharField(db_column='TAXON_LINEAGE', max_length=400)
-    cmseq = models.FloatField(db_column='CMSEQ', null=True, )
-    taxincons = models.FloatField(db_column='TAXINCONS')
 
     num_genomes_total = models.IntegerField(db_column='PANGENOME_TOTAL_GENOMES', null=True, blank=True)
     num_genomes_non_redundant = models.IntegerField(db_column='PANGENOME_NON_RED_GENOMES', null=True, blank=True)

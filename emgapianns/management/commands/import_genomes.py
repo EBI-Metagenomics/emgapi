@@ -135,7 +135,6 @@ class Command(BaseCommand):
         geo_locations = data.get('geographic_range')
         data.pop('geographic_range', None)
         data.pop('genome_accession', None)
-        data.setdefault('taxincons', 0)
 
         data['result_directory'] = get_genome_result_path(genome_dir)
         data['catalogue'] = self.catalogue_obj
@@ -290,16 +289,16 @@ class Command(BaseCommand):
                                 genome.accession + '_InterProScan.tsv', 'Genome analysis', 'genome', False)
 
         if has_pangenome:
-            self.upload_genome_file(genome, directory, 'Core predicted CDS', 'tab',
+            self.upload_genome_file(genome, directory, 'Pangenome core genes list', 'tab',
                                     'core_genes.txt', 'Pan-Genome analysis', 'pan-genome', False)
-            self.upload_genome_file(genome, directory, 'Core & Accessory predicted CDS', 'fasta',
+            self.upload_genome_file(genome, directory, 'Pangenome DNA sequence', 'fasta',
                                     'pan-genome.fna', 'Pan-Genome analysis', 'pan-genome', False)
             self.upload_genome_file(genome, directory,
                                     'Gene Presence / Absence matrix',
-                                    'tsv', 'genes_presence-absence.Rtab', 'Pan-Genome analysis', 'pan-genome', False)
+                                    'tsv', 'gene_presence_absence.Rtab', 'Pan-Genome analysis', 'pan-genome', False)
             self.upload_genome_file(genome, directory,
                                     'Pairwise Mash distances of conspecific genomes',
-                                    'nwk', 'mashtree.nwk ', 'Pan-Genome analysis', 'pan-genome', False)
+                                    'nwk', 'mashtree.nwk', 'Pan-Genome analysis', 'pan-genome', False)
 
     def prepare_file_upload(self, desc_label, file_format, filename, group_name=None, subdir_name=None):
 
