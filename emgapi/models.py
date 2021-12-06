@@ -1658,7 +1658,6 @@ class Genome(models.Model):
     taxon_lineage = models.CharField(db_column='TAXON_LINEAGE', max_length=400)
 
     num_genomes_total = models.IntegerField(db_column='PANGENOME_TOTAL_GENOMES', null=True, blank=True)
-    num_genomes_non_redundant = models.IntegerField(db_column='PANGENOME_NON_RED_GENOMES', null=True, blank=True)
     pangenome_size = models.IntegerField(db_column='PANGENOME_SIZE', null=True, blank=True)
     pangenome_core_size = models.IntegerField(db_column='PANGENOME_CORE_PROP', null=True, blank=True)
     pangenome_accessory_size = models.IntegerField(db_column='PANGENOME_ACCESSORY_PROP', null=True, blank=True)

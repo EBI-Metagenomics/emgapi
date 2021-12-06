@@ -907,19 +907,6 @@ class GenomeFilter(django_filters.FilterSet):
         help_text="Total number of genomes in species less/equal value",
     )
 
-    num_genomes_non_redundant__gte = django_filters.NumberFilter(
-        field_name="num_genomes_non_redundant",
-        label="Non-redundant number of genomes in species",
-        lookup_expr="gte",
-        help_text="Non-redundant number of genomes in species greater/equal value",
-    )
-    num_genomes_non_redundant__lte = django_filters.NumberFilter(
-        field_name="num_genomes_non_redundant",
-        label="Non-redundant number of genomes in species",
-        lookup_expr="gte",
-        help_text="Non-redundant number of genomes in species greater/equal value",
-    )
-
     pangenome_size__gte = django_filters.NumberFilter(
         field_name="pangenome_size",
         label="Pan-genome size",

@@ -54,7 +54,9 @@ class TestGenomes:
             ("Tree generated from the pairwise Mash distances of conspecific genomes",
              "Pairwise Mash distances of conspecific genomes"),
             ("DNA sequence FASTA file of the pangenome", "Pangenome DNA sequence"),
-            ("List of core genes in the entire pangenome", "Pangenome core genes list")
+            ("List of core genes in the entire pangenome", "Pangenome core genes list"),
+            ('rRNA sequence of the genome species representative', 'Genome rRNA Sequence')
+
         )
         for d in downloads:
             emg_models.DownloadDescriptionLabel.objects.get_or_create(

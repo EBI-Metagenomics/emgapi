@@ -77,7 +77,6 @@ REQUIRED_JSON_FIELDS = {
 
 REQUIRED_JSON_PANGENOME_FIELDS = {
     'pangenome_accessory_size',
-    'num_genomes_non_redundant',
     'pangenome_core_size',
     'num_genomes_total',
     'pangenome_size'

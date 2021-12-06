@@ -115,6 +115,9 @@ class Command(BaseCommand):
             d.update(d['pangenome'])
             del d['pangenome']
 
+        if 'num_genomes_non_redundant' in d:
+            del d['num_genomes_non_redundant']
+
         if 'geographic_origin' in d:
             d['geo_origin'] = self.get_geo_location(d['geographic_origin'])
             del d['geographic_origin']
@@ -287,6 +290,8 @@ class Command(BaseCommand):
                                 genome.accession + '_eggNOG.tsv', 'Genome analysis', 'genome', False)
         self.upload_genome_file(genome, directory, 'InterProScan annotation', 'tsv',
                                 genome.accession + '_InterProScan.tsv', 'Genome analysis', 'genome', False)
+        self.upload_genome_file(genome, directory, 'Genome rRNA Sequence', 'fasta',
+                                genome.accession + '_rRNAs.fasta', 'Genome analysis', 'genome', False)
 
         if has_pangenome:
             self.upload_genome_file(genome, directory, 'Pangenome core genes list', 'tab',
