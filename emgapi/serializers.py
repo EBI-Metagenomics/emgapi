@@ -1437,7 +1437,7 @@ class CogCountSerializer(ExplicitFieldsModelSerializer):
 
     class Meta:
         model = emg_models.GenomeCogCounts
-        fields = ('name', 'description', 'genome_count', 'pangenome_count')
+        fields = ('name', 'description', 'genome_count')
 
 
 class KeggClassMatchSerializer(ExplicitFieldsModelSerializer):
@@ -1446,7 +1446,7 @@ class KeggClassMatchSerializer(ExplicitFieldsModelSerializer):
 
     class Meta:
         model = emg_models.GenomeKeggClassCounts
-        fields = ('class_id', 'name', 'genome_count', 'pangenome_count')
+        fields = ('class_id', 'name', 'genome_count')
 
 
 class KeggModuleMatchSerializer(ExplicitFieldsModelSerializer):
@@ -1455,7 +1455,7 @@ class KeggModuleMatchSerializer(ExplicitFieldsModelSerializer):
 
     class Meta:
         model = emg_models.GenomeKeggModuleCounts
-        fields = ('name', 'description', 'genome_count', 'pangenome_count')
+        fields = ('name', 'description', 'genome_count')
 
 
 class AntiSmashCountSerializer(ExplicitFieldsModelSerializer):
@@ -1595,7 +1595,7 @@ def get_MAG_choices():
 
 
 class GenomeUploadSearchSerializer(drf_serializers.Serializer):
-    def __init__(self, user, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(GenomeUploadSearchSerializer, self).__init__(*args, **kwargs)
         self.fields['mag_catalogue'] = ChoiceField(get_MAG_choices())
 

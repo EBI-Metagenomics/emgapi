@@ -1,0 +1,38 @@
+{
+    "accession": "MGYG000000002",
+    "completeness": 99.37,
+    "contamination": 0.0,
+    "eggnog_coverage": 95.56,
+    "ena_sample_accession": "ERS370064",
+    "ena_study_accession": "ERP105624",
+    "gc_content": 42.6,
+    "genome_accession": "GUT_GENOME000004",
+    "geographic_origin": "Europe",
+    "gold_biome": "root:Host-Associated:Human:Digestive System:Large intestine",
+    "ipr_coverage": 88.85,
+    "length": 4433109,
+    "n_50": 109267,
+    "nc_rnas": 57,
+    "num_contigs": 101,
+    "num_proteins": 3920,
+    "pangenome": {
+        "geographic_range": [
+            "Oceania",
+            "North America",
+            "South America",
+            "Europe",
+            "Asia"
+        ],
+        "num_genomes_non_redundant": 359,
+        "num_genomes_total": 359,
+        "pangenome_accessory_size": 28211,
+        "pangenome_core_size": 661,
+        "pangenome_size": 28872
+    },
+    "rna_16s": 95.37,
+    "rna_23s": 86.19,
+    "rna_5s": 82.35,
+    "taxon_lineage": "d__Bacteria;p__Firmicutes_A;c__Clostridia;o__Lachnospirales;f__Lachnospiraceae;g__Blautia_A;s__Blautia_A faecis",
+    "trnas": 19,
+    "type": "Isolate"
+}

@@ -1,0 +1,39 @@
+{
+    "accession": "MGYG000000003",
+    "completeness": 100.0,
+    "contamination": 0.0,
+    "eggnog_coverage": 93.38,
+    "ena_sample_accession": "ERS370070",
+    "ena_study_accession": "ERP105624",
+    "gc_content": 58.52,
+    "genome_accession": "GUT_GENOME000008",
+    "geographic_origin": "Europe",
+    "gold_biome": "root:Host-Associated:Human:Digestive System:Large intestine",
+    "ipr_coverage": 89.14,
+    "length": 3229518,
+    "n_50": 158570,
+    "nc_rnas": 27,
+    "num_contigs": 35,
+    "num_proteins": 2690,
+    "pangenome": {
+        "geographic_range": [
+            "NA",
+            "Oceania",
+            "North America",
+            "Europe",
+            "Asia",
+            "South America"
+        ],
+        "num_genomes_non_redundant": 1181,
+        "num_genomes_total": 1181,
+        "pangenome_accessory_size": 13239,
+        "pangenome_core_size": 1163,
+        "pangenome_size": 14402
+    },
+    "rna_16s": 99.67,
+    "rna_23s": 99.66,
+    "rna_5s": 94.96,
+    "taxon_lineage": "d__Bacteria;p__Bacteroidota;c__Bacteroidia;o__Bacteroidales;f__Rikenellaceae;g__Alistipes;s__Alistipes shahii",
+    "trnas": 20,
+    "type": "Isolate"
+}
