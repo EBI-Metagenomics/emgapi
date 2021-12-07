@@ -44,7 +44,7 @@ django-rest-framework-mongoengine==3.4.1
 
 # assembly viewer
 pysam==0.15.3; python_version < '3.5'
-pysam==0.16.0.1; python_version > '3.4'
+pysam==0.18.0; python_version > '3.4'
 
 # sourmash search
 celery[redis]==5.1.0
