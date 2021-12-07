@@ -1,8 +1,8 @@
 -r requirements.txt
 
 # EBI MGnify libs
-ena-api-libs~=1.0.4
-emg-backlog-schema~=1.0.0
+ena-api-libs~=1.1.0
+emg-backlog-schema~=1.0.1
 pandas~=0.25.2
 
 django-debug-toolbar==3.2.2
