@@ -388,8 +388,12 @@ def read_config(config_path, db):
     backlog_config = EMG_CONF.get('backlog', {}).get('databases', {}).get(db)
     if not backlog_config:
         raise Exception(f"Could not find Backlog Config for db={db} in {config_path}")
-    backlog_config['raise_on_warnings'] = True
-    backlog_config['autocommit'] = True
-    backlog_config['port'] = int(backlog_config["port"])
-    return backlog_config
+    return {
+        'raise_on_warnings': True,
+        'autocommit': True,
+        'port': backlog_config['PORT'],
+        'host': backlog_config['HOST'],
+        'user': backlog_config['USER'],
+        'password': backlog_config['PASSWORD'],
+    }
 
