@@ -385,7 +385,7 @@ def get_result_dir(result_dir, substring="results/"):
 
 def read_config(config_path, db):
     EMG_CONF = yamjam(config_path)
-    backlog_config = EMG_CONF.get('backlog', {}).get(db)
+    backlog_config = EMG_CONF.get('backlog', {}).get('databases', {}).get(db)
     if not backlog_config:
         raise Exception(f"Could not find Backlog Config for db={db} in {config_path}")
     backlog_config['raise_on_warnings'] = True
