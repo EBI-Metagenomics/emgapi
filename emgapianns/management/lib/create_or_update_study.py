@@ -64,13 +64,13 @@ class StudyImporter:
         db_result, api_result = None, None
         try:
             db_result = ena_models.RunStudy.objects.using(database).raw(f"""
-                select * from {ena_models.RunStudy.Meta.db_table}
+                select * from {ena_models.RunStudy._meta.db_table}
                 where STUDY_ID=%s or PROJECT_ID=%s
                 """, [study_accession, study_accession])
         except RunStudy.DoesNotExist:
             try:
                 db_result = ena_models.AssemblyStudy.objects.using(database).raw(f"""
-                    select * from {ena_models.AssemblyStudy.Meta.db_table}
+                    select * from {ena_models.AssemblyStudy._meta.db_table}
                     where STUDY_ID=%s or PROJECT_ID=%s
                 """, [study_accession, study_accession])
             except AssemblyStudy.DoesNotExist:
