@@ -195,7 +195,16 @@ class StudyImporter:
 
     @staticmethod
     def _get_ena_project(ena_db, project_id):
-        return ena_models.Project.objects.using(ena_db).get(project_id=project_id)
+        # return ena_models.Project.objects.using(ena_db).get(project_id=project_id)
+        try:
+            project = ena_models.Project.objects.using(ena_db).raw(f"""
+            select * from {ena_models.Project._meta.db_table} where PROJECT_ID=%s
+            """, [project_id,])[0]
+        except (ena_models.Project.DoesNotExist, IndexError):
+            logging.warning(f'No ENA project found for {project_id}')
+            return None
+        else:
+            return project
 
     def _update_or_create_study_from_api_result(self, api_study, study_result_dir, lineage, ena_db, emg_db):
         secondary_study_accession = api_study.get('secondary_study_accession')
