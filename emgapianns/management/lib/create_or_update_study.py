@@ -66,14 +66,14 @@ class StudyImporter:
             db_result = ena_models.RunStudy.objects.using(database).raw(f"""
                 select * from {ena_models.RunStudy._meta.db_table}
                 where STUDY_ID=%s or PROJECT_ID=%s
-                """, [study_accession, study_accession])
-        except RunStudy.DoesNotExist:
+                """, [study_accession, study_accession])[0]
+        except (RunStudy.DoesNotExist, IndexError):
             try:
                 db_result = ena_models.AssemblyStudy.objects.using(database).raw(f"""
                     select * from {ena_models.AssemblyStudy._meta.db_table}
                     where STUDY_ID=%s or PROJECT_ID=%s
-                """, [study_accession, study_accession])
-            except AssemblyStudy.DoesNotExist:
+                """, [study_accession, study_accession])[0]
+            except (AssemblyStudy.DoesNotExist, IndexError):
                 logging.warning(
                     "Could not find study {0} in the ENA database (ERAPRO). Calling ENA Portal API "
                     "now to retrieve study metadata.".format(study_accession))
