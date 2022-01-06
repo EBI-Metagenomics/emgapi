@@ -16,7 +16,6 @@
 
 import logging
 
-from django.db.models import Q
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from ena_portal_api import ena_handler
@@ -63,17 +62,11 @@ class StudyImporter:
         """
         db_result, api_result = None, None
         try:
-            db_result = ena_models.RunStudy.objects.using(database).raw(f"""
-                select * from {ena_models.RunStudy._meta.db_table}
-                where STUDY_ID=%s or PROJECT_ID=%s
-                """, [study_accession, study_accession])[0]
-        except (RunStudy.DoesNotExist, IndexError):
+            db_result = ena_models.RunStudy.objects.using(database).filter(study_id=study_accession, project_id=study_accession, combine_operator='OR')
+        except RunStudy.DoesNotExist:
             try:
-                db_result = ena_models.AssemblyStudy.objects.using(database).raw(f"""
-                    select * from {ena_models.AssemblyStudy._meta.db_table}
-                    where STUDY_ID=%s or PROJECT_ID=%s
-                """, [study_accession, study_accession])[0]
-            except (AssemblyStudy.DoesNotExist, IndexError):
+                db_result = ena_models.AssemblyStudy.objects.using(database).get(study_id=study_accession, project_id=study_accession, combine_operator='OR')
+            except AssemblyStudy.DoesNotExist:
                 logging.warning(
                     "Could not find study {0} in the ENA database (ERAPRO). Calling ENA Portal API "
                     "now to retrieve study metadata.".format(study_accession))
@@ -197,10 +190,8 @@ class StudyImporter:
     def _get_ena_project(ena_db, project_id):
         # return ena_models.Project.objects.using(ena_db).get(project_id=project_id)
         try:
-            project = ena_models.Project.objects.using(ena_db).raw(f"""
-            select * from {ena_models.Project._meta.db_table} where PROJECT_ID=%s
-            """, [project_id,])[0]
-        except (ena_models.Project.DoesNotExist, IndexError):
+            project = ena_models.Project.objects.using(ena_db).get(project_id=project_id)
+        except ena_models.Project.DoesNotExist:
             logging.warning(f'No ENA project found for {project_id}')
             return None
         else:

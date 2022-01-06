@@ -161,8 +161,8 @@ class Command(BaseCommand):
 
     def get_ena_db_sample(self, accession):
         logger.info('Fetching sample {} from ena oracle DB'.format(accession))
-        query = Q(sample_id=accession) | Q(biosample_id=accession)
-        return ena_models.Sample.objects.using(self.ena_db).filter(query).first()
+        # query = Q(sample_id=accession) | Q(biosample_id=accession)
+        return ena_models.Sample.objects.using(self.ena_db).filter(sample_id=accession, biosample_id=accession, combine_operator='OR')[0]
 
     def get_variable(self, name):
         try:
@@ -215,8 +215,7 @@ class Command(BaseCommand):
     def get_backlog_lineage(sample_accession):
         try:
             run = backlog_models.Run.objects.using('backlog_prod') \
-                .filter(sample_primary_accession=sample_accession) \
-                .first()
+                .filter(sample_primary_accession=sample_accession)[0]
             return run.biome.lineage
         except AttributeError:
             logging.error('Could not retrieve backlog biome for sample {}, '
