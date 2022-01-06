@@ -62,7 +62,7 @@ class StudyImporter:
         """
         db_result, api_result = None, None
         try:
-            db_result = ena_models.RunStudy.objects.using(database).filter(study_id=study_accession, project_id=study_accession, combine_operator='OR')
+            db_result = ena_models.RunStudy.objects.using(database).get(study_id=study_accession, project_id=study_accession, combine_operator='OR')
         except RunStudy.DoesNotExist:
             try:
                 db_result = ena_models.AssemblyStudy.objects.using(database).get(study_id=study_accession, project_id=study_accession, combine_operator='OR')
