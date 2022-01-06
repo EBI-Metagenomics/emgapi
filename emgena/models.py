@@ -138,6 +138,7 @@ class Oracle11Manager(models.QuerySet):
             where_clause = f"{where_k}='{where_v}'" if type(where_v) is str else f"{where_k}={where_v}"
             if first:
                 query += f" WHERE {where_clause}"
+                first = False
             else:
                 query += f" {combiner} {where_clause}"
 
