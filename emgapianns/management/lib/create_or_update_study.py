@@ -16,7 +16,6 @@
 
 import logging
 
-from django.db.models import Q
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from ena_portal_api import ena_handler
@@ -63,12 +62,10 @@ class StudyImporter:
         """
         db_result, api_result = None, None
         try:
-            db_result = ena_models.RunStudy.objects.using(database).get(
-                Q(study_id=study_accession) | Q(project_id=study_accession))
+            db_result = ena_models.RunStudy.objects.using(database).get(study_id=study_accession, project_id=study_accession, combine_operator='OR')
         except RunStudy.DoesNotExist:
             try:
-                db_result = ena_models.AssemblyStudy.objects.using(database).get(
-                    Q(study_id=study_accession) | Q(project_id=study_accession))
+                db_result = ena_models.AssemblyStudy.objects.using(database).get(study_id=study_accession, project_id=study_accession, combine_operator='OR')
             except AssemblyStudy.DoesNotExist:
                 logging.warning(
                     "Could not find study {0} in the ENA database (ERAPRO). Calling ENA Portal API "
@@ -191,7 +188,14 @@ class StudyImporter:
 
     @staticmethod
     def _get_ena_project(ena_db, project_id):
-        return ena_models.Project.objects.using(ena_db).get(project_id=project_id)
+        # return ena_models.Project.objects.using(ena_db).get(project_id=project_id)
+        try:
+            project = ena_models.Project.objects.using(ena_db).get(project_id=project_id)
+        except ena_models.Project.DoesNotExist:
+            logging.warning(f'No ENA project found for {project_id}')
+            return None
+        else:
+            return project
 
     def _update_or_create_study_from_api_result(self, api_study, study_result_dir, lineage, ena_db, emg_db):
         secondary_study_accession = api_study.get('secondary_study_accession')
