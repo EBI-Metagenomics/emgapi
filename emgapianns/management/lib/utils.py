@@ -190,7 +190,7 @@ def get_pipeline_version(rootpath):
 
 
 def sanitise_string(s):
-    return unicodedata.normalize('NFKD', s).encode('ascii', 'ignore')
+    return unicodedata.normalize('NFKD', s)
 
 
 def read_chunkfile(filename):
