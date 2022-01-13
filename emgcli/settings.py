@@ -638,3 +638,11 @@ except KeyError:
         "celery_broker": "redis://localhost:6379/0",
         "celery_backend": "redis://localhost:6379/0",
     }
+
+try:
+    EUROPE_PMC = EMG_CONF['emg']['europe_pmc']
+except KeyError:
+    EUROPE_PMC = {
+        "annotations_endpoint": 'https://www.ebi.ac.uk/europepmc/annotations_api/annotationsByArticleIds',
+        "annotations_provider": "Metagenomics"
+    }

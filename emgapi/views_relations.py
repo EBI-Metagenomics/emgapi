@@ -689,6 +689,14 @@ class GenomeCatalogueGenomeRelationshipViewSet(emg_mixins.ListModelMixin,
                                                emg_viewsets.BaseGenomeGenericViewSet):  # noqa
     lookup_field = 'catalogue_id'
 
+    search_fields = (
+        'accession',
+        'taxon_lineage',
+        'type',
+        'genome_set__name',
+        'catalogue__name'
+    )
+
     def get_queryset(self):
         catalogue_id = self.kwargs[self.lookup_field]
         if catalogue_id == 'all':
@@ -1094,7 +1102,6 @@ class GenomeCogsRelationshipsViewSet(emg_mixins.ListModelMixin,
     ordering_fields = (
         'name',
         'genome_count',
-        'pangenome_count',
         'description'
     )
 
@@ -1126,7 +1133,6 @@ class GenomeKeggClassRelationshipsViewSet(emg_mixins.ListModelMixin,
         'class_id',
         'name',
         'genome_count',
-        'pangenome_count'
     )
 
     ordering = ['-genome_count']
@@ -1142,11 +1148,6 @@ class GenomeKeggClassRelationshipsViewSet(emg_mixins.ListModelMixin,
         queryset = emg_models.GenomeKeggClassCounts.objects \
             .select_related('kegg_class') \
             .filter(genome=genome)
-        filter_param = self.request.GET.get('filter', '').split(',')
-        if 'pangenome' in filter_param:
-            queryset = queryset.filter(pangenome=True)
-        elif 'genome' in filter_param:
-            queryset = queryset.filter(pangenome=False)
         return queryset
 
 
@@ -1162,7 +1163,6 @@ class GenomeKeggModuleRelationshipsViewSet(emg_mixins.ListModelMixin,
         'class_id',
         'name',
         'genome_count',
-        'pangenome_count'
     )
 
     ordering = ['-genome_count']
@@ -1178,11 +1178,6 @@ class GenomeKeggModuleRelationshipsViewSet(emg_mixins.ListModelMixin,
         queryset = emg_models.GenomeKeggModuleCounts.objects \
             .select_related('kegg_module') \
             .filter(genome=genome)
-        filter_param = self.request.GET.get('filter', '').split(',')
-        if 'pangenome' in filter_param:
-            queryset = queryset.filter(pangenome=True)
-        elif 'genome' in filter_param:
-            queryset = queryset.filter(pangenome=False)
         return queryset
 
 

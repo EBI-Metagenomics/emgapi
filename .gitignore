@@ -24,3 +24,4 @@ fixtures/*.sig
 .idea/
 
 .coverage
+/build/

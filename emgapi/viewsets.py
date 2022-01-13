@@ -256,6 +256,7 @@ class BaseGenomeGenericViewSet(viewsets.GenericViewSet):
         'num_genomes_total',
         'num_proteins',
         'last_update',
+        'type'
     )
 
     ordering = ('accession',)

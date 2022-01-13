@@ -77,7 +77,7 @@ class Command(BaseCommand):
 
     def get_ena_db_assembly(self, accession):
         logger.info("Fetching assembly {} from ena oracle DB".format(accession))
-        return ena_models.Assembly.objects.using(self.ena_db).filter(assembly_id=accession).first()
+        return ena_models.Assembly.objects.using(self.ena_db).get(assembly_id=accession)
 
     def create_or_update_assembly(self, ena_assembly):
         accession = ena_assembly.assembly_id

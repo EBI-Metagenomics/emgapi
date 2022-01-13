@@ -1656,16 +1656,11 @@ class Genome(models.Model):
     eggnog_coverage = models.FloatField(db_column='EGGNOG_COVERAGE')
     ipr_coverage = models.FloatField(db_column='IPR_COVERAGE')
     taxon_lineage = models.CharField(db_column='TAXON_LINEAGE', max_length=400)
-    cmseq = models.FloatField(db_column='CMSEQ', null=True, )
-    taxincons = models.FloatField(db_column='TAXINCONS')
 
     num_genomes_total = models.IntegerField(db_column='PANGENOME_TOTAL_GENOMES', null=True, blank=True)
-    num_genomes_non_redundant = models.IntegerField(db_column='PANGENOME_NON_RED_GENOMES', null=True, blank=True)
     pangenome_size = models.IntegerField(db_column='PANGENOME_SIZE', null=True, blank=True)
     pangenome_core_size = models.IntegerField(db_column='PANGENOME_CORE_PROP', null=True, blank=True)
     pangenome_accessory_size = models.IntegerField(db_column='PANGENOME_ACCESSORY_PROP', null=True, blank=True)
-    pangenome_eggnog_coverage = models.FloatField(db_column='PANGENOME_EGGNOG_COV', null=True, blank=True)
-    pangenome_ipr_coverage = models.FloatField(db_column='PANGENOME_IPR_COV', null=True, blank=True)
 
     last_update = models.DateTimeField(db_column='LAST_UPDATE', auto_now=True)
     first_created = models.DateTimeField(db_column='FIRST_CREATED', auto_now_add=True)
@@ -1730,7 +1725,6 @@ class GenomeCogCounts(models.Model):
     cog = models.ForeignKey(CogCat, db_column='COG_ID',
                             on_delete=models.DO_NOTHING)
     genome_count = models.IntegerField(db_column='GENOME_COUNT')
-    pangenome_count = models.IntegerField(db_column='PANGENOME_COUNT')
 
     class Meta:
         db_table = 'GENOME_COG_COUNTS'
@@ -1758,7 +1752,6 @@ class GenomeKeggClassCounts(models.Model):
     kegg_class = models.ForeignKey(KeggClass, db_column='KEGG_ID',
                                    on_delete=models.DO_NOTHING)
     genome_count = models.IntegerField(db_column='GENOME_COUNT')
-    pangenome_count = models.IntegerField(db_column='PANGENOME_COUNT')
 
     class Meta:
         db_table = 'GENOME_KEGG_CLASS_COUNTS'
@@ -1785,7 +1778,6 @@ class GenomeKeggModuleCounts(models.Model):
     kegg_module = models.ForeignKey(KeggModule, db_column='KEGG_MODULE',
                                     on_delete=models.DO_NOTHING)
     genome_count = models.IntegerField(db_column='GENOME_COUNT')
-    pangenome_count = models.IntegerField(db_column='PANGENOME_COUNT')
 
     class Meta:
         db_table = 'GENOME_KEGG_MODULE_COUNTS'
@@ -1834,7 +1826,7 @@ class GenomeCatalogueDownload(BaseDownload):
 
     class Meta:
         db_table = 'GENOME_CATALOGUE_DOWNLOAD'
-        unique_together = (('realname', 'alias'),)
+        unique_together = (('realname', 'alias', 'genome_catalogue'),)
         ordering = ('group_type', 'alias')
 
 
