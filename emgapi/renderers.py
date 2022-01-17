@@ -19,6 +19,8 @@ from rest_framework import renderers
 from rest_framework_json_api.renderers import JSONRenderer
 from rest_framework_csv.renderers import CSVRenderer, CSVStreamingRenderer as BaseCSVStreamingRenderer
 
+from .relations import HyperlinkedRelatedFieldWithCustomId
+
 
 class DefaultJSONRenderer(JSONRenderer):
     media_type = 'application/json'
@@ -36,6 +38,17 @@ class DefaultJSONRenderer(JSONRenderer):
             **kwargs
     ):
         resource_data = super().build_json_resource_obj(fields, resource, resource_instance, resource_name, serializer, force_type_resolution=force_type_resolution)
+
+        relationships = resource_data.get('relationships')
+        if relationships:
+            for field_name in relationships.keys():
+                if isinstance(fields.fields.get(field_name), HyperlinkedRelatedFieldWithCustomId):
+                    id_field = getattr(fields.fields.get(field_name), 'related_link_id_field')
+                    related_instance =  getattr(resource_instance, field_name)
+                    id_value = getattr(related_instance, id_field)
+                    resource_data['relationships'][field_name]['data']['id'] = id_value
+                    continue
+
         current_serializer = fields.serializer
         context = current_serializer.context
         view = context.get("view", None)

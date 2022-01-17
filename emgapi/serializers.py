@@ -32,6 +32,7 @@ from . import fields as emg_fields
 
 # TODO: add related_link_lookup_fields, a list
 from emgapianns import models as m_models
+from .relations import HyperlinkedRelatedFieldWithCustomId
 
 logger = logging.getLogger(__name__)
 
@@ -1008,12 +1009,13 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
 
     sample_metadata = serializers.ListField()
 
-    # relationships
-    biome = serializers.HyperlinkedRelatedField(
+    biome = HyperlinkedRelatedFieldWithCustomId(
         read_only=True,
         view_name='emgapi_v1:biomes-detail',
         lookup_field='lineage',
+        related_link_id_field='lineage'
     )
+    # biome = ResourceRelatedField(queryset)
 
     studies = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
         source='get_studies',
