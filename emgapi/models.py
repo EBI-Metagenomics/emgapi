@@ -1842,7 +1842,7 @@ class Search(models.Lookup):
 
 class LegacyAssembly(models.Model):
     """Assemblies that were re-uploaded and got new ERZ accessions.
-    This table has the mapping with the old accessions and the new ones.
+    This table has the mapping between the old accessions and the new ones.
     It's used to keep the "old" accessions live.
     """
     legacy_accession = models.CharField(
