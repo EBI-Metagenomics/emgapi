@@ -1164,9 +1164,6 @@ class Assembly(models.Model):
     study = models.ForeignKey("emgapi.Study", db_column="STUDY_ID",
         on_delete=models.SET_NULL, null=True, blank=True)
 
-    new_accession = models.CharField(
-        'new_accession', through='LegacyAssembly', related_name='assemblies', blank=True)  
-
     coverage = models.IntegerField(db_column="COVERAGE", null=True, blank=True)
 
     min_gap_length = models.IntegerField(db_column="MIN_GAP_LENGTH", null=True, blank=True)
@@ -1844,17 +1841,22 @@ class Search(models.Lookup):
 
 
 class LegacyAssembly(models.Model):
-    legacy_accession = models.ForeignKey(
-        'Legacy assembly', db_column='legacy_accession', on_delete=models.CASCADE)
-    new_accession = models.ForeignKey(
-        'New accession', db_column='new_accession', on_delete=models.CASCADE)
+    """Assemblies that were re-uploaded and got new ERZ accessions.
+    This table has the mapping with the old accessions and the new ones.
+    It's used to keep the "old" accessions live.
+    """
+    legacy_accession = models.CharField(
+        "Legacy assembly", db_column="LEGACY_ACCESSION", db_index=True, max_length=80)
+    new_accession = models.CharField(
+        "New accession", db_column="NEW_ACCESSION", max_length=80)
 
     class Meta:
         db_table = 'LEGACY_ASSEMBLY'
         unique_together = (('legacy_accession', 'new_accession'),)
+        
 
     def __str__(self):
-        return 'Legacy Assembly:{} - New Accession:{}'.format(self.legacy_accession, self.new_accession)
+        return f"Legacy Assembly:{self.legacy_accession} - New Accession:{self.new_accession}"
 
 models.CharField.register_lookup(Search)
 models.TextField.register_lookup(Search)
