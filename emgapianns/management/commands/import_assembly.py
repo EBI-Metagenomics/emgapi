@@ -145,11 +145,9 @@ class Command(BaseCommand):
             logging.warning("Could not retrieve run accession from assembly name!")
         # checking if there are additional accession using ena_portal_api, required for hybrid assemblies
         alt_runs = []
-        run_refs = ena.get_assembly(assembly_name=assembly, fields="run_refs")
-        if 'run_refs' in run_refs:
-            for run_ref in run_refs['run_refs']:
-                if run_ref == run_accession:
-                    continue
+        run_refs = ena.get_assembly(assembly_name=assembly, fields="run_refs").get('run_refs', [])
+        for run_ref in run_refs:
+            if not run_ref == run_accession:    
                 alt_runs.append(run_ref)
         for run in alt_runs:
             self.tag_run(assembly, run)
