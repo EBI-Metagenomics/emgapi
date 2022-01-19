@@ -737,7 +737,9 @@ class AssemblyViewSet(mixins.RetrieveModelMixin,
             try:
                 legacy_entry = emg_models.LegacyAssembly.objects. \
                     get(legacy_accession=self.kwargs['accession'])
-                return redirect("emgapi_v1:assemblies-detail", accession=legacy_entry.new_accession)
+                return redirect("emgapi_v1:assemblies-detail",
+                    accession=legacy_entry.new_accession,
+                    permanent=True)
             except emg_models.LegacyAssembly.DoesNotExist:
                 raise Http404()
         return super(AssemblyViewSet, self).retrieve(request, *args, **kwargs)
