@@ -22,28 +22,11 @@ from rest_framework_json_api.relations import (
     SkipDataMixin,
 )
 from rest_framework_json_api.utils import get_resource_type_from_instance
-from rest_framework_json_api.serializers import HyperlinkedRelatedField
 
 from rest_framework_json_api.relations import LINKS_PARAMS
 LINKS_PARAMS.append('related_link_self_view_name')
 LINKS_PARAMS.append('related_link_self_lookup_field')
 LINKS_PARAMS.append('related_link_self_lookup_fields')
-
-
-class HyperlinkedRelatedFieldWithCustomId(HyperlinkedRelatedField):
-    """
-    Like a regular HyperLinkedRelatedField, except with an attribute `related_link_id_field`,
-    that determines with field to render as the "id:" of an object when it is rendered in the `relationships`
-    of a related object.
-    """
-    related_link_id_field = 'pk'
-
-    def __init__(self, *args, **kwargs):
-        self.related_link_id_field = kwargs.pop(
-            'related_link_id_field',
-            self.related_link_id_field)
-        super(HyperlinkedRelatedFieldWithCustomId, self) \
-            .__init__(*args, **kwargs)
 
 
 class HyperlinkedSerializerMethodResourceRelatedField(SerializerMethodResourceRelatedField):  # noqa

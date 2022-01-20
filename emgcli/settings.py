@@ -364,8 +364,8 @@ REST_FRAMEWORK = {
         # 'emgapi.renderers.JSONLDRenderer',
         # 'rest_framework_xml.renderers.XMLRenderer',
         # 'rest_framework_yaml.renderers.YAMLRenderer',
-        # 'emgapi.renderers.CSVStreamingRenderer',
-        'rest_framework_json_api.renderers.BrowsableAPIRenderer',
+        'emgapi.renderers.CSVStreamingRenderer',
+        'emgapi.renderers.EMGBrowsableAPIRenderer',
     ),
 
     'DEFAULT_FILTER_BACKENDS': (

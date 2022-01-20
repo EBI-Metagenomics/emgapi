@@ -14,12 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import csv
+from collections import OrderedDict
 
+from django.utils import encoding
 from rest_framework import renderers
-from rest_framework_json_api.renderers import JSONRenderer
 from rest_framework_csv.renderers import CSVRenderer, CSVStreamingRenderer as BaseCSVStreamingRenderer
-
-from .relations import HyperlinkedRelatedFieldWithCustomId
+from rest_framework.relations import HyperlinkedRelatedField
+from rest_framework_json_api import utils
+from rest_framework_json_api.renderers import JSONRenderer, BrowsableAPIRenderer
 
 
 class DefaultJSONRenderer(JSONRenderer):
@@ -42,12 +44,12 @@ class DefaultJSONRenderer(JSONRenderer):
         relationships = resource_data.get('relationships')
         if relationships:
             for field_name in relationships.keys():
-                if isinstance(fields.fields.get(field_name), HyperlinkedRelatedFieldWithCustomId):
-                    id_field = getattr(fields.fields.get(field_name), 'related_link_id_field')
+                if isinstance(fields.fields.get(field_name), HyperlinkedRelatedField):
+                    id_field = getattr(fields.fields.get(field_name), 'lookup_field')
                     related_instance =  getattr(resource_instance, field_name)
-                    id_value = getattr(related_instance, id_field)
-                    resource_data['relationships'][field_name]['data']['id'] = id_value
-                    continue
+                    id_value = getattr(related_instance, id_field, None)
+                    if None not in [id_value, resource_data['relationships'][field_name]['data']]:
+                        resource_data['relationships'][field_name]['data']['id'] = id_value
 
         current_serializer = fields.serializer
         context = current_serializer.context
@@ -57,8 +59,34 @@ class DefaultJSONRenderer(JSONRenderer):
                 resource_data['id'] = resource.get(view.relationship_lookup_field, resource_data['id'])
         elif hasattr(view, 'lookup_field'):
             if view.lookup_field in resource:
-                resource_data['id'] = resource.get(view.lookup_field, resource_data['id'])
+                resource_data['id'] = encoding.force_str(resource.get(view.lookup_field, resource_data['id']))
+        if "url" in fields and resource_data.get('id') is not None:
+            custom_id = getattr(resource_instance, fields["url"].lookup_field)
+            resource_data['id'] = encoding.force_str(custom_id)
+
         return resource_data
+
+
+class EMGBrowsableAPIRenderer(BrowsableAPIRenderer):
+    @classmethod
+    def _get_included_serializers(cls, serializer, prefix="", already_seen=None):
+        """Prevents browsable API showing options to include deeply nested serializers
+        (e.g. ?include=biome.studies.biomes)"""
+        if not already_seen:
+            already_seen = set()
+
+        if serializer in already_seen:
+            return []
+
+        included_serializers = []
+        already_seen.add(serializer)
+
+        for include, included_serializer in utils.get_included_serializers(
+                serializer
+        ).items():
+            included_serializers.append(f"{prefix}{include}")
+
+        return included_serializers
 
 
 class JSONLDRenderer(renderers.JSONRenderer):
