@@ -39,7 +39,6 @@ class Command(BaseCommand):
     emg_db = None
     ena_db = None
     biome = None
-    run_biome = None
 
     def add_arguments(self, parser):
         parser.add_argument('accessions', help='ENA sample accessions', nargs='+')
@@ -51,16 +50,12 @@ class Command(BaseCommand):
                             choices=['default', 'dev', 'prod'],
                             default='default')
         parser.add_argument('--biome', help='Lineage of GOLD biome')
-        parser.add_argument('--run-biome',
-                            help='Lineage of GOLD biome for the run, to be used if --biome is empty',
-                            required=False)
 
     def handle(self, *args, **options):
         logger.info("CLI %r" % options)
         self.emg_db = options['emg_db']
         self.ena_db = options['ena_db']
         self.biome = options['biome']
-        self.run_biome = options['run-biome']
 
         for acc in options['accessions']:
             logger.info('Importing sample {}'.format(acc))
@@ -81,6 +76,14 @@ class Command(BaseCommand):
 
     def create_or_update_sample(self, ena_db_model, api_data):
         accession = api_data['secondary_sample_accession']
+        logger.debug('Getting the biome from the DB.')
+        try:
+            biome_model = emg_models.Biome.objects.using(self.emg_db).get(lineage=self.biome)
+        except emg_models.Biome.DoesNotExist as exception:
+            logger.exception(exception)
+            logger.error(f'The supplied biome is not valid. Biome: "{self.biome}"')
+            sys.exit(1)
+
         logger.info('Creating sample {}'.format(accession))
         defaults = sanitise_fields({
             'collection_date': api_data['collection_date'],
@@ -93,7 +96,7 @@ class Command(BaseCommand):
             'sample_alias': api_data['sample_alias'],
             'host_tax_id': self.__get_host_tax_id(api_data['host_tax_id']),
             'species': self.__get_species(),
-            'biome': self.get_biome(accession),
+            'biome': biome_model,
             'last_update': timezone.now(),
             'submission_account_id': ena_db_model.submission_account_id,
         })
@@ -185,17 +188,6 @@ class Command(BaseCommand):
                 pass
         if not len(studies):
             logger.warning('No studies tagged to sample {}'.format(sample.accession))
-
-    def get_emg_biome_obj(self, lineage):
-        return emg_models.Biome.objects.using(self.emg_db).get(lineage=lineage)
-
-    def get_biome(self, sample_accession):
-        if self.biome:
-            lineage = self.biome
-        else:
-            lineage = self.run_biome
-
-        return self.get_emg_biome_obj(lineage)
 
     def __get_host_tax_id(self, ena_host_tax_id):
         if self.biome.startswith('root:Host-associated:Human'):
