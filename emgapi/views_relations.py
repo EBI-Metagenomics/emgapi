@@ -124,7 +124,7 @@ class StudyGeoCoordinateRelationshipViewSet(mixins.ListModelMixin,
         queryset = emg_models.SampleGeoCoordinate.objects \
             .available(self.request) \
             .filter(studies=study.study_id) \
-            .values('lon_lat_pk', 'longitude', 'latitude', 'pk') \
+            .values('lon_lat_pk', 'longitude', 'latitude') \
             .annotate(samples_count=Count('lon_lat_pk'))
         return queryset
 

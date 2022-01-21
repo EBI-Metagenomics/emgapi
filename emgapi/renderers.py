@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import csv
-from collections import OrderedDict
 
 from django.utils import encoding
 from rest_framework import renderers
@@ -22,6 +21,29 @@ from rest_framework_csv.renderers import CSVRenderer, CSVStreamingRenderer as Ba
 from rest_framework.relations import HyperlinkedRelatedField
 from rest_framework_json_api import utils
 from rest_framework_json_api.renderers import JSONRenderer, BrowsableAPIRenderer
+
+
+class DictAsDummyInstance(dict):
+    """
+    Add dot-notation getter and setters to a dict, e.g. when for a fake instance of a proxy model generated with
+    queryset.values(...). Additionally look for a likely fieldname to dummy as a `pk`,
+    e.g. if no 'pk' is set, but `lot_lan_pk` exists, set pk=lon_lat_pk.
+
+    E.g. my_data = {'my_fake_pk': 1, 'some_proxy_field': 'some data'}
+    my_fake_instance = DictAsDummyInstance(my_data)
+    assert my_fake_instance.pk == 1
+    """
+    __getattr__ = dict.get
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if getattr(self, 'pk', None) is None:
+            for field in self.keys():
+                if 'pk' in field:
+                    self.pk = self[field]
+                    break
 
 
 class DefaultJSONRenderer(JSONRenderer):
@@ -39,6 +61,8 @@ class DefaultJSONRenderer(JSONRenderer):
             force_type_resolution=False,
             **kwargs
     ):
+        if type(resource_instance) is dict:
+            resource_instance = DictAsDummyInstance(resource_instance)
         resource_data = super().build_json_resource_obj(fields, resource, resource_instance, resource_name, serializer, force_type_resolution=force_type_resolution)
 
         relationships = resource_data.get('relationships')
