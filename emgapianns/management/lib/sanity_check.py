@@ -9,7 +9,6 @@ from emgapianns.management.lib.uploader_exceptions import NoAnnotationsFoundExce
     UnexpectedLibraryStrategyException, QCNotPassedException, CoverageCheckException
 from emgapianns.management.lib import utils
 from emgapianns.management.webuploader_configs import get_downloadset_config
-from backlog import models as backlog_models
 
 logger = logging.getLogger(__name__)
 BACKLOG_CONFIG = os.environ.get('BACKLOG_CONFIG')

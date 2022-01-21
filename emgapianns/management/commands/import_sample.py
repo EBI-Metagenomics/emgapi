@@ -17,20 +17,14 @@ import logging
 import sys
 
 from django.db import IntegrityError
-from django.db.models import Q
 from django.utils import timezone
 from django.core.management import BaseCommand
 from emgapianns.management.lib.utils import get_lat_long, sanitise_fields
 from ena_portal_api import ena_handler
 from emgapi import models as emg_models
 from emgena import models as ena_models
-from backlog import models as backlog_models
 
 logger = logging.getLogger(__name__)
-
-cog_cache = {}
-ipr_cache = {}
-kegg_cache = {}
 
 ena = ena_handler.EnaApiHandler()
 
@@ -56,12 +50,14 @@ class Command(BaseCommand):
                             choices=['default', 'dev', 'prod'],
                             default='default')
         parser.add_argument('--biome', help='Lineage of GOLD biome')
+        parser.add_argument('--run-biome', help='Lineage of GOLD biome for the run, to be used if --biome is empty')
 
     def handle(self, *args, **options):
         logger.info("CLI %r" % options)
         self.emg_db = options['emg_db']
         self.ena_db = options['ena_db']
         self.biome = options['biome']
+        self.run_biome = options['run-biome']
 
         for acc in options['accessions']:
             logger.info('Importing sample {}'.format(acc))
@@ -161,7 +157,6 @@ class Command(BaseCommand):
 
     def get_ena_db_sample(self, accession):
         logger.info('Fetching sample {} from ena oracle DB'.format(accession))
-        # query = Q(sample_id=accession) | Q(biosample_id=accession)
         return ena_models.Sample.objects.using(self.ena_db).filter(sample_id=accession, biosample_id=accession, combine_operator='OR')[0]
 
     def get_variable(self, name):
@@ -195,7 +190,7 @@ class Command(BaseCommand):
         if self.biome:
             lineage = self.biome
         else:
-            lineage = self.get_backlog_lineage(sample_accession)
+            lineage = self.run_biome
 
         return self.get_emg_biome_obj(lineage)
 
@@ -210,14 +205,3 @@ class Command(BaseCommand):
             return 'Homo sapiens'
         else:
             return None
-
-    @staticmethod
-    def get_backlog_lineage(sample_accession):
-        try:
-            run = backlog_models.Run.objects.using('backlog_prod') \
-                .filter(sample_primary_accession=sample_accession)[0]
-            return run.biome.lineage
-        except AttributeError:
-            logging.error('Could not retrieve backlog biome for sample {}, '
-                          'please set using the biome-tagger'.format(sample_accession))
-            sys.exit(1)
