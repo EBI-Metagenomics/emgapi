@@ -39,6 +39,7 @@ class Command(BaseCommand):
     emg_db = None
     ena_db = None
     biome = None
+    run_biome = None
 
     def add_arguments(self, parser):
         parser.add_argument('accessions', help='ENA sample accessions', nargs='+')
@@ -50,7 +51,9 @@ class Command(BaseCommand):
                             choices=['default', 'dev', 'prod'],
                             default='default')
         parser.add_argument('--biome', help='Lineage of GOLD biome')
-        parser.add_argument('--run-biome', help='Lineage of GOLD biome for the run, to be used if --biome is empty')
+        parser.add_argument('--run-biome',
+                            help='Lineage of GOLD biome for the run, to be used if --biome is empty',
+                            required=False)
 
     def handle(self, *args, **options):
         logger.info("CLI %r" % options)
