@@ -78,12 +78,15 @@ class DefaultJSONRenderer(JSONRenderer):
         relationships = resource_data.get('relationships')
         if relationships:
             for field_name in relationships.keys():
+                field_resource = resource_data['relationships'][field_name]
                 if isinstance(fields.fields.get(field_name), HyperlinkedRelatedField):
                     id_field = getattr(fields.fields.get(field_name), 'lookup_field')
-                    related_instance =  getattr(resource_instance, field_name)
+                    related_instance = getattr(resource_instance, field_name)
                     id_value = getattr(related_instance, id_field, None)
-                    if None not in [id_value, resource_data['relationships'][field_name]['data']]:
-                        resource_data['relationships'][field_name]['data']['id'] = id_value
+                    if None not in [id_value, field_resource['data']]:
+                        field_resource['data']['id'] = id_value
+                if 'data' in field_resource and field_resource['data'] is None and 'links' in field_resource:
+                    resource_data['relationships'][field_name].pop('data')
 
         current_serializer = fields.serializer
         context = current_serializer.context
