@@ -106,14 +106,16 @@
                 <li class="vf-navigation__item">
                   <a href="/metagenomics" class="vf-navigation__link">MGnify website</a>
                 </li>
-                  {%  block apibrowsernavitem %}
+                {%  block apibrowsernavitem %}
                     <li class="vf-navigation__item">
                       <a href="/metagenomics/api" class="vf-navigation__link">API Browser</a>
                     </li>
-                  {% endblock %}
-                <li class="vf-navigation__item">
-                  <a href="/metagenomics/api/docs" class="vf-navigation__link">API Documentation</a>
-                </li>
+                {% endblock %}
+                {%  block apidocsnavitem %}
+                  <li class="vf-navigation__item">
+                    <a href="/metagenomics/api/docs" class="vf-navigation__link">API Documentation</a>
+                  </li>
+                {% endblock %}
                 <li class="vf-navigation__item">
                   <a href="/metagenomics/about" class="vf-navigation__link">About</a>
                 </li>

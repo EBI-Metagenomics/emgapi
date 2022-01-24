@@ -20,6 +20,12 @@
       <link rel="stylesheet" type="text/css" href="{{dist}}/swagger-ui.css" />
 {% endblock %}
 
+{%  block apidocsnavitem %}
+<li class="vf-navigation__item">
+  <a href="/metagenomics/api/docs" class="vf-navigation__link" aria-current="page">API Documentation</a>
+</li>
+{% endblock %}
+
 {% block content %}
 
     <div id="swagger-ui"></div>
