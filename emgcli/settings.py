@@ -388,7 +388,6 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_SCHEMA_CLASS':
         'drf_spectacular.openapi.AutoSchema',
-        # 'rest_framework_json_api.schemas.openapi.AutoSchema',
 }
 
 JSON_API_FORMAT_KEYS = 'dasherize'
