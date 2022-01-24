@@ -128,7 +128,8 @@ class CSVStreamingRenderer(BaseCSVStreamingRenderer):
 
     def render(self, data, *args, **kwargs):
         if not isinstance(data, list):
-            data = data.get(self.results_field, [])
+            if self.results_field in data:
+                data = data.get(self.results_field, [])
         return super(CSVStreamingRenderer, self).render(data, *args, **kwargs)
 
     def flatten_item(self, item):
