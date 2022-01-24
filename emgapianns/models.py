@@ -367,6 +367,9 @@ class AnalysisJobOrganism(mongoengine.EmbeddedDocument):
     def pipeline_version(self):
         return self.organism.pipeline_version
 
+    class EMGMeta:
+        pk_field = 'lineage'
+
 
 class AnalysisJobTaxonomy(mongoengine.Document):
 

@@ -99,31 +99,34 @@
       </div>
     </section>
 
-    <div style="height: 20px"></div>
+    <section class="vf-card-container | vf-u-fullbleed vf-u-background-color-ui--grey--light">
+        <div class="container">
+            <nav class="vf-navigation vf-navigation--main | vf-cluster">
+              <ul class="vf-navigation__list | vf-list | vf-cluster__inner">
+                <li class="vf-navigation__item">
+                  <a href="/metagenomics" class="vf-navigation__link">MGnify website</a>
+                </li>
+                  {%  block apibrowsernavitem %}
+                    <li class="vf-navigation__item">
+                      <a href="/metagenomics/api" class="vf-navigation__link">API Browser</a>
+                    </li>
+                  {% endblock %}
+                <li class="vf-navigation__item">
+                  <a href="/metagenomics/api/docs" class="vf-navigation__link">API Documentation</a>
+                </li>
+                <li class="vf-navigation__item">
+                  <a href="/metagenomics/about" class="vf-navigation__link">About</a>
+                </li>
+                <li class="vf-navigation__item">
+                  <a href="/metagenomics/help" class="vf-navigation__link">Help</a>
+                </li>
 
+              </ul>
+            </nav>
+        </div>
+    </section>
 
-    <nav class="vf-navigation vf-navigation--main | vf-cluster">
-      <ul class="vf-navigation__list | vf-list | vf-cluster__inner">
-        <li class="vf-navigation__item">
-          <a href="/metagenomics" class="vf-navigation__link">MGnify website</a>
-        </li>
-        <li class="vf-navigation__item">
-          <a href="/metagenomics/api" class="vf-navigation__link">API Browser</a>
-        </li>
-        <li class="vf-navigation__item">
-          <a href="/metagenomics/api/docs" class="vf-navigation__link">API Documentation</a>
-        </li>
-        <li class="vf-navigation__item">
-          <a href="/metagenomics/about" class="vf-navigation__link">About</a>
-        </li>
-        <li class="vf-navigation__item">
-          <a href="/metagenomics/help" class="vf-navigation__link">Help</a>
-        </li>
-
-      </ul>
-    </nav>
-
-    <div class="navbar navbar-static-top {% block bootstrap_navbar_variant %}navbar{% endblock %}"
+    <nav class="navbar navbar-static-top {% block bootstrap_navbar_variant %}navbar{% endblock %}"
          role="navigation" aria-label="{% trans "navbar" %}">
       <div class="container">
         <ul class="nav navbar-nav pull-right">
@@ -136,11 +139,24 @@
           {% endblock %}
         </ul>
       </div>
-    </div>
+    </nav>
 {% endblock %}
-
+{% block breadcrumbs %}
+    <nav class="vf-breadcrumbs" aria-label="Breadcrumb">
+      <ul class="vf-breadcrumbs__list | vf-list vf-list--inline">
+        {% for breadcrumb_name, breadcrumb_url in breadcrumblist %}
+            <li class="vf-breadcrumbs__item">
+                <a href="{{ breadcrumb_url }}" class="vf-breadcrumbs__link">{{ breadcrumb_name }}</a>
+            </li>
+        {% empty %}
+          {% block breadcrumbs_empty %}&nbsp;{% endblock breadcrumbs_empty %}
+        {% endfor %}
+      </ul>
+    </nav>
+{% endblock %}
 {% block content %}
 {{ block.super }}
+
     <div class="full-width">
         <div class="vf-banner-elixir vf-banner"
              data-vf-js-banner-elixir

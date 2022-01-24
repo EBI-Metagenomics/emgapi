@@ -46,6 +46,15 @@ class DictAsDummyInstance(dict):
                     break
 
 
+def ensure_pk(instance):
+    if hasattr(instance, 'pk'):
+        return
+    if hasattr(instance, 'EMGMeta') and hasattr(instance.EMGMeta, 'pk_field'):
+        instance.pk = getattr(instance, instance.EMGMeta.pk_field)
+    elif hasattr(instance, 'accession'):
+        instance.pk = instance.accession
+
+
 class DefaultJSONRenderer(JSONRenderer):
     media_type = 'application/json'
     format = 'json'
@@ -63,8 +72,9 @@ class DefaultJSONRenderer(JSONRenderer):
     ):
         if type(resource_instance) is dict:
             resource_instance = DictAsDummyInstance(resource_instance)
-        resource_data = super().build_json_resource_obj(fields, resource, resource_instance, resource_name, serializer, force_type_resolution=force_type_resolution)
-
+        ensure_pk(resource_instance)
+        resource_data = super().build_json_resource_obj(fields, resource, resource_instance, resource_name, serializer,
+                                                        force_type_resolution=force_type_resolution)
         relationships = resource_data.get('relationships')
         if relationships:
             for field_name in relationships.keys():
