@@ -214,10 +214,10 @@ class MyDataViewSet(emg_mixins.ListModelMixin,
         return super(MyDataViewSet, self).list(request, *args, **kwargs)
 
 
-# class BiomeViewSet(mixins.RetrieveModelMixin,
-#                    emg_mixins.ListModelMixin,
-#                    viewsets.GenericViewSet):
-class BiomeViewSet(ReadOnlyModelViewSet):
+class BiomeViewSet(mixins.RetrieveModelMixin,
+                   emg_mixins.ListModelMixin,
+                   viewsets.GenericViewSet):
+# class BiomeViewSet(ReadOnlyModelViewSet):
     serializer_class = emg_serializers.BiomeSerializer
 
     filter_backends = (
@@ -242,7 +242,7 @@ class BiomeViewSet(ReadOnlyModelViewSet):
     ordering_fields = (
         'biome_name',
         'lineage',
-        # 'samples_count',
+        'samples_count',
     )
 
     ordering = ('biome_id',)

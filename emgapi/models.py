@@ -305,7 +305,7 @@ class Biome(models.Model):
 
     class Meta:
         db_table = 'BIOME_HIERARCHY_TREE'
-        ordering = ('lft',)
+        ordering = ('biome_id',)
         unique_together = (
             ('lineage', 'biome_name'),
         )
