@@ -217,12 +217,11 @@ class MyDataViewSet(emg_mixins.ListModelMixin,
 class BiomeViewSet(mixins.RetrieveModelMixin,
                    emg_mixins.ListModelMixin,
                    viewsets.GenericViewSet):
-# class BiomeViewSet(ReadOnlyModelViewSet):
     serializer_class = emg_serializers.BiomeSerializer
 
     filter_backends = (
         emg_filters.JsonApiPlusSearchQueryParameterValidationFilter,
-        drfja_filters.OrderingFilter,
+        filters.OrderingFilter,
         DRFJADjangoFilterBackend,
         filters.SearchFilter,
     )
