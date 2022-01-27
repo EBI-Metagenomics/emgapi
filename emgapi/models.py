@@ -1840,5 +1840,25 @@ class Search(models.Lookup):
         return 'MATCH (%s) AGAINST (%s IN BOOLEAN MODE)' % (lhs, rhs), params
 
 
+class LegacyAssembly(models.Model):
+    """Assemblies that were re-uploaded and got new ERZ accessions.
+    This table has the mapping between the old accessions and the new ones.
+    It's used to keep the "old" accessions live.
+    """
+    legacy_accession = models.CharField(
+        "Legacy assembly", db_column="LEGACY_ACCESSION", db_index=True, max_length=80)
+    new_accession = models.CharField(
+        "New accession", db_column="NEW_ACCESSION", max_length=80)
+    legacy_date = models.DateField("Legacy date", db_column="LEGACY_DATE", null=True, blank=True)
+    comments = models.CharField("Comments", db_column="COMMENTS", max_length=200, null=True, blank=True)
+
+    class Meta:
+        db_table = 'LEGACY_ASSEMBLY'
+        unique_together = (('legacy_accession', 'new_accession'),)
+
+
+    def __str__(self):
+        return f"Legacy Assembly:{self.legacy_accession} - New Accession:{self.new_accession}"
+
 models.CharField.register_lookup(Search)
 models.TextField.register_lookup(Search)
