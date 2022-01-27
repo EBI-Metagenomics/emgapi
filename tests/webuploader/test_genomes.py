@@ -52,7 +52,11 @@ class TestGenomes:
             ("Phylogenetic tree of catalogue genomes", 'Phylogenetic tree of catalogue genomes'),
             ("Genome GFF file with antiSMASH geneclusters annotations", "Genome antiSMASH Annotation"),
             ("Tree generated from the pairwise Mash distances of conspecific genomes",
-             "Pairwise Mash distances of conspecific genomes")
+             "Pairwise Mash distances of conspecific genomes"),
+            ("DNA sequence FASTA file of the pangenome", "Pangenome DNA sequence"),
+            ("List of core genes in the entire pangenome", "Pangenome core genes list"),
+            ('rRNA sequence of the genome species representative', 'Genome rRNA Sequence')
+
         )
         for d in downloads:
             emg_models.DownloadDescriptionLabel.objects.get_or_create(
@@ -76,44 +80,39 @@ class TestGenomes:
 
     @pytest.mark.django_db
     def test_import_genomes(self, client):
-        """Assert that the import worked for genome 'MGYG-HGUT-00776'
+        """Assert that the import worked for genome 'MGYG000000001'
         """
         self._setup()
         baker.make('emgapi.Biome',
                    lineage='root:Host-Associated:Human:Digestive System:Large intestine')
-        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test_data/genomes/')
-        call_command('import_genomes', path, 'hgut/1.0', 'UHGG', '1.0',
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test_data/')
+        call_command('import_genomes', path, 'genomes/uhgg/2.0', 'UHGG', '2.0',
                      'root:Host-Associated:Human:Digestive System:Large intestine')
 
-        genome = emg_models.Genome.objects.get(accession='MGYG-HGUT-00776')
+        genome = emg_models.Genome.objects.get(accession='MGYG000000001')
 
-        assert genome.accession == 'MGYG-HGUT-00776'
-        assert genome.completeness == 83.8
-        assert genome.contamination == 1.9
-        assert genome.eggnog_coverage == 89.98
-        assert genome.ena_genome_accession == 'ERZ840115'
-        assert genome.ena_sample_accession == 'DRS026637'
-        assert genome.ena_study_accession == 'DRP003048'
-        assert genome.gc_content == 47.61
-        assert genome.genome_set.name == 'EBI'
-        assert genome.geographic_origin == 'Asia'
+        assert genome.accession == 'MGYG000000001'
+        assert genome.completeness == 98.59
+        assert genome.contamination == 0.7
+        assert genome.eggnog_coverage == 93.78
+        assert genome.ena_sample_accession == 'ERS370061'
+        assert genome.ena_study_accession == 'ERP105624'
+        assert genome.gc_content == 28.26
+        assert genome.geographic_origin == 'Europe'
         assert genome.biome.lineage == 'root:Host-Associated:Human:Digestive System:Large intestine'
-        assert genome.ipr_coverage == 89.79
-        assert genome.length == 1666477
-        assert genome.n_50 == 8435
-        assert genome.nc_rnas == 75
-        assert genome.num_contigs == 234
-        assert genome.num_proteins == 1537
-        assert genome.rna_16s == 99.67
-        assert genome.rna_23s == 90.6
-        assert genome.rna_5s == 0.0
-        assert genome.taxon_lineage == 'd__Bacteria;p__Firmicutes_C;c__Negativicutes;' \
-                                       'o__Veillonellales;f__Dialisteraceae;g__UBA5809;' \
-                                       's__UBA5809 sp002417965'
-        assert genome.trnas == 17
-        assert genome.type == 'MAG'
-        assert genome.cmseq == 0.07
-        assert genome.taxincons == 0.48
+        assert genome.ipr_coverage == 86.42
+        assert genome.length == 3219617
+        assert genome.n_50 == 47258
+        assert genome.nc_rnas == 63
+        assert genome.num_contigs == 137
+        assert genome.num_proteins == 3182
+        assert genome.rna_16s == 99.74
+        assert genome.rna_23s == 99.83
+        assert genome.rna_5s == 88.24
+        assert genome.taxon_lineage == "d__Bacteria;p__Firmicutes_A;c__Clostridia;o__Peptostreptococcales;" \
+                                       "f__Peptostreptococcaceae;g__GCA-900066495;s__GCA-900066495 sp902362365"
+        assert genome.trnas == 20
+        assert genome.type == 'Isolate'
 
         url = reverse('emgapi_v1:genomes-list')
         response = client.get(url)
@@ -121,9 +120,12 @@ class TestGenomes:
         resp_data = response.json()
         assert len(resp_data) == 3
         expected_ids = [
-            'MGYG-HGUT-00776',
-            'MGYG-HGUT-00777',
-            'MGYG-HGUT-00778'
+            'MGYG000000001',
+            'MGYG000000002',
+            'MGYG000000003'
         ]
         returned_ids = [d.get('attributes').get('accession') for d in resp_data['data']]
         assert expected_ids.sort() == returned_ids.sort()
+
+        call_command('remove_genomes_catalogue', 'uhgg-v2-0', confirm=True)
+        assert not emg_models.GenomeCatalogue.objects.filter(catalogue_id='uhgg-v2-0').exists()

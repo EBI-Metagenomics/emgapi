@@ -13,7 +13,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import os
 import logging
 import inflection
@@ -26,7 +25,7 @@ from django.conf import settings
 from django.db.models import Prefetch, Count, Q
 from django.http import Http404, HttpResponseBadRequest, HttpResponse, StreamingHttpResponse
 from django.middleware import csrf
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.clickjacking import xframe_options_exempt
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -49,6 +48,7 @@ from . import viewsets as emg_viewsets
 from . import utils as emg_utils
 from . import renderers as emg_renderers
 from . import filters as emg_filters
+from .europe_pmc import get_publication_annotations, get_publication_annotations_existence_for_sample
 from .sourmash import validate_sourmash_signature, save_signature, send_sourmash_jobs, get_sourmash_job_status, \
     get_result_file
 
@@ -617,6 +617,21 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         """
         return super(SampleViewSet, self).list(request, *args, **kwargs)
 
+    @action(
+        detail=True,
+        methods=['get', ]
+    )
+    def studies_publications_annotations_existence(self, request, accession=None):
+        """
+        Get a summary of whether a Sample's linked Studies have any Publications which are annotated by Europe PMC.
+
+        Example:
+        ---
+        `/samples/ERS1015417/check_studies_publications_for_annotations`
+        """
+        sample = self.get_object()
+        return Response(data=get_publication_annotations_existence_for_sample(sample))
+
 
 class RunViewSet(mixins.RetrieveModelMixin,
                  emg_mixins.ListModelMixin,
@@ -680,8 +695,8 @@ class AssemblyViewSet(mixins.RetrieveModelMixin,
         return emg_models.Assembly.objects.available(self.request)
 
     def get_object(self):
-        return get_object_or_404(
-            self.get_queryset(),
+         return get_object_or_404(
+             self.get_queryset(),
             Q(accession=self.kwargs['accession']) |
             Q(wgs_accession=self.kwargs['accession']) |
             Q(legacy_accession=self.kwargs['accession'])
@@ -713,6 +728,20 @@ class AssemblyViewSet(mixins.RetrieveModelMixin,
         ---
         `/assembly/ERZ477576`
         """
+        try:
+            self.object = self.get_object()
+        except Http404:
+            # This code handles the Legacy assemblies. Those assemblies had their accessions
+            # re-assigned to new ERZ. This code handles the legacy accessions, to prevent
+            # users from getting 404 errors.
+            try:
+                legacy_entry = emg_models.LegacyAssembly.objects. \
+                    get(legacy_accession=self.kwargs['accession'])
+                return redirect("emgapi_v1:assemblies-detail",
+                    accession=legacy_entry.new_accession,
+                    permanent=True)
+            except emg_models.LegacyAssembly.DoesNotExist:
+                raise Http404()
         return super(AssemblyViewSet, self).retrieve(request, *args, **kwargs)
 
 
@@ -1164,6 +1193,22 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         """
         return super(PublicationViewSet, self).list(request, *args, **kwargs)
 
+    @action(
+        detail=True,
+        methods=['get', ]
+    )
+    def europe_pmc_annotations(self, request, pubmed_id=None):
+        """
+        Retrieve Europe PMC Metagenomics annotations for a publication.
+
+        Example:
+        ---
+        `/publications/{pubmed}/europe_pmc_annotations`
+        """
+        if not pubmed_id:
+            raise Http404
+        return Response(data=get_publication_annotations(pubmed_id))
+
 
 class GenomeCatalogueViewSet(mixins.RetrieveModelMixin,
                              emg_mixins.ListModelMixin,
@@ -1239,7 +1284,8 @@ class GenomeViewSet(mixins.RetrieveModelMixin,
         'contamination',
         'num_genomes_total',
         'num_proteins',
-        'last_update'
+        'last_update',
+        'type'
     )
 
     ordering = ('-accession',)

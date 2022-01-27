@@ -11,3 +11,8 @@ emg:
   mongodb:
       db: emg_tests
       host: mongodb
+  sourmash:
+    signatures_path: 'fixtures/'
+    results_path: 'fixtures/'
+    celery_broker: 'redis://localhost:6379/0'
+    celery_backend: 'redis://localhost:6379/1'

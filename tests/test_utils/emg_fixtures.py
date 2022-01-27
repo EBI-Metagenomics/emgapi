@@ -19,15 +19,17 @@ import pytest
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
+from model_bakery import baker
+
 from emgapi import models as emg_models
 
 __all__ = ['apiclient', 'api_version', 'biome', 'biome_human', 'super_study', 'studies',
            'samples', 'study', 'study_private', 'sample', 'sample_private',
            'run_status', 'analysis_status',
-           'pipeline', 'pipelines', 'experiment_type',
+           'pipeline', 'pipelines', 'experiment_type', 'experiment_type_assembly',
            'runs', 'run', 'run_v5', 'runjob_pipeline_v1', 'run_emptyresults', 'run_with_sample',
            'analysis_results', 'run_multiple_analysis', 'var_names', 'analysis_metadata_variable_names',
-           'genome_catalogue', 'genome']
+           'genome_catalogue', 'genome', 'assemblies', 'legacy_mapping']
 
 
 @pytest.fixture
@@ -74,7 +76,7 @@ def genome_catalogue(biome_human):
 @pytest.fixture
 def genome(biome_human, genome_catalogue):
     return emg_models.Genome.objects.create(
-        accession='MGYG00000001',
+        accession='MGYG000000001',
         biome=biome_human,
         catalogue=genome_catalogue,
         length=1,
@@ -93,7 +95,6 @@ def genome(biome_human, genome_catalogue):
         eggnog_coverage=1.0,
         ipr_coverage=1.0,
         taxon_lineage='d__Test;',
-        taxincons=1.0
     )
 
 
@@ -305,6 +306,15 @@ def experiment_type():
         pk=1,
         experiment_type='metagenomic'
     )
+
+
+@pytest.fixture
+def experiment_type_assembly():
+    experiment_type, _ = emg_models.ExperimentType.objects.get_or_create(
+        pk=2,
+        experiment_type='assembly'
+    )
+    return experiment_type
 
 
 @pytest.fixture
@@ -599,3 +609,27 @@ def analysis_metadata_variable_names():
             )
         )
     emg_models.AnalysisMetadataVariableNames.objects.bulk_create(_variable_names)
+
+
+@pytest.fixture
+def assemblies(study, runs, samples, experiment_type_assembly):
+    assemblies = baker.make(emg_models.Assembly,
+        study=study,
+        experiment_type=experiment_type_assembly,
+        _quantity=10)
+
+    # one with a fixed ERZ9999 to be used with the legacy mapping
+    assemblies.append(baker.make(emg_models.Assembly,
+        accession="ERZ9999",
+        study=study,
+        experiment_type=experiment_type_assembly,
+        _quantity=10))
+
+    return assemblies
+
+@pytest.fixture
+def legacy_mapping(assemblies):
+    fake_accession = "ERZ1111"
+    return baker.make(emg_models.LegacyAssembly,
+        legacy_accession=fake_accession,
+        new_accession="ERZ999")
