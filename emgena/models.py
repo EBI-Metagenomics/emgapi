@@ -27,7 +27,7 @@
 from __future__ import unicode_literals
 
 from datetime import date
-from django.db import models
+from django.db import models, NotSupportedError
 
 
 class Submitter(models.Model):
@@ -114,6 +114,59 @@ class AssemblyMapping(models.Model):
         return self.accession
 
 
+class Oracle11Manager(models.QuerySet):
+    def filter(self, *args, **kwargs):
+        """
+        Return a RawQuerySet which shares some of the functionality of a QuerySet.
+        Uses Raw SQL to give compatibility with Oracle DB 11 (e.g. ENA ERAPRO).
+
+        Example:
+        Model.filter(my_id=1, my_name='thor', combiner_operator='OR')
+        """
+        combiner = kwargs.pop('combine_operator', 'AND')
+        if len(kwargs) < 1:
+            raise NotSupportedError(
+                'Calling .get(...) without kwargs is not supported for Oracle11 compatibility.'
+            )
+        if len(args) > 0:
+            raise NotSupportedError(
+                'Calling .filter(...) with args is not supported for Oracle11 compatibility.'
+            )
+        query = f'SELECT * FROM {self.model._meta.db_table}'
+        first = True
+        for where_k, where_v in kwargs.items():
+            where_clause = f"{where_k}='{where_v}'" if type(where_v) is str else f"{where_k}={where_v}"
+            if first:
+                query += f" WHERE {where_clause}"
+                first = False
+            else:
+                query += f" {combiner} {where_clause}"
+
+        return self.raw(query)
+
+    def get(self, *args, **kwargs):
+        """
+        Perform the query and return a single object matching the given
+        keyword arguments (else raise an error).
+        Simplified to generate SQL compatible with Oracle11 (as used by ENA ERAPRO db).
+
+        Example:
+        Model.get(my_id=1, my_name='thor', combiner_operator='OR')
+        (default is to AND together the kwargs)
+        """
+        rqs = self.filter(*args, **kwargs)
+        num = len(rqs)
+        if num == 1:
+            return rqs[0]
+        if not num:
+            raise self.model.DoesNotExist(
+                f"{self.model._meta.object_name} matching query does not exist."
+            )
+        raise self.model.MultipleObjectsReturned(
+            f'get() returned more than one {self.model._meta.object_name} -- it returned {num}!'
+        )
+
+
 class Study(models.Model):
     study_id = models.CharField(db_column='STUDY_ID', primary_key=True, max_length=15)
     project_id = models.CharField(db_column='PROJECT_ID', max_length=15)
@@ -126,6 +179,8 @@ class Study(models.Model):
     study_description = models.TextField(db_column='STUDY_DESCRIPTION')
     submission_account_id = models.CharField(db_column='SUBMISSION_ACCOUNT_ID', max_length=15)
     pubmed_id = models.TextField(db_column='PUBMED_ID', max_length=4000)
+
+    objects = Oracle11Manager.as_manager()
 
     @property
     def get_study_id(self):
@@ -156,6 +211,8 @@ class Project(models.Model):
     project_id = models.CharField(db_column='PROJECT_ID', primary_key=True, max_length=15)
     center_name = models.TextField(db_column='CENTER_NAME', max_length=500)
 
+    objects = Oracle11Manager.as_manager()
+
     class Meta:
         managed = False
         app_label = 'emgena'
@@ -175,6 +232,8 @@ class Sample(models.Model):
     title = models.CharField(db_column='SAMPLE_TITLE', max_length=200)
     alias = models.CharField(db_column='SAMPLE_ALIAS', max_length=200)
     checklist = models.CharField(db_column='CHECKLIST_ID', max_length=200)
+
+    objects = Oracle11Manager.as_manager()
 
     @property
     def is_public(self):
@@ -196,6 +255,8 @@ class Run(models.Model):
     last_updated = models.DateField(db_column='LAST_UPDATED')
     submission_account_id = models.CharField(db_column='SUBMISSION_ACCOUNT_ID', max_length=15)
 
+    objects = Oracle11Manager.as_manager()
+
     class Meta:
         managed = False
         app_label = 'emgena'
@@ -214,6 +275,8 @@ class Analysis(models.Model):
     secondary_study_accession = models.CharField(db_column='STUDY_ID', max_length=15)
     unique_alias = models.CharField(db_column='UNIQUE_ALIAS', max_length=100)
     submission_account_id = models.CharField(db_column='SUBMISSION_ACCOUNT_ID', max_length=15)
+
+    objects = Oracle11Manager.as_manager()
 
     class Meta:
         managed = False
@@ -237,6 +300,8 @@ class Assembly(models.Model):
     coverage = models.IntegerField(db_column='COVERAGE')
     min_gap_length = models.IntegerField(db_column='MIN_GAP_LENGTH', null=True, blank=True)
     contig_accession_range = models.CharField(db_column='CONTIG_ACC_RANGE', max_length=50)
+
+    objects = Oracle11Manager.as_manager()
 
     class Meta:
         managed = False

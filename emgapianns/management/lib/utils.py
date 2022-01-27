@@ -19,7 +19,8 @@ import os
 import re
 import sys
 import unicodedata
-import json
+
+from YamJam import yamjam
 
 from emgapi import models as emg_models
 from emgapianns.management.lib.downloadable_files import ChunkedDownloadFiles, UnchunkedDownloadFile
@@ -189,7 +190,7 @@ def get_pipeline_version(rootpath):
 
 
 def sanitise_string(s):
-    return unicodedata.normalize('NFKD', s).encode('ascii', 'ignore')
+    return unicodedata.normalize('NFKD', s)
 
 
 def read_chunkfile(filename):
@@ -373,12 +374,26 @@ def get_result_dir(result_dir, substring="results/"):
     return result_dir[pos + len(substring):]
 
 
+# def read_config(config_path, db):
+#     with open(config_path, 'r') as json_config:
+#         whole_config = json.load(json_config)
+#         config = whole_config[db]
+#         config["raise_on_warnings"] = True
+#         config["autocommit"] = True
+#         config["port"] = int(config["port"])
+#     return config
+
 def read_config(config_path, db):
-    with open(config_path, 'r') as json_config:
-        whole_config = json.load(json_config)
-        config = whole_config[db]
-        config["raise_on_warnings"] = True
-        config["autocommit"] = True
-        config["port"] = int(config["port"])
-    return config
+    EMG_CONF = yamjam(config_path)
+    backlog_config = EMG_CONF.get('backlog', {}).get('databases', {}).get(db)
+    if not backlog_config:
+        raise Exception(f"Could not find Backlog Config for db={db} in {config_path}")
+    return {
+        'raise_on_warnings': True,
+        'autocommit': True,
+        'port': backlog_config['PORT'],
+        'host': backlog_config['HOST'],
+        'user': backlog_config['USER'],
+        'password': backlog_config['PASSWORD'],
+    }
 

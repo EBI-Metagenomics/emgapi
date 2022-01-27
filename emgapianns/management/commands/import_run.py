@@ -97,7 +97,7 @@ class Command(BaseCommand):
 
     def get_ena_db_run(self, accession):
         logger.info('Fetching run {} from ena oracle DB'.format(accession))
-        return ena_models.Run.objects.using(self.ena_db).filter(run_id=accession).first()
+        return ena_models.Run.objects.using(self.ena_db).filter(run_id=accession)[0]
 
     def create_or_update_run(self, db_data, api_data):
         accession = api_data['run_accession']

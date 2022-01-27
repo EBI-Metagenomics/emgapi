@@ -126,3 +126,6 @@ class TestGenomes:
         ]
         returned_ids = [d.get('attributes').get('accession') for d in resp_data['data']]
         assert expected_ids.sort() == returned_ids.sort()
+
+        call_command('remove_genomes_catalogue', 'uhgg-v2-0', confirm=True)
+        assert not emg_models.GenomeCatalogue.objects.filter(catalogue_id='uhgg-v2-0').exists()
