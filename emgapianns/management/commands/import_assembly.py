@@ -137,20 +137,25 @@ class Command(BaseCommand):
                 .DoesNotExist("Experiment type {} does not exist in database".format(experiment_type))
 
     def tag_optional_run(self, assembly, name):
-        logging.info("Retrieving run accession from assembly name {}".format(name))
+        logging.info(f"Retrieving runs for the assembly name {name}")
         run_accession = utils.get_run_accession(name)
         if run_accession and is_run_accession(run_accession):
             self.tag_run(assembly, run_accession)
         else:
             logging.warning("Could not retrieve run accession from assembly name!")
-        # checking if there are additional accession using ena_portal_api, required for hybrid assemblies
-        alt_runs = []
-        run_refs = ena.get_assembly(assembly_name=assembly, fields="run_refs").get('run_refs', [])
-        for run_ref in run_refs:
-            if not run_ref == run_accession:    
-                alt_runs.append(run_ref)
-        for run in alt_runs:
-            self.tag_run(assembly, run)
+
+        logging.info("Checking if there are additional runs in ENA, required for hybrid assemblies")
+        try:
+            alt_runs = []
+            run_refs = ena.get_assembly(assembly_name=assembly.accession, fields="run_refs").get("runi_refs", [])
+            for run_ref in run_refs:
+                if not run_ref == run_accession:    
+                    alt_runs.append(run_ref)
+            for run in alt_runs:
+                self.tag_run(assembly, run)
+        except ValueError as e:
+            logging.exception(e)
+            logging.info(f"Could not retrive the runs for the assembly {assembly}")
 
     def tag_run(self, assembly, run_accession):
         try:
