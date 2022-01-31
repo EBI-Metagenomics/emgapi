@@ -30,7 +30,7 @@ def study_summary(tmp_path):
                secondary_accession="ERP106131",
                result_directory="test")
     study_summary = study_summary_generator.StudySummaryGenerator("ERP106131",
-                                                                  5, tmp_path, None, None)
+                                                                  5, tmp_path, None)
     study_summary.summary_dir = os.path.join(os.path.dirname(__file__), "test_data")
     return study_summary
 
@@ -40,7 +40,7 @@ def study_summary_v5_assembly(tmp_path):
                secondary_accession="ERP104174",
                result_directory="test")
     study_summary = study_summary_generator.StudySummaryGenerator("ERP104174",
-                                                                  5, tmp_path, None, None)
+                                                                  5, tmp_path, None)
     study_summary.summary_dir = os.path.join(os.path.dirname(__file__), "test_data")
     return study_summary
 
@@ -50,7 +50,7 @@ def study_summary_v4_assembly(tmp_path):
                secondary_accession="ERP104174",
                result_directory="test")
     study_summary = study_summary_generator.StudySummaryGenerator("ERP104174",
-                                                                  4.1, tmp_path, None, None)
+                                                                  4.1, tmp_path, None)
     study_summary.summary_dir = os.path.join(os.path.dirname(__file__), "test_data")
     return study_summary
 
