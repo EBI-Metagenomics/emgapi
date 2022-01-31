@@ -58,11 +58,9 @@ def is_run_accession(accession):
 
 
 def retrieve_existing_result_dir(rootpath, dest_pattern):
-    """
-        Searches file system for existing result folder.
-
-        Example absolute path:
-        /nfs/production/interpro/metagenomics/results/2019/07/ERP108931/version_4.1/ERZ651/009/ERZ651769_FASTA/
+    """Searches file system for existing result folder.
+    Example absolute path:
+    /nfs/production/interpro/metagenomics/results/2019/07/ERP108931/version_4.1/ERZ651/009/ERZ651769_FASTA/
     :param rootpath:
     :param dest_pattern: e.g. ['2*', '*', 'version_*', '*', '00*', ERP000001s]
     :return:

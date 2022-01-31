@@ -16,6 +16,7 @@
 import logging
 
 from django.core.management import BaseCommand
+from django.conf import settings
 from emgapianns.management.lib import utils
 
 from emgapianns.management.lib.create_or_update_study import StudyImporter
@@ -39,7 +40,7 @@ class Command(BaseCommand):
                                    help="NFS root path of the study in the results archive")
         dir_locations.add_argument('--rootpath',
                                    help="NFS root path of the results archive",
-                                   default='/nfs/production/interpro/metagenomics/results/')
+                                   default=settings.RESULTS_PRODUCTION_DIR)
         parser.add_argument('--ena_db',
                             help="ENA's production database",
                             default='era')
@@ -58,7 +59,12 @@ class Command(BaseCommand):
 
         logger.info('Importing study {}'.format(study_accession))
 
-        study_dir = self.get_study_dir(options.get('study_dir'), options.get('rootpath'), study_accession)
+        rootpath = options.get('rootpath')
+
+        if not rootpath:
+            raise ValueError("rootpath (RESULTS_PRODUCTION_DIR setting) cannot by empty)")
+
+        study_dir = self.get_study_dir(options.get('study_dir'), rootpath, study_accession)
         importer = StudyImporter(study_accession, study_dir, lineage, ena_db, emg_db)
         importer.run()
 
