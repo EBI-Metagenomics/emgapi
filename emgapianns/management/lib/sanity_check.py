@@ -26,14 +26,14 @@ def get_result_status(db_name, accession):
     :param accession: Run accession (SRSXXX or ERRXXX)
     :return: result status
     """
-    config = utils.read_config(BACKLOG_CONFIG, db_name)
+    config = utils.read_backlog_config(BACKLOG_CONFIG, db_name)
     cnx = mysql.connector.connect(**config)
     cursor = cnx.cursor()
     command = (
-        "SELECT result_status FROM emg_backlog_2.AnnotationJob "
-        "INNER JOIN emg_backlog_2.RunAnnotationJob "
+        "SELECT result_status FROM AnnotationJob "
+        "INNER JOIN RunAnnotationJob "
         "ON AnnotationJob.id = RunAnnotationJob.annotation_job_id "
-        "INNER JOIN emg_backlog_2.Run ON "
+        "INNER JOIN Run ON "
         "Run.id = RunAnnotationJob.run_id WHERE Run.primary_accession = %s"
     )
     cursor.execute(command, (accession,))

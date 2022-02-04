@@ -160,14 +160,11 @@ class Command(BaseCommand):
         logger.info("The upload of the run/assembly {} finished successfully.".format(self.accession))
 
     def __find_existing_result_dir(self, secondary_study_accession, run_accession, version):
-        """
-
-        :param run_accession:
-        :param version:
-        :return:
+        """Find the results folder 
         """
         logging.info("Finding result directory...")
-        directory = os.path.join(self.rootpath, '2019')
+        # FIXME: remove hardcoded value.
+        directory = os.path.join(self.rootpath, '2022')
         study_folder = self.__find_folder(directory, search_pattern=secondary_study_accession, recursive=True)
 
         # find version_{} folder
