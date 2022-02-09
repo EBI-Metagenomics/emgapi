@@ -146,13 +146,11 @@ class Command(BaseCommand):
 
         logging.info("Checking if there are additional runs in ENA, required for hybrid assemblies")
         try:
-            alt_runs = []
-            run_refs = ena.get_assembly(assembly_name=assembly.accession, fields="run_refs").get("runi_refs", [])
+            run_refs = ena.get_assembly(assembly_name=assembly.accession, fields="run_ref", data_portal="ena").get("run_ref", []).split(";")
             for run_ref in run_refs:
                 if not run_ref == run_accession:    
-                    alt_runs.append(run_ref)
-            for run in alt_runs:
-                self.tag_run(assembly, run)
+                    logging.info("Assembly has additional run: {}".format(run_ref))
+                    self.tag_run(assembly, run_ref)
         except ValueError as e:
             logging.exception(e)
             logging.info(f"Could not retrive the runs for the assembly {assembly}")
