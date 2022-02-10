@@ -380,7 +380,7 @@ def read_backlog_config(config_path, db):
     return {
         'raise_on_warnings': True,
         'autocommit': True,
-        'name': backlog_config['NAME'],
+        'database': backlog_config['NAME'],
         'port': backlog_config['PORT'],
         'host': backlog_config['HOST'],
         'user': backlog_config['USER'],
