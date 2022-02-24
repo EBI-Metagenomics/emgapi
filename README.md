@@ -5,28 +5,30 @@ EMG API
 
 Metagenomics service is a large-scale platform for analyzing and archiving metagenomic and metatranscriptome data. It provides a standardized analysis workflow, capable of producing rich taxonomic diversity and functional annotations, and allows analysis results to be compared within and across projects on a broad level, and across different data types (e.g. metagenomic and metatranscriptomic).
 
-Setup
-=====
+# Setup
+## Local env.
 
-Local env. 
-##########
+For development there are 3 options: 
 
-For development there are 2 options: 
+* Use the parent repo ["MGnify Web"](https://github.com/EBI-Metagenomics/mgnify-web) which includes this API repository, as well as two frontend web repositories needed to develop/run the [MGnify website](https://www.ebi.ac.uk/metagenomics).
+* Or, install the stack locally
+* Or, use Docker for the database and mongo
 
-* Install the stack locally
-* Use Docker for the database and mongo
+In any case the webapp will be executed from a local virtual environment.
 
-On either case the webapp will be executed from a local virtual environment.
+### MGnify Web parent repo
+The parent repo uses docker-compose to configure a development environment and test data for the entire stack of the MGnify website.
+It is the recommended development setup.
+See: [MGnify Web](https://github.com/EBI-Metagenomics/mgnify-web) on GitHub for instructions.
 
-Stack locally
--------------
+
+### Stack locally
 
 The app uses `MySQL` version `5.6` and `Mongo` version `3.4`.
 
 TODO: write the instructions for MacOS and Linux.
 
-Docker
-------
+### Docker
 
 There are 2 docker containers defined, one for `MySQL` and another one `MongoDB`.
 
@@ -34,17 +36,14 @@ The app will be executed from a python virtual environment.
 
 **The Docker setup is just for local dev. at the moment.**
 
-Helper scipts
--------------
+### Helper scripts
 
 There are some helper scripts that are meant to make running the project locally easier. 
 
 - `manage.sh` wrapper for `manage.py` commands such as `runserver`.
 - `gunicorn.sh` run the app using gunicorn with the `--reload` flag.
 
-Setup
-^^^^^
-
+## Setup
 Create configuration file in `~/path/to/config.yaml <docker/config.yaml>`_.
 
 ### DB config file
@@ -94,11 +93,8 @@ Run the server::
 
    ./manage.sh runserver 8000
 
-Production env.
-###############
-
-Install
--------
+## Production env.
+### Install
 
 Install application::
 
@@ -130,8 +126,7 @@ Start application (API)::
 
 NOTE: `~/emgvar` is used as default directory to store logs, etc.
 
-How to run the webuploader?
----------------------------
+### How to run the webuploader?
 
 How to install the webuploader (one off)?
 
@@ -155,8 +150,7 @@ How to install the webuploader (one off)?
 
     ./manage.sh import_analysis <rootpath>
 
-How to run a Django schema or data migration on dev?
-----------------------------------------------------
+### How to run a Django schema or data migration on dev?
 
     sync PRO/REL DB to DEV
 
@@ -171,16 +165,14 @@ How to run a Django schema or data migration on dev?
     emgcli migrate --fake-initial
 
 
-Run in Docker
--------------
+### Run in Docker
 
 Start containers using::
 
     docker-compose -f docker/docker-compose.yml up --build --abort-on-container-exit
 
 
-Tests
-#####
+#### Tests
 
 Tests are ran using `pytest <https://pytest.org>`_.
 

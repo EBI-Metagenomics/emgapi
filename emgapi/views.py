@@ -25,7 +25,7 @@ from django.conf import settings
 from django.db.models import Prefetch, Count, Q
 from django.http import Http404, HttpResponseBadRequest, HttpResponse, StreamingHttpResponse
 from django.middleware import csrf
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.clickjacking import xframe_options_exempt
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -135,7 +135,7 @@ class UtilsViewSet(viewsets.GenericViewSet):
         if serializer.is_valid():
             try:
                 status_code = serializer.save()
-                if status_code == 200:
+                if status_code == 200 or status_code == 201:
                     return Response("Created", status=status.HTTP_201_CREATED)
             except Exception as e:
                 logging.error(e, exc_info=True)
@@ -710,8 +710,8 @@ class AssemblyViewSet(mixins.RetrieveModelMixin,
         return emg_models.Assembly.objects.available(self.request)
 
     def get_object(self):
-        return get_object_or_404(
-            self.get_queryset(),
+         return get_object_or_404(
+             self.get_queryset(),
             Q(accession=self.kwargs['accession']) |
             Q(wgs_accession=self.kwargs['accession']) |
             Q(legacy_accession=self.kwargs['accession'])
@@ -743,6 +743,20 @@ class AssemblyViewSet(mixins.RetrieveModelMixin,
         ---
         `/assembly/ERZ477576`
         """
+        try:
+            self.object = self.get_object()
+        except Http404:
+            # This code handles the Legacy assemblies. Those assemblies had their accessions
+            # re-assigned to new ERZ. This code handles the legacy accessions, to prevent
+            # users from getting 404 errors.
+            try:
+                legacy_entry = emg_models.LegacyAssembly.objects. \
+                    get(legacy_accession=self.kwargs['accession'])
+                return redirect("emgapi_v1:assemblies-detail",
+                    accession=legacy_entry.new_accession,
+                    permanent=True)
+            except emg_models.LegacyAssembly.DoesNotExist:
+                raise Http404()
         return super(AssemblyViewSet, self).retrieve(request, *args, **kwargs)
 
 
