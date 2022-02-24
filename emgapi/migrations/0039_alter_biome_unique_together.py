@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('emgapi', '0037_remove_genome_num_genomes_non_redundant'),
+        ('emgapi', '0038_legacyassembly'),
     ]
 
     operations = [
