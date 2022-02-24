@@ -32,7 +32,7 @@ def pytest_configure():
     settings.RT = {
         "url": "https://fake.helpdesk.ebi.ac.uk/REST/1.0/ticket/new",
         "user": "metagenomics-help-api-user",
-        "token": "<<TOKEN>>",
+        "pass": "secret-password",
         "emg_queue": "EMG_Q",
         "emg_email": "EMG@mail.com",
         "ena_queue": "ENA_Q"
