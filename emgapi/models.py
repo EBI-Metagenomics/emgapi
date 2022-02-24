@@ -307,7 +307,7 @@ class Biome(models.Model):
         db_table = 'BIOME_HIERARCHY_TREE'
         ordering = ('biome_id',)
         unique_together = (
-            ('biome_id', 'biome_name'),
+            ('lineage', 'biome_name'),
         )
 
     def __str__(self):
