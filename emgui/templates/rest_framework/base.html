@@ -176,7 +176,7 @@
 {{ block.super }}
     <script src="https://assets.emblstatic.net/vf/v2.5.2/scripts/scripts.js"></script>
     <script defer>
-        let baseUrl = window.location.protocol + window.location.hostname;
+        let baseUrl = window.location.protocol + '//' + window.location.hostname;
         if (window.location.port) {
             baseUrl += ':' + window.location.port
         }
