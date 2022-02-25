@@ -306,9 +306,9 @@ class Biome(models.Model):
     class Meta:
         db_table = 'BIOME_HIERARCHY_TREE'
         ordering = ('biome_id',)
-        unique_together = (
-            ('lineage', 'biome_name'),
-        )
+        constraints = [
+            models.UniqueConstraint(fields=['lineage', 'biome_name'], name='biome_hier_uniq_lineage'),
+        ]
 
     def __str__(self):
         return self.lineage
