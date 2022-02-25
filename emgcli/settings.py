@@ -390,6 +390,7 @@ JSON_API_FORMAT_FIELD_NAMES = 'dasherize'
 # settings These can either be configured under SWAGGER_SETTINGS or Django settings.
 LOGIN_URL = 'rest_framework:login'
 LOGOUT_URL = 'rest_framework:logout'
+LOGIN_REDIRECT_URL = '/v1/'
 
 # Custom settings
 try:
