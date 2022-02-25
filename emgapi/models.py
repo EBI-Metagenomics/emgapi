@@ -306,9 +306,11 @@ class Biome(models.Model):
     class Meta:
         db_table = 'BIOME_HIERARCHY_TREE'
         ordering = ('biome_id',)
-        constraints = [
-            models.UniqueConstraint(fields=['lineage', 'biome_name'], name='biome_hier_uniq_lineage'),
-        ]
+        # TODO: When production MySQL is updated or when Python3.6 is dropped and
+        #  so Django4 adopted, change this constraint to lineage + biome_name.
+        unique_together = (
+            ('biome_id', 'biome_name'),
+        )
 
     def __str__(self):
         return self.lineage
