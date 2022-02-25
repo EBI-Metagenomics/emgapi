@@ -437,6 +437,9 @@ STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 )
 
+# Post-Login redirect (if using API login form directly)
+LOGIN_REDIRECT_URL = FORCE_SCRIPT_NAME
+
 # Security
 try:
     secure_cookies = EMG_CONF['emg']['secure_cookies']
