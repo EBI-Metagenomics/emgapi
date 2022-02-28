@@ -3,57 +3,60 @@
 {% include "vf2_include/style.html" %}
 {% include "vf2_include/meta.html" %}
 
-<form action="{% url 'rest_framework:login' %}" role="form" method="post" class="vf-stack vf-stack--400">
-  {% csrf_token %}
-  <div class="vf-form__item vf-stack">
+<div>
+    <form action="{% url 'rest_framework:login' %}" role="form" method="post" class="vf-stack vf-stack--400">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}" />
+      <div class="vf-form__item vf-stack">
 
-    <label for="id_username" class="vf-form__label vf-form__label--required">
-      Webin-ID
-      <span class="vf-u-sr-only">this field is required.</span>
-      <svg class="vf-icon vf-icon--asterick" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <title>asterick</title>
-        <path d="M23.555,8.729a1.505,1.505,0,0,0-1.406-.98H16.062a.5.5,0,0,1-.472-.334L13.405,1.222a1.5,1.5,0,0,0-2.81,0l-.005.016L8.41,7.415a.5.5,0,0,1-.471.334H1.85A1.5,1.5,0,0,0,.887,10.4l5.184,4.3a.5.5,0,0,1,.155.543L4.048,21.774a1.5,1.5,0,0,0,2.31,1.684l5.346-3.92a.5.5,0,0,1,.591,0l5.344,3.919a1.5,1.5,0,0,0,2.312-1.683l-2.178-6.535a.5.5,0,0,1,.155-.543l5.194-4.306A1.5,1.5,0,0,0,23.555,8.729Z" />
-      </svg>
-    </label>
-    <p class="vf-form__helper">MGnify uses the same Webin credentials as your <a href="https://www.ebi.ac.uk/ena/submit/webin/login">ENA account</a></p>
-    <input type="text" name="username" maxlength="100"
-        autocapitalize="off"
-        autocorrect="off" class="vf-form__input"
-        id="id_username" required autofocus
-        {% if form.username.value %}value="{{ form.username.value }}"{% endif %}>
-    {% if form.username.errors %}
-        <p class="vf-form__helper vf-form__helper--error">
-            {{ form.username.errors|striptags }}
-        </p>
-    {% endif %}
-  </div>
-
-  <div class="vf-form__item vf-stack">
-
-    <label for="id_password" class="vf-form__label vf-form__label--required">
-      Password
-      <span class="vf-u-sr-only">this field is required.</span>
-      <svg class="vf-icon vf-icon--asterick" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <title>asterick</title>
-        <path d="M23.555,8.729a1.505,1.505,0,0,0-1.406-.98H16.062a.5.5,0,0,1-.472-.334L13.405,1.222a1.5,1.5,0,0,0-2.81,0l-.005.016L8.41,7.415a.5.5,0,0,1-.471.334H1.85A1.5,1.5,0,0,0,.887,10.4l5.184,4.3a.5.5,0,0,1,.155.543L4.048,21.774a1.5,1.5,0,0,0,2.31,1.684l5.346-3.92a.5.5,0,0,1,.591,0l5.344,3.919a1.5,1.5,0,0,0,2.312-1.683l-2.178-6.535a.5.5,0,0,1,.155-.543l5.194-4.306A1.5,1.5,0,0,0,23.555,8.729Z"></path>
-      </svg>
-    </label>
-    <p class="vf-form__helper form-forgotten"><a href="https://www.ebi.ac.uk/ena/submit/webin/login">Forgot your password?</a></p>
-    <input type="password" name="password" maxlength="100" autocapitalize="off" autocorrect="off" class="vf-form__input" id="id_password" required>
-    {% if form.password.errors %}
-      <p class="vf-form__helper vf-form__helper--error">
-        {{ form.password.errors|striptags }}
-      </p>
-    {% endif %}
-    </div>
-
-    {% if form.non_field_errors %}
-        {% for error in form.non_field_errors %}
+        <label for="id_username" class="vf-form__label vf-form__label--required">
+          Webin-ID
+          <span class="vf-u-sr-only">this field is required.</span>
+          <svg class="vf-icon vf-icon--asterick" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <title>asterick</title>
+            <path d="M23.555,8.729a1.505,1.505,0,0,0-1.406-.98H16.062a.5.5,0,0,1-.472-.334L13.405,1.222a1.5,1.5,0,0,0-2.81,0l-.005.016L8.41,7.415a.5.5,0,0,1-.471.334H1.85A1.5,1.5,0,0,0,.887,10.4l5.184,4.3a.5.5,0,0,1,.155.543L4.048,21.774a1.5,1.5,0,0,0,2.31,1.684l5.346-3.92a.5.5,0,0,1,.591,0l5.344,3.919a1.5,1.5,0,0,0,2.312-1.683l-2.178-6.535a.5.5,0,0,1,.155-.543l5.194-4.306A1.5,1.5,0,0,0,23.555,8.729Z" />
+          </svg>
+        </label>
+        <p class="vf-form__helper">MGnify uses the same Webin credentials as your <a href="https://www.ebi.ac.uk/ena/submit/webin/login">ENA account</a></p>
+        <input type="text" name="username" maxlength="100"
+            autocapitalize="off"
+            autocorrect="off" class="vf-form__input"
+            id="id_username" required autofocus
+            {% if form.username.value %}value="{{ form.username.value }}"{% endif %}>
+        {% if form.username.errors %}
             <p class="vf-form__helper vf-form__helper--error">
-                {{ error }}
+                {{ form.username.errors|striptags }}
             </p>
+        {% endif %}
+      </div>
 
-        {% endfor %}
-    {% endif %}
-    <button class="vf-button vf-button--primary" id="submit-id-submit" type="submit" name="submit">Log in</button>
-</form>
+      <div class="vf-form__item vf-stack">
+
+        <label for="id_password" class="vf-form__label vf-form__label--required">
+          Password
+          <span class="vf-u-sr-only">this field is required.</span>
+          <svg class="vf-icon vf-icon--asterick" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <title>asterick</title>
+            <path d="M23.555,8.729a1.505,1.505,0,0,0-1.406-.98H16.062a.5.5,0,0,1-.472-.334L13.405,1.222a1.5,1.5,0,0,0-2.81,0l-.005.016L8.41,7.415a.5.5,0,0,1-.471.334H1.85A1.5,1.5,0,0,0,.887,10.4l5.184,4.3a.5.5,0,0,1,.155.543L4.048,21.774a1.5,1.5,0,0,0,2.31,1.684l5.346-3.92a.5.5,0,0,1,.591,0l5.344,3.919a1.5,1.5,0,0,0,2.312-1.683l-2.178-6.535a.5.5,0,0,1,.155-.543l5.194-4.306A1.5,1.5,0,0,0,23.555,8.729Z"></path>
+          </svg>
+        </label>
+        <p class="vf-form__helper form-forgotten"><a href="https://www.ebi.ac.uk/ena/submit/webin/login">Forgot your password?</a></p>
+        <input type="password" name="password" maxlength="100" autocapitalize="off" autocorrect="off" class="vf-form__input" id="id_password" required>
+        {% if form.password.errors %}
+          <p class="vf-form__helper vf-form__helper--error">
+            {{ form.password.errors|striptags }}
+          </p>
+        {% endif %}
+        </div>
+
+        {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+                <p class="vf-form__helper vf-form__helper--error">
+                    {{ error }}
+                </p>
+
+            {% endfor %}
+        {% endif %}
+        <input type="submit" name="submit" value="Log in" class="vf-button vf-button--primary" id="submit-id-submit">
+    </form>
+</div>
