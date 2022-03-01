@@ -189,7 +189,6 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    # 'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     # CORS
     'corsheaders',
@@ -197,11 +196,10 @@ INSTALLED_APPS = [
     'emgui',
     # rest framework
     'rest_framework',
-    # 'rest_framework.authtoken',
+    'rest_framework_json_api',
     'rest_framework_mongoengine',
     'rest_framework_jwt',
     'django_filters',
-    'rest_framework_json_api',
     # apps
     'emgapi',
     'emgena',
@@ -346,26 +344,17 @@ REST_FRAMEWORK = {
         'rest_framework_json_api.exceptions.exception_handler',
 
     'DEFAULT_PAGINATION_CLASS':
-        # 'rest_framework.pagination.PageNumberPagination',
         'emgcli.pagination.DefaultPagination',
 
     'DEFAULT_PARSER_CLASSES': (
         'rest_framework_json_api.parsers.JSONParser',
         'rest_framework.parsers.JSONParser',
-        # 'rest_framework_xml.parsers.XMLParser',
-        # 'rest_framework_yaml.parsers.YAMLParser',
-        # 'rest_framework.parsers.MultiPartParser'
     ),
 
     'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework_json_api.renderers.JSONRenderer',
         'emgapi.renderers.DefaultJSONRenderer',
-        # 'rest_framework.renderers.JSONRenderer',
-        'emgapi.renderers.JSONLDRenderer',
-        # 'rest_framework_xml.renderers.XMLRenderer',
-        # 'rest_framework_yaml.renderers.YAMLRenderer',
         'emgapi.renderers.CSVStreamingRenderer',
-        'rest_framework_json_api.renderers.BrowsableAPIRenderer',
+        'emgapi.renderers.EMGBrowsableAPIRenderer',
     ),
 
     'DEFAULT_FILTER_BACKENDS': (
@@ -401,6 +390,7 @@ JSON_API_FORMAT_FIELD_NAMES = 'dasherize'
 # settings These can either be configured under SWAGGER_SETTINGS or Django settings.
 LOGIN_URL = 'rest_framework:login'
 LOGOUT_URL = 'rest_framework:logout'
+LOGIN_REDIRECT_URL = '/v1/'
 
 # Custom settings
 try:
@@ -447,6 +437,9 @@ STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 )
+
+# Post-Login redirect (if using API login form directly)
+LOGIN_REDIRECT_URL = FORCE_SCRIPT_NAME
 
 # Security
 try:

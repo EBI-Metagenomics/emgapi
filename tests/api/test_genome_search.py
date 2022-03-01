@@ -51,7 +51,7 @@ def mock_group_result(*args, **kwargs):
     return ResultMock()
 
 @pytest.mark.django_db
-class TestStudyAPI:
+class TestGenomeSearchAPI:
     def test_genome_search_get(self, client):
         url = reverse("emgapi_v1:genomes-gather-list")
         response = client.get(url)

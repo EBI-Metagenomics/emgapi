@@ -16,7 +16,6 @@
 
 
 import logging
-import json
 
 from django.conf import settings
 from django.core.mail import send_mail
@@ -86,7 +85,6 @@ class NotifySerializer(serializers.Serializer):
         - create ticket in ENA-MG queue
         otherwise:
         - create ticket in EMG queue
-        Note: remember to setup valid credentials (i.e. url, user and token token) in the config.rt
         """
         import requests
         n = ena_models.Notify(**validated_data)
@@ -95,10 +93,11 @@ class NotifySerializer(serializers.Serializer):
         ena_queue = settings.RT["ena_queue"]
 
         ticket = {
+            "id": "ticket/new",
             "Requestor": n.from_email,
             "Priority": "4",
             "Subject": n.subject,
-            "Content": n.message.replace("\n", ';')
+            "Text": n.message.replace("\n", ';')
         }
         if n.cc:
             ticket["Cc"] = n.cc
@@ -110,16 +109,22 @@ class NotifySerializer(serializers.Serializer):
 
         logger.info("Ticket %r" % ticket)
 
-        headers = {
-            'Content-Type': 'application/json',
-            'Authorization': 'token ' + settings.RT['token']
+        content = [
+            "{key}: {value}".format(
+                key=key, value=value) for key, value in ticket.items()
+        ]
+
+        payload = {
+            'user': settings.RT['user'],
+            'pass': settings.RT['pass'],
+            'content': "\n".join(content),
         }
 
-        r = requests.post(
-            settings.RT['url'],
-            data=json.dumps(ticket),
-            headers=headers
-        )
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+
+        r = requests.post(settings.RT['url'], data=payload, headers=headers)
         return r.status_code
 
     class Meta:

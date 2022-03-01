@@ -15,6 +15,8 @@
 
 import sys
 
+from urllib.parse import urlencode
+
 from django.urls import reverse
 from django.conf import settings
 
@@ -22,7 +24,6 @@ from rest_framework.test import APITestCase
 
 import pytest
 import responses
-import json
 
 from test_utils.emg_fixtures import *  # noqa
 
@@ -47,11 +48,16 @@ class TestNotify(APITestCase):
         """Test notify endpoint for non-consent requests
         """
         expected_body = {
-            "Requestor": "fake@email.com",
-            "Priority": "4",
-            "Subject": "Test email subject",
-            "Content": "Hi this is just an example",
-            "Queue": settings.RT["emg_queue"]
+            "user": "metagenomics-help-api-user",
+            "pass": "secret-password",
+            "content": "\n".join([
+                "id: ticket/new",
+                "Requestor: fake@email.com",
+                "Priority: 4",
+                "Subject: Test email subject",
+                "Text: Hi this is just an example",
+                "Queue: " + settings.RT["emg_queue"]
+            ])
         }
 
         responses.add(
@@ -73,7 +79,7 @@ class TestNotify(APITestCase):
         assert len(responses.calls) == 1
         call = responses.calls[0]
         assert call.request.url == settings.RT["url"]
-        assert call.request.body == json.dumps(expected_body)
+        assert call.request.body == urlencode(expected_body)
 
     @responses.activate
     @pytest.mark.skipif(sys.version_info < (3, 6), reason="requires python3.6 or higher")
@@ -81,11 +87,16 @@ class TestNotify(APITestCase):
         """Test notify endpoint for consent requests
         """
         expected_body = {
-            "Requestor": "fake@email.com",
-            "Priority": "4",
-            "Subject": "Test email subject",
-            "Content": "Hi this is just an example",
-            "Queue": settings.RT["ena_queue"],
+            "user": "metagenomics-help-api-user",
+            "pass": "secret-password",
+            "content": "\n".join([
+                "id: ticket/new",
+                "Requestor: fake@email.com",
+                "Priority: 4",
+                "Subject: Test email subject",
+                "Text: Hi this is just an example",
+                "Queue: " + settings.RT["ena_queue"],
+            ])
         }
 
         responses.add(
@@ -109,4 +120,4 @@ class TestNotify(APITestCase):
         assert len(responses.calls) == 1
         call = responses.calls[0]
         assert call.request.url == settings.RT["url"]
-        assert call.request.body == json.dumps(expected_body)
+        assert call.request.body == urlencode(expected_body)

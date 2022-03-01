@@ -306,6 +306,8 @@ class Biome(models.Model):
     class Meta:
         db_table = 'BIOME_HIERARCHY_TREE'
         ordering = ('biome_id',)
+        # TODO: When production MySQL is updated or when Python3.6 is dropped and
+        #  so Django4 adopted, change this constraint to lineage + biome_name.
         unique_together = (
             ('biome_id', 'biome_name'),
         )

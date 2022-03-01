@@ -5,11 +5,10 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.http.response import StreamingHttpResponse
 from rest_framework.exceptions import APIException
-from rest_framework.renderers import BrowsableAPIRenderer
 
 from rest_framework.response import Response
 
-from emgapi.renderers import CSVStreamingRenderer
+from emgapi.renderers import CSVStreamingRenderer, EMGBrowsableAPIRenderer
 from rest_framework_json_api.renderers import JSONRenderer
 
 
@@ -53,7 +52,7 @@ class ListModelMixin(object):
                 # (for a complicated endpoint like Studies).
                 # Return custom exception detailing use of paginated API.
                 if request.accepts('text/html'):
-                    request.accepted_renderer = BrowsableAPIRenderer()
+                    request.accepted_renderer = EMGBrowsableAPIRenderer()
                 else:
                     request.accepted_renderer = JSONRenderer()
                 raise ExcessiveCSVException

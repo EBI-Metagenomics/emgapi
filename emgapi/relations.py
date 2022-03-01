@@ -18,7 +18,6 @@ import collections
 
 from rest_framework_json_api.relations import (
     SerializerMethodResourceRelatedField,
-    SerializerMethodHyperlinkedRelatedField,
     ManySerializerMethodHyperlinkedRelatedField,
     SkipDataMixin,
 )
@@ -28,8 +27,6 @@ from rest_framework_json_api.relations import LINKS_PARAMS
 LINKS_PARAMS.append('related_link_self_view_name')
 LINKS_PARAMS.append('related_link_self_lookup_field')
 LINKS_PARAMS.append('related_link_self_lookup_fields')
-
-
 
 
 class HyperlinkedSerializerMethodResourceRelatedField(SerializerMethodResourceRelatedField):  # noqa

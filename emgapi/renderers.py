@@ -15,14 +15,115 @@
 # limitations under the License.
 import csv
 
+from django.utils import encoding
 from rest_framework import renderers
-from rest_framework_json_api.renderers import JSONRenderer
 from rest_framework_csv.renderers import CSVRenderer, CSVStreamingRenderer as BaseCSVStreamingRenderer
+from rest_framework.relations import HyperlinkedRelatedField
+from rest_framework_json_api import utils
+from rest_framework_json_api.renderers import JSONRenderer, BrowsableAPIRenderer
+
+
+class DictAsDummyInstance(dict):
+    """
+    Add dot-notation getter and setters to a dict, e.g. when for a fake instance of a proxy model generated with
+    queryset.values(...). Additionally look for a likely fieldname to dummy as a `pk`,
+    e.g. if no 'pk' is set, but `lot_lan_pk` exists, set pk=lon_lat_pk.
+
+    E.g. my_data = {'my_fake_pk': 1, 'some_proxy_field': 'some data'}
+    my_fake_instance = DictAsDummyInstance(my_data)
+    assert my_fake_instance.pk == 1
+    """
+    __getattr__ = dict.get
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if getattr(self, 'pk', None) is None:
+            for field in self.keys():
+                if 'pk' in field:
+                    self.pk = self[field]
+                    break
+
+
+def ensure_pk(instance):
+    if hasattr(instance, 'pk'):
+        return
+    if hasattr(instance, 'EMGMeta') and hasattr(instance.EMGMeta, 'pk_field'):
+        instance.pk = getattr(instance, instance.EMGMeta.pk_field)
+    elif hasattr(instance, 'accession'):
+        instance.pk = instance.accession
 
 
 class DefaultJSONRenderer(JSONRenderer):
     media_type = 'application/json'
     format = 'json'
+
+    @classmethod
+    def build_json_resource_obj(
+            cls,
+            fields,
+            resource,
+            resource_instance,
+            resource_name,
+            serializer,
+            force_type_resolution=False,
+            **kwargs
+    ):
+        if type(resource_instance) is dict:
+            resource_instance = DictAsDummyInstance(resource_instance)
+        ensure_pk(resource_instance)
+        resource_data = super().build_json_resource_obj(fields, resource, resource_instance, resource_name, serializer,
+                                                        force_type_resolution=force_type_resolution)
+        relationships = resource_data.get('relationships')
+        if relationships:
+            for field_name in relationships.keys():
+                field_resource = resource_data['relationships'][field_name]
+                if isinstance(fields.fields.get(field_name), HyperlinkedRelatedField):
+                    id_field = getattr(fields.fields.get(field_name), 'lookup_field')
+                    related_instance = getattr(resource_instance, field_name)
+                    id_value = getattr(related_instance, id_field, None)
+                    if None not in [id_value, field_resource['data']]:
+                        field_resource['data']['id'] = id_value
+                if 'data' in field_resource and field_resource['data'] is None and 'links' in field_resource:
+                    resource_data['relationships'][field_name].pop('data')
+
+        current_serializer = fields.serializer
+        context = current_serializer.context
+        view = context.get("view", None)
+        if hasattr(view, "relationship_lookup_field"):
+            if view.relationship_lookup_field in resource:
+                resource_data['id'] = resource.get(view.relationship_lookup_field, resource_data['id'])
+        elif hasattr(view, 'lookup_field'):
+            if view.lookup_field in resource:
+                resource_data['id'] = encoding.force_str(resource.get(view.lookup_field, resource_data['id']))
+        if "url" in fields and resource_data.get('id') is not None:
+            custom_id = getattr(resource_instance, fields["url"].lookup_field)
+            resource_data['id'] = encoding.force_str(custom_id)
+
+        return resource_data
+
+
+class EMGBrowsableAPIRenderer(BrowsableAPIRenderer):
+    @classmethod
+    def _get_included_serializers(cls, serializer, prefix="", already_seen=None):
+        """Prevents browsable API showing options to include deeply nested serializers
+        (e.g. ?include=biome.studies.biomes)"""
+        if not already_seen:
+            already_seen = set()
+
+        if serializer in already_seen:
+            return []
+
+        included_serializers = []
+        already_seen.add(serializer)
+
+        for include, included_serializer in utils.get_included_serializers(
+                serializer
+        ).items():
+            included_serializers.append(f"{prefix}{include}")
+
+        return included_serializers
 
 
 class JSONLDRenderer(renderers.JSONRenderer):
@@ -40,7 +141,8 @@ class CSVStreamingRenderer(BaseCSVStreamingRenderer):
 
     def render(self, data, *args, **kwargs):
         if not isinstance(data, list):
-            data = data.get(self.results_field, [])
+            if self.results_field in data:
+                data = data.get(self.results_field, [])
         return super(CSVStreamingRenderer, self).render(data, *args, **kwargs)
 
     def flatten_item(self, item):

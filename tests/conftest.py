@@ -32,7 +32,7 @@ def pytest_configure():
     settings.RT = {
         "url": "https://fake.helpdesk.ebi.ac.uk/REST/1.0/ticket/new",
         "user": "metagenomics-help-api-user",
-        "token": "<<TOKEN>>",
+        "pass": "secret-password",
         "emg_queue": "EMG_Q",
         "emg_email": "EMG@mail.com",
         "ena_queue": "ENA_Q"
@@ -72,16 +72,8 @@ def django_db_setup(hide_ena_config, django_db_setup):
 def mongodb(request):
     """On the EMG_CONFIG use 'testdb' on the mongo configuration
     """
-    if os.environ.get("JENKINS", False):
-        # TEMP py3.4
-        # patch to run a fake mongo db on
-        # Jenkins, we don't have a running mongo
-        # instance there yet.
-        # This will be removed when we drop support for py3.4
-        db = mongoengine.connect('testdb', host='mongomock://localhost')
-    else:
-        # real mongo connection
-        db = mongoengine.connect('testdb', host='localhost:27017', alias='test')
+    host = settings.MONGO_CONF['host']
+    db = mongoengine.connect('testdb', host=f'{host}:27017', alias='test')
 
     def finalizer():
         db.drop_database('testdb')

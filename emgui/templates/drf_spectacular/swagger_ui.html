@@ -1,247 +1,53 @@
+{% extends "rest_framework/base.html" %}
 {% load static %}
 {% load i18n %}
+{% load rest_framework %}
 
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <title>MGnify API: archiving, analysis and integration of metagenomics data. EMBL-EBI</title>
-  <meta name="description" content="EMBL-EBI" /><!-- Describe what this page is about -->
-  <meta name="keywords" content="bioinformatics, europe, institute" /><!-- A few keywords that relate to the content of THIS PAGE (not the whol project) -->
-  <meta name="author" content="EMBL-EBI" /><!-- Your [project-name] here -->
-  <meta name="HandheldFriendly" content="true" />
-  <meta name="MobileOptimized" content="width" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="theme-color" content="#70BDBD" /> <!-- Android Chrome mobile browser tab color -->
+{%  block style %}
+    {{ block.super }}
 
-  <!-- Add information on the life cycle of this page -->
-  <meta name="ebi:owner" content="metagenomics@ebi.ac.uk" /> <!-- Who should be contacted about changes -->
-  <meta name="ebi:review-cycle" content="365" /> <!-- In days, how often should the content be reviewed -->
-  <meta name="ebi:last-review" content="2021-07-21" /> <!-- The last time the content was reviewed -->
-  <meta name="ebi:expiry" content="2022-07-21" /> <!-- When this content is no longer relevant -->
+    <style>
+        pre.version, pre.version-stamp {
+            all: unset;
+            line-height: 1em;
+        }
+        code {
+            all: unset;
+        }
 
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:creator" content="@EBImetagenomics">
-  <meta name="twitter:site" content="@EBImetagenomics">
-  <meta name="twitter:title" content="MGnify API">
-  <meta name="twitter:description" content="MGnify is a freely available hub for the analysis and exploration of metagenomic, metatranscriptomic, amplicon and assembly data.">
-  <meta name="twitter:image:src" content="https://avatars1.githubusercontent.com/u/32897658?s=200&v=4">
-  <meta name="twitter:image:width" content="280">
-  <meta name="twitter:image:height" content="150">
-  <!-- End Twitter -->
+      </style>
 
-  <!-- If you link to any other sites frequently, consider optimising performance with a DNS prefetch -->
-  <link rel="dns-prefetch" href="//embl.de" />
+      <link rel="stylesheet" type="text/css" href="{{dist}}/swagger-ui.css" />
+{% endblock %}
 
-  <!-- If you have custom icon, replace these as appropriate.
-       You can generate them at realfavicongenerator.net -->
-  <link rel="icon" type="image/x-icon" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/favicon.ico" />
-  <link rel="icon" type="image/png" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/favicon-32x32.png" />
-  <link rel="icon" type="image/png" sizes="192×192" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/android-chrome-192x192.png" /> <!-- Android (192px) -->
-  <link rel="apple-touch-icon-precomposed" sizes="114x114" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/apple-icon-114x114.png" /> <!-- For iPhone 4 Retina display (114px) -->
-  <link rel="apple-touch-icon-precomposed" sizes="72x72" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/apple-icon-72x72.png" /> <!-- For iPad (72px) -->
-  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/apple-icon-144x144.png" /> <!-- For iPad retinat (144px) -->
-  <link rel="apple-touch-icon-precomposed" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/apple-icon-57x57.png" /> <!-- For iPhone (57px) -->
-  <link rel="mask-icon" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/safari-pinned-tab.svg" color="#ffffff" /> <!-- Safari icon for pinned tab -->
-  <meta name="msapplication-TileColor" content="#2b5797" /> <!-- MS Icons -->
-  <meta name="msapplication-TileImage" content="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/images/logos/EMBL-EBI/favicons/mstile-144x144.png" />
+{%  block apidocsnavitem %}
+<li class="vf-navigation__item">
+  <a href="/metagenomics/api/docs" class="vf-navigation__link" aria-current="page">API Documentation</a>
+</li>
+{% endblock %}
 
-  <!-- CSS: implied media=all -->
-  <!-- CSS concatenated and minified via ant build script-->
-  <link rel="stylesheet" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/libraries/foundation-6/css/foundation.css" type="text/css" media="all" />
-  <link rel="stylesheet" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/css/ebi-global.css" type="text/css" media="all" />
-  <link rel="stylesheet" href="https://www.ebi.ac.uk/web_guidelines/EBI-Icon-fonts/v1.1/fonts.css" type="text/css" media="all" />
-  <link rel="stylesheet" type="text/css" href="{{dist}}/swagger-ui.css" />
+{% block content %}
 
-  <!-- Use this CSS file for any custom styling -->
-  <!--
-    <link rel="stylesheet" href="css/custom.css" type="text/css" media="all" />
-  -->
+    <div id="swagger-ui"></div>
+    <script src="{{dist}}/swagger-ui-bundle.js"></script>
+    <script src="{{dist}}/swagger-ui-standalone-preset.js"></script>
+    {% if script_url %}
+    <script src="{{script_url|safe}}"></script>
+    {% else %}
+    <script>
+    {% include template_name_js %}
+    </script>
+    {% endif %}
 
-  <!-- Custom EMG CSS files -->
-  {% include "drf_spectacular/include/swagger_css.html" %}
-  <!-- End of Custom EMG CSS files -->
-    <link rel="stylesheet" type="text/css" href="{{dist}}/swagger-ui.css" />
-
-  <!-- If you have a custom header image or colour -->
-  <!--
-  <meta name="ebi:localmasthead-color" content="#000" />
-  <meta name="ebi:localmasthead-image" content="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/images/backgrounds/embl-ebi-background.jpg" />
-  -->
-
-    <!-- you can replace this with theme-[projectname].css. See http://www.ebi.ac.uk/web/style/colour for details of how to do this -->
-  <!-- also inform ES so we can host your colour palette file -->
-  <link rel="stylesheet" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/css/theme-embl-petrol.css" type="text/css" media="all" />
-
-  <!-- for production the above can be replaced with -->
-  <!--
-  <link rel="stylesheet" href="//www.ebi.ac.uk/web_guidelines/css/compliance/mini/ebi-fluid-embl.css" />
-  -->
-
-  <!-- end CSS-->
-
-
-  <!-- All JavaScript at the bottom, except for Modernizr -->
-  <script src="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/libraries/modernizr/modernizr.custom.49274.js"></script>
-
-</head>
-
-<body class="level2"><!-- add any of your classes or IDs -->
-  <div id="skip-to">
-    <ul>
-      <li><a href="#content">Skip to main content</a></li>
-      <li><a href="#local-nav">Skip to local navigation</a></li>
-      <li><a href="#global-nav">Skip to EBI global navigation menu</a></li>
-      <li><a href="#global-nav-expanded">Skip to expanded EBI global navigation menu (includes all sub-sections)</a></li>
-    </ul>
-  </div>
-
-  <div data-sticky-container>
-    <div id="local-masthead" data-sticky data-sticky-on="large" data-top-anchor="180" data-btm-anchor="300000">
-      <header>
-
-        <div id="global-masthead" class="clearfix">
-          <!--This has to be one line and no newline characters-->
-          <a href="//www.ebi.ac.uk/" title="Go to the EMBL-EBI homepage"><span class="ebi-logo"></span></a>
-
-          <nav>
-            <div class="row">
-              <ul id="global-nav" class="menu">
-                <!-- set active class as appropriate -->
-                <li id="home-mobile" class=""><a href="//www.ebi.ac.uk"></a></li>
-                <li id="home" class="active"><a href="//www.ebi.ac.uk"><i class="icon icon-generic" data-icon="H"></i> EMBL-EBI</a></li>
-                <li id="services"><a href="//www.ebi.ac.uk/services"><i class="icon icon-generic" data-icon="("></i> Services</a></li>
-                <li id="research"><a href="//www.ebi.ac.uk/research"><i class="icon icon-generic" data-icon=")"></i> Research</a></li>
-                <li id="training"><a href="//www.ebi.ac.uk/training"><i class="icon icon-generic" data-icon="t"></i> Training</a></li>
-                <li id="about"><a href="//www.ebi.ac.uk/about"><i class="icon icon-generic" data-icon="i"></i> About us</a></li>
-                <li id="search">
-                  <a href="#" data-toggle="search-global-dropdown"><i class="icon icon-functional" data-icon="1"></i> <span class="show-for-small-only">Search</span></a>
-                  <div id="search-global-dropdown" class="dropdown-pane" data-dropdown data-options="closeOnClick:true;">
-                    <form id="global-search" name="global-search" action="/ebisearch/search.ebi" method="GET">
-                      <fieldset>
-                        <div class="input-group">
-                          <input type="text" name="query" id="global-searchbox" class="input-group-field" placeholder="Search all of EMBL-EBI">
-                          <div class="input-group-button">
-                            <input type="submit" name="submit" value="Search" class="button">
-                            <input type="hidden" name="db" value="allebi" checked="checked">
-                            <input type="hidden" name="requestFrom" value="global-masthead" checked="checked">
-                          </div>
-                        </div>
-                      </fieldset>
-                    </form>
-                  </div>
-                </li>
-                <li class="float-right show-for-medium embl-selector">
-                  <button class="button float-right" type="button" data-toggle="embl-dropdown">Hinxton</button>
-                  <!-- The dropdown menu will be programmatically added by script.js -->
-                </li>
-              </ul>
-            </div>
-          </nav>
-
+    <div class="full-width">
+        <div class="vf-banner-elixir vf-banner"
+             data-vf-js-banner-elixir
+             data-vf-js-banner-elixir-name="MGnify"
+             data-vf-js-banner-elixir-description="Submit, analyse, discover and compare microbiome data"
+             data-vf-js-banner-elixir-link="https://elixir-europe.org/services/elixir-embl-ebi">
         </div>
-
-        <div class="masthead row">
-
-          <!-- local-title -->
-          <div class="columns medium-12" id="local-title">
-              {% include "drf_spectacular/include/header.html" %}
-          </div>
-          <!-- /local-title -->
-
-          <!-- local-nav -->
-          <nav>
-              <ul id="local-nav" class="dropdown menu float-left" data-description="navigational" data-dropdown-menu="unlqrb-dropdown-menu" role="menubar">
-                  <li id="overview-nav" role="menuitem"><a href="/metagenomics/">Overview</a></li>
-                  <li id="api-nav" role="menuitem"><a href="/metagenomics/api/">API</a></li>
-                  <li id="api-nav" role="menuitem" class="active"><a href="/metagenomics/api/docs/">API Documentation</a></li>
-                  <li id="about-nav" role="menuitem"><a href="/metagenomics/about">About</a></li>
-                  <li id="help-nav" role="menuitem"><a href="/metagenomics/help">Help</a></li>
-              </ul>
-              <ul class="dropdown menu float-right" data-description="tasks">
-                <li class="">
-                  {% include "rest_framework/include/login.html" %}
-                </li>
-              </ul>
-          </nav>
-
-          <!-- /local-nav -->
-
-        </div>
-
-      </header>
-
-      </div>
     </div>
-
-
-    <div id="content" role="main" class="row">
-
-      <!-- Suggested layout containers -->
-      <section>
-
-        <!-- Your menu structure should make a breadcrumb redundant, but if a breadcrump is needed uncomment the below -->
-        <nav aria-label="You are here:" role="navigation">
-          <ul class="breadcrumbs">
-            <li><a href="/metagenomics">Home</a></li>
-            <li><a href="../">API Browser</a></li>
-            <li>
-              <span class="show-for-sr">Current: </span>API Documentation
-            </li>
-          </ul>
-        </nav>
-
-        <div id="main-content-area" class="row">
-            <div id="swagger-ui"></div>
-            <script src="{{dist}}/swagger-ui-bundle.js"></script>
-                {% if script_url %}
-                    <script src="{{script_url|safe}}"></script>
-                {% else %}
-                <script>
-                    {% include template_name_js %}
-                </script>
-            {% endif %}
-        </div>
-
-      </section>
-      <!-- End suggested layout containers -->
-
+    <div class="full-width">
+        <link rel="import" href="https://www.embl.org/api/v1/pattern.html?filter-content-type=article&filter-id=106902&pattern=node-body&source=contenthub" data-target="self" data-embl-js-content-hub-loader>
     </div>
-
-
-    <footer>
-      <!-- Optional local footer (insert citation / project-specific copyright / etc here -->
-      {% block elixir %}
-      {% include "rest_framework/include/elixir.html" %}
-      {% endblock %}
-      <!-- End optional local footer -->
-
-      <div id="global-footer">
-
-        <nav id="global-nav-expanded" class="row">
-          <!-- Footer will be automatically inserted by footer.js -->
-        </nav>
-
-        <section id="ebi-footer-meta" class="row">
-          <!-- Footer meta will be automatically inserted by footer.js -->
-        </section>
-
-      </div>
-
-    </footer>
-
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-
-  <script defer="defer" src="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/js/cookiebanner.js"></script>
-  <script defer="defer" src="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/js/foot.js"></script>
-  <script defer="defer" src="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/js/script.js"></script>
-
-  <!-- The Foundation theme JavaScript -->
-  <script src="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/libraries/foundation-6/js/foundation.js"></script>
-  <script src="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/js/foundationExtendEBI.js"></script>
-  <script type="text/JavaScript">$(document).foundation();</script>
-  <script type="text/JavaScript">$(document).foundationExtendEBI();</script>
-
-</body>
-</html>
+{%  endblock %}

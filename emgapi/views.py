@@ -40,6 +40,10 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework_csv.misc import Echo
 from rest_framework.reverse import reverse
 
+from rest_framework_json_api import filters as drfja_filters
+from rest_framework_json_api.django_filters import DjangoFilterBackend as DRFJADjangoFilterBackend
+from rest_framework_json_api.views import ReadOnlyModelViewSet
+
 from . import models as emg_models
 from . import serializers as emg_serializers
 from . import mixins as emg_mixins
@@ -131,7 +135,7 @@ class UtilsViewSet(viewsets.GenericViewSet):
         if serializer.is_valid():
             try:
                 status_code = serializer.save()
-                if status_code == 200 or status_code == 201:
+                if status_code == 200:
                     return Response("Created", status=status.HTTP_201_CREATED)
             except Exception as e:
                 logging.error(e, exc_info=True)
@@ -216,8 +220,17 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
     serializer_class = emg_serializers.BiomeSerializer
 
     filter_backends = (
-        filters.SearchFilter,
+        emg_filters.JsonApiPlusSearchQueryParameterValidationFilter,
         filters.OrderingFilter,
+        DRFJADjangoFilterBackend,
+        filters.SearchFilter,
+    )
+
+    filterset_fields = (
+        'biome_id',
+        'biome_name',
+        'depth',
+        'lineage',
     )
 
     search_fields = (
@@ -230,6 +243,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         'lineage',
         'samples_count',
     )
+
     ordering = ('biome_id',)
 
     lookup_field = 'lineage'
@@ -361,6 +375,7 @@ class StudyViewSet(mixins.RetrieveModelMixin,
         name, abstract, author and centre name etc.
 
         `/studies?search=microbial%20fuel%20cells`
+
         """
         return super(StudyViewSet, self).list(request, *args, **kwargs)
 
