@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import json
 import os
 import logging
 import inflection
@@ -1315,6 +1316,25 @@ class GenomeViewSet(mixins.RetrieveModelMixin,
 
     queryset = emg_models.Genome.objects.all() \
         .select_related('biome', 'geo_origin', 'catalogue')
+
+
+class GenomeFragmentSearchViewSet(viewsets.GenericViewSet):
+    serializer_class = emg_serializers.GenomeFragmentSearchSerializer
+    permission_classes = [AllowAny]
+    parser_classes = [FormParser, MultiPartParser]
+
+    def get_queryset(self):
+        return None
+
+    def list(self, request):
+        return Response("You need to use the POST method to send a search sequence to the API")
+
+    def create(self, request):
+        try:
+            response = requests.post(settings.GENOME_SEARCH_PROXY, data=request.data)
+            return HttpResponse(response.text, content_type='application/json')
+        except requests.exceptions.RequestException:
+            raise Http404('Genome search failed. Please try later.')
 
 
 class GenomeSearchGatherViewSet(viewsets.GenericViewSet):

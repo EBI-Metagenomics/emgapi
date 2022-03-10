@@ -28,7 +28,7 @@ from rest_framework_jwt.views import verify_jwt_token
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from emgapi.urls import router as emg_router
-from emgapi.urls import mydata_router, utils_router, urlpatterns as emgapi_urlpatterns 
+from emgapi.urls import mydata_router, utils_router, urlpatterns as emgapi_urlpatterns
 from emgapianns.urls import mongo_router, urlpatterns as mongo_urlpatterns
 from emgapianns.urls import router as emg_ext_router
 
@@ -99,9 +99,3 @@ if settings.DEBUG:
     urlpatterns = [
         path(r'__debug__/', include(debug_toolbar.urls)),
     ] + urlpatterns
-
-if settings.DOWNLOADS_BYPASS_NGINX:
-    from emgapi.utils import GenomeSearchProxyView
-    urlpatterns += [
-        path(r'v1/genome-search', GenomeSearchProxyView.as_view(), name='genome-search')  # proxied by nginx on prod
-    ]
