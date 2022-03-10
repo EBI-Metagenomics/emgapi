@@ -1636,6 +1636,28 @@ class GenomeUploadSearchSerializer(drf_serializers.Serializer):
         fields = ['file_uploaded', 'mag_catalog']
 
 
+class GenomeFragmentSearchSerializer(drf_serializers.Serializer):
+    def __init__(self, *args, **kwargs):
+        super(GenomeFragmentSearchSerializer, self).__init__(*args, **kwargs)
+        self.fields['catalogues_filter'] = serializers.MultipleChoiceField(get_MAG_choices())
+
+    seq = serializers.CharField(
+        min_length=50,
+        max_length=5000,
+        allow_null=False,
+        help_text='DNA sequence (gene fragment) between 50 and 5000bp long.'
+    )
+    threshold = serializers.FloatField(
+        min_value=0,
+        max_value=1.0,
+        default=0.4,
+        help_text='Minimum k-mer similarity fraction for a MAG to be included in results. Default 0.4.'
+    )
+
+    class Meta:
+        fields = ['seq', 'catalogues_filter', 'threshold']
+
+
 class GenomeCatalogueDownloadSerializer(BaseDownloadSerializer):
     url = emg_fields.DownloadHyperlinkedIdentityField(
         view_name='emgapi_v1:genome-catalogue-downloads-detail',

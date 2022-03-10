@@ -48,6 +48,7 @@ class TestAPISurface:
             'experiment-types': '/experiment-types',
             'publications': '/publications',
             'pipeline-tools': '/pipeline-tools',
+            'genome-search': '/genome-search',
             'genomes-search/gather': '/genomes-search/gather',
             'annotations/go-terms': '/annotations/go-terms',
             'annotations/interpro-identifiers': '/annotations/interpro-identifiers',
