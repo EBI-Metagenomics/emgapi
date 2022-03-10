@@ -174,7 +174,10 @@ try:
 except KeyError:
     DOWNLOADS_BYPASS_NGINX = False
 
-GENOME_SEARCH_PROXY = 'http://gs-mgnify2.ebi.ac.uk:8001/search' if DOWNLOADS_BYPASS_NGINX else 'http://nosearch'  # uses nginx on prod
+try:
+    GENOME_SEARCH_PROXY = EMG_CONF['emg']['genome_fragment_search_url']
+except KeyError:
+    GENOME_SEARCH_PROXY = 'https://bigsi-genome-search-01.mgnify.org/search'
 
 # Admin panel
 try:

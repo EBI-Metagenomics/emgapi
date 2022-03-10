@@ -1636,6 +1636,17 @@ class GenomeUploadSearchSerializer(drf_serializers.Serializer):
         fields = ['file_uploaded', 'mag_catalog']
 
 
+class GenomeFragmentSearchSerializer(drf_serializers.Serializer):
+    def __init__(self, *args, **kwargs):
+        super(GenomeFragmentSearchSerializer, self).__init__(*args, **kwargs)
+        self.fields['catalogues_filter'] = serializers.MultipleChoiceField(get_MAG_choices())
+
+    seq = serializers.CharField(max_length=500)
+
+    class Meta:
+        fields = ['seq', 'catalogues_filter']
+
+
 class GenomeCatalogueDownloadSerializer(BaseDownloadSerializer):
     url = emg_fields.DownloadHyperlinkedIdentityField(
         view_name='emgapi_v1:genome-catalogue-downloads-detail',

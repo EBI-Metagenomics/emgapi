@@ -21,7 +21,6 @@ from rest_framework import routers
 from . import views
 from . import views_relations
 
-
 router = routers.DefaultRouter(trailing_slash=False)
 
 router.register(
@@ -322,6 +321,15 @@ router.register(
     views.GenomeViewSet,
     basename='genomes'
 )
+
+# Proxy BIGSI search requests to alternative backend
+router.register(
+    r'genome-search',
+    views.GenomeFragmentSearchViewSet,
+    basename='genome-search'
+)
+
+# Sourmash search
 router.register(
     r'genomes-search/gather',
     views.GenomeSearchGatherViewSet,
