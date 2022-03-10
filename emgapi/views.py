@@ -1331,7 +1331,10 @@ class GenomeFragmentSearchViewSet(viewsets.GenericViewSet):
 
     def create(self, request):
         response = requests.post(settings.GENOME_SEARCH_PROXY, data=request.data)
-        return Response(json.loads(response.text))
+        try:
+            return Response(json.loads(response.text))
+        except json.JSONDecodeError:
+            raise Http404('Genome search failed. Please try later.')
 
 
 class GenomeSearchGatherViewSet(viewsets.GenericViewSet):
