@@ -36,6 +36,8 @@ import datetime
 
 from os.path import expanduser
 
+from corsheaders.defaults import default_headers
+
 try:
     from YamJam import yamjam, YAMLError
 except ImportError:
@@ -463,7 +465,7 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 
 try:
     ALLOWED_HOSTS = EMG_CONF['emg']['allowed_host']
-    CORS_ORIGIN_WHITELIST = \
+    CORS_ALLOWED_ORIGINS = \
         [f'http://{h}' for h in ALLOWED_HOSTS] + \
         [f'https://{h}' for h in ALLOWED_HOSTS]
     logger.info("ALLOWED_HOSTS %r" % ALLOWED_HOSTS)
@@ -471,9 +473,9 @@ except KeyError:
     warnings.warn("ALLOWED_HOSTS not configured using wildecard",
                   RuntimeWarning)
 try:
-    CORS_ORIGIN_ALLOW_ALL = EMG_CONF['emg']['cors_origin_allow_all']
+    CORS_ALLOW_ALL_ORIGINS = EMG_CONF['emg']['cors_origin_allow_all']
 except KeyError:
-    CORS_ORIGIN_ALLOW_ALL = False
+    CORS_ALLOW_ALL_ORIGINS = False
 
 # CORS_URLS_REGEX = r'^%s/.*$' % FORCE_SCRIPT_NAME
 # CORS_URLS_ALLOW_ALL_REGEX = ()
@@ -482,6 +484,10 @@ CORS_ALLOW_METHODS = (
     'HEAD',
     'OPTIONS',
 )
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "sentry-trace",
+]
 
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=108000),

@@ -1330,10 +1330,10 @@ class GenomeFragmentSearchViewSet(viewsets.GenericViewSet):
         return Response("You need to use the POST method to send a search sequence to the API")
 
     def create(self, request):
-        response = requests.post(settings.GENOME_SEARCH_PROXY, data=request.data)
         try:
-            return Response(json.loads(response.text))
-        except json.JSONDecodeError:
+            response = requests.post(settings.GENOME_SEARCH_PROXY, data=request.data)
+            return HttpResponse(response.text, content_type='application/json')
+        except requests.exceptions.RequestException:
             raise Http404('Genome search failed. Please try later.')
 
 
