@@ -16,6 +16,8 @@
 import json
 import os
 import logging
+from json import JSONDecodeError
+
 import inflection
 import csv
 import math
@@ -1323,6 +1325,10 @@ class GenomeFragmentSearchViewSet(viewsets.GenericViewSet):
     permission_classes = [AllowAny]
     parser_classes = [FormParser, MultiPartParser]
 
+    @staticmethod
+    def genome_id_from_accession(accession):
+        return int(accession[4:])
+
     def get_queryset(self):
         return None
 
@@ -1332,9 +1338,29 @@ class GenomeFragmentSearchViewSet(viewsets.GenericViewSet):
     def create(self, request):
         try:
             response = requests.post(settings.GENOME_SEARCH_PROXY, data=request.data)
-            return HttpResponse(response.text, content_type='application/json')
         except requests.exceptions.RequestException:
+            logging.error(f'Failed to talk to genome search backend at {settings.GENOME_SEARCH_PROXY}')
             raise Http404('Genome search failed. Please try later.')
+        try:
+            response = response.json()
+        except (JSONDecodeError, ValueError):
+            logging.error(f'Failed to decode JSON from genome search backend')
+            raise Http404('Genome search failed. Please try later.')
+
+        results = response.get('results', [])
+        mgyg_matches = [self.genome_id_from_accession(result.get('genome')) for result in results]
+        genomes = emg_models.Genome.objects.filter(genome_id__in=mgyg_matches).all()
+
+        annotated_results = []
+        for result in results:
+            try:
+                genome = genomes.get(genome_id=self.genome_id_from_accession(result.get('genome')))
+            except emg_models.Genome.DoesNotExist:
+                continue
+            mgnify_data = emg_serializers.GenomeSerializer(genome, context={'request': request})
+            annotated_results.append({'mgnify': mgnify_data.data, 'cobs': result})
+        response['results'] = annotated_results
+        return Response(response)
 
 
 class GenomeSearchGatherViewSet(viewsets.GenericViewSet):
