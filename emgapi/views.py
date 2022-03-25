@@ -13,7 +13,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import json
 import os
 import logging
 from json import JSONDecodeError
@@ -1345,20 +1344,28 @@ class GenomeFragmentSearchViewSet(viewsets.GenericViewSet):
             response = response.json()
         except (JSONDecodeError, ValueError):
             logging.error(f'Failed to decode JSON from genome search backend')
+            logging.error(response.text)
             raise Http404('Genome search failed. Please try later.')
 
         results = response.get('results', [])
+        logging.info(f'Got {len(results)} search results')
         mgyg_matches = [self.genome_id_from_accession(result.get('genome')) for result in results]
         genomes = emg_models.Genome.objects.filter(genome_id__in=mgyg_matches).all()
 
+        matches = {
+            result['genome']: result
+            for result in results
+        }
+        logging.error(matches)
+
         annotated_results = []
-        for result in results:
-            try:
-                genome = genomes.get(genome_id=self.genome_id_from_accession(result.get('genome')))
-            except emg_models.Genome.DoesNotExist:
+        for genome in genomes:
+            logging.error(genome.accession)
+            if not genome.accession in matches:
                 continue
             mgnify_data = emg_serializers.GenomeSerializer(genome, context={'request': request})
-            annotated_results.append({'mgnify': mgnify_data.data, 'cobs': result})
+            annotated_results.append({'mgnify': mgnify_data.data, 'cobs': matches[genome.accession]})
+
         response['results'] = annotated_results
         return Response(response)
 
