@@ -647,3 +647,10 @@ except KeyError:
         "annotations_endpoint": 'https://www.ebi.ac.uk/europepmc/annotations_api/annotationsByArticleIds',
         "annotations_provider": "Metagenomics"
     }
+
+try:
+    ELIXIR_CDCH = EMG_CONF['emg']['contextual_data_clearing_house']
+except KeyError:
+    ELIXIR_CDCH = {
+        "sample_metadata_endpoint": "https://www.ebi.ac.uk/ena/clearinghouse/api/curations/"
+    }
