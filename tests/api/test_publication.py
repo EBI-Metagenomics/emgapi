@@ -56,7 +56,7 @@ class TestPublicationAPI(APITestCase):
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
 
-    @mock.patch('emgapi.europe_pmc.requests.get')
+    @mock.patch('emgapi.third_party_metadata.requests.get')
     def test_europe_pmc_annotations(self, mock_get):
         mock_get.return_value = MockEuropePMCResponse()
         url = reverse('emgapi_v1:publications-europe-pmc-annotations', args=('007',))
