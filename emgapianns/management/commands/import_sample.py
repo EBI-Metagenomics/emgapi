@@ -82,6 +82,7 @@ class Command(BaseCommand):
         except emg_models.Biome.DoesNotExist as exception:
             logger.exception(exception)
             logger.error(f'The supplied biome is not valid. Biome: "{self.biome}"')
+            # TODO: replace with raise CommandError
             sys.exit(1)
 
         logger.info('Creating sample {}'.format(accession))

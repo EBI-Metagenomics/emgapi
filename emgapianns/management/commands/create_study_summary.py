@@ -64,8 +64,12 @@ class Command(BaseCommand):
         if not options['rootpath']:
             raise ValueError("rootpath (RESULTS_PRODUCTION_DIR setting) cannot by empty)")
 
+
         rootpath = os.path.abspath(options['rootpath'])
 
+        if not os.path.isdir(rootpath):
+            raise ValueError(f"rootpath {rootpath} is not a directory")
+        
         gen = StudySummaryGenerator(accession=study_accession, pipeline=pipeline, rootpath=rootpath,
                                     database=database)
         gen.run()

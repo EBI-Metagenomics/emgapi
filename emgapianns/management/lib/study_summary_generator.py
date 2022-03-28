@@ -29,6 +29,7 @@ class StudySummaryGenerator(object):
 
     def run(self):
         if not os.path.exists(self.study_result_dir):
+            # TODO: replace with raise CommandError
             sys.exit(
                 "Study result directory for {} does not exist:\n{}".format(self.study_accession, self.study_result_dir))
 

@@ -84,7 +84,7 @@ class Command(BaseCommand):
                             help='Library strategy',
                             choices=['AMPLICON', 'WGS', 'ASSEMBLY', 'RNA-Seq', 'WGA'])
         parser.add_argument('--pipeline', help='Pipeline version',
-                            choices=['4.1', '5.0'], default='4.1')
+                            choices=['4.1', '5.0'], default='5.0')
         parser.add_argument('--database',
                             help='Target emg_db_name alias',
                             choices=['default', 'dev', 'prod'],
@@ -170,6 +170,7 @@ class Command(BaseCommand):
         # find version_{} folder
         result_folder = []
         if len(study_folder) == 0:
+            # TODO: replace with raise CommandError
             sys.exit('Could not find result directory for: {}'.format(secondary_study_accession))
         for cur_study_folder in study_folder:
             directory = os.path.join(cur_study_folder, 'version_{}/'.format(version))
@@ -177,6 +178,7 @@ class Command(BaseCommand):
 
         # if len(result_folder) > 1: take the latest created version_{} folder
         if len(result_folder) == 0:
+            # TODO: replace with raise CommandError
             sys.exit('Could not find result directory for: {}'.format(run_accession))
         else:
             latest_folder = max(result_folder, key=os.path.getctime)
