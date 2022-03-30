@@ -1,4 +1,5 @@
 import itertools
+import logging
 from functools import reduce
 from json import JSONDecodeError
 
@@ -150,10 +151,20 @@ def get_contextual_data_clearing_house_metadata(sample):
     :param sample: a MGnify Sample model instance.
     :return: curations from the CDCH.
     """
-    response = requests.get(f'{settings.ELIXIR_CDCH["sample_metadata_endpoint"]}{sample.accession}')
+    endpoint = settings.ELIXIR_CDCH["sample_metadata_endpoint"]
+    response = requests.get(f'{endpoint}{sample.accession}')
     try:
         assert response.status_code == 200
         curations = response.json().get('curations', [])
-    except (AssertionError, JSONDecodeError):
+    except AssertionError:
+        if not response.status_code == 200:
+            logging.warning(
+                f'Non-OK response code from CDCH. '
+                f'Endpoint: {endpoint}. '
+                f'Status: {response.status_code}. '
+                f'Sample: {sample.accession}'
+            )
+        return []
+    except JSONDecodeError:
         return []
     return curations
