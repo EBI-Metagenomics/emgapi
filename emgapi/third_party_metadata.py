@@ -157,7 +157,7 @@ def get_contextual_data_clearing_house_metadata(sample):
         assert response.status_code == 200
         curations = response.json().get('curations', [])
     except AssertionError:
-        if not response.status_code == 200:
+        if response.status_code not in [200, 404]:
             logging.warning(
                 f'Non-OK response code from CDCH. '
                 f'Endpoint: {endpoint}. '
