@@ -42,7 +42,7 @@ class EMGBaseCommand(BaseCommand):
                 '4.0',
                 '4.1',
                 '5.0'],
-            default='4.1'
+            default='5.0'
         )
 
     def handle(self, *args, **options):

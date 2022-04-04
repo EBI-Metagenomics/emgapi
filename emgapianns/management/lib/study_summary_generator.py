@@ -17,11 +17,10 @@ from emgapianns.management.lib.utils import DownloadFileDatabaseHandler
 
 
 class StudySummaryGenerator(object):
-    def __init__(self, accession, pipeline, rootpath, nfs_public_rootpath, database):
+    def __init__(self, accession, pipeline, rootpath, database):
         self.study_accession = accession
         self.pipeline = pipeline
         self.rootpath = rootpath
-        self.nfs_public_rootpath = nfs_public_rootpath
         self.emg_db_name = database
         self.study = emg_models.Study.objects.using(self.emg_db_name).get(secondary_accession=self.study_accession)
         self.study_result_dir = os.path.join(self.rootpath, self.study.result_directory)
@@ -30,6 +29,7 @@ class StudySummaryGenerator(object):
 
     def run(self):
         if not os.path.exists(self.study_result_dir):
+            # TODO: replace with raise CommandError
             sys.exit(
                 "Study result directory for {} does not exist:\n{}".format(self.study_accession, self.study_result_dir))
 
@@ -64,29 +64,7 @@ class StudySummaryGenerator(object):
             self.generate_go_summary(analysis_jobs, 'slim', self.pipeline)
             self.generate_go_summary(analysis_jobs, 'full', self.pipeline)
 
-        self.sync_study_summary_files()
-
         logging.info("Program finished successfully.")
-
-    def sync_study_summary_files(self):
-        logging.info("Syncing project summary files over to NFS public...")
-        _study_result_dir = self.study.result_directory
-        nfs_prod_dest = os.path.join(self.rootpath, _study_result_dir,
-                                     'version_{}/{}'.format(self.pipeline, 'project-summary'))
-        nfs_public_dest = os.path.join(self.nfs_public_rootpath, _study_result_dir, 'version_{}/'.format(self.pipeline))
-        logging.info("From: " + nfs_prod_dest)
-        logging.info("To: " + nfs_public_dest)
-
-        rsync_options = ['-rtDzv']
-
-        more_rsync_options = ['--no-owner', '--no-perms', '--prune-empty-dirs', '--exclude', '*.lsf',
-                              '--delete-excluded', '--chmod=Do-w,Fu+x,Fg+x,Fo+r']
-        rsync_cmd = ["sudo", "-H", "-u", "emg_adm", "rsync"] + rsync_options + more_rsync_options + [nfs_prod_dest,
-                                                                                                     nfs_public_dest]
-        logging.info(rsync_cmd)
-
-        subprocess.check_call(rsync_cmd)
-        logging.info("Synchronisation is done.")
 
     @staticmethod
     def _get_group_type(rna_type):

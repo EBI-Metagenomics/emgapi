@@ -34,8 +34,7 @@ jobs:
 
     - name: 🔧 - Install Dependencies
       run: |
-        pip install -U git+git://github.com/EBI-Metagenomics/emg-backlog-schema.git
-        pip install -U git+git://github.com/EBI-Metagenomics/ena-api-handler.git
+        pip install -U git+https://github.com/EBI-Metagenomics/ena-api-handler.git
         pip install -U -r requirements.txt
         pip install -U -r requirements-test.txt
         pip install "flake8==3.4" "pycodestyle==2.3.1" pep8-naming
