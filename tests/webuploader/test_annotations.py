@@ -69,7 +69,6 @@ class TestAnnotations:
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
-        print(rsp)
         assert len(rsp["data"]) == 3
 
         expected = ["GO:0030246", "GO:0046906", "GO:0043167"]
