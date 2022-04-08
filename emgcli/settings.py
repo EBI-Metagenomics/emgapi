@@ -667,7 +667,7 @@ except KeyError:
     RESULTS_PRODUCTION_DIR = ""
 
 # ENA API handler #
-if "ena_api_user" in EMG_CONF['emg']:
-    os.environ["ENA_API_USER"] = EMG_CONF['emg']["ena_api_user"]
-if "ena_api_password" in EMG_CONF['emg']:
-    os.environ["ENA_API_PASSWORD"] = EMG_CONF['emg']["ena_api_password"]
+if 'ena_api_user' in EMG_CONF['emg']:
+    os.environ['ENA_API_USER'] = EMG_CONF['emg']['ena_api_user']
+if 'ena_api_password' in EMG_CONF['emg']:
+    os.environ['ENA_API_PASSWORD'] = EMG_CONF['emg']['ena_api_password']
