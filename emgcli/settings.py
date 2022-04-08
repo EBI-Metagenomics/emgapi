@@ -57,9 +57,12 @@ EMG_CONF = yamjam(EMG_CONFIG)
 try:
     LOGDIR = EMG_CONF['emg']['log_dir']
 except KeyError:
+    # TODO: should we assume this?
     LOGDIR = os.path.join(expanduser("~"), 'emg', 'log')
 if not os.path.exists(LOGDIR):
     os.makedirs(LOGDIR)
+
+LOGFILE = EMG_CONF["emg"].get("log_file", "emg.log")
 
 LOGGING_CLASS = 'concurrent_log_handler.ConcurrentRotatingFileHandler'
 LOGGING_FORMATER = (
@@ -86,8 +89,8 @@ LOGGING = {
         'default': {
             'level': 'DEBUG',
             'class': LOGGING_CLASS,
-            'filename': os.path.join(LOGDIR, 'emg.log').replace('\\', '/'),
-            'maxBytes': 1024*1024*10,
+            'filename': os.path.join(LOGDIR, LOGFILE).replace('\\', '/'),
+            'maxBytes': 1024 * 1024 * 10,
             'backupCount': 50,
             'formatter': 'default',
         },
@@ -98,7 +101,6 @@ LOGGING = {
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            'filters': ['require_debug_true'],
             'formatter': 'default',
         },
         'notify': {
@@ -116,6 +118,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False
         },
+        'emgapianns.management.commands': { 
+            'handlers': ['default', 'console'],
+            'level': 'INFO',
+            'propagate': False
+        },
         'django.request': {  # Stop SQL debug from logging to main logger
             'handlers': ['default'],
             'level': 'INFO',
@@ -123,11 +130,6 @@ LOGGING = {
         },
         'django': {
             'handlers': ['null'],
-            'level': 'INFO',
-            'propagate': True
-        },
-        '': {
-            'handlers': ['console'],
             'level': 'INFO',
             'propagate': True
         }
@@ -432,13 +434,6 @@ try:
 except KeyError:
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Temp user images storage, TODO: a CDN would be a better option
-try:
-    IMG_FOLDER = EMG_CONF['emg']['img_folder']
-    IMG_DIR = EMG_CONF['emg']['img_dir']
-except KeyError:
-    IMG_FOLDER = '/results/images'
-    IMG_DIR = os.path.join(expanduser('~'), 'results/images')
 
 WHITENOISE_STATIC_PREFIX = '/static/'
 
@@ -661,7 +656,7 @@ except KeyError:
         "sample_metadata_endpoint": "https://www.ebi.ac.uk/ena/clearinghouse/api/curations/"
     }
 
-# Webuploder
+# Webuploder #
 try:
     RESULTS_PRODUCTION_DIR = EMG_CONF['emg']['results_production_dir']
 except KeyError:
@@ -670,3 +665,9 @@ except KeyError:
         RuntimeWarning
     )
     RESULTS_PRODUCTION_DIR = ""
+
+# ENA API handler #
+if "ena_api_user" in EMG_CONF['emg']:
+    os.environ["ENA_API_USER"] = EMG_CONF['emg']["ena_api_user"]
+if "ena_api_password" in EMG_CONF['emg']:
+    os.environ["ENA_API_PASSWORD"] = EMG_CONF['emg']["ena_api_password"]
