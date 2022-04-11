@@ -647,3 +647,13 @@ except KeyError:
         "annotations_endpoint": 'https://www.ebi.ac.uk/europepmc/annotations_api/annotationsByArticleIds',
         "annotations_provider": "Metagenomics"
     }
+
+# Webuploder
+try:
+    RESULTS_PRODUCTION_DIR = EMG_CONF['emg']['results_production_dir']
+except KeyError:
+    warnings.warn(
+        "RESULTS_PRODUCTION_DIR not configured",
+        RuntimeWarning
+    )
+    RESULTS_PRODUCTION_DIR = ""
