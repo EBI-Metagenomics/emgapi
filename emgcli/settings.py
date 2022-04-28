@@ -647,3 +647,20 @@ except KeyError:
         "annotations_endpoint": 'https://www.ebi.ac.uk/europepmc/annotations_api/annotationsByArticleIds',
         "annotations_provider": "Metagenomics"
     }
+
+try:
+    ELIXIR_CDCH = EMG_CONF['emg']['contextual_data_clearing_house']
+except KeyError:
+    ELIXIR_CDCH = {
+        "sample_metadata_endpoint": "https://www.ebi.ac.uk/ena/clearinghouse/api/curations/"
+    }
+
+# Webuploder
+try:
+    RESULTS_PRODUCTION_DIR = EMG_CONF['emg']['results_production_dir']
+except KeyError:
+    warnings.warn(
+        "RESULTS_PRODUCTION_DIR not configured",
+        RuntimeWarning
+    )
+    RESULTS_PRODUCTION_DIR = ""

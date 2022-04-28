@@ -13,7 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import logging
 
 import requests
 
@@ -32,12 +32,12 @@ class EMGBackend:
     def authenticate(self, request, username=None, password=None):
         ena_auth_url = settings.EMG_BACKEND_AUTH_URL
         data = {
-            'authRealms': ['SRA'],
-            'rememberMe': False,
+            'authRealms': ['ENA', 'EGA'],
             'username': username,
             'password': password,
         }
         req = requests.post(ena_auth_url, json=data)
+        logging.info(f'Response from ENA auth: {req}')
         resp = req.json()
         if req.status_code == 200:
             if resp.get('authenticated', False):

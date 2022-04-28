@@ -6,7 +6,7 @@
 <div>
     <form action="{% url 'rest_framework:login' %}" role="form" method="post" class="vf-stack vf-stack--400">
       {% csrf_token %}
-      <input type="hidden" name="next" value="{{ next }}" />
+      <input type="hidden" name="next" value="{{ next|default:'/' }}" />
       <div class="vf-form__item vf-stack">
 
         <label for="id_username" class="vf-form__label vf-form__label--required">

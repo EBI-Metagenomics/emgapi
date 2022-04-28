@@ -17,20 +17,14 @@ import logging
 import sys
 
 from django.db import IntegrityError
-from django.db.models import Q
 from django.utils import timezone
 from django.core.management import BaseCommand
 from emgapianns.management.lib.utils import get_lat_long, sanitise_fields
 from ena_portal_api import ena_handler
 from emgapi import models as emg_models
 from emgena import models as ena_models
-from backlog import models as backlog_models
 
 logger = logging.getLogger(__name__)
-
-cog_cache = {}
-ipr_cache = {}
-kegg_cache = {}
 
 ena = ena_handler.EnaApiHandler()
 
@@ -82,6 +76,15 @@ class Command(BaseCommand):
 
     def create_or_update_sample(self, ena_db_model, api_data):
         accession = api_data['secondary_sample_accession']
+        logger.debug('Getting the biome from the DB.')
+        try:
+            biome_model = emg_models.Biome.objects.using(self.emg_db).get(lineage=self.biome)
+        except emg_models.Biome.DoesNotExist as exception:
+            logger.exception(exception)
+            logger.error(f'The supplied biome is not valid. Biome: "{self.biome}"')
+            # TODO: replace with raise CommandError
+            sys.exit(1)
+
         logger.info('Creating sample {}'.format(accession))
         defaults = sanitise_fields({
             'collection_date': api_data['collection_date'],
@@ -94,7 +97,7 @@ class Command(BaseCommand):
             'sample_alias': api_data['sample_alias'],
             'host_tax_id': self.__get_host_tax_id(api_data['host_tax_id']),
             'species': self.__get_species(),
-            'biome': self.get_biome(accession),
+            'biome': biome_model,
             'last_update': timezone.now(),
             'submission_account_id': ena_db_model.submission_account_id,
         })
@@ -161,7 +164,6 @@ class Command(BaseCommand):
 
     def get_ena_db_sample(self, accession):
         logger.info('Fetching sample {} from ena oracle DB'.format(accession))
-        # query = Q(sample_id=accession) | Q(biosample_id=accession)
         return ena_models.Sample.objects.using(self.ena_db).filter(sample_id=accession, biosample_id=accession, combine_operator='OR')[0]
 
     def get_variable(self, name):
@@ -188,17 +190,6 @@ class Command(BaseCommand):
         if not len(studies):
             logger.warning('No studies tagged to sample {}'.format(sample.accession))
 
-    def get_emg_biome_obj(self, lineage):
-        return emg_models.Biome.objects.using(self.emg_db).get(lineage=lineage)
-
-    def get_biome(self, sample_accession):
-        if self.biome:
-            lineage = self.biome
-        else:
-            lineage = self.get_backlog_lineage(sample_accession)
-
-        return self.get_emg_biome_obj(lineage)
-
     def __get_host_tax_id(self, ena_host_tax_id):
         if self.biome.startswith('root:Host-associated:Human'):
             return 9606
@@ -210,14 +201,3 @@ class Command(BaseCommand):
             return 'Homo sapiens'
         else:
             return None
-
-    @staticmethod
-    def get_backlog_lineage(sample_accession):
-        try:
-            run = backlog_models.Run.objects.using('backlog_prod') \
-                .filter(sample_primary_accession=sample_accession)[0]
-            return run.biome.lineage
-        except AttributeError:
-            logging.error('Could not retrieve backlog biome for sample {}, '
-                          'please set using the biome-tagger'.format(sample_accession))
-            sys.exit(1)

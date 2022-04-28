@@ -58,11 +58,9 @@ def is_run_accession(accession):
 
 
 def retrieve_existing_result_dir(rootpath, dest_pattern):
-    """
-        Searches file system for existing result folder.
-
-        Example absolute path:
-        /nfs/production/interpro/metagenomics/results/2019/07/ERP108931/version_4.1/ERZ651/009/ERZ651769_FASTA/
+    """Searches file system for existing result folder.
+    Example absolute path:
+    /nfs/production/interpro/metagenomics/results/2019/07/ERP108931/version_4.1/ERZ651/009/ERZ651769_FASTA/
     :param rootpath:
     :param dest_pattern: e.g. ['2*', '*', 'version_*', '*', '00*', ERP000001s]
     :return:
@@ -374,23 +372,15 @@ def get_result_dir(result_dir, substring="results/"):
     return result_dir[pos + len(substring):]
 
 
-# def read_config(config_path, db):
-#     with open(config_path, 'r') as json_config:
-#         whole_config = json.load(json_config)
-#         config = whole_config[db]
-#         config["raise_on_warnings"] = True
-#         config["autocommit"] = True
-#         config["port"] = int(config["port"])
-#     return config
-
-def read_config(config_path, db):
-    EMG_CONF = yamjam(config_path)
-    backlog_config = EMG_CONF.get('backlog', {}).get('databases', {}).get(db)
+def read_backlog_config(config_path, db):
+    BACKLOG_CONFIG = yamjam(config_path)
+    backlog_config = BACKLOG_CONFIG.get('databases', {}).get(db)
     if not backlog_config:
         raise Exception(f"Could not find Backlog Config for db={db} in {config_path}")
     return {
         'raise_on_warnings': True,
         'autocommit': True,
+        'database': backlog_config['NAME'],
         'port': backlog_config['PORT'],
         'host': backlog_config['HOST'],
         'user': backlog_config['USER'],

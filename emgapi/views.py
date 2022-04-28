@@ -54,7 +54,7 @@ from . import viewsets as emg_viewsets
 from . import utils as emg_utils
 from . import renderers as emg_renderers
 from . import filters as emg_filters
-from .europe_pmc import get_publication_annotations, get_publication_annotations_existence_for_sample
+from . import third_party_metadata
 from .sourmash import validate_sourmash_signature, save_signature, send_sourmash_jobs, get_sourmash_job_status, \
     get_result_file
 
@@ -647,7 +647,22 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         `/samples/ERS1015417/check_studies_publications_for_annotations`
         """
         sample = self.get_object()
-        return Response(data=get_publication_annotations_existence_for_sample(sample))
+        return Response(data=third_party_metadata.get_epmc_publication_annotations_existence_for_sample(sample))
+
+    @action(
+        detail=True,
+        methods=['get', ]
+    )
+    def contextual_data_clearing_house_metadata(self, request, accession=None):
+        """
+        Get additional metadata for a Sample, from Elixir's Contextual Data Clearing House.
+
+        Example:
+        ---
+        `/samples/ERS235564/contextual_data_clearing_house_metadata`
+        """
+        sample = self.get_object()
+        return Response(data=third_party_metadata.get_contextual_data_clearing_house_metadata(sample))
 
 
 class RunViewSet(mixins.RetrieveModelMixin,
@@ -1224,7 +1239,7 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         """
         if not pubmed_id:
             raise Http404
-        return Response(data=get_publication_annotations(pubmed_id))
+        return Response(data=third_party_metadata.get_epmc_publication_annotations(pubmed_id))
 
 
 class GenomeCatalogueViewSet(mixins.RetrieveModelMixin,
