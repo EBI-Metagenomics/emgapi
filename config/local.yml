@@ -17,7 +17,7 @@ emg:
   debug: true
   results_dir: '/opt/emgapi/results'
   static_root: '/opt/emgapi/staticfiles'
-  emg_backend_auth: 'https://www.ebi.ac.uk/ena/auth/login'
+  emg_backend_auth: 'https://wwwdev.ebi.ac.uk/ena/dev/submit/webin/auth/login'
   secure_cookies: false
 
   mongodb:
