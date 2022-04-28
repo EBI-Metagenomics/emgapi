@@ -1701,6 +1701,10 @@ class Genome(models.Model):
             name = None
         return name
 
+    @staticmethod
+    def id_from_accession(accession):
+        return int(accession[4:])
+
     class Meta:
         db_table = 'GENOME'
 

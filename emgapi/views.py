@@ -1324,10 +1324,6 @@ class GenomeFragmentSearchViewSet(viewsets.GenericViewSet):
     permission_classes = [AllowAny]
     parser_classes = [FormParser, MultiPartParser]
 
-    @staticmethod
-    def genome_id_from_accession(accession):
-        return int(accession[4:])
-
     def get_queryset(self):
         return None
 
@@ -1349,7 +1345,7 @@ class GenomeFragmentSearchViewSet(viewsets.GenericViewSet):
 
         results = response.get('results', [])
         logging.info(f'Got {len(results)} search results')
-        mgyg_matches = [self.genome_id_from_accession(result.get('genome')) for result in results]
+        mgyg_matches = [emg_models.Genome.id_from_accession(result.get('genome')) for result in results]
         genomes = emg_models.Genome.objects.filter(genome_id__in=mgyg_matches).all()
 
         matches = {
