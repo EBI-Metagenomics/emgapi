@@ -179,7 +179,7 @@ except KeyError:
 try:
     GENOME_SEARCH_PROXY = EMG_CONF['emg']['genome_fragment_search_url']
 except KeyError:
-    GENOME_SEARCH_PROXY = 'https://bigsi-genome-search-01.mgnify.org/search'
+    GENOME_SEARCH_PROXY = 'https://cobs-genome-search-01.mgnify.org/search'
 
 # Admin panel
 try:

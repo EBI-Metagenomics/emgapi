@@ -322,7 +322,7 @@ router.register(
     basename='genomes'
 )
 
-# Proxy BIGSI search requests to alternative backend
+# Proxy Genome Search requests to microservice backend
 router.register(
     r'genome-search',
     views.GenomeFragmentSearchViewSet,

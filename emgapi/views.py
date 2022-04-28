@@ -13,9 +13,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import json
 import os
 import logging
+from json import JSONDecodeError
+
 import inflection
 import csv
 import math
@@ -1347,9 +1348,37 @@ class GenomeFragmentSearchViewSet(viewsets.GenericViewSet):
     def create(self, request):
         try:
             response = requests.post(settings.GENOME_SEARCH_PROXY, data=request.data)
-            return HttpResponse(response.text, content_type='application/json')
         except requests.exceptions.RequestException:
+            logging.error(f'Failed to talk to genome search backend at {settings.GENOME_SEARCH_PROXY}')
             raise Http404('Genome search failed. Please try later.')
+        try:
+            response = response.json()
+        except (JSONDecodeError, ValueError):
+            logging.error(f'Failed to decode JSON from genome search backend')
+            logging.error(response.text)
+            raise Http404('Genome search failed. Please try later.')
+
+        results = response.get('results', [])
+        logging.info(f'Got {len(results)} search results')
+        mgyg_matches = [emg_models.Genome.id_from_accession(result.get('genome')) for result in results]
+        genomes = emg_models.Genome.objects.filter(genome_id__in=mgyg_matches).all()
+
+        matches = {
+            result['genome']: result
+            for result in results
+        }
+        logging.error(matches)
+
+        annotated_results = []
+        for genome in genomes:
+            logging.error(genome.accession)
+            if not genome.accession in matches:
+                continue
+            mgnify_data = emg_serializers.GenomeSerializer(genome, context={'request': request})
+            annotated_results.append({'mgnify': mgnify_data.data, 'cobs': matches[genome.accession]})
+
+        response['results'] = annotated_results
+        return Response(response)
 
 
 class GenomeSearchGatherViewSet(viewsets.GenericViewSet):
