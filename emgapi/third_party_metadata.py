@@ -1,5 +1,7 @@
 import itertools
+import logging
 from functools import reduce
+from json import JSONDecodeError
 
 import requests
 from django.conf import settings
@@ -41,7 +43,7 @@ def icase_annotation_text(annotation):
     return annotation.get('exact', '').lower()
 
 
-def get_publication_annotations(pubmed_id):
+def get_epmc_publication_annotations(pubmed_id):
     """
     Fetch EMERALD-provided Europe PMC metagenomics annotations for a paper, and group them by type and text.
     :param pubmed_id: the publication identified in pubmed
@@ -105,7 +107,7 @@ QUERY_POSSIBLE = 'query_possible'
 STUDY_HAS_ANNOTATIONS = 'study_has_annotations'
 
 
-def get_publication_annotations_existence_for_sample(sample, study_query_limit=8, publication_query_limit=8):
+def get_epmc_publication_annotations_existence_for_sample(sample, study_query_limit=8, publication_query_limit=8):
     """
     Determine whether any of the studies related to a sample have publications which are annotated by Europe PMC.
     :param sample: a MGnify Sample model instance.
@@ -141,3 +143,28 @@ def get_publication_annotations_existence_for_sample(sample, study_query_limit=8
         response[QUERY_POSSIBLE] = True
 
     return response
+
+
+def get_contextual_data_clearing_house_metadata(sample):
+    """
+    Fetch sample metadata from the Elixir Contextual Data Clearing House, if present.
+    :param sample: a MGnify Sample model instance.
+    :return: curations from the CDCH.
+    """
+    endpoint = settings.ELIXIR_CDCH["sample_metadata_endpoint"]
+    response = requests.get(f'{endpoint}{sample.accession}')
+    try:
+        assert response.status_code == 200
+        curations = response.json().get('curations', [])
+    except AssertionError:
+        if response.status_code not in [200, 404]:
+            logging.warning(
+                f'Non-OK response code from CDCH. '
+                f'Endpoint: {endpoint}. '
+                f'Status: {response.status_code}. '
+                f'Sample: {sample.accession}'
+            )
+        return []
+    except JSONDecodeError:
+        return []
+    return curations
