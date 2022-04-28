@@ -62,7 +62,7 @@ urlpatterns = [
 
 # API authentication routing.
 urlpatterns += [
-    path(r'500/', TemplateView.as_view(template_name='500.html')),
+    path(r'500/', TemplateView.as_view(template_name='rest_framework/500.html')),
 ]
 
 # API URL routing.

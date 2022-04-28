@@ -22,21 +22,20 @@ from django.core.management import call_command
 from test_utils.emg_fixtures import *  # noqa
 
 
-@pytest.mark.usefixtures('mongodb')
+@pytest.mark.usefixtures("mongodb")
 @pytest.mark.django_db
 class TestExamples:
-
     def test_list(self, live_server, runs, api_version):
         """
         List samples and its metadata for given study
         """
         from jsonapi_client import Session
 
-        api_base = '%s/%s/' % (live_server.url, api_version)
+        api_base = "%s/%s/" % (live_server.url, api_version)
         with Session(api_base) as s:
-            study = s.get('studies', 'MGYS00000025').resource
-            assert study.accession == 'MGYS00000025'
-            assert study.secondary_accession == 'SRP0025'
+            study = s.get("studies", "MGYS00000025").resource
+            assert study.accession == "MGYS00000025"
+            assert study.secondary_accession == "SRP0025"
             # list samples
             sample_list = study.samples
             assert len(sample_list) == 1
@@ -45,26 +44,30 @@ class TestExamples:
                 run_list = sample.runs
                 assert len(run_list) == 1
                 run = run_list[0]
-                assert study.accession == 'MGYS00000025'
-                assert study.bioproject == 'PRJDB0025'
-                assert sample.accession == 'ERS0025'
-                assert sample.biome.biome_name == 'bar'
-                assert run.accession == 'ABC_025'
-                assert run.experiment_type == 'metagenomic'
+                assert study.accession == "MGYS00000025"
+                assert study.bioproject == "PRJDB0025"
+                assert sample.accession == "ERS0025"
+                assert sample.biome.biome_name == "bar"
+                assert run.accession == "ABC_025"
+                assert run.experiment_type == "metagenomic"
 
     def test_annotations(self, live_server, run_with_sample, api_version):
         from jsonapi_client import Session
 
-        call_command('import_summary', 'ABC01234',
-                     os.path.dirname(os.path.abspath(__file__)),
-                     suffix='.go_slim')
+        call_command(
+            "import_summary",
+            "ABC01234",
+            os.path.dirname(os.path.abspath(__file__)),
+            suffix=".go_slim",
+            pipeline="4.1",
+        )
 
-        api_base = '%s/%s/' % (live_server.url, api_version)
+        api_base = "%s/%s/" % (live_server.url, api_version)
         with Session(api_base) as s:
-            run = s.get('runs', 'ABC01234').resource
+            run = s.get("runs", "ABC01234").resource
             for analyses in run.analyses:
                 go_terms = []
                 for go in analyses.go_slim:
                     go_terms.append(go.accession)
-                expected = ['GO:0030246', 'GO:0046906', 'GO:0043167']
+                expected = ["GO:0030246", "GO:0046906", "GO:0043167"]
                 assert go_terms == expected

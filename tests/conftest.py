@@ -37,6 +37,7 @@ def pytest_configure():
         "emg_email": "EMG@mail.com",
         "ena_queue": "ENA_Q"
     }
+    settings.RESULTS_PRODUCTION_DIR = "/dummy/path"
     # TODO: backend mock to replace FakeEMGBackend
     # settings.EMG_BACKEND_AUTH_URL = 'http://fake_backend/auth'
     settings.AUTHENTICATION_BACKENDS = ('test_utils.FakeEMGBackend',)

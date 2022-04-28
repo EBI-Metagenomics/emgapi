@@ -15,15 +15,14 @@
 # limitations under the License.
 import logging
 import os
+
 from django.core.management import BaseCommand
+from django.conf import settings
+
 from ena_portal_api import ena_handler
 from emgapianns.management.lib.study_summary_generator import StudySummaryGenerator
 
 logger = logging.getLogger(__name__)
-
-cog_cache = {}
-ipr_cache = {}
-kegg_cache = {}
 
 ena = ena_handler.EnaApiHandler()
 
@@ -47,11 +46,8 @@ class Command(BaseCommand):
         parser.add_argument('pipeline', help='Pipeline version',
                             choices=['4.1', '5.0'], default='4.1')
         parser.add_argument('--rootpath',
-                            help="NFS root path of the results archive.",
-                            default="/nfs/production/interpro/metagenomics/results")
-        parser.add_argument('--nfs-public-rootpath',
-                            help="NFS public root path of the results archive.",
-                            default="/nfs/public/ro/metagenomics/results")
+                            help="NFS prod root path of the results archive.",
+                            default=settings.RESULTS_PRODUCTION_DIR)
         parser.add_argument('--database',
                             help='Target emg_db_name alias',
                             choices=['default', 'dev', 'prod'],
@@ -64,9 +60,16 @@ class Command(BaseCommand):
         study_accession = options['accession']
         pipeline = options['pipeline']
         database = options['database']
-        rootpath = os.path.abspath(options['rootpath'])
-        nfs_public_rootpath = os.path.abspath(options['nfs_public_rootpath'])
 
+        if not options['rootpath']:
+            raise ValueError("rootpath (RESULTS_PRODUCTION_DIR setting) cannot by empty)")
+
+
+        rootpath = os.path.abspath(options['rootpath'])
+
+        if not os.path.isdir(rootpath):
+            raise ValueError(f"rootpath {rootpath} is not a directory")
+        
         gen = StudySummaryGenerator(accession=study_accession, pipeline=pipeline, rootpath=rootpath,
-                                    nfs_public_rootpath=nfs_public_rootpath, database=database)
+                                    database=database)
         gen.run()

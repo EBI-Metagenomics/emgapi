@@ -22,6 +22,7 @@ import getpass
 
 from django.core.management import BaseCommand, call_command
 from django.utils import timezone
+from django.conf import settings
 from ena_portal_api import ena_handler
 
 from emgapi import models as emg_models
@@ -33,10 +34,6 @@ from emgapianns.management.lib.uploader_exceptions import QCNotPassedException, 
 from emgapianns.management.lib.utils import get_conf_downloadset
 
 logger = logging.getLogger(__name__)
-
-cog_cache = {}
-ipr_cache = {}
-kegg_cache = {}
 
 ena = ena_handler.EnaApiHandler()
 
@@ -79,15 +76,15 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         super(Command, self).add_arguments(parser)
         parser.add_argument('--rootpath',
-                            help="NFS root path of the results archive.",
-                            default="/nfs/production/interpro/metagenomics/results/")
+                            help="NFS production root path of the results archive.",
+                            default=settings.RESULTS_PRODUCTION_DIR)
         parser.add_argument('accession', help="Specify run or assembly/analysis accession.")
         parser.add_argument('biome', help='Lineage of GOLD biome')
         parser.add_argument('library_strategy',
                             help='Library strategy',
                             choices=['AMPLICON', 'WGS', 'ASSEMBLY', 'RNA-Seq', 'WGA'])
         parser.add_argument('--pipeline', help='Pipeline version',
-                            choices=['4.1', '5.0'], default='4.1')
+                            choices=['4.1', '5.0'], default='5.0')
         parser.add_argument('--database',
                             help='Target emg_db_name alias',
                             choices=['default', 'dev', 'prod'],
@@ -97,6 +94,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         setup_logging(options)
         self.emg_db = options['database']
+
+        if not options['rootpath']:
+            raise ValueError("rootpath (RESULTS_PRODUCTION_DIR setting) cannot by empty)")
+
         self.rootpath = os.path.abspath(options['rootpath'])
         self.accession = options['accession']
         self.biome = options['biome']
@@ -159,19 +160,17 @@ class Command(BaseCommand):
         logger.info("The upload of the run/assembly {} finished successfully.".format(self.accession))
 
     def __find_existing_result_dir(self, secondary_study_accession, run_accession, version):
-        """
-
-        :param run_accession:
-        :param version:
-        :return:
+        """Find the results folder 
         """
         logging.info("Finding result directory...")
-        directory = os.path.join(self.rootpath, '2019')
+        # FIXME: remove hardcoded value.
+        directory = os.path.join(self.rootpath, '2022')
         study_folder = self.__find_folder(directory, search_pattern=secondary_study_accession, recursive=True)
 
         # find version_{} folder
         result_folder = []
         if len(study_folder) == 0:
+            # TODO: replace with raise CommandError
             sys.exit('Could not find result directory for: {}'.format(secondary_study_accession))
         for cur_study_folder in study_folder:
             directory = os.path.join(cur_study_folder, 'version_{}/'.format(version))
@@ -179,6 +178,7 @@ class Command(BaseCommand):
 
         # if len(result_folder) > 1: take the latest created version_{} folder
         if len(result_folder) == 0:
+            # TODO: replace with raise CommandError
             sys.exit('Could not find result directory for: {}'.format(run_accession))
         else:
             latest_folder = max(result_folder, key=os.path.getctime)
@@ -194,7 +194,7 @@ class Command(BaseCommand):
         :return:
         """
         logger.info('Generating study summary {}'.format(secondary_study_accession))
-        call_command('import_study_summary', secondary_study_accession, self.version, '--database', self.emg_db,
+        call_command('create_study_summary', secondary_study_accession, self.version, '--database', self.emg_db,
                      '--rootpath', self.rootpath)
 
     def retrieve_metadata(self):
