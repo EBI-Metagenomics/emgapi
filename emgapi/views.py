@@ -13,9 +13,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import json
 import os
 import logging
+from json import JSONDecodeError
+
 import inflection
 import csv
 import math
@@ -53,7 +54,7 @@ from . import viewsets as emg_viewsets
 from . import utils as emg_utils
 from . import renderers as emg_renderers
 from . import filters as emg_filters
-from .europe_pmc import get_publication_annotations, get_publication_annotations_existence_for_sample
+from . import third_party_metadata
 from .sourmash import validate_sourmash_signature, save_signature, send_sourmash_jobs, get_sourmash_job_status, \
     get_result_file
 
@@ -139,7 +140,7 @@ class UtilsViewSet(viewsets.GenericViewSet):
                 if status_code == 200 or status_code == 201:
                     return Response("Created", status=status.HTTP_201_CREATED)
             except Exception as e:
-                logging.error(e, exc_info=True)
+                logger.error(e, exc_info=True)
                 return Response(
                     serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             return Response(
@@ -162,7 +163,7 @@ class UtilsViewSet(viewsets.GenericViewSet):
                 return Response(
                     serializer.data, status=status.HTTP_201_CREATED)
             except Exception as e:
-                logging.error(e, exc_info=True)
+                logger.error(e, exc_info=True)
                 return Response(
                     serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -646,7 +647,22 @@ class SampleViewSet(mixins.RetrieveModelMixin,
         `/samples/ERS1015417/check_studies_publications_for_annotations`
         """
         sample = self.get_object()
-        return Response(data=get_publication_annotations_existence_for_sample(sample))
+        return Response(data=third_party_metadata.get_epmc_publication_annotations_existence_for_sample(sample))
+
+    @action(
+        detail=True,
+        methods=['get', ]
+    )
+    def contextual_data_clearing_house_metadata(self, request, accession=None):
+        """
+        Get additional metadata for a Sample, from Elixir's Contextual Data Clearing House.
+
+        Example:
+        ---
+        `/samples/ERS235564/contextual_data_clearing_house_metadata`
+        """
+        sample = self.get_object()
+        return Response(data=third_party_metadata.get_contextual_data_clearing_house_metadata(sample))
 
 
 class RunViewSet(mixins.RetrieveModelMixin,
@@ -1223,7 +1239,7 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
         """
         if not pubmed_id:
             raise Http404
-        return Response(data=get_publication_annotations(pubmed_id))
+        return Response(data=third_party_metadata.get_epmc_publication_annotations(pubmed_id))
 
 
 class GenomeCatalogueViewSet(mixins.RetrieveModelMixin,
@@ -1332,9 +1348,41 @@ class GenomeFragmentSearchViewSet(viewsets.GenericViewSet):
     def create(self, request):
         try:
             response = requests.post(settings.GENOME_SEARCH_PROXY, data=request.data)
-            return HttpResponse(response.text, content_type='application/json')
         except requests.exceptions.RequestException:
+            logger.error(f'Failed to talk to genome search backend at {settings.GENOME_SEARCH_PROXY}')
             raise Http404('Genome search failed. Please try later.')
+        try:
+            response = response.json()
+        except (JSONDecodeError, ValueError):
+            logging.error(f'Failed to decode JSON from genome search backend')
+            logging.error(response.text)
+            raise Http404('Genome search failed. Please try later.')
+
+        results = response.get('results', [])
+        logger.info(f'Got {len(results)} search results')
+
+        genomes = emg_models.Genome.objects.filter(
+            accession__in=map(lambda result: result.get('genome'), results)
+        ).all()
+
+        matches = {
+            result['genome']: result
+            for result in results
+        }
+        logger.debug(matches)
+
+        annotated_results = []
+        for genome in genomes:
+            if not genome.accession in matches:
+                continue
+            mgnify_data = emg_serializers.GenomeSerializer(genome, context={'request': request})
+            annotated_results.append({'mgnify': mgnify_data.data, 'cobs': matches[genome.accession]})
+        response['results'] = sorted(
+            annotated_results,
+            key=lambda result: result.get('cobs', {}).get('percent_kmers_found', 0),
+            reverse=True
+        )
+        return Response(response)
 
 
 class GenomeSearchGatherViewSet(viewsets.GenericViewSet):

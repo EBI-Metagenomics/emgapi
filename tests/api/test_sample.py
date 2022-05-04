@@ -101,17 +101,8 @@ class MockUnsuccessfulEuropePMCResponse:
 
 
 class TestSampleStudiesPublicationsAnnotationsAPI(APITestCase):
-    # def setUp(self):
-    #     # Sample 1 > Study 1 > Pub 1 > Annotations
-    #     baker.make(
-    #         'emgapi.Study',
-    #         pk=1,
-    #         pubmed_id='007',
-    #         pub_title='The man with the golden metagenome',
-    #         authors='Bond, J; Moneypenny, J; et al'
-    #     )
 
-    @mock.patch('emgapi.europe_pmc.requests.get')
+    @mock.patch('emgapi.third_party_metadata.requests.get')
     def test_sample_with_study_with_annotated_pub(self, mock_get):
         biome = baker.make(
             'emgapi.Biome',
@@ -270,3 +261,91 @@ class TestSampleStudiesPublicationsAnnotationsAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()['data']
         self.assertFalse(data['query_possible'])
+
+
+class MockSuccessfulCDCHResponse:
+    status_code = 200
+
+    @staticmethod
+    def json():
+        return {
+            'curations': [
+                {
+                    'attributePost': 'fruit',
+                    'valuePost': 'banana',
+                    "assertionEvidences": [
+                        {
+                            "label": "author statement"
+                        }
+                    ],
+                    "updatedTimestamp": "2001-01-00T00:00:00.000+0000",
+                }
+            ],
+            "totalAttributes": 1,
+            "totalRecords": 1
+        }
+
+
+class MockUnsuccessfulCDCHResponse:
+    status_code = 404
+
+
+class TestSampleContextualDataClearingHouseMetadataAPI(APITestCase):
+
+    @mock.patch('emgapi.third_party_metadata.requests.get')
+    def test_sample_with_study_with_annotated_pub(self, mock_get):
+        biome = baker.make(
+            'emgapi.Biome',
+            pk=1,
+            biome_id=1,
+            biome_name='bar',
+            lft=0, rgt=1, depth=2,
+            lineage='root:ghosts:ectoplasmic',
+        )
+
+        sample = baker.make(
+            'emgapi.Sample',
+            biome=biome,
+            pk=1,
+            accession='ERS00001',
+            primary_accession='SAMS00001',
+            is_public=1,
+            species='Slimer',
+            sample_name='Ectoplasm 1',
+            sample_desc='ghostbusters',
+            latitude=40.7,
+            longitude=74.0,
+            last_update='1970-01-01 00:00:00',
+            analysis_completed='1970-01-01',
+            collection_date='1970-01-01',
+            environment_feature='gggbbb',
+            environment_material='gggbbb',
+            geo_loc_name='New York',
+            sample_alias='ERS00001',
+        )
+
+        # Sample with no additional metadata
+        mock_get.return_value = MockUnsuccessfulCDCHResponse()
+        url = reverse('emgapi_v1:samples-contextual-data-clearing-house-metadata', args=(sample.accession,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()['data']
+        self.assertEqual(data, [])
+
+        # Sample with additional metadata
+        mock_get.return_value = MockSuccessfulCDCHResponse()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()['data']
+        self.assertEqual(data, [
+            {
+                'attributePost': 'fruit',
+                'valuePost': 'banana',
+                "assertionEvidences": [
+                    {
+                        "label": "author statement"
+                    }
+                ],
+                "updatedTimestamp": "2001-01-00T00:00:00.000+0000",
+            }
+        ])

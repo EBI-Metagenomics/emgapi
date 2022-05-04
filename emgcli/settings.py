@@ -179,7 +179,7 @@ except KeyError:
 try:
     GENOME_SEARCH_PROXY = EMG_CONF['emg']['genome_fragment_search_url']
 except KeyError:
-    GENOME_SEARCH_PROXY = 'https://bigsi-genome-search-01.mgnify.org/search'
+    GENOME_SEARCH_PROXY = 'https://cobs-genome-search-01.mgnify.org/search'
 
 # Admin panel
 try:
@@ -646,6 +646,13 @@ except KeyError:
     EUROPE_PMC = {
         "annotations_endpoint": 'https://www.ebi.ac.uk/europepmc/annotations_api/annotationsByArticleIds',
         "annotations_provider": "Metagenomics"
+    }
+
+try:
+    ELIXIR_CDCH = EMG_CONF['emg']['contextual_data_clearing_house']
+except KeyError:
+    ELIXIR_CDCH = {
+        "sample_metadata_endpoint": "https://www.ebi.ac.uk/ena/clearinghouse/api/curations/"
     }
 
 # Webuploder
