@@ -1369,7 +1369,7 @@ class GenomeFragmentSearchViewSet(viewsets.GenericViewSet):
             result['genome']: result
             for result in results
         }
-        logger.info(matches)
+        logger.debug(matches)
 
         annotated_results = []
         for genome in genomes:
@@ -1377,8 +1377,11 @@ class GenomeFragmentSearchViewSet(viewsets.GenericViewSet):
                 continue
             mgnify_data = emg_serializers.GenomeSerializer(genome, context={'request': request})
             annotated_results.append({'mgnify': mgnify_data.data, 'cobs': matches[genome.accession]})
-
-        response['results'] = annotated_results
+        response['results'] = sorted(
+            annotated_results,
+            key=lambda result: result.get('cobs', {}).get('percent_kmers_found', 0),
+            reverse=True
+        )
         return Response(response)
 
 
