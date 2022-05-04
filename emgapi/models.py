@@ -1604,6 +1604,17 @@ class GenomeCatalogue(models.Model):
         self.save()
 
 
+class GenomeManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related(
+            'biome',
+            'geo_origin',
+            'catalogue'
+        ).prefetch_related(
+            'pangenome_geographic_range'
+        )
+
+
 class Genome(models.Model):
 
     ISOLATE = 'isolate'
@@ -1612,6 +1623,8 @@ class Genome(models.Model):
         (MAG, 'MAG'),
         (ISOLATE, 'Isolate'),
     )
+
+    objects = GenomeManager()
 
     genome_id = models.AutoField(
         db_column='GENOME_ID', primary_key=True)
@@ -1689,8 +1702,6 @@ class Genome(models.Model):
 
     @property
     def geographic_range(self):
-        """TODO: improve this, this is making len(pangenome_geographic_range) queries each time
-        """
         return [v.name for v in self.pangenome_geographic_range.all()]
 
     @property
@@ -1700,10 +1711,6 @@ class Genome(models.Model):
         else:
             name = None
         return name
-
-    @staticmethod
-    def id_from_accession(accession):
-        return int(accession[4:])
 
     class Meta:
         db_table = 'GENOME'

@@ -140,7 +140,7 @@ class UtilsViewSet(viewsets.GenericViewSet):
                 if status_code == 200 or status_code == 201:
                     return Response("Created", status=status.HTTP_201_CREATED)
             except Exception as e:
-                logging.error(e, exc_info=True)
+                logger.error(e, exc_info=True)
                 return Response(
                     serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             return Response(
@@ -163,7 +163,7 @@ class UtilsViewSet(viewsets.GenericViewSet):
                 return Response(
                     serializer.data, status=status.HTTP_201_CREATED)
             except Exception as e:
-                logging.error(e, exc_info=True)
+                logger.error(e, exc_info=True)
                 return Response(
                     serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -1349,7 +1349,7 @@ class GenomeFragmentSearchViewSet(viewsets.GenericViewSet):
         try:
             response = requests.post(settings.GENOME_SEARCH_PROXY, data=request.data)
         except requests.exceptions.RequestException:
-            logging.error(f'Failed to talk to genome search backend at {settings.GENOME_SEARCH_PROXY}')
+            logger.error(f'Failed to talk to genome search backend at {settings.GENOME_SEARCH_PROXY}')
             raise Http404('Genome search failed. Please try later.')
         try:
             response = response.json()
@@ -1359,19 +1359,20 @@ class GenomeFragmentSearchViewSet(viewsets.GenericViewSet):
             raise Http404('Genome search failed. Please try later.')
 
         results = response.get('results', [])
-        logging.info(f'Got {len(results)} search results')
-        mgyg_matches = [emg_models.Genome.id_from_accession(result.get('genome')) for result in results]
-        genomes = emg_models.Genome.objects.filter(genome_id__in=mgyg_matches).all()
+        logger.info(f'Got {len(results)} search results')
+
+        genomes = emg_models.Genome.objects.filter(
+            accession__in=map(lambda result: result.get('genome'), results)
+        ).all()
 
         matches = {
             result['genome']: result
             for result in results
         }
-        logging.error(matches)
+        logger.info(matches)
 
         annotated_results = []
         for genome in genomes:
-            logging.error(genome.accession)
             if not genome.accession in matches:
                 continue
             mgnify_data = emg_serializers.GenomeSerializer(genome, context={'request': request})
