@@ -193,7 +193,7 @@ class BaseAnalysisGenericViewSet(viewsets.GenericViewSet):
         'pipeline__release_version',
         'experiment_type__experiment_type',
     )
-    ordering = ('-pipeline',)
+    ordering = ('-pipeline_id',)
 
     search_fields = (
         'job_id',

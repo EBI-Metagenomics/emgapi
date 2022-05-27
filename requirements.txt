@@ -49,3 +49,6 @@ pysam==0.18.0; python_version > '3.4'
 
 # sourmash search
 celery[redis]==5.1.0
+
+# my-sql utils
+django-mysql==4.3.0
