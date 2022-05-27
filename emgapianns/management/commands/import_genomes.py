@@ -114,6 +114,7 @@ class Command(BaseCommand):
         if has_pangenome:
             d.update(d['pangenome'])
             del d['pangenome']
+        d.setdefault('num_genomes_total', 1)
 
         if 'num_genomes_non_redundant' in d:
             del d['num_genomes_non_redundant']
