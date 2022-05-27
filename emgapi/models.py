@@ -31,7 +31,10 @@ from django.db import models
 from django.db.models import (CharField, Count, OuterRef, Prefetch, Q,
                               Subquery, Value)
 from django.db.models.functions import Cast, Concat
+
 from rest_framework.generics import get_object_or_404
+
+from django_mysql.models import QuerySet as MySQLQuerySet
 
 
 class Resource(object):
@@ -135,7 +138,7 @@ class BaseQuerySet(models.QuerySet):
                 q.extend(filters['authenticated'])
         else:
             q.extend(filters['all'])
-        return self.distinct().filter(*q)
+        return self.filter(*q)
 
 
 class PipelineTool(models.Model):
@@ -1215,7 +1218,7 @@ class AssemblySample(models.Model):
         return 'Assembly:{} - Sample:{}'.format(self.assembly, self.sample)
 
 
-class AnalysisJobQuerySet(BaseQuerySet):
+class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet):
     def available(self, request=None):
         """Override BaseQuerySet with the AnalysisJob auth rules
         Use cases
@@ -1252,16 +1255,46 @@ class AnalysisJobQuerySet(BaseQuerySet):
 
 class AnalysisJobManager(models.Manager):
     def get_queryset(self):
+        """Customized Analysis Job QS.
+        There are 2 very custom bits here:
+        
+        straight_join
+        -------------
+        This one is needed because of a mysql bug that causes the optimizer
+        to https://code.djangoproject.com/ticket/22438
+
+        force_index
+        -----------
+        This one is more of a mistery to me. The join with PIPELINE_RELEASE 
+        is causing a full table scan on PIPELINE_RELEASE.
+
+        | id | select\_type | table | type | possible\_keys | key | key\_len | ref | rows | filtered | Extra |
+        | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+        | 1 | SIMPLE | PIPELINE\_RELEASE | ALL | PRIMARY,PIPELINE\_RELEASE\_PIPELINE\_ID\_RELEASE\_VERSION\_d40fe384\_uniq,PIPELINE\_RELEASE\_PIPELINE\_ID\_index | NULL | NULL | NULL | 6 | 83.33 | Using where; Using join buffer \(Block Nested Loop\) |
+
+        By forcing the index PRIMARY on the JOIN the query is faster:
+
+        | id | select\_type | table | type | possible\_keys | key | key\_len | ref | rows | filtered | Extra |
+        | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+        | 1 | SIMPLE | PIPELINE\_RELEASE | eq\_ref | PRIMARY | PRIMARY | 2 | emg.ANALYSIS\_JOB.PIPELINE\_ID | 1 | 100 | NULL |
+
+        IMPORTANT: it is also required that the ordering of the query set is done by ANALYSIS_JOB.PIPELINE_ID and not a 
+                   field of PIPELINE_RELEASE. This was changes in emgapi.viewsets.BaseAnalysisGenericViewSet.ordering
+
+        TODO: figure our what is going on with this query.
+        """
         _qs = AnalysisJobAnn.objects.all() \
             .select_related('var')
         return AnalysisJobQuerySet(self.model, using=self._db) \
+            .straight_join() \
+            .force_index("PRIMARY", table_name="PIPELINE_RELEASE", for_="JOIN") \
             .select_related(
-                'pipeline',
                 'analysis_status',
                 'experiment_type',
                 'run',
                 'study',
                 'assembly',
+                'pipeline',
                 'sample') \
             .prefetch_related(
                 Prefetch('analysis_metadata', queryset=_qs),)

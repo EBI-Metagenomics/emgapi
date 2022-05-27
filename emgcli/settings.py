@@ -187,6 +187,7 @@ try:
 except KeyError:
     ADMIN = False
 
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -211,6 +212,7 @@ INSTALLED_APPS = [
     'emgapianns',
     # schema
     'drf_spectacular',
+    'django_mysql',
 ]
 
 if ADMIN:
@@ -289,6 +291,10 @@ try:
     DATABASES = EMG_CONF['emg']['databases']
 except KeyError:
     raise KeyError("Config must container default database.")
+
+# this is required to use the djang-mysql QS Hints 
+# https://django-mysql.readthedocs.io/en/latest/queryset_extensions.html?highlight=DJANGO_MYSQL_REWRITE_QUERIES#query-hints 
+DJANGO_MYSQL_REWRITE_QUERIES = True
 
 try:
     SESSION_ENGINE = EMG_CONF['emg']['session_engine']
