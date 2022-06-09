@@ -64,9 +64,7 @@ class StudyImporter:
 
     @staticmethod
     def _fetch_study_metadata(study_accession, database):
-        """
-            Fetches latest study metadata from ENA's production database
-        :return:
+        """Fetches latest study metadata from ENA's production database
         """
         db_result, api_result = None, None
         try:
