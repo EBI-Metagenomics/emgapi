@@ -179,10 +179,13 @@ Set the env variable `EMG_CONFIG`.
 To run tests::
 
     python setup.py test
+    
+    # or the simpler
+    pytest # will use config/local-tests.yml as the config file
 
 or use the wrapper script (will user docker/contig-test.yml)::
 
     ./run-tests.sh
 
 
-Copyright (c) 2019 EMBL - European Bioinformatics Institute
+Copyright (c) 2017-2022 EMBL - European Bioinformatics Institute
