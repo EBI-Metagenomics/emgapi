@@ -132,6 +132,11 @@ LOGGING = {
             'handlers': ['null'],
             'level': 'INFO',
             'propagate': True
+        },
+        '': {
+            'handlers': ['default', 'console'],
+            'level': 'INFO',
+            'propagate': True
         }
     }
 }
@@ -496,36 +501,6 @@ JWT_AUTH = {
 }
 
 try:
-    ADMINS = EMG_CONF['emg']['admins']
-    MANAGERS = ADMINS
-    # IGNORABLE_404_URLS
-except KeyError:
-    ADMINS = []
-    warnings.warn("ADMINS not configured, no error notification",
-                  RuntimeWarning)
-
-# EMAIL
-try:
-    EMAIL_HOST = EMG_CONF['emg']['email']['host']
-    EMAIL_PORT = EMG_CONF['emg']['email']['port']
-    EMAIL_SUBJECT_PREFIX = EMG_CONF['emg']['email']['subject']
-    MIDDLEWARE += ('django.middleware.common.BrokenLinkEmailsMiddleware',)
-
-    LOGGING['handlers']['mail_admins'] = \
-        {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
-    if 'mail_admins' not in LOGGING['loggers']['django.request']['handlers']:
-        LOGGING['loggers']['django.request']['handlers'].append('mail_admins')
-except KeyError:
-    warnings.warn(
-        "EMAIL not configured, no error notification for %r." % ADMINS,
-        RuntimeWarning
-    )
-
-try:
     EMAIL_HELPDESK = EMG_CONF['emg']['email']['helpdesk']
 except KeyError:
     warnings.warn(
@@ -536,27 +511,6 @@ try:
     RT = EMG_CONF['emg']['rt']
 except KeyError:
     warnings.warn("RT not configured.", RuntimeWarning)
-
-# SLACK
-try:
-    SLACK_TOKEN = EMG_CONF['emg']['slack']['token']
-    SLACK_CHANNEL = EMG_CONF['emg']['slack']['channel']
-    SLACK_USERNAME = EMG_CONF['emg']['slack']['username']
-    SLACK_FAIL_SILENTLY = EMG_CONF['emg']['slack']['fail_silently']
-    SLACK_BACKEND = 'django_slack.backends.RequestsBackend'
-    INSTALLED_APPS += ('django_slack',)
-    MIDDLEWARE += ('emgcli.middleware.BrokenLinkSlackMiddleware',)
-
-    LOGGING['handlers']['slack_admins'] = \
-    {
-        'level': 'ERROR',
-        'filters': ['require_debug_false'],
-        'class': 'django_slack.log.SlackExceptionHandler',
-    }
-    if 'slack_admins' not in LOGGING['loggers']['django.request']['handlers']:
-        LOGGING['loggers']['django.request']['handlers'].append('slack_admins')
-except KeyError:
-    warnings.warn("SLACK not configured.", RuntimeWarning)
 
 # EMG
 try:
