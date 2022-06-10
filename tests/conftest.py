@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2020 EMBL - European Bioinformatics Institute
+# Copyright 2017-2022 EMBL - European Bioinformatics Institute
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,10 @@
 # limitations under the License.
 
 
+import sys
 import os
+from importlib.util import find_spec 
+
 import pytest
 
 import mongoengine
@@ -26,6 +29,18 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'emgcli.settings')
 
 
 def pytest_configure():
+    root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    if not os.getenv("EMG_CONFIG"):
+        print("EMG_CONFIG not found on env, defaulting to config/local-tests.yml")
+        os.environ["EMG_CONFIG"] = os.path.join(
+            root, "config/local-tests.yml"
+        )
+    
+    if find_spec("emgcli") is None:
+        # Add emgcli to the path
+        sys.path.insert(0, root)
+        os.environ["PATH"] += ":" + os.path.join(root, "emgcli")
+
     settings.DEBUG = False
     settings.ALLOWED_HOSTS = ["*"]
     settings.REST_FRAMEWORK['TEST_REQUEST_DEFAULT_FORMAT'] = 'vnd.api+json'
