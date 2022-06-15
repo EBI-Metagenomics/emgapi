@@ -178,8 +178,7 @@ def get_study_dir(rootpath):
     while not is_study_accession(os.path.basename(split_path)):
         split_path = os.path.abspath(os.path.join(split_path, os.pardir))
         if len(split_path) < 9:
-            raise ValueError('Could not retrieve study dir from {}'.format(rootpath))
-
+            raise ValueError(f'Could not retrieve study dir from {rootpath}')
     return split_path
 
 
