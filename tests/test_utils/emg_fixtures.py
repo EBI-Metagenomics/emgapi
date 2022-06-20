@@ -652,6 +652,6 @@ def ena_run_study():
         "helminths and the faecal microbial and metabolic profiles of a cohort of equine youngstock, prior to and following "
         "treatment with parasiticides (ivermectin)."
     )
-    study.submission_account_id = "Webin-50804"
+    study.submission_account_id = "Webin-99999"
     study.pubmed_id = ""
     return study
