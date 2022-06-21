@@ -22,6 +22,8 @@ from django.contrib.auth import get_user_model
 from model_bakery import baker
 
 from emgapi import models as emg_models
+from emgena import models as ena_models
+
 
 __all__ = ['apiclient', 'api_version', 'biome', 'biome_human', 'super_study', 'studies',
            'samples', 'study', 'study_private', 'sample', 'sample_private',
@@ -29,7 +31,7 @@ __all__ = ['apiclient', 'api_version', 'biome', 'biome_human', 'super_study', 's
            'pipeline', 'pipelines', 'experiment_type', 'experiment_type_assembly',
            'runs', 'run', 'run_v5', 'runjob_pipeline_v1', 'run_emptyresults', 'run_with_sample',
            'analysis_results', 'run_multiple_analysis', 'var_names', 'analysis_metadata_variable_names',
-           'genome_catalogue', 'genome', 'assemblies', 'legacy_mapping']
+           'genome_catalogue', 'genome', 'assemblies', 'legacy_mapping', 'ena_run_study']
 
 
 @pytest.fixture
@@ -633,3 +635,23 @@ def legacy_mapping(assemblies):
     return baker.make(emg_models.LegacyAssembly,
         legacy_accession=fake_accession,
         new_accession="ERZ999")
+
+@pytest.fixture
+def ena_run_study():
+    study = ena_models.RunStudy()
+    study.study_id = "ERP117125"
+    study.project_id = "PRJNA278393"
+    study.study_status = "public"
+    study.center_name = "UNIVERSITY OF CAMBRIDGE"
+    study.hold_date = None
+    study.first_created = "2019-09-04 11:23:26"
+    study.last_updated = "2019-09-04 11:23:26"
+    study.study_title = "Dysbiosis associated with acute helminth infections in herbivorous youngstock - observations and implications"
+    study.study_description = (
+        "This study investigates, for the first time, the associations between acute infections by GI "
+        "helminths and the faecal microbial and metabolic profiles of a cohort of equine youngstock, prior to and following "
+        "treatment with parasiticides (ivermectin)."
+    )
+    study.submission_account_id = "Webin-99999"
+    study.pubmed_id = ""
+    return study

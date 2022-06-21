@@ -487,7 +487,7 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     )
 
     def get_pipelines(self, obj):
-        # TODO: push that to manager
+        # TODO: push this to the manager
         return emg_models.Pipeline.objects \
             .filter(analyses__run=obj)
 

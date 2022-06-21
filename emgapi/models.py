@@ -14,19 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-# This is an auto-generated Django model module.
-# You'll have to do the following manually to clean this up:
-#   * Rearrange models' order
-#   * Make sure each model has one field with primary_key=True
-#   * Make sure each ForeignKey has `on_delete` set to the desired behavior.
-#   * Remove `managed = False` lines if you wish to allow Django to create,
-#     modify, and delete the table
-# Feel free to rename the models, but don't rename db_table values
-# or field names.
-
-from __future__ import unicode_literals
-
 from django.db import models
 from django.db.models import (CharField, Count, OuterRef, Prefetch, Q,
                               Subquery, Value)
@@ -35,6 +22,8 @@ from django.db.models.functions import Cast, Concat
 from rest_framework.generics import get_object_or_404
 
 from django_mysql.models import QuerySet as MySQLQuerySet
+
+from emgapi.validators import validate_ena_study_accession
 
 
 class Resource(object):
@@ -1103,6 +1092,12 @@ class Run(models.Model):
     study = models.ForeignKey(
         'Study', db_column='STUDY_ID', related_name='runs',
         on_delete=models.CASCADE, blank=True, null=True)
+    # We use this field to link to the study if we haven't analyzed the study, hence
+    # there is no Study linked (`study` fk is none)
+    ena_study_accession = models.CharField(
+        db_column='ENA_STUDY_ACCESSION', validators=[validate_ena_study_accession],
+        help_text='ENA Study accession.',
+        max_length=20, blank=True, null=True)
     # TODO: not consistent, schema changes may be needed
     experiment_type = models.ForeignKey(
         ExperimentType, db_column='EXPERIMENT_TYPE_ID',
