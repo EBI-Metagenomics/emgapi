@@ -940,11 +940,15 @@ class KronaViewSet(emg_mixins.ListModelMixin,
         `/runs/GCA_900216095/pipelines/4.0/krona/lsu`
         """
         obj = self.get_object()
-        path = os.path.join(settings.RESULTS_DIR, obj.result_directory, 'taxonomy-summary')
+        base_path = os.path.join(settings.RESULTS_DIR, obj.result_directory, 'taxonomy-summary')
         if subdir in ['unite', 'itsonedb']:
-            path = os.path.join(path, 'its', subdir)
+            path = os.path.join(base_path, 'its', subdir)
         else:
-            path = os.path.join(path, subdir.upper())
+            path = os.path.join(base_path, subdir.upper())
+
+        if subdir == 'ssu' and not os.path.exists(path):
+            # Older pipelines (1, 2...?) have SSU-only Krona in un-nested directory.
+            path = base_path
 
         krona = os.path.abspath(os.path.join(path, 'krona.html'))
         if os.path.isfile(krona):
