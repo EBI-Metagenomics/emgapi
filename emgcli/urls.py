@@ -13,7 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from django.conf.urls.static import static
 from django.contrib import admin
 
 from django.urls import include, path, re_path
@@ -99,3 +99,6 @@ if settings.DEBUG:
     urlpatterns = [
         path(r'__debug__/', include(debug_toolbar.urls)),
     ] + urlpatterns
+
+if settings.DOWNLOADS_BYPASS_NGINX:
+    urlpatterns += static(r'/metagenomics/', document_root=settings.STATIC_ROOT + '/nginx_mirror/')
