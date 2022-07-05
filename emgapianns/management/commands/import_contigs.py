@@ -45,7 +45,7 @@ class Command(EMGBaseCommand):
 
     def add_arguments(self, parser):
         super().add_arguments(parser)
-        parser.add_argument('--batch-size', action='store', type=int, default=200,
+        parser.add_argument('--batch-size', action='store', type=int, default=10000,
                             help='Mongo DB insert batch size.')
         parser.add_argument('--faix', action='store', type=str,
                             help='Fasta index file.', required=False)
@@ -111,6 +111,7 @@ class Command(EMGBaseCommand):
                     for at_cluster in at.split(','):
                         cluster = at_cluster.replace('as_gene_clusters=', '').replace('\n', '')
                         contig_ann.setdefault('antismash', []).append(cluster)
+        logger.info('Loaded antiSMASH')
 
     def load_kegg_modules(self, kegg_modules, annotations_dict):
         """Load KEGG Modules and paths
@@ -208,67 +209,43 @@ class Command(EMGBaseCommand):
                 )
 
                 if 'kegg' in annotations:
-                    contig.keggs = list()
-                    feature_count = Counter(annotations['kegg'])
-                    contig.has_kegg = bool(feature_count)
-                    for feature in feature_count:
-                        contig.keggs.append(
-                            m_models.AnalysisJobKeggOrthologAnnotation(ko=feature, count=feature_count[feature])
-                        )
+                    kegg_feature_count = Counter(annotations['kegg'])
+                    contig.has_kegg = bool(kegg_feature_count)
+                    contig.keggs = map(lambda f: m_models.AnalysisJobKeggOrthologAnnotation(ko=f, count=kegg_feature_count[f]), kegg_feature_count)
+
                 if 'cog' in annotations:
-                    contig.cogs = list()
-                    feature_count = Counter(annotations['cog'])
-                    contig.has_cog = bool(feature_count)
-                    for feature in feature_count:
-                        contig.cogs.append(
-                            m_models.AnalysisJobCOGAnnotation(cog=feature, count=feature_count[feature])
-                        )
+                    cog_feature_count = Counter(annotations['cog'])
+                    contig.has_cog = bool(cog_feature_count)
+                    contig.cogs = map(lambda f: m_models.AnalysisJobCOGAnnotation(cog=f, count=cog_feature_count[f]), cog_feature_count)
+
                 if 'pfam' in annotations:
-                    contig.pfams = list()
-                    feature_count = Counter(annotations['pfam'])
-                    contig.has_pfam = bool(feature_count)
-                    for feature in feature_count:
-                        contig.pfams.append(
-                            m_models.AnalysisJobPfamAnnotation(pfam_entry=feature, count=feature_count[feature])
-                        )
+                    pfam_feature_count = Counter(annotations['pfam'])
+                    contig.has_pfam = bool(pfam_feature_count)
+                    contig.pfams = list(map(lambda f: m_models.AnalysisJobPfamAnnotation(pfam_entry=f, count=pfam_feature_count[f]),
+                                      pfam_feature_count))
+                    if contig.contig_id == 'ERZ8153470.29114-NODE-29114-length-500-cov-0.826966':
+                        logger.warning(contig.pfams)
+                        logger.warning(pfam_feature_count)
+
                 if 'interpro' in annotations:
-                    contig.interpros = list()
-                    feature_count = Counter(annotations['interpro'])
-                    contig.has_interpro = bool(feature_count)
-                    for feature in feature_count:
-                        contig.interpros.append(
-                            m_models.AnalysisJobInterproIdentifierAnnotation(
-                                interpro_identifier=feature, count=feature_count[feature])
-                        )
+                    interpro_feature_count = Counter(annotations['interpro'])
+                    contig.has_interpro = bool(interpro_feature_count)
+                    contig.interpros = map(lambda f: m_models.AnalysisJobInterproIdentifierAnnotation(interpro_identifier=f, count=interpro_feature_count[f]), interpro_feature_count)
+
                 if 'go' in annotations:
-                    contig.gos = list()
-                    feature_count = Counter(annotations['go'])
-                    contig.has_go = bool(feature_count)
-                    for feature in feature_count:
-                        contig.gos.append(
-                            m_models.AnalysisJobGoTermAnnotation(go_term=feature, count=feature_count[feature])
-                        )
+                    go_feature_count = Counter(annotations['go'])
+                    contig.has_go = bool(go_feature_count)
+                    contig.gos = map(lambda f: m_models.AnalysisJobGoTermAnnotation(go_term=f, count=go_feature_count[f]), go_feature_count)
+
                 if 'antismash' in annotations:
-                    contig.as_geneclusters = list()
-                    feature_count = Counter(annotations['antismash'])
-                    contig.has_antismash = bool(feature_count)
-                    for feature in feature_count:
-                        contig.as_geneclusters.append(
-                            m_models.AnalysisJobAntiSmashGCAnnotation(gene_cluster=feature,
-                                                                      count=feature_count[feature])
-                        )
+                    antismash_feature_count = Counter(annotations['antismash'])
+                    contig.has_antismash = bool(antismash_feature_count)
+                    contig.as_geneclusters = map(lambda f: m_models.AnalysisJobAntiSmashGCAnnotation(gene_cluster=f, count=antismash_feature_count[f]), antismash_feature_count)
+
                 if 'keggmodules' in annotations:
-                    contig.kegg_modules = list()
                     kegg_modules = annotations['keggmodules'].items()
                     contig.has_antismash = bool(kegg_modules)
-                    for module, data in kegg_modules:
-                        for completeness, matching, missing in data:
-                            contig.kegg_modules.append(
-                                m_models.AnalysisJobKeggModuleAnnotation(module=module,
-                                                                         completeness=completeness,
-                                                                         matching_kos=matching or list(),
-                                                                         missing_kos=missing or list())
-                            )
+                    contig.kegg_modules = map(lambda km: m_models.AnalysisJobKeggModuleAnnotation(module=km[0], completeness=km[1][0], matching_kos=km[1][1] or [], missing_kos=km[1][2] or []), kegg_modules)
 
                 new_contigs.append(contig)
                 if len(new_contigs) % batch_size == 0:
