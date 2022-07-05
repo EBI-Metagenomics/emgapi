@@ -23,7 +23,7 @@ PyYAML==5.4.1
 # log handler
 concurrent-log-handler~=0.9.19
 
-Django==3.2.12
+Django==3.2.14
 djangorestframework==3.12.4
 django-filter==2.4.0
 djangorestframework-jwt~=1.11.0
