@@ -324,7 +324,7 @@ class Command(EMGBaseCommand):
             for entity in existing_entities:
                 referenced_entities.pop(entity.id)
             if referenced_entities:
-                entity_model.objects.insert(referenced_entities)
+                entity_model.objects.insert(referenced_entities.values())
             logger.info(
                 'Created {} new entries'.format(len(referenced_entities)))
 
