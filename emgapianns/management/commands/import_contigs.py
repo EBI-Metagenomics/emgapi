@@ -223,9 +223,6 @@ class Command(EMGBaseCommand):
                     contig.has_pfam = bool(pfam_feature_count)
                     contig.pfams = list(map(lambda f: m_models.AnalysisJobPfamAnnotation(pfam_entry=f, count=pfam_feature_count[f]),
                                       pfam_feature_count))
-                    if contig.contig_id == 'ERZ8153470.29114-NODE-29114-length-500-cov-0.826966':
-                        logger.warning(contig.pfams)
-                        logger.warning(pfam_feature_count)
 
                 if 'interpro' in annotations:
                     interpro_feature_count = Counter(annotations['interpro'])
