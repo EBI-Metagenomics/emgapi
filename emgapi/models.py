@@ -1213,6 +1213,27 @@ class AssemblySample(models.Model):
         return 'Assembly:{} - Sample:{}'.format(self.assembly, self.sample)
 
 
+class AssemblyExtraAnnotation(BaseDownload):
+    """
+    An annotation (downloadble file) created directly on an Assembly, rather than by an Analysis Pipeline run.
+    This is intended as a testbed for new tools' results (e.g. EMERALD) that are not yet part of a Pipeline.
+    """
+    assembly = models.ForeignKey(
+        'Assembly', db_column='ASSEMBLY_ID',
+        on_delete=models.CASCADE, db_index=True)
+
+    @property
+    def accession(self):
+        return self.assembly.accession
+
+    objects = BaseDownloadManager(['assembly'])
+
+    class Meta:
+        db_table = 'ASSEMBLY_DOWNLOAD'
+        unique_together = (('realname', 'alias', 'assembly'),)
+        ordering = ('group_type', 'alias')
+
+
 class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet):
     def available(self, request=None):
         """Override BaseQuerySet with the AnalysisJob auth rules
