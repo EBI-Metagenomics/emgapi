@@ -46,7 +46,7 @@ class Command(BaseCommand):
                 sample_id__in=samples
             ).aggregate(Count("study", distinct=True))
             if sample_study_counts["study__count"] < 2:
-                # This is likely an empty study due to a partial update
+                # This is likely an empty study due to a partial upload
                 logger.info(f"{study} with no linked to other studies")
                 continue
 
