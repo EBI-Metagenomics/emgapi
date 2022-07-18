@@ -47,7 +47,7 @@ class Command(BaseCommand):
             ).aggregate(Count("study", distinct=True))
             if sample_study_counts["study__count"] < 2:
                 # This is likely an empty study due to a partial upload
-                logger.info(f"{study} with no linked to other studies")
+                logger.info(f"{study} has no samples linked to other studies – not suppressing")
                 continue
 
             logger.info(f"Updating the {study} runs...")
