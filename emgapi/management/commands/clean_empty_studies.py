@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = "Check for missing download files for all (or any) study."
+    help = "Suppress 'empty' Studies, i.e. studies with no analyses (provided the empty study's samples are also linked to another study)."
 
     def handle(self, *args, **kwargs):
         logger.info("Starting to cleanup the 'empty studies'")
