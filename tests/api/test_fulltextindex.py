@@ -65,7 +65,7 @@ def create_studies(count):
                 biome=_biome,
                 study_name="Study findme",
                 study_abstract="abcdefghijklmnoprstuvwxyz",
-                is_public=1
+                is_private=False
             )
         )
     for pk in range(count+1, 2*count+1):
@@ -77,7 +77,7 @@ def create_studies(count):
                 biome=_biome,
                 study_name="Study hide",
                 study_abstract="abcdefghijklmnoprstuvwxyz",
-                is_public=1
+                is_private=False
             )
         )
     return entries
@@ -87,7 +87,7 @@ def create_samples(count):
     entries = []
     for pk in range(1, count+1):
         _biome = baker.make('emgapi.Biome', pk=pk)
-        _study = baker.make('emgapi.Study', pk=pk, biome=_biome, is_public=1)
+        _study = baker.make('emgapi.Study', pk=pk, biome=_biome, is_private=False)
         entries.append(
             baker.prepare(
                 "emgapi.Sample",
@@ -95,12 +95,12 @@ def create_samples(count):
                 biome=_biome,
                 studies=[_study],
                 sample_name="Sample findme",
-                is_public=1
+                is_private=False
             )
         )
     for pk in range(count+1, 2*count+1):
         _biome = baker.make('emgapi.Biome', pk=pk)
-        _study = baker.make('emgapi.Study', pk=pk, biome=_biome, is_public=1)
+        _study = baker.make('emgapi.Study', pk=pk, biome=_biome, is_private=False)
         entries.append(
             baker.prepare(
                 "emgapi.Sample",
@@ -108,7 +108,7 @@ def create_samples(count):
                 biome=_biome,
                 studies=[_study],
                 sample_name="Sample hideme",
-                is_public=1
+                is_private=False
             )
         )
     return entries

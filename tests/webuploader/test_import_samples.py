@@ -67,7 +67,7 @@ class TestImportSampleTransactions:
             assert created_sample.sample_desc == expected_data['description']
             assert created_sample.sample_alias == expected_data['sample_alias']
             assert created_sample.sample_name == expected_data['sample_alias']
-            assert created_sample.is_public
+            assert created_sample.is_private == False
             assert created_sample.biome == emg_models.Biome.objects.get(lineage='root:foo:bar')
 
     @pytest.mark.usefixtures("biome")
@@ -82,7 +82,7 @@ class TestImportSampleTransactions:
             cmd = Command()
             cmd.run_from_argv(argv=['manage.py', 'import_sample', sample_accession, '--biome', 'root:foo:bar'])
             created_sample = emg_models.Sample.objects.get(accession=sample_accession)
-            assert not created_sample.is_public
+            assert created_sample.is_private
 
     @pytest.mark.usefixtures("biome")
     @pytest.mark.usefixtures("var_names")
@@ -171,7 +171,7 @@ class TestImportSampleTransactions:
         mock_db = mock.patch.object(Command, 'get_ena_db_sample', new=create_model)
 
         s = emg_models.Study(secondary_accession=fake_study,
-                             is_public=True,
+                             is_private=False,
                              last_update='2019-01-01',
                              first_created='2019-01-01',
                              biome=emg_models.Biome.objects.get(lineage='root:foo:bar'))
@@ -193,7 +193,7 @@ class TestImportSampleTransactions:
         mock_db = mock.patch.object(Command, 'get_ena_db_sample', new=create_model)
 
         s = emg_models.Study(secondary_accession=fake_study,
-                             is_public=True,
+                             is_private=False,
                              last_update='2019-01-01',
                              first_created='2019-01-01',
                              biome=emg_models.Biome.objects.get(lineage='root:foo:bar'))

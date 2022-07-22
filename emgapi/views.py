@@ -300,7 +300,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
             SAMPLE as sample
         WHERE node.lft BETWEEN parent.lft AND parent.rgt
             AND node.BIOME_ID = sample.BIOME_ID
-            AND sample.IS_PUBLIC = 1
+            AND NOT sample.IS_PRIVATE
             AND parent.BIOME_ID in %s
         GROUP BY parent.BIOME_ID
         ORDER BY samples_count DESC

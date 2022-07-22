@@ -27,8 +27,8 @@ from emgena import models as ena_models
 
 __all__ = ['apiclient', 'api_version', 'biome', 'biome_human', 'super_study', 'studies',
            'samples', 'study', 'study_private', 'sample', 'sample_private',
-           'run_status', 'analysis_status',
-           'pipeline', 'pipelines', 'experiment_type', 'experiment_type_assembly',
+           'analysis_status', 'pipeline', 'pipelines',
+           'experiment_type', 'experiment_type_assembly',
            'runs', 'run', 'run_v5', 'runjob_pipeline_v1', 'run_emptyresults', 'run_with_sample',
            'analysis_results', 'run_multiple_analysis', 'var_names', 'analysis_metadata_variable_names',
            'genome_catalogue', 'genome', 'assemblies', 'legacy_mapping', 'ena_run_study']
@@ -127,7 +127,7 @@ def studies(biome):
                 study_id=pk,
                 secondary_accession='SRP0{:0>3}'.format(pk),
                 centre_name='Centre Name',
-                is_public=1,
+                is_private=False,
                 public_release_date=None,
                 study_name='Example study name %i' % pk,
                 study_status='FINISHED',
@@ -152,7 +152,7 @@ def samples(biome, studies):
                 biome=biome,
                 sample_id=pk,
                 accession='ERS0{:0>3}'.format(pk),
-                is_public=1,
+                is_private=False,
                 species='homo sapiense',
                 sample_name='Example sample name %i' % pk,
                 latitude=12.3456,
@@ -176,7 +176,7 @@ def study(biome):
         study_id=1234,
         secondary_accession='SRP01234',
         centre_name='Centre Name',
-        is_public=1,
+        is_private=False,
         public_release_date=None,
         study_name='Example study name SRP01234',
         study_abstract='abcdefghijklmnoprstuvwyz',
@@ -197,7 +197,7 @@ def study_private(biome):
         study_id=222,
         secondary_accession='SRP00000',
         centre_name='Centre Name',
-        is_public=0,
+        is_private=True,
         public_release_date=None,
         study_name='Example study name SRP00000',
         study_abstract='00000',
@@ -218,7 +218,7 @@ def sample(biome, study):
         pk=111,
         accession='ERS01234',
         primary_accession='SAMS01234',
-        is_public=1,
+        is_private=False,
         species='homo sapiense',
         sample_name='Example sample name ERS01234',
         sample_desc='abcdefghijklmnoprstuvwyz',
@@ -245,7 +245,7 @@ def sample_private(biome, study):
         pk=222,
         accession='ERS00000',
         primary_accession='SAMS00000',
-        is_public=0,
+        is_private=True,
         species='homo sapiense',
         sample_name='Example sample name ERS00000',
         sample_desc='abcdefghijklmnoprstuvwyz',
@@ -271,15 +271,6 @@ def analysis_status():
         pk=3,
         analysis_status='3',
     )
-
-
-@pytest.fixture
-def run_status():
-    status, _ = emg_models.Status.objects.get_or_create(
-        pk=4,
-        status='public',
-    )
-    return status
 
 
 @pytest.fixture
@@ -320,7 +311,7 @@ def experiment_type_assembly():
 
 
 @pytest.fixture
-def runs(study, samples, run_status, analysis_status, pipeline,
+def runs(study, samples, analysis_status, pipeline,
          experiment_type):
     jobs = []
     for s in samples:
@@ -330,14 +321,14 @@ def runs(study, samples, run_status, analysis_status, pipeline,
             study=study,
             accession='ABC_{:0>3}'.format(pk),
             secondary_accession='DEF_{:0>3}'.format(pk),
-            status_id=run_status,
+            is_private=False,
             experiment_type=experiment_type,
         )
         _aj = emg_models.AnalysisJob(
             sample=s,
             study=study,
             run=run,
-            run_status_id=4,
+            is_private=False,
             experiment_type=experiment_type,
             pipeline=pipeline,
             analysis_status=analysis_status,
@@ -350,13 +341,13 @@ def runs(study, samples, run_status, analysis_status, pipeline,
 
 
 @pytest.fixture
-def run(study, sample, run_status, analysis_status, pipeline, experiment_type):
+def run(study, sample, analysis_status, pipeline, experiment_type):
     run, _ = emg_models.Run.objects.get_or_create(
         run_id=1234,
         accession='ABC01234',
         sample=sample,
         study=study,
-        status_id=run_status,
+        is_private=False,
         experiment_type=experiment_type
     )
     emg_models.AnalysisJob.objects.create(
@@ -364,7 +355,7 @@ def run(study, sample, run_status, analysis_status, pipeline, experiment_type):
         sample=sample,
         study=study,
         run=run,
-        run_status_id=4,
+        is_private=False,
         experiment_type=experiment_type,
         pipeline=pipeline,
         analysis_status=analysis_status,
@@ -376,14 +367,14 @@ def run(study, sample, run_status, analysis_status, pipeline, experiment_type):
 
 
 @pytest.fixture
-def run_v5(study, sample, run_status, analysis_status, pipelines, experiment_type):
+def run_v5(study, sample, analysis_status, pipelines, experiment_type):
     p5 = pipelines.filter(release_version='5.0').first()
     run, _ = emg_models.Run.objects.get_or_create(
         run_id=5555,
         accession='ABC01234',
         sample=sample,
         study=study,
-        status_id=run_status,
+        is_private=False,
         experiment_type=experiment_type
     )
     emg_models.AnalysisJob.objects.create(
@@ -391,7 +382,7 @@ def run_v5(study, sample, run_status, analysis_status, pipelines, experiment_typ
         sample=sample,
         study=study,
         run=run,
-        run_status_id=4,
+        is_private=False,
         experiment_type=experiment_type,
         pipeline=p5,
         analysis_status=analysis_status,
@@ -409,7 +400,7 @@ def runjob_pipeline_v1(run, sample, study, experiment_type, analysis_status, pip
         sample=sample,
         study=study,
         run=run,
-        run_status_id=4,
+        is_private=False,
         experiment_type=experiment_type,
         pipeline=pipelines.filter(release_version='1.0').first(),
         analysis_status=analysis_status,
@@ -420,7 +411,7 @@ def runjob_pipeline_v1(run, sample, study, experiment_type, analysis_status, pip
 
 
 @pytest.fixture
-def run_multiple_analysis(study, sample, run_status, analysis_status,
+def run_multiple_analysis(study, sample, analysis_status,
                           experiment_type):
     pipeline, created = emg_models.Pipeline.objects.get_or_create(
         pk=1,
@@ -442,7 +433,7 @@ def run_multiple_analysis(study, sample, run_status, analysis_status,
         accession='ABC01234',
         sample=sample,
         study=study,
-        status_id=run_status,
+        is_private=False,
         experiment_type=experiment_type
     )
     _anl1 = emg_models.AnalysisJob.objects.create(
@@ -450,7 +441,7 @@ def run_multiple_analysis(study, sample, run_status, analysis_status,
         sample=sample,
         study=study,
         run=run,
-        run_status_id=4,
+        is_private=False,
         experiment_type=experiment_type,
         pipeline=pipeline,
         analysis_status=analysis_status,
@@ -463,7 +454,7 @@ def run_multiple_analysis(study, sample, run_status, analysis_status,
         sample=sample,
         study=study,
         run=run,
-        run_status_id=4,
+        is_private=False,
         experiment_type=experiment_type,
         pipeline=pipeline4,
         analysis_status=analysis_status,
@@ -476,7 +467,7 @@ def run_multiple_analysis(study, sample, run_status, analysis_status,
         sample=sample,
         study=study,
         run=run,
-        run_status_id=4,
+        is_private=False,
         experiment_type=experiment_type,
         pipeline=pipeline5,
         analysis_status=analysis_status,
@@ -488,14 +479,14 @@ def run_multiple_analysis(study, sample, run_status, analysis_status,
 
 
 @pytest.fixture
-def run_emptyresults(study, sample, run_status, analysis_status, pipeline,
+def run_emptyresults(study, sample, analysis_status, pipeline,
                      experiment_type):
     run = emg_models.Run.objects.create(
         run_id=1234,
         accession='ABC01234',
         sample=sample,
         study=study,
-        status_id=run_status,
+        is_private=False,
         experiment_type=experiment_type
     )
     return emg_models.AnalysisJob.objects.create(
@@ -503,7 +494,7 @@ def run_emptyresults(study, sample, run_status, analysis_status, pipeline,
         sample=sample,
         study=study,
         run=run,
-        run_status_id=4,
+        is_private=False,
         experiment_type=experiment_type,
         pipeline=pipeline,
         analysis_status=analysis_status,
@@ -514,12 +505,12 @@ def run_emptyresults(study, sample, run_status, analysis_status, pipeline,
 
 
 @pytest.fixture
-def run_with_sample(study, sample, run_status, analysis_status, pipeline,
+def run_with_sample(study, sample, analysis_status, pipeline,
                     experiment_type):
     run = emg_models.Run.objects.create(
         run_id=1234,
         accession='ABC01234',
-        status_id=run_status,
+        is_private=False,
         sample=sample,
         study=study,
         experiment_type=experiment_type,
@@ -529,7 +520,7 @@ def run_with_sample(study, sample, run_status, analysis_status, pipeline,
         sample=sample,
         study=study,
         run=run,
-        run_status_id=4,
+        is_private=False,
         experiment_type=experiment_type,
         pipeline=pipeline,
         analysis_status=analysis_status,
@@ -540,12 +531,12 @@ def run_with_sample(study, sample, run_status, analysis_status, pipeline,
 
 
 @pytest.fixture
-def analysis_results(study, sample, run_status, analysis_status,
+def analysis_results(study, sample, analysis_status,
                      experiment_type, pipelines):
     run = emg_models.Run.objects.create(
         run_id=1234,
         accession='ABC01234',
-        status_id=run_status,
+        is_private=False,
         sample=sample,
         study=study,
         experiment_type=experiment_type,
@@ -557,7 +548,7 @@ def analysis_results(study, sample, run_status, analysis_status,
             study=study,
             sample=sample,
             run=run,
-            run_status_id=4,
+            is_private=False,
             experiment_type=experiment_type,
             pipeline=pipe,
             analysis_status=analysis_status,

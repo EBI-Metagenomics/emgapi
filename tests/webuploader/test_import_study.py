@@ -130,7 +130,7 @@ class TestImportStudyTransactions:
             assert ena_run_study.project_id == actual_study.project_id
             assert ena_run_study.center_name == actual_study.centre_name
             assert None is actual_study.experimental_factor
-            assert True is actual_study.is_public
+            assert actual_study.is_private == False
             assert None is actual_study.public_release_date
             assert ena_run_study.study_description in actual_study.study_abstract
             assert ena_run_study.study_title in actual_study.study_name
@@ -183,7 +183,7 @@ class TestImportStudyTransactions:
             assert expected[0].project_id == actual_study.project_id
             assert expected[0].center_name == actual_study.centre_name
             assert None is actual_study.experimental_factor
-            assert True is actual_study.is_public
+            assert actual_study.is_private == False
             assert None is actual_study.public_release_date
             assert expected[0].study_description in actual_study.study_abstract
             assert expected[0].study_title in actual_study.study_name
@@ -240,7 +240,7 @@ class TestImportStudyTransactions:
             assert expected[0].project_id == actual_study.project_id
             assert expected[0].center_name == actual_study.centre_name
             assert None is actual_study.experimental_factor
-            assert True is actual_study.is_public
+            assert actual_study.is_private == False
             assert None is actual_study.public_release_date
             assert expected[0].study_description in actual_study.study_abstract
             assert expected[0].study_title in actual_study.study_name

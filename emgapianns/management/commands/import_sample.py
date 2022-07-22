@@ -86,9 +86,10 @@ class Command(BaseCommand):
             sys.exit(1)
 
         logger.info('Creating sample {}'.format(accession))
+
         defaults = sanitise_fields({
             'collection_date': api_data['collection_date'],
-            'is_public': api_data['status_id'] == '4',
+            'is_private': int(api_data['status_id']) == 2,
             'sample_desc': api_data['description'],
             'environment_biome': api_data['environment_biome'],
             'environment_feature': api_data['environment_feature'],
@@ -101,6 +102,7 @@ class Command(BaseCommand):
             'last_update': timezone.now(),
             'submission_account_id': ena_db_model.submission_account_id,
         })
+
         if api_data.get('location'):
             defaults['latitude'], defaults['longitude'] = get_lat_long(api_data['location'])
 

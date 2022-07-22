@@ -32,7 +32,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         logger.info("Starting to cleanup the 'empty studies'")
 
-        studies = Study.objects.exclude(is_public=Status.SUPRESSED)
+        studies = Study.objects.exclude(is_suppressed=True)
         for study in studies:
             # only those with no jobs
             if AnalysisJob.objects.filter(study=study).exists():
@@ -56,6 +56,5 @@ class Command(BaseCommand):
                 run.ena_study_accession = study.secondary_accession
                 run.study = None
             Run.objects.bulk_update(runs, ["ena_study_accession", "study"])
-            study.is_public = Status.SUPRESSED
-            study.save()
+            study.suppress()
             logger.info(f"{study} suppressed")

@@ -507,7 +507,9 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     class Meta:
         model = emg_models.Run
         exclude = (
-            'status_id',
+            'is_suppressed',
+            'suppresion_reason',
+            'suppressed_at',
         )
 
 
@@ -589,7 +591,6 @@ class AssemblySerializer(ExplicitFieldsModelSerializer,
     class Meta:
         model = emg_models.Assembly
         exclude = (
-            'status_id',
             'study',
         )
 
@@ -907,7 +908,6 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
             'input_file_name',
             'result_directory',
             'is_production_run',
-            'run_status_id',
             'job_operator',
             'submit_time',
             'analysis_status',
@@ -945,7 +945,6 @@ class AnalysisSerializer(BaseAnalysisSerializer):
             'input_file_name',
             'result_directory',
             'is_production_run',
-            'run_status_id',
             'job_operator',
             'submit_time',
             'pipeline',
@@ -1062,7 +1061,10 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
         model = emg_models.Sample
         exclude = (
             'primary_accession',
-            'is_public',
+            'is_private',
+            'is_suppressed',
+            'suppresion_reason',
+            'suppressed_at',
             'metadata_received',
             'sequencedata_received',
             'sequencedata_archived',
@@ -1315,6 +1317,9 @@ class StudySerializer(ExplicitFieldsModelSerializer,
             'study_status',
             'author_email',
             'author_name',
+            'is_suppressed',
+            'suppresion_reason',
+            'suppressed_at',
         )
 
 

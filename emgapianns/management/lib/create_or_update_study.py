@@ -166,7 +166,7 @@ class StudyImporter:
         )
 
         hold_date = ena_study.hold_date
-        is_public = True if not hold_date else False
+        is_private = False if not hold_date else True
 
         # Retrieve biome object
         biome = emg_models.Biome.objects.using(emg_db).get(lineage=lineage)
@@ -185,7 +185,7 @@ class StudyImporter:
 
         defaults = {
             "centre_name": center_name,
-            "is_public": is_public,
+            "is_private": is_private,
             "public_release_date": hold_date,
             "study_abstract": utils.sanitise_string(ena_study.study_description),
             "study_name": utils.sanitise_string(ena_study.study_title),
@@ -232,8 +232,6 @@ class StudyImporter:
             "SUBMITTED" if secondary_study_accession.startswith("ERP") else "HARVESTED"
         )
 
-        is_public = True
-
         # Retrieve biome object
         biome = emg_models.Biome.objects.using(emg_db).get(lineage=lineage)
 
@@ -246,7 +244,7 @@ class StudyImporter:
 
         defaults = {
             "centre_name": center_name,
-            "is_public": is_public,
+            "is_private": False,
             "study_abstract": utils.sanitise_string(api_study.get("description")),
             "study_name": utils.sanitise_string(api_study.get("study_title")),
             "study_status": "FINISHED",

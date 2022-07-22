@@ -56,7 +56,11 @@ def pytest_configure():
     # TODO: backend mock to replace FakeEMGBackend
     # settings.EMG_BACKEND_AUTH_URL = 'http://fake_backend/auth'
     settings.AUTHENTICATION_BACKENDS = ('test_utils.FakeEMGBackend',)
-    # disconnect main database
+
+    settings.MONGO_CONF = {
+        'host': 'mongomock://localhost'
+    }
+
     mongoengine.connection.disconnect()
 
 
@@ -82,19 +86,3 @@ def django_db_setup(hide_ena_config, django_db_setup):
     if hide_ena_config:
         settings.DATABASES.update(hide_ena_config)
 
-
-# MongoDB connection
-@pytest.fixture(scope='function')
-def mongodb(request):
-    """On the EMG_CONFIG use 'testdb' on the mongo configuration
-    """
-    host = settings.MONGO_CONF['host']
-    db = mongoengine.connect('testdb', host=f'{host}:27017', alias='test')
-
-    def finalizer():
-        db.drop_database('testdb')
-        db.close()
-
-    request.addfinalizer(finalizer)
-
-    return db

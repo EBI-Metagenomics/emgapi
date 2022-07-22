@@ -48,19 +48,19 @@ FAKE_ENA_RESPONSE = {
     "sample_title": "This sample has been submitted by pda|rampelli85 on 2015-05-27; human gut metagenome",
     "sample_description": "Human Gut Microbiome of Hadza subject 1",
     "first_public": "2015-06-05",
-    "status_id": "4",
+    "status_id": "4", # Public
 }
 
 
 @pytest.mark.django_db(transaction=True)
-@pytest.mark.usefixtures("experiment_type", "run_status")
+@pytest.mark.usefixtures("experiment_type")
 class TestImportAssembly:
     @patch("emgapianns.management.commands.import_run.Command.get_run_api")
-    def test_import_run(self, mock_get_run, biome, run_status):
+    def test_import_run(self, mock_get_run, biome):
         """Test import run - with no study"""
 
         sample = baker.make(
-            "emgapi.Sample", accession="SRS882224", biome=biome, is_public=1
+            "emgapi.Sample", accession="SRS882224", biome=biome, is_private=False
         )
 
         mock_get_run.return_value = FAKE_ENA_RESPONSE
@@ -77,7 +77,7 @@ class TestImportAssembly:
             run.ena_study_accession
             == mock_get_run.return_value["secondary_study_accession"]
         )
-        assert run.status_id == run_status  # 4 - public
+        assert run.is_private == False
         assert run.sample == sample
         assert (
             run.instrument_platform == mock_get_run.return_value["instrument_platform"]
@@ -88,7 +88,7 @@ class TestImportAssembly:
     def test_import_run_invalid_study_accession(self, mock_get_run, biome):
         """Test import run - with an invalid study accession"""
 
-        baker.make("emgapi.Sample", accession="SRS882224", biome=biome, is_public=1)
+        baker.make("emgapi.Sample", accession="SRS882224", biome=biome, is_private=False)
 
         ena_response = FAKE_ENA_RESPONSE
         ena_response[
@@ -114,14 +114,13 @@ class TestImportAssembly:
         mock_study_dir,
         mock_ena_project,
         biome,
-        run_status,
         ena_run_study,
     ):
         """Test import run - and import the study too.
         This is an integration test as it will pull the Study data from ENA
         """
         sample = baker.make(
-            "emgapi.Sample", accession="SRS882224", biome=biome, is_public=1
+            "emgapi.Sample", accession="SRS882224", biome=biome, is_private=False
         )
 
         ena_response = FAKE_ENA_RESPONSE
@@ -147,7 +146,7 @@ class TestImportAssembly:
         )
         assert run.accession == mock_get_run.return_value["run_accession"]
         assert run.ena_study_accession is None
-        assert run.status_id == run_status  # 4 - public
+        assert run.is_private == False
         assert run.sample == sample
         assert (
             run.instrument_platform == mock_get_run.return_value["instrument_platform"]

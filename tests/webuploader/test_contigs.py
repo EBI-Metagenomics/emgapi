@@ -25,7 +25,6 @@ from rest_framework import status
 from test_utils.emg_fixtures import *  # noqa
 
 
-@pytest.mark.usefixtures('mongodb')
 @pytest.mark.django_db
 class TestContigs:
     """Integration tests for the contigs and it's annotations
