@@ -166,7 +166,7 @@ class StudyImporter:
         )
 
         hold_date = ena_study.hold_date
-        is_private = False if not hold_date else True
+        is_private = bool(hold_date)
 
         # Retrieve biome object
         biome = emg_models.Biome.objects.using(emg_db).get(lineage=lineage)

@@ -90,7 +90,6 @@ class Command(BaseCommand):
             "coverage": ena_assembly.coverage,
             "min_gap_length": ena_assembly.min_gap_length
         })
-        print(defaults)
         assembly, created = emg_models.Assembly.objects.using(self.emg_db).update_or_create(
             accession=accession,
             defaults=defaults

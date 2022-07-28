@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='analysisjob',
             name='is_suppressed',
-            field=models.BooleanField(db_column='IS_SUPRESSED', default=False),
+            field=models.BooleanField(db_column='IS_SUPPRESSED', default=False),
         ),
         migrations.AddField(
             model_name='analysisjob',
@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='analysisjob',
             name='suppressed_at',
-            field=models.DateTimeField(blank=True, db_column='SUPRESSED_AT', null=True),
+            field=models.DateTimeField(blank=True, db_column='SUPPRESSED_AT', null=True),
         ),
         migrations.AddField(
             model_name='assembly',
@@ -38,7 +38,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assembly',
             name='is_suppressed',
-            field=models.BooleanField(db_column='IS_SUPRESSED', default=False),
+            field=models.BooleanField(db_column='IS_SUPPRESSED', default=False),
         ),
         migrations.AddField(
             model_name='assembly',
@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assembly',
             name='suppressed_at',
-            field=models.DateTimeField(blank=True, db_column='SUPRESSED_AT', null=True),
+            field=models.DateTimeField(blank=True, db_column='SUPPRESSED_AT', null=True),
         ),
         migrations.AddField(
             model_name='run',
@@ -58,7 +58,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='run',
             name='is_suppressed',
-            field=models.BooleanField(db_column='IS_SUPRESSED', default=False),
+            field=models.BooleanField(db_column='IS_SUPPRESSED', default=False),
         ),
         migrations.AddField(
             model_name='run',
@@ -68,7 +68,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='run',
             name='suppressed_at',
-            field=models.DateTimeField(blank=True, db_column='SUPRESSED_AT', null=True),
+            field=models.DateTimeField(blank=True, db_column='SUPPRESSED_AT', null=True),
         ),
         migrations.AddField(
             model_name='sample',
@@ -78,7 +78,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='sample',
             name='is_suppressed',
-            field=models.BooleanField(db_column='IS_SUPRESSED', default=False),
+            field=models.BooleanField(db_column='IS_SUPPRESSED', default=False),
         ),
         migrations.AddField(
             model_name='sample',
@@ -88,7 +88,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='sample',
             name='suppressed_at',
-            field=models.DateTimeField(blank=True, db_column='SUPRESSED_AT', null=True),
+            field=models.DateTimeField(blank=True, db_column='SUPPRESSED_AT', null=True),
         ),
         migrations.AlterField(
             model_name='study',
@@ -103,12 +103,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='study',
             name='is_suppressed',
-            field=models.BooleanField(db_column='IS_SUPRESSED', default=False),
+            field=models.BooleanField(db_column='IS_SUPPRESSED', default=False),
         ),
         migrations.AddField(
             model_name='study',
             name='suppressed_at',
-            field=models.DateTimeField(blank=True, db_column='SUPRESSED_AT', null=True),
+            field=models.DateTimeField(blank=True, db_column='SUPPRESSED_AT', null=True),
         ),
         migrations.AddField(
             model_name='study',

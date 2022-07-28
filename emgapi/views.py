@@ -290,7 +290,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         ---
         `/biomes/top10`
         """
-
+        # TODO Review the `sample.IS_PRIVATE` condition. It doesn't seem to be required.
         sql = """
         SELECT
             parent.BIOME_ID,

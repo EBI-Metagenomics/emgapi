@@ -8,7 +8,7 @@ DRAFT = 1
 PRIVATE = 2
 CANCELLED = 3
 PUBLIC = 4
-SUPRESSED = 5
+SUPPRESSED = 5
 KILLED = 6
 TEMPORARY_SUPPRESSED = 7
 TEMPORARY_KILLED = 8
@@ -29,7 +29,7 @@ def migrate_the_status_field(apps, schema_editor):
     for model in [Sample, Study]:
         model.objects.filter(is_public=0).update(is_private=True)
         model.objects.filter(is_public=1).update(is_private=False)
-        model.objects.filter(is_public=SUPRESSED).update(**suppress)
+        model.objects.filter(is_public=SUPPRESSED).update(**suppress)
 
     Run = apps.get_model("emgapi", "Run")
     Assembly = apps.get_model("emgapi", "Assembly")
@@ -37,7 +37,7 @@ def migrate_the_status_field(apps, schema_editor):
         model.objects.filter(status_id=PRIVATE).update(is_private=True)
         model.objects.filter(status_id=PUBLIC).update(is_private=False)
         for suppression_code in [
-            SUPRESSED,
+            SUPPRESSED,
             KILLED,
             TEMPORARY_SUPPRESSED,
             TEMPORARY_KILLED,
@@ -51,7 +51,7 @@ def migrate_the_status_field(apps, schema_editor):
     AnalysisJob.objects.filter(run_status_id=PRIVATE).update(is_private=True)
     AnalysisJob.objects.filter(run_status_id=PUBLIC).update(is_private=False)
     for suppression_code in [
-        SUPRESSED,
+        SUPPRESSED,
         KILLED,
         TEMPORARY_SUPPRESSED,
         TEMPORARY_KILLED,

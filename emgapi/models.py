@@ -38,7 +38,7 @@ class Token(object):
         for field in ('id', 'token'):
             setattr(self, field, kwargs.get(field, None))
 
-class PrivacyModel(models.Model):
+class PrivacyControlledModel(models.Model):
     is_private = models.BooleanField(db_column='IS_PRIVATE', default=True)
 
     class Meta:
@@ -55,7 +55,7 @@ class SuppressManager(models.Manager):
         return SuppressQuerySet(self.model, self._db).filter(is_suppressed=False)
 
 
-class SuppressModel(models.Model):
+class SuppressibleModel(models.Model):
     
     class Reason(models.IntegerChoices):
         DRAFT = 1
@@ -64,8 +64,8 @@ class SuppressModel(models.Model):
         TEMPORARY_SUPPRESSED = 7
         TEMPORARY_KILLED = 8
 
-    is_suppressed = models.BooleanField(db_column='IS_SUPRESSED', default=False)
-    suppressed_at = models.DateTimeField(db_column='SUPRESSED_AT', blank=True, null=True)
+    is_suppressed = models.BooleanField(db_column='IS_SUPPRESSED', default=False)
+    suppressed_at = models.DateTimeField(db_column='SUPPRESSED_AT', blank=True, null=True)
     suppresion_reason = models.IntegerField(db_column='REASON', blank=True, null=True, choices=Reason.choices)
 
     def suppress(self, reason=None):
@@ -81,7 +81,7 @@ class SuppressModel(models.Model):
 
 
 class BaseQuerySet(models.QuerySet):
-    """Auth mechanism to filter private / suppress models
+    """Auth mechanism to filter private / suppressed models
     """
     # TODO: the QuerySet should not have to handle the request
     #       if should recieve the username
@@ -122,7 +122,7 @@ class BaseQuerySet(models.QuerySet):
             },
             'AnalysisJobDownloadQuerySet': {
                 'all': [
-                    ~Q(job__sample__is_suppressed=True),
+                    Q(job__sample__is_suppressed=False),
                     Q(job__study__is_private=False),
                     Q(job__run__is_private=False) | Q(job__assembly__is_private=False),
                     Q(job__analysis_status_id=AnalysisStatus.COMPLETED) | Q(job__analysis_status_id=AnalysisStatus.QC_NOT_PASSED)
@@ -675,7 +675,7 @@ class StudyManager(models.Manager):
         return self.get_queryset().mydata(request)
 
 
-class Study(SuppressModel, PrivacyModel):
+class Study(SuppressibleModel, PrivacyControlledModel):
 
     def __init__(self, *args, **kwargs):
         super(Study, self).__init__(*args, **kwargs)
@@ -906,7 +906,7 @@ class SampleManager(models.Manager):
         return queryset
 
 
-class Sample(SuppressModel, PrivacyModel):
+class Sample(SuppressibleModel, PrivacyControlledModel):
     sample_id = models.AutoField(
         db_column='SAMPLE_ID', primary_key=True)
     accession = models.CharField(
@@ -1075,7 +1075,7 @@ class Status(models.Model):
     PRIVATE = 2
     CANCELLED = 3
     PUBLIC = 4
-    SUPRESSED = 5
+    SUPPRESSED = 5
     KILLED = 6
     TEMPORARY_SUPPRESSED = 7
     TEMPORARY_KILLED = 8
@@ -1112,7 +1112,7 @@ class RunManager(models.Manager):
         return self.get_queryset().available(request)
 
 
-class Run(SuppressModel, PrivacyModel):
+class Run(SuppressibleModel, PrivacyControlledModel):
     run_id = models.BigAutoField(
         db_column='RUN_ID', primary_key=True)
     accession = models.CharField(
@@ -1174,7 +1174,7 @@ class AssemblyManager(models.Manager):
         )
 
 
-class Assembly(SuppressModel, PrivacyModel):
+class Assembly(SuppressibleModel, PrivacyControlledModel):
 
     assembly_id = models.BigAutoField(
         db_column='ASSEMBLY_ID', primary_key=True)
@@ -1261,7 +1261,7 @@ class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet, SuppressQuerySet):
         query_filters = {
             "all": [
                 Q(study__is_private=False),
-                ~Q(sample__is_suppressed=True),
+                Q(sample__is_suppressed=False),
                 Q(run__is_private=False) | Q(assembly__is_private=False),
                 Q(analysis_status_id=AnalysisStatus.COMPLETED)
                 | Q(analysis_status_id=AnalysisStatus.QC_NOT_PASSED),
@@ -1271,7 +1271,7 @@ class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet, SuppressQuerySet):
         if request is not None and request.user.is_authenticated:
             username = request.user.username
             query_filters["authenticated"] = [
-                ~Q(sample__is_suppressed=True),
+                Q(sample__is_suppressed=False),
                 Q(study__submission_account_id=username, run__is_private=True)
                 | Q(
                     study__submission_account_id=username,
@@ -1350,7 +1350,7 @@ class AnalysisJobManager(models.Manager):
         )
 
 
-class AnalysisJob(SuppressModel, PrivacyModel):
+class AnalysisJob(SuppressibleModel, PrivacyControlledModel):
     def __init__(self, *args, **kwargs):
         super(AnalysisJob, self).__init__(*args, **kwargs)
         setattr(self, 'accession',
