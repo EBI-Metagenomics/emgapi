@@ -24,6 +24,8 @@ from rest_framework import status
 
 from test_utils.emg_fixtures import *  # noqa
 
+from emgapianns.models import AnalysisJobContig
+
 
 @pytest.mark.django_db
 class TestContigs:
@@ -33,6 +35,8 @@ class TestContigs:
     def test_import_contigs(self, client, run_v5):
         """Run an import contigs and check the results
         """
+        AnalysisJobContig.objects.all().delete()
+
         assert run_v5.accession == 'ABC01234'
         rootpath = os.path.dirname(os.path.abspath(__file__))
         call_command('import_contigs', run_v5.accession, rootpath, '--pipeline', '5.0')
