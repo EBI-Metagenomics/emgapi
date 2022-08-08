@@ -122,7 +122,7 @@ class BaseQuerySet(models.QuerySet):
             },
             'AnalysisJobDownloadQuerySet': {
                 'all': [
-                    Q(job__sample__is_suppressed=False),
+                    Q(job__sample__isnull=True) | Q(job__sample__is_suppressed=False),
                     Q(job__study__is_private=False),
                     Q(job__run__is_private=False) | Q(job__assembly__is_private=False),
                     Q(job__analysis_status_id=AnalysisStatus.COMPLETED) | Q(job__analysis_status_id=AnalysisStatus.QC_NOT_PASSED)
@@ -1261,7 +1261,7 @@ class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet, SuppressQuerySet):
         query_filters = {
             "all": [
                 Q(study__is_private=False),
-                Q(sample__is_suppressed=False),
+                Q(sample__isnull=True) | Q(sample__is_suppressed=False),
                 Q(run__is_private=False) | Q(assembly__is_private=False),
                 Q(analysis_status_id=AnalysisStatus.COMPLETED)
                 | Q(analysis_status_id=AnalysisStatus.QC_NOT_PASSED),
@@ -1271,7 +1271,7 @@ class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet, SuppressQuerySet):
         if request is not None and request.user.is_authenticated:
             username = request.user.username
             query_filters["authenticated"] = [
-                Q(sample__is_suppressed=False),
+                Q(sample__isnull=True) | Q(sample__is_suppressed=False),
                 Q(study__submission_account_id=username, run__is_private=True)
                 | Q(
                     study__submission_account_id=username,
