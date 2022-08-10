@@ -30,6 +30,17 @@ from datetime import date
 from django.db import models, NotSupportedError
 
 
+class Status(models.IntegerChoices):
+    DRAFT = 1
+    PRIVATE = 2
+    CANCELLED = 3
+    PUBLIC = 4
+    SUPPRESSED = 5
+    KILLED = 6
+    TEMPORARY_SUPPRESSED = 7
+    TEMPORARY_KILLED = 8
+
+
 class Submitter(models.Model):
     submission_account = models.ForeignKey(
         'SubmitterContact', db_column='SUBMISSION_ACCOUNT_ID',
@@ -168,7 +179,7 @@ class Oracle11Manager(models.QuerySet):
 
 
 class Study(models.Model):
-    study_id = models.CharField(db_column='STUDY_ID', primary_key=True, max_length=15)
+    study_id = models.CharField(db_column='STUDY_ID', primary_key=True, max_length=15, choices=Status.choices)
     project_id = models.CharField(db_column='PROJECT_ID', max_length=15)
     study_status = models.CharField(db_column='STUDY_STATUS', max_length=50)
     center_name = models.TextField(db_column='CENTER_NAME', max_length=500)
@@ -250,7 +261,7 @@ class Run(models.Model):
     submission_id = models.CharField(db_column='SUBMISSION_ID', max_length=15)
     experiment_id = models.CharField(db_column='EXPERIMENT_ID', max_length=15)
     alias = models.CharField(db_column='RUN_ALIAS', max_length=100)
-    status_id = models.IntegerField(db_column='STATUS_ID')
+    status_id = models.IntegerField(db_column='STATUS_ID', choices=Status.choices)
     first_created = models.DateField(db_column='FIRST_CREATED')
     last_updated = models.DateField(db_column='LAST_UPDATED')
     submission_account_id = models.CharField(db_column='SUBMISSION_ACCOUNT_ID', max_length=15)
@@ -290,7 +301,7 @@ class Assembly(models.Model):
     biosample_id = models.CharField(db_column='BIOSAMPLE_ID', max_length=15)
     submission_account_id = models.CharField(db_column='SUBMISSION_ACCOUNT_ID', max_length=15)
     submission_id = models.CharField(db_column='SUBMISSION_ID', max_length=15)
-    status_id = models.IntegerField(db_column='STATUS_ID')
+    status_id = models.IntegerField(db_column='STATUS_ID', choices=Status.choices)
     gc_id = models.CharField(db_column='GC_ID', max_length=15)
     assembly_type = models.IntegerField(db_column='ASSEMBLY_TYPE')
     primary_study_accession = models.CharField(db_column='PROJECT_ACC', max_length=50)
