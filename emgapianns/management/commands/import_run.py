@@ -101,7 +101,7 @@ class Command(BaseCommand):
         defaults = utils.sanitise_fields({
             'instrument_platform': api_data['instrument_platform'],
             'instrument_model': api_data['instrument_model'],
-            'status_id_id': int(api_data["status_id"]),
+            'is_private': int(api_data["status_id"]) == 2,
             'secondary_accession': accession
         })
         run, created = emg_models.Run.objects.using(self.emg_db).update_or_create(

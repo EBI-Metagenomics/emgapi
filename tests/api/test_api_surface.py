@@ -162,7 +162,7 @@ class TestAPISurface:
     )
     @pytest.mark.django_db
     def test_list(self, client, _model, _camelcase, _view, _view_args,
-                  relations, api_version, run_status):
+                  relations, api_version):
         model_name = 'emgapi.%s' % _model
         view_name = '%s-list' % _view
 
@@ -172,44 +172,44 @@ class TestAPISurface:
             if _model in ('Study', 'Sample'):
                 _biome = baker.make('emgapi.Biome', pk=pk)
                 _sm = baker.make('emgapi.Sample',
-                                 pk=pk, biome=_biome, is_public=1)
+                                 pk=pk, biome=_biome, is_private=False)
                 _st = baker.make('emgapi.Study', pk=pk, biome=_biome,
-                                 is_public=1, samples=[_sm])
+                                 is_private=False, samples=[_sm])
                 _as = baker.make('emgapi.AnalysisStatus', pk=3)
                 _p = baker.make('emgapi.Pipeline', pk=1, release_version='1.0')
                 baker.make('emgapi.AnalysisJob', pk=pk, pipeline=_p,
-                           analysis_status=_as, run_status_id=4,
+                           analysis_status=_as, is_private=False,
                            study=_st, sample=_sm)
             elif _model in ('Run',):
                 _biome = baker.make('emgapi.Biome', pk=pk)
                 _sm = baker.make('emgapi.Sample',
-                                 pk=pk, biome=_biome, is_public=1)
+                                 pk=pk, biome=_biome, is_private=False)
                 _st = baker.make('emgapi.Study', pk=pk, biome=_biome,
-                                 is_public=1, samples=[_sm])
-                baker.make('emgapi.Run', pk=pk, status_id=run_status,
+                                 is_private=False, samples=[_sm])
+                baker.make('emgapi.Run', pk=pk, is_private=False,
                            study=_st, sample=_sm)
             elif _model in ('Assembly',):
                 _biome = baker.make('emgapi.Biome', pk=pk)
                 _sm = baker.make('emgapi.Sample',
-                                 pk=pk, biome=_biome, is_public=1)
+                                 pk=pk, biome=_biome, is_private=False)
                 _st = baker.make('emgapi.Study', pk=pk, biome=_biome,
-                                 is_public=1, samples=[_sm])
-                _r = baker.make('emgapi.Run', pk=pk, status_id=run_status,
+                                 is_private=False, samples=[_sm])
+                _r = baker.make('emgapi.Run', pk=pk, is_private=False,
                                 study=_st, sample=_sm)
-                baker.make('emgapi.Assembly', pk=pk, status_id=run_status,
+                baker.make('emgapi.Assembly', pk=pk, is_private=False,
                            runs=[_r])
             elif _model in ('AnalysisJob',):
                 _biome = baker.make('emgapi.Biome', pk=pk)
                 _sm = baker.make('emgapi.Sample',
-                                 pk=pk, biome=_biome, is_public=1)
+                                 pk=pk, biome=_biome, is_private=False)
                 _st = baker.make('emgapi.Study', pk=pk, biome=_biome,
-                                 is_public=1, samples=[_sm])
-                _r = baker.make('emgapi.Run', pk=pk, status_id=run_status,
+                                 is_private=False, samples=[_sm])
+                _r = baker.make('emgapi.Run', pk=pk, is_private=False,
                                 study=_st, sample=_sm)
-                _as = baker.make('emgapi.AnalysisStatus', pk=3)
+                _as = baker.make('emgapi.AnalysisStatus', pk=3) # COMPLETED
                 _p = baker.make('emgapi.Pipeline', pk=1, release_version='1.0')
                 baker.make('emgapi.AnalysisJob', pk=pk, pipeline=_p,
-                           analysis_status=_as, run_status_id=4,
+                           analysis_status=_as, is_private=False,
                            study=_st, sample=_sm, run=_r)
             elif _model in ('PipelineTool',):
                 _p = baker.make('emgapi.Pipeline', pk=pk,

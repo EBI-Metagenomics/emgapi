@@ -22,7 +22,6 @@ from django.core.management import call_command
 from test_utils.emg_fixtures import *  # noqa
 
 
-@pytest.mark.usefixtures("mongodb")
 @pytest.mark.django_db
 class TestExamples:
     def test_list(self, live_server, runs, api_version):

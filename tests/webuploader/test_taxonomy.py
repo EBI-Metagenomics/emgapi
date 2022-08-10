@@ -24,7 +24,6 @@ from rest_framework import status
 from test_utils.emg_fixtures import *  # noqa
 
 
-@pytest.mark.usefixtures('mongodb')
 @pytest.mark.django_db
 class TestTaxonomy(object):
 

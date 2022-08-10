@@ -29,7 +29,7 @@ class TestImportSample(TransactionTestCase):
         assert created_sample.sample_desc
         assert created_sample.sample_alias
         assert created_sample.sample_name
-        assert created_sample.is_public
+        assert created_sample.is_private == False
         assert created_sample.biome == emg_models.Biome.objects.get(lineage='root:foo:bar')
 
         annotations = emg_models.SampleAnn.objects.filter(sample=created_sample)

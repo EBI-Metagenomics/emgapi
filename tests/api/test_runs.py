@@ -27,25 +27,24 @@ from emgapi.models import Run  # noqa
 class TestRunAPI(APITestCase):
 
     def test_public(self):
-        _status = baker.make('emgapi.Status', pk=4)
-        st = baker.make('emgapi.Study', pk=123, is_public=1)
-        _s1 = baker.make('emgapi.Sample', pk=123, accession='123', is_public=1)
-        _s2 = baker.make('emgapi.Sample', pk=456, accession='456', is_public=0)
+        st = baker.make('emgapi.Study', pk=123, is_private=False)
+        _s1 = baker.make('emgapi.Sample', pk=123, accession='123', is_private=False)
+        _s2 = baker.make('emgapi.Sample', pk=456, accession='456', is_private=True)
         baker.make('emgapi.StudySample', study=st, sample=_s1)
         baker.make('emgapi.StudySample', study=st, sample=_s2)
 
-        baker.make('emgapi.Run', pk=123, accession='123', status_id=_status,
+        baker.make('emgapi.Run', pk=123, accession='123', is_private=False,
                    study=st, sample=_s2)
-        baker.make('emgapi.Run', pk=456, accession='456', status_id=_status,
+        baker.make('emgapi.Run', pk=456, accession='456', is_private=False,
                    study=st, sample=_s2)
 
         _as = baker.make('emgapi.AnalysisStatus', pk=3)
         _p = baker.make('emgapi.Pipeline', pk=1, release_version='1.0')
         baker.make('emgapi.AnalysisJob', pk=123,
-                   pipeline=_p, analysis_status=_as, run_status_id=4,
+                   pipeline=_p, analysis_status=_as, is_private=False,
                    study=st, sample=_s2)
         baker.make('emgapi.AnalysisJob', pk=456,
-                   pipeline=_p, run_status_id=2,
+                   pipeline=_p, is_private=True,
                    study=st, sample=_s2)
 
         url = reverse('emgapi_v1:samples-list')

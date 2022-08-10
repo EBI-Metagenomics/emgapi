@@ -47,7 +47,7 @@ class TestStudyAPI:
         assert _attr['data-origination'] == "HARVESTED"
         assert _attr['last-update'] == "1970-01-01T00:00:00"
         assert _attr['bioproject'] == "PRJDB1234"
-        assert _attr['is-public'] == 1
+        assert _attr['is-private'] == False
 
     def test_public(self, client, study, study_private):
         url = reverse("emgapi_v1:studies-list")
@@ -82,7 +82,7 @@ class TestStudyAPI:
             "\"centre_name\"",
             "\"data_origination\"",
             "\"downloads\"",
-            "\"is_public\"",
+            "\"is_private\"",
             "\"last_update\"",
             "\"public_release_date\"",
             "\"publications\"",
@@ -100,7 +100,7 @@ class TestStudyAPI:
             "\"Centre Name\"",
             "\"HARVESTED\"",
             "\"\"",
-            "True",
+            "False",
             "\"1970-01-01T00:00:00\"",
             "\"\"",
             "\"\"",
