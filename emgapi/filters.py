@@ -608,7 +608,7 @@ class RunFilter(django_filters.FilterSet):
         help_text='Sample accession')
 
     def filter_sample_accession(self, qs, name, value):
-        return qs.filter(sample__accession=value)
+        return qs.filter(Q(sample__accession=value) | Q(sample__primary_accession=value))
 
     study_accession = django_filters.CharFilter(
         method='filter_study_accession', distinct=True,
