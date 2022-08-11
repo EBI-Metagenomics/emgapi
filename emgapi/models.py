@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
+
 from django.db import models
 from django.db.models import (CharField, Count, OuterRef, Prefetch, Q,
                               Subquery, Value)
@@ -27,6 +29,9 @@ from django_mysql.models import QuerySet as MySQLQuerySet
 from emgapi.validators import validate_ena_study_accession
 
 from emgena.models import Status as ENAStatus
+
+
+logger = logging.getLogger(__name__)
 
 
 class Resource(object):
@@ -49,8 +54,10 @@ class PrivacyControlledModel(models.Model):
 
 class SuppressQuerySet(models.QuerySet):
     def suppress(self, reason):
-        return self.update(is_suppressed=True, suppressed_at=timezone.now(), reason=reason)
+        return self.update(is_suppressed=True, suppressed_at=timezone.now(), suppresion_reason=reason)
 
+    def unsuppress(self, reason):
+        return self.update(is_suppressed=False, suppressed_at=None, suppresion_reason=None)
 
 class SuppressManager(models.Manager):
     def get_queryset(self):
@@ -62,6 +69,7 @@ class SuppressibleModel(models.Model):
     class Reason(models.IntegerChoices):
         DRAFT = 1
         CANCELLED = 3
+        SUPPRESSED = 5
         KILLED = 6
         TEMPORARY_SUPPRESSED = 7
         TEMPORARY_KILLED = 8
@@ -70,33 +78,41 @@ class SuppressibleModel(models.Model):
     suppressed_at = models.DateTimeField(db_column='SUPPRESSED_AT', blank=True, null=True)
     suppresion_reason = models.IntegerField(db_column='REASON', blank=True, null=True, choices=Reason.choices)
 
-    def suppress(self, reason=None, save=True):
+    def suppress(self, suppresion_reason=None, save=True):
         self.is_suppressed = True
         self.suppressed_at = timezone.now()
-        if reason:
-            self.suppresion_reason = reason
+        self.suppresion_reason = suppresion_reason
+        if save:
+            self.save()
+        return self
+
+    def unsuppress(self, suppresion_reason=None, save=True):
+        self.is_suppressed = False
+        self.suppressed_at = None
+        self.suppresion_reason = None
         if save:
             self.save()
         return self
 
     class Meta:
-        abstract = TRUE
+        abstract = True
 
 
 class ENASyncableModel(SuppressibleModel, PrivacyControlledModel):
 
-    def sync_with_ena_status(self, ena_status: ENAStatus):
+    def sync_with_ena_status(self, ena_model_status: ENAStatus):
         """Sync the model with the ENA status accordingly.
         Fields that are updated: is_supppressed, suppressed_at, reason and is_private
         """
-        if ena_model_status == ENAStatus.PRIVATE and not emg_study.is_private:
+        print(f"{ena_model_status} - ")
+        if ena_model_status == ENAStatus.PRIVATE and not self.is_private:
             self.is_private = True
             logging.info(f"{self} marked as private")
-        if ena_model_status == ENAStatus.PUBLIC and emg_study.is_private:
+        if ena_model_status == ENAStatus.PUBLIC and self.is_private:
             self.is_private = False
             logging.info(f"{self} marked as public")
 
-        if ena_model_status == "draft":
+        if ena_model_status == ENAStatus.DRAFT:
             logging.warning(
                 f"{study} will not be updated due to the study status being 'draft'"
             )
@@ -113,19 +129,22 @@ class ENASyncableModel(SuppressibleModel, PrivacyControlledModel):
             and not self.is_suppressed
         ):
             reason = None
-            if ena_model_status.status == ENAStatus.KILLED:
+            if ena_model_status == ENAStatus.SUPPRESSED:
+                reason = SuppressibleModel.Reason.SUPPRESSED
+            if ena_model_status == ENAStatus.KILLED:
                 reason = SuppressibleModel.Reason.KILLED
-            elif ena_model_status.status == ENAStatus.CANCELLED:
+            elif ena_model_status == ENAStatus.CANCELLED:
                 reason = SuppressibleModel.Reason.CANCELLED
-            elif ena_model_status.status == ENAStatus.TEMPORARY_SUPPRESSED:
+            elif ena_model_status == ENAStatus.TEMPORARY_SUPPRESSED:
                 reason = (
                     SuppressibleModel.Reason.TEMPORARY_SUPPRESSED
                 )
-            elif ena_model_status.status == ENAStatus.TEMPORARY_KILLED:
+            elif ena_model_status == ENAStatus.TEMPORARY_KILLED:
                 reason = SuppressibleModel.Reason.TEMPORARY_KILLED
-            elif ena_model_status.status == ENAStatus.CANCELLED:
+            elif ena_model_status == ENAStatus.CANCELLED:
                 reason = SuppressibleModel.Reason.CANCELLED
-            self.suppress(reason=reason, save=False)
+
+            self.suppress(suppresion_reason=reason, save=False)
 
             logging.info(
                 f"{self} was suppressed, status on ENA {ena_model_status}"
@@ -732,7 +751,7 @@ class StudyManager(models.Manager):
         return self.get_queryset().mydata(request)
 
 
-class Study(SuppressibleModel, PrivacyControlledModel, ENASyncableModel):
+class Study(ENASyncableModel):
 
     def __init__(self, *args, **kwargs):
         super(Study, self).__init__(*args, **kwargs)
@@ -963,7 +982,7 @@ class SampleManager(models.Manager):
         return queryset
 
 
-class Sample(SuppressibleModel, PrivacyControlledModel, ENASyncableModel):
+class Sample(ENASyncableModel):
     sample_id = models.AutoField(
         db_column='SAMPLE_ID', primary_key=True)
     accession = models.CharField(
@@ -1169,7 +1188,7 @@ class RunManager(models.Manager):
         return self.get_queryset().available(request)
 
 
-class Run(SuppressibleModel, PrivacyControlledModel, ENASyncableModel):
+class Run(ENASyncableModel):
     run_id = models.BigAutoField(
         db_column='RUN_ID', primary_key=True)
     accession = models.CharField(
@@ -1231,7 +1250,7 @@ class AssemblyManager(models.Manager):
         )
 
 
-class Assembly(SuppressibleModel, PrivacyControlledModel, ENASyncableModel):
+class Assembly(ENASyncableModel):
 
     assembly_id = models.BigAutoField(
         db_column='ASSEMBLY_ID', primary_key=True)

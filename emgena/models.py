@@ -178,10 +178,10 @@ class Oracle11Manager(models.QuerySet):
         )
 
 
-class Study(models.Model):
-    study_id = models.CharField(db_column='STUDY_ID', primary_key=True, max_length=15, choices=Status.choices)
+class StudyAbstract(models.Model):
+    study_id = models.CharField(db_column='STUDY_ID', primary_key=True, max_length=15)
     project_id = models.CharField(db_column='PROJECT_ID', max_length=15)
-    study_status = models.CharField(db_column='STUDY_STATUS', max_length=50)
+    study_status = models.CharField(db_column='STUDY_STATUS', max_length=50, choices=Status.choices)
     center_name = models.TextField(db_column='CENTER_NAME', max_length=500)
     hold_date = models.DateTimeField(db_column='HOLD_DATE')
     first_created = models.DateTimeField(db_column='FIRST_CREATED')
@@ -208,13 +208,18 @@ class Study(models.Model):
         abstract = True
 
 
-class RunStudy(Study):
-    class Meta(Study.Meta):
+class Study(StudyAbstract):
+    class Meta(StudyAbstract.Meta):
+        db_table = 'STUDY'
+
+
+class RunStudy(StudyAbstract):
+    class Meta(StudyAbstract.Meta):
         db_table = 'V_MGP_RUN_STUDY'
 
 
-class AssemblyStudy(Study):
-    class Meta(Study.Meta):
+class AssemblyStudy(StudyAbstract):
+    class Meta(StudyAbstract.Meta):
         db_table = 'V_MGP_ASSEMBLY_STUDY'
 
 
@@ -238,6 +243,7 @@ class Sample(models.Model):
     first_created = models.DateField(db_column='FIRST_CREATED')
     last_updated = models.DateField(db_column='LAST_UPDATED')
     first_public = models.DateField(db_column='FIRST_PUBLIC')
+    status_id = models.IntegerField(db_column='STATUS_ID', choices=Status.choices)
     tax_id = models.IntegerField(db_column='TAX_ID')
     scientific_name = models.CharField(db_column='SCIENTIFIC_NAME', max_length=100)
     title = models.CharField(db_column='SAMPLE_TITLE', max_length=200)

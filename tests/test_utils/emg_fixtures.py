@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import pytest
+import uuid
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -31,7 +32,10 @@ __all__ = ['apiclient', 'api_version', 'biome', 'biome_human', 'super_study', 's
            'experiment_type', 'experiment_type_assembly',
            'runs', 'run', 'run_v5', 'runjob_pipeline_v1', 'run_emptyresults', 'run_with_sample',
            'analysis_results', 'run_multiple_analysis', 'var_names', 'analysis_metadata_variable_names',
-           'genome_catalogue', 'genome', 'assemblies', 'legacy_mapping', 'ena_run_study']
+           'genome_catalogue', 'genome', 'assemblies', 'legacy_mapping', 'ena_run_study',
+           'ena_public_studies', 'ena_private_studies', 'ena_suppressed_studies',
+           'ena_public_runs', 'ena_private_runs', 'ena_suppressed_runs',
+           'ena_public_samples', 'ena_private_samples', 'ena_suppressed_samples']
 
 
 @pytest.fixture
@@ -646,3 +650,177 @@ def ena_run_study():
     study.submission_account_id = "Webin-99999"
     study.pubmed_id = ""
     return study
+
+def make_suppresible_studies(quantity, emg_props=None, ena_props=None):
+    emg_props = emg_props or {}
+    ena_props = ena_props or {}
+    studies = baker.make(emg_models.Study, _quantity=quantity, **emg_props)
+    ena_studies = []
+    for emg_study in studies:
+        ena_studies.append(
+            ena_models.Study(study_id=emg_study.secondary_accession, **ena_props)
+        )
+    return ena_studies
+
+
+
+@pytest.fixture
+def ena_public_studies():
+    return make_suppresible_studies(
+        10, ena_props={"study_status": ena_models.Status.PUBLIC}
+    )
+
+
+@pytest.fixture
+def ena_private_studies():
+    return make_suppresible_studies(
+        6, ena_props={"study_status": ena_models.Status.PRIVATE}
+    )
+
+
+@pytest.fixture
+def ena_suppressed_studies():
+    """Returns:
+    6 Studies that where SUPPRESSED
+    5 Studies that were KILLED
+    3 Studies that were CANCELLED
+    The EMG studies are also suppressed.
+    """
+    studies = []
+    emg_props = {"is_suppressed": True}
+    studies.extend(
+        make_suppresible_studies(
+            6,
+            emg_props=emg_props,
+            ena_props={"study_status": ena_models.Status.SUPPRESSED},
+        )
+    )
+    studies.extend(
+        make_suppresible_studies(
+            5, emg_props=emg_props, ena_props={"study_status": ena_models.Status.KILLED}
+        )
+    )
+    studies.extend(
+        make_suppresible_studies(
+            3,
+            emg_props=emg_props,
+            ena_props={"study_status": ena_models.Status.CANCELLED},
+        )
+    )
+    return studies
+
+def make_suppresible_runs(quantity, emg_props=None, ena_props=None):
+    emg_props = emg_props or {}
+    ena_props = ena_props or {}
+    runs = baker.make(emg_models.Run, _quantity=quantity, **emg_props)
+    for run in runs:
+        run.accession = str(uuid.uuid4())
+        run.save()
+    ena_runs = []
+    for emg_run in runs:
+        ena_runs.append(
+            ena_models.Run(run_id=emg_run.accession, **ena_props)
+        )
+    return ena_runs
+
+@pytest.fixture
+def ena_public_runs():
+    return make_suppresible_runs(
+        10, ena_props={"status_id": ena_models.Status.PUBLIC}
+    )
+
+
+@pytest.fixture
+def ena_private_runs():
+    return make_suppresible_runs(
+        6, ena_props={"status_id": ena_models.Status.PRIVATE}
+    )
+
+@pytest.fixture
+def ena_suppressed_runs():
+    """Returns:
+    6 Studies that where SUPPRESSED
+    5 Studies that were KILLED
+    3 Studies that were CANCELLED
+    The EMG studies are also suppressed.
+    """
+    runs = []
+    emg_props = {"is_suppressed": True}
+    runs.extend(
+        make_suppresible_runs(
+            6,
+            emg_props=emg_props,
+            ena_props={"status_id": ena_models.Status.SUPPRESSED},
+        )
+    )
+    runs.extend(
+        make_suppresible_runs(
+            5, emg_props=emg_props, ena_props={"status_id": ena_models.Status.KILLED}
+        )
+    )
+    runs.extend(
+        make_suppresible_runs(
+            3,
+            emg_props=emg_props,
+            ena_props={"status_id": ena_models.Status.CANCELLED},
+        )
+    )
+    return runs
+
+def make_suppresible_samples(quantity, emg_props=None, ena_props=None):
+    emg_props = emg_props or {}
+    ena_props = ena_props or {}
+    samples = baker.make(emg_models.Sample, _quantity=quantity, **emg_props)
+    for sample in samples:
+        sample.accession = str(uuid.uuid4())[:5]
+        sample.save()
+    ena_samples = []
+    for emg_sample in samples:
+        ena_samples.append(
+            ena_models.Sample(sample_id=emg_sample.accession, **ena_props)
+        )
+    return ena_samples
+
+@pytest.fixture
+def ena_public_samples():
+    return make_suppresible_samples(
+        10, ena_props={"status_id": ena_models.Status.PUBLIC}
+    )
+
+
+@pytest.fixture
+def ena_private_samples():
+    return make_suppresible_samples(
+        6, ena_props={"status_id": ena_models.Status.PRIVATE}
+    )
+
+@pytest.fixture
+def ena_suppressed_samples():
+    """Returns:
+    6 Studies that where SUPPRESSED
+    5 Studies that were KILLED
+    3 Studies that were CANCELLED
+    The EMG studies are also suppressed.
+    """
+    samples = []
+    emg_props = {"is_suppressed": True}
+    samples.extend(
+        make_suppresible_samples(
+            2,
+            emg_props=emg_props,
+            ena_props={"status_id": ena_models.Status.SUPPRESSED},
+        )
+    )
+    samples.extend(
+        make_suppresible_samples(
+            3, emg_props=emg_props, ena_props={"status_id": ena_models.Status.KILLED}
+        )
+    )
+    samples.extend(
+        make_suppresible_samples(
+            7,
+            emg_props=emg_props,
+            ena_props={"status_id": ena_models.Status.CANCELLED},
+        )
+    )
+    return samples

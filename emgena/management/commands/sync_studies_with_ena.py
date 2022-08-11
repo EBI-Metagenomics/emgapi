@@ -37,31 +37,42 @@ class Command(BaseCommand):
         batch_size = 1000
         studies_count = emg_models.Study.objects.count()
 
-        logger.info(f"Total {model_name} on EMG {emg_model_count}")
+        logger.info(f"Total studies on EMG {studies_count}")
 
         while offset < studies_count:
-            emg_studies_batch = emg_model.objects.all[offset, batch_size]
+            emg_studies_batch = emg_models.Study.objects.all()[offset:batch_size]
             ena_studies_batch = ena_models.Study.objects.filter(
                 study_id__in=[study.secondary_accession for study in emg_studies_batch]
             )
             for emg_study in emg_studies_batch:
                 ena_study = next(
-                    (el for el in ena_studies_batch if el.study_id == study.secondary_accession),
-                    default=None,
+                    (
+                        el
+                        for el in ena_studies_batch
+                        if el.study_id == emg_study.secondary_accession
+                    ),
+                    None,
                 )
                 if ena_study is None:
                     logger.error(f"{study} not found in ENA.")
                     continue
-                if ena_study.status is None:
+                if ena_study.study_status is None:
                     logger.error(f"{study} on ENA has no value on the column status.")
                     continue
-                emg_study.sync_with_ena_status(ena_study.status)
+
+                emg_study.sync_with_ena_status(ena_study.study_status)
                 emg_study.public_release_date = ena_study.hold_date
 
             emg_models.Study.objects.bulk_update(
-                emg_studies_batch, ["is_private", "is_suppressed", "reason", "public_release_date"]
+                emg_studies_batch,
+                [
+                    "is_private",
+                    "is_suppressed",
+                    "suppresion_reason",
+                    "public_release_date",
+                ],
             )
-            logger.info(f"Batch {studies_count / batch_size::.0f} processed.")
+            logger.info(f"Batch {studies_count / batch_size} processed.")
             offset += batch_size
 
         logger.info("Completed")
