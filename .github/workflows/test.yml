@@ -38,7 +38,7 @@ jobs:
         pip install -U -r requirements.txt
         pip install -U -r requirements-test.txt
         python setup.py sdist
-        pip install -U .
+        pip install -U --force-reinstall .
         pip freeze
     - name: 🧪 - Testing
       run: |
