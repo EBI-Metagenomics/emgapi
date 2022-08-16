@@ -54,10 +54,10 @@ class PrivacyControlledModel(models.Model):
 
 class SuppressQuerySet(models.QuerySet):
     def suppress(self, reason):
-        return self.update(is_suppressed=True, suppressed_at=timezone.now(), suppresion_reason=reason)
+        return self.update(is_suppressed=True, suppressed_at=timezone.now(), suppression_reason=reason)
 
     def unsuppress(self, reason):
-        return self.update(is_suppressed=False, suppressed_at=None, suppresion_reason=None)
+        return self.update(is_suppressed=False, suppressed_at=None, suppression_reason=None)
 
 class SuppressManager(models.Manager):
     def get_queryset(self):
@@ -76,20 +76,20 @@ class SuppressibleModel(models.Model):
 
     is_suppressed = models.BooleanField(db_column='IS_SUPPRESSED', default=False)
     suppressed_at = models.DateTimeField(db_column='SUPPRESSED_AT', blank=True, null=True)
-    suppresion_reason = models.IntegerField(db_column='REASON', blank=True, null=True, choices=Reason.choices)
+    suppression_reason = models.IntegerField(db_column='SUPPRESSION_REASON', blank=True, null=True, choices=Reason.choices)
 
-    def suppress(self, suppresion_reason=None, save=True):
+    def suppress(self, suppression_reason=None, save=True):
         self.is_suppressed = True
         self.suppressed_at = timezone.now()
-        self.suppresion_reason = suppresion_reason
+        self.suppression_reason = suppression_reason
         if save:
             self.save()
         return self
 
-    def unsuppress(self, suppresion_reason=None, save=True):
+    def unsuppress(self, suppression_reason=None, save=True):
         self.is_suppressed = False
         self.suppressed_at = None
-        self.suppresion_reason = None
+        self.suppression_reason = None
         if save:
             self.save()
         return self
@@ -104,7 +104,6 @@ class ENASyncableModel(SuppressibleModel, PrivacyControlledModel):
         """Sync the model with the ENA status accordingly.
         Fields that are updated: is_supppressed, suppressed_at, reason and is_private
         """
-        print(f"{ena_model_status} - ")
         if ena_model_status == ENAStatus.PRIVATE and not self.is_private:
             self.is_private = True
             logging.info(f"{self} marked as private")
@@ -144,7 +143,7 @@ class ENASyncableModel(SuppressibleModel, PrivacyControlledModel):
             elif ena_model_status == ENAStatus.CANCELLED:
                 reason = SuppressibleModel.Reason.CANCELLED
 
-            self.suppress(suppresion_reason=reason, save=False)
+            self.suppress(suppression_reason=reason, save=False)
 
             logging.info(
                 f"{self} was suppressed, status on ENA {ena_model_status}"
@@ -1288,7 +1287,7 @@ class Assembly(ENASyncableModel):
         verbose_name_plural = 'assemblies'
 
     def __str__(self):
-        return self.accession
+        return self.accession or str(self.assembly_id)
 
 
 class AssemblyRun(models.Model):

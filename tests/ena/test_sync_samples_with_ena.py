@@ -29,7 +29,7 @@ from test_utils.emg_fixtures import *  # noqa
 @pytest.mark.django_db
 class TestSyncENAStudies:
     @patch("emgena.models.Sample.objects")
-    def test_make_studies_private(self, ena_sample_objs_mock, ena_private_samples):
+    def test_make_samples_private(self, ena_sample_objs_mock, ena_private_samples):
         ena_sample_objs_mock.filter.return_value = ena_private_samples
 
         public_samples = Sample.objects.order_by("?").all()[0:5]
@@ -47,8 +47,8 @@ class TestSyncENAStudies:
 
 
     @patch("emgena.models.Sample.objects")
-    def test_make_studies_public(self, ena_sample_objs_mock, ena_public_samples):
-        ena_sample_objs_mock.filter.return_value = ena_sample_objs_mock
+    def test_make_samples_public(self, ena_sample_objs_mock, ena_public_samples):
+        ena_sample_objs_mock.filter.return_value = ena_public_samples
 
         private_samples = Sample.objects.order_by("?").all()[0:5]
 
@@ -61,11 +61,11 @@ class TestSyncENAStudies:
 
         for sample in private_samples:
             sample.refresh_from_db()
-            assert sample.is_private == True
+            assert sample.is_private == False
 
 
     @patch("emgena.models.Sample.objects")
-    def test_suppress_studies(self, ena_sample_objs_mock, ena_suppressed_samples):
+    def test_suppress_samples(self, ena_sample_objs_mock, ena_suppressed_samples):
         ena_sample_objs_mock.filter.return_value = ena_suppressed_samples
 
         suppressed_samples = Sample.objects.order_by("?").all()[0:5]
@@ -87,5 +87,5 @@ class TestSyncENAStudies:
             )
             assert (
                 ena_sample.get_status_id_display().lower()
-                == sample.get_suppresion_reason_display().lower()
+                == sample.get_suppression_reason_display().lower()
             )

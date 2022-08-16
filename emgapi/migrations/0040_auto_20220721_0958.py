@@ -22,8 +22,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='analysisjob',
-            name='suppresion_reason',
-            field=models.IntegerField(blank=True, choices=[(1, 'Draft'), (3, 'Cancelled'), (6, 'Killed'), (7, 'Temporary Suppressed'), (8, 'Temporary Killed')], db_column='REASON', null=True),
+            name='suppression_reason',
+            field=models.IntegerField(blank=True, choices=[(1, 'Draft'), (3, 'Cancelled'), (6, 'Killed'), (7, 'Temporary Suppressed'), (8, 'Temporary Killed')], db_column='SUPPRESSION_REASON', null=True),
         ),
         migrations.AddField(
             model_name='analysisjob',
@@ -42,8 +42,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='assembly',
-            name='suppresion_reason',
-            field=models.IntegerField(blank=True, choices=[(1, 'Draft'), (3, 'Cancelled'), (6, 'Killed'), (7, 'Temporary Suppressed'), (8, 'Temporary Killed')], db_column='REASON', null=True),
+            name='suppression_reason',
+            field=models.IntegerField(blank=True, choices=[(1, 'Draft'), (3, 'Cancelled'), (6, 'Killed'), (7, 'Temporary Suppressed'), (8, 'Temporary Killed')], db_column='SUPPRESSION_REASON', null=True),
         ),
         migrations.AddField(
             model_name='assembly',
@@ -62,8 +62,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='run',
-            name='suppresion_reason',
-            field=models.IntegerField(blank=True, choices=[(1, 'Draft'), (3, 'Cancelled'), (6, 'Killed'), (7, 'Temporary Suppressed'), (8, 'Temporary Killed')], db_column='REASON', null=True),
+            name='suppression_reason',
+            field=models.IntegerField(blank=True, choices=[(1, 'Draft'), (3, 'Cancelled'), (6, 'Killed'), (7, 'Temporary Suppressed'), (8, 'Temporary Killed')], db_column='SUPPRESSION_REASON', null=True),
         ),
         migrations.AddField(
             model_name='run',
@@ -82,8 +82,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='sample',
-            name='suppresion_reason',
-            field=models.IntegerField(blank=True, choices=[(1, 'Draft'), (3, 'Cancelled'), (6, 'Killed'), (7, 'Temporary Suppressed'), (8, 'Temporary Killed')], db_column='REASON', null=True),
+            name='suppression_reason',
+            field=models.IntegerField(blank=True, choices=[(1, 'Draft'), (3, 'Cancelled'), (6, 'Killed'), (7, 'Temporary Suppressed'), (8, 'Temporary Killed')], db_column='SUPPRESSION_REASON', null=True),
         ),
         migrations.AddField(
             model_name='sample',
@@ -112,7 +112,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='study',
-            name='suppresion_reason',
-            field=models.IntegerField(blank=True, choices=[(1, 'Draft'), (3, 'Cancelled'), (6, 'Killed'), (7, 'Temporary Suppressed'), (8, 'Temporary Killed')], db_column='REASON', null=True),
+            name='suppression_reason',
+            field=models.IntegerField(blank=True, choices=[(1, 'Draft'), (3, 'Cancelled'), (6, 'Killed'), (7, 'Temporary Suppressed'), (8, 'Temporary Killed')], db_column='SUPPRESSION_REASON', null=True),
         ),
     ]

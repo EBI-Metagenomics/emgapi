@@ -508,7 +508,7 @@ class RunSerializer(ExplicitFieldsModelSerializer,
         model = emg_models.Run
         exclude = (
             'is_suppressed',
-            'suppresion_reason',
+            'suppression_reason',
             'suppressed_at',
         )
 
@@ -1063,7 +1063,7 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
             'primary_accession',
             'is_private',
             'is_suppressed',
-            'suppresion_reason',
+            'suppression_reason',
             'suppressed_at',
             'metadata_received',
             'sequencedata_received',
@@ -1318,7 +1318,7 @@ class StudySerializer(ExplicitFieldsModelSerializer,
             'author_email',
             'author_name',
             'is_suppressed',
-            'suppresion_reason',
+            'suppression_reason',
             'suppressed_at',
         )
 

@@ -94,5 +94,5 @@ class TestSyncENAStudies:
             assert ena_study.hold_date == study.public_release_date
             assert (
                 ena_study.get_study_status_display().lower()
-                == study.get_suppresion_reason_display().lower()
+                == study.get_suppression_reason_display().lower()
             )

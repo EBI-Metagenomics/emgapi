@@ -40,7 +40,9 @@ class Command(BaseCommand):
         logger.info(f"Total studies on EMG {studies_count}")
 
         while offset < studies_count:
-            emg_studies_batch = emg_models.Study.objects.all()[offset:batch_size]
+            emg_studies_batch = list(
+                emg_models.Study.objects.all()[offset : offset + batch_size]
+            )
             ena_studies_batch = ena_models.Study.objects.filter(
                 study_id__in=[study.secondary_accession for study in emg_studies_batch]
             )
@@ -68,11 +70,12 @@ class Command(BaseCommand):
                 [
                     "is_private",
                     "is_suppressed",
-                    "suppresion_reason",
+                    "suppression_reason",
+                    "suppressed_at",
                     "public_release_date",
                 ],
             )
-            logger.info(f"Batch {studies_count / batch_size} processed.")
+            logger.info(f"Batch {round(studies_count / batch_size)} processed.")
             offset += batch_size
 
         logger.info("Completed")

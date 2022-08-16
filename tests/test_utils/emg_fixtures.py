@@ -35,7 +35,8 @@ __all__ = ['apiclient', 'api_version', 'biome', 'biome_human', 'super_study', 's
            'genome_catalogue', 'genome', 'assemblies', 'legacy_mapping', 'ena_run_study',
            'ena_public_studies', 'ena_private_studies', 'ena_suppressed_studies',
            'ena_public_runs', 'ena_private_runs', 'ena_suppressed_runs',
-           'ena_public_samples', 'ena_private_samples', 'ena_suppressed_samples']
+           'ena_public_samples', 'ena_private_samples', 'ena_suppressed_samples',
+           'ena_public_assemblies', 'ena_private_assemblies', 'ena_suppressed_assemblies']
 
 
 @pytest.fixture
@@ -824,3 +825,61 @@ def ena_suppressed_samples():
         )
     )
     return samples
+
+def make_suppresible_assemblies(quantity, emg_props=None, ena_props=None):
+    emg_props = emg_props or {}
+    ena_props = ena_props or {}
+    assemblies = baker.make(emg_models.Assembly, _quantity=quantity, **emg_props)
+    for assembly in assemblies:
+        assembly.legacy_accession = str(uuid.uuid4())[:5]
+        assembly.save()
+    ena_assemblies = []
+    for emg_assembly in assemblies:
+        ena_assemblies.append(
+            ena_models.Assembly(gc_id=emg_assembly.legacy_accession, **ena_props)
+        )
+    return ena_assemblies
+
+@pytest.fixture
+def ena_public_assemblies():
+    return make_suppresible_assemblies(
+        54, ena_props={"status_id": ena_models.Status.PUBLIC}
+    )
+
+
+@pytest.fixture
+def ena_private_assemblies():
+    return make_suppresible_assemblies(
+        6, ena_props={"status_id": ena_models.Status.PRIVATE}
+    )
+
+@pytest.fixture
+def ena_suppressed_assemblies():
+    """Returns:
+    6 Studies that where SUPPRESSED
+    5 Studies that were KILLED
+    3 Studies that were CANCELLED
+    The EMG studies are also suppressed.
+    """
+    assemblies = []
+    emg_props = {"is_suppressed": True}
+    assemblies.extend(
+        make_suppresible_assemblies(
+            32,
+            emg_props=emg_props,
+            ena_props={"status_id": ena_models.Status.SUPPRESSED},
+        )
+    )
+    assemblies.extend(
+        make_suppresible_assemblies(
+            12, emg_props=emg_props, ena_props={"status_id": ena_models.Status.KILLED}
+        )
+    )
+    assemblies.extend(
+        make_suppresible_assemblies(
+            9,
+            emg_props=emg_props,
+            ena_props={"status_id": ena_models.Status.CANCELLED},
+        )
+    )
+    return assemblies

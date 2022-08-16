@@ -40,7 +40,7 @@ class Command(BaseCommand):
         logger.info(f"Total Runs on EMG {runs_count}")
 
         while offset < runs_count:
-            emg_runs_batch = emg_models.Run.objects.all()[offset:offset + batch_size]
+            emg_runs_batch = emg_models.Run.objects.all()[offset : offset + batch_size]
             ena_runs_batch = ena_models.Run.objects.filter(
                 run_id__in=[run.accession for run in emg_runs_batch]
             )
@@ -59,7 +59,8 @@ class Command(BaseCommand):
                 emg_run.sync_with_ena_status(ena_run.status_id)
 
             emg_models.Run.objects.bulk_update(
-                emg_runs_batch, ["is_private", "is_suppressed", "suppresion_reason"]
+                emg_runs_batch,
+                ["is_private", "is_suppressed", "suppression_reason", "suppressed_at"],
             )
             logger.info(f"Batch {round(runs_count / batch_size)} processed.")
             offset += batch_size

@@ -85,5 +85,5 @@ class TestSyncENAStudies:
             )
             assert (
                 ena_run.get_status_id_display().lower()
-                == run.get_suppresion_reason_display().lower()
+                == run.get_suppression_reason_display().lower()
             )

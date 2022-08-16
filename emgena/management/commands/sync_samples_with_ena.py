@@ -40,11 +40,13 @@ class Command(BaseCommand):
         logger.info(f"Total Samples on EMG {samples_count}")
 
         while offset < samples_count:
-            # TODO: review this rule, I didn't have enought time to review it.
+            # TODO: review this rule, I didn't have enough time to review it.
             # ported from: https://github.com/EBI-Metagenomics/mi-automation/blob/develop/legacy_production/tools/production/emg-object-status-checker.py#L242
-            emg_samples_batch = emg_models.Sample.objects.exclude(
-                accession__startswith="GCA_"
-            )[offset:offset + batch_size]
+            emg_samples_batch = list(
+                emg_models.Sample.objects.exclude(accession__startswith="GCA_")[
+                    offset : offset + batch_size
+                ]
+            )
             ena_samples_batch = ena_models.Sample.objects.filter(
                 sample_id__in=[sample.accession for sample in emg_samples_batch]
             )
@@ -56,7 +58,7 @@ class Command(BaseCommand):
                         for el in ena_samples_batch
                         if el.sample_id == emg_sample.accession
                     ),
-                    None
+                    None,
                 )
                 if ena_sample is None:
                     logger.error(f"{emg_sample} not found in ENA.")
@@ -69,7 +71,8 @@ class Command(BaseCommand):
                 emg_sample.sync_with_ena_status(ena_sample.status_id)
 
             emg_models.Sample.objects.bulk_update(
-                emg_samples_batch, ["is_private", "is_suppressed", "suppresion_reason"]
+                emg_samples_batch,
+                ["is_private", "is_suppressed", "suppression_reason", "suppressed_at"],
             )
             logger.info(f"Batch {round(samples_count / batch_size)} processed.")
             offset += batch_size
