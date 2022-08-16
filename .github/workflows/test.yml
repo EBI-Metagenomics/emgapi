@@ -38,8 +38,6 @@ jobs:
         pip install -U -r requirements.txt
         pip install -U -r requirements-test.txt
         pip freeze
-#        python setup.py sdist
-#        pip install -U --force-reinstall .
     - name: 🧪 - Testing
       run: |
         cat $EMG_CONFIG
