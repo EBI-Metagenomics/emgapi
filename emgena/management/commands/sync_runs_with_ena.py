@@ -40,7 +40,7 @@ class Command(BaseCommand):
         logger.info(f"Total Runs on EMG {runs_count}")
 
         while offset < runs_count:
-            emg_runs_batch = emg_models.Run.objects.all()[offset:batch_size]
+            emg_runs_batch = emg_models.Run.objects.all()[offset:offset + batch_size]
             ena_runs_batch = ena_models.Run.objects.filter(
                 run_id__in=[run.accession for run in emg_runs_batch]
             )
