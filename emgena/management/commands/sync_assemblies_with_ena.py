@@ -40,7 +40,7 @@ class Command(BaseCommand):
         logger.info(f"Total Assemblies on EMG {assemblies_count}")
 
         while offset < runs_count:
-            emg_assemblies_batch = emg_models.Assembly.all().select_related("study")[offset:batch_size]
+            emg_assemblies_batch = emg_models.Assembly.all().select_related("study")[offset:offset + batch_size]
             ena_assemblies_batch = ena_models.Assembly.filter(
                 gc_id__in=[assembly.legacy_accession for assembly in ena_assemblies_batch]
             )
