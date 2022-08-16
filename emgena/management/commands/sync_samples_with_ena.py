@@ -44,7 +44,7 @@ class Command(BaseCommand):
             # ported from: https://github.com/EBI-Metagenomics/mi-automation/blob/develop/legacy_production/tools/production/emg-object-status-checker.py#L242
             emg_samples_batch = emg_models.Sample.objects.exclude(
                 accession__startswith="GCA_"
-            )[offset:batch_size]
+            )[offset:offset + batch_size]
             ena_samples_batch = ena_models.Sample.objects.filter(
                 sample_id__in=[sample.accession for sample in emg_samples_batch]
             )
