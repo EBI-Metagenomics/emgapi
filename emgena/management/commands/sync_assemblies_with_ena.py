@@ -44,7 +44,7 @@ class Command(BaseCommand):
             ena_assemblies_batch = ena_models.Assembly.filter(
                 gc_id__in=[assembly.legacy_accession for assembly in ena_assemblies_batch]
             )
-            for emg_assembly in ena_assemblies_batch:
+            for emg_assembly in emg_assemblies_batch:
                 ena_assembly = next(
                     (el for el in ena_assemblies_batch if el.gc_id == emg_run.legacy_accession),
                     default=None,
