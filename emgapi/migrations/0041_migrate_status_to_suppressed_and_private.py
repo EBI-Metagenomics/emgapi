@@ -44,7 +44,7 @@ def migrate_the_status_field(apps, schema_editor):
             CANCELLED,
         ]:
             model.objects.filter(status_id=suppression_code).update(
-                **dict(suppress, **{"suppresion_reason": suppression_code})
+                **dict(suppress, **{"suppression_reason": suppression_code})
             )
 
     AnalysisJob = apps.get_model("emgapi", "AnalysisJob")
@@ -58,7 +58,7 @@ def migrate_the_status_field(apps, schema_editor):
         CANCELLED,
     ]:
         AnalysisJob.objects.filter(run_status_id=suppression_code).update(
-            **dict(suppress, **{"suppresion_reason": suppression_code})
+            **dict(suppress, **{"suppression_reason": suppression_code})
         )
 
 

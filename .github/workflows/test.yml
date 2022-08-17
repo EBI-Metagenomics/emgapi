@@ -37,8 +37,6 @@ jobs:
         pip install -U git+https://github.com/EBI-Metagenomics/ena-api-handler.git
         pip install -U -r requirements.txt
         pip install -U -r requirements-test.txt
-        python setup.py sdist
-        pip install -U .
         pip freeze
     - name: 🧪 - Testing
       run: |
