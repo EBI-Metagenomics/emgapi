@@ -29,21 +29,17 @@ def bake_models(coverage=None, min_gap_length=None):
     """Build the required models for import_assembly
     :return: an instance of  emgena.Assembly
     """
-    # Status models are created on a migration
-    status, _ = emg_models.Status.objects.get_or_create(status="public", status_id=4)
-
     ena_assembly = baker.prepare(
         "emgena.Assembly",
         primary_study_accession="DUMMY_PSA",
         coverage=coverage,
         min_gap_length=min_gap_length,
-        status_id=status.status_id,
     )
 
     emg_study = baker.make(
         "emgapi.Study",
         project_id=ena_assembly.primary_study_accession,
-        is_public=True,
+        is_private=False,
     )
     emg_sample = baker.make("emgapi.Sample", accession=ena_assembly.sample_id)
     emg_experyment_type = baker.make(
@@ -77,12 +73,9 @@ class TestImportAssembly:
         emg_assembly = emg_models.Assembly.objects.get(
             accession=ena_assembly.assembly_id
         )
-
-        status = emg_models.Status.objects.get(status="public")
-
         assert emg_assembly.coverage == None
         assert emg_assembly.min_gap_length == None
-        assert emg_assembly.status_id == status
+        assert emg_assembly.is_private == False
         assert emg_assembly.wgs_accession == ena_assembly.wgs_accession
         assert emg_assembly.legacy_accession == ena_assembly.gc_id
 
@@ -111,10 +104,8 @@ class TestImportAssembly:
             accession=ena_assembly.assembly_id
         )
 
-        status = emg_models.Status.objects.get(status="public")
-
         assert emg_assembly.coverage == 97
         assert emg_assembly.min_gap_length == 30
-        assert emg_assembly.status_id == status
+        assert emg_assembly.is_private == False
         assert emg_assembly.wgs_accession == ena_assembly.wgs_accession
         assert emg_assembly.legacy_accession == ena_assembly.gc_id

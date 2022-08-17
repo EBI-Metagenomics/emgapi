@@ -290,7 +290,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         ---
         `/biomes/top10`
         """
-
+        # TODO Review the `sample.IS_PRIVATE` condition. It doesn't seem to be required.
         sql = """
         SELECT
             parent.BIOME_ID,
@@ -300,7 +300,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
             SAMPLE as sample
         WHERE node.lft BETWEEN parent.lft AND parent.rgt
             AND node.BIOME_ID = sample.BIOME_ID
-            AND sample.IS_PUBLIC = 1
+            AND NOT sample.IS_PRIVATE
             AND parent.BIOME_ID in %s
         GROUP BY parent.BIOME_ID
         ORDER BY samples_count DESC

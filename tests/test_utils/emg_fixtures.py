@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import pytest
+import uuid
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -27,11 +28,15 @@ from emgena import models as ena_models
 
 __all__ = ['apiclient', 'api_version', 'biome', 'biome_human', 'super_study', 'studies',
            'samples', 'study', 'study_private', 'sample', 'sample_private',
-           'run_status', 'analysis_status',
-           'pipeline', 'pipelines', 'experiment_type', 'experiment_type_assembly',
+           'analysis_status', 'pipeline', 'pipelines',
+           'experiment_type', 'experiment_type_assembly',
            'runs', 'run', 'run_v5', 'runjob_pipeline_v1', 'run_emptyresults', 'run_with_sample',
            'analysis_results', 'run_multiple_analysis', 'var_names', 'analysis_metadata_variable_names',
-           'genome_catalogue', 'genome', 'assemblies', 'legacy_mapping', 'ena_run_study']
+           'genome_catalogue', 'genome', 'assemblies', 'legacy_mapping', 'ena_run_study',
+           'ena_public_studies', 'ena_private_studies', 'ena_suppressed_studies',
+           'ena_public_runs', 'ena_private_runs', 'ena_suppressed_runs',
+           'ena_public_samples', 'ena_private_samples', 'ena_suppressed_samples',
+           'ena_public_assemblies', 'ena_private_assemblies', 'ena_suppressed_assemblies']
 
 
 @pytest.fixture
@@ -127,7 +132,7 @@ def studies(biome):
                 study_id=pk,
                 secondary_accession='SRP0{:0>3}'.format(pk),
                 centre_name='Centre Name',
-                is_public=1,
+                is_private=False,
                 public_release_date=None,
                 study_name='Example study name %i' % pk,
                 study_status='FINISHED',
@@ -152,7 +157,7 @@ def samples(biome, studies):
                 biome=biome,
                 sample_id=pk,
                 accession='ERS0{:0>3}'.format(pk),
-                is_public=1,
+                is_private=False,
                 species='homo sapiense',
                 sample_name='Example sample name %i' % pk,
                 latitude=12.3456,
@@ -176,7 +181,7 @@ def study(biome):
         study_id=1234,
         secondary_accession='SRP01234',
         centre_name='Centre Name',
-        is_public=1,
+        is_private=False,
         public_release_date=None,
         study_name='Example study name SRP01234',
         study_abstract='abcdefghijklmnoprstuvwyz',
@@ -197,7 +202,7 @@ def study_private(biome):
         study_id=222,
         secondary_accession='SRP00000',
         centre_name='Centre Name',
-        is_public=0,
+        is_private=True,
         public_release_date=None,
         study_name='Example study name SRP00000',
         study_abstract='00000',
@@ -218,7 +223,7 @@ def sample(biome, study):
         pk=111,
         accession='ERS01234',
         primary_accession='SAMS01234',
-        is_public=1,
+        is_private=False,
         species='homo sapiense',
         sample_name='Example sample name ERS01234',
         sample_desc='abcdefghijklmnoprstuvwyz',
@@ -245,7 +250,7 @@ def sample_private(biome, study):
         pk=222,
         accession='ERS00000',
         primary_accession='SAMS00000',
-        is_public=0,
+        is_private=True,
         species='homo sapiense',
         sample_name='Example sample name ERS00000',
         sample_desc='abcdefghijklmnoprstuvwyz',
@@ -271,15 +276,6 @@ def analysis_status():
         pk=3,
         analysis_status='3',
     )
-
-
-@pytest.fixture
-def run_status():
-    status, _ = emg_models.Status.objects.get_or_create(
-        pk=4,
-        status='public',
-    )
-    return status
 
 
 @pytest.fixture
@@ -320,7 +316,7 @@ def experiment_type_assembly():
 
 
 @pytest.fixture
-def runs(study, samples, run_status, analysis_status, pipeline,
+def runs(study, samples, analysis_status, pipeline,
          experiment_type):
     jobs = []
     for s in samples:
@@ -330,14 +326,14 @@ def runs(study, samples, run_status, analysis_status, pipeline,
             study=study,
             accession='ABC_{:0>3}'.format(pk),
             secondary_accession='DEF_{:0>3}'.format(pk),
-            status_id=run_status,
+            is_private=False,
             experiment_type=experiment_type,
         )
         _aj = emg_models.AnalysisJob(
             sample=s,
             study=study,
             run=run,
-            run_status_id=4,
+            is_private=False,
             experiment_type=experiment_type,
             pipeline=pipeline,
             analysis_status=analysis_status,
@@ -350,13 +346,13 @@ def runs(study, samples, run_status, analysis_status, pipeline,
 
 
 @pytest.fixture
-def run(study, sample, run_status, analysis_status, pipeline, experiment_type):
+def run(study, sample, analysis_status, pipeline, experiment_type):
     run, _ = emg_models.Run.objects.get_or_create(
         run_id=1234,
         accession='ABC01234',
         sample=sample,
         study=study,
-        status_id=run_status,
+        is_private=False,
         experiment_type=experiment_type
     )
     emg_models.AnalysisJob.objects.create(
@@ -364,7 +360,7 @@ def run(study, sample, run_status, analysis_status, pipeline, experiment_type):
         sample=sample,
         study=study,
         run=run,
-        run_status_id=4,
+        is_private=False,
         experiment_type=experiment_type,
         pipeline=pipeline,
         analysis_status=analysis_status,
@@ -376,14 +372,14 @@ def run(study, sample, run_status, analysis_status, pipeline, experiment_type):
 
 
 @pytest.fixture
-def run_v5(study, sample, run_status, analysis_status, pipelines, experiment_type):
+def run_v5(study, sample, analysis_status, pipelines, experiment_type):
     p5 = pipelines.filter(release_version='5.0').first()
     run, _ = emg_models.Run.objects.get_or_create(
         run_id=5555,
         accession='ABC01234',
         sample=sample,
         study=study,
-        status_id=run_status,
+        is_private=False,
         experiment_type=experiment_type
     )
     emg_models.AnalysisJob.objects.create(
@@ -391,7 +387,7 @@ def run_v5(study, sample, run_status, analysis_status, pipelines, experiment_typ
         sample=sample,
         study=study,
         run=run,
-        run_status_id=4,
+        is_private=False,
         experiment_type=experiment_type,
         pipeline=p5,
         analysis_status=analysis_status,
@@ -409,7 +405,7 @@ def runjob_pipeline_v1(run, sample, study, experiment_type, analysis_status, pip
         sample=sample,
         study=study,
         run=run,
-        run_status_id=4,
+        is_private=False,
         experiment_type=experiment_type,
         pipeline=pipelines.filter(release_version='1.0').first(),
         analysis_status=analysis_status,
@@ -420,7 +416,7 @@ def runjob_pipeline_v1(run, sample, study, experiment_type, analysis_status, pip
 
 
 @pytest.fixture
-def run_multiple_analysis(study, sample, run_status, analysis_status,
+def run_multiple_analysis(study, sample, analysis_status,
                           experiment_type):
     pipeline, created = emg_models.Pipeline.objects.get_or_create(
         pk=1,
@@ -442,7 +438,7 @@ def run_multiple_analysis(study, sample, run_status, analysis_status,
         accession='ABC01234',
         sample=sample,
         study=study,
-        status_id=run_status,
+        is_private=False,
         experiment_type=experiment_type
     )
     _anl1 = emg_models.AnalysisJob.objects.create(
@@ -450,7 +446,7 @@ def run_multiple_analysis(study, sample, run_status, analysis_status,
         sample=sample,
         study=study,
         run=run,
-        run_status_id=4,
+        is_private=False,
         experiment_type=experiment_type,
         pipeline=pipeline,
         analysis_status=analysis_status,
@@ -463,7 +459,7 @@ def run_multiple_analysis(study, sample, run_status, analysis_status,
         sample=sample,
         study=study,
         run=run,
-        run_status_id=4,
+        is_private=False,
         experiment_type=experiment_type,
         pipeline=pipeline4,
         analysis_status=analysis_status,
@@ -476,7 +472,7 @@ def run_multiple_analysis(study, sample, run_status, analysis_status,
         sample=sample,
         study=study,
         run=run,
-        run_status_id=4,
+        is_private=False,
         experiment_type=experiment_type,
         pipeline=pipeline5,
         analysis_status=analysis_status,
@@ -488,14 +484,14 @@ def run_multiple_analysis(study, sample, run_status, analysis_status,
 
 
 @pytest.fixture
-def run_emptyresults(study, sample, run_status, analysis_status, pipeline,
+def run_emptyresults(study, sample, analysis_status, pipeline,
                      experiment_type):
     run = emg_models.Run.objects.create(
         run_id=1234,
         accession='ABC01234',
         sample=sample,
         study=study,
-        status_id=run_status,
+        is_private=False,
         experiment_type=experiment_type
     )
     return emg_models.AnalysisJob.objects.create(
@@ -503,7 +499,7 @@ def run_emptyresults(study, sample, run_status, analysis_status, pipeline,
         sample=sample,
         study=study,
         run=run,
-        run_status_id=4,
+        is_private=False,
         experiment_type=experiment_type,
         pipeline=pipeline,
         analysis_status=analysis_status,
@@ -514,12 +510,12 @@ def run_emptyresults(study, sample, run_status, analysis_status, pipeline,
 
 
 @pytest.fixture
-def run_with_sample(study, sample, run_status, analysis_status, pipeline,
+def run_with_sample(study, sample, analysis_status, pipeline,
                     experiment_type):
     run = emg_models.Run.objects.create(
         run_id=1234,
         accession='ABC01234',
-        status_id=run_status,
+        is_private=False,
         sample=sample,
         study=study,
         experiment_type=experiment_type,
@@ -529,7 +525,7 @@ def run_with_sample(study, sample, run_status, analysis_status, pipeline,
         sample=sample,
         study=study,
         run=run,
-        run_status_id=4,
+        is_private=False,
         experiment_type=experiment_type,
         pipeline=pipeline,
         analysis_status=analysis_status,
@@ -540,12 +536,12 @@ def run_with_sample(study, sample, run_status, analysis_status, pipeline,
 
 
 @pytest.fixture
-def analysis_results(study, sample, run_status, analysis_status,
+def analysis_results(study, sample, analysis_status,
                      experiment_type, pipelines):
     run = emg_models.Run.objects.create(
         run_id=1234,
         accession='ABC01234',
-        status_id=run_status,
+        is_private=False,
         sample=sample,
         study=study,
         experiment_type=experiment_type,
@@ -557,7 +553,7 @@ def analysis_results(study, sample, run_status, analysis_status,
             study=study,
             sample=sample,
             run=run,
-            run_status_id=4,
+            is_private=False,
             experiment_type=experiment_type,
             pipeline=pipe,
             analysis_status=analysis_status,
@@ -655,3 +651,235 @@ def ena_run_study():
     study.submission_account_id = "Webin-99999"
     study.pubmed_id = ""
     return study
+
+def make_suppresible_studies(quantity, emg_props=None, ena_props=None):
+    emg_props = emg_props or {}
+    ena_props = ena_props or {}
+    studies = baker.make(emg_models.Study, _quantity=quantity, **emg_props)
+    ena_studies = []
+    for emg_study in studies:
+        ena_studies.append(
+            ena_models.Study(study_id=emg_study.secondary_accession, **ena_props)
+        )
+    return ena_studies
+
+
+
+@pytest.fixture
+def ena_public_studies():
+    return make_suppresible_studies(
+        10, ena_props={"study_status": ena_models.Status.PUBLIC}
+    )
+
+
+@pytest.fixture
+def ena_private_studies():
+    return make_suppresible_studies(
+        6, ena_props={"study_status": ena_models.Status.PRIVATE}
+    )
+
+
+@pytest.fixture
+def ena_suppressed_studies():
+    """Returns:
+    6 Studies that where SUPPRESSED
+    5 Studies that were KILLED
+    3 Studies that were CANCELLED
+    The EMG studies are also suppressed.
+    """
+    studies = []
+    emg_props = {"is_suppressed": True}
+    studies.extend(
+        make_suppresible_studies(
+            6,
+            emg_props=emg_props,
+            ena_props={"study_status": ena_models.Status.SUPPRESSED},
+        )
+    )
+    studies.extend(
+        make_suppresible_studies(
+            5, emg_props=emg_props, ena_props={"study_status": ena_models.Status.KILLED}
+        )
+    )
+    studies.extend(
+        make_suppresible_studies(
+            3,
+            emg_props=emg_props,
+            ena_props={"study_status": ena_models.Status.CANCELLED},
+        )
+    )
+    return studies
+
+def make_suppresible_runs(quantity, emg_props=None, ena_props=None):
+    emg_props = emg_props or {}
+    ena_props = ena_props or {}
+    runs = baker.make(emg_models.Run, _quantity=quantity, **emg_props)
+    for run in runs:
+        run.accession = str(uuid.uuid4())
+        run.save()
+    ena_runs = []
+    for emg_run in runs:
+        ena_runs.append(
+            ena_models.Run(run_id=emg_run.accession, **ena_props)
+        )
+    return ena_runs
+
+@pytest.fixture
+def ena_public_runs():
+    return make_suppresible_runs(
+        10, ena_props={"status_id": ena_models.Status.PUBLIC}
+    )
+
+
+@pytest.fixture
+def ena_private_runs():
+    return make_suppresible_runs(
+        6, ena_props={"status_id": ena_models.Status.PRIVATE}
+    )
+
+@pytest.fixture
+def ena_suppressed_runs():
+    """Returns:
+    6 Studies that where SUPPRESSED
+    5 Studies that were KILLED
+    3 Studies that were CANCELLED
+    The EMG studies are also suppressed.
+    """
+    runs = []
+    emg_props = {"is_suppressed": True}
+    runs.extend(
+        make_suppresible_runs(
+            6,
+            emg_props=emg_props,
+            ena_props={"status_id": ena_models.Status.SUPPRESSED},
+        )
+    )
+    runs.extend(
+        make_suppresible_runs(
+            5, emg_props=emg_props, ena_props={"status_id": ena_models.Status.KILLED}
+        )
+    )
+    runs.extend(
+        make_suppresible_runs(
+            3,
+            emg_props=emg_props,
+            ena_props={"status_id": ena_models.Status.CANCELLED},
+        )
+    )
+    return runs
+
+def make_suppresible_samples(quantity, emg_props=None, ena_props=None):
+    emg_props = emg_props or {}
+    ena_props = ena_props or {}
+    samples = baker.make(emg_models.Sample, _quantity=quantity, **emg_props)
+    for sample in samples:
+        sample.accession = str(uuid.uuid4())[:5]
+        sample.save()
+    ena_samples = []
+    for emg_sample in samples:
+        ena_samples.append(
+            ena_models.Sample(sample_id=emg_sample.accession, **ena_props)
+        )
+    return ena_samples
+
+@pytest.fixture
+def ena_public_samples():
+    return make_suppresible_samples(
+        10, ena_props={"status_id": ena_models.Status.PUBLIC}
+    )
+
+
+@pytest.fixture
+def ena_private_samples():
+    return make_suppresible_samples(
+        6, ena_props={"status_id": ena_models.Status.PRIVATE}
+    )
+
+@pytest.fixture
+def ena_suppressed_samples():
+    """Returns:
+    6 Studies that where SUPPRESSED
+    5 Studies that were KILLED
+    3 Studies that were CANCELLED
+    The EMG studies are also suppressed.
+    """
+    samples = []
+    emg_props = {"is_suppressed": True}
+    samples.extend(
+        make_suppresible_samples(
+            2,
+            emg_props=emg_props,
+            ena_props={"status_id": ena_models.Status.SUPPRESSED},
+        )
+    )
+    samples.extend(
+        make_suppresible_samples(
+            3, emg_props=emg_props, ena_props={"status_id": ena_models.Status.KILLED}
+        )
+    )
+    samples.extend(
+        make_suppresible_samples(
+            7,
+            emg_props=emg_props,
+            ena_props={"status_id": ena_models.Status.CANCELLED},
+        )
+    )
+    return samples
+
+def make_suppresible_assemblies(quantity, emg_props=None, ena_props=None):
+    emg_props = emg_props or {}
+    ena_props = ena_props or {}
+    assemblies = baker.make(emg_models.Assembly, _quantity=quantity, **emg_props)
+    for assembly in assemblies:
+        assembly.legacy_accession = str(uuid.uuid4())[:5]
+        assembly.save()
+    ena_assemblies = []
+    for emg_assembly in assemblies:
+        ena_assemblies.append(
+            ena_models.Assembly(gc_id=emg_assembly.legacy_accession, **ena_props)
+        )
+    return ena_assemblies
+
+@pytest.fixture
+def ena_public_assemblies():
+    return make_suppresible_assemblies(
+        54, ena_props={"status_id": ena_models.Status.PUBLIC}
+    )
+
+
+@pytest.fixture
+def ena_private_assemblies():
+    return make_suppresible_assemblies(
+        6, ena_props={"status_id": ena_models.Status.PRIVATE}
+    )
+
+@pytest.fixture
+def ena_suppressed_assemblies():
+    """Returns:
+    6 Studies that where SUPPRESSED
+    5 Studies that were KILLED
+    3 Studies that were CANCELLED
+    The EMG studies are also suppressed.
+    """
+    assemblies = []
+    emg_props = {"is_suppressed": True}
+    assemblies.extend(
+        make_suppresible_assemblies(
+            32,
+            emg_props=emg_props,
+            ena_props={"status_id": ena_models.Status.SUPPRESSED},
+        )
+    )
+    assemblies.extend(
+        make_suppresible_assemblies(
+            12, emg_props=emg_props, ena_props={"status_id": ena_models.Status.KILLED}
+        )
+    )
+    assemblies.extend(
+        make_suppresible_assemblies(
+            9,
+            emg_props=emg_props,
+            ena_props={"status_id": ena_models.Status.CANCELLED},
+        )
+    )
+    return assemblies

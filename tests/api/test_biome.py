@@ -58,7 +58,7 @@ class TestBiomeAPI(APITestCase):
                     pk=pk,
                     biome=emg_models.Biome.objects.get(pk=pk),
                     accession="ERS{:0>3}".format(pk),
-                    is_public=1
+                    is_private=False
                 )
             )
 
@@ -66,7 +66,7 @@ class TestBiomeAPI(APITestCase):
             'emgapi.Study',
             pk=1,
             secondary_accession="SPR0001",
-            is_public=1,
+            is_private=False,
             # add root until Biome is dropped from Study
             biome=emg_models.Biome.objects.get(lineage='root'),
             samples=self.data['samples']
