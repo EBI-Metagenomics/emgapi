@@ -592,6 +592,9 @@ class AssemblySerializer(ExplicitFieldsModelSerializer,
         model = emg_models.Assembly
         exclude = (
             'study',
+            'is_suppressed',
+            'suppressed_at',
+            'suppression_reason',
         )
 
 
@@ -914,6 +917,9 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
             'pipeline',
             'external_run_ids',
             'secondary_accession',
+            'is_suppressed',
+            'suppressed_at',
+            'suppression_reason',
         )
 
 
