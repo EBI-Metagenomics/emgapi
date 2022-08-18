@@ -956,6 +956,9 @@ class AnalysisSerializer(BaseAnalysisSerializer):
             'pipeline',
             'external_run_ids',
             'secondary_accession',
+            'is_suppressed',
+            'suppressed_at',
+            'suppression_reason',
         )
 
 
