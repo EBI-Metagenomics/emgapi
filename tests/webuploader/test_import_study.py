@@ -24,34 +24,12 @@ from emgapi import models as emg_models
 from emgapianns.management.commands.import_study import Command
 from emgena import models as ena_models
 
-
-def mock_ena_run_study(*args, **kwargs):
-    study = ena_models.RunStudy()
-    study.study_id = "ERP117125"
-    study.project_id = "PRJEB34249"
-    study.study_status = "public"
-    study.center_name = "UNIVERSITY OF CAMBRIDGE"
-    study.hold_date = None
-    study.first_created = "2019-09-04 11:23:26"
-    study.last_updated = "2019-09-04 11:23:26"
-    study.study_title = "Dysbiosis associated with acute helminth infections in herbivorous youngstock - "
-    "observations and implications"
-    study.study_description = (
-        "This study investigates, for the first time, the associations between acute "
-    )
-    "infections by GI helminths and the faecal microbial and metabolic profiles of "
-    "a cohort of equine youngstock, prior to and following treatment with "
-    "parasiticides (ivermectin)."
-    study.submission_account_id = "Webin-50804"
-    study.pubmed_id = ""
-    return study, []
+from test_utils.emg_fixtures import ena_run_study
 
 
 def mock_ncbi_run_study_SRP000125():
-    """
-        Useful tests for this case:
-            List of pubmed_ids
-    :return:
+    """Useful tests for this case:
+    List of pubmed_ids
     """
     study = ena_models.RunStudy()
     study.study_id = "SRP000125"
@@ -127,7 +105,7 @@ class TestImportStudyTransactions:
         "emgapianns.management.lib.create_or_update_study.StudyImporter._fetch_study_metadata"
     )
     def test_import_ena_study_should_succeed(
-        self, mock_db, mock_study_dir, mock_ena_project
+        self, mock_db, mock_study_dir, mock_ena_project, ena_run_study
     ):
         """
         :param mock_db:
@@ -138,7 +116,7 @@ class TestImportStudyTransactions:
         lineage = "root:Host-associated:Mammals:Digestive system:Fecal"
         biome_name = "Fecal"
 
-        mock_db.return_value = expected = mock_ena_run_study()
+        mock_db.return_value = [ena_run_study, []]
         mock_study_dir.return_value = "2019/09/ERP117125"
         mock_ena_project.return_value = get_ena_project_mock("UNIVERSITY OF CAMBRIDGE")
 
@@ -148,14 +126,14 @@ class TestImportStudyTransactions:
             cmd = Command()
             cmd.run_from_argv(argv=["manage.py", "import_study", accession, lineage])
             actual_study = emg_models.Study.objects.get(secondary_accession=accession)
-            assert expected[0].study_id == actual_study.secondary_accession
-            assert expected[0].project_id == actual_study.project_id
-            assert expected[0].center_name == actual_study.centre_name
+            assert ena_run_study.study_id == actual_study.secondary_accession
+            assert ena_run_study.project_id == actual_study.project_id
+            assert ena_run_study.center_name == actual_study.centre_name
             assert None is actual_study.experimental_factor
-            assert True is actual_study.is_public
+            assert actual_study.is_private == False
             assert None is actual_study.public_release_date
-            assert expected[0].study_description in actual_study.study_abstract
-            assert expected[0].study_title in actual_study.study_name
+            assert ena_run_study.study_description in actual_study.study_abstract
+            assert ena_run_study.study_title in actual_study.study_name
             assert "FINISHED" == actual_study.study_status
             assert "SUBMITTED" == actual_study.data_origination
             assert None is actual_study.author_email
@@ -164,11 +142,11 @@ class TestImportStudyTransactions:
                 "%m/%d/%Y"
             ) == actual_study.last_update.strftime("%m/%d/%Y")
             assert (
-                expected[0].submission_account_id == actual_study.submission_account_id
+                ena_run_study.submission_account_id == actual_study.submission_account_id
             )
             assert biome_name == actual_study.biome.biome_name
             assert mock_study_dir.return_value == actual_study.result_directory
-            assert expected[0].first_created == actual_study.first_created.strftime(
+            assert ena_run_study.first_created == actual_study.first_created.strftime(
                 "%Y-%m-%d %H:%M:%S"
             )
             assert 0 == len(actual_study.publications.all())
@@ -205,7 +183,7 @@ class TestImportStudyTransactions:
             assert expected[0].project_id == actual_study.project_id
             assert expected[0].center_name == actual_study.centre_name
             assert None is actual_study.experimental_factor
-            assert True is actual_study.is_public
+            assert actual_study.is_private == False
             assert None is actual_study.public_release_date
             assert expected[0].study_description in actual_study.study_abstract
             assert expected[0].study_title in actual_study.study_name
@@ -262,7 +240,7 @@ class TestImportStudyTransactions:
             assert expected[0].project_id == actual_study.project_id
             assert expected[0].center_name == actual_study.centre_name
             assert None is actual_study.experimental_factor
-            assert True is actual_study.is_public
+            assert actual_study.is_private == False
             assert None is actual_study.public_release_date
             assert expected[0].study_description in actual_study.study_abstract
             assert expected[0].study_title in actual_study.study_name

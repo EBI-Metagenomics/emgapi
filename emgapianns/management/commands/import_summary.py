@@ -300,35 +300,33 @@ class Command(EMGBaseCommand):
         analysis.pipeline_version = obj.pipeline.release_version
         analysis.job_id = obj.job_id
 
-        new_entities = []
+        referenced_entities = {}
         annotations = []
 
         # drop previous annotations
         setattr(analysis, analysis_field, [])
         analysis.save()
 
-        # next(reader)  # skip header
-
         for count, model_id, description in reader:
             count = int(count)
 
-            new_entity = None
-            try:
-                new_entity = entity_model.objects.get(accession=model_id)
-            except entity_model.DoesNotExist:
-                new_entity = entity_model(
-                    accession=model_id,
-                    description=description
-                )
-                new_entities.append(new_entity)
+            entity = entity_model(
+                accession=model_id,
+                description=description
+            )
+            referenced_entities[model_id] = entity
             new_annotation = ann_model(count=count)
-            setattr(new_annotation, ann_field, new_entity)
+            setattr(new_annotation, ann_field, entity)
             annotations.append(new_annotation)
 
-        if len(new_entities):
-            entity_model.objects.insert(new_entities)
+        if len(referenced_entities):
+            existing_entities = entity_model.objects.filter(accession__in=referenced_entities.keys())
+            for entity in existing_entities:
+                referenced_entities.pop(entity.id)
+            if referenced_entities:
+                entity_model.objects.insert(referenced_entities.values())
             logger.info(
-                'Created {} new entries'.format(len(new_entities)))
+                'Created {} new entries'.format(len(referenced_entities)))
 
         if len(annotations):
             setattr(analysis, analysis_field, annotations)
@@ -337,7 +335,6 @@ class Command(EMGBaseCommand):
 
         analysis.save()
         logger.info('Saved {}'.format(analysis_field))
-
 
     def load_genome_properties(self, reader,  obj):
         """Genome properties import, using the output summary from GP

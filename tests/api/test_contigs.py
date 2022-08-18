@@ -55,7 +55,6 @@ def contigs():
     m_models.AnalysisJobContig.objects.insert(contigs)
 
 
-@pytest.mark.usefixtures("mongodb")
 @pytest.mark.django_db
 class TestContigsAPI:
     def test_contigs(self, client, contigs, run_v5):

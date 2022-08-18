@@ -35,7 +35,7 @@ class TestPermissionsAPI:
             "emgapi.Study",
             pk=111,
             secondary_accession="SRP0111",
-            is_public=1,
+            is_private=False,
             submission_account_id="Webin-000",
             biome=biome,
         )
@@ -43,7 +43,7 @@ class TestPermissionsAPI:
             "emgapi.Study",
             pk=112,
             secondary_accession="SRP0112",
-            is_public=1,
+            is_private=False,
             submission_account_id="Webin-000",
             biome=biome,
         )
@@ -52,7 +52,7 @@ class TestPermissionsAPI:
             "emgapi.Study",
             pk=113,
             secondary_accession="SRP0113",
-            is_public=0,
+            is_private=True,
             submission_account_id="Webin-000",
             biome=biome,
         )
@@ -62,7 +62,7 @@ class TestPermissionsAPI:
             "emgapi.Study",
             pk=114,
             secondary_accession="SRP0114",
-            is_public=1,
+            is_private=False,
             submission_account_id="Webin-111",
             biome=biome,
         )
@@ -71,7 +71,7 @@ class TestPermissionsAPI:
             "emgapi.Study",
             pk=115,
             secondary_accession="SRP0115",
-            is_public=0,
+            is_private=True,
             submission_account_id="Webin-111",
             biome=biome,
         )
@@ -81,7 +81,7 @@ class TestPermissionsAPI:
             "emgapi.Study",
             pk=120,
             secondary_accession="SRP0120",
-            is_public=1,
+            is_private=False,
             submission_account_id=None,
             biome=biome,
         )
@@ -90,36 +90,26 @@ class TestPermissionsAPI:
             "emgapi.Study",
             pk=121,
             secondary_accession="SRP0121",
-            is_public=0,
+            is_private=True,
             submission_account_id=None,
             biome=biome,
         )
 
         # public run (needeed for auth filtering)
-        public_status = baker.make(
-            "emgapi.Status",
-            pk=emg_models.Status.PUBLIC,
-            status="public",
-        )
         public_run = baker.make(
             "emgapi.Run",
             run_id=1234,
             accession="ABC01234",
-            status_id=public_status,
+            is_private=False,
             experiment_type=experiment_type,
         )
 
         # private (needeed for auth filtering)
-        private_status = baker.make(
-            "emgapi.Status",
-            pk=emg_models.Status.PRIVATE,
-            status="private",
-        )
         run_private = baker.make(
             "emgapi.Run",
             run_id=9821,
             accession="ABC01234",
-            status_id=private_status,
+            is_private=True,
             experiment_type=experiment_type,
         )
 
@@ -138,8 +128,8 @@ class TestPermissionsAPI:
                 "emgapi.AnalysisJob",
                 pk=public_id,
                 study=study,
-                analysis_status=analysis_status,  # 3
-                run_status_id=emg_models.Status.PUBLIC,
+                analysis_status=analysis_status,  # 3 - Completed
+                is_private=False,
                 run=public_run,
                 experiment_type=experiment_type,
                 pipeline=pipeline_v5,
@@ -166,8 +156,8 @@ class TestPermissionsAPI:
                 "emgapi.AnalysisJob",
                 pk=private_id,
                 study=study,
-                analysis_status=analysis_status,  # 3
-                run_status_id=emg_models.Status.PRIVATE,
+                analysis_status=analysis_status,  # 3 Completed
+                is_private=True,
                 run=run_private,
                 experiment_type=experiment_type,
                 pipeline=pipeline_v5,
@@ -181,7 +171,7 @@ class TestPermissionsAPI:
             )
             private_id += 1
 
-        # AnalysisJob with run_status_id = Public
+        # AnalysisJob - public
         # but in a private study (should not be visible)
         # belongs to Webin-000
         baker.make(
@@ -189,7 +179,7 @@ class TestPermissionsAPI:
             pk=999,
             study=webin_zero_priv,
             analysis_status=analysis_status,  # 3
-            run_status_id=emg_models.Status.PUBLIC,
+            is_private=False,
             run=run_private,
             experiment_type=experiment_type,
             pipeline=pipeline_v5,

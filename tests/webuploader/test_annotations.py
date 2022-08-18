@@ -25,7 +25,6 @@ from rest_framework import status
 from test_utils.emg_fixtures import *  # noqa
 
 
-@pytest.mark.usefixtures("mongodb")
 @pytest.mark.django_db
 class TestAnnotations:
     @property
@@ -53,6 +52,29 @@ class TestAnnotations:
             ".gprops",
             ".antismash",
         ]
+
+    def test_empty(self, client, run_emptyresults):
+        """Test empty annotations"""
+        assert run_emptyresults.release_version == "4.1"
+        assert run_emptyresults.accession == "MGYA00001234"
+
+        accession = run_emptyresults.accession
+
+        for suffix in self._import_suffixes:
+            call_command(
+                "import_summary",
+                accession,
+                os.path.dirname(os.path.abspath(__file__)),
+                pipeline=run_emptyresults.release_version,
+                suffix=suffix,
+            )
+
+        for endpoint, _ in self._annotation_endpoints:
+            url = reverse("emgapi_v1:analysis-goslim-list", args=[accession])
+            response = client.get(url)
+            assert response.status_code == status.HTTP_200_OK
+            rsp = response.json()
+            assert len(rsp["data"]) == 0
 
     def test_goslim(self, client, run):
         """Test GO Slim list and detail"""
@@ -158,29 +180,6 @@ class TestAnnotations:
         url = reverse("emgapi_v1:interproidentifier-detail", args=["IPR9999"])
         response = client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
-
-    def test_empty(self, client, run_emptyresults):
-        """Test empty annotations"""
-        assert run_emptyresults.release_version == "4.1"
-        assert run_emptyresults.accession == "MGYA00001234"
-
-        accession = run_emptyresults.accession
-
-        for suffix in self._import_suffixes:
-            call_command(
-                "import_summary",
-                accession,
-                os.path.dirname(os.path.abspath(__file__)),
-                pipeline=run_emptyresults.release_version,
-                suffix=suffix,
-            )
-
-        for endpoint, _ in self._annotation_endpoints:
-            url = reverse("emgapi_v1:analysis-goslim-list", args=[accession])
-            response = client.get(url)
-            assert response.status_code == status.HTTP_200_OK
-            rsp = response.json()
-            assert len(rsp["data"]) == 0
 
     @pytest.mark.parametrize(
         "expected",

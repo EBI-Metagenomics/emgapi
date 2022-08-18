@@ -67,8 +67,8 @@ class Command(BaseCommand):
         sample = self.tag_sample(assembly, db_assembly_data.sample_id)
         self.tag_study(assembly, db_assembly_data.primary_study_accession, sample)
 
-        if assembly.study.is_public:
-            assembly = self.update_assembly_status(db_assembly_data.assembly_id, "public")
+        assembly.is_private = assembly.study.is_private
+        assembly.save()
 
         self.tag_experiment_type(assembly, "assembly")
         self.tag_optional_run(assembly, db_assembly_data.name)
@@ -81,28 +81,14 @@ class Command(BaseCommand):
 
     def create_or_update_assembly(self, ena_assembly):
         accession = ena_assembly.assembly_id
-
         logger.info("Creating assembly {}".format(accession))
-        status = emg_models.Status.objects.using(self.emg_db).get(status_id=ena_assembly.status_id)
         defaults = sanitise_fields({
-            "status_id": status,
+            "is_private": ena_assembly.status_id == 2,
+            "is_suppressed": ena_assembly.status_id in [3, 5 ,6],
             "wgs_accession": ena_assembly.wgs_accession,
             "legacy_accession": ena_assembly.gc_id,
             "coverage": ena_assembly.coverage,
             "min_gap_length": ena_assembly.min_gap_length
-        })
-        assembly, created = emg_models.Assembly.objects.using(self.emg_db).update_or_create(
-            accession=accession,
-            defaults=defaults
-        )
-        return assembly
-
-    def update_assembly_status(self, accession, status):
-
-        logger.info("Updating assembly {} to {}".format(accession, status))
-        status = emg_models.Status.objects.using(self.emg_db).get(status=status)
-        defaults = sanitise_fields({
-            "status_id": status,
         })
         assembly, created = emg_models.Assembly.objects.using(self.emg_db).update_or_create(
             accession=accession,

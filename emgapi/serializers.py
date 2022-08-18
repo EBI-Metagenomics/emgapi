@@ -487,7 +487,7 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     )
 
     def get_pipelines(self, obj):
-        # TODO: push that to manager
+        # TODO: push this to the manager
         return emg_models.Pipeline.objects \
             .filter(analyses__run=obj)
 
@@ -507,7 +507,9 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     class Meta:
         model = emg_models.Run
         exclude = (
-            'status_id',
+            'is_suppressed',
+            'suppression_reason',
+            'suppressed_at',
         )
 
 
@@ -589,8 +591,10 @@ class AssemblySerializer(ExplicitFieldsModelSerializer,
     class Meta:
         model = emg_models.Assembly
         exclude = (
-            'status_id',
             'study',
+            'is_suppressed',
+            'suppressed_at',
+            'suppression_reason',
         )
 
 
@@ -907,13 +911,15 @@ class BaseAnalysisSerializer(ExplicitFieldsModelSerializer,
             'input_file_name',
             'result_directory',
             'is_production_run',
-            'run_status_id',
             'job_operator',
             'submit_time',
             'analysis_status',
             'pipeline',
             'external_run_ids',
             'secondary_accession',
+            'is_suppressed',
+            'suppressed_at',
+            'suppression_reason',
         )
 
 
@@ -945,12 +951,14 @@ class AnalysisSerializer(BaseAnalysisSerializer):
             'input_file_name',
             'result_directory',
             'is_production_run',
-            'run_status_id',
             'job_operator',
             'submit_time',
             'pipeline',
             'external_run_ids',
             'secondary_accession',
+            'is_suppressed',
+            'suppressed_at',
+            'suppression_reason',
         )
 
 
@@ -1062,7 +1070,10 @@ class SampleSerializer(ExplicitFieldsModelSerializer,
         model = emg_models.Sample
         exclude = (
             'primary_accession',
-            'is_public',
+            'is_private',
+            'is_suppressed',
+            'suppression_reason',
+            'suppressed_at',
             'metadata_received',
             'sequencedata_received',
             'sequencedata_archived',
@@ -1315,6 +1326,9 @@ class StudySerializer(ExplicitFieldsModelSerializer,
             'study_status',
             'author_email',
             'author_name',
+            'is_suppressed',
+            'suppression_reason',
+            'suppressed_at',
         )
 
 

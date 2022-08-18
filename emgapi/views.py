@@ -290,7 +290,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         ---
         `/biomes/top10`
         """
-
+        # TODO Review the `sample.IS_PRIVATE` condition. It doesn't seem to be required.
         sql = """
         SELECT
             parent.BIOME_ID,
@@ -300,7 +300,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
             SAMPLE as sample
         WHERE node.lft BETWEEN parent.lft AND parent.rgt
             AND node.BIOME_ID = sample.BIOME_ID
-            AND sample.IS_PUBLIC = 1
+            AND NOT sample.IS_PRIVATE
             AND parent.BIOME_ID in %s
         GROUP BY parent.BIOME_ID
         ORDER BY samples_count DESC
@@ -940,11 +940,15 @@ class KronaViewSet(emg_mixins.ListModelMixin,
         `/runs/GCA_900216095/pipelines/4.0/krona/lsu`
         """
         obj = self.get_object()
-        path = os.path.join(settings.RESULTS_DIR, obj.result_directory, 'taxonomy-summary')
+        base_path = os.path.join(settings.RESULTS_DIR, obj.result_directory, 'taxonomy-summary')
         if subdir in ['unite', 'itsonedb']:
-            path = os.path.join(path, 'its', subdir)
+            path = os.path.join(base_path, 'its', subdir)
         else:
-            path = os.path.join(path, subdir.upper())
+            path = os.path.join(base_path, subdir.upper())
+
+        if subdir == 'ssu' and not os.path.exists(path):
+            # Older pipelines (1, 2...?) have SSU-only Krona in un-nested directory.
+            path = base_path
 
         krona = os.path.abspath(os.path.join(path, 'krona.html'))
         if os.path.isfile(krona):

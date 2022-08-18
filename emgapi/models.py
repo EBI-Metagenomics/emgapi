@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2020 EMBL - European Bioinformatics Institute
+# Copyright 2017-2022 EMBL - European Bioinformatics Institute
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,27 +14,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-# This is an auto-generated Django model module.
-# You'll have to do the following manually to clean this up:
-#   * Rearrange models' order
-#   * Make sure each model has one field with primary_key=True
-#   * Make sure each ForeignKey has `on_delete` set to the desired behavior.
-#   * Remove `managed = False` lines if you wish to allow Django to create,
-#     modify, and delete the table
-# Feel free to rename the models, but don't rename db_table values
-# or field names.
-
-from __future__ import unicode_literals
+import logging
 
 from django.db import models
 from django.db.models import (CharField, Count, OuterRef, Prefetch, Q,
                               Subquery, Value)
 from django.db.models.functions import Cast, Concat
+from django.utils import timezone
 
 from rest_framework.generics import get_object_or_404
 
 from django_mysql.models import QuerySet as MySQLQuerySet
+
+from emgapi.validators import validate_ena_study_accession
+
+from emgena.models import Status as ENAStatus
+
+
+logger = logging.getLogger(__name__)
 
 
 class Resource(object):
@@ -48,9 +45,118 @@ class Token(object):
         for field in ('id', 'token'):
             setattr(self, field, kwargs.get(field, None))
 
+class PrivacyControlledModel(models.Model):
+    is_private = models.BooleanField(db_column='IS_PRIVATE', default=True)
+
+    class Meta:
+        abstract = True
+
+
+class SuppressQuerySet(models.QuerySet):
+    def suppress(self, reason):
+        return self.update(is_suppressed=True, suppressed_at=timezone.now(), suppression_reason=reason)
+
+    def unsuppress(self, reason):
+        return self.update(is_suppressed=False, suppressed_at=None, suppression_reason=None)
+
+class SuppressManager(models.Manager):
+    def get_queryset(self):
+        return SuppressQuerySet(self.model, self._db).filter(is_suppressed=False)
+
+
+class SuppressibleModel(models.Model):
+    
+    class Reason(models.IntegerChoices):
+        DRAFT = 1
+        CANCELLED = 3
+        SUPPRESSED = 5
+        KILLED = 6
+        TEMPORARY_SUPPRESSED = 7
+        TEMPORARY_KILLED = 8
+
+    is_suppressed = models.BooleanField(db_column='IS_SUPPRESSED', default=False)
+    suppressed_at = models.DateTimeField(db_column='SUPPRESSED_AT', blank=True, null=True)
+    suppression_reason = models.IntegerField(db_column='SUPPRESSION_REASON', blank=True, null=True, choices=Reason.choices)
+
+    def suppress(self, suppression_reason=None, save=True):
+        self.is_suppressed = True
+        self.suppressed_at = timezone.now()
+        self.suppression_reason = suppression_reason
+        if save:
+            self.save()
+        return self
+
+    def unsuppress(self, suppression_reason=None, save=True):
+        self.is_suppressed = False
+        self.suppressed_at = None
+        self.suppression_reason = None
+        if save:
+            self.save()
+        return self
+
+    class Meta:
+        abstract = True
+
+
+class ENASyncableModel(SuppressibleModel, PrivacyControlledModel):
+
+    def sync_with_ena_status(self, ena_model_status: ENAStatus):
+        """Sync the model with the ENA status accordingly.
+        Fields that are updated: is_supppressed, suppressed_at, reason and is_private
+        """
+        if ena_model_status == ENAStatus.PRIVATE and not self.is_private:
+            self.is_private = True
+            logging.info(f"{self} marked as private")
+        if ena_model_status == ENAStatus.PUBLIC and self.is_private:
+            self.is_private = False
+            logging.info(f"{self} marked as public")
+
+        if ena_model_status == ENAStatus.DRAFT:
+            logging.warning(
+                f"{study} will not be updated due to the study status being 'draft'"
+            )
+
+        if (
+            ena_model_status
+            in [
+                ENAStatus.SUPPRESSED,
+                ENAStatus.KILLED,
+                ENAStatus.TEMPORARY_SUPPRESSED,
+                ENAStatus.TEMPORARY_KILLED,
+                ENAStatus.CANCELLED,
+            ]
+            and not self.is_suppressed
+        ):
+            reason = None
+            if ena_model_status == ENAStatus.SUPPRESSED:
+                reason = SuppressibleModel.Reason.SUPPRESSED
+            if ena_model_status == ENAStatus.KILLED:
+                reason = SuppressibleModel.Reason.KILLED
+            elif ena_model_status == ENAStatus.CANCELLED:
+                reason = SuppressibleModel.Reason.CANCELLED
+            elif ena_model_status == ENAStatus.TEMPORARY_SUPPRESSED:
+                reason = (
+                    SuppressibleModel.Reason.TEMPORARY_SUPPRESSED
+                )
+            elif ena_model_status == ENAStatus.TEMPORARY_KILLED:
+                reason = SuppressibleModel.Reason.TEMPORARY_KILLED
+            elif ena_model_status == ENAStatus.CANCELLED:
+                reason = SuppressibleModel.Reason.CANCELLED
+
+            self.suppress(suppression_reason=reason, save=False)
+
+            logging.info(
+                f"{self} was suppressed, status on ENA {ena_model_status}"
+            )
+
+        return self
+
+    class Meta:
+        abstract = True
+
 
 class BaseQuerySet(models.QuerySet):
-    """Auth mechanism to filter private models
+    """Auth mechanism to filter private / suppressed models
     """
     # TODO: the QuerySet should not have to handle the request
     #       if should recieve the username
@@ -71,31 +177,30 @@ class BaseQuerySet(models.QuerySet):
         """
         _query_filters = {
             'StudyQuerySet': {
-                'all': [Q(is_public=1), ],
+                'all': [Q(is_private=False),],
             },
             'StudyDownloadQuerySet': {
-                'all': [Q(study__is_public=1), ],
+                'all': [Q(study__is_private=False),],
             },
             'SampleQuerySet': {
-                'all': [Q(is_public=1), ],
+                'all': [Q(is_private=False),],
             },
             'RunQuerySet': {
                 'all': [
-                    Q(status_id=4),
+                    Q(is_private=False),
                 ],
             },
             'AssemblyQuerySet': {
                 'all': [
-                    Q(status_id=4),
+                    Q(is_private=False),
                 ],
             },
             'AnalysisJobDownloadQuerySet': {
                 'all': [
-                    # TMP: IS_PUBLIC = 5 is suppressed
-                    ~Q(job__sample__is_public=5),
-                    Q(job__study__is_public=1),
-                    Q(job__run__status_id=4) | Q(job__assembly__status_id=4),
-                    Q(job__analysis_status_id=3) | Q(job__analysis_status_id=6)
+                    Q(job__sample__isnull=True) | Q(job__sample__is_suppressed=False),
+                    Q(job__study__is_private=False),
+                    Q(job__run__is_private=False) | Q(job__assembly__is_private=False),
+                    Q(job__analysis_status_id=AnalysisStatus.COMPLETED) | Q(job__analysis_status_id=AnalysisStatus.QC_NOT_PASSED)
                 ],
             },
         }
@@ -103,25 +208,25 @@ class BaseQuerySet(models.QuerySet):
         if request is not None and request.user.is_authenticated:
             _username = request.user.username
             _query_filters['StudyQuerySet']['authenticated'] = \
-                [Q(submission_account_id=_username) | Q(is_public=1)]
+                [Q(submission_account_id=_username) | Q(is_private=False)]
             _query_filters['StudyDownloadQuerySet']['authenticated'] = \
                 [Q(study__submission_account_id=_username) |
-                 Q(study__is_public=1)]
+                 Q(study__is_private=False)]
             _query_filters['SampleQuerySet']['authenticated'] = \
-                [Q(submission_account_id=_username) | Q(is_public=1)]
+                [Q(submission_account_id=_username) | Q(is_private=False)]
             _query_filters['RunQuerySet']['authenticated'] = \
-                [Q(study__submission_account_id=_username, status_id=2) |
-                 Q(status_id=4)]
+                [Q(study__submission_account_id=_username, is_private=True) |
+                 Q(is_private=True)]
             _query_filters['AssemblyQuerySet']['authenticated'] = \
                 [Q(samples__studies__submission_account_id=_username,
-                   status_id=2) |
-                 Q(status_id=4)]
+                   is_private=True) |
+                 Q(is_private=False)]
             _query_filters['AnalysisJobDownloadQuerySet']['authenticated'] = \
                 [Q(job__study__submission_account_id=_username,
-                   job__run__status_id=2) |
+                   job__is_private=True) |
                  Q(job__study__submission_account_id=_username,
-                   job__assembly__status_id=2) |
-                 Q(job__run__status_id=4) | Q(job__assembly__status_id=4)]
+                   job__assembly__is_private=True) |
+                 Q(job__run__is_private=False) | Q(job__assembly__is_private=False)]
 
         filters = _query_filters.get(self.__class__.__name__)
 
@@ -533,8 +638,8 @@ class AnalysisJobDownloadQuerySet(BaseQuerySet):
 
 class AnalysisJobDownloadManager(models.Manager):
     def get_queryset(self):
-        return AnalysisJobDownloadQuerySet(self.model, using=self._db).\
-            select_related(
+        return AnalysisJobDownloadQuerySet(self.model, using=self._db) \
+            .select_related(
                 'job',
                 'pipeline',
                 'group_type',
@@ -609,7 +714,11 @@ class StudyDownload(BaseAnnotationPipelineDownload):
         ordering = ('pipeline', 'group_type', 'alias',)
 
 
-class StudyQuerySet(BaseQuerySet):
+class StudyQuerySet(BaseQuerySet, SuppressQuerySet):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
     def mydata(self, request):
         if request.user.is_authenticated:
             _username = request.user.username
@@ -641,7 +750,8 @@ class StudyManager(models.Manager):
         return self.get_queryset().mydata(request)
 
 
-class Study(models.Model):
+class Study(ENASyncableModel):
+
     def __init__(self, *args, **kwargs):
         super(Study, self).__init__(*args, **kwargs)
         setattr(self, 'accession', kwargs.get('accession', self._custom_pk()))
@@ -659,8 +769,6 @@ class Study(models.Model):
         db_column='CENTRE_NAME', max_length=255, blank=True, null=True)
     experimental_factor = models.CharField(
         db_column='EXPERIMENTAL_FACTOR', max_length=255, blank=True, null=True)
-    is_public = models.BooleanField(
-        db_column='IS_PUBLIC', default=False)
     public_release_date = models.DateField(
         db_column='PUBLIC_RELEASE_DATE', blank=True, null=True)
     study_abstract = models.TextField(
@@ -843,8 +951,10 @@ class SuperStudyBiome(models.Model):
         verbose_name_plural = 'super studies biomes'
 
 
-class SampleQuerySet(BaseQuerySet):
-    pass
+class SampleQuerySet(BaseQuerySet, SuppressQuerySet):
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 
 class SampleManager(models.Manager):
@@ -862,7 +972,7 @@ class SampleManager(models.Manager):
                 Prefetch('studies', queryset=Study.objects.available(request)),
                 Prefetch('metadata', queryset=SampleAnn.objects.all())
             ).defer(
-                'is_public',
+                'is_private',
                 'metadata_received',
                 'sequencedata_received',
                 'sequencedata_archived',
@@ -871,12 +981,7 @@ class SampleManager(models.Manager):
         return queryset
 
 
-class Sample(models.Model):
-    # is_public possible values
-    PUBLIC = 1
-    PRIVATE = 0
-    SUPPRESSED = 5 # TODO: this should not be in is_public
-
+class Sample(ENASyncableModel):
     sample_id = models.AutoField(
         db_column='SAMPLE_ID', primary_key=True)
     accession = models.CharField(
@@ -893,12 +998,6 @@ class Sample(models.Model):
     geo_loc_name = models.CharField(
         db_column='GEO_LOC_NAME', max_length=255, blank=True, null=True,
         help_text='Name of geographical location')
-    # possible values
-    # 1 - public
-    # 0 - private
-    # 5 - suppressed
-    is_public = models.IntegerField(
-        db_column='IS_PUBLIC', blank=True, null=True)
     metadata_received = models.DateTimeField(
         db_column='METADATA_RECEIVED', blank=True, null=True)
     sample_desc = models.TextField(
@@ -1018,11 +1117,11 @@ class ExperimentTypeManager(models.Manager):
         return ExperimentTypeQuerySet(self.model, using=self._db) \
             .annotate(
             samples_count=Count(
-                'runs__sample', filter=Q(runs__status_id=4), distinct=True)
+                'runs__sample', filter=Q(runs__is_private=False), distinct=True)
         ) \
             .annotate(
             runs_count=Count(
-                'runs', filter=Q(runs__status_id=4), distinct=True)
+                'runs', filter=Q(runs__is_private=False), distinct=True)
         )
 
 
@@ -1051,7 +1150,7 @@ class Status(models.Model):
     PRIVATE = 2
     CANCELLED = 3
     PUBLIC = 4
-    SUPRESSED = 5
+    SUPPRESSED = 5
     KILLED = 6
     TEMPORARY_SUPPRESSED = 7
     TEMPORARY_KILLED = 8
@@ -1069,15 +1168,16 @@ class Status(models.Model):
         return self.status
 
 
-class RunQuerySet(BaseQuerySet):
-    pass
+class RunQuerySet(BaseQuerySet, SuppressQuerySet):
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 
 class RunManager(models.Manager):
     def get_queryset(self):
         return RunQuerySet(self.model, using=self._db) \
             .select_related(
-                'status_id',
                 'sample',
                 'study',
                 'experiment_type'
@@ -1087,22 +1187,25 @@ class RunManager(models.Manager):
         return self.get_queryset().available(request)
 
 
-class Run(models.Model):
+class Run(ENASyncableModel):
     run_id = models.BigAutoField(
         db_column='RUN_ID', primary_key=True)
     accession = models.CharField(
         db_column='ACCESSION', max_length=80, blank=True, null=True)
     secondary_accession = models.CharField(
         db_column='SECONDARY_ACCESSION', max_length=100, blank=True, null=True)
-    status_id = models.ForeignKey(
-        'Status', db_column='STATUS_ID', related_name='runs',
-        on_delete=models.CASCADE, default=2)
     sample = models.ForeignKey(
         'Sample', db_column='SAMPLE_ID', related_name='runs',
         on_delete=models.CASCADE, blank=True, null=True)
     study = models.ForeignKey(
         'Study', db_column='STUDY_ID', related_name='runs',
         on_delete=models.CASCADE, blank=True, null=True)
+    # We use this field to link to the study if we haven't analyzed the study, hence
+    # there is no Study linked (`study` fk is none)
+    ena_study_accession = models.CharField(
+        db_column='ENA_STUDY_ACCESSION', validators=[validate_ena_study_accession],
+        help_text='ENA Study accession.',
+        max_length=20, blank=True, null=True)
     # TODO: not consistent, schema changes may be needed
     experiment_type = models.ForeignKey(
         ExperimentType, db_column='EXPERIMENT_TYPE_ID',
@@ -1129,8 +1232,10 @@ class Run(models.Model):
         return self.accession
 
 
-class AssemblyQuerySet(BaseQuerySet):
-    pass
+class AssemblyQuerySet(BaseQuerySet, SuppressQuerySet):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 
 class AssemblyManager(models.Manager):
@@ -1144,7 +1249,7 @@ class AssemblyManager(models.Manager):
         )
 
 
-class Assembly(models.Model):
+class Assembly(ENASyncableModel):
 
     assembly_id = models.BigAutoField(
         db_column='ASSEMBLY_ID', primary_key=True)
@@ -1154,9 +1259,6 @@ class Assembly(models.Model):
         db_column='WGS_ACCESSION', max_length=100, blank=True, null=True)
     legacy_accession = models.CharField(
         db_column='LEGACY_ACCESSION', max_length=100, blank=True, null=True)
-    status_id = models.ForeignKey(
-        'Status', db_column='STATUS_ID', related_name='assemblies',
-        on_delete=models.CASCADE, default=2)
     experiment_type = models.ForeignKey(
         ExperimentType, db_column='EXPERIMENT_TYPE_ID',
         related_name='assemblies',
@@ -1185,7 +1287,7 @@ class Assembly(models.Model):
         verbose_name_plural = 'assemblies'
 
     def __str__(self):
-        return self.accession
+        return self.accession or str(self.assembly_id)
 
 
 class AssemblyRun(models.Model):
@@ -1218,7 +1320,11 @@ class AssemblySample(models.Model):
         return 'Assembly:{} - Sample:{}'.format(self.assembly, self.sample)
 
 
-class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet):
+class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet, SuppressQuerySet):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
     def available(self, request=None):
         """Override BaseQuerySet with the AnalysisJob auth rules
         Use cases
@@ -1229,9 +1335,9 @@ class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet):
         """
         query_filters = {
             "all": [
-                Q(study__is_public=1),
-                ~Q(sample__is_public=Sample.SUPPRESSED),
-                Q(run__status_id=Status.PUBLIC) | Q(assembly__status_id=Status.PUBLIC),
+                Q(study__is_private=False),
+                Q(sample__isnull=True) | Q(sample__is_suppressed=False),
+                Q(run__is_private=False) | Q(assembly__is_private=False),
                 Q(analysis_status_id=AnalysisStatus.COMPLETED)
                 | Q(analysis_status_id=AnalysisStatus.QC_NOT_PASSED),
             ],
@@ -1240,14 +1346,14 @@ class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet):
         if request is not None and request.user.is_authenticated:
             username = request.user.username
             query_filters["authenticated"] = [
-                ~Q(sample__is_public=Sample.SUPPRESSED),
-                Q(study__submission_account_id=username, run__status_id=Status.PRIVATE)
+                Q(sample__isnull=True) | Q(sample__is_suppressed=False),
+                Q(study__submission_account_id=username, run__is_private=True)
                 | Q(
                     study__submission_account_id=username,
-                    assembly__status_id=Status.PRIVATE,
+                    assembly__is_private=True,
                 )
-                | Q(run__status_id=Status.PUBLIC)
-                | Q(assembly__status_id=Status.PUBLIC)
+                | Q(run__is_private=False)
+                | Q(assembly__is_private=False)
             ]
 
         return self._apply_filters(query_filters, request)
@@ -1319,7 +1425,7 @@ class AnalysisJobManager(models.Manager):
         )
 
 
-class AnalysisJob(models.Model):
+class AnalysisJob(SuppressibleModel, PrivacyControlledModel):
     def __init__(self, *args, **kwargs):
         super(AnalysisJob, self).__init__(*args, **kwargs)
         setattr(self, 'accession',
@@ -1374,8 +1480,6 @@ class AnalysisJob(models.Model):
         ExperimentType, db_column='EXPERIMENT_TYPE_ID',
         related_name='analyses',
         on_delete=models.CASCADE)
-    run_status_id = models.IntegerField(
-        db_column='RUN_STATUS_ID', blank=True, null=True)  # TODO: Should be renamed to status_id
     instrument_platform = models.CharField(
         db_column='INSTRUMENT_PLATFORM', max_length=50,
         blank=True, null=True)

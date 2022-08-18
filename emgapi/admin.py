@@ -87,7 +87,7 @@ class StudyAdmin(admin.ModelAdmin, NoRemoveMixin):
         'project_id',
         'study_name',
     )
-    list_filter = ('is_public', )
+    list_filter = ('is_private', )
     raw_id_fields = ('biome',)
 
     def save_model(self, request, obj, form, change):
@@ -155,14 +155,14 @@ class SampleAdmin(admin.ModelAdmin, NoRemoveMixin):
     ]
     change_list_template = "admin/change_list_filter_sidebar.html"
     list_filter = [
-        'is_public',
+        'is_private',
     ]
     list_display = [
         'accession',
         'primary_accession',
         'sample_name',
         'sample_desc',
-        'is_public',
+        'is_private',
     ]
 
     def get_search_results(self, request, queryset, search_term):
@@ -195,16 +195,12 @@ class RunAdmin(admin.ModelAdmin, AccessionSearch):
         'instrument_platform',
         'instrument_model'
     ]
-    list_filter = [
-        'status_id',
-    ]
     list_display = [
         'run_id',
         'accession',
         'secondary_accession',
         'sample',
         'study',
-        'status_id'
     ]
 
     filter_property = 'study'
@@ -247,9 +243,6 @@ class AssemblyAdmin(admin.ModelAdmin):
         'wgs_accession',
         'legacy_accession',
         'experiment_type__experiment_type'
-    ]
-    list_filter = [
-        'status_id'
     ]
 
 
