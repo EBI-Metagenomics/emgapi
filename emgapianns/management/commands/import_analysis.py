@@ -305,7 +305,10 @@ class Command(BaseCommand):
             defaults['instrument_model'] = run.instrument_model
             defaults['instrument_platform'] = run.instrument_platform
             defaults['experiment_type'] = run.experiment_type
-            defaults['run_status_id'] = run.status_id.pk
+            defaults['is_private'] = run.is_private
+            defaults['is_suppressed'] = run.is_suppressed
+            defaults['suppressed_at'] = run.suppressed_at
+            defaults['suppression_reason'] = run.suppression_reason
         else:
             assembly = self.get_emg_assembly(metadata.analysis_accession)
             comp_key.update({
@@ -313,8 +316,10 @@ class Command(BaseCommand):
                 'assembly': assembly,
             })
             defaults['experiment_type'] = self.get_experiment_type('assembly')
-            # TODO: run_status_id should be renamed to status_id
-            defaults['run_status_id'] = assembly.status_id.pk
+            defaults['is_private'] = assembly.is_private
+            defaults['is_suppressed'] = assembly.is_suppressed
+            defaults['suppressed_at'] = assembly.suppressed_at
+            defaults['suppression_reason'] = assembly.suppression_reason
             if metadata.run_accession:
                 run = self.get_emg_run(metadata.run_accession)
                 defaults['instrument_model'] = run.instrument_model
