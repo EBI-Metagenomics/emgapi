@@ -30,7 +30,7 @@ from test_utils.emg_fixtures import *  # noqa
 class TestSyncENAStudies:
     @patch("emgena.models.Run.objects")
     def test_make_runs_private(self, ena_run_objs_mock, ena_private_runs):
-        ena_run_objs_mock.using("era_pro").filter.return_value = ena_private_runs
+        ena_run_objs_mock.using("era").filter.return_value = ena_private_runs
 
         public_runs = Run.objects.order_by("?").all()[0:5]
 
@@ -47,7 +47,7 @@ class TestSyncENAStudies:
 
     @patch("emgena.models.Run.objects")
     def test_make_runs_public(self, ena_run_objs_mock, ena_public_runs):
-        ena_run_objs_mock.using("era_pro").filter.return_value = ena_public_runs
+        ena_run_objs_mock.using("era").filter.return_value = ena_public_runs
 
         private_runs = Run.objects.order_by("?").all()[0:5]
 
@@ -64,7 +64,7 @@ class TestSyncENAStudies:
 
     @patch("emgena.models.Run.objects")
     def test_suppress_studies(self, ena_run_objs_mock, ena_suppressed_runs):
-        ena_run_objs_mock.using("era_pro").filter.return_value = ena_suppressed_runs
+        ena_run_objs_mock.using("era").filter.return_value = ena_suppressed_runs
 
         suppress_runs = Run.objects.order_by("?").all()[0:5]
 

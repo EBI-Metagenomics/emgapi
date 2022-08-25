@@ -47,7 +47,7 @@ class Command(BaseCommand):
                     offset : offset + batch_size
                 ]
             )
-            ena_samples_batch = ena_models.Sample.objects.using("era_pro").filter(
+            ena_samples_batch = ena_models.Sample.objects.using("era").filter(
                 sample_id__in=[sample.accession for sample in emg_samples_batch]
             )
 
