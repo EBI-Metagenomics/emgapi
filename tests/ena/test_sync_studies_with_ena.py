@@ -30,7 +30,7 @@ from test_utils.emg_fixtures import *  # noqa
 class TestSyncENAStudies:
     @patch("emgena.models.Study.objects")
     def test_make_studies_private(self, ena_study_objs_mock, ena_private_studies):
-        ena_study_objs_mock.using("era_pro").filter.return_value = ena_private_studies
+        ena_study_objs_mock.using("era").filter.return_value = ena_private_studies
 
         all_studies = Study.objects.order_by("?").all()
         public_studies = all_studies[0:5]
@@ -51,7 +51,7 @@ class TestSyncENAStudies:
 
     @patch("emgena.models.Study.objects")
     def test_make_studies_public(self, ena_study_objs_mock, ena_public_studies):
-        ena_study_objs_mock.using("era_pro").filter.return_value = ena_public_studies
+        ena_study_objs_mock.using("era").filter.return_value = ena_public_studies
 
         all_studies = Study.objects.order_by("?").all()
         private_studies = all_studies[0:5]
@@ -72,7 +72,7 @@ class TestSyncENAStudies:
 
     @patch("emgena.models.Study.objects")
     def test_suppress_studies(self, ena_study_objs_mock, ena_suppressed_studies):
-        ena_study_objs_mock.using("era_pro").filter.return_value = ena_suppressed_studies
+        ena_study_objs_mock.using("era").filter.return_value = ena_suppressed_studies
 
         suppress_studies = Study.objects.order_by("?").all()[0:5]
 

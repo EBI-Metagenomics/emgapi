@@ -43,7 +43,7 @@ class Command(BaseCommand):
             emg_studies_batch = list(
                 emg_models.Study.objects.all()[offset : offset + batch_size]
             )
-            ena_studies_batch = ena_models.Study.objects.using("era_pro").filter(
+            ena_studies_batch = ena_models.Study.objects.using("era").filter(
                 study_id__in=[study.secondary_accession for study in emg_studies_batch]
             )
             for emg_study in emg_studies_batch:
