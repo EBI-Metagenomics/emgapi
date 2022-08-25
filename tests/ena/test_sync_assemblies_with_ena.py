@@ -32,7 +32,7 @@ class TestSyncENAAssemblies:
     def test_make_assemblies_private(
         self, ena_assemblies_objs_mock, ena_private_assemblies
     ):
-        ena_assemblies_objs_mock.filter.return_value = ena_private_assemblies
+        ena_assemblies_objs_mock.using("era_pro").filter.return_value = ena_private_assemblies
 
         public_assemblies = Assembly.objects.order_by("?").all()[0:5]
 
@@ -49,7 +49,7 @@ class TestSyncENAAssemblies:
 
     @patch("emgena.models.Assembly.objects")
     def test_make_assemblies_public(self, ena_assembly_objs_mock, ena_public_assemblies):
-        ena_assembly_objs_mock.filter.return_value = ena_public_assemblies
+        ena_assembly_objs_mock.using("era_pro").filter.return_value = ena_public_assemblies
 
         private_assemblies = Assembly.objects.order_by("?").all()[0:5]
 
@@ -66,7 +66,7 @@ class TestSyncENAAssemblies:
 
     @patch("emgena.models.Assembly.objects")
     def test_suppress_assemblies(self, ena_assembly_objs_mock, ena_suppressed_assemblies):
-        ena_assembly_objs_mock.filter.return_value = ena_suppressed_assemblies
+        ena_assembly_objs_mock.using("era_pro").filter.return_value = ena_suppressed_assemblies
 
         suppressed_assemblies = Assembly.objects.order_by("?").all()[0:5]
 
