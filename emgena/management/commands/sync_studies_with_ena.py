@@ -43,7 +43,7 @@ class Command(BaseCommand):
             emg_studies_batch = list(
                 emg_models.Study.objects.all()[offset : offset + batch_size]
             )
-            ena_studies_batch = ena_models.Study.objects.filter(
+            ena_studies_batch = ena_models.Study.objects.using("era_pro").filter(
                 study_id__in=[study.secondary_accession for study in emg_studies_batch]
             )
             for emg_study in emg_studies_batch:
@@ -56,10 +56,10 @@ class Command(BaseCommand):
                     None,
                 )
                 if ena_study is None:
-                    logger.error(f"{study} not found in ENA.")
+                    logger.error(f"{emg_study} not found in ENA.")
                     continue
                 if ena_study.study_status is None:
-                    logger.error(f"{study} on ENA has no value on the column status.")
+                    logger.error(f"{emg_study} on ENA has no value on the column status.")
                     continue
 
                 emg_study.sync_with_ena_status(ena_study.study_status)

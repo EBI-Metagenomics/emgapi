@@ -45,7 +45,7 @@ class Command(BaseCommand):
                     offset : offset + batch_size
                 ]
             )
-            ena_assemblies_batch = ena_models.Assembly.objects.filter(
+            ena_assemblies_batch = ena_models.Assembly.objects.using("era_pro").filter(
                 gc_id__in=[
                     assembly.legacy_accession for assembly in emg_assemblies_batch
                 ]
