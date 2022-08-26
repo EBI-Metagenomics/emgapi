@@ -17,10 +17,14 @@ import logging
 import sys
 
 from django.db import IntegrityError
+from django.db.models import Q
 from django.utils import timezone
 from django.core.management import BaseCommand
+
 from emgapianns.management.lib.utils import get_lat_long, sanitise_fields
+
 from ena_portal_api import ena_handler
+
 from emgapi import models as emg_models
 from emgena import models as ena_models
 
@@ -166,7 +170,7 @@ class Command(BaseCommand):
 
     def get_ena_db_sample(self, accession):
         logger.info('Fetching sample {} from ena oracle DB'.format(accession))
-        return ena_models.Sample.objects.using(self.ena_db).filter(sample_id=accession, biosample_id=accession, combine_operator='OR')[0]
+        return ena_models.Sample.objects.using(self.ena_db).filter(Q(sample_id=accession) | Q(biosample_id=accession))[0]
 
     def get_variable(self, name):
         try:
