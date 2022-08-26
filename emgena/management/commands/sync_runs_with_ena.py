@@ -24,20 +24,18 @@ from django.conf import settings
 from emgapi import models as emg_models
 from emgena import models as ena_models
 
-logger = logging.getLogger(__name__)
-
 
 class Command(BaseCommand):
     help = "Sync the Runs status with ENA"
 
     def handle(self, *args, **kwargs):
-        logger.info("Starting...")
+        logging.info("Starting...")
 
         offset = 0
         batch_size = 1000
         runs_count = emg_models.Run.objects.count()
 
-        logger.info(f"Total Runs on EMG {runs_count}")
+        logging.info(f"Total Runs on EMG {runs_count}")
 
         while offset < runs_count:
             emg_runs_batch = emg_models.Run.objects.all()[offset : offset + batch_size]
@@ -51,10 +49,10 @@ class Command(BaseCommand):
                     None,
                 )
                 if ena_run is None:
-                    logger.error(f"{emg_run} not found in ENA.")
+                    logging.error(f"{emg_run} not found in ENA.")
                     continue
                 if ena_run.status_id is None:
-                    logger.error(f"{emg_run} on ENA has no value on the column status.")
+                    logging.error(f"{emg_run} on ENA has no value on the column status.")
                     continue
                 emg_run.sync_with_ena_status(ena_run.status_id)
 
@@ -62,7 +60,7 @@ class Command(BaseCommand):
                 emg_runs_batch,
                 ["is_private", "is_suppressed", "suppression_reason", "suppressed_at"],
             )
-            logger.info(f"Batch {round(runs_count / batch_size)} processed.")
+            logging.info(f"Batch {round(runs_count / batch_size)} processed.")
             offset += batch_size
 
-        logger.info("Completed")
+        logging.info("Completed")
