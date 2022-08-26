@@ -16,6 +16,7 @@
 
 import logging
 
+from django.db.models import Q
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from ena_portal_api import ena_handler
@@ -69,16 +70,12 @@ class StudyImporter:
         db_result, api_result = None, None
         try:
             db_result = ena_models.RunStudy.objects.using(database).get(
-                study_id=study_accession,
-                project_id=study_accession,
-                combine_operator="OR",
+                Q(study_id=study_accession) | Q(project_id=study_accession)
             )
         except RunStudy.DoesNotExist:
             try:
                 db_result = ena_models.AssemblyStudy.objects.using(database).get(
-                    study_id=study_accession,
-                    project_id=study_accession,
-                    combine_operator="OR",
+                    Q(study_id=study_accession) | Q(project_id=study_accession),
                 )
             except AssemblyStudy.DoesNotExist:
                 logging.warning(
