@@ -24,20 +24,18 @@ from django.conf import settings
 from emgapi import models as emg_models
 from emgena import models as ena_models
 
-logger = logging.getLogger(__name__)
-
 
 class Command(BaseCommand):
     help = "Sync the Studies status with ENA"
 
     def handle(self, *args, **kwargs):
-        logger.info("Starting...")
+        logging.info("Starting...")
 
         offset = 0
         batch_size = 1000
         studies_count = emg_models.Study.objects.count()
 
-        logger.info(f"Total studies on EMG {studies_count}")
+        logging.info(f"Total studies on EMG {studies_count}")
 
         while offset < studies_count:
             emg_studies_batch = list(
@@ -56,10 +54,10 @@ class Command(BaseCommand):
                     None,
                 )
                 if ena_study is None:
-                    logger.error(f"{emg_study} not found in ENA.")
+                    logging.error(f"{emg_study} not found in ENA.")
                     continue
                 if ena_study.study_status is None:
-                    logger.error(f"{emg_study} on ENA has no value on the column status.")
+                    logging.error(f"{emg_study} on ENA has no value on the column status.")
                     continue
 
                 emg_study.sync_with_ena_status(ena_study.study_status)
@@ -75,7 +73,7 @@ class Command(BaseCommand):
                     "public_release_date",
                 ],
             )
-            logger.info(f"Batch {round(studies_count / batch_size)} processed.")
+            logging.info(f"Batch {round(studies_count / batch_size)} processed.")
             offset += batch_size
 
-        logger.info("Completed")
+        logging.info("Completed")

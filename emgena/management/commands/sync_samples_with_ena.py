@@ -24,20 +24,18 @@ from django.conf import settings
 from emgapi import models as emg_models
 from emgena import models as ena_models
 
-logger = logging.getLogger(__name__)
-
 
 class Command(BaseCommand):
     help = "Sync the Samples status with ENA"
 
     def handle(self, *args, **kwargs):
-        logger.info("Starting...")
+        logging.info("Starting...")
 
         offset = 0
         batch_size = 1000
         samples_count = emg_models.Sample.objects.count()
 
-        logger.info(f"Total Samples on EMG {samples_count}")
+        logging.info(f"Total Samples on EMG {samples_count}")
 
         while offset < samples_count:
             # TODO: review this rule, I didn't have enough time to review it.
@@ -61,10 +59,10 @@ class Command(BaseCommand):
                     None,
                 )
                 if ena_sample is None:
-                    logger.error(f"{emg_sample} not found in ENA.")
+                    logging.error(f"{emg_sample} not found in ENA.")
                     continue
                 if ena_sample.status_id is None:
-                    logger.error(
+                    logging.error(
                         f"{emg_sample} on ENA has no value on the column status."
                     )
                     continue
@@ -74,7 +72,7 @@ class Command(BaseCommand):
                 emg_samples_batch,
                 ["is_private", "is_suppressed", "suppression_reason", "suppressed_at"],
             )
-            logger.info(f"Batch {round(samples_count / batch_size)} processed.")
+            logging.info(f"Batch {round(samples_count / batch_size)} processed.")
             offset += batch_size
 
-        logger.info("Completed")
+        logging.info("Completed")

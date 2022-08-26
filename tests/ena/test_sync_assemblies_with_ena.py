@@ -32,7 +32,9 @@ class TestSyncENAAssemblies:
     def test_make_assemblies_private(
         self, ena_assemblies_objs_mock, ena_private_assemblies
     ):
-        ena_assemblies_objs_mock.using("era").filter.return_value = ena_private_assemblies
+        ena_assemblies_objs_mock.using(
+            "ena"
+        ).filter.return_value = ena_private_assemblies
 
         public_assemblies = Assembly.objects.order_by("?").all()[0:5]
 
@@ -48,8 +50,10 @@ class TestSyncENAAssemblies:
             assert assembly.is_private == True
 
     @patch("emgena.models.Assembly.objects")
-    def test_make_assemblies_public(self, ena_assembly_objs_mock, ena_public_assemblies):
-        ena_assembly_objs_mock.using("era").filter.return_value = ena_public_assemblies
+    def test_make_assemblies_public(
+        self, ena_assembly_objs_mock, ena_public_assemblies
+    ):
+        ena_assembly_objs_mock.using("ena").filter.return_value = ena_public_assemblies
 
         private_assemblies = Assembly.objects.order_by("?").all()[0:5]
 
@@ -65,8 +69,12 @@ class TestSyncENAAssemblies:
             assert assembly.is_private == False
 
     @patch("emgena.models.Assembly.objects")
-    def test_suppress_assemblies(self, ena_assembly_objs_mock, ena_suppressed_assemblies):
-        ena_assembly_objs_mock.using("era").filter.return_value = ena_suppressed_assemblies
+    def test_suppress_assemblies(
+        self, ena_assembly_objs_mock, ena_suppressed_assemblies
+    ):
+        ena_assembly_objs_mock.using(
+            "ena"
+        ).filter.return_value = ena_suppressed_assemblies
 
         suppressed_assemblies = Assembly.objects.order_by("?").all()[0:5]
 
@@ -81,9 +89,31 @@ class TestSyncENAAssemblies:
             assembly.refresh_from_db()
             assert assembly.is_suppressed == True
             ena_assembly = next(
-                e for e in ena_suppressed_assemblies if e.gc_id == assembly.legacy_accession
+                e
+                for e in ena_suppressed_assemblies
+                if e.gc_id == assembly.legacy_accession
             )
             assert (
                 ena_assembly.get_status_id_display().lower()
                 == assembly.get_suppression_reason_display().lower()
             )
+
+    @patch("emgena.models.Assembly.objects")
+    def test_sync_assemblies_based_on_study(
+        self, ena_assembly_objs_mock, ena_private_assemblies
+    ):
+        ena_assembly_objs_mock.using("ena").filter.return_value = ena_private_assemblies
+
+        assemblies = Assembly.objects.order_by("?").all()[0:5]
+
+        for assembly in assemblies:
+            assembly.study.is_private = False
+            assembly.study.save()
+            assert assembly.is_private == True
+
+        call_command("sync_assemblies_with_ena")
+
+        for assembly in assemblies:
+            assembly.refresh_from_db()
+            assert assembly.is_suppressed == False
+            assert assembly.is_private == False

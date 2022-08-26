@@ -832,6 +832,7 @@ def make_suppresible_assemblies(quantity, emg_props=None, ena_props=None):
     assemblies = baker.make(emg_models.Assembly, _quantity=quantity, **emg_props)
     for assembly in assemblies:
         assembly.legacy_accession = str(uuid.uuid4())[:5]
+        assembly.study = baker.make(emg_models.Study)
         assembly.save()
     ena_assemblies = []
     for emg_assembly in assemblies:
