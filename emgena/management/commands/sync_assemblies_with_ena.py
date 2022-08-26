@@ -45,7 +45,7 @@ class Command(BaseCommand):
                     offset : offset + batch_size
                 ]
             )
-            ena_assemblies_batch = ena_models.Assembly.objects.using("era").filter(
+            ena_assemblies_batch = ena_models.Assembly.objects.using("ena").filter(
                 gc_id__in=[
                     assembly.legacy_accession for assembly in emg_assemblies_batch
                 ]
@@ -59,28 +59,39 @@ class Command(BaseCommand):
                     ),
                     None,
                 )
+                study = emg_assembly.study
+
                 if ena_assembly is None:
-                    # inherits the status of its study
-                    study = emg_assembly.study
+                    logger.debug(
+                        f"{emg_assembly} not found in ENA. The assembly inherits from the study: {study}"
+                    )
                     if not study:
-                        logger.error(f"{ena_assembly} not found in ENA, and the assembly doesn't have a study.")
+                        logger.error(
+                            f"{emg_assembly} not found in ENA, and the assembly doesn't have a study."
+                        )
                         continue
 
-                    logger.debug(
-                        f"{ena_assembly} not found in ENA. The assembly inherits from the study: {study}"
-                    )
-                    if study.is_supppressed:
+                    # inherits the status of its study
+                    if study.is_suppressed:
                         emg_assembly.suppress(
                             suppression_reason=study.suppression_reason
                         )
                     emg_assembly.is_private = study.is_private
+
                 if ena_assembly.status_id is None:
                     logger.error(
                         f"{emg_assembly} on ENA has no value on the column status."
                     )
                     continue
 
-                emg_assembly.sync_with_ena_status(ena_assembly.status_id)
+                # It's possible that the assembly and the study have different public/private values
+                # if they are different, the study takes precedence
+                if ena_assembly.status_id == ena_models.Status.PRIVATE and (
+                    study and not study.is_private
+                ):
+                    emg_assembly.is_private = study.is_private
+                else:
+                    emg_assembly.sync_with_ena_status(ena_assembly.status_id)
 
             emg_models.Assembly.objects.bulk_update(
                 emg_assemblies_batch,
