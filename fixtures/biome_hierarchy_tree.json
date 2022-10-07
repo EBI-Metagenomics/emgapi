@@ -1,0 +1,3938 @@
+[
+  {
+    "BIOME_ID": 0,
+    "BIOME_NAME": "root",
+    "LFT": 1,
+    "RGT": 985,
+    "DEPTH": 1,
+    "LINEAGE": "root"
+  },
+  {
+    "BIOME_ID": 1,
+    "BIOME_NAME": "Engineered",
+    "LFT": 2,
+    "RGT": 161,
+    "DEPTH": 2,
+    "LINEAGE": "root:Engineered"
+  },
+  {
+    "BIOME_ID": 2,
+    "BIOME_NAME": "Biogas plant",
+    "LFT": 3,
+    "RGT": 6,
+    "DEPTH": 3,
+    "LINEAGE": "root:Engineered:Biogas plant"
+  },
+  {
+    "BIOME_ID": 3,
+    "BIOME_NAME": "Wet fermentation",
+    "LFT": 4,
+    "RGT": 5,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Biogas plant:Wet fermentation"
+  },
+  {
+    "BIOME_ID": 4,
+    "BIOME_NAME": "Bioreactor",
+    "LFT": 7,
+    "RGT": 18,
+    "DEPTH": 3,
+    "LINEAGE": "root:Engineered:Bioreactor"
+  },
+  {
+    "BIOME_ID": 5,
+    "BIOME_NAME": "Continuous culture",
+    "LFT": 8,
+    "RGT": 17,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Bioreactor:Continuous culture"
+  },
+  {
+    "BIOME_ID": 6,
+    "BIOME_NAME": "Marine intertidal flat sediment inoculum",
+    "LFT": 9,
+    "RGT": 12,
+    "DEPTH": 5,
+    "LINEAGE": "root:Engineered:Bioreactor:Continuous culture:Marine intertidal flat sediment inoculum"
+  },
+  {
+    "BIOME_ID": 7,
+    "BIOME_NAME": "Wadden Sea-Germany",
+    "LFT": 10,
+    "RGT": 11,
+    "DEPTH": 6,
+    "LINEAGE": "root:Engineered:Bioreactor:Continuous culture:Marine intertidal flat sediment inoculum:Wadden Sea-Germany"
+  },
+  {
+    "BIOME_ID": 8,
+    "BIOME_NAME": "Marine sediment inoculum",
+    "LFT": 13,
+    "RGT": 16,
+    "DEPTH": 5,
+    "LINEAGE": "root:Engineered:Bioreactor:Continuous culture:Marine sediment inoculum"
+  },
+  {
+    "BIOME_ID": 9,
+    "BIOME_NAME": "Wadden Sea-Germany",
+    "LFT": 14,
+    "RGT": 15,
+    "DEPTH": 6,
+    "LINEAGE": "root:Engineered:Bioreactor:Continuous culture:Marine sediment inoculum:Wadden Sea-Germany"
+  },
+  {
+    "BIOME_ID": 10,
+    "BIOME_NAME": "Bioremediation",
+    "LFT": 19,
+    "RGT": 50,
+    "DEPTH": 3,
+    "LINEAGE": "root:Engineered:Bioremediation"
+  },
+  {
+    "BIOME_ID": 11,
+    "BIOME_NAME": "Hydrocarbon",
+    "LFT": 20,
+    "RGT": 25,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Bioremediation:Hydrocarbon"
+  },
+  {
+    "BIOME_ID": 12,
+    "BIOME_NAME": "Benzene",
+    "LFT": 21,
+    "RGT": 24,
+    "DEPTH": 5,
+    "LINEAGE": "root:Engineered:Bioremediation:Hydrocarbon:Benzene"
+  },
+  {
+    "BIOME_ID": 13,
+    "BIOME_NAME": "Bioreactor",
+    "LFT": 22,
+    "RGT": 23,
+    "DEPTH": 6,
+    "LINEAGE": "root:Engineered:Bioremediation:Hydrocarbon:Benzene:Bioreactor"
+  },
+  {
+    "BIOME_ID": 14,
+    "BIOME_NAME": "Metal",
+    "LFT": 26,
+    "RGT": 27,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Bioremediation:Metal"
+  },
+  {
+    "BIOME_ID": 15,
+    "BIOME_NAME": "Persistent organic pollutants (POP)",
+    "LFT": 28,
+    "RGT": 31,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Bioremediation:Persistent organic pollutants (POP)"
+  },
+  {
+    "BIOME_ID": 16,
+    "BIOME_NAME": "Polycyclic aromatic hydrocarbons",
+    "LFT": 29,
+    "RGT": 30,
+    "DEPTH": 5,
+    "LINEAGE": "root:Engineered:Bioremediation:Persistent organic pollutants (POP):Polycyclic aromatic hydrocarbons"
+  },
+  {
+    "BIOME_ID": 17,
+    "BIOME_NAME": "Terephthalate",
+    "LFT": 32,
+    "RGT": 39,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Bioremediation:Terephthalate"
+  },
+  {
+    "BIOME_ID": 18,
+    "BIOME_NAME": "Wastewater",
+    "LFT": 33,
+    "RGT": 38,
+    "DEPTH": 5,
+    "LINEAGE": "root:Engineered:Bioremediation:Terephthalate:Wastewater"
+  },
+  {
+    "BIOME_ID": 19,
+    "BIOME_NAME": "Activated sludge",
+    "LFT": 34,
+    "RGT": 35,
+    "DEPTH": 6,
+    "LINEAGE": "root:Engineered:Bioremediation:Terephthalate:Wastewater:Activated sludge"
+  },
+  {
+    "BIOME_ID": 20,
+    "BIOME_NAME": "Bioreactor",
+    "LFT": 36,
+    "RGT": 37,
+    "DEPTH": 6,
+    "LINEAGE": "root:Engineered:Bioremediation:Terephthalate:Wastewater:Bioreactor"
+  },
+  {
+    "BIOME_ID": 21,
+    "BIOME_NAME": "Tetrachloroethylene and derivatives",
+    "LFT": 40,
+    "RGT": 49,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Bioremediation:Tetrachloroethylene and derivatives"
+  },
+  {
+    "BIOME_ID": 22,
+    "BIOME_NAME": "Chloroethene",
+    "LFT": 41,
+    "RGT": 44,
+    "DEPTH": 5,
+    "LINEAGE": "root:Engineered:Bioremediation:Tetrachloroethylene and derivatives:Chloroethene"
+  },
+  {
+    "BIOME_ID": 23,
+    "BIOME_NAME": "Bioreactor",
+    "LFT": 42,
+    "RGT": 43,
+    "DEPTH": 6,
+    "LINEAGE": "root:Engineered:Bioremediation:Tetrachloroethylene and derivatives:Chloroethene:Bioreactor"
+  },
+  {
+    "BIOME_ID": 24,
+    "BIOME_NAME": "Tetrachloroethylene",
+    "LFT": 45,
+    "RGT": 48,
+    "DEPTH": 5,
+    "LINEAGE": "root:Engineered:Bioremediation:Tetrachloroethylene and derivatives:Tetrachloroethylene"
+  },
+  {
+    "BIOME_ID": 25,
+    "BIOME_NAME": "Bioreactor",
+    "LFT": 46,
+    "RGT": 47,
+    "DEPTH": 6,
+    "LINEAGE": "root:Engineered:Bioremediation:Tetrachloroethylene and derivatives:Tetrachloroethylene:Bioreactor"
+  },
+  {
+    "BIOME_ID": 26,
+    "BIOME_NAME": "Biotransformation",
+    "LFT": 51,
+    "RGT": 58,
+    "DEPTH": 3,
+    "LINEAGE": "root:Engineered:Biotransformation"
+  },
+  {
+    "BIOME_ID": 27,
+    "BIOME_NAME": "Microbial enhanced oil recovery",
+    "LFT": 52,
+    "RGT": 53,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Biotransformation:Microbial enhanced oil recovery"
+  },
+  {
+    "BIOME_ID": 28,
+    "BIOME_NAME": "Microbial solubilization of coal",
+    "LFT": 54,
+    "RGT": 55,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Biotransformation:Microbial solubilization of coal"
+  },
+  {
+    "BIOME_ID": 29,
+    "BIOME_NAME": "Mixed alcohol bioreactor",
+    "LFT": 56,
+    "RGT": 57,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Biotransformation:Mixed alcohol bioreactor"
+  },
+  {
+    "BIOME_ID": 30,
+    "BIOME_NAME": "Built environment",
+    "LFT": 59,
+    "RGT": 60,
+    "DEPTH": 3,
+    "LINEAGE": "root:Engineered:Built environment"
+  },
+  {
+    "BIOME_ID": 31,
+    "BIOME_NAME": "Food production",
+    "LFT": 61,
+    "RGT": 72,
+    "DEPTH": 3,
+    "LINEAGE": "root:Engineered:Food production"
+  },
+  {
+    "BIOME_ID": 32,
+    "BIOME_NAME": "Dairy products",
+    "LFT": 62,
+    "RGT": 63,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Food production:Dairy products"
+  },
+  {
+    "BIOME_ID": 33,
+    "BIOME_NAME": "Fermented beverages",
+    "LFT": 64,
+    "RGT": 65,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Food production:Fermented beverages"
+  },
+  {
+    "BIOME_ID": 34,
+    "BIOME_NAME": "Fermented seafood",
+    "LFT": 66,
+    "RGT": 67,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Food production:Fermented seafood"
+  },
+  {
+    "BIOME_ID": 35,
+    "BIOME_NAME": "Fermented vegetables",
+    "LFT": 68,
+    "RGT": 69,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Food production:Fermented vegetables"
+  },
+  {
+    "BIOME_ID": 36,
+    "BIOME_NAME": "Silage fermentation",
+    "LFT": 70,
+    "RGT": 71,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Food production:Silage fermentation"
+  },
+  {
+    "BIOME_ID": 37,
+    "BIOME_NAME": "Industrial production",
+    "LFT": 73,
+    "RGT": 76,
+    "DEPTH": 3,
+    "LINEAGE": "root:Engineered:Industrial production"
+  },
+  {
+    "BIOME_ID": 38,
+    "BIOME_NAME": "Engineered product",
+    "LFT": 74,
+    "RGT": 75,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Industrial production:Engineered product"
+  },
+  {
+    "BIOME_ID": 39,
+    "BIOME_NAME": "Lab enrichment",
+    "LFT": 77,
+    "RGT": 90,
+    "DEPTH": 3,
+    "LINEAGE": "root:Engineered:Lab enrichment"
+  },
+  {
+    "BIOME_ID": 40,
+    "BIOME_NAME": "Defined media",
+    "LFT": 78,
+    "RGT": 87,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Lab enrichment:Defined media"
+  },
+  {
+    "BIOME_ID": 41,
+    "BIOME_NAME": "Aerobic media",
+    "LFT": 79,
+    "RGT": 80,
+    "DEPTH": 5,
+    "LINEAGE": "root:Engineered:Lab enrichment:Defined media:Aerobic media"
+  },
+  {
+    "BIOME_ID": 42,
+    "BIOME_NAME": "Anaerobic media",
+    "LFT": 81,
+    "RGT": 82,
+    "DEPTH": 5,
+    "LINEAGE": "root:Engineered:Lab enrichment:Defined media:Anaerobic media"
+  },
+  {
+    "BIOME_ID": 43,
+    "BIOME_NAME": "Marine media",
+    "LFT": 83,
+    "RGT": 86,
+    "DEPTH": 5,
+    "LINEAGE": "root:Engineered:Lab enrichment:Defined media:Marine media"
+  },
+  {
+    "BIOME_ID": 44,
+    "BIOME_NAME": "Algoconsortia",
+    "LFT": 84,
+    "RGT": 85,
+    "DEPTH": 6,
+    "LINEAGE": "root:Engineered:Lab enrichment:Defined media:Marine media:Algoconsortia"
+  },
+  {
+    "BIOME_ID": 45,
+    "BIOME_NAME": "Undefined media",
+    "LFT": 88,
+    "RGT": 89,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Lab enrichment:Undefined media"
+  },
+  {
+    "BIOME_ID": 46,
+    "BIOME_NAME": "Lab Synthesis",
+    "LFT": 91,
+    "RGT": 94,
+    "DEPTH": 3,
+    "LINEAGE": "root:Engineered:Lab Synthesis"
+  },
+  {
+    "BIOME_ID": 47,
+    "BIOME_NAME": "Genetic cross",
+    "LFT": 92,
+    "RGT": 93,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Lab Synthesis:Genetic cross"
+  },
+  {
+    "BIOME_ID": 48,
+    "BIOME_NAME": "Modeled",
+    "LFT": 95,
+    "RGT": 104,
+    "DEPTH": 3,
+    "LINEAGE": "root:Engineered:Modeled"
+  },
+  {
+    "BIOME_ID": 49,
+    "BIOME_NAME": "Simulated communities (DNA mixture)",
+    "LFT": 96,
+    "RGT": 97,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Modeled:Simulated communities (DNA mixture)"
+  },
+  {
+    "BIOME_ID": 50,
+    "BIOME_NAME": "Simulated communities (microbial mixture)",
+    "LFT": 98,
+    "RGT": 99,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Modeled:Simulated communities (microbial mixture)"
+  },
+  {
+    "BIOME_ID": 51,
+    "BIOME_NAME": "Simulated communities (sequence read mixture)",
+    "LFT": 100,
+    "RGT": 103,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Modeled:Simulated communities (sequence read mixture)"
+  },
+  {
+    "BIOME_ID": 52,
+    "BIOME_NAME": "Sanger",
+    "LFT": 101,
+    "RGT": 102,
+    "DEPTH": 5,
+    "LINEAGE": "root:Engineered:Modeled:Simulated communities (sequence read mixture):Sanger"
+  },
+  {
+    "BIOME_ID": 53,
+    "BIOME_NAME": "Solid waste",
+    "LFT": 105,
+    "RGT": 122,
+    "DEPTH": 3,
+    "LINEAGE": "root:Engineered:Solid waste"
+  },
+  {
+    "BIOME_ID": 54,
+    "BIOME_NAME": "Composting",
+    "LFT": 106,
+    "RGT": 117,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Solid waste:Composting"
+  },
+  {
+    "BIOME_ID": 55,
+    "BIOME_NAME": "Grass",
+    "LFT": 107,
+    "RGT": 110,
+    "DEPTH": 5,
+    "LINEAGE": "root:Engineered:Solid waste:Composting:Grass"
+  },
+  {
+    "BIOME_ID": 56,
+    "BIOME_NAME": "Bioreactor",
+    "LFT": 108,
+    "RGT": 109,
+    "DEPTH": 6,
+    "LINEAGE": "root:Engineered:Solid waste:Composting:Grass:Bioreactor"
+  },
+  {
+    "BIOME_ID": 57,
+    "BIOME_NAME": "Bioreactor",
+    "LFT": 111,
+    "RGT": 112,
+    "DEPTH": 5,
+    "LINEAGE": "root:Engineered:Solid waste:Composting:Bioreactor"
+  },
+  {
+    "BIOME_ID": 58,
+    "BIOME_NAME": "Wood",
+    "LFT": 113,
+    "RGT": 116,
+    "DEPTH": 5,
+    "LINEAGE": "root:Engineered:Solid waste:Composting:Wood"
+  },
+  {
+    "BIOME_ID": 59,
+    "BIOME_NAME": "Bioreactor",
+    "LFT": 114,
+    "RGT": 115,
+    "DEPTH": 6,
+    "LINEAGE": "root:Engineered:Solid waste:Composting:Wood:Bioreactor"
+  },
+  {
+    "BIOME_ID": 60,
+    "BIOME_NAME": "Landfill",
+    "LFT": 118,
+    "RGT": 119,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Solid waste:Landfill"
+  },
+  {
+    "BIOME_ID": 61,
+    "BIOME_NAME": "Solid animal waste",
+    "LFT": 120,
+    "RGT": 121,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Solid waste:Solid animal waste"
+  },
+  {
+    "BIOME_ID": 62,
+    "BIOME_NAME": "Wastewater",
+    "LFT": 123,
+    "RGT": 160,
+    "DEPTH": 3,
+    "LINEAGE": "root:Engineered:Wastewater"
+  },
+  {
+    "BIOME_ID": 63,
+    "BIOME_NAME": "Activated Sludge",
+    "LFT": 124,
+    "RGT": 125,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Wastewater:Activated Sludge"
+  },
+  {
+    "BIOME_ID": 64,
+    "BIOME_NAME": "Industrial wastewater",
+    "LFT": 126,
+    "RGT": 137,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Wastewater:Industrial wastewater"
+  },
+  {
+    "BIOME_ID": 65,
+    "BIOME_NAME": "Agricultural wastewater",
+    "LFT": 127,
+    "RGT": 128,
+    "DEPTH": 5,
+    "LINEAGE": "root:Engineered:Wastewater:Industrial wastewater:Agricultural wastewater"
+  },
+  {
+    "BIOME_ID": 66,
+    "BIOME_NAME": "Landfill leachate",
+    "LFT": 129,
+    "RGT": 130,
+    "DEPTH": 5,
+    "LINEAGE": "root:Engineered:Wastewater:Industrial wastewater:Landfill leachate"
+  },
+  {
+    "BIOME_ID": 67,
+    "BIOME_NAME": "Mine water",
+    "LFT": 131,
+    "RGT": 132,
+    "DEPTH": 5,
+    "LINEAGE": "root:Engineered:Wastewater:Industrial wastewater:Mine water"
+  },
+  {
+    "BIOME_ID": 68,
+    "BIOME_NAME": "Petrochemical",
+    "LFT": 133,
+    "RGT": 134,
+    "DEPTH": 5,
+    "LINEAGE": "root:Engineered:Wastewater:Industrial wastewater:Petrochemical"
+  },
+  {
+    "BIOME_ID": 69,
+    "BIOME_NAME": "Pulp and paper wastewater",
+    "LFT": 135,
+    "RGT": 136,
+    "DEPTH": 5,
+    "LINEAGE": "root:Engineered:Wastewater:Industrial wastewater:Pulp and paper wastewater"
+  },
+  {
+    "BIOME_ID": 70,
+    "BIOME_NAME": "Nutrient removal",
+    "LFT": 138,
+    "RGT": 157,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Wastewater:Nutrient removal"
+  },
+  {
+    "BIOME_ID": 71,
+    "BIOME_NAME": "Biological phosphorus removal",
+    "LFT": 139,
+    "RGT": 144,
+    "DEPTH": 5,
+    "LINEAGE": "root:Engineered:Wastewater:Nutrient removal:Biological phosphorus removal"
+  },
+  {
+    "BIOME_ID": 72,
+    "BIOME_NAME": "Activated sludge",
+    "LFT": 140,
+    "RGT": 141,
+    "DEPTH": 6,
+    "LINEAGE": "root:Engineered:Wastewater:Nutrient removal:Biological phosphorus removal:Activated sludge"
+  },
+  {
+    "BIOME_ID": 73,
+    "BIOME_NAME": "Bioreactor",
+    "LFT": 142,
+    "RGT": 143,
+    "DEPTH": 6,
+    "LINEAGE": "root:Engineered:Wastewater:Nutrient removal:Biological phosphorus removal:Bioreactor"
+  },
+  {
+    "BIOME_ID": 74,
+    "BIOME_NAME": "Dissolved organics (aerobic)",
+    "LFT": 145,
+    "RGT": 148,
+    "DEPTH": 5,
+    "LINEAGE": "root:Engineered:Wastewater:Nutrient removal:Dissolved organics (aerobic)"
+  },
+  {
+    "BIOME_ID": 75,
+    "BIOME_NAME": "Activated sludge",
+    "LFT": 146,
+    "RGT": 147,
+    "DEPTH": 6,
+    "LINEAGE": "root:Engineered:Wastewater:Nutrient removal:Dissolved organics (aerobic):Activated sludge"
+  },
+  {
+    "BIOME_ID": 76,
+    "BIOME_NAME": "Dissolved organics (anaerobic)",
+    "LFT": 149,
+    "RGT": 152,
+    "DEPTH": 5,
+    "LINEAGE": "root:Engineered:Wastewater:Nutrient removal:Dissolved organics (anaerobic)"
+  },
+  {
+    "BIOME_ID": 77,
+    "BIOME_NAME": "Activated sludge",
+    "LFT": 150,
+    "RGT": 151,
+    "DEPTH": 6,
+    "LINEAGE": "root:Engineered:Wastewater:Nutrient removal:Dissolved organics (anaerobic):Activated sludge"
+  },
+  {
+    "BIOME_ID": 78,
+    "BIOME_NAME": "Nitrogen removal",
+    "LFT": 153,
+    "RGT": 156,
+    "DEPTH": 5,
+    "LINEAGE": "root:Engineered:Wastewater:Nutrient removal:Nitrogen removal"
+  },
+  {
+    "BIOME_ID": 79,
+    "BIOME_NAME": "Anammox",
+    "LFT": 154,
+    "RGT": 155,
+    "DEPTH": 6,
+    "LINEAGE": "root:Engineered:Wastewater:Nutrient removal:Nitrogen removal:Anammox"
+  },
+  {
+    "BIOME_ID": 80,
+    "BIOME_NAME": "Water and sludge",
+    "LFT": 158,
+    "RGT": 159,
+    "DEPTH": 4,
+    "LINEAGE": "root:Engineered:Wastewater:Water and sludge"
+  },
+  {
+    "BIOME_ID": 81,
+    "BIOME_NAME": "Environmental",
+    "LFT": 162,
+    "RGT": 513,
+    "DEPTH": 2,
+    "LINEAGE": "root:Environmental"
+  },
+  {
+    "BIOME_ID": 82,
+    "BIOME_NAME": "Air",
+    "LFT": 163,
+    "RGT": 168,
+    "DEPTH": 3,
+    "LINEAGE": "root:Environmental:Air"
+  },
+  {
+    "BIOME_ID": 83,
+    "BIOME_NAME": "Indoor Air",
+    "LFT": 164,
+    "RGT": 165,
+    "DEPTH": 4,
+    "LINEAGE": "root:Environmental:Air:Indoor Air"
+  },
+  {
+    "BIOME_ID": 84,
+    "BIOME_NAME": "Outdoor Air",
+    "LFT": 166,
+    "RGT": 167,
+    "DEPTH": 4,
+    "LINEAGE": "root:Environmental:Air:Outdoor Air"
+  },
+  {
+    "BIOME_ID": 85,
+    "BIOME_NAME": "Aquatic",
+    "LFT": 169,
+    "RGT": 418,
+    "DEPTH": 3,
+    "LINEAGE": "root:Environmental:Aquatic"
+  },
+  {
+    "BIOME_ID": 86,
+    "BIOME_NAME": "Aquaculture",
+    "LFT": 170,
+    "RGT": 171,
+    "DEPTH": 4,
+    "LINEAGE": "root:Environmental:Aquatic:Aquaculture"
+  },
+  {
+    "BIOME_ID": 87,
+    "BIOME_NAME": "Estuary",
+    "LFT": 172,
+    "RGT": 175,
+    "DEPTH": 4,
+    "LINEAGE": "root:Environmental:Aquatic:Estuary"
+  },
+  {
+    "BIOME_ID": 88,
+    "BIOME_NAME": "Sediment",
+    "LFT": 173,
+    "RGT": 174,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Estuary:Sediment"
+  },
+  {
+    "BIOME_ID": 89,
+    "BIOME_NAME": "Freshwater",
+    "LFT": 176,
+    "RGT": 257,
+    "DEPTH": 4,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater"
+  },
+  {
+    "BIOME_ID": 90,
+    "BIOME_NAME": "Drinking water",
+    "LFT": 177,
+    "RGT": 182,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Drinking water"
+  },
+  {
+    "BIOME_ID": 91,
+    "BIOME_NAME": "Chlorinated",
+    "LFT": 178,
+    "RGT": 179,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Drinking water:Chlorinated"
+  },
+  {
+    "BIOME_ID": 92,
+    "BIOME_NAME": "Delivery networks",
+    "LFT": 180,
+    "RGT": 181,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Drinking water:Delivery networks"
+  },
+  {
+    "BIOME_ID": 93,
+    "BIOME_NAME": "Groundwater",
+    "LFT": 183,
+    "RGT": 198,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Groundwater"
+  },
+  {
+    "BIOME_ID": 94,
+    "BIOME_NAME": "Acid Mine Drainage",
+    "LFT": 184,
+    "RGT": 185,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Groundwater:Acid Mine Drainage"
+  },
+  {
+    "BIOME_ID": 95,
+    "BIOME_NAME": "Biofilm",
+    "LFT": 186,
+    "RGT": 187,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Groundwater:Biofilm"
+  },
+  {
+    "BIOME_ID": 96,
+    "BIOME_NAME": "Cave water",
+    "LFT": 188,
+    "RGT": 189,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Groundwater:Cave water"
+  },
+  {
+    "BIOME_ID": 97,
+    "BIOME_NAME": "Coalbed water",
+    "LFT": 190,
+    "RGT": 191,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Groundwater:Coalbed water"
+  },
+  {
+    "BIOME_ID": 98,
+    "BIOME_NAME": "Contaminated",
+    "LFT": 192,
+    "RGT": 193,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Groundwater:Contaminated"
+  },
+  {
+    "BIOME_ID": 99,
+    "BIOME_NAME": "Mine",
+    "LFT": 194,
+    "RGT": 195,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Groundwater:Mine"
+  },
+  {
+    "BIOME_ID": 100,
+    "BIOME_NAME": "Mine drainage",
+    "LFT": 196,
+    "RGT": 197,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Groundwater:Mine drainage"
+  },
+  {
+    "BIOME_ID": 101,
+    "BIOME_NAME": "Ice",
+    "LFT": 199,
+    "RGT": 206,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Ice"
+  },
+  {
+    "BIOME_ID": 102,
+    "BIOME_NAME": "Glacial lake",
+    "LFT": 200,
+    "RGT": 201,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Ice:Glacial lake"
+  },
+  {
+    "BIOME_ID": 103,
+    "BIOME_NAME": "Glacier",
+    "LFT": 202,
+    "RGT": 203,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Ice:Glacier"
+  },
+  {
+    "BIOME_ID": 104,
+    "BIOME_NAME": "Ice accretions",
+    "LFT": 204,
+    "RGT": 205,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Ice:Ice accretions"
+  },
+  {
+    "BIOME_ID": 105,
+    "BIOME_NAME": "Lake",
+    "LFT": 207,
+    "RGT": 208,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Lake"
+  },
+  {
+    "BIOME_ID": 106,
+    "BIOME_NAME": "Lentic",
+    "LFT": 209,
+    "RGT": 220,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Lentic"
+  },
+  {
+    "BIOME_ID": 107,
+    "BIOME_NAME": "Epilimnion",
+    "LFT": 210,
+    "RGT": 211,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Lentic:Epilimnion"
+  },
+  {
+    "BIOME_ID": 108,
+    "BIOME_NAME": "Hypolimnion",
+    "LFT": 212,
+    "RGT": 213,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Lentic:Hypolimnion"
+  },
+  {
+    "BIOME_ID": 109,
+    "BIOME_NAME": "Limnetic zone",
+    "LFT": 214,
+    "RGT": 215,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Lentic:Limnetic zone"
+  },
+  {
+    "BIOME_ID": 110,
+    "BIOME_NAME": "Littoral zone",
+    "LFT": 216,
+    "RGT": 217,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Lentic:Littoral zone"
+  },
+  {
+    "BIOME_ID": 111,
+    "BIOME_NAME": "Sediment",
+    "LFT": 218,
+    "RGT": 219,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Lentic:Sediment"
+  },
+  {
+    "BIOME_ID": 112,
+    "BIOME_NAME": "Lotic",
+    "LFT": 221,
+    "RGT": 232,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Lotic"
+  },
+  {
+    "BIOME_ID": 113,
+    "BIOME_NAME": "Acidic",
+    "LFT": 222,
+    "RGT": 223,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Lotic:Acidic"
+  },
+  {
+    "BIOME_ID": 114,
+    "BIOME_NAME": "Low land river systems",
+    "LFT": 224,
+    "RGT": 225,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Lotic:Low land river systems"
+  },
+  {
+    "BIOME_ID": 115,
+    "BIOME_NAME": "Microbial mats",
+    "LFT": 226,
+    "RGT": 227,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Lotic:Microbial mats"
+  },
+  {
+    "BIOME_ID": 116,
+    "BIOME_NAME": "Mid stream",
+    "LFT": 228,
+    "RGT": 229,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Lotic:Mid stream"
+  },
+  {
+    "BIOME_ID": 117,
+    "BIOME_NAME": "Sediment",
+    "LFT": 230,
+    "RGT": 231,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Lotic:Sediment"
+  },
+  {
+    "BIOME_ID": 118,
+    "BIOME_NAME": "Microbialites",
+    "LFT": 233,
+    "RGT": 234,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Microbialites"
+  },
+  {
+    "BIOME_ID": 119,
+    "BIOME_NAME": "Pond",
+    "LFT": 235,
+    "RGT": 238,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Pond"
+  },
+  {
+    "BIOME_ID": 120,
+    "BIOME_NAME": "Sediment",
+    "LFT": 236,
+    "RGT": 237,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Pond:Sediment"
+  },
+  {
+    "BIOME_ID": 121,
+    "BIOME_NAME": "Sediment",
+    "LFT": 239,
+    "RGT": 240,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Sediment"
+  },
+  {
+    "BIOME_ID": 122,
+    "BIOME_NAME": "Storm water",
+    "LFT": 241,
+    "RGT": 244,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Storm water"
+  },
+  {
+    "BIOME_ID": 123,
+    "BIOME_NAME": "Drainage pipe biofilm",
+    "LFT": 242,
+    "RGT": 243,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Storm water:Drainage pipe biofilm"
+  },
+  {
+    "BIOME_ID": 124,
+    "BIOME_NAME": "Subglacial lake",
+    "LFT": 245,
+    "RGT": 246,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Subglacial lake"
+  },
+  {
+    "BIOME_ID": 125,
+    "BIOME_NAME": "Wetlands",
+    "LFT": 247,
+    "RGT": 256,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Wetlands"
+  },
+  {
+    "BIOME_ID": 126,
+    "BIOME_NAME": "Bog",
+    "LFT": 248,
+    "RGT": 249,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Wetlands:Bog"
+  },
+  {
+    "BIOME_ID": 127,
+    "BIOME_NAME": "Marsh",
+    "LFT": 250,
+    "RGT": 251,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Wetlands:Marsh"
+  },
+  {
+    "BIOME_ID": 128,
+    "BIOME_NAME": "Sediment",
+    "LFT": 252,
+    "RGT": 253,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Wetlands:Sediment"
+  },
+  {
+    "BIOME_ID": 129,
+    "BIOME_NAME": "Swamp",
+    "LFT": 254,
+    "RGT": 255,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Freshwater:Wetlands:Swamp"
+  },
+  {
+    "BIOME_ID": 130,
+    "BIOME_NAME": "Lentic",
+    "LFT": 258,
+    "RGT": 261,
+    "DEPTH": 4,
+    "LINEAGE": "root:Environmental:Aquatic:Lentic"
+  },
+  {
+    "BIOME_ID": 131,
+    "BIOME_NAME": "Brackish",
+    "LFT": 259,
+    "RGT": 260,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Lentic:Brackish"
+  },
+  {
+    "BIOME_ID": 132,
+    "BIOME_NAME": "Marine",
+    "LFT": 262,
+    "RGT": 347,
+    "DEPTH": 4,
+    "LINEAGE": "root:Environmental:Aquatic:Marine"
+  },
+  {
+    "BIOME_ID": 133,
+    "BIOME_NAME": "Brackish",
+    "LFT": 263,
+    "RGT": 264,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Brackish"
+  },
+  {
+    "BIOME_ID": 134,
+    "BIOME_NAME": "Coastal",
+    "LFT": 265,
+    "RGT": 268,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Coastal"
+  },
+  {
+    "BIOME_ID": 135,
+    "BIOME_NAME": "Sediment",
+    "LFT": 266,
+    "RGT": 267,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Coastal:Sediment"
+  },
+  {
+    "BIOME_ID": 136,
+    "BIOME_NAME": "Cold seeps",
+    "LFT": 269,
+    "RGT": 272,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Cold seeps"
+  },
+  {
+    "BIOME_ID": 137,
+    "BIOME_NAME": "Sediment",
+    "LFT": 270,
+    "RGT": 271,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Cold seeps:Sediment"
+  },
+  {
+    "BIOME_ID": 138,
+    "BIOME_NAME": "Fossil",
+    "LFT": 273,
+    "RGT": 276,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Fossil"
+  },
+  {
+    "BIOME_ID": 139,
+    "BIOME_NAME": "Whale fall",
+    "LFT": 274,
+    "RGT": 275,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Fossil:Whale fall"
+  },
+  {
+    "BIOME_ID": 140,
+    "BIOME_NAME": "Hydrothermal vents",
+    "LFT": 277,
+    "RGT": 286,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Hydrothermal vents"
+  },
+  {
+    "BIOME_ID": 141,
+    "BIOME_NAME": "Black smokers",
+    "LFT": 278,
+    "RGT": 279,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Hydrothermal vents:Black smokers"
+  },
+  {
+    "BIOME_ID": 142,
+    "BIOME_NAME": "Diffuse flow",
+    "LFT": 280,
+    "RGT": 281,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Hydrothermal vents:Diffuse flow"
+  },
+  {
+    "BIOME_ID": 143,
+    "BIOME_NAME": "Microbial mats",
+    "LFT": 282,
+    "RGT": 283,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Hydrothermal vents:Microbial mats"
+  },
+  {
+    "BIOME_ID": 144,
+    "BIOME_NAME": "Sediment",
+    "LFT": 284,
+    "RGT": 285,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Hydrothermal vents:Sediment"
+  },
+  {
+    "BIOME_ID": 145,
+    "BIOME_NAME": "Intertidal zone",
+    "LFT": 287,
+    "RGT": 304,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Intertidal zone"
+  },
+  {
+    "BIOME_ID": 146,
+    "BIOME_NAME": "Beach",
+    "LFT": 288,
+    "RGT": 289,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Intertidal zone:Beach"
+  },
+  {
+    "BIOME_ID": 147,
+    "BIOME_NAME": "Coral reef",
+    "LFT": 290,
+    "RGT": 291,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Intertidal zone:Coral reef"
+  },
+  {
+    "BIOME_ID": 148,
+    "BIOME_NAME": "Estuary",
+    "LFT": 292,
+    "RGT": 293,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Intertidal zone:Estuary"
+  },
+  {
+    "BIOME_ID": 149,
+    "BIOME_NAME": "Mangrove swamp",
+    "LFT": 294,
+    "RGT": 295,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Intertidal zone:Mangrove swamp"
+  },
+  {
+    "BIOME_ID": 150,
+    "BIOME_NAME": "Microbialites",
+    "LFT": 296,
+    "RGT": 297,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Intertidal zone:Microbialites"
+  },
+  {
+    "BIOME_ID": 151,
+    "BIOME_NAME": "Oil-contaminated",
+    "LFT": 298,
+    "RGT": 299,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Intertidal zone:Oil-contaminated"
+  },
+  {
+    "BIOME_ID": 152,
+    "BIOME_NAME": "Salt marsh",
+    "LFT": 300,
+    "RGT": 301,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Intertidal zone:Salt marsh"
+  },
+  {
+    "BIOME_ID": 153,
+    "BIOME_NAME": "Sediment",
+    "LFT": 302,
+    "RGT": 303,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Intertidal zone:Sediment"
+  },
+  {
+    "BIOME_ID": 154,
+    "BIOME_NAME": "Marginal Sea",
+    "LFT": 305,
+    "RGT": 306,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Marginal Sea"
+  },
+  {
+    "BIOME_ID": 155,
+    "BIOME_NAME": "Neritic zone",
+    "LFT": 307,
+    "RGT": 312,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Neritic zone"
+  },
+  {
+    "BIOME_ID": 156,
+    "BIOME_NAME": "Oil-contaminated sediment",
+    "LFT": 308,
+    "RGT": 309,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Neritic zone:Oil-contaminated sediment"
+  },
+  {
+    "BIOME_ID": 157,
+    "BIOME_NAME": "Sediment",
+    "LFT": 310,
+    "RGT": 311,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Neritic zone:Sediment"
+  },
+  {
+    "BIOME_ID": 158,
+    "BIOME_NAME": "Oceanic",
+    "LFT": 313,
+    "RGT": 328,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Oceanic"
+  },
+  {
+    "BIOME_ID": 159,
+    "BIOME_NAME": "Abyssal plane",
+    "LFT": 314,
+    "RGT": 315,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Oceanic:Abyssal plane"
+  },
+  {
+    "BIOME_ID": 160,
+    "BIOME_NAME": "Aphotic zone",
+    "LFT": 316,
+    "RGT": 317,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Oceanic:Aphotic zone"
+  },
+  {
+    "BIOME_ID": 161,
+    "BIOME_NAME": "Benthic",
+    "LFT": 318,
+    "RGT": 319,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Oceanic:Benthic"
+  },
+  {
+    "BIOME_ID": 162,
+    "BIOME_NAME": "Oil-contaminated",
+    "LFT": 320,
+    "RGT": 321,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Oceanic:Oil-contaminated"
+  },
+  {
+    "BIOME_ID": 163,
+    "BIOME_NAME": "Oil-contaminated sediments",
+    "LFT": 322,
+    "RGT": 323,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Oceanic:Oil-contaminated sediments"
+  },
+  {
+    "BIOME_ID": 164,
+    "BIOME_NAME": "Photic zone",
+    "LFT": 324,
+    "RGT": 325,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Oceanic:Photic zone"
+  },
+  {
+    "BIOME_ID": 165,
+    "BIOME_NAME": "Sediment",
+    "LFT": 326,
+    "RGT": 327,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Oceanic:Sediment"
+  },
+  {
+    "BIOME_ID": 166,
+    "BIOME_NAME": "Oil field",
+    "LFT": 329,
+    "RGT": 332,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Oil field"
+  },
+  {
+    "BIOME_ID": 167,
+    "BIOME_NAME": "bore hole",
+    "LFT": 330,
+    "RGT": 331,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Oil field:bore hole"
+  },
+  {
+    "BIOME_ID": 168,
+    "BIOME_NAME": "Oil seeps",
+    "LFT": 333,
+    "RGT": 334,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Oil seeps"
+  },
+  {
+    "BIOME_ID": 169,
+    "BIOME_NAME": "Pelagic",
+    "LFT": 335,
+    "RGT": 336,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Pelagic"
+  },
+  {
+    "BIOME_ID": 170,
+    "BIOME_NAME": "Oil-contaminated sediment",
+    "LFT": 337,
+    "RGT": 338,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Oil-contaminated sediment"
+  },
+  {
+    "BIOME_ID": 171,
+    "BIOME_NAME": "Sediment",
+    "LFT": 339,
+    "RGT": 340,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Sediment"
+  },
+  {
+    "BIOME_ID": 172,
+    "BIOME_NAME": "Volcanic",
+    "LFT": 341,
+    "RGT": 342,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Volcanic"
+  },
+  {
+    "BIOME_ID": 173,
+    "BIOME_NAME": "Wetlands",
+    "LFT": 343,
+    "RGT": 346,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Wetlands"
+  },
+  {
+    "BIOME_ID": 174,
+    "BIOME_NAME": "Sediment",
+    "LFT": 344,
+    "RGT": 345,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Marine:Wetlands:Sediment"
+  },
+  {
+    "BIOME_ID": 175,
+    "BIOME_NAME": "Meromictic lake",
+    "LFT": 348,
+    "RGT": 349,
+    "DEPTH": 4,
+    "LINEAGE": "root:Environmental:Aquatic:Meromictic lake"
+  },
+  {
+    "BIOME_ID": 176,
+    "BIOME_NAME": "Non-marine Saline and Alkaline",
+    "LFT": 350,
+    "RGT": 387,
+    "DEPTH": 4,
+    "LINEAGE": "root:Environmental:Aquatic:Non-marine Saline and Alkaline"
+  },
+  {
+    "BIOME_ID": 177,
+    "BIOME_NAME": "Alkaline",
+    "LFT": 351,
+    "RGT": 358,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Non-marine Saline and Alkaline:Alkaline"
+  },
+  {
+    "BIOME_ID": 178,
+    "BIOME_NAME": "Carbonate",
+    "LFT": 352,
+    "RGT": 353,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Non-marine Saline and Alkaline:Alkaline:Carbonate"
+  },
+  {
+    "BIOME_ID": 179,
+    "BIOME_NAME": "Microbial mats",
+    "LFT": 354,
+    "RGT": 355,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Non-marine Saline and Alkaline:Alkaline:Microbial mats"
+  },
+  {
+    "BIOME_ID": 180,
+    "BIOME_NAME": "Sediment",
+    "LFT": 356,
+    "RGT": 357,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Non-marine Saline and Alkaline:Alkaline:Sediment"
+  },
+  {
+    "BIOME_ID": 181,
+    "BIOME_NAME": "Hypersaline",
+    "LFT": 359,
+    "RGT": 364,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Non-marine Saline and Alkaline:Hypersaline"
+  },
+  {
+    "BIOME_ID": 182,
+    "BIOME_NAME": "Microbial mats",
+    "LFT": 360,
+    "RGT": 361,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Non-marine Saline and Alkaline:Hypersaline:Microbial mats"
+  },
+  {
+    "BIOME_ID": 183,
+    "BIOME_NAME": "Sediment",
+    "LFT": 362,
+    "RGT": 363,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Non-marine Saline and Alkaline:Hypersaline:Sediment"
+  },
+  {
+    "BIOME_ID": 184,
+    "BIOME_NAME": "Near-boiling (>90C)",
+    "LFT": 365,
+    "RGT": 368,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Non-marine Saline and Alkaline:Near-boiling (>90C)"
+  },
+  {
+    "BIOME_ID": 185,
+    "BIOME_NAME": "Alkaline",
+    "LFT": 366,
+    "RGT": 367,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Non-marine Saline and Alkaline:Near-boiling (>90C):Alkaline"
+  },
+  {
+    "BIOME_ID": 186,
+    "BIOME_NAME": "Saline",
+    "LFT": 369,
+    "RGT": 382,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Non-marine Saline and Alkaline:Saline"
+  },
+  {
+    "BIOME_ID": 187,
+    "BIOME_NAME": "Athalassic",
+    "LFT": 370,
+    "RGT": 371,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Non-marine Saline and Alkaline:Saline:Athalassic"
+  },
+  {
+    "BIOME_ID": 188,
+    "BIOME_NAME": "Epilimnion",
+    "LFT": 372,
+    "RGT": 373,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Non-marine Saline and Alkaline:Saline:Epilimnion"
+  },
+  {
+    "BIOME_ID": 189,
+    "BIOME_NAME": "Hypolimnion",
+    "LFT": 374,
+    "RGT": 375,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Non-marine Saline and Alkaline:Saline:Hypolimnion"
+  },
+  {
+    "BIOME_ID": 190,
+    "BIOME_NAME": "Microbial mats",
+    "LFT": 376,
+    "RGT": 377,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Non-marine Saline and Alkaline:Saline:Microbial mats"
+  },
+  {
+    "BIOME_ID": 191,
+    "BIOME_NAME": "Sediment",
+    "LFT": 378,
+    "RGT": 379,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Non-marine Saline and Alkaline:Saline:Sediment"
+  },
+  {
+    "BIOME_ID": 192,
+    "BIOME_NAME": "Thalassic",
+    "LFT": 380,
+    "RGT": 381,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Non-marine Saline and Alkaline:Saline:Thalassic"
+  },
+  {
+    "BIOME_ID": 193,
+    "BIOME_NAME": "Salt crystallizer pond",
+    "LFT": 383,
+    "RGT": 386,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Non-marine Saline and Alkaline:Salt crystallizer pond"
+  },
+  {
+    "BIOME_ID": 194,
+    "BIOME_NAME": "Microbial mats",
+    "LFT": 384,
+    "RGT": 385,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Non-marine Saline and Alkaline:Salt crystallizer pond:Microbial mats"
+  },
+  {
+    "BIOME_ID": 195,
+    "BIOME_NAME": "Sediment",
+    "LFT": 388,
+    "RGT": 389,
+    "DEPTH": 4,
+    "LINEAGE": "root:Environmental:Aquatic:Sediment"
+  },
+  {
+    "BIOME_ID": 196,
+    "BIOME_NAME": "Thermal springs",
+    "LFT": 390,
+    "RGT": 417,
+    "DEPTH": 4,
+    "LINEAGE": "root:Environmental:Aquatic:Thermal springs"
+  },
+  {
+    "BIOME_ID": 197,
+    "BIOME_NAME": "Hot (42-90C)",
+    "LFT": 391,
+    "RGT": 400,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Thermal springs:Hot (42-90C)"
+  },
+  {
+    "BIOME_ID": 198,
+    "BIOME_NAME": "Acidic",
+    "LFT": 392,
+    "RGT": 393,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Thermal springs:Hot (42-90C):Acidic"
+  },
+  {
+    "BIOME_ID": 199,
+    "BIOME_NAME": "Alkaline",
+    "LFT": 394,
+    "RGT": 395,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Thermal springs:Hot (42-90C):Alkaline"
+  },
+  {
+    "BIOME_ID": 200,
+    "BIOME_NAME": "Neutral",
+    "LFT": 396,
+    "RGT": 397,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Thermal springs:Hot (42-90C):Neutral"
+  },
+  {
+    "BIOME_ID": 201,
+    "BIOME_NAME": "Sediment",
+    "LFT": 398,
+    "RGT": 399,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Thermal springs:Hot (42-90C):Sediment"
+  },
+  {
+    "BIOME_ID": 202,
+    "BIOME_NAME": "Near-boiling (>90C)",
+    "LFT": 401,
+    "RGT": 404,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Thermal springs:Near-boiling (>90C)"
+  },
+  {
+    "BIOME_ID": 203,
+    "BIOME_NAME": "Alkaline",
+    "LFT": 402,
+    "RGT": 403,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Thermal springs:Near-boiling (>90C):Alkaline"
+  },
+  {
+    "BIOME_ID": 204,
+    "BIOME_NAME": "Sediment",
+    "LFT": 405,
+    "RGT": 406,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Thermal springs:Sediment"
+  },
+  {
+    "BIOME_ID": 205,
+    "BIOME_NAME": "Tepid (25-34C)",
+    "LFT": 407,
+    "RGT": 410,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Thermal springs:Tepid (25-34C)"
+  },
+  {
+    "BIOME_ID": 206,
+    "BIOME_NAME": "Sediment",
+    "LFT": 408,
+    "RGT": 409,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Thermal springs:Tepid (25-34C):Sediment"
+  },
+  {
+    "BIOME_ID": 207,
+    "BIOME_NAME": "Warm (34-42C)",
+    "LFT": 411,
+    "RGT": 416,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Aquatic:Thermal springs:Warm (34-42C)"
+  },
+  {
+    "BIOME_ID": 208,
+    "BIOME_NAME": "Neutral",
+    "LFT": 412,
+    "RGT": 413,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Thermal springs:Warm (34-42C):Neutral"
+  },
+  {
+    "BIOME_ID": 209,
+    "BIOME_NAME": "Sediment",
+    "LFT": 414,
+    "RGT": 415,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Aquatic:Thermal springs:Warm (34-42C):Sediment"
+  },
+  {
+    "BIOME_ID": 210,
+    "BIOME_NAME": "Terrestrial",
+    "LFT": 419,
+    "RGT": 512,
+    "DEPTH": 3,
+    "LINEAGE": "root:Environmental:Terrestrial"
+  },
+  {
+    "BIOME_ID": 211,
+    "BIOME_NAME": "Agricultural field",
+    "LFT": 420,
+    "RGT": 421,
+    "DEPTH": 4,
+    "LINEAGE": "root:Environmental:Terrestrial:Agricultural field"
+  },
+  {
+    "BIOME_ID": 212,
+    "BIOME_NAME": "Asphalt lakes",
+    "LFT": 422,
+    "RGT": 425,
+    "DEPTH": 4,
+    "LINEAGE": "root:Environmental:Terrestrial:Asphalt lakes"
+  },
+  {
+    "BIOME_ID": 213,
+    "BIOME_NAME": "Tar",
+    "LFT": 423,
+    "RGT": 424,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Terrestrial:Asphalt lakes:Tar"
+  },
+  {
+    "BIOME_ID": 214,
+    "BIOME_NAME": "Deep subsurface",
+    "LFT": 426,
+    "RGT": 429,
+    "DEPTH": 4,
+    "LINEAGE": "root:Environmental:Terrestrial:Deep subsurface"
+  },
+  {
+    "BIOME_ID": 215,
+    "BIOME_NAME": "Clay",
+    "LFT": 427,
+    "RGT": 428,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Terrestrial:Deep subsurface:Clay"
+  },
+  {
+    "BIOME_ID": 216,
+    "BIOME_NAME": "Geologic",
+    "LFT": 430,
+    "RGT": 433,
+    "DEPTH": 4,
+    "LINEAGE": "root:Environmental:Terrestrial:Geologic"
+  },
+  {
+    "BIOME_ID": 217,
+    "BIOME_NAME": "Mine",
+    "LFT": 431,
+    "RGT": 432,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Terrestrial:Geologic:Mine"
+  },
+  {
+    "BIOME_ID": 218,
+    "BIOME_NAME": "Oil reservoir",
+    "LFT": 434,
+    "RGT": 435,
+    "DEPTH": 4,
+    "LINEAGE": "root:Environmental:Terrestrial:Oil reservoir"
+  },
+  {
+    "BIOME_ID": 219,
+    "BIOME_NAME": "Rock-dwelling (subaerial biofilm)",
+    "LFT": 436,
+    "RGT": 437,
+    "DEPTH": 4,
+    "LINEAGE": "root:Environmental:Terrestrial:Rock-dwelling (subaerial biofilm)"
+  },
+  {
+    "BIOME_ID": 220,
+    "BIOME_NAME": "Soil",
+    "LFT": 438,
+    "RGT": 507,
+    "DEPTH": 4,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil"
+  },
+  {
+    "BIOME_ID": 221,
+    "BIOME_NAME": "Clay",
+    "LFT": 439,
+    "RGT": 448,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Clay"
+  },
+  {
+    "BIOME_ID": 222,
+    "BIOME_NAME": "Agricultural land",
+    "LFT": 440,
+    "RGT": 441,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Clay:Agricultural land"
+  },
+  {
+    "BIOME_ID": 223,
+    "BIOME_NAME": "Contaminated",
+    "LFT": 442,
+    "RGT": 443,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Clay:Contaminated"
+  },
+  {
+    "BIOME_ID": 224,
+    "BIOME_NAME": "Grasslands",
+    "LFT": 444,
+    "RGT": 445,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Clay:Grasslands"
+  },
+  {
+    "BIOME_ID": 225,
+    "BIOME_NAME": "Oil-contaminated",
+    "LFT": 446,
+    "RGT": 447,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Clay:Oil-contaminated"
+  },
+  {
+    "BIOME_ID": 226,
+    "BIOME_NAME": "Crop",
+    "LFT": 449,
+    "RGT": 452,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Crop"
+  },
+  {
+    "BIOME_ID": 227,
+    "BIOME_NAME": "Agricultural land",
+    "LFT": 450,
+    "RGT": 451,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Crop:Agricultural land"
+  },
+  {
+    "BIOME_ID": 228,
+    "BIOME_NAME": "Loam",
+    "LFT": 453,
+    "RGT": 462,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Loam"
+  },
+  {
+    "BIOME_ID": 229,
+    "BIOME_NAME": "Agricultural",
+    "LFT": 454,
+    "RGT": 455,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Loam:Agricultural"
+  },
+  {
+    "BIOME_ID": 230,
+    "BIOME_NAME": "Contaminated",
+    "LFT": 456,
+    "RGT": 457,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Loam:Contaminated"
+  },
+  {
+    "BIOME_ID": 231,
+    "BIOME_NAME": "Forest soil",
+    "LFT": 458,
+    "RGT": 459,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Loam:Forest soil"
+  },
+  {
+    "BIOME_ID": 232,
+    "BIOME_NAME": "Grasslands",
+    "LFT": 460,
+    "RGT": 461,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Loam:Grasslands"
+  },
+  {
+    "BIOME_ID": 233,
+    "BIOME_NAME": "Sand",
+    "LFT": 463,
+    "RGT": 472,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Sand"
+  },
+  {
+    "BIOME_ID": 234,
+    "BIOME_NAME": "Desert",
+    "LFT": 464,
+    "RGT": 465,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Sand:Desert"
+  },
+  {
+    "BIOME_ID": 235,
+    "BIOME_NAME": "Forest soil",
+    "LFT": 466,
+    "RGT": 467,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Sand:Forest soil"
+  },
+  {
+    "BIOME_ID": 236,
+    "BIOME_NAME": "Grasslands",
+    "LFT": 468,
+    "RGT": 469,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Sand:Grasslands"
+  },
+  {
+    "BIOME_ID": 237,
+    "BIOME_NAME": "Oil-contaminated",
+    "LFT": 470,
+    "RGT": 471,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Sand:Oil-contaminated"
+  },
+  {
+    "BIOME_ID": 238,
+    "BIOME_NAME": "Silt",
+    "LFT": 473,
+    "RGT": 474,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Silt"
+  },
+  {
+    "BIOME_ID": 239,
+    "BIOME_NAME": "Agricultural",
+    "LFT": 475,
+    "RGT": 476,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Agricultural"
+  },
+  {
+    "BIOME_ID": 240,
+    "BIOME_NAME": "Boreal forest",
+    "LFT": 477,
+    "RGT": 478,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Boreal forest"
+  },
+  {
+    "BIOME_ID": 241,
+    "BIOME_NAME": "Contaminated",
+    "LFT": 479,
+    "RGT": 480,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Contaminated"
+  },
+  {
+    "BIOME_ID": 242,
+    "BIOME_NAME": "Desert",
+    "LFT": 481,
+    "RGT": 482,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Desert"
+  },
+  {
+    "BIOME_ID": 243,
+    "BIOME_NAME": "Forest soil",
+    "LFT": 483,
+    "RGT": 484,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Forest soil"
+  },
+  {
+    "BIOME_ID": 244,
+    "BIOME_NAME": "Grasslands",
+    "LFT": 485,
+    "RGT": 486,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Grasslands"
+  },
+  {
+    "BIOME_ID": 245,
+    "BIOME_NAME": "Mine",
+    "LFT": 487,
+    "RGT": 488,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Mine"
+  },
+  {
+    "BIOME_ID": 246,
+    "BIOME_NAME": "Mine drainage",
+    "LFT": 489,
+    "RGT": 490,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Mine drainage"
+  },
+  {
+    "BIOME_ID": 247,
+    "BIOME_NAME": "Oil-contaminated",
+    "LFT": 491,
+    "RGT": 492,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Oil-contaminated"
+  },
+  {
+    "BIOME_ID": 248,
+    "BIOME_NAME": "Permafrost",
+    "LFT": 493,
+    "RGT": 494,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Permafrost"
+  },
+  {
+    "BIOME_ID": 249,
+    "BIOME_NAME": "Shrubland",
+    "LFT": 495,
+    "RGT": 496,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Shrubland"
+  },
+  {
+    "BIOME_ID": 250,
+    "BIOME_NAME": "Tropical rainforest",
+    "LFT": 497,
+    "RGT": 498,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Tropical rainforest"
+  },
+  {
+    "BIOME_ID": 251,
+    "BIOME_NAME": "Uranium contaminated",
+    "LFT": 499,
+    "RGT": 500,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Uranium contaminated"
+  },
+  {
+    "BIOME_ID": 252,
+    "BIOME_NAME": "Viriome",
+    "LFT": 501,
+    "RGT": 502,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Viriome"
+  },
+  {
+    "BIOME_ID": 253,
+    "BIOME_NAME": "Wetlands",
+    "LFT": 503,
+    "RGT": 506,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Wetlands"
+  },
+  {
+    "BIOME_ID": 254,
+    "BIOME_NAME": "Permafrost",
+    "LFT": 504,
+    "RGT": 505,
+    "DEPTH": 6,
+    "LINEAGE": "root:Environmental:Terrestrial:Soil:Wetlands:Permafrost"
+  },
+  {
+    "BIOME_ID": 255,
+    "BIOME_NAME": "Volcanic",
+    "LFT": 508,
+    "RGT": 511,
+    "DEPTH": 4,
+    "LINEAGE": "root:Environmental:Terrestrial:Volcanic"
+  },
+  {
+    "BIOME_ID": 256,
+    "BIOME_NAME": "Fumaroles",
+    "LFT": 509,
+    "RGT": 510,
+    "DEPTH": 5,
+    "LINEAGE": "root:Environmental:Terrestrial:Volcanic:Fumaroles"
+  },
+  {
+    "BIOME_ID": 257,
+    "BIOME_NAME": "Host-associated",
+    "LFT": 514,
+    "RGT": 981,
+    "DEPTH": 2,
+    "LINEAGE": "root:Host-associated"
+  },
+  {
+    "BIOME_ID": 258,
+    "BIOME_NAME": "Algae",
+    "LFT": 515,
+    "RGT": 526,
+    "DEPTH": 3,
+    "LINEAGE": "root:Host-associated:Algae"
+  },
+  {
+    "BIOME_ID": 259,
+    "BIOME_NAME": "Brown Algae",
+    "LFT": 516,
+    "RGT": 517,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Algae:Brown Algae"
+  },
+  {
+    "BIOME_ID": 260,
+    "BIOME_NAME": "Green algae",
+    "LFT": 518,
+    "RGT": 521,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Algae:Green algae"
+  },
+  {
+    "BIOME_ID": 261,
+    "BIOME_NAME": "Ectosymbionts",
+    "LFT": 519,
+    "RGT": 520,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Algae:Green algae:Ectosymbionts"
+  },
+  {
+    "BIOME_ID": 262,
+    "BIOME_NAME": "Red algae",
+    "LFT": 522,
+    "RGT": 525,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Algae:Red algae"
+  },
+  {
+    "BIOME_ID": 263,
+    "BIOME_NAME": "Ectosymbionts ",
+    "LFT": 523,
+    "RGT": 524,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Algae:Red algae:Ectosymbionts "
+  },
+  {
+    "BIOME_ID": 264,
+    "BIOME_NAME": "Amphibia",
+    "LFT": 527,
+    "RGT": 532,
+    "DEPTH": 3,
+    "LINEAGE": "root:Host-associated:Amphibia"
+  },
+  {
+    "BIOME_ID": 265,
+    "BIOME_NAME": "Digestive system",
+    "LFT": 528,
+    "RGT": 529,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Amphibia:Digestive system"
+  },
+  {
+    "BIOME_ID": 266,
+    "BIOME_NAME": "Excretory system",
+    "LFT": 530,
+    "RGT": 531,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Amphibia:Excretory system"
+  },
+  {
+    "BIOME_ID": 267,
+    "BIOME_NAME": "Animal",
+    "LFT": 533,
+    "RGT": 552,
+    "DEPTH": 3,
+    "LINEAGE": "root:Host-associated:Animal"
+  },
+  {
+    "BIOME_ID": 268,
+    "BIOME_NAME": "Circulatory system",
+    "LFT": 534,
+    "RGT": 535,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Animal:Circulatory system"
+  },
+  {
+    "BIOME_ID": 269,
+    "BIOME_NAME": "Digestive system",
+    "LFT": 536,
+    "RGT": 539,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Animal:Digestive system"
+  },
+  {
+    "BIOME_ID": 270,
+    "BIOME_NAME": "Fecal",
+    "LFT": 537,
+    "RGT": 538,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Animal:Digestive system:Fecal"
+  },
+  {
+    "BIOME_ID": 271,
+    "BIOME_NAME": "Fossil",
+    "LFT": 540,
+    "RGT": 545,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Animal:Fossil"
+  },
+  {
+    "BIOME_ID": 272,
+    "BIOME_NAME": "Bone",
+    "LFT": 541,
+    "RGT": 542,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Animal:Fossil:Bone"
+  },
+  {
+    "BIOME_ID": 273,
+    "BIOME_NAME": "Feces",
+    "LFT": 543,
+    "RGT": 544,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Animal:Fossil:Feces"
+  },
+  {
+    "BIOME_ID": 274,
+    "BIOME_NAME": "Reproductive system",
+    "LFT": 546,
+    "RGT": 547,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Animal:Reproductive system"
+  },
+  {
+    "BIOME_ID": 275,
+    "BIOME_NAME": "Respiratory system",
+    "LFT": 548,
+    "RGT": 549,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Animal:Respiratory system"
+  },
+  {
+    "BIOME_ID": 276,
+    "BIOME_NAME": "Skin",
+    "LFT": 550,
+    "RGT": 551,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Animal:Skin"
+  },
+  {
+    "BIOME_ID": 277,
+    "BIOME_NAME": "Annelida",
+    "LFT": 553,
+    "RGT": 580,
+    "DEPTH": 3,
+    "LINEAGE": "root:Host-associated:Annelida"
+  },
+  {
+    "BIOME_ID": 278,
+    "BIOME_NAME": "Digestive system",
+    "LFT": 554,
+    "RGT": 559,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Annelida:Digestive system"
+  },
+  {
+    "BIOME_ID": 279,
+    "BIOME_NAME": "Digestive tube",
+    "LFT": 555,
+    "RGT": 558,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Annelida:Digestive system:Digestive tube"
+  },
+  {
+    "BIOME_ID": 280,
+    "BIOME_NAME": "Extracellular symbionts",
+    "LFT": 556,
+    "RGT": 557,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Annelida:Digestive system:Digestive tube:Extracellular symbionts"
+  },
+  {
+    "BIOME_ID": 281,
+    "BIOME_NAME": "Integument",
+    "LFT": 560,
+    "RGT": 569,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Annelida:Integument"
+  },
+  {
+    "BIOME_ID": 282,
+    "BIOME_NAME": "Cuticle",
+    "LFT": 561,
+    "RGT": 564,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Annelida:Integument:Cuticle"
+  },
+  {
+    "BIOME_ID": 283,
+    "BIOME_NAME": "Epibionts",
+    "LFT": 562,
+    "RGT": 563,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Annelida:Integument:Cuticle:Epibionts"
+  },
+  {
+    "BIOME_ID": 284,
+    "BIOME_NAME": "Subcuticular space",
+    "LFT": 565,
+    "RGT": 568,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Annelida:Integument:Subcuticular space"
+  },
+  {
+    "BIOME_ID": 285,
+    "BIOME_NAME": "Extracellular symbionts",
+    "LFT": 566,
+    "RGT": 567,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Annelida:Integument:Subcuticular space:Extracellular symbionts"
+  },
+  {
+    "BIOME_ID": 286,
+    "BIOME_NAME": "Intracellular endosymbionts",
+    "LFT": 570,
+    "RGT": 573,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Annelida:Intracellular endosymbionts"
+  },
+  {
+    "BIOME_ID": 287,
+    "BIOME_NAME": "Trophosome",
+    "LFT": 571,
+    "RGT": 572,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Annelida:Intracellular endosymbionts:Trophosome"
+  },
+  {
+    "BIOME_ID": 288,
+    "BIOME_NAME": "Reproductive system",
+    "LFT": 574,
+    "RGT": 579,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Annelida:Reproductive system"
+  },
+  {
+    "BIOME_ID": 289,
+    "BIOME_NAME": "Egg capsule",
+    "LFT": 575,
+    "RGT": 578,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Annelida:Reproductive system:Egg capsule"
+  },
+  {
+    "BIOME_ID": 290,
+    "BIOME_NAME": "Extracellular",
+    "LFT": 576,
+    "RGT": 577,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Annelida:Reproductive system:Egg capsule:Extracellular"
+  },
+  {
+    "BIOME_ID": 291,
+    "BIOME_NAME": "Arthropoda",
+    "LFT": 581,
+    "RGT": 636,
+    "DEPTH": 3,
+    "LINEAGE": "root:Host-associated:Arthropoda"
+  },
+  {
+    "BIOME_ID": 292,
+    "BIOME_NAME": "Digestive system",
+    "LFT": 582,
+    "RGT": 603,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Arthropoda:Digestive system"
+  },
+  {
+    "BIOME_ID": 293,
+    "BIOME_NAME": "Foregut",
+    "LFT": 583,
+    "RGT": 584,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Arthropoda:Digestive system:Foregut"
+  },
+  {
+    "BIOME_ID": 294,
+    "BIOME_NAME": "Gut",
+    "LFT": 585,
+    "RGT": 590,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Arthropoda:Digestive system:Gut"
+  },
+  {
+    "BIOME_ID": 295,
+    "BIOME_NAME": "P3 segment",
+    "LFT": 586,
+    "RGT": 587,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Arthropoda:Digestive system:Gut:P3 segment"
+  },
+  {
+    "BIOME_ID": 296,
+    "BIOME_NAME": "Proctodeal segment",
+    "LFT": 588,
+    "RGT": 589,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Arthropoda:Digestive system:Gut:Proctodeal segment"
+  },
+  {
+    "BIOME_ID": 297,
+    "BIOME_NAME": "Hindgut",
+    "LFT": 591,
+    "RGT": 596,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Arthropoda:Digestive system:Hindgut"
+  },
+  {
+    "BIOME_ID": 298,
+    "BIOME_NAME": "P1 segment",
+    "LFT": 592,
+    "RGT": 593,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Arthropoda:Digestive system:Hindgut:P1 segment"
+  },
+  {
+    "BIOME_ID": 299,
+    "BIOME_NAME": "P3 segment",
+    "LFT": 594,
+    "RGT": 595,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Arthropoda:Digestive system:Hindgut:P3 segment"
+  },
+  {
+    "BIOME_ID": 300,
+    "BIOME_NAME": "Midgut",
+    "LFT": 597,
+    "RGT": 598,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Arthropoda:Digestive system:Midgut"
+  },
+  {
+    "BIOME_ID": 301,
+    "BIOME_NAME": "Oral",
+    "LFT": 599,
+    "RGT": 602,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Arthropoda:Digestive system:Oral"
+  },
+  {
+    "BIOME_ID": 302,
+    "BIOME_NAME": "Saliva",
+    "LFT": 600,
+    "RGT": 601,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Arthropoda:Digestive system:Oral:Saliva"
+  },
+  {
+    "BIOME_ID": 303,
+    "BIOME_NAME": "Integument",
+    "LFT": 604,
+    "RGT": 609,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Arthropoda:Integument"
+  },
+  {
+    "BIOME_ID": 304,
+    "BIOME_NAME": "Cuticle",
+    "LFT": 605,
+    "RGT": 608,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Arthropoda:Integument:Cuticle"
+  },
+  {
+    "BIOME_ID": 305,
+    "BIOME_NAME": "Thoracic segments",
+    "LFT": 606,
+    "RGT": 607,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Arthropoda:Integument:Cuticle:Thoracic segments"
+  },
+  {
+    "BIOME_ID": 306,
+    "BIOME_NAME": "Intracellular endosymbionts",
+    "LFT": 610,
+    "RGT": 617,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Arthropoda:Intracellular endosymbionts"
+  },
+  {
+    "BIOME_ID": 307,
+    "BIOME_NAME": "Primary",
+    "LFT": 611,
+    "RGT": 614,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Arthropoda:Intracellular endosymbionts:Primary"
+  },
+  {
+    "BIOME_ID": 308,
+    "BIOME_NAME": "Bacteriomes",
+    "LFT": 612,
+    "RGT": 613,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Arthropoda:Intracellular endosymbionts:Primary:Bacteriomes"
+  },
+  {
+    "BIOME_ID": 309,
+    "BIOME_NAME": "Secondary",
+    "LFT": 615,
+    "RGT": 616,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Arthropoda:Intracellular endosymbionts:Secondary"
+  },
+  {
+    "BIOME_ID": 310,
+    "BIOME_NAME": "Oral cavity",
+    "LFT": 618,
+    "RGT": 619,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Arthropoda:Oral cavity"
+  },
+  {
+    "BIOME_ID": 311,
+    "BIOME_NAME": "Respiratory system",
+    "LFT": 620,
+    "RGT": 623,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Arthropoda:Respiratory system"
+  },
+  {
+    "BIOME_ID": 312,
+    "BIOME_NAME": "Gills",
+    "LFT": 621,
+    "RGT": 622,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Arthropoda:Respiratory system:Gills"
+  },
+  {
+    "BIOME_ID": 313,
+    "BIOME_NAME": "Symbiotic fungal gardens and galleries",
+    "LFT": 624,
+    "RGT": 631,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Arthropoda:Symbiotic fungal gardens and galleries"
+  },
+  {
+    "BIOME_ID": 314,
+    "BIOME_NAME": "Fungus gallery",
+    "LFT": 625,
+    "RGT": 626,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Arthropoda:Symbiotic fungal gardens and galleries:Fungus gallery"
+  },
+  {
+    "BIOME_ID": 315,
+    "BIOME_NAME": "Fungus garden",
+    "LFT": 627,
+    "RGT": 630,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Arthropoda:Symbiotic fungal gardens and galleries:Fungus garden"
+  },
+  {
+    "BIOME_ID": 316,
+    "BIOME_NAME": "Garden dump",
+    "LFT": 628,
+    "RGT": 629,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Arthropoda:Symbiotic fungal gardens and galleries:Fungus garden:Garden dump"
+  },
+  {
+    "BIOME_ID": 317,
+    "BIOME_NAME": "Venom gland",
+    "LFT": 632,
+    "RGT": 635,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Arthropoda:Venom gland"
+  },
+  {
+    "BIOME_ID": 318,
+    "BIOME_NAME": "Venom",
+    "LFT": 633,
+    "RGT": 634,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Arthropoda:Venom gland:Venom"
+  },
+  {
+    "BIOME_ID": 319,
+    "BIOME_NAME": "Birds",
+    "LFT": 637,
+    "RGT": 668,
+    "DEPTH": 3,
+    "LINEAGE": "root:Host-associated:Birds"
+  },
+  {
+    "BIOME_ID": 320,
+    "BIOME_NAME": "Circulatory system",
+    "LFT": 638,
+    "RGT": 641,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Birds:Circulatory system"
+  },
+  {
+    "BIOME_ID": 321,
+    "BIOME_NAME": "Blood",
+    "LFT": 639,
+    "RGT": 640,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Birds:Circulatory system:Blood"
+  },
+  {
+    "BIOME_ID": 322,
+    "BIOME_NAME": "Digestive system",
+    "LFT": 642,
+    "RGT": 661,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Birds:Digestive system"
+  },
+  {
+    "BIOME_ID": 323,
+    "BIOME_NAME": "Ceca",
+    "LFT": 643,
+    "RGT": 646,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Birds:Digestive system:Ceca"
+  },
+  {
+    "BIOME_ID": 324,
+    "BIOME_NAME": "Lumen",
+    "LFT": 644,
+    "RGT": 645,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Birds:Digestive system:Ceca:Lumen"
+  },
+  {
+    "BIOME_ID": 325,
+    "BIOME_NAME": "Crop",
+    "LFT": 647,
+    "RGT": 650,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Birds:Digestive system:Crop"
+  },
+  {
+    "BIOME_ID": 326,
+    "BIOME_NAME": "Lumen",
+    "LFT": 648,
+    "RGT": 649,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Birds:Digestive system:Crop:Lumen"
+  },
+  {
+    "BIOME_ID": 327,
+    "BIOME_NAME": "Digestive tube",
+    "LFT": 651,
+    "RGT": 654,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Birds:Digestive system:Digestive tube"
+  },
+  {
+    "BIOME_ID": 328,
+    "BIOME_NAME": "Cecum",
+    "LFT": 652,
+    "RGT": 653,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Birds:Digestive system:Digestive tube:Cecum"
+  },
+  {
+    "BIOME_ID": 329,
+    "BIOME_NAME": "Fecal",
+    "LFT": 655,
+    "RGT": 656,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Birds:Digestive system:Fecal"
+  },
+  {
+    "BIOME_ID": 330,
+    "BIOME_NAME": "Small intestine",
+    "LFT": 657,
+    "RGT": 660,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Birds:Digestive system:Small intestine"
+  },
+  {
+    "BIOME_ID": 331,
+    "BIOME_NAME": "Duodenal",
+    "LFT": 658,
+    "RGT": 659,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Birds:Digestive system:Small intestine:Duodenal"
+  },
+  {
+    "BIOME_ID": 332,
+    "BIOME_NAME": "Reproductive system",
+    "LFT": 662,
+    "RGT": 663,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Birds:Reproductive system"
+  },
+  {
+    "BIOME_ID": 333,
+    "BIOME_NAME": "Respiratory system",
+    "LFT": 664,
+    "RGT": 667,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Birds:Respiratory system"
+  },
+  {
+    "BIOME_ID": 334,
+    "BIOME_NAME": "Lungs",
+    "LFT": 665,
+    "RGT": 666,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Birds:Respiratory system:Lungs"
+  },
+  {
+    "BIOME_ID": 335,
+    "BIOME_NAME": "Cnidaria",
+    "LFT": 669,
+    "RGT": 670,
+    "DEPTH": 3,
+    "LINEAGE": "root:Host-associated:Cnidaria"
+  },
+  {
+    "BIOME_ID": 336,
+    "BIOME_NAME": "Echinodermata",
+    "LFT": 671,
+    "RGT": 672,
+    "DEPTH": 3,
+    "LINEAGE": "root:Host-associated:Echinodermata"
+  },
+  {
+    "BIOME_ID": 337,
+    "BIOME_NAME": "Endosymbionts",
+    "LFT": 673,
+    "RGT": 678,
+    "DEPTH": 3,
+    "LINEAGE": "root:Host-associated:Endosymbionts"
+  },
+  {
+    "BIOME_ID": 338,
+    "BIOME_NAME": "Fungi",
+    "LFT": 674,
+    "RGT": 677,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Endosymbionts:Fungi"
+  },
+  {
+    "BIOME_ID": 339,
+    "BIOME_NAME": "Endosymbionts",
+    "LFT": 675,
+    "RGT": 676,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Endosymbionts:Fungi:Endosymbionts"
+  },
+  {
+    "BIOME_ID": 340,
+    "BIOME_NAME": "Fish",
+    "LFT": 679,
+    "RGT": 702,
+    "DEPTH": 3,
+    "LINEAGE": "root:Host-associated:Fish"
+  },
+  {
+    "BIOME_ID": 341,
+    "BIOME_NAME": "Circulatory system",
+    "LFT": 680,
+    "RGT": 683,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Fish:Circulatory system"
+  },
+  {
+    "BIOME_ID": 342,
+    "BIOME_NAME": "Blood",
+    "LFT": 681,
+    "RGT": 682,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Fish:Circulatory system:Blood"
+  },
+  {
+    "BIOME_ID": 343,
+    "BIOME_NAME": "Digestive system",
+    "LFT": 684,
+    "RGT": 691,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Fish:Digestive system"
+  },
+  {
+    "BIOME_ID": 344,
+    "BIOME_NAME": "Foregut",
+    "LFT": 685,
+    "RGT": 688,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Fish:Digestive system:Foregut"
+  },
+  {
+    "BIOME_ID": 345,
+    "BIOME_NAME": "Uncharacterized",
+    "LFT": 686,
+    "RGT": 687,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Fish:Digestive system:Foregut:Uncharacterized"
+  },
+  {
+    "BIOME_ID": 346,
+    "BIOME_NAME": "Intestine",
+    "LFT": 689,
+    "RGT": 690,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Fish:Digestive system:Intestine"
+  },
+  {
+    "BIOME_ID": 347,
+    "BIOME_NAME": "Excretory system",
+    "LFT": 692,
+    "RGT": 695,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Fish:Excretory system"
+  },
+  {
+    "BIOME_ID": 348,
+    "BIOME_NAME": "Kidneys",
+    "LFT": 693,
+    "RGT": 694,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Fish:Excretory system:Kidneys"
+  },
+  {
+    "BIOME_ID": 349,
+    "BIOME_NAME": "Reproductive system",
+    "LFT": 696,
+    "RGT": 697,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Fish:Reproductive system"
+  },
+  {
+    "BIOME_ID": 350,
+    "BIOME_NAME": "Skin",
+    "LFT": 698,
+    "RGT": 701,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Fish:Skin"
+  },
+  {
+    "BIOME_ID": 351,
+    "BIOME_NAME": "Slime",
+    "LFT": 699,
+    "RGT": 700,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Fish:Skin:Slime"
+  },
+  {
+    "BIOME_ID": 352,
+    "BIOME_NAME": "Fungi",
+    "LFT": 703,
+    "RGT": 704,
+    "DEPTH": 3,
+    "LINEAGE": "root:Host-associated:Fungi"
+  },
+  {
+    "BIOME_ID": 353,
+    "BIOME_NAME": "Human",
+    "LFT": 705,
+    "RGT": 816,
+    "DEPTH": 3,
+    "LINEAGE": "root:Host-associated:Human"
+  },
+  {
+    "BIOME_ID": 354,
+    "BIOME_NAME": "Circulatory system",
+    "LFT": 706,
+    "RGT": 709,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Human:Circulatory system"
+  },
+  {
+    "BIOME_ID": 355,
+    "BIOME_NAME": "Blood",
+    "LFT": 707,
+    "RGT": 708,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Human:Circulatory system:Blood"
+  },
+  {
+    "BIOME_ID": 356,
+    "BIOME_NAME": "Digestive system",
+    "LFT": 710,
+    "RGT": 747,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Human:Digestive system"
+  },
+  {
+    "BIOME_ID": 357,
+    "BIOME_NAME": "Hindgut",
+    "LFT": 711,
+    "RGT": 714,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Human:Digestive system:Hindgut"
+  },
+  {
+    "BIOME_ID": 358,
+    "BIOME_NAME": "Rectum",
+    "LFT": 712,
+    "RGT": 713,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Digestive system:Hindgut:Rectum"
+  },
+  {
+    "BIOME_ID": 359,
+    "BIOME_NAME": "Intestine",
+    "LFT": 715,
+    "RGT": 716,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Human:Digestive system:Intestine"
+  },
+  {
+    "BIOME_ID": 360,
+    "BIOME_NAME": "Large intestine",
+    "LFT": 717,
+    "RGT": 722,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Human:Digestive system:Large intestine"
+  },
+  {
+    "BIOME_ID": 361,
+    "BIOME_NAME": "Fecal",
+    "LFT": 718,
+    "RGT": 719,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Digestive system:Large intestine:Fecal"
+  },
+  {
+    "BIOME_ID": 362,
+    "BIOME_NAME": "Sigmoid colon",
+    "LFT": 720,
+    "RGT": 721,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Digestive system:Large intestine:Sigmoid colon"
+  },
+  {
+    "BIOME_ID": 363,
+    "BIOME_NAME": "Oral",
+    "LFT": 723,
+    "RGT": 743,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Human:Digestive system:Oral"
+  },
+  {
+    "BIOME_ID": 364,
+    "BIOME_NAME": "Attached Keratinized gingiva",
+    "LFT": 724,
+    "RGT": 725,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Digestive system:Oral:Attached Keratinized gingiva"
+  },
+  {
+    "BIOME_ID": 365,
+    "BIOME_NAME": "buccal mucosa",
+    "LFT": 726,
+    "RGT": 727,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Digestive system:Oral:buccal mucosa"
+  },
+  {
+    "BIOME_ID": 366,
+    "BIOME_NAME": "hard palate",
+    "LFT": 728,
+    "RGT": 729,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Digestive system:Oral:hard palate"
+  },
+  {
+    "BIOME_ID": 367,
+    "BIOME_NAME": "Palatine tonsils",
+    "LFT": 730,
+    "RGT": 731,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Digestive system:Oral:Palatine tonsils"
+  },
+  {
+    "BIOME_ID": 368,
+    "BIOME_NAME": "Periodontal pockets",
+    "LFT": 732,
+    "RGT": 733,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Digestive system:Oral:Periodontal pockets"
+  },
+  {
+    "BIOME_ID": 369,
+    "BIOME_NAME": "Saliva",
+    "LFT": 734,
+    "RGT": 735,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Digestive system:Oral:Saliva"
+  },
+  {
+    "BIOME_ID": 370,
+    "BIOME_NAME": "Subgingival plaque",
+    "LFT": 736,
+    "RGT": 737,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Digestive system:Oral:Subgingival plaque"
+  },
+  {
+    "BIOME_ID": 372,
+    "BIOME_NAME": "Supragingival plaque",
+    "LFT": 738,
+    "RGT": 739,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Digestive system:Oral:Supragingival plaque"
+  },
+  {
+    "BIOME_ID": 373,
+    "BIOME_NAME": "Throat",
+    "LFT": 740,
+    "RGT": 741,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Digestive system:Oral:Throat"
+  },
+  {
+    "BIOME_ID": 374,
+    "BIOME_NAME": "tongue dorsum",
+    "LFT": 742,
+    "RGT": 743,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Digestive system:Oral:tongue dorsum"
+  },
+  {
+    "BIOME_ID": 375,
+    "BIOME_NAME": "Excretory system",
+    "LFT": 748,
+    "RGT": 753,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Human:Excretory system"
+  },
+  {
+    "BIOME_ID": 376,
+    "BIOME_NAME": "Urethra",
+    "LFT": 749,
+    "RGT": 752,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Human:Excretory system:Urethra"
+  },
+  {
+    "BIOME_ID": 377,
+    "BIOME_NAME": "Urine",
+    "LFT": 750,
+    "RGT": 751,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Excretory system:Urethra:Urine"
+  },
+  {
+    "BIOME_ID": 378,
+    "BIOME_NAME": "Fossil",
+    "LFT": 754,
+    "RGT": 757,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Human:Fossil"
+  },
+  {
+    "BIOME_ID": 379,
+    "BIOME_NAME": "Bone",
+    "LFT": 755,
+    "RGT": 756,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Human:Fossil:Bone"
+  },
+  {
+    "BIOME_ID": 380,
+    "BIOME_NAME": "Lympathic system",
+    "LFT": 758,
+    "RGT": 761,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Human:Lympathic system"
+  },
+  {
+    "BIOME_ID": 381,
+    "BIOME_NAME": "Lymph nodes",
+    "LFT": 759,
+    "RGT": 760,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Human:Lympathic system:Lymph nodes"
+  },
+  {
+    "BIOME_ID": 382,
+    "BIOME_NAME": "Milk",
+    "LFT": 762,
+    "RGT": 763,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Human:Milk"
+  },
+  {
+    "BIOME_ID": 383,
+    "BIOME_NAME": "Nervous system",
+    "LFT": 764,
+    "RGT": 767,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Human:Nervous system"
+  },
+  {
+    "BIOME_ID": 384,
+    "BIOME_NAME": "Cerebrospinal fluid",
+    "LFT": 765,
+    "RGT": 766,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Human:Nervous system:Cerebrospinal fluid"
+  },
+  {
+    "BIOME_ID": 385,
+    "BIOME_NAME": "Reproductive system",
+    "LFT": 768,
+    "RGT": 779,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Human:Reproductive system"
+  },
+  {
+    "BIOME_ID": 386,
+    "BIOME_NAME": "Female",
+    "LFT": 769,
+    "RGT": 770,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Human:Reproductive system:Female"
+  },
+  {
+    "BIOME_ID": 387,
+    "BIOME_NAME": "Vagina",
+    "LFT": 771,
+    "RGT": 778,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Human:Reproductive system:Vagina"
+  },
+  {
+    "BIOME_ID": 388,
+    "BIOME_NAME": "Introitus",
+    "LFT": 772,
+    "RGT": 773,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Reproductive system:Vagina:Introitus"
+  },
+  {
+    "BIOME_ID": 389,
+    "BIOME_NAME": "Midpoint vagina",
+    "LFT": 774,
+    "RGT": 775,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Reproductive system:Vagina:Midpoint vagina"
+  },
+  {
+    "BIOME_ID": 390,
+    "BIOME_NAME": "posterior fornix",
+    "LFT": 776,
+    "RGT": 777,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Reproductive system:Vagina:posterior fornix"
+  },
+  {
+    "BIOME_ID": 391,
+    "BIOME_NAME": "Respiratory system",
+    "LFT": 780,
+    "RGT": 799,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Human:Respiratory system"
+  },
+  {
+    "BIOME_ID": 392,
+    "BIOME_NAME": "Nasopharyngeal",
+    "LFT": 781,
+    "RGT": 788,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Human:Respiratory system:Nasopharyngeal"
+  },
+  {
+    "BIOME_ID": 393,
+    "BIOME_NAME": "anterior nares",
+    "LFT": 782,
+    "RGT": 783,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Respiratory system:Nasopharyngeal:anterior nares"
+  },
+  {
+    "BIOME_ID": 394,
+    "BIOME_NAME": "Nasal cavity",
+    "LFT": 784,
+    "RGT": 785,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Respiratory system:Nasopharyngeal:Nasal cavity"
+  },
+  {
+    "BIOME_ID": 395,
+    "BIOME_NAME": "Pharynx",
+    "LFT": 786,
+    "RGT": 787,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Respiratory system:Nasopharyngeal:Pharynx"
+  },
+  {
+    "BIOME_ID": 396,
+    "BIOME_NAME": "Pulmonary system",
+    "LFT": 789,
+    "RGT": 798,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Human:Respiratory system:Pulmonary system"
+  },
+  {
+    "BIOME_ID": 397,
+    "BIOME_NAME": "Lung",
+    "LFT": 790,
+    "RGT": 791,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Respiratory system:Pulmonary system:Lung"
+  },
+  {
+    "BIOME_ID": 398,
+    "BIOME_NAME": "Sputum",
+    "LFT": 792,
+    "RGT": 793,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Respiratory system:Pulmonary system:Sputum"
+  },
+  {
+    "BIOME_ID": 399,
+    "BIOME_NAME": "Trachea",
+    "LFT": 794,
+    "RGT": 795,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Respiratory system:Pulmonary system:Trachea"
+  },
+  {
+    "BIOME_ID": 400,
+    "BIOME_NAME": "Viriome",
+    "LFT": 796,
+    "RGT": 797,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Respiratory system:Pulmonary system:Viriome"
+  },
+  {
+    "BIOME_ID": 401,
+    "BIOME_NAME": "Skin",
+    "LFT": 800,
+    "RGT": 815,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Human:Skin"
+  },
+  {
+    "BIOME_ID": 402,
+    "BIOME_NAME": "Axilla",
+    "LFT": 801,
+    "RGT": 802,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Human:Skin:Axilla"
+  },
+  {
+    "BIOME_ID": 403,
+    "BIOME_NAME": "Medial distal leg",
+    "LFT": 803,
+    "RGT": 806,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Human:Skin:Medial distal leg"
+  },
+  {
+    "BIOME_ID": 404,
+    "BIOME_NAME": "Venous leg ulcers",
+    "LFT": 804,
+    "RGT": 805,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Human:Skin:Medial distal leg:Venous leg ulcers"
+  },
+  {
+    "BIOME_ID": 405,
+    "BIOME_NAME": "Naris",
+    "LFT": 807,
+    "RGT": 808,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Human:Skin:Naris"
+  },
+  {
+    "BIOME_ID": 406,
+    "BIOME_NAME": "retroauricular crease",
+    "LFT": 809,
+    "RGT": 810,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Human:Skin:retroauricular crease"
+  },
+  {
+    "BIOME_ID": 407,
+    "BIOME_NAME": "Umbilicus",
+    "LFT": 811,
+    "RGT": 812,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Human:Skin:Umbilicus"
+  },
+  {
+    "BIOME_ID": 408,
+    "BIOME_NAME": "Volar forearm",
+    "LFT": 813,
+    "RGT": 814,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Human:Skin:Volar forearm"
+  },
+  {
+    "BIOME_ID": 409,
+    "BIOME_NAME": "Insecta",
+    "LFT": 817,
+    "RGT": 820,
+    "DEPTH": 3,
+    "LINEAGE": "root:Host-associated:Insecta"
+  },
+  {
+    "BIOME_ID": 410,
+    "BIOME_NAME": "Digestive system",
+    "LFT": 818,
+    "RGT": 819,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Insecta:Digestive system"
+  },
+  {
+    "BIOME_ID": 411,
+    "BIOME_NAME": "Invertebrates",
+    "LFT": 821,
+    "RGT": 834,
+    "DEPTH": 3,
+    "LINEAGE": "root:Host-associated:Invertebrates"
+  },
+  {
+    "BIOME_ID": 412,
+    "BIOME_NAME": "Bryozoans",
+    "LFT": 822,
+    "RGT": 825,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Invertebrates:Bryozoans"
+  },
+  {
+    "BIOME_ID": 413,
+    "BIOME_NAME": "Gymnolaemates",
+    "LFT": 823,
+    "RGT": 824,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Invertebrates:Bryozoans:Gymnolaemates"
+  },
+  {
+    "BIOME_ID": 414,
+    "BIOME_NAME": "Cnidaria",
+    "LFT": 826,
+    "RGT": 829,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Invertebrates:Cnidaria"
+  },
+  {
+    "BIOME_ID": 415,
+    "BIOME_NAME": "Coral",
+    "LFT": 827,
+    "RGT": 828,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Invertebrates:Cnidaria:Coral"
+  },
+  {
+    "BIOME_ID": 416,
+    "BIOME_NAME": "Echinodermata",
+    "LFT": 830,
+    "RGT": 833,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Invertebrates:Echinodermata"
+  },
+  {
+    "BIOME_ID": 417,
+    "BIOME_NAME": "Sea Urchin",
+    "LFT": 831,
+    "RGT": 832,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Invertebrates:Echinodermata:Sea Urchin"
+  },
+  {
+    "BIOME_ID": 418,
+    "BIOME_NAME": "Mammals",
+    "LFT": 835,
+    "RGT": 902,
+    "DEPTH": 3,
+    "LINEAGE": "root:Host-associated:Mammals"
+  },
+  {
+    "BIOME_ID": 419,
+    "BIOME_NAME": "Circulatory system",
+    "LFT": 836,
+    "RGT": 839,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Mammals:Circulatory system"
+  },
+  {
+    "BIOME_ID": 420,
+    "BIOME_NAME": "Blood",
+    "LFT": 837,
+    "RGT": 838,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Mammals:Circulatory system:Blood"
+  },
+  {
+    "BIOME_ID": 421,
+    "BIOME_NAME": "Digestive system",
+    "LFT": 840,
+    "RGT": 867,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Mammals:Digestive system"
+  },
+  {
+    "BIOME_ID": 422,
+    "BIOME_NAME": "Fecal",
+    "LFT": 841,
+    "RGT": 844,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Mammals:Digestive system:Fecal"
+  },
+  {
+    "BIOME_ID": 423,
+    "BIOME_NAME": "Uncharacterized",
+    "LFT": 842,
+    "RGT": 843,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Mammals:Digestive system:Fecal:Uncharacterized"
+  },
+  {
+    "BIOME_ID": 424,
+    "BIOME_NAME": "Foregut",
+    "LFT": 845,
+    "RGT": 848,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Mammals:Digestive system:Foregut"
+  },
+  {
+    "BIOME_ID": 425,
+    "BIOME_NAME": "Rumen",
+    "LFT": 846,
+    "RGT": 847,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Mammals:Digestive system:Foregut:Rumen"
+  },
+  {
+    "BIOME_ID": 426,
+    "BIOME_NAME": "Large intestine",
+    "LFT": 849,
+    "RGT": 854,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Mammals:Digestive system:Large intestine"
+  },
+  {
+    "BIOME_ID": 427,
+    "BIOME_NAME": "Cecum",
+    "LFT": 850,
+    "RGT": 851,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Mammals:Digestive system:Large intestine:Cecum"
+  },
+  {
+    "BIOME_ID": 428,
+    "BIOME_NAME": "Fecal",
+    "LFT": 852,
+    "RGT": 853,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Mammals:Digestive system:Large intestine:Fecal"
+  },
+  {
+    "BIOME_ID": 429,
+    "BIOME_NAME": "Midgut",
+    "LFT": 855,
+    "RGT": 856,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Mammals:Digestive system:Midgut"
+  },
+  {
+    "BIOME_ID": 430,
+    "BIOME_NAME": "Oral cavity",
+    "LFT": 857,
+    "RGT": 860,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Mammals:Digestive system:Oral cavity"
+  },
+  {
+    "BIOME_ID": 431,
+    "BIOME_NAME": "Buccal mucosa",
+    "LFT": 858,
+    "RGT": 859,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Mammals:Digestive system:Oral cavity:Buccal mucosa"
+  },
+  {
+    "BIOME_ID": 432,
+    "BIOME_NAME": "Stomach",
+    "LFT": 861,
+    "RGT": 866,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Mammals:Digestive system:Stomach"
+  },
+  {
+    "BIOME_ID": 433,
+    "BIOME_NAME": "Endoperitrophic space",
+    "LFT": 862,
+    "RGT": 863,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Mammals:Digestive system:Stomach:Endoperitrophic space"
+  },
+  {
+    "BIOME_ID": 434,
+    "BIOME_NAME": "Rumen",
+    "LFT": 864,
+    "RGT": 865,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Mammals:Digestive system:Stomach:Rumen"
+  },
+  {
+    "BIOME_ID": 435,
+    "BIOME_NAME": "Excretory system",
+    "LFT": 868,
+    "RGT": 871,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Mammals:Excretory system"
+  },
+  {
+    "BIOME_ID": 436,
+    "BIOME_NAME": "Urine",
+    "LFT": 869,
+    "RGT": 870,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Mammals:Excretory system:Urine"
+  },
+  {
+    "BIOME_ID": 437,
+    "BIOME_NAME": "Gastrointestinal tract",
+    "LFT": 872,
+    "RGT": 877,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Mammals:Gastrointestinal tract"
+  },
+  {
+    "BIOME_ID": 438,
+    "BIOME_NAME": "Intestine",
+    "LFT": 873,
+    "RGT": 876,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Mammals:Gastrointestinal tract:Intestine"
+  },
+  {
+    "BIOME_ID": 439,
+    "BIOME_NAME": "Fecal",
+    "LFT": 874,
+    "RGT": 875,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Mammals:Gastrointestinal tract:Intestine:Fecal"
+  },
+  {
+    "BIOME_ID": 440,
+    "BIOME_NAME": "Lymphatic",
+    "LFT": 878,
+    "RGT": 881,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Mammals:Lymphatic"
+  },
+  {
+    "BIOME_ID": 441,
+    "BIOME_NAME": "Lymph nodes",
+    "LFT": 879,
+    "RGT": 880,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Mammals:Lymphatic:Lymph nodes"
+  },
+  {
+    "BIOME_ID": 442,
+    "BIOME_NAME": "Milk",
+    "LFT": 882,
+    "RGT": 883,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Mammals:Milk"
+  },
+  {
+    "BIOME_ID": 443,
+    "BIOME_NAME": "Nervous system",
+    "LFT": 884,
+    "RGT": 887,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Mammals:Nervous system"
+  },
+  {
+    "BIOME_ID": 444,
+    "BIOME_NAME": "Brain",
+    "LFT": 885,
+    "RGT": 886,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Mammals:Nervous system:Brain"
+  },
+  {
+    "BIOME_ID": 445,
+    "BIOME_NAME": "Reproductive system",
+    "LFT": 888,
+    "RGT": 889,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Mammals:Reproductive system"
+  },
+  {
+    "BIOME_ID": 446,
+    "BIOME_NAME": "Respiratory system",
+    "LFT": 890,
+    "RGT": 899,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Mammals:Respiratory system"
+  },
+  {
+    "BIOME_ID": 447,
+    "BIOME_NAME": "Nasopharyngeal",
+    "LFT": 891,
+    "RGT": 894,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Mammals:Respiratory system:Nasopharyngeal"
+  },
+  {
+    "BIOME_ID": 448,
+    "BIOME_NAME": "Nasal cavity",
+    "LFT": 892,
+    "RGT": 893,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Mammals:Respiratory system:Nasopharyngeal:Nasal cavity"
+  },
+  {
+    "BIOME_ID": 449,
+    "BIOME_NAME": "Pulmonary system",
+    "LFT": 895,
+    "RGT": 898,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Mammals:Respiratory system:Pulmonary system"
+  },
+  {
+    "BIOME_ID": 450,
+    "BIOME_NAME": "Viriome",
+    "LFT": 896,
+    "RGT": 897,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Mammals:Respiratory system:Pulmonary system:Viriome"
+  },
+  {
+    "BIOME_ID": 451,
+    "BIOME_NAME": "Skin",
+    "LFT": 900,
+    "RGT": 901,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Mammals:Skin"
+  },
+  {
+    "BIOME_ID": 452,
+    "BIOME_NAME": "Microbial",
+    "LFT": 903,
+    "RGT": 910,
+    "DEPTH": 3,
+    "LINEAGE": "root:Host-associated:Microbial"
+  },
+  {
+    "BIOME_ID": 453,
+    "BIOME_NAME": "Bacteria",
+    "LFT": 904,
+    "RGT": 905,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Microbial:Bacteria"
+  },
+  {
+    "BIOME_ID": 454,
+    "BIOME_NAME": "Dinoflagellates",
+    "LFT": 906,
+    "RGT": 909,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Microbial:Dinoflagellates"
+  },
+  {
+    "BIOME_ID": 455,
+    "BIOME_NAME": "Endosymbionts",
+    "LFT": 907,
+    "RGT": 908,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Microbial:Dinoflagellates:Endosymbionts"
+  },
+  {
+    "BIOME_ID": 456,
+    "BIOME_NAME": "Mollusca",
+    "LFT": 911,
+    "RGT": 930,
+    "DEPTH": 3,
+    "LINEAGE": "root:Host-associated:Mollusca"
+  },
+  {
+    "BIOME_ID": 457,
+    "BIOME_NAME": "Digestive system",
+    "LFT": 912,
+    "RGT": 919,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Mollusca:Digestive system"
+  },
+  {
+    "BIOME_ID": 458,
+    "BIOME_NAME": "Ceca",
+    "LFT": 913,
+    "RGT": 916,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Mollusca:Digestive system:Ceca"
+  },
+  {
+    "BIOME_ID": 459,
+    "BIOME_NAME": "Uncharacterized",
+    "LFT": 914,
+    "RGT": 915,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Mollusca:Digestive system:Ceca:Uncharacterized"
+  },
+  {
+    "BIOME_ID": 460,
+    "BIOME_NAME": "Glands",
+    "LFT": 917,
+    "RGT": 918,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Mollusca:Digestive system:Glands"
+  },
+  {
+    "BIOME_ID": 461,
+    "BIOME_NAME": "Respiratory system",
+    "LFT": 920,
+    "RGT": 927,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Mollusca:Respiratory system"
+  },
+  {
+    "BIOME_ID": 462,
+    "BIOME_NAME": "Gills",
+    "LFT": 921,
+    "RGT": 926,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Mollusca:Respiratory system:Gills"
+  },
+  {
+    "BIOME_ID": 463,
+    "BIOME_NAME": "Extracellular",
+    "LFT": 922,
+    "RGT": 923,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Mollusca:Respiratory system:Gills:Extracellular"
+  },
+  {
+    "BIOME_ID": 464,
+    "BIOME_NAME": "Intracellular",
+    "LFT": 924,
+    "RGT": 925,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Mollusca:Respiratory system:Gills:Intracellular"
+  },
+  {
+    "BIOME_ID": 465,
+    "BIOME_NAME": "Shell",
+    "LFT": 928,
+    "RGT": 929,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Mollusca:Shell"
+  },
+  {
+    "BIOME_ID": 466,
+    "BIOME_NAME": "Plants",
+    "LFT": 931,
+    "RGT": 960,
+    "DEPTH": 3,
+    "LINEAGE": "root:Host-associated:Plants"
+  },
+  {
+    "BIOME_ID": 467,
+    "BIOME_NAME": "Phylloplane",
+    "LFT": 932,
+    "RGT": 937,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Plants:Phylloplane"
+  },
+  {
+    "BIOME_ID": 468,
+    "BIOME_NAME": "Endophytes",
+    "LFT": 933,
+    "RGT": 934,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Plants:Phylloplane:Endophytes"
+  },
+  {
+    "BIOME_ID": 469,
+    "BIOME_NAME": "Epiphytes",
+    "LFT": 935,
+    "RGT": 936,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Plants:Phylloplane:Epiphytes"
+  },
+  {
+    "BIOME_ID": 470,
+    "BIOME_NAME": "Rhizome",
+    "LFT": 938,
+    "RGT": 941,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Plants:Rhizome"
+  },
+  {
+    "BIOME_ID": 471,
+    "BIOME_NAME": "Epiphytes",
+    "LFT": 939,
+    "RGT": 940,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Plants:Rhizome:Epiphytes"
+  },
+  {
+    "BIOME_ID": 472,
+    "BIOME_NAME": "Rhizoplane",
+    "LFT": 942,
+    "RGT": 949,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Plants:Rhizoplane"
+  },
+  {
+    "BIOME_ID": 473,
+    "BIOME_NAME": "Endophytes",
+    "LFT": 943,
+    "RGT": 944,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Plants:Rhizoplane:Endophytes"
+  },
+  {
+    "BIOME_ID": 474,
+    "BIOME_NAME": "Epiphytes",
+    "LFT": 945,
+    "RGT": 946,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Plants:Rhizoplane:Epiphytes"
+  },
+  {
+    "BIOME_ID": 475,
+    "BIOME_NAME": "Soil",
+    "LFT": 947,
+    "RGT": 948,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Plants:Rhizoplane:Soil"
+  },
+  {
+    "BIOME_ID": 476,
+    "BIOME_NAME": "Rhizosphere",
+    "LFT": 950,
+    "RGT": 957,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Plants:Rhizosphere"
+  },
+  {
+    "BIOME_ID": 477,
+    "BIOME_NAME": "Epiphytes",
+    "LFT": 951,
+    "RGT": 952,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Plants:Rhizosphere:Epiphytes"
+  },
+  {
+    "BIOME_ID": 478,
+    "BIOME_NAME": "Soil",
+    "LFT": 953,
+    "RGT": 954,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Plants:Rhizosphere:Soil"
+  },
+  {
+    "BIOME_ID": 479,
+    "BIOME_NAME": "Forest soil",
+    "LFT": 955,
+    "RGT": 956,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Plants:Rhizosphere:Forest soil"
+  },
+  {
+    "BIOME_ID": 480,
+    "BIOME_NAME": "Root",
+    "LFT": 958,
+    "RGT": 959,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Plants:Root"
+  },
+  {
+    "BIOME_ID": 481,
+    "BIOME_NAME": "Porifera",
+    "LFT": 961,
+    "RGT": 962,
+    "DEPTH": 3,
+    "LINEAGE": "root:Host-associated:Porifera"
+  },
+  {
+    "BIOME_ID": 482,
+    "BIOME_NAME": "Protists",
+    "LFT": 963,
+    "RGT": 964,
+    "DEPTH": 3,
+    "LINEAGE": "root:Host-associated:Protists"
+  },
+  {
+    "BIOME_ID": 483,
+    "BIOME_NAME": "Protozoa",
+    "LFT": 965,
+    "RGT": 966,
+    "DEPTH": 3,
+    "LINEAGE": "root:Host-associated:Protozoa"
+  },
+  {
+    "BIOME_ID": 484,
+    "BIOME_NAME": "Reptile",
+    "LFT": 967,
+    "RGT": 974,
+    "DEPTH": 3,
+    "LINEAGE": "root:Host-associated:Reptile"
+  },
+  {
+    "BIOME_ID": 485,
+    "BIOME_NAME": "Oral cavity",
+    "LFT": 968,
+    "RGT": 973,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Reptile:Oral cavity"
+  },
+  {
+    "BIOME_ID": 486,
+    "BIOME_NAME": "Venom gland",
+    "LFT": 969,
+    "RGT": 972,
+    "DEPTH": 5,
+    "LINEAGE": "root:Host-associated:Reptile:Oral cavity:Venom gland"
+  },
+  {
+    "BIOME_ID": 487,
+    "BIOME_NAME": "Venom",
+    "LFT": 970,
+    "RGT": 971,
+    "DEPTH": 6,
+    "LINEAGE": "root:Host-associated:Reptile:Oral cavity:Venom gland:Venom"
+  },
+  {
+    "BIOME_ID": 488,
+    "BIOME_NAME": "Spiralia",
+    "LFT": 975,
+    "RGT": 976,
+    "DEPTH": 3,
+    "LINEAGE": "root:Host-associated:Spiralia"
+  },
+  {
+    "BIOME_ID": 489,
+    "BIOME_NAME": "Tunicates",
+    "LFT": 977,
+    "RGT": 980,
+    "DEPTH": 3,
+    "LINEAGE": "root:Host-associated:Tunicates"
+  },
+  {
+    "BIOME_ID": 490,
+    "BIOME_NAME": "Ascidians",
+    "LFT": 978,
+    "RGT": 979,
+    "DEPTH": 4,
+    "LINEAGE": "root:Host-associated:Tunicates:Ascidians"
+  },
+  {
+    "BIOME_ID": 491,
+    "BIOME_NAME": "Control",
+    "LFT": 982,
+    "RGT": 983,
+    "DEPTH": 2,
+    "LINEAGE": "root:Control"
+  },
+  {
+    "BIOME_ID": 492,
+    "BIOME_NAME": "Mixed",
+    "LFT": 984,
+    "RGT": 985,
+    "DEPTH": 2,
+    "LINEAGE": "root:Mixed"
+  }
+]

@@ -125,12 +125,12 @@ LOGGING = {
         },
         'django.request': {  # Stop SQL debug from logging to main logger
             'handlers': ['default'],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': False
         },
         'django': {
             'handlers': ['null'],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': True
         },
         '': {

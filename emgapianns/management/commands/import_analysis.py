@@ -69,6 +69,7 @@ class Command(BaseCommand):
     result_dir = None
     library_strategy = None
     force_study_summary = False
+    result_status = None
 
     def __init__(self):
         super().__init__()
@@ -90,6 +91,8 @@ class Command(BaseCommand):
                             choices=['default', 'dev', 'prod'],
                             default='default')
         parser.add_argument('--force-study-summary', dest='force_study_summary', action='store_true', default=False)
+        parser.add_argument('--result_status', help='Override result status rather than connecting to backlog',
+                            default=None)
 
     def handle(self, *args, **options):
         setup_logging(options)
@@ -104,6 +107,7 @@ class Command(BaseCommand):
         self.library_strategy = options['library_strategy']
         self.version = options['pipeline']
         self.force_study_summary = options['force_study_summary']
+        self.result_status = options['result_status']
         logger.info("CLI %r" % options)
 
         metadata = self.retrieve_metadata()
@@ -113,7 +117,15 @@ class Command(BaseCommand):
 
         input_file_name = os.path.basename(self.result_dir)
 
-        sanity_checker = SanityCheck(self.accession, self.result_dir, self.library_strategy, self.version, emg_db=self.emg_db)
+        sanity_checker = SanityCheck(
+            self.accession,
+            self.result_dir,
+            self.library_strategy,
+            self.version,
+            result_status=self.result_status,
+            emg_db=self.emg_db
+        )
+
         sanity_checker.check_file_existence()
 
         sanity_checker.run_quality_control_check()
@@ -332,8 +344,14 @@ class Command(BaseCommand):
 
     def upload_analysis_files(self, library_strategy, analysis_job, input_file_name):
         logging.info("Creating downloadable files...")
-        dl_set = get_conf_downloadset(self.result_dir, input_file_name,
-                                      self.emg_db, library_strategy, self.version)
+        dl_set = get_conf_downloadset(
+            self.result_dir,
+            input_file_name,
+            self.emg_db,
+            library_strategy,
+            self.version,
+            result_status=self.result_status
+        )
         dl_set.insert_files(analysis_job)
         logging.info("Downloadable files successfully created.")
 

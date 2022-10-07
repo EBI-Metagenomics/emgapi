@@ -1,0 +1,33 @@
+emg:
+  databases:
+    default:
+      ENGINE: 'django.db.backends.sqlite3'
+      NAME: '/opt/ci/testdbs/emg-testdb.sqlite'
+    ena:
+      ENGINE: 'django.db.backends.sqlite3'
+      NAME: '/opt/ci/testdbs/ena-testdb.sqlite'
+    era:
+      ENGINE: 'django.db.backends.sqlite3'
+      NAME: '/opt/ci/testdbs/ena-testdb.sqlite'
+
+  admin: True
+  downloads_bypass_nginx: True
+  auth_backends:
+    - 'emgapi.backends.EMGBackend'
+    - 'django.contrib.auth.backends.ModelBackend'
+
+  cors_origin_allow_all: true
+  debug: true
+  results_dir: '/opt/emgapi/results'
+  results_production_dir: '/opt/emgapi/results'
+  static_root: '/opt/emgapi/staticfiles'
+  emg_backend_auth: 'https://wwwdev.ebi.ac.uk/ena/dev/submit/webin/auth/login'
+  secure_cookies: false
+
+  mongodb:
+    db: emg
+    host: mongodb-lite
+  documentation:
+    title: 'EBI Metagenomics API'
+    description: 'Is a free resource to visualise and discover metagenomic datasets. For more details go to http://www.ebi.ac.uk/metagenomics/'
+  allowed_host: ['localhost', '127.0.0.1', 'localhost:9000', '127.0.0.1:9000']

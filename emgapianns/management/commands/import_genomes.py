@@ -100,7 +100,10 @@ class Command(BaseCommand):
         self.upload_genome_files(genome, directory, has_pangenome)
 
     def get_gold_biome(self, lineage):
-        return emg_models.Biome.objects.using(self.database).get(lineage=lineage)
+        biome = emg_models.Biome.objects.using(self.database).filter(lineage__iexact=lineage).first()
+        if not biome:
+            raise emg_models.Biome.DoesNotExist()
+        return biome
 
     def get_or_create_genome_set(self, setname):
         return emg_models.GenomeSet.objects.using(self.database).get_or_create(name=setname)[0]
