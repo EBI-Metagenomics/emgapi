@@ -3,79 +3,9 @@ databases:
     ENGINE: 'django.db.backends.sqlite3'
     NAME: '/opt/ci/testdbs/backlog-testdb.sqlite'
 
-#secret_key: very-secret
-
-# Pipeline execution #
-# The results directory structure
-# - production_dir is on nfs/production which only stores the last year
-# - public_dir is the web production public area with the whole archive
 results_production_dir: //opt/emgapi/results
 results_public_dir: /opt/emgapi/results
-#annotation_job_working_dir: ''
-# "tmp" will be converted to tmp directory in settings.py
-#log_dir: tmp
 
 debug: true
 
-#static_root: static
-
-# LDAP Auth
 ldap: false
-
-# Admin
-#admin: true
-
-# lsf #
-#lsf_production_queue: production
-#lsf_max_concurrent_jobs: 25
-#lsf_max_pend_jobs: 10000
-
-# RT #
-#rt_base_url: https://helpdesk.ebi.ac.uk/REST/2.0
-
-#schedule_jobs_db_lock_retries: 5
-
-# tools configuration and scripts
-#fetch_tool_reads_sh: fetch-reads-tool
-#fetch_tool_assembly_sh: fetch-assembly-tool
-
-# webuploader
-#webuploader_wrapper_script: webuploader.sh
-#backlog_wrapper_script: backlog.sh
-
-#upload_analyses_job_group: /upload_analyses_group
-
-# pipeline related configuration
-#mgnify_v5_sh: run.sh
-#mgnify_v5_sh_restart: restart.sh
-
-# resource allocation on jobs #
-#mgnify_v5_cores: 8
-#mgnify_v5_memory: # in gigabytes
-#  amplicon: 8
-#  assembly: 40
-#  wgs: 40
-#mgnify_v5_memory_restart: # in gigabytes
-#  amplicon: 15
-#  assembly: 60
-#  wgs: 70
-# toil queue limits
-#mgnify_v5_queue_limit:
-#  amplicon: 200
-#  assembly: 200
-#  wgs: 200
-#
-# production setup
-#toil_job_store_location_workflow: work-dir/job-store-wf
-
-# mgnify api #
-#mgnify_api_url: https://www.ebi.ac.uk/metagenomics/api/v1/
-#mgnify_api_password: PASSWORD
-#mgnify_api_login_url: https://www.ebi.ac.uk/metagenomics/api/http-auth/login/
-#mgnify_api_login_form: https://www.ebi.ac.uk/metagenomics/api/http-auth/login_form
-
-# ena_api handler #
-# emtpy, the ena_api_handler will use auth if ena_api_user and ena_api_password are configured
-# Examples:
-#ena_api_user: "user"
-#ena_api_password: "secret"
