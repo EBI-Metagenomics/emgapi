@@ -300,17 +300,18 @@ def pipelines():
 
 @pytest.fixture
 def experiment_type():
-    return emg_models.ExperimentType.objects.create(
-        pk=1,
-        experiment_type='metagenomic'
+    experiment_type, _ = emg_models.ExperimentType.objects.get_or_create(
+        experiment_type='metagenomic',
+        defaults={'experiment_type_id': 2}
     )
+    return experiment_type
 
 
 @pytest.fixture
 def experiment_type_assembly():
     experiment_type, _ = emg_models.ExperimentType.objects.get_or_create(
-        pk=2,
-        experiment_type='assembly'
+        experiment_type='assembly',
+        defaults={'experiment_type_id': 4}
     )
     return experiment_type
 
