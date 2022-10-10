@@ -1076,11 +1076,11 @@ class Migration(migrations.Migration):
             name='job_operator',
             field=models.CharField(blank=True, db_column='JOB_OPERATOR', max_length=15, null=True),
         ),
-        migrations.AlterField(
-            model_name='analysisjob',
-            name='pipeline',
-            field=models.ForeignKey(blank=True, db_column='PIPELINE_ID', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='analysis', to='emgapi.pipeline'),
-        ),
+        # migrations.AlterField(
+        #     model_name='analysisjob',
+        #     name='pipeline',
+        #     field=models.ForeignKey(blank=True, db_column='PIPELINE_ID', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='analysis', to='emgapi.pipeline'),
+        # ),
         migrations.AlterField(
             model_name='analysisjob',
             name='submit_time',
@@ -1139,9 +1139,9 @@ class Migration(migrations.Migration):
         # migrations.RunSQL(
         #     sql="INSERT INTO RUN (ACCESSION, SECONDARY_ACCESSION,\n                STATUS_ID, SAMPLE_ID, STUDY_ID, EXPERIMENT_TYPE_ID,\n                INSTRUMENT_PLATFORM, INSTRUMENT_MODEL)\n                SELECT distinct EXTERNAL_RUN_IDS, SECONDARY_ACCESSION,\n                    RUN_STATUS_ID, SAMPLE_ID, STUDY_ID, EXPERIMENT_TYPE_ID,\n                    group_concat(\n                        INSTRUMENT_PLATFORM\n                        ORDER BY INSTRUMENT_PLATFORM\n                        SEPARATOR ','\n                    ) as INSTRUMENT_PLATFORM,\n                    group_concat(\n                        INSTRUMENT_MODEL\n                        ORDER BY INSTRUMENT_MODEL\n                        SEPARATOR ','\n                    ) as INSTRUMENT_MODEL\n                    FROM ANALYSIS_JOB\n                    GROUP BY EXTERNAL_RUN_IDS\n            ",
         # ),
-        # # migrations.RunPython(
-        # #     code=emgapi.migrations.0007_split_run.populate_runs,
-        # # ),
+        # migrations.RunPython(
+        #     code=emgapi.migrations.0007_split_run.populate_runs,
+        # ),
         migrations.AlterModelOptions(
             name='study',
             options={'ordering': ('study_id',)},
@@ -1224,9 +1224,9 @@ class Migration(migrations.Migration):
             name='assembly',
             field=models.ForeignKey(blank=True, db_column='ASSEMBLY_ID', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='analyses', to='emgapi.assembly'),
         ),
-        # # migrations.RunPython(
-        # #     code=emgapi.migrations.0010_run_assembly_split.populate_assemblies,
-        # # ),
+        # migrations.RunPython(
+        #     code=emgapi.migrations.0010_run_assembly_split.populate_assemblies,
+        # ),
         migrations.AlterField(
             model_name='study',
             name='is_public',
@@ -1247,11 +1247,11 @@ class Migration(migrations.Migration):
             name='experiment_type',
             field=models.ForeignKey(db_column='EXPERIMENT_TYPE_ID', on_delete=django.db.models.deletion.CASCADE, related_name='analyses', to='emgapi.experimenttype'),
         ),
-        migrations.AlterField(
-            model_name='analysisjob',
-            name='pipeline',
-            field=models.ForeignKey(blank=True, db_column='PIPELINE_ID', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='analyses', to='emgapi.pipeline'),
-        ),
+        # migrations.AlterField(
+        #     model_name='analysisjob',
+        #     name='pipeline',
+        #     field=models.ForeignKey(blank=True, db_column='PIPELINE_ID', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='analyses', to='emgapi.pipeline'),
+        # ),
         migrations.AlterField(
             model_name='analysisjob',
             name='run',
@@ -1459,10 +1459,10 @@ class Migration(migrations.Migration):
         # migrations.RunPython(
         #     code=rm_study_pub_optional_keys,
         # ),
-        migrations.AlterUniqueTogether(
-            name='studypublication',
-            unique_together=set(),
-        ),
+        # migrations.AlterUniqueTogether(
+        #     name='studypublication',
+        #     unique_together=set(),
+        # ),
         # migrations.AddField(
         #     model_name='studypublication',
         #     name='id',
@@ -1481,10 +1481,10 @@ class Migration(migrations.Migration):
         #     name='id',
         #     field=models.AutoField(primary_key=True, serialize=False),
         # ),
-        migrations.AlterUniqueTogether(
-            name='studypublication',
-            unique_together={('study', 'pub')},
-        ),
+        # migrations.AlterUniqueTogether(
+        #     name='studypublication',
+        #     unique_together={('study', 'pub')},
+        # ),
         migrations.CreateModel(
             name='CogCat',
             fields=[
@@ -1718,7 +1718,7 @@ class Migration(migrations.Migration):
             options={
                 'db_table': 'RELEASE_DOWNLOAD',
                 'ordering': ('group_type', 'alias'),
-                'unique_together': {('realname', 'alias')},
+                # 'unique_together': {('realname', 'alias')},
             },
         ),
         migrations.CreateModel(
@@ -1740,22 +1740,22 @@ class Migration(migrations.Migration):
                 'unique_together': {('realname', 'alias', 'genome')},
             },
         ),
-        # # migrations.RunPython(
-        # #     code=emgapi.migrations.0015_genomes.add_group_types,
-        # #     reverse_code=emgapi.migrations.0015_genomes.remove_group_types,
-        # # ),
-        # # migrations.RunPython(
-        # #     code=emgapi.migrations.0015_genomes.add_fileformats,
-        # #     reverse_code=emgapi.migrations.0015_genomes.remove_file_formats,
-        # # ),
-        # # migrations.RunPython(
-        # #     code=emgapi.migrations.0015_genomes.add_download_description,
-        # #     reverse_code=emgapi.migrations.0015_genomes.remove_download_description,
-        # # ),
-        # # migrations.RunPython(
-        # #     code=emgapi.migrations.0015_genomes.add_subdirs,
-        # #     reverse_code=emgapi.migrations.0015_genomes.remove_subdirs,
-        # # ),
+        # migrations.RunPython(
+        #     code=emgapi.migrations.0015_genomes.add_group_types,
+        #     reverse_code=emgapi.migrations.0015_genomes.remove_group_types,
+        # ),
+        # migrations.RunPython(
+        #     code=emgapi.migrations.0015_genomes.add_fileformats,
+        #     reverse_code=emgapi.migrations.0015_genomes.remove_file_formats,
+        # ),
+        # migrations.RunPython(
+        #     code=emgapi.migrations.0015_genomes.add_download_description,
+        #     reverse_code=emgapi.migrations.0015_genomes.remove_download_description,
+        # ),
+        # migrations.RunPython(
+        #     code=emgapi.migrations.0015_genomes.add_subdirs,
+        #     reverse_code=emgapi.migrations.0015_genomes.remove_subdirs,
+        # ),
         migrations.CreateModel(
             name='SuperStudy',
             fields=[
@@ -1820,25 +1820,25 @@ class Migration(migrations.Migration):
         migrations.RunPython(
             code=create_pipeline_v5,
         ),
-        # # migrations.RunPython(
-        # #     code=emgapi.migrations.0017_auto_20190918_1239.create_group_types,
-        # # ),
-        # # migrations.RunPython(
-        # #     code=emgapi.migrations.0017_auto_20190918_1239.create_subdirs,
-        # # ),
-        # # migrations.RunPython(
-        # #     code=emgapi.migrations.0017_auto_20190918_1239.create_download_description,
-        # # ),
-        # # migrations.RunPython(
-        # #     code=emgapi.migrations.0017_auto_20190918_1239.create_fileformats,
-        # # ),
+        # migrations.RunPython(
+        #     code=emgapi.migrations.0017_auto_20190918_1239.create_group_types,
+        # ),
+        # migrations.RunPython(
+        #     code=emgapi.migrations.0017_auto_20190918_1239.create_subdirs,
+        # ),
+        # migrations.RunPython(
+        #     code=emgapi.migrations.0017_auto_20190918_1239.create_download_description,
+        # ),
+        # migrations.RunPython(
+        #     code=emgapi.migrations.0017_auto_20190918_1239.create_fileformats,
+        # ),
         migrations.RunPython(
             code=add_antismash_clusters,
             reverse_code=remove_antismash_clusters,
         ),
-        # # migrations.RunPython(
-        # #     code=emgapi.migrations.0019_auto_20200110_1455.create_download_description,
-        # # ),
+        # migrations.RunPython(
+        #     code=emgapi.migrations.0019_auto_20200110_1455.create_download_description,
+        # ),
         migrations.RunPython(
             code=create_summary_var_names,
         ),
@@ -2229,10 +2229,10 @@ class Migration(migrations.Migration):
         migrations.DeleteModel(
             name='ReleaseGenomes',
         ),
-        migrations.AlterUniqueTogether(
-            name='genomecataloguedownload',
-            unique_together={('realname', 'alias')},
-        ),
+        # migrations.AlterUniqueTogether(
+        #     name='genomecataloguedownload',
+        #     unique_together={('realname', 'alias')},
+        # ),
         migrations.AlterField(
             model_name='genomecataloguedownload',
             name='genome_catalogue',
@@ -2247,14 +2247,14 @@ class Migration(migrations.Migration):
             name='genome_count',
             field=models.IntegerField(blank=True, db_column='GENOME_COUNT', null=True),
         ),
-        # # migrations.RunPython(
-        # #     code=emgapi.migrations.0033_multiple_genome_cats.set_catalogue_biome,
-        # #     reverse_code=django.db.migrations.operations.special.RunPython.noop,
-        # # ),
-        # # migrations.RunPython(
-        # #     code=emgapi.migrations.0033_multiple_genome_cats.calculate_genomes_count,
-        # #     reverse_code=django.db.migrations.operations.special.RunPython.noop,
-        # # ),
+        # migrations.RunPython(
+        #     code=emgapi.migrations.0033_multiple_genome_cats.set_catalogue_biome,
+        #     reverse_code=django.db.migrations.operations.special.RunPython.noop,
+        # ),
+        # migrations.RunPython(
+        #     code=emgapi.migrations.0033_multiple_genome_cats.calculate_genomes_count,
+        #     reverse_code=django.db.migrations.operations.special.RunPython.noop,
+        # ),
         migrations.AlterUniqueTogether(
             name='genomecataloguedownload',
             unique_together={('realname', 'alias', 'genome_catalogue')},
@@ -2287,18 +2287,18 @@ class Migration(migrations.Migration):
             model_name='genome',
             name='taxincons',
         ),
-        # # migrations.RunPython(
-        # #     code=emgapi.migrations.0036_auto_20211202_1412.create_pangenome_download_descriptions,
-        # #     reverse_code=django.db.migrations.operations.special.RunPython.noop,
-        # # ),
+        # migrations.RunPython(
+        #     code=emgapi.migrations.0036_auto_20211202_1412.create_pangenome_download_descriptions,
+        #     reverse_code=django.db.migrations.operations.special.RunPython.noop,
+        # ),
         migrations.RemoveField(
             model_name='genome',
             name='num_genomes_non_redundant',
         ),
-        # # migrations.RunPython(
-        # #     code=emgapi.migrations.0037_remove_genome_num_genomes_non_redundant.create_pangenome_download_descriptions,
-        # #     reverse_code=django.db.migrations.operations.special.RunPython.noop,
-        # # ),
+        # migrations.RunPython(
+        #     code=emgapi.migrations.0037_remove_genome_num_genomes_non_redundant.create_pangenome_download_descriptions,
+        #     reverse_code=django.db.migrations.operations.special.RunPython.noop,
+        # ),
         migrations.CreateModel(
             name='LegacyAssembly',
             fields=[
@@ -2433,10 +2433,10 @@ class Migration(migrations.Migration):
                                                            (7, 'Temporary Suppressed'), (8, 'Temporary Killed')],
                                       db_column='SUPPRESSION_REASON', null=True),
         ),
-        # # migrations.RunPython(
-        # #     code=emgapi.migrations.0041_migrate_status_to_suppressed_and_private.migrate_the_status_field,
-        # #     reverse_code=django.db.migrations.operations.special.RunPython.noop,
-        # # ),
+        # migrations.RunPython(
+        #     code=emgapi.migrations.0041_migrate_status_to_suppressed_and_private.migrate_the_status_field,
+        #     reverse_code=django.db.migrations.operations.special.RunPython.noop,
+        # ),
         migrations.RemoveField(
             model_name='analysisjob',
             name='run_status_id',
