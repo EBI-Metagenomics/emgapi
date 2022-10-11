@@ -1,12 +1,4 @@
-FROM centos:centos7
-
-RUN yum -y update && \
-    yum clean all && \
-    yum -y install epel-release gcc bzip2 git wget && \
-    yum clean all
-
-RUN yum -y install python3 python3-devel python3-setuptools mysql-devel && \
-    pip3 install -U pip setuptools
+FROM python:3.8-bullseye
 
 RUN mkdir /opt/emgapi && mkdir -p /opt/staticfiles && mkdir -p /opt/results
 

@@ -290,8 +290,7 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
         ---
         `/biomes/top10`
         """
-        # TODO Review the `sample.IS_PRIVATE` condition. It doesn't seem to be required.
-        sql = """
+        sql = f"""
         SELECT
             parent.BIOME_ID,
             COUNT(distinct sample.SAMPLE_ID) as samples_count
@@ -300,16 +299,13 @@ class BiomeViewSet(mixins.RetrieveModelMixin,
             SAMPLE as sample
         WHERE node.lft BETWEEN parent.lft AND parent.rgt
             AND node.BIOME_ID = sample.BIOME_ID
-            AND NOT sample.IS_PRIVATE
-            AND parent.BIOME_ID in %s
+            AND parent.BIOME_ID in {tuple(settings.TOP10BIOMES)}
         GROUP BY parent.BIOME_ID
         ORDER BY samples_count DESC
         LIMIT 10;
         """
 
-        queryset = list(
-            emg_models.Biome.objects.raw(
-                sql, [tuple(settings.TOP10BIOMES), ]))
+        queryset = emg_models.Biome.objects.raw(sql)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
