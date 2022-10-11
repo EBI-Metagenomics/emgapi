@@ -1752,7 +1752,9 @@ class GenomeCatalogueSerializer(ExplicitFieldsModelSerializer,
             'genome_count',
             'unclustered_genome_count',
             'version',
-            'last_update'
+            'last_update',
+            'pipeline_version_tag',
+            'ftp_url',
         )
 
 
