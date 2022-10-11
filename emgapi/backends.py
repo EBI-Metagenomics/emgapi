@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
+from json import JSONDecodeError
 
 import requests
 
@@ -38,7 +39,10 @@ class EMGBackend:
         }
         req = requests.post(ena_auth_url, json=data)
         logging.info(f'Response from ENA auth: {req}')
-        resp = req.json()
+        try:
+            resp = req.json()
+        except JSONDecodeError:
+            return None
         if req.status_code == 200:
             if resp.get('authenticated', False):
                 user, created = User.objects.get_or_create(
