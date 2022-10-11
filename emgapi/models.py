@@ -1727,7 +1727,17 @@ class GenomeCatalogue(models.Model):
         Biome, db_column='BIOME_ID',
         on_delete=models.CASCADE,
         null=True, blank=True)
-    genome_count = models.IntegerField(db_column='GENOME_COUNT', null=True, blank=True)
+    genome_count = models.IntegerField(
+        db_column='GENOME_COUNT',
+        null=True,
+        blank=True,
+        help_text='Number of genomes available in the web database (species-level cluster reps only)')
+    unclustered_genome_count = models.IntegerField(
+        db_column='UNCLUSTERED_GENOME_COUNT',
+        null=True,
+        blank=True,
+        help_text='Total number of genomes in the catalogue (including cluster reps and members)'
+    )
 
     class Meta:
         unique_together = ('biome', 'version')

@@ -1750,6 +1750,7 @@ class GenomeCatalogueSerializer(ExplicitFieldsModelSerializer,
             'protein_catalogue_description',
             'downloads',
             'genome_count',
+            'unclustered_genome_count',
             'version',
             'last_update'
         )
