@@ -1346,8 +1346,13 @@ class GenomeFragmentSearchViewSet(viewsets.GenericViewSet):
         return Response("You need to use the POST method to send a search sequence to the API")
 
     def create(self, request):
+        # Find repeated catalogues_filter entries in form data:
+        forward_data = request.data.copy()
+        if 'catalogues_filter' in forward_data:
+            forward_data['catalogues_filter'] = request.POST.getlist('catalogues_filter')
+
         try:
-            response = requests.post(settings.GENOME_SEARCH_PROXY, data=request.data)
+            response = requests.post(settings.GENOME_SEARCH_PROXY, data=forward_data)
         except requests.exceptions.RequestException:
             logger.error(f'Failed to talk to genome search backend at {settings.GENOME_SEARCH_PROXY}')
             raise Http404('Genome search failed. Please try later.')
