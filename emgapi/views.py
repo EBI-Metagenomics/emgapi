@@ -1400,10 +1400,22 @@ class GenomeSearchGatherViewSet(viewsets.GenericViewSet):
 
     def create(self, request):
         names = {}
-        mag_catalog = self.request.POST.get('mag_catalog', None)
-        mag_choices = dict(emg_serializers.get_MAG_choices())
-        if mag_catalog not in mag_choices:
-            raise Exception(f"The provided mag_catalog is not valid, it should be one of {mag_choices.keys()}")
+        mag_catalogues = set(request.POST.getlist('mag_catalogues', []))
+
+        if not mag_catalogues:
+            raise Exception("A list of mag_catalogues to search against must be provided")
+
+        catalogue_choices = dict(emg_serializers.get_mag_catalogue_choices())
+
+        bad_catalogues = mag_catalogues.difference(catalogue_choices.keys())
+
+        if bad_catalogues:
+            raise Exception(
+                f"The provided mag_catalogues are not valid. "
+                f"Available: {catalogue_choices.keys()}; "
+                f"Unavailable: {bad_catalogues}"
+            )
+
         for file_uploaded in request.FILES.getlist('file_uploaded'):
             try:
                 validate_sourmash_signature(
@@ -1413,7 +1425,7 @@ class GenomeSearchGatherViewSet(viewsets.GenericViewSet):
                 raise Exception("Unable to parse the uploaded file")
 
             names[file_uploaded.name] = save_signature(file_uploaded)
-        job_id, children_ids = send_sourmash_jobs(names, mag_catalog)
+        job_id, children_ids = send_sourmash_jobs(names, mag_catalogues)
         response = {
             "message": "Your files {} were successfully uploaded. "
                        "Use the given URL to check the status of the new job".format(",".join(names.keys())),

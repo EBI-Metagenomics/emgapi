@@ -1632,7 +1632,7 @@ class GenomeDownloadSerializer(BaseDownloadSerializer):
         )
 
 
-def get_MAG_choices():
+def get_mag_catalogue_choices():
     return [
         (cat.catalogue_id, cat.name,)
         for cat in emg_models.GenomeCatalogue.objects.all()
@@ -1642,7 +1642,7 @@ def get_MAG_choices():
 class GenomeUploadSearchSerializer(drf_serializers.Serializer):
     def __init__(self, *args, **kwargs):
         super(GenomeUploadSearchSerializer, self).__init__(*args, **kwargs)
-        self.fields['mag_catalogue'] = ChoiceField(get_MAG_choices())
+        self.fields['mag_catalogue'] = ChoiceField(get_mag_catalogue_choices())
 
     file_uploaded = FileField()
 
@@ -1653,7 +1653,7 @@ class GenomeUploadSearchSerializer(drf_serializers.Serializer):
 class GenomeFragmentSearchSerializer(drf_serializers.Serializer):
     def __init__(self, *args, **kwargs):
         super(GenomeFragmentSearchSerializer, self).__init__(*args, **kwargs)
-        self.fields['catalogues_filter'] = serializers.MultipleChoiceField(get_MAG_choices())
+        self.fields['catalogues_filter'] = serializers.MultipleChoiceField(get_mag_catalogue_choices())
 
     seq = serializers.CharField(
         min_length=50,
