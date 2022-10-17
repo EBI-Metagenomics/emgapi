@@ -335,7 +335,7 @@ class Command(BaseCommand):
         if group_name:
             group = emg_models.DownloadGroupType \
                 .objects.using(self.database) \
-                .filter(group_type=group_name) \
+                .filter(group_type__iexact=group_name) \
                 .first()
             obj['group_type'] = group
 
