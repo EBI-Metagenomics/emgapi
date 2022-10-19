@@ -72,6 +72,7 @@ class Command(BaseCommand):
 
         self.upload_catalogue_files()
         self.catalogue_obj.calculate_genome_count()
+        self.catalogue_obj.save()
 
     def get_catalogue(self, catalogue_name, catalogue_version, gold_biome, catalogue_dir):
         logging.warning('GOLD')
@@ -314,7 +315,7 @@ class Command(BaseCommand):
         obj = {}
         desc = emg_models.DownloadDescriptionLabel \
             .objects.using(self.database) \
-            .filter(description_label=desc_label) \
+            .filter(description_label__iexact=desc_label) \
             .first()
         obj['description'] = desc
         if desc is None:
@@ -334,7 +335,7 @@ class Command(BaseCommand):
         if group_name:
             group = emg_models.DownloadGroupType \
                 .objects.using(self.database) \
-                .filter(group_type=group_name) \
+                .filter(group_type__iexact=group_name) \
                 .first()
             obj['group_type'] = group
 

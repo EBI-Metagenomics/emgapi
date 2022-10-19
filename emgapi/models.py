@@ -16,6 +16,7 @@
 
 import logging
 
+from django.conf import settings
 from django.db import models
 from django.db.models import (CharField, Count, OuterRef, Prefetch, Q,
                               Subquery, Value)
@@ -1727,7 +1728,27 @@ class GenomeCatalogue(models.Model):
         Biome, db_column='BIOME_ID',
         on_delete=models.CASCADE,
         null=True, blank=True)
-    genome_count = models.IntegerField(db_column='GENOME_COUNT', null=True, blank=True)
+    genome_count = models.IntegerField(
+        db_column='GENOME_COUNT',
+        null=True,
+        blank=True,
+        help_text='Number of genomes available in the web database (species-level cluster reps only)')
+    unclustered_genome_count = models.IntegerField(
+        db_column='UNCLUSTERED_GENOME_COUNT',
+        null=True,
+        blank=True,
+        help_text='Total number of genomes in the catalogue (including cluster reps and members)'
+    )
+    ftp_url = models.CharField(
+        db_column='FTP_URL',
+        max_length=200,
+        default=settings.MAGS_FTP_SITE
+    )
+    pipeline_version_tag = models.CharField(
+        db_column='PIPELINE_VERSION_TAG',
+        max_length=20,
+        default=settings.LATEST_MAGS_PIPELINE_TAG
+    )
 
     class Meta:
         unique_together = ('biome', 'version')

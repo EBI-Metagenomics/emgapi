@@ -31,3 +31,9 @@ emg:
     title: 'EBI Metagenomics API'
     description: 'Is a free resource to visualise and discover metagenomic datasets. For more details go to http://www.ebi.ac.uk/metagenomics/'
   allowed_host: ['localhost', '127.0.0.1', 'localhost:9000', '127.0.0.1:9000']
+
+  sourmash:
+    signatures_path: '/opt/sourmash/queries'
+    results_path: '/opt/sourmash/results'
+    celery_broker: 'redis://redis:6379/0'
+    celery_backend: 'redis://redis:6379/1'

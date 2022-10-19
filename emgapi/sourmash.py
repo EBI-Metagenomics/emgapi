@@ -17,7 +17,11 @@ def is_signature_valid(signature):
     return True
 
 
-app = Celery('tasks', broker=settings.SOURMASH['celery_broker'], backend=settings.SOURMASH['celery_backend'])
+app = Celery(
+    "tasks",
+    broker=settings.SOURMASH["celery_broker"],
+    backend=settings.SOURMASH["celery_backend"],
+)
 app.conf.update(
     result_extended=True,
     result_expires=RESULTS_EXPIRE,
@@ -31,14 +35,18 @@ def validate_sourmash_signature(json_str):
         for s in signature:
             if is_signature_valid(s):
                 continue
-            elif 'signatures' in s:
-                for ss in s['signatures']:
+            elif "signatures" in s:
+                for ss in s["signatures"]:
                     if is_signature_valid(ss):
                         continue
                     else:
-                        raise Exception("One of the signatures in the uploaded file is not valid")
+                        raise Exception(
+                            "One of the signatures in the uploaded file is not valid"
+                        )
             else:
-                raise Exception("One of the signatures in the uploaded file is not valid")
+                raise Exception(
+                    "One of the signatures in the uploaded file is not valid"
+                )
     elif not is_signature_valid(signature):
         raise Exception("The file is not a valid sourmash signature")
 
@@ -53,26 +61,28 @@ def get_unique_name(file):
 def save_signature(file):
     name = get_unique_name(file)
     path = f"{settings.SOURMASH['signatures_path']}/{name}"
-    with open(path, 'wb+') as destination:
+    with open(path, "wb+") as destination:
         for chunk in file.chunks():
             destination.write(chunk)
     return name
 
 
-def send_sourmash_jobs(names, mag_catalog):
-    job = group([
-        app.signature(
-            'tasks.run_gather',
-            args=(names[name], name, mag_catalog),
-        ) for name in names
-    ], app=app)
+def send_sourmash_jobs(names, mag_catalogues):
+    job = group(
+        [
+            app.signature(
+                "tasks.run_gather",
+                args=(names[name], name, catalogue),
+            )
+            for name in names
+            for catalogue in mag_catalogues
+        ],
+        app=app,
+    )
     result = job.apply_async()
     result.save()
     try:
-        children_ids = {
-            r.args[1]: r.id
-            for r in result.results
-        }
+        children_ids = {r.args[1]: r.id for r in result.results}
     except Exception:
         children_ids = None
     return result.id, children_ids
@@ -93,10 +103,16 @@ def get_task_worker_status(task_id, inspect):
     tasks_by_worker = inspect.query_task(task_id)
     for task in tasks_by_worker.values():
         status = task[task_id][0]
-        if status == 'reserved':
+        if status == "reserved":
             return "IN_QUEUE"
-        if status == 'active':
+        if status == "active":
             return "RUNNING"
+
+
+def get_task_catalogue(task_id, inspect):
+    tasks_by_worker = inspect.query_task(task_id)
+    for task in tasks_by_worker.values():
+        return task[task_id][0]
 
 
 def get_sourmash_job_status(job_id, request):
@@ -114,29 +130,39 @@ def get_sourmash_job_status(job_id, request):
             "status": result.status,
         }
         try:
-            signature['filename'] = result.args[1]
+            signature["filename"] = result.args[1]
         except Exception:
             pass
-        if result.status == 'SUCCESS':
-            signature['result'] = result.result
-            signature['results_url'] = reverse('genomes-results', args=[result.id], request=request)
+        if result.status == "SUCCESS":
+            signature["result"] = result.result
+            signature["results_url"] = reverse(
+                "genomes-results", args=[result.id], request=request
+            )
+            signature["catalogue"] = result.result.get('catalog')
             has_results = True
-        elif result.status == 'FAILURE':
-            signature['reason'] = str(result.result)
-        elif result.status == 'PENDING' and ping is not None:
+        elif result.status == "FAILURE":
+            signature["reason"] = str(result.result)
+            signature["catalogue"] = None
+        elif result.status == "PENDING" and ping is not None:
             signature["status"] = get_task_worker_status(result.id, inspect)
+            signature["catalogue"] = get_task_catalogue(result.id, inspect)
             if signature["status"] == "IN_QUEUE":
                 if reserved is None:
                     reserved = inspect.reserved()
-                signature['position_in_queue'] = get_task_pos_in_reserved(result.id, reserved)
+                signature["position_in_queue"] = get_task_pos_in_reserved(
+                    result.id, reserved
+                )
 
         signatures.append(signature)
     return {
-        'group_id': job_id,
-        'signatures': signatures,
-        'results_url': reverse('genomes-results', args=[job_id], request=request) if has_results else None,
-        'worker_status': "OFFLINE" if ping is None else "OK"
+        "group_id": job_id,
+        "signatures": signatures,
+        "results_url": reverse("genomes-results", args=[job_id], request=request)
+        if has_results
+        else None,
+        "worker_status": "OFFLINE" if ping is None else "OK",
     }
+
 
 def generate_tgz_from_group_id(group_id):
     group_result = app.GroupResult.restore(group_id, app=app)
@@ -151,19 +177,18 @@ def generate_tgz_from_group_id(group_id):
             )
     tar.close()
 
+
 def get_result_file(job_id):
     path = f"{settings.SOURMASH['results_path']}/{job_id}.csv"
     try:
-        return open(path, 'r'), 'text/csv'
+        return open(path, "r"), "text/csv"
     except FileNotFoundError:
         gzpath = f"{settings.SOURMASH['results_path']}/{job_id}.tgz"
         try:
-            return open(gzpath, 'rb'), 'application/gzip'
+            return open(gzpath, "rb"), "application/gzip"
         except FileNotFoundError:
             generate_tgz_from_group_id(job_id)
             try:
-                return open(gzpath, 'rb'), 'application/gzip'
+                return open(gzpath, "rb"), "application/gzip"
             except FileNotFoundError:
                 return None, None
-
-
