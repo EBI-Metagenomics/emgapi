@@ -209,23 +209,23 @@ class BaseQuerySet(models.QuerySet):
         if request is not None and request.user.is_authenticated:
             _username = request.user.username
             _query_filters['StudyQuerySet']['authenticated'] = \
-                [Q(submission_account_id=_username) | Q(is_private=False)]
+                [Q(submission_account_id__iexact=_username) | Q(is_private=False)]
             _query_filters['StudyDownloadQuerySet']['authenticated'] = \
-                [Q(study__submission_account_id=_username) |
+                [Q(study__submission_account_id__iexact=_username) |
                  Q(study__is_private=False)]
             _query_filters['SampleQuerySet']['authenticated'] = \
-                [Q(submission_account_id=_username) | Q(is_private=False)]
+                [Q(submission_account_id__iexact=_username) | Q(is_private=False)]
             _query_filters['RunQuerySet']['authenticated'] = \
-                [Q(study__submission_account_id=_username, is_private=True) |
+                [Q(study__submission_account_id__iexact=_username, is_private=True) |
                  Q(is_private=True)]
             _query_filters['AssemblyQuerySet']['authenticated'] = \
-                [Q(samples__studies__submission_account_id=_username,
+                [Q(samples__studies__submission_account_id__iexact=_username,
                    is_private=True) |
                  Q(is_private=False)]
             _query_filters['AnalysisJobDownloadQuerySet']['authenticated'] = \
-                [Q(job__study__submission_account_id=_username,
+                [Q(job__study__submission_account_id__iexact=_username,
                    job__is_private=True) |
-                 Q(job__study__submission_account_id=_username,
+                 Q(job__study__submission_account_id__iexact=_username,
                    job__assembly__is_private=True) |
                  Q(job__run__is_private=False) | Q(job__assembly__is_private=False)]
 
@@ -724,7 +724,7 @@ class StudyQuerySet(BaseQuerySet, SuppressQuerySet):
         if request.user.is_authenticated:
             _username = request.user.username
             return self.distinct() \
-                .filter(Q(submission_account_id=_username))
+                .filter(Q(submission_account_id__iexact=_username))
         return ()
 
     def recent(self):
@@ -1348,9 +1348,9 @@ class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet, SuppressQuerySet):
             username = request.user.username
             query_filters["authenticated"] = [
                 Q(sample__isnull=True) | Q(sample__is_suppressed=False),
-                Q(study__submission_account_id=username, run__is_private=True)
+                Q(study__submission_account_id__iexact=username, run__is_private=True)
                 | Q(
-                    study__submission_account_id=username,
+                    study__submission_account_id__iexact=username,
                     assembly__is_private=True,
                 )
                 | Q(run__is_private=False)
