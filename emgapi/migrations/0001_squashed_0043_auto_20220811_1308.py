@@ -309,75 +309,6 @@ def create_pipeline_v5(apps, schema_editor):
                                                   release_date='2019-11-06')
 
 
-def add_antismash_clusters(apps, schema_editor):
-    """antiSMASM GC
-    https://docs.antismash.secondarymetabolites.org/glossary/
-    """
-    genecluster_types = [
-        ['acyl_amino_acids', 'N-acyl amino acid cluster'],
-        ['amglyccycl', 'Aminoglycoside/aminocyclitol cluster'],
-        ['aminocoumarin', 'Aminocoumarin cluster'],
-        ['arylpolyene', 'Aryl polyene cluster'],
-        ['bacteriocin', 'Bacteriocin or other unspecified ribosomally ' +
-                        'synthesised and post-translationally modified peptide product (RiPP) cluster'],
-        ['betalactone', 'beta-lactone containing protease inhibitor'],
-        ['blactam', 'Î²-lactam cluster'],
-        ['bottromycin', 'Bottromycin cluster'],
-        ['butyrolactone', 'Butyrolactone cluster'],
-        ['CDPS', 'tRNA-dependent cyclodipeptide synthases'],
-        ['cyanobactin', 'Cyanobactin cluster'],
-        ['ectoine', 'Ectoine cluster'],
-        ['fatty_acid', 'Fatty acid cluster (loose strictness, likely from primary metabolism)'],
-        ['fungal-RiPP', 'Fungal RiPP with POP or UstH peptidase types and a modification'],
-        ['furan', 'Furan cluster'],
-        ['fused', 'Pheganomycin-style protein ligase-containing cluster'],
-        ['glycocin', 'Glycocin cluster'],
-        ['halogenated', 'Cluster containing a halogenase and thus potentially generating a halogenated product'],
-        ['head_to_tail', 'Head-to-tail cyclised (subtilosin-like) cluster'],
-        ['hglE-KS', 'heterocyst glycolipid synthase-like PKS'],
-        ['hserlactone', 'Homoserine lactone cluster'],
-        ['indole', 'Indole cluster'],
-        ['ladderane', 'Ladderane cluster'],
-        ['lanthipeptide', 'Lanthipeptide cluster'],
-        ['LAP', 'Linear azol(in)e-containing peptides'],
-        ['lassopeptide', 'Lasso peptide cluster'],
-        ['linaridin', 'Linaridin cluster'],
-        ['lipolanthine', 'Lanthipeptide class containing N-terminal fatty acids'],
-        ['melanin', 'Melanin cluster'],
-        ['microviridin', 'Microviridin cluster'],
-        ['NAGGN', 'N-acetylglutaminylglutamine amide'],
-        ['nrps-like', 'NRPS-like fragment'],
-        ['nrps', 'Non-ribosomal peptide synthetase cluster'],
-        ['nucleoside', 'Nucleoside cluster'],
-        ['oligosaccharide', 'Oligosaccharide cluster'],
-        ['other', 'Cluster containing a secondary metabolite-related protein that does not fit into any other category'],
-        ['PBDE', 'Polybrominated diphenyl ether cluster'],
-        ['phenazine', 'Phenazine cluster'],
-        ['phosphoglycolipid', 'Phosphoglycolipid cluster'],
-        ['phosphonate', 'Phosphonate cluster'],
-        ['PKS-like', 'Other types of PKS cluster'],
-        ['PpyS-KS', 'PPY-like pyrone cluster'],
-        ['proteusin', 'Proteusin cluster'],
-        ['PUFA', 'Polyunsaturated fatty acid cluster'],
-        ['RaS-RiPP', 'Streptide-like thioether-bond RiPPs'],
-        ['resorcinol', 'Resorcinol cluster'],
-        ['saccharide', 'Saccharide cluster (loose strictness, likely from primary metabolism)'],
-        ['sactipeptide', 'Sactipeptide cluster'],
-        ['siderophore', 'Siderophore cluster'],
-        ['T1PKS', 'Type I PKS (Polyketide synthase)'],
-        ['T2PKS', 'Type II PKS'],
-        ['T3PKS', 'Type III PKS'],
-        ['terpene', 'Terpene'],
-        ['thioamide-NRP', 'Thioamide-containing non-ribosomal peptide'],
-        ['thiopeptide', 'Thiopeptide cluster'],
-        ['transAT-PKS', 'Trans-AT PKS fragment, with trans-AT domain not found'],
-        ['transAT-PKS', 'Trans-AT PKS']
-    ]
-    for accession, description in genecluster_types:
-        m_models.AntiSmashGeneCluster.objects(accession=accession) \
-                                     .modify(upsert=True, new=True, set__description=description)
-
-
 def create_summary_var_names(apps, schema_editor):
     AnalysisMetadataVariableNames = apps.get_model("emgapi", "AnalysisMetadataVariableNames")
     var_names = (
@@ -414,12 +345,6 @@ def create_summary_var_names(apps, schema_editor):
             )
         )
     AnalysisMetadataVariableNames.objects.bulk_create(_var_names)
-
-
-def remove_antismash_clusters(apps, schema_editor):
-    """Remove geneclusters types from mongo
-    """
-    m_models.AntiSmashGeneCluster.objects.all().delete()
 
 
 def add_checksum_algorithms(apps, schema_editor):
@@ -1832,10 +1757,10 @@ class Migration(migrations.Migration):
         # migrations.RunPython(
         #     code=emgapi.migrations.0017_auto_20190918_1239.create_fileformats,
         # ),
-        migrations.RunPython(
-            code=add_antismash_clusters,
-            reverse_code=remove_antismash_clusters,
-        ),
+        # migrations.RunPython(  # Not needed after UHGGv1.
+        #     code=add_antismash_clusters,
+        #     reverse_code=remove_antismash_clusters,
+        # ),
         # migrations.RunPython(
         #     code=emgapi.migrations.0019_auto_20200110_1455.create_download_description,
         # ),
