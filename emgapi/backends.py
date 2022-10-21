@@ -22,6 +22,8 @@ from django.conf import settings
 
 from django.contrib.auth.models import User
 
+logger = logging.getLogger(__name__)
+
 
 class EMGBackend:
     """ENA Auth backend
@@ -41,7 +43,9 @@ class EMGBackend:
         logging.info(f'Response from ENA auth: {req}')
         try:
             resp = req.json()
-        except JSONDecodeError:
+        except JSONDecodeError as e:
+            logger.warning('Failed decoding JSON from ENA auth endpoint')
+            logger.warning(e.msg)
             return None
         if req.status_code == 200:
             if resp.get('authenticated', False):
