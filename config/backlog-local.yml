@@ -1,0 +1,11 @@
+databases:
+  default:
+    ENGINE: 'django.db.backends.sqlite3'
+    NAME: '/opt/ci/testdbs/backlog-testdb.sqlite'
+
+results_production_dir: //opt/emgapi/results
+results_public_dir: /opt/emgapi/results
+
+debug: true
+
+ldap: false

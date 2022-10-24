@@ -610,6 +610,16 @@ except KeyError:
         "sample_metadata_endpoint": "https://www.ebi.ac.uk/ena/clearinghouse/api/curations/"
     }
 
+try:
+    MAGS_FTP_SITE = EMG_CONF['emg']['mags']['ftp_site']
+except KeyError:
+    MAGS_FTP_SITE = "http://ftp.ebi.ac.uk/pub/databases/metagenomics/mgnify_genomes/"
+
+try:
+    LATEST_MAGS_PIPELINE_TAG = EMG_CONF['emg']['mags']['latest_pipeline_tag']
+except KeyError:
+    LATEST_MAGS_PIPELINE_TAG = "v1.2.1"
+
 # Webuploder #
 try:
     RESULTS_PRODUCTION_DIR = EMG_CONF['emg']['results_production_dir']

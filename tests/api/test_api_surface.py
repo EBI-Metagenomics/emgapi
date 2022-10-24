@@ -93,15 +93,23 @@ class TestAPISurface:
         ]
     )
     @pytest.mark.django_db
-    def test_empty_list(self, client, _view):
+    def test_default_list(self, client, _view):
+        # Some list views are never empty because they are populated during migrations
+        never_empty_lists = {
+            'emgapi_v1:experiment-types': 8,
+        }
+
         view_name = '{}-list'.format(_view)
         url = reverse(view_name)
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
-        assert rsp['meta']['pagination']['page'] == 1
-        assert rsp['meta']['pagination']['pages'] == 1
-        assert rsp['meta']['pagination']['count'] == 0
+        if _view in never_empty_lists:
+            assert  rsp['meta']['pagination']['count'] == never_empty_lists[_view]
+        else:
+            assert rsp['meta']['pagination']['page'] == 1
+            assert rsp['meta']['pagination']['pages'] == 1
+            assert rsp['meta']['pagination']['count'] == 0
 
     @pytest.mark.django_db
     @pytest.mark.skip(reason="No sure why this is failing at the moment")
