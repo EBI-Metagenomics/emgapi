@@ -348,9 +348,9 @@ class DownloadSet:
         DownloadFileDatabaseHandler(self.emg_db_name).save_chunked_files(f, analysis_job)
 
 
-def get_conf_downloadset(rootpath, input_file_name, emg_db_name, library_strategy, version):
+def get_conf_downloadset(rootpath, input_file_name, emg_db_name, library_strategy, version, result_status=None):
     accession = input_file_name.split('_')[0]
-    result_status = sanity.get_result_status(emg_db_name, accession)
+    result_status = result_status or sanity.get_result_status(emg_db_name, accession)
     config = get_downloadset_config(version, library_strategy, result_status)
     #SSU.fasta and LSU.fasta could still be present. Do not upload for no_tax
     if result_status == 'no_tax':

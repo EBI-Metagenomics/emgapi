@@ -1,18 +1,17 @@
 emg:
   databases:
     default:
-      ENGINE: 'django.db.backends.mysql'
-      NAME: 'emg_tests'
-      USER: 'root'
-      HOST: mysql
-      PORT: 3306
+      ENGINE: 'django.db.backends.sqlite3'
+      NAME: '/opt/ci/testdbs/emg-testdb-tests.sqlite'
+
   session_engine: 'django.contrib.sessions.backends.cache'
   emg_backend_auth: "https://backend"
   mongodb:
       db: emg_tests
-      host: mongodb
+      host: mongodb-lite
   sourmash:
     signatures_path: 'fixtures/'
     results_path: 'fixtures/'
     celery_broker: 'redis://localhost:6379/0'
     celery_backend: 'redis://localhost:6379/1'
+  results_production_dir: '/dummy/path/results'

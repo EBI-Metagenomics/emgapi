@@ -16,6 +16,7 @@
 
 import logging
 
+from django.conf import settings
 from django.db import models
 from django.db.models import (CharField, Count, OuterRef, Prefetch, Q,
                               Subquery, Value)
@@ -208,23 +209,23 @@ class BaseQuerySet(models.QuerySet):
         if request is not None and request.user.is_authenticated:
             _username = request.user.username
             _query_filters['StudyQuerySet']['authenticated'] = \
-                [Q(submission_account_id=_username) | Q(is_private=False)]
+                [Q(submission_account_id__iexact=_username) | Q(is_private=False)]
             _query_filters['StudyDownloadQuerySet']['authenticated'] = \
-                [Q(study__submission_account_id=_username) |
+                [Q(study__submission_account_id__iexact=_username) |
                  Q(study__is_private=False)]
             _query_filters['SampleQuerySet']['authenticated'] = \
-                [Q(submission_account_id=_username) | Q(is_private=False)]
+                [Q(submission_account_id__iexact=_username) | Q(is_private=False)]
             _query_filters['RunQuerySet']['authenticated'] = \
-                [Q(study__submission_account_id=_username, is_private=True) |
+                [Q(study__submission_account_id__iexact=_username, is_private=True) |
                  Q(is_private=True)]
             _query_filters['AssemblyQuerySet']['authenticated'] = \
-                [Q(samples__studies__submission_account_id=_username,
+                [Q(samples__studies__submission_account_id__iexact=_username,
                    is_private=True) |
                  Q(is_private=False)]
             _query_filters['AnalysisJobDownloadQuerySet']['authenticated'] = \
-                [Q(job__study__submission_account_id=_username,
+                [Q(job__study__submission_account_id__iexact=_username,
                    job__is_private=True) |
-                 Q(job__study__submission_account_id=_username,
+                 Q(job__study__submission_account_id__iexact=_username,
                    job__assembly__is_private=True) |
                  Q(job__run__is_private=False) | Q(job__assembly__is_private=False)]
 
@@ -723,7 +724,7 @@ class StudyQuerySet(BaseQuerySet, SuppressQuerySet):
         if request.user.is_authenticated:
             _username = request.user.username
             return self.distinct() \
-                .filter(Q(submission_account_id=_username))
+                .filter(Q(submission_account_id__iexact=_username))
         return ()
 
     def recent(self):
@@ -1347,9 +1348,9 @@ class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet, SuppressQuerySet):
             username = request.user.username
             query_filters["authenticated"] = [
                 Q(sample__isnull=True) | Q(sample__is_suppressed=False),
-                Q(study__submission_account_id=username, run__is_private=True)
+                Q(study__submission_account_id__iexact=username, run__is_private=True)
                 | Q(
-                    study__submission_account_id=username,
+                    study__submission_account_id__iexact=username,
                     assembly__is_private=True,
                 )
                 | Q(run__is_private=False)
@@ -1727,7 +1728,27 @@ class GenomeCatalogue(models.Model):
         Biome, db_column='BIOME_ID',
         on_delete=models.CASCADE,
         null=True, blank=True)
-    genome_count = models.IntegerField(db_column='GENOME_COUNT', null=True, blank=True)
+    genome_count = models.IntegerField(
+        db_column='GENOME_COUNT',
+        null=True,
+        blank=True,
+        help_text='Number of genomes available in the web database (species-level cluster reps only)')
+    unclustered_genome_count = models.IntegerField(
+        db_column='UNCLUSTERED_GENOME_COUNT',
+        null=True,
+        blank=True,
+        help_text='Total number of genomes in the catalogue (including cluster reps and members)'
+    )
+    ftp_url = models.CharField(
+        db_column='FTP_URL',
+        max_length=200,
+        default=settings.MAGS_FTP_SITE
+    )
+    pipeline_version_tag = models.CharField(
+        db_column='PIPELINE_VERSION_TAG',
+        max_length=20,
+        default=settings.LATEST_MAGS_PIPELINE_TAG
+    )
 
     class Meta:
         unique_together = ('biome', 'version')

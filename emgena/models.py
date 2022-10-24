@@ -112,7 +112,35 @@ class AssemblyMapping(models.Model):
     legacy_version = models.CharField(
         db_column='GC_VERSION', max_length=30)
     wgs_accession = models.CharField(
-        db_column='WGS_ACC', max_length=30)
+        db_column='WGS_ACC', max_length=30, null=True)
+    sample_id = models.CharField(
+        db_column='SAMPLE_ID', max_length=30
+    )
+    biosample_id = models.CharField(
+        db_column='BIOSAMPLE_ID', max_length=30
+    )
+    submission_id = models.CharField(
+        db_column='SUBMISSION_ID', max_length=30
+    )
+    status = models.CharField(
+        db_column='STATUS_ID', max_length=5
+    )
+    assembly_type = models.CharField(
+        db_column='ASSEMBLY_TYPE', max_length=30
+    )
+    project_accession = models.CharField(
+        db_column='PROJECT_ACC', max_length=30
+    )
+    coverage = models.CharField(
+        db_column='COVERAGE', max_length=30
+    )
+    min_gap_length = models.CharField(
+        db_column='MIN_GAP_LENGTH', max_length=30, null=True
+    )
+    contig_accession_range = models.CharField(
+        db_column='CONTIG_ACC_RANGE', max_length=100
+    )
+
 
     class Meta:
         managed = False
@@ -130,7 +158,7 @@ class StudyAbstract(models.Model):
     project_id = models.CharField(db_column='PROJECT_ID', max_length=15)
     study_status = models.CharField(db_column='STUDY_STATUS', max_length=50, choices=Status.choices)
     center_name = models.TextField(db_column='CENTER_NAME', max_length=500)
-    hold_date = models.DateTimeField(db_column='HOLD_DATE')
+    hold_date = models.DateTimeField(db_column='HOLD_DATE', null=True)
     first_created = models.DateTimeField(db_column='FIRST_CREATED')
     last_updated = models.DateTimeField(db_column='LAST_UPDATED')
     study_title = models.TextField(db_column='STUDY_TITLE', max_length=4000)
@@ -197,7 +225,7 @@ class Sample(models.Model):
     scientific_name = models.CharField(db_column='SCIENTIFIC_NAME', max_length=100)
     title = models.CharField(db_column='SAMPLE_TITLE', max_length=200)
     alias = models.CharField(db_column='SAMPLE_ALIAS', max_length=200)
-    checklist = models.CharField(db_column='CHECKLIST_ID', max_length=200)
+    checklist = models.CharField(db_column='CHECKLIST_ID', max_length=200, null=True)
 
     @property
     def is_public(self):

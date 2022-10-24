@@ -65,13 +65,13 @@ class TestGenomeSearchAPI:
         url = reverse("emgapi_v1:genomes-gather-list")
         data = {
             'file_uploaded': create_file_object('x'),
-            'mag_catalog': 'mandalor-1-0',
+            'mag_catalogues': ['mandalor-1-0'],
         }
         with pytest.raises(Exception, match='Unable to parse the uploaded file'):
             client.post(url, data, format='multipart')
         data = {
             'file_uploaded': create_file_object('{"type": "a json that is not a signature"}'),
-            'mag_catalog': 'mandalor-1-0',
+            'mag_catalogues': ['mandalor-1-0'],
         }
         with pytest.raises(Exception, match='Unable to parse the uploaded file'):
             client.post(url, data, format='multipart')
@@ -81,7 +81,7 @@ class TestGenomeSearchAPI:
         url = reverse("emgapi_v1:genomes-gather-list")
         data = {
             'file_uploaded': create_file_object('{"molecule": "dna"}'),
-            'mag_catalog': 'mandalor-1-0',
+            'mag_catalogues': ['mandalor-1-0'],
         }
         response = client.post(url, data, format='multipart')
         assert response.status_code == status.HTTP_200_OK
