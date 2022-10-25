@@ -1722,7 +1722,7 @@ class GenomeCatalogue(models.Model):
     protein_catalogue_name = models.CharField(db_column='PROTEIN_CATALOGUE_NAME', max_length=100, null=True, blank=True)
     protein_catalogue_description = models.TextField(db_column='PROTEIN_CATALOGUE_DESCRIPTION', null=True, blank=True,
                                                      help_text=MARKDOWN_HELP)
-    last_update = models.DateTimeField(db_column='LAST_UPDATE', auto_now=True)
+    last_update = models.DateTimeField(db_column='LAST_UPDATE', default=timezone.now)
     result_directory = models.CharField(db_column='RESULT_DIRECTORY', max_length=100, null=True, blank=True)
     biome = models.ForeignKey(
         Biome, db_column='BIOME_ID',
