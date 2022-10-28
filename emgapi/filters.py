@@ -107,7 +107,7 @@ class JsonApiPlusSearchQueryParameterValidationFilter(drfja_filters.QueryParamet
     Validate query parameters align to JSON:API standard, but also allow the non-standard ?search= param.
     """
     query_regex = re.compile(
-        r"^(sort|include|search|ordering)$|^(?P<type>filter|fields|page|page_size)(\[[\w\.\-]+\])?$"
+        r"^(format|sort|include|search|ordering)$|^(?P<type>filter|fields|page|page_size)(\[[\w\.\-]+\])?$"
     )
 
 
