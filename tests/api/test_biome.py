@@ -92,6 +92,21 @@ class TestBiomeAPI(APITestCase):
             assert b['type'] == 'biomes'
             assert b['id'] in expected
 
+    def tests_biomes_list_csv(self):
+        url = reverse('emgapi_v1:biomes-list')
+        response = self.client.get(f'{url}?format=csv')
+        assert response.status_code == status.HTTP_200_OK
+        rsp = str(b''.join(response.streaming_content))
+        assert 'root' in rsp
+        assert '?format=csv' in rsp
+
+        url = reverse('emgapi_v1:biomes-list')
+        response = self.client.get(f'{url}.csv')
+        assert response.status_code == status.HTTP_200_OK
+        rsp = str(b''.join(response.streaming_content))
+        assert 'root' in rsp
+        assert '.csv' in rsp
+
     def test_children(self):
         url = reverse('emgapi_v1:biomes-children-list', args=['root:foo'])
         response = self.client.get(url)
