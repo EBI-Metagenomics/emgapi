@@ -114,7 +114,7 @@ class ENASyncableModel(SuppressibleModel, PrivacyControlledModel):
 
         if ena_model_status == ENAStatus.DRAFT:
             logging.warning(
-                f"{study} will not be updated due to the study status being 'draft'"
+                f"{self} will not be updated due to the study status being 'draft'"
             )
 
         if (
