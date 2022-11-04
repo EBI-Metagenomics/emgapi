@@ -39,41 +39,53 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        logger.info(options)
+
         self.results_directory = os.path.realpath(options.get('results_directory').strip())
 
         if not os.path.exists(self.results_directory):
-            raise FileNotFoundError('Results dir {} does not exist'
-                                    .format(self.results_directory))
+            raise FileNotFoundError(f'Results dir {self.results_directory} does not exist')
 
         gffs_directory = options['gffs_directory'].strip()
         self.gffs_dir = os.path.join(self.results_directory, gffs_directory)
+        if not os.path.exists(self.gffs_dir):
+            raise FileNotFoundError(f'GFFs dir {self.gffs_dir} does not exist')
 
-        if self.tool == 'sanntis':
-            for file in Path(self.gffs_dir).glob('*.gff'):
+        if options.get('tool') == 'sanntis':
+            logger.info('Looking for SanntiS-style GFFs')
+            for file in Path(self.gffs_dir).glob('**/*.gff'):
+                logger.info(f'Handling GFF file {file}')
                 erz = file.name.split('.')[0]
                 try:
-                    assmebly = emg_models.Assembly.objects.get(accession=erz)
+                    assembly = emg_models.Assembly.objects.get(accession=erz)
                 except emg_models.Assembly.DoesNotExist:
                     logger.warning(f'No Assembly found for sanntis GFF {erz}')
                     continue
-                logger.info(f'Handling sanntis GFF for {erz}')
-                self.upload_sanntis_gff_file(erz, file.name)
+                logger.info(f'Will upload sanntis GFF for {erz}')
+                self.upload_sanntis_gff_file(assembly, gffs_directory, file.name)
 
     def upload_sanntis_gff_file(
         self,
         assembly,
+        subdir,
         filename,
     ):
-        description_label = emg_models.DownloadDescriptionLabel \
+        description_label, created = emg_models.DownloadDescriptionLabel \
             .objects \
             .get_or_create(description_label='SanntiS annotation', defaults={
                 "description": "SMBGC Annotation using Neural Networks Trained on Interpro Signatures"
         })
+        if created:
+            logger.info(f'Added new download description label {description_label}')
 
         fmt = emg_models.FileFormat \
             .objects \
             .filter(format_extension='gff', compression=False) \
             .first()
+
+        subdir_obj, created = emg_models.DownloadSubdir.objects.get_or_create(subdir=subdir)
+        if created:
+            logger.info(f'Added new downloads subdir {subdir_obj}')
 
         group = emg_models.DownloadGroupType.objects.get(
             group_type='Functional analysis'
@@ -84,9 +96,10 @@ class Command(BaseCommand):
         defaults = {
             'alias': alias,
             'description': description_label,
-            'format': fmt,
+            'file_format': fmt,
             'group_type': group,
             'realname': os.path.basename(filename),
+            'subdir': subdir_obj
         }
 
         dl, created = emg_models.AssemblyExtraAnnotation.objects.update_or_create(
@@ -95,8 +108,5 @@ class Command(BaseCommand):
             alias=alias,
         )
 
-        if created:
-            logger.info(f'Created download {dl}')
-        else:
-            logger.info(f'Updated download {dl}')
+        logger.info(f'{"Created" if created else "Updated"} download {dl}')
         return dl

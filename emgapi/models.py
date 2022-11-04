@@ -714,6 +714,9 @@ class AssemblyExtraAnnotation(BaseDownload):
         unique_together = (('realname', 'alias', 'assembly'),)
         ordering = ('group_type', 'alias',)
 
+    def __str__(self):
+        return f'AssemblyExtraAnnotation: {self.id} {self.alias}'
+
 
 class StudyDownloadQuerySet(BaseQuerySet):
     pass
