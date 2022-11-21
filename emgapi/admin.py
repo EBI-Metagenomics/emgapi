@@ -106,8 +106,15 @@ class SuperStudyBiomesInline(admin.TabularInline):
     model = emg_models.SuperStudyBiome
     raw_id_fields = ('biome',)
 
+
+class SuperStudyGenomeCataloguesInline(admin.TabularInline):
+    model = emg_models.SuperStudyGenomeCatalogue
+    extra = 0
+
+
 class Base64FileInput(forms.TextInput):
     template_name = 'admin/base64_image.html'
+
 
 class SuperStudyAdminForm(forms.ModelForm):
     class Meta:
@@ -121,7 +128,7 @@ class SuperStudyAdminForm(forms.ModelForm):
 @admin.register(emg_models.SuperStudy)
 class SuperStudyAdmin(admin.ModelAdmin):
 
-    inlines = [SuperStudyStudiesInline, SuperStudyBiomesInline]
+    inlines = [SuperStudyStudiesInline, SuperStudyBiomesInline, SuperStudyGenomeCataloguesInline]
     form = SuperStudyAdminForm
 
 

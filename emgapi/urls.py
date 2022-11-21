@@ -146,6 +146,12 @@ router.register(
 )
 
 router.register(
+    r'super-studies/(?P<super_study_id>[^/]+)/related-genome-catalogues',
+    views_relations.SuperStudyGenomeCataloguesViewSet,
+    basename='super-studies-related-genome-catalogues'
+)
+
+router.register(
     r'runs/(?P<accession>[^/]+)/analyses',
     views_relations.RunAnalysisViewSet,
     basename='runs-analyses'

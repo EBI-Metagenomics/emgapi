@@ -34,6 +34,8 @@ from emgena.models import Status as ENAStatus
 
 logger = logging.getLogger(__name__)
 
+MARKDOWN_HELP = 'Use <a href="https://commonmark.org/help/" target="_newtab">markdown</a> for links and rich text.'
+
 
 class Resource(object):
     def __init__(self, **kwargs):
@@ -45,6 +47,7 @@ class Token(object):
     def __init__(self, **kwargs):
         for field in ('id', 'token'):
             setattr(self, field, kwargs.get(field, None))
+
 
 class PrivacyControlledModel(models.Model):
     is_private = models.BooleanField(db_column='IS_PRIVATE', default=True)
@@ -59,6 +62,7 @@ class SuppressQuerySet(models.QuerySet):
 
     def unsuppress(self, reason):
         return self.update(is_suppressed=False, suppressed_at=None, suppression_reason=None)
+
 
 class SuppressManager(models.Manager):
     def get_queryset(self):
@@ -872,6 +876,7 @@ class SuperStudyManager(models.Manager):
             return get_object_or_404(self.get_queryset(), super_study_id=int(id_or_slug))
         return get_object_or_404(self.get_queryset(), url_slug=id_or_slug)
 
+
 class SuperStudy(models.Model):
     """
     Aggregation of studies.
@@ -883,7 +888,7 @@ class SuperStudy(models.Model):
                                       primary_key=True)
     title = models.CharField(db_column='TITLE', max_length=100)
     url_slug = models.SlugField(db_column='URL_SLUG', max_length=100)
-    description = models.TextField(db_column='DESCRIPTION', blank=True, null=True)
+    description = models.TextField(db_column='DESCRIPTION', blank=True, null=True, help_text=MARKDOWN_HELP)
 
     flagship_studies = models.ManyToManyField(
         'Study', through='SuperStudyStudy', related_name='super_studies', blank=True
@@ -891,6 +896,10 @@ class SuperStudy(models.Model):
 
     biomes = models.ManyToManyField(
         'Biome', through='SuperStudyBiome', related_name='super_studies', blank=True
+    )
+
+    genome_catalogues = models.ManyToManyField(
+        'GenomeCatalogue', through='SuperStudyGenomeCatalogue', related_name='super_studies', blank=True
     )
 
     logo = models.TextField(db_column='LOGO', max_length=100000, blank=True, null=True)
@@ -950,6 +959,30 @@ class SuperStudyBiome(models.Model):
         db_table = 'SUPER_STUDY_BIOME'
         unique_together = (('biome', 'super_study'),)
         verbose_name_plural = 'super studies biomes'
+
+
+class SuperStudyGenomeCatalogue(models.Model):
+    """
+    Relationship between a Super Study and a MAG Catalogue
+    """
+    genome_catalogue = models.ForeignKey(
+        'GenomeCatalogue',
+        db_column='GENOME_CATALOGUE_ID',
+        on_delete=models.CASCADE,
+    )
+    super_study = models.ForeignKey(
+        'SuperStudy',
+        db_column='SUPER_STUDY_ID',
+        on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return f'{self.super_study} - {self.genome_catalogue}'
+
+    class Meta:
+        db_table = 'SUPER_STUDY_GENOME_CATALOGUE'
+        unique_together = (('genome_catalogue', 'super_study'),)
+        verbose_name_plural = 'super studies genome catalogues'
 
 
 class SampleQuerySet(BaseQuerySet, SuppressQuerySet):
@@ -1712,7 +1745,6 @@ class GenomeSet(models.Model):
 
 
 class GenomeCatalogue(models.Model):
-    MARKDOWN_HELP = 'Use <a href="https://commonmark.org/help/" target="_newtab">markdown</a> for links and rich text.'
     catalogue_id = models.SlugField(
         db_column='CATALOGUE_ID', max_length=100)
     version = models.CharField(db_column='VERSION', max_length=20)

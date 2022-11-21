@@ -368,7 +368,7 @@ class SuperStudyFlagshipStudiesViewSet(emg_mixins.ListModelMixin,
         Retrieves flagship studies for the given super_study_id
         Example:
         ---
-        `/studies/1/flagship-studies`
+        `/super-studies/1/flagship-studies`
         """
         return super(SuperStudyFlagshipStudiesViewSet, self) \
             .list(request, *args, **kwargs)
@@ -400,6 +400,30 @@ class SuperStudyRelatedStudiesViewSet(emg_mixins.ListModelMixin,
         `/super-studies/1/related-studies`
         """
         return super(SuperStudyRelatedStudiesViewSet, self) \
+            .list(request, *args, **kwargs)
+
+
+class SuperStudyGenomeCataloguesViewSet(
+    emg_mixins.ListModelMixin,
+    emg_viewsets.BaseGenomeCatalogueGenericViewSet
+):
+
+    lookup_field = 'super_study_id'
+
+    def get_queryset(self):
+        super_study = emg_models.SuperStudy.objects.get_by_id_or_slug_or_404(
+            id_or_slug=self.kwargs['super_study_id']
+        )
+        return super_study.genome_catalogues
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves genome catalogues related to the given super_study_id
+        Example:
+        ---
+        `/super-studies/1/genome-catalogues`
+        """
+        return super(SuperStudyGenomeCataloguesViewSet, self) \
             .list(request, *args, **kwargs)
 
 
