@@ -47,10 +47,8 @@ class TestAssembliesAPI:
         assembly = assembly_extra_annotation.assembly
 
         url = reverse("emgapi_v1:assembly-extra-annotations-list", args=[assembly.accession])
-        print(url)
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
-        print(rsp)
         assert len(rsp["data"]) == 1
         assert rsp["data"][0]["attributes"]["alias"] == "extra.gff"

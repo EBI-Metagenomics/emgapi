@@ -18,6 +18,11 @@ class Command(BaseCommand):
     gffs_dir = None
     tool = None
 
+    fmt_cache = {}
+    desc_label_cache = {}
+    group_cache = {}
+    subdir_cache = {}
+
     def add_arguments(self, parser):
         parser.add_argument(
             'results_directory',
@@ -70,25 +75,36 @@ class Command(BaseCommand):
         subdir,
         filename,
     ):
-        description_label, created = emg_models.DownloadDescriptionLabel \
-            .objects \
-            .get_or_create(description_label='SanntiS annotation', defaults={
-                "description": "SMBGC Annotation using Neural Networks Trained on Interpro Signatures"
-        })
-        if created:
-            logger.info(f'Added new download description label {description_label}')
+        description_label = self.desc_label_cache.get('SanntiS annotation')
+        if not description_label:
+            description_label, created = emg_models.DownloadDescriptionLabel \
+                .objects \
+                .get_or_create(description_label='SanntiS annotation', defaults={
+                    "description": "SMBGC Annotation using Neural Networks Trained on Interpro Signatures"
+                })
+            if created:
+                logger.info(f'Added new download description label {description_label}')
+            self.desc_label_cache[description_label.description_label] = description_label
 
-        fmt = emg_models.FileFormat \
-            .objects \
-            .filter(format_extension='gff', compression=False) \
+        fmt = self.fmt_cache.setdefault(
+            'gff',
+            emg_models.FileFormat.objects
+            .filter(format_extension='gff', compression=False)
             .first()
+        )
 
-        subdir_obj, created = emg_models.DownloadSubdir.objects.get_or_create(subdir=subdir)
-        if created:
-            logger.info(f'Added new downloads subdir {subdir_obj}')
+        subdir_obj = self.subdir_cache.get(subdir)
+        if not subdir_obj:
+            subdir_obj, created = emg_models.DownloadSubdir.objects.get_or_create(subdir=subdir)
+            if created:
+                logger.info(f'Added new downloads subdir {subdir_obj}')
+            self.subdir_cache[subdir] = subdir_obj
 
-        group = emg_models.DownloadGroupType.objects.get(
-            group_type='Functional analysis'
+        group = self.group_cache.setdefault(
+            'Functional analysis',
+            emg_models.DownloadGroupType.objects.get(
+                group_type='Functional analysis'
+            )
         )
 
         alias = f'{assembly.accession}-sanntis.gff'
