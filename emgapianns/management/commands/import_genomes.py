@@ -322,9 +322,6 @@ class Command(BaseCommand):
         obj['description'] = desc
         if desc is None:
             logger.error('Desc_label missing: {0}'.format(desc_label))
-            logger.info('Available')
-            for desc_label in emg_models.DownloadDescriptionLabel.objects.using(self.database).all():
-                logger.info(desc_label.description_label)
             quit()
 
         fmt = emg_models.FileFormat \
