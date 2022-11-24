@@ -3,17 +3,22 @@
 from django.db import migrations
 
 
-def create_virify_genome_download_description(apps, schema_editor):
+def create_virify_genome_download_descriptions(apps, schema_editor):
     DownloadDescriptionLabel = apps.get_model("emgapi", "DownloadDescriptionLabel")
     DownloadDescriptionLabel.objects.create(
         description="Genome GFF file with VIRify viral annotations",
         description_label="Genome VIRify Annotation"
     )
+    DownloadDescriptionLabel.objects.create(
+        description="Genome TSV file with VIRify viral regions",
+        description_label="Genome VIRify Regions"
+    )
 
 
-def remove_virify_genome_download_description(apps, schema_editor):
+def remove_virify_genome_download_descriptions(apps, schema_editor):
     DownloadDescriptionLabel = apps.get_model("emgapi", "DownloadDescriptionLabel")
     DownloadDescriptionLabel.objects.filter(description_label="Genome VIRify Annotation").delete()
+    DownloadDescriptionLabel.objects.filter(description_label="Genome VIRify Regions").delete()
 
 
 class Migration(migrations.Migration):
@@ -24,7 +29,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(
-            code=create_virify_genome_download_description,
-            reverse_code=remove_virify_genome_download_description,
+            code=create_virify_genome_download_descriptions,
+            reverse_code=remove_virify_genome_download_descriptions,
         ),
     ]

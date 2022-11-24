@@ -57,6 +57,7 @@ class TestGenomes:
             ("List of core genes in the entire pangenome", "Pangenome core genes list"),
             ('rRNA sequence of the genome species representative', 'Genome rRNA Sequence'),
             ('Genome GFF file with VIRify viral annotations', "Genome VIRify Annotation"),
+            ('Genome TSV file with VIRify viral regions', "Genome VIRify Regions"),
         )
         for d in downloads:
             emg_models.DownloadDescriptionLabel.objects.get_or_create(

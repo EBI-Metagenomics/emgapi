@@ -293,6 +293,8 @@ class Command(BaseCommand):
                                 genome.accession + '_antismash.gff', 'Genome analysis', 'genome', False)
         self.upload_genome_file(genome, directory, 'Genome VIRify Annotation', 'gff',
                                 genome.accession + '_virify.gff', 'Genome analysis', 'genome', False)
+        self.upload_genome_file(genome, directory, 'Genome VIRify Regions', 'tsv',
+                                genome.accession + '_virify_metadata.tsv', 'Genome analysis', 'genome', False)
         self.upload_genome_file(genome, directory, 'EggNog annotation', 'tsv',
                                 genome.accession + '_eggNOG.tsv', 'Genome analysis', 'genome', False)
         self.upload_genome_file(genome, directory, 'InterProScan annotation', 'tsv',
