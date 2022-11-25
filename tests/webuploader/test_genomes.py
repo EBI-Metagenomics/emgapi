@@ -87,8 +87,15 @@ class TestGenomes:
         baker.make('emgapi.Biome',
                    lineage='root:Host-Associated:Human:Digestive System:Large intestine')
         path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test_data/')
-        call_command('import_genomes', path, 'genomes/uhgg/2.0', 'UHGG', '2.0',
-                     'root:Host-Associated:Human:Digestive System:Large intestine')
+        call_command(
+            'import_genomes',
+            path,
+            'genomes/uhgg/2.0',
+            'UHGG',
+            '2.0',
+            'root:Host-Associated:Human:Digestive System:Large intestine',
+            "1.2.1"
+        )
 
         genome = emg_models.Genome.objects.get(accession='MGYG000000001')
 
