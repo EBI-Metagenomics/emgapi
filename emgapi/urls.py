@@ -60,6 +60,12 @@ router.register(
 )
 
 router.register(
+    r'assemblies/(?P<accession>[^/]+)/extra-annotations',
+    views.AssemblyExtraAnnotationViewSet,
+    basename='assembly-extra-annotations'
+)
+
+router.register(
     r'analyses',
     views.AnalysisJobViewSet,
     basename='analyses'

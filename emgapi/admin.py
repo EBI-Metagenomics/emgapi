@@ -236,6 +236,19 @@ class PublicationAdmin(admin.ModelAdmin):
     ]
 
 
+class AssemblyExtraAnnotationDownloads(admin.TabularInline):
+    model = emg_models.AssemblyExtraAnnotation
+    raw_id_fields = [
+        'assembly',
+        'parent_id',
+        'group_type',
+        'subdir',
+        'description',
+        'file_format'
+    ]
+    extra = 0
+
+
 @admin.register(emg_models.Assembly)
 class AssemblyAdmin(admin.ModelAdmin):
     change_list_template = "admin/change_list_filter_sidebar.html"
@@ -250,6 +263,9 @@ class AssemblyAdmin(admin.ModelAdmin):
         'wgs_accession',
         'legacy_accession',
         'experiment_type__experiment_type'
+    ]
+    inlines = [
+        AssemblyExtraAnnotationDownloads
     ]
 
 

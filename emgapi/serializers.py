@@ -513,6 +513,48 @@ class RunSerializer(ExplicitFieldsModelSerializer,
         )
 
 
+class BaseDownloadSerializer(ExplicitFieldsModelSerializer,
+                             serializers.HyperlinkedModelSerializer):
+
+    id = serializers.ReadOnlyField(source='alias')
+
+    description = serializers.SerializerMethodField()
+
+    def get_description(self, obj):
+        if obj.description is not None:
+            return {
+                'label': obj.description.description_label,
+                'description': obj.description.description
+            }
+        return None
+
+    group_type = serializers.SerializerMethodField()
+
+    def get_group_type(self, obj):
+        if obj.group_type is not None:
+            return obj.group_type.group_type
+        return None
+
+    file_format = serializers.SerializerMethodField()
+
+    def get_file_format(self, obj):
+        if obj.file_format is not None:
+            return {
+                'name': obj.file_format.format_name,
+                'extension': obj.file_format.format_extension,
+                'compression': obj.file_format.compression,
+            }
+        return None
+
+    file_checksum = serializers.SerializerMethodField()
+
+    def get_file_checksum(self, obj):
+        return {
+            'checksum': obj.file_checksum,
+            'checksum-algorithm': obj.checksum_algorithm.name if obj.checksum_algorithm else ''
+        }
+
+
 class AssemblySerializer(ExplicitFieldsModelSerializer,
                          serializers.HyperlinkedModelSerializer):
 
@@ -588,6 +630,19 @@ class AssemblySerializer(ExplicitFieldsModelSerializer,
     def get_analyses(self, obj):
         return None
 
+    extra_annotations = relations.SerializerMethodHyperlinkedRelatedField(
+        many=True,
+        read_only=True,
+        source='get_extra_annotations',
+        model=emg_models.AssemblyExtraAnnotation,
+        related_link_view_name='emgapi_v1:assembly-extra-annotations-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+    )
+
+    def get_extra_annotations(self, obj):
+        return None
+
     class Meta:
         model = emg_models.Assembly
         exclude = (
@@ -595,6 +650,25 @@ class AssemblySerializer(ExplicitFieldsModelSerializer,
             'is_suppressed',
             'suppressed_at',
             'suppression_reason',
+        )
+
+
+class AssemblyExtraAnnotationSerializer(BaseDownloadSerializer):
+    url = emg_fields.DownloadHyperlinkedIdentityField(
+        view_name='emgapi_v1:assembly-extra-annotations-detail',
+        lookup_field='alias',
+    )
+
+    class Meta:
+        model = emg_models.AssemblyExtraAnnotation
+        fields = (
+            'id',
+            'url',
+            'alias',
+            'file_format',
+            'description',
+            'group_type',
+            'file_checksum'
         )
 
 
@@ -613,49 +687,6 @@ class RetrieveAssemblySerializer(AssemblySerializer):
         # TODO: push that to queryset
         pipelines = obj.analyses.values('pipeline_id').distinct()
         return emg_models.Pipeline.objects.filter(pk__in=pipelines)
-
-
-# Download serializer
-class BaseDownloadSerializer(ExplicitFieldsModelSerializer,
-                             serializers.HyperlinkedModelSerializer):
-
-    id = serializers.ReadOnlyField(source='alias')
-
-    description = serializers.SerializerMethodField()
-
-    def get_description(self, obj):
-        if obj.description is not None:
-            return {
-                'label': obj.description.description_label,
-                'description': obj.description.description
-            }
-        return None
-
-    group_type = serializers.SerializerMethodField()
-
-    def get_group_type(self, obj):
-        if obj.group_type is not None:
-            return obj.group_type.group_type
-        return None
-
-    file_format = serializers.SerializerMethodField()
-
-    def get_file_format(self, obj):
-        if obj.file_format is not None:
-            return {
-                'name': obj.file_format.format_name,
-                'extension': obj.file_format.format_extension,
-                'compression': obj.file_format.compression,
-            }
-        return None
-
-    file_checksum = serializers.SerializerMethodField()
-
-    def get_file_checksum(self, obj):
-        return {
-            'checksum': obj.file_checksum,
-            'checksum-algorithm': obj.checksum_algorithm.name if obj.checksum_algorithm else ''
-        }
 
 
 class BasePipelineDownloadSerializer(BaseDownloadSerializer):

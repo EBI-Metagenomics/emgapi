@@ -26,17 +26,19 @@ from emgapi import models as emg_models
 from emgena import models as ena_models
 
 
-__all__ = ['apiclient', 'api_version', 'biome', 'biome_human', 'super_study', 'studies',
-           'samples', 'study', 'study_private', 'sample', 'sample_private',
-           'analysis_status', 'pipeline', 'pipelines',
-           'experiment_type', 'experiment_type_assembly',
-           'runs', 'run', 'run_v5', 'runjob_pipeline_v1', 'run_emptyresults', 'run_with_sample',
-           'analysis_results', 'run_multiple_analysis', 'var_names', 'analysis_metadata_variable_names',
-           'genome_catalogue', 'genome', 'assemblies', 'legacy_mapping', 'ena_run_study',
-           'ena_public_studies', 'ena_private_studies', 'ena_suppressed_studies',
-           'ena_public_runs', 'ena_private_runs', 'ena_suppressed_runs',
-           'ena_public_samples', 'ena_private_samples', 'ena_suppressed_samples',
-           'ena_public_assemblies', 'ena_private_assemblies', 'ena_suppressed_assemblies']
+__all__ = [
+    'apiclient', 'api_version', 'biome', 'biome_human', 'super_study', 'studies',
+    'samples', 'study', 'study_private', 'sample', 'sample_private',
+    'analysis_status', 'pipeline', 'pipelines', 'experiment_type',
+    'experiment_type_assembly', 'runs', 'run', 'run_v5', 'runjob_pipeline_v1',
+    'run_emptyresults', 'run_with_sample', 'analysis_results', 'run_multiple_analysis',
+    'var_names', 'analysis_metadata_variable_names', 'genome_catalogue', 'genome',
+    'assemblies', 'legacy_mapping', 'ena_run_study', 'ena_public_studies',
+    'ena_private_studies', 'ena_suppressed_studies', 'ena_public_runs', 'ena_private_runs',
+    'ena_suppressed_runs', 'ena_public_samples', 'ena_private_samples', 'ena_suppressed_samples',
+    'ena_public_assemblies', 'ena_private_assemblies', 'ena_suppressed_assemblies',
+    'assembly_extra_annotation',
+]
 
 
 @pytest.fixture
@@ -622,9 +624,41 @@ def assemblies(study, runs, samples, experiment_type_assembly):
         accession="ERZ9999",
         study=study,
         experiment_type=experiment_type_assembly,
-        _quantity=10))
+        _quantity=1))
 
     return assemblies
+
+
+@pytest.fixture
+def assembly_extra_annotation(assemblies):
+    assembly = emg_models.Assembly.objects.get(accession="ERZ9999")
+
+    description_label, created = emg_models.DownloadDescriptionLabel \
+        .objects \
+        .get_or_create(description_label='SanntiS annotation', defaults={
+            "description": "SMBGC Annotation using Neural Networks Trained on Interpro Signatures"
+        })
+
+    fmt = emg_models.FileFormat \
+        .objects \
+        .filter(format_extension='gff', compression=False) \
+        .first()
+
+    group = emg_models.DownloadGroupType.objects.get(
+        group_type='Functional analysis'
+    )
+
+    annotation = emg_models.AssemblyExtraAnnotation.objects.create(
+        assembly=assembly,
+        alias='extra.gff',
+        description=description_label,
+        file_format=fmt,
+        group_type=group,
+        realname='extra.gff',
+    )
+
+    return annotation
+
 
 @pytest.fixture
 def legacy_mapping(assemblies):
@@ -632,6 +666,7 @@ def legacy_mapping(assemblies):
     return baker.make(emg_models.LegacyAssembly,
         legacy_accession=fake_accession,
         new_accession="ERZ999")
+
 
 @pytest.fixture
 def ena_run_study():

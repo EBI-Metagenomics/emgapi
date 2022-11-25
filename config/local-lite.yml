@@ -13,8 +13,8 @@ emg:
   admin: True
   downloads_bypass_nginx: True
   auth_backends:
-    - 'emgapi.backends.EMGBackend'
     - 'django.contrib.auth.backends.ModelBackend'
+    - 'emgapi.backends.EMGBackend'
 
   cors_origin_allow_all: true
   debug: true

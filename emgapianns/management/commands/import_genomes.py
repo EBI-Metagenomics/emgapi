@@ -39,6 +39,8 @@ class Command(BaseCommand):
         parser.add_argument('gold_biome', action='store', type=str,
                             help="Primary biome for the catalogue, as a GOLD lineage. "
                                  "E.g. root:Host-Associated:Human:Digestive\\ System:Large\\ intestine")
+        parser.add_argument('pipeline_version', action='store', type=str,
+                            help='Pipeline version tag that catalogue was produced by. E.g. "1.2.1"')
         parser.add_argument('--database', type=str,
                             default='default')
 
@@ -52,10 +54,16 @@ class Command(BaseCommand):
         version = options['catalogue_version'].strip()
         catalogue_dir = options['catalogue_directory'].strip()
         gold_biome = options['gold_biome'].strip()
+        pipeline_version_tag = options['pipeline_version'].strip()
         self.catalogue_dir = os.path.join(self.results_directory, catalogue_dir)
 
         self.database = options['database']
-        self.catalogue_obj = self.get_catalogue(catalogue_name, version, gold_biome, catalogue_dir)
+        self.catalogue_obj = self.get_catalogue(
+            catalogue_name,
+            version, gold_biome,
+            catalogue_dir,
+            pipeline_version_tag
+        )
 
         logger.info("CLI %r" % options)
 
@@ -74,7 +82,7 @@ class Command(BaseCommand):
         self.catalogue_obj.calculate_genome_count()
         self.catalogue_obj.save()
 
-    def get_catalogue(self, catalogue_name, catalogue_version, gold_biome, catalogue_dir):
+    def get_catalogue(self, catalogue_name, catalogue_version, gold_biome, catalogue_dir, pipeline_version_tag):
         logging.warning('GOLD')
         logging.warning(gold_biome)
         biome = self.get_gold_biome(gold_biome)
@@ -87,7 +95,9 @@ class Command(BaseCommand):
                     'version': catalogue_version,
                     'name': '{0} v{1}'.format(catalogue_name, catalogue_version),
                     'biome': biome,
-                    'result_directory': catalogue_dir
+                    'result_directory': catalogue_dir,
+                    'ftp_url': 'http://ftp.ebi.ac.uk/pub/databases/metagenomics/mgnify_genomes/',
+                    'pipeline_version_tag': pipeline_version_tag
                 })
         return catalogue
 
@@ -291,6 +301,10 @@ class Command(BaseCommand):
                                 genome.accession + '.gff', 'Genome analysis', 'genome', True)
         self.upload_genome_file(genome, directory, 'Genome antiSMASH Annotation', 'gff',
                                 genome.accession + '_antismash.gff', 'Genome analysis', 'genome', False)
+        self.upload_genome_file(genome, directory, 'Genome VIRify Annotation', 'gff',
+                                genome.accession + '_virify.gff', 'Genome analysis', 'genome', False)
+        self.upload_genome_file(genome, directory, 'Genome VIRify Regions', 'tsv',
+                                genome.accession + '_virify_metadata.tsv', 'Genome analysis', 'genome', False)
         self.upload_genome_file(genome, directory, 'EggNog annotation', 'tsv',
                                 genome.accession + '_eggNOG.tsv', 'Genome analysis', 'genome', False)
         self.upload_genome_file(genome, directory, 'InterProScan annotation', 'tsv',
