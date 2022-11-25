@@ -55,8 +55,9 @@ class TestGenomes:
              "Pairwise Mash distances of conspecific genomes"),
             ("DNA sequence FASTA file of the pangenome", "Pangenome DNA sequence"),
             ("List of core genes in the entire pangenome", "Pangenome core genes list"),
-            ('rRNA sequence of the genome species representative', 'Genome rRNA Sequence')
-
+            ('rRNA sequence of the genome species representative', 'Genome rRNA Sequence'),
+            ('Genome GFF file with VIRify viral annotations', "Genome VIRify Annotation"),
+            ('Genome TSV file with VIRify viral regions', "Genome VIRify Regions"),
         )
         for d in downloads:
             emg_models.DownloadDescriptionLabel.objects.get_or_create(
@@ -86,8 +87,15 @@ class TestGenomes:
         baker.make('emgapi.Biome',
                    lineage='root:Host-Associated:Human:Digestive System:Large intestine')
         path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test_data/')
-        call_command('import_genomes', path, 'genomes/uhgg/2.0', 'UHGG', '2.0',
-                     'root:Host-Associated:Human:Digestive System:Large intestine')
+        call_command(
+            'import_genomes',
+            path,
+            'genomes/uhgg/2.0',
+            'UHGG',
+            '2.0',
+            'root:Host-Associated:Human:Digestive System:Large intestine',
+            "1.2.1"
+        )
 
         genome = emg_models.Genome.objects.get(accession='MGYG000000001')
 

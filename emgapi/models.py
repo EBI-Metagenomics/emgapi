@@ -46,6 +46,7 @@ class Token(object):
         for field in ('id', 'token'):
             setattr(self, field, kwargs.get(field, None))
 
+
 class PrivacyControlledModel(models.Model):
     is_private = models.BooleanField(db_column='IS_PRIVATE', default=True)
 
@@ -59,6 +60,7 @@ class SuppressQuerySet(models.QuerySet):
 
     def unsuppress(self, reason):
         return self.update(is_suppressed=False, suppressed_at=None, suppression_reason=None)
+
 
 class SuppressManager(models.Manager):
     def get_queryset(self):
@@ -114,7 +116,7 @@ class ENASyncableModel(SuppressibleModel, PrivacyControlledModel):
 
         if ena_model_status == ENAStatus.DRAFT:
             logging.warning(
-                f"{study} will not be updated due to the study status being 'draft'"
+                f"{self} will not be updated due to the study status being 'draft'"
             )
 
         if (
@@ -204,6 +206,11 @@ class BaseQuerySet(models.QuerySet):
                     Q(job__analysis_status_id=AnalysisStatus.COMPLETED) | Q(job__analysis_status_id=AnalysisStatus.QC_NOT_PASSED)
                 ],
             },
+            'AssemblyExtraAnnotationQuerySet': {
+                'all': [
+                    Q(assembly__is_private=False),
+                ],
+            },
         }
 
         if request is not None and request.user.is_authenticated:
@@ -228,6 +235,10 @@ class BaseQuerySet(models.QuerySet):
                  Q(job__study__submission_account_id__iexact=_username,
                    job__assembly__is_private=True) |
                  Q(job__run__is_private=False) | Q(job__assembly__is_private=False)]
+            _query_filters['AssemblyExtraAnnotationQuerySet']['authenticated'] = \
+                [Q(assembly__samples__studies__submission_account_id__iexact=_username,
+                   is_private=True) |
+                 Q(assembly__is_private=False)]
 
         filters = _query_filters.get(self.__class__.__name__)
 
@@ -675,6 +686,36 @@ class AnalysisJobDownload(BaseAnnotationPipelineDownload):
         db_table = 'ANALYSIS_JOB_DOWNLOAD'
         unique_together = (('realname', 'alias', 'pipeline'),)
         ordering = ('pipeline', 'group_type', 'alias',)
+
+
+class AssemblyExtraAnnotationQuerySet(BaseQuerySet):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+class AssemblyExtraAnnotationManager(BaseDownloadManager):
+    pass
+
+
+class AssemblyExtraAnnotation(BaseDownload):
+    assembly = models.ForeignKey(
+        'Assembly', db_column='ASSEMBLY_ID', related_name='extra_annotations',
+        on_delete=models.CASCADE)
+
+    @property
+    def accession(self):
+        return self.assembly.accession
+
+    objects = AssemblyExtraAnnotationManager(select_related=[])
+
+    class Meta:
+        db_table = 'ASSEMBLY_DOWNLOAD'
+        unique_together = (('realname', 'alias', 'assembly'),)
+        ordering = ('group_type', 'alias',)
+
+    def __str__(self):
+        return f'AssemblyExtraAnnotation: {self.id} {self.alias}'
 
 
 class StudyDownloadQuerySet(BaseQuerySet):

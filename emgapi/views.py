@@ -773,6 +773,61 @@ class AssemblyViewSet(mixins.RetrieveModelMixin,
         return super(AssemblyViewSet, self).retrieve(request, *args, **kwargs)
 
 
+class AssemblyExtraAnnotationViewSet(
+    emg_mixins.ListModelMixin,
+    viewsets.GenericViewSet
+):
+    serializer_class = emg_serializers.AssemblyExtraAnnotationSerializer
+
+    filter_backends = (
+        filters.OrderingFilter,
+    )
+
+    ordering_fields = (
+        'alias',
+    )
+
+    ordering = ('alias',)
+
+    lookup_field = 'alias'
+    lookup_value_regex = '[^/]+'
+
+    def get_queryset(self):
+        try:
+            accession = self.kwargs['accession']
+        except ValueError:
+            raise Http404()
+        return emg_models.AssemblyExtraAnnotation.objects.available(self.request) \
+            .filter(assembly__accession=accession)
+
+    def get_object(self):
+        return get_object_or_404(
+            self.get_queryset(), Q(alias=self.kwargs['alias'])
+        )
+
+    def get_serializer_class(self):
+        return super(AssemblyExtraAnnotationViewSet, self) \
+            .get_serializer_class()
+
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves list of Assembly Extra Annotation downloads
+        Example:
+        ---
+        `/assembly/<accession>/extra-annotations`
+        """
+        return super(AssemblyExtraAnnotationViewSet, self).list(request, *args, **kwargs)
+
+    def retrieve(self, request, accession, alias,
+                 *args, **kwargs):
+        obj = self.get_object()
+        if obj.subdir is not None:
+            file_path = f'{obj.subdir}/{obj.realname}'
+        else:
+            file_path = obj.realname
+        return emg_utils.prepare_results_file_download_response(file_path, alias)
+
+
 class AnalysisJobViewSet(mixins.RetrieveModelMixin,
                          emg_mixins.ListModelMixin,
                          emg_viewsets.BaseAnalysisGenericViewSet):

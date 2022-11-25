@@ -20,8 +20,6 @@ from django.urls import reverse
 
 from rest_framework import status
 
-from emgapi import models as emg_models
-
 from test_utils.emg_fixtures import *  # noqa
 
 
@@ -44,3 +42,13 @@ class TestAssembliesAPI:
         response = client.get(url)
         assert response.status_code == status.HTTP_301_MOVED_PERMANENTLY
         assert legacy_mapping.new_accession in response.headers["Location"]
+
+    def test_assembly_extra_annotations(self, client, assembly_extra_annotation):
+        assembly = assembly_extra_annotation.assembly
+
+        url = reverse("emgapi_v1:assembly-extra-annotations-list", args=[assembly.accession])
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        rsp = response.json()
+        assert len(rsp["data"]) == 1
+        assert rsp["data"][0]["attributes"]["alias"] == "extra.gff"
