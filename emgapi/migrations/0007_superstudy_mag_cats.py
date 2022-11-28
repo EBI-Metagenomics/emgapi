@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('emgapi', '0004_genome_catalogues_last_update'),
+        ('emgapi', '0006_auto_20221123_1504'),
     ]
 
     operations = [

@@ -905,7 +905,7 @@ class SuperStudyManager(models.Manager):
         queryset = self.get_queryset()
         if prefetch:
             queryset = queryset.prefetch_related(
-                Prefetch('flagship_studies', queryset=Study.objects.available(request)),
+                Prefetch('studies', queryset=Study.objects.available(request)),
                 Prefetch('biome', queryset=Biome.objects.all()),
             )
         return queryset
@@ -919,9 +919,9 @@ class SuperStudyManager(models.Manager):
 class SuperStudy(models.Model):
     """
     Aggregation of studies.
-    Each Super Study will have multiples Studies under 2 categories:
-    - Flagship Projects, those that are directly related to the Super Study
-    - Related Projects, the studies that share the biome with the Super Study
+    Each Super Study will have multiples Studies.
+        - each study might be tagged as a "flagship" study or not.
+    Each Super Study may also have multiple Genome Catalogues linked to it.
     """
     super_study_id = models.AutoField(db_column='STUDY_ID',
                                       primary_key=True)
@@ -929,7 +929,7 @@ class SuperStudy(models.Model):
     url_slug = models.SlugField(db_column='URL_SLUG', max_length=100)
     description = models.TextField(db_column='DESCRIPTION', blank=True, null=True, help_text=MARKDOWN_HELP)
 
-    flagship_studies = models.ManyToManyField(
+    studies = models.ManyToManyField(
         'Study', through='SuperStudyStudy', related_name='super_studies', blank=True
     )
 
@@ -970,6 +970,9 @@ class SuperStudyStudy(models.Model):
     super_study = models.ForeignKey(
         'SuperStudy', db_column='SUPER_STUDY_ID',
         on_delete=models.CASCADE)
+    is_flagship = models.BooleanField(
+        default=True
+    )
 
     def __str__(self):
         return '{} - {}'.format(self.super_study, self.study)
