@@ -352,8 +352,10 @@ class StudyAnalysisResultViewSet(emg_mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class SuperStudyFlagshipStudiesViewSet(emg_mixins.ListModelMixin,
-                                       emg_viewsets.BaseStudyGenericViewSet):
+class SuperStudyFlagshipStudiesViewSet(
+    emg_mixins.ListModelMixin,
+    emg_viewsets.BaseStudyGenericViewSet
+):
 
     lookup_field = 'super_study_id'
 
@@ -361,7 +363,7 @@ class SuperStudyFlagshipStudiesViewSet(emg_mixins.ListModelMixin,
         super_study = emg_models.SuperStudy.objects.get_by_id_or_slug_or_404(
             id_or_slug=self.kwargs['super_study_id']
         )
-        return super_study.flagship_studies.available(self.request)
+        return super_study.studies.filter(superstudystudy__is_flagship=True).available(self.request)
 
     def list(self, request, *args, **kwargs):
         """
@@ -374,8 +376,10 @@ class SuperStudyFlagshipStudiesViewSet(emg_mixins.ListModelMixin,
             .list(request, *args, **kwargs)
 
 
-class SuperStudyRelatedStudiesViewSet(emg_mixins.ListModelMixin,
-                                      emg_viewsets.BaseStudyGenericViewSet):
+class SuperStudyRelatedStudiesViewSet(
+    emg_mixins.ListModelMixin,
+    emg_viewsets.BaseStudyGenericViewSet
+):
 
     lookup_field = 'super_study_id'
 
@@ -383,14 +387,7 @@ class SuperStudyRelatedStudiesViewSet(emg_mixins.ListModelMixin,
         super_study = emg_models.SuperStudy.objects.get_by_id_or_slug_or_404(
             id_or_slug=self.kwargs['super_study_id']
         )
-        biomes = super_study.biomes.all() \
-                                   .values('biome_id')
-        flagship_studies = super_study.flagship_studies.all() \
-                                      .values('study_id')
-        return emg_models.Study.objects \
-                         .filter(biome_id__in=biomes) \
-                         .exclude(pk__in=flagship_studies) \
-                         .available(self.request)
+        return super_study.studies.filter(superstudystudy__is_flagship=False).available(self.request)
 
     def list(self, request, *args, **kwargs):
         """
