@@ -58,6 +58,7 @@ class TestGenomes:
             ('rRNA sequence of the genome species representative', 'Genome rRNA Sequence'),
             ('Genome GFF file with VIRify viral annotations', "Genome VIRify Annotation"),
             ('Genome TSV file with VIRify viral regions', "Genome VIRify Regions"),
+            ('Genome GFF file with SanntiS SMBGC annotations', "Genome SanntiS Annotation"),
         )
         for d in downloads:
             emg_models.DownloadDescriptionLabel.objects.get_or_create(
