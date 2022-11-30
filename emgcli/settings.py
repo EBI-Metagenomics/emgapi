@@ -630,6 +630,12 @@ except KeyError:
     )
     RESULTS_PRODUCTION_DIR = ""
 
+# Webin - ENA - MGnify #
+try:
+    ENA_MGNIFY_PREFIX = EMG_CONF['emg']['ena_mgnify_prefix']
+except KeyError:
+    ENA_MGNIFY_PREFIX = "mg-"
+
 # ENA API handler #
 if 'ena_api_user' in EMG_CONF['emg']:
     os.environ['ENA_API_USER'] = EMG_CONF['emg']['ena_api_user']
