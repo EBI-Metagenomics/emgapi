@@ -49,6 +49,8 @@ class EMGBackend:
             return None
         if req.status_code == 200:
             if resp.get('authenticated', False):
+                if username.startswith(settings.ENA_MGNIFY_PREFIX):
+                    username = username.strip(settings.ENA_MGNIFY_PREFIX)
                 user, created = User.objects.get_or_create(
                     username__iexact=username,
                     defaults={'username': username.lower()}
