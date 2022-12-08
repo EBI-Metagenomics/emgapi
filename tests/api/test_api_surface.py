@@ -152,7 +152,7 @@ class TestAPISurface:
              ['biome', 'studies', 'runs', 'metadata']),
             ('SuperStudy', 'super-studies', 'emgapi_v1:super-studies', [],
              ['title', 'description', 'flagship-studies',
-              'related-studies', 'biomes']),
+              'related-studies', 'biomes', 'related-genome-catalogues']),
             ('Study', 'studies', 'emgapi_v1:studies', [],
              ['biomes', 'publications', 'samples', 'downloads',
               'geocoordinates', 'analyses']),

@@ -1208,6 +1208,23 @@ class SuperStudySerializer(ExplicitFieldsModelSerializer,
             return obj.biomes.all()
         return None
 
+    related_genome_catalogues = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(
+        many=True,
+        read_only=True,
+        source='get_related_genome_catalogues',
+        model=emg_models.GenomeCatalogue,
+        related_link_view_name='emgapi_v1:super-studies-related-genome-catalogues-list',
+        related_link_url_kwarg='super_study_id',
+        related_link_lookup_field='super_study_id',
+        related_link_self_view_name='emgapi_v1:genome-catalogue-detail',
+        related_link_self_lookup_field='accession',
+    )
+
+    def get_related_genome_catalogues(self, obj):
+        if 'genome_catalogues' in utils.get_included_resources(self.context['request']):
+            return obj.genome_catalgoues.all()
+        return None
+
     class Meta:
         model = emg_models.SuperStudy
         fields = (
@@ -1221,6 +1238,7 @@ class SuperStudySerializer(ExplicitFieldsModelSerializer,
             'biomes_count',
             'flagship_studies',
             'related_studies',
+            'related_genome_catalogues',
         )
 
 
