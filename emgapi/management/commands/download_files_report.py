@@ -263,7 +263,7 @@ class Command(BaseCommand):
 
         if study_accession:
             study = Study.objects.get(study_id=int(study_accession.lstrip('MGYS')))
-            download_files = download_files.filter(study=study)
+            download_files = download_files.filter(job__study=study)
 
         if pipeline_version:
             pipeline = Pipeline.objects.get(release_version=pipeline_version)
