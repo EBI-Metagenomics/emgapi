@@ -107,7 +107,7 @@ class Command(BaseCommand):
         download_files = StudyDownload.objects.all()
 
         if study_accession:
-            study = Study.objects.get(accession=study_accession)
+            study = Study.objects.get(study_id=int(study_accession.lstrip('MGYS')))
             download_files = download_files.filter(study=study)
 
         paginator = Paginator(download_files, 50)
@@ -262,7 +262,7 @@ class Command(BaseCommand):
             download_files.filter(job__id=int(analysis_accession.lstrip('MGYA')))
 
         if study_accession:
-            study = Study.objects.get(accession=study_accession)
+            study = Study.objects.get(study_id=int(study_accession.lstrip('MGYS')))
             download_files = download_files.filter(study=study)
 
         if pipeline_version:
