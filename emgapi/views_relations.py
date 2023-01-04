@@ -41,11 +41,13 @@ class BiomeStudyRelationshipViewSet(emg_mixins.ListModelMixin,
     def get_queryset(self):
         lineage = self.kwargs[self.lookup_field]
         obj = get_object_or_404(emg_models.Biome, lineage=lineage)
-        queryset = emg_models.Study.objects \
-            .available(self.request) \
-            .filter(samples__biome__lft__gte=obj.lft,
-                    samples__biome__rgt__lte=obj.rgt,
-                    samples__biome__depth__gte=obj.depth)
+        queryset = emg_models.Study.objects.available(
+            self.request
+        ).filter(
+            biome__lft__gte=obj.lft,
+            biome__rgt__lte=obj.rgt,
+            biome__depth__gte=obj.depth,
+        )
         if 'samples' in self.request.GET.get('include', '').split(','):
             _qs = emg_models.Sample.objects \
                 .available(self.request, prefetch=True)
