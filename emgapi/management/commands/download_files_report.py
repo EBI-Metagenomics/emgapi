@@ -118,12 +118,12 @@ class Command(BaseCommand):
             for d_file in page.object_list:
 
                 d_file_path = "{0}/{1}".format(
-                    d_file.job.study.result_directory, d_file.realname
+                    d_file.study.result_directory, d_file.realname
                 )
 
                 if d_file.subdir is not None:
                     d_file_path = "{0}/{1}/{2}".format(
-                        d_file.job.study.result_directory,
+                        d_file.study.result_directory,
                         d_file.subdir,
                         d_file.realname,
                     )
