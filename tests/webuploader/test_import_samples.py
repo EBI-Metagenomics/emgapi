@@ -57,7 +57,12 @@ class TestImportSampleTransactions:
         mock_api_data = mock_fetch_sample_api()
         mock_api = mock.patch.object(Command, 'fetch_sample_api', new=lambda *args, **kwargs: mock_api_data)
         mock_db = mock.patch.object(Command, 'get_ena_db_sample', new=create_model)
-        with mock_api, mock_db:
+        mock_api_sample_studies = mock.patch.object(
+            Command,
+            'get_sample_studies',
+            new=lambda *args, **kwargs: {'ERP022699'}
+        )
+        with mock_api, mock_db, mock_api_sample_studies:
             cmd = Command()
             cmd.run_from_argv(argv=['manage.py', 'import_sample', sample_accession, '--biome', 'root:foo:bar'])
             created_sample = emg_models.Sample.objects.get(accession=sample_accession)
@@ -78,7 +83,12 @@ class TestImportSampleTransactions:
         mock_api_data['status_id'] = '2'
         mock_api = mock.patch.object(Command, 'fetch_sample_api', new=lambda *args, **kwargs: mock_api_data)
         mock_db = mock.patch.object(Command, 'get_ena_db_sample', new=create_model)
-        with mock_api, mock_db:
+        mock_api_sample_studies = mock.patch.object(
+            Command,
+            'get_sample_studies',
+            new=lambda *args, **kwargs: {'ERP022699'}
+        )
+        with mock_api, mock_db, mock_api_sample_studies:
             cmd = Command()
             cmd.run_from_argv(argv=['manage.py', 'import_sample', sample_accession, '--biome', 'root:foo:bar'])
             created_sample = emg_models.Sample.objects.get(accession=sample_accession)
@@ -92,7 +102,12 @@ class TestImportSampleTransactions:
         del mock_api_data['location']
         mock_api = mock.patch.object(Command, 'fetch_sample_api', new=lambda *args, **kwargs: mock_api_data)
         mock_db = mock.patch.object(Command, 'get_ena_db_sample', new=create_model)
-        with mock_api, mock_db:
+        mock_api_sample_studies = mock.patch.object(
+            Command,
+            'get_sample_studies',
+            new=lambda *args, **kwargs: {'ERP022699'}
+        )
+        with mock_api, mock_db, mock_api_sample_studies:
             cmd = Command()
             cmd.run_from_argv(argv=['manage.py', 'import_sample', sample_accession, '--biome', 'root:foo:bar'])
             created_sample = emg_models.Sample.objects.get(accession=sample_accession)
@@ -106,7 +121,12 @@ class TestImportSampleTransactions:
         mock_api_data = mock_fetch_sample_api()
         mock_api = mock.patch.object(Command, 'fetch_sample_api', new=lambda *args, **kwargs: mock_api_data)
         mock_db = mock.patch.object(Command, 'get_ena_db_sample', new=create_model)
-        with mock_api, mock_db:
+        mock_api_sample_studies = mock.patch.object(
+            Command,
+            'get_sample_studies',
+            new=lambda *args, **kwargs: {'ERP022699'}
+        )
+        with mock_api, mock_db, mock_api_sample_studies:
             cmd = Command()
             cmd.run_from_argv(argv=['manage.py', 'import_sample', sample_accession, '--biome', 'root:foo:bar'])
             created_sample = emg_models.Sample.objects.get(accession=sample_accession)
@@ -120,7 +140,12 @@ class TestImportSampleTransactions:
         mock_api_data = mock_fetch_sample_api()
         mock_api = mock.patch.object(Command, 'fetch_sample_api', new=lambda *args, **kwargs: mock_api_data)
         mock_db = mock.patch.object(Command, 'get_ena_db_sample', new=create_model)
-        with mock_api, mock_db:
+        mock_api_sample_studies = mock.patch.object(
+            Command,
+            'get_sample_studies',
+            new=lambda *args, **kwargs: {'ERP022699'}
+        )
+        with mock_api, mock_db, mock_api_sample_studies:
             cmd = Command()
             cmd.run_from_argv(argv=['manage.py', 'import_sample', sample_accession, '--biome', 'root:foo:bar'])
             created_sample = emg_models.Sample.objects.get(accession=sample_accession)
@@ -137,7 +162,12 @@ class TestImportSampleTransactions:
         del mock_api_data['location']
         mock_api = mock.patch.object(Command, 'fetch_sample_api', new=lambda *args, **kwargs: mock_api_data)
         mock_db = mock.patch.object(Command, 'get_ena_db_sample', new=create_model)
-        with mock_api, mock_db:
+        mock_api_sample_studies = mock.patch.object(
+            Command,
+            'get_sample_studies',
+            new=lambda *args, **kwargs: {'ERP022699'}
+        )
+        with mock_api, mock_db, mock_api_sample_studies:
             cmd = Command()
             cmd.run_from_argv(
                 argv=['manage.py', 'import_sample', sample_accession, '--biome', 'root:Host-associated:Human'])
@@ -153,7 +183,12 @@ class TestImportSampleTransactions:
         del mock_api_data['location']
         mock_api = mock.patch.object(Command, 'fetch_sample_api', new=lambda *args, **kwargs: mock_api_data)
         mock_db = mock.patch.object(Command, 'get_ena_db_sample', new=create_model)
-        with mock_api, mock_db:
+        mock_api_sample_studies = mock.patch.object(
+            Command,
+            'get_sample_studies',
+            new=lambda *args, **kwargs: {'ERP022699'}
+        )
+        with mock_api, mock_db, mock_api_sample_studies:
             cmd = Command()
             cmd.run_from_argv(
                 argv=['manage.py', 'import_sample', sample_accession, '--biome', 'root:foo:bar'])
@@ -214,7 +249,12 @@ class TestImportSampleTransactions:
         mock_api_data = mock_fetch_sample_api()
         mock_api = mock.patch.object(Command, 'fetch_sample_api', new=lambda *args, **kwargs: mock_api_data)
         mock_db = mock.patch.object(Command, 'get_ena_db_sample', new=create_model)
-        with mock_api, mock_db:
+        mock_api_sample_studies = mock.patch.object(
+            Command,
+            'get_sample_studies',
+            new=lambda *args, **kwargs: {'ERP022699'}
+        )
+        with mock_api, mock_db, mock_api_sample_studies:
             cmd = Command()
             with pytest.raises(emg_models.VariableNames.DoesNotExist):
                 cmd.run_from_argv(argv=['manage.py', 'import_sample', sample_accession, '--biome', 'root:foo:bar'])
