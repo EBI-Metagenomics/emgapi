@@ -1246,7 +1246,7 @@ class StudySerializer(ExplicitFieldsModelSerializer,
                       serializers.HyperlinkedModelSerializer):
 
     included_serializers = {
-        'biomes': 'emgapi.serializers.BiomeSerializer',
+        'biomes': 'emgapi.serializers.BiomeSkinnySerializer',
         'downloads': 'emgapi.serializers.StudyDownloadSerializer',
         'samples': 'emgapi.serializers.SampleSerializer'
     }
