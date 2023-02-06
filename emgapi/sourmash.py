@@ -103,23 +103,30 @@ def get_task_pos_in_reserved(task_id, reserved):
 
 def get_task_worker_status(task_id, inspect):
     tasks_by_worker = inspect.query_task(task_id)
-    for task in tasks_by_worker.values():
-        if task_id not in task:
-            logger.warning(f'Task {task_id} unexpectedly missing from task')
-            logger.warning(task)
-            # Some kind of race condition?
-            return "UNKNOWN"
-        status = task[task_id][0]
+    for worker, worker_tasks in tasks_by_worker.items():
+        if task_id not in worker_tasks:
+            logger.warning(f'Task {task_id} not found on worker {worker}')
+            # Given Celery API, this should not happen because we should
+            # always get the response from the worker the task is on...
+            continue
+        status = worker_tasks[task_id][0]
         if status == "reserved":
             return "IN_QUEUE"
         if status == "active":
             return "RUNNING"
+        return status
+    return "UNKNOWN"
 
 
 def get_task_catalogue(task_id, inspect):
     tasks_by_worker = inspect.query_task(task_id)
-    for task in tasks_by_worker.values():
-        return task[task_id][0]
+    for worker, worker_tasks in tasks_by_worker.items():
+        if task_id not in worker_tasks:
+            continue
+        args = worker_tasks[task_id][1]['args']
+        # args = [id, query fna filename, catalogue]
+        return args[2]
+    return ""
 
 
 def get_sourmash_job_status(job_id, request):
@@ -140,6 +147,7 @@ def get_sourmash_job_status(job_id, request):
             signature["filename"] = result.args[1]
         except Exception:
             pass
+
         if result.status == "SUCCESS":
             signature["result"] = result.result
             signature["results_url"] = reverse(
