@@ -1,4 +1,5 @@
 import json
+import logging
 import tarfile
 import hashlib
 
@@ -7,6 +8,7 @@ from rest_framework.reverse import reverse
 from celery import Celery, group
 from celery.app.control import Control
 
+logger = logging.getLogger(__name__)
 
 RESULTS_EXPIRE = 60 * 60 * 24 * 30  # 30 days
 
@@ -102,6 +104,11 @@ def get_task_pos_in_reserved(task_id, reserved):
 def get_task_worker_status(task_id, inspect):
     tasks_by_worker = inspect.query_task(task_id)
     for task in tasks_by_worker.values():
+        if task_id not in task:
+            logger.warning(f'Task {task_id} unexpectedly missing from task')
+            logger.warning(task)
+            # Some kind of race condition?
+            return "UNKNOWN"
         status = task[task_id][0]
         if status == "reserved":
             return "IN_QUEUE"
