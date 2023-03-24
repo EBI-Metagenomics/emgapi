@@ -226,7 +226,7 @@ class BaseQuerySet(models.QuerySet):
                 [Q(submission_account_id__iexact=_username) | Q(is_private=False)]
             _query_filters['RunQuerySet']['authenticated'] = \
                 [Q(study__submission_account_id__iexact=_username, is_private=True) |
-                 Q(is_private=True)]
+                 Q(is_private=False)]
             _query_filters['AssemblyQuerySet']['authenticated'] = \
                 [Q(samples__studies__submission_account_id__iexact=_username,
                    is_private=True) |
