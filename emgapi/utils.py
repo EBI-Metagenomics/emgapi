@@ -19,7 +19,7 @@ import re
 
 from django.conf import settings
 from django.db.models import Q
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse
 
 logger = logging.getLogger(__name__)
 
@@ -120,6 +120,8 @@ def prepare_results_file_download_response(path_in_results, alias):
     if settings.DOWNLOADS_BYPASS_NGINX:
         logger.warning('DOWNLOADS_BYPASS_NGINX is true, so serving download directly as Django response '
                        '(not via NGINX redirect)')
+        if str(path_in_results).endswith('zip'):
+            return FileResponse(open(os.path.join(settings.RESULTS_DIR, path_in_results.lstrip('/')), 'rb'))
         with open(os.path.join(settings.RESULTS_DIR, path_in_results.lstrip('/')), 'r') as file:
             response.content = file.read()
     else:
