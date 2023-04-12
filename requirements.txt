@@ -19,7 +19,7 @@ PyYAML==6.0
 concurrent-log-handler~=0.9.22
 
 Django==3.2.18
-djangorestframework==3.14.0
+djangorestframework==3.12
 django-filter==23.1
 djangorestframework-jwt~=1.11.0
 django-cors-headers==3.14.0
