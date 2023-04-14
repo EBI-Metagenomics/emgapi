@@ -1301,7 +1301,7 @@ class GenomeCatalogueViewSet(mixins.RetrieveModelMixin,
                              emg_mixins.ListModelMixin,
                              emg_viewsets.BaseGenomeCatalogueGenericViewSet):
 
-    filter_class = emg_filters.GenomeCatalogueFilter
+    filterset_class = emg_filters.GenomeCatalogueFilter
 
     lookup_field = 'catalogue_id'
     lookup_value_regex = '[^/]+'
@@ -1352,7 +1352,7 @@ class GenomeViewSet(mixins.RetrieveModelMixin,
                     emg_mixins.ListModelMixin,
                     viewsets.GenericViewSet):
     serializer_class = emg_serializers.GenomeSerializer
-    filter_class = emg_filters.GenomeFilter
+    filterset_class = emg_filters.GenomeFilter
 
     lookup_field = 'accession'
     lookup_value_regex = '[^/]+'
