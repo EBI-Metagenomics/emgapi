@@ -316,7 +316,7 @@ class StudyAnalysisResultViewSet(emg_mixins.ListModelMixin,
                                  viewsets.GenericViewSet):
     serializer_class = emg_serializers.AnalysisSerializer
 
-    filter_class = emg_filters.AnalysisJobFilter
+    filterset_class = emg_filters.AnalysisJobFilter
 
     filter_backends = (
         DjangoFilterBackend,
@@ -430,7 +430,7 @@ class RunAnalysisViewSet(emg_mixins.ListModelMixin,
                          viewsets.GenericViewSet):
     serializer_class = emg_serializers.AnalysisSerializer
 
-    filter_class = emg_filters.AnalysisJobFilter
+    filterset_class = emg_filters.AnalysisJobFilter
 
     filter_backends = (
         DjangoFilterBackend,
@@ -861,7 +861,7 @@ class BiomeTreeViewSet(mixins.ListModelMixin,
     serializer_class = emg_serializers.BiomeSerializer
     queryset = emg_models.Biome.objects.filter(depth=1)
 
-    filter_class = emg_filters.BiomeFilter
+    filterset_class = emg_filters.BiomeFilter
 
     filter_backends = (
         DjangoFilterBackend,
@@ -983,7 +983,7 @@ class RunAssemblyViewSet(emg_mixins.ListModelMixin,
                          viewsets.GenericViewSet):
     serializer_class = emg_serializers.AssemblySerializer
 
-    filter_class = emg_filters.AssemblyFilter
+    filterset_class = emg_filters.AssemblyFilter
 
     filter_backends = (
         DjangoFilterBackend,
@@ -1026,7 +1026,7 @@ class AssemblyAnalysisViewSet(emg_mixins.ListModelMixin,
                               viewsets.GenericViewSet):
     serializer_class = emg_serializers.AnalysisSerializer
 
-    filter_class = emg_filters.AnalysisJobFilter
+    filterset_class = emg_filters.AnalysisJobFilter
 
     filter_backends = (
         DjangoFilterBackend,
@@ -1073,7 +1073,7 @@ class AssemblyRunsViewSet(emg_mixins.ListModelMixin,
 
     serializer_class = emg_serializers.RunSerializer
 
-    filter_class = emg_filters.RunFilter
+    filterset_class = emg_filters.RunFilter
 
     filter_backends = (
         DjangoFilterBackend,

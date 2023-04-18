@@ -11,7 +11,8 @@ logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     help = "Imports a directory of GFFs that as 'extra assembly annotations', " \
-           "i.e. annotations from tools that aren't part of the analysis pipelines."
+           "i.e. annotations from tools that aren't part of the analysis pipelines." \
+           "GFFs may (preferably) be wrapped into self-describing RO Crates."
 
     obj_list = list()
     results_directory = None
@@ -33,14 +34,20 @@ class Command(BaseCommand):
             'gffs_directory',
             action='store',
             type=str,
-            help='The folder within `results_directory` where the GFF files are, e.g. "sanntis/"'
+            help='The folder within `results_directory` where the GFF/ROCrate files are, e.g. "crates/"'
         )
         parser.add_argument(
             'tool',
             action='store',
             type=str,
-            help='The type of annotation (e.g. sanntis)',
-            choices=['sanntis']
+            help='The type of annotation (e.g. rocrate)',
+            choices=['sanntis', 'rocrate']
+        )
+        parser.add_argument(
+            'rocrate_description',
+            action='store',
+            type=str,
+            help='A short description if the annotation is a RO Crate',
         )
 
     def handle(self, *args, **options):
@@ -68,6 +75,19 @@ class Command(BaseCommand):
                     continue
                 logger.info(f'Will upload sanntis GFF for {erz}')
                 self.upload_sanntis_gff_file(assembly, gffs_directory, file.name)
+
+        if options.get('tool') == 'rocrate':
+            logger.info('Looking for RO Crates (.zips')
+            for file in Path(self.gffs_dir).glob('**/*.zip'):
+                logger.info(f'Handling RO Crate Zip file {file}')
+                erz = 'ERZ' + file.name.split('ERZ')[1].strip('.zip')
+                try:
+                    assembly = emg_models.Assembly.objects.get(accession=erz)
+                except emg_models.Assembly.DoesNotExist:
+                    logger.warning(f'No Assembly found for RO Crate apparent ERZ {erz}')
+                    continue
+                logger.info(f'Will upload RO Crate for {erz}')
+                self.upload_rocrate(assembly, gffs_directory, file.name)
 
     def upload_sanntis_gff_file(
         self,
@@ -108,6 +128,69 @@ class Command(BaseCommand):
         )
 
         alias = f'{assembly.accession}-sanntis.gff'
+
+        defaults = {
+            'alias': alias,
+            'description': description_label,
+            'file_format': fmt,
+            'group_type': group,
+            'realname': os.path.basename(filename),
+            'subdir': subdir_obj
+        }
+
+        dl, created = emg_models.AssemblyExtraAnnotation.objects.update_or_create(
+            defaults,
+            assembly=assembly,
+            alias=alias,
+        )
+
+        logger.info(f'{"Created" if created else "Updated"} download {dl}')
+        return dl
+
+    def upload_rocrate(
+        self,
+        assembly,
+        subdir,
+        filename,
+    ):
+        description_label = self.desc_label_cache.get('Analysis RO Crate')
+        if not description_label:
+            description_label, created = emg_models.DownloadDescriptionLabel \
+                .objects \
+                .get_or_create(description_label='Analysis RO Crate', defaults={
+                    "description": "Self-describing analysis workflow product packaged as RO Crate"
+                })
+            if created:
+                logger.info(f'Added new download description label {description_label}')
+            self.desc_label_cache[description_label.description_label] = description_label
+
+        fmt = self.fmt_cache.get('RO Crate')
+        if not fmt:
+            fmt, created = emg_models.FileFormat \
+                .objects \
+                .get_or_create(format_name='RO Crate', defaults={
+                    "format_extension": "zip",
+                    "compression": True
+                })
+            if created:
+                logger.info(f'Added new file format {fmt}')
+            self.fmt_cache[fmt.format_name] = fmt
+
+        subdir_obj = self.subdir_cache.get(subdir)
+        if not subdir_obj:
+            subdir_obj, created = emg_models.DownloadSubdir.objects.get_or_create(subdir=subdir)
+            if created:
+                logger.info(f'Added new downloads subdir {subdir_obj}')
+            self.subdir_cache[subdir] = subdir_obj
+
+        group = self.group_cache.get('Analysis RO Crate')
+        if not group:
+            group, created = emg_models.DownloadGroupType.objects.get_or_create(group_type='Analysis RO Crate')
+            if created:
+                logger.info(f'Added new download group type {group}')
+            self.group_cache[group.group_type] = group
+
+        alias = os.path.basename(filename)
 
         defaults = {
             'alias': alias,
