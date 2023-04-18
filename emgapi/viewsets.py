@@ -31,7 +31,7 @@ class BaseSuperStudyViewSet(viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.SuperStudySerializer
 
-    filter_class = emg_filters.SuperStudyFilter
+    filterset_class = emg_filters.SuperStudyFilter
 
     filter_backends = (
         DjangoFilterBackend,
@@ -57,7 +57,7 @@ class BaseStudyGenericViewSet(viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.StudySerializer
 
-    filter_class = emg_filters.StudyFilter
+    filterset_class = emg_filters.StudyFilter
 
     filter_backends = (
         DjangoFilterBackend,
@@ -88,7 +88,7 @@ class BaseSampleGenericViewSet(viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.SampleSerializer
 
-    filter_class = emg_filters.SampleFilter
+    filterset_class = emg_filters.SampleFilter
 
     filter_backends = (
         DjangoFilterBackend,
@@ -123,7 +123,7 @@ class BaseRunGenericViewSet(viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.RunSerializer
 
-    filter_class = emg_filters.RunFilter
+    filterset_class = emg_filters.RunFilter
 
     filter_backends = (
         DjangoFilterBackend,
@@ -151,7 +151,7 @@ class BaseAssemblyGenericViewSet(viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.AssemblySerializer
 
-    filter_class = emg_filters.AssemblyFilter
+    filterset_class = emg_filters.AssemblyFilter
 
     filter_backends = (
         DjangoFilterBackend,
@@ -177,7 +177,7 @@ class BaseAnalysisGenericViewSet(viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
 
-    filter_class = emg_filters.AnalysisJobFilter
+    filterset_class = emg_filters.AnalysisJobFilter
 
     filter_backends = (
         DjangoFilterBackend,
@@ -210,7 +210,7 @@ class BasePublicationGenericViewSet(viewsets.GenericViewSet):
 
     serializer_class = emg_serializers.PublicationSerializer
 
-    filter_class = emg_filters.PublicationFilter
+    filterset_class = emg_filters.PublicationFilter
 
     filter_backends = (
         DjangoFilterBackend,

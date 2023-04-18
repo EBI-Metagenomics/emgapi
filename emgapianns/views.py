@@ -871,7 +871,7 @@ class OrganismAnalysisRelationshipViewSet(m_viewsets.ListReadOnlyModelViewSet):
 
     serializer_class = emg_serializers.AnalysisSerializer
 
-    filter_class = emg_filters.AnalysisJobFilter
+    filterset_class = emg_filters.AnalysisJobFilter
 
     filter_backends = (
         DjangoFilterBackend,
