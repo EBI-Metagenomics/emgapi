@@ -95,7 +95,7 @@ class TestGenomes:
             'UHGG',
             '2.0',
             'root:Host-Associated:Human:Digestive System:Large intestine',
-            "1.2.1"
+            "v1.2.1"
         )
 
         genome = emg_models.Genome.objects.get(accession='MGYG000000001')
