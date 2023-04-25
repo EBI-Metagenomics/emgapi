@@ -59,6 +59,12 @@ class TestGenomes:
             ('Genome GFF file with VIRify viral annotations', "Genome VIRify Annotation"),
             ('Genome TSV file with VIRify viral regions', "Genome VIRify Regions"),
             ('Genome GFF file with SanntiS SMBGC annotations', "Genome SanntiS Annotation"),
+            ('Genome GFF file with SanntiS SMBGC annotations', "Genome SanntiS Annotation"),
+            ("AMR annotations produced by AMRFinderPlus", "Genome AMRFinderPlus Annotation"),
+            ("Unfiltered CRISPRCasFinder results file, including calls that have evidence level 1 and are less likely to be genuine", "Genome CRISPRCasFinder Annotation"),
+            ("Additional data for CRISPRCasFinder records reported in the CRISPRCasFinder GFF", "Genome CRISPRCasFinder Additional Records"),
+            ("Annotated viral sequence and mobile elements", "Genome Mobilome Annotation"),
+            ("List of genes in the pan-genome with their annotation and MGYG accessions.", "Gene Presence / Absence list"),
         )
         for d in downloads:
             emg_models.DownloadDescriptionLabel.objects.get_or_create(
