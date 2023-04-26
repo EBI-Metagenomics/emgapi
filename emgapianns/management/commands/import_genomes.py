@@ -380,7 +380,7 @@ class Command(BaseCommand):
                                     'tsv', 'gene_presence_absence.Rtab', 'Pan-Genome analysis', 'pan-genome', False)
             self.upload_genome_file(genome, directory,
                                     'Gene Presence / Absence list',
-                                    'csv', 'gene_presence_absence.csv', 'Pen-Genome analysis', 'pan-genome', False)
+                                    'csv', 'gene_presence_absence.csv', 'Pan-Genome analysis', 'pan-genome', False)
             self.upload_genome_file(genome, directory,
                                     'Pairwise Mash distances of conspecific genomes',
                                     'nwk', 'mashtree.nwk', 'Pan-Genome analysis', 'pan-genome', False)
