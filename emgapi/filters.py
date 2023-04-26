@@ -780,7 +780,7 @@ class AssemblyFilter(django_filters.FilterSet):
         return qs.filter(samples__accession=value)
 
     run_accession = django_filters.CharFilter(
-        method='filter_run_accession', distinct=True,
+        method='filter_runs_accession', distinct=True,
         label='Run accession',
         help_text='Run accession')
 

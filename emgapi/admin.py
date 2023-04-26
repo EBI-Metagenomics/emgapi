@@ -333,7 +333,7 @@ class AnalysisJobAdmin(admin.ModelAdmin, AccessionSearch, NoRemoveMixin):
         'secondary_accession',
         'run__accession',
         'sample__accession',
-        'study__accession',
+        'study__study_id',
         'assembly__accession',
         'instrument_platform',
         'instrument_model'
@@ -460,8 +460,9 @@ class AnalysisJobAnnAdmin(admin.ModelAdmin):
         'var'
     ]
     search_fields = [
-        'job__accession',
-        'var'
+        'job__job_id',
+        'var__var_name',
+        'var__description',
     ]
 
 
@@ -777,7 +778,7 @@ class AnalysisJobDownloadAdmin(admin.ModelAdmin,
         'job'
     ]
     search_fields = BaseDownloadAdmin.search_fields + [
-        'job__accession'
+        'job__job_id'
     ]
 
 

@@ -43,12 +43,6 @@ class Command(BaseCommand):
             help='The type of annotation (e.g. rocrate)',
             choices=['sanntis', 'rocrate']
         )
-        parser.add_argument(
-            'rocrate_description',
-            action='store',
-            type=str,
-            help='A short description if the annotation is a RO Crate',
-        )
 
     def handle(self, *args, **options):
         logger.info(options)

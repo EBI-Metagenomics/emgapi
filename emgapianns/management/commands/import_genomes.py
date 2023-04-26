@@ -1,7 +1,7 @@
 import logging
 import os
 
-from django.core.management import BaseCommand
+from django.core.management import BaseCommand, CommandError
 from django.utils.text import slugify
 
 from emgapi import models as emg_models
@@ -45,6 +45,53 @@ class Command(BaseCommand):
                             default='default')
 
     def handle(self, *args, **options):
+        ver = options['pipeline_version'].strip()
+        if ver.startswith('v1'):
+            return self.handle_v1(*args, **options)
+        if ver.startswith('v2'):
+            return self.handle_v2(*args, **options)
+        else:
+            raise CommandError("Only pipeline versions v1.x and v2.x are supported.")
+
+    def handle_v1(self, *args, **options):
+        self.results_directory = os.path.realpath(options.get('results_directory').strip())
+        if not os.path.exists(self.results_directory):
+            raise FileNotFoundError('Results dir {} does not exist'
+                                    .format(self.results_directory))
+
+        catalogue_name = options['catalogue_name'].strip()
+        version = options['catalogue_version'].strip()
+        catalogue_dir = options['catalogue_directory'].strip()
+        gold_biome = options['gold_biome'].strip()
+        pipeline_version_tag = options['pipeline_version'].strip()
+        self.catalogue_dir = os.path.join(self.results_directory, catalogue_dir)
+
+        self.database = options['database']
+        self.catalogue_obj = self.get_catalogue(
+            catalogue_name,
+            version, gold_biome,
+            catalogue_dir,
+            pipeline_version_tag
+        )
+
+        logger.info("CLI %r" % options)
+
+        genome_dirs = find_genome_results(self.catalogue_dir)
+        logger.info(
+            'Found {} genome dirs to upload'.format(len(genome_dirs)))
+
+        [sanity_check_genome_output(d) for d in genome_dirs]
+
+        sanity_check_catalogue_dir(self.catalogue_dir)
+
+        for d in genome_dirs:
+            self.upload_dir(d)
+
+        self.upload_catalogue_files()
+        self.catalogue_obj.calculate_genome_count()
+        self.catalogue_obj.save()
+
+    def handle_v2(self, *args, **options):
         self.results_directory = os.path.realpath(options.get('results_directory').strip())
         if not os.path.exists(self.results_directory):
             raise FileNotFoundError('Results dir {} does not exist'
@@ -313,6 +360,15 @@ class Command(BaseCommand):
                                 genome.accession + '_InterProScan.tsv', 'Genome analysis', 'genome', False)
         self.upload_genome_file(genome, directory, 'Genome rRNA Sequence', 'fasta',
                                 genome.accession + '_rRNAs.fasta', 'Genome analysis', 'genome', False)
+        # pipeline v2 files (if present):
+        self.upload_genome_file(genome, directory, 'Genome AMRFinderPlus Annotation', 'tsv',
+                                genome.accession + '_amrfinderplus.tsv', 'Genome analysis', 'genome', False)
+        self.upload_genome_file(genome, directory, 'Genome CRISPRCasFinder Annotation', 'gff',
+                                genome.accession + '_crisprcasfinder.gff', 'Genome analysis', 'genome', False)
+        self.upload_genome_file(genome, directory, 'Genome CRISPRCasFinder Additional Records', 'tsv',
+                                genome.accession + '_crisprcasfinder.tsv', 'Genome analysis', 'genome', False)
+        self.upload_genome_file(genome, directory, 'Genome Mobilome Annotation', 'gff',
+                                genome.accession + '_mobilome.gff', 'Genome analysis', 'genome', False)
 
         if has_pangenome:
             self.upload_genome_file(genome, directory, 'Pangenome core genes list', 'tab',
@@ -322,6 +378,9 @@ class Command(BaseCommand):
             self.upload_genome_file(genome, directory,
                                     'Gene Presence / Absence matrix',
                                     'tsv', 'gene_presence_absence.Rtab', 'Pan-Genome analysis', 'pan-genome', False)
+            self.upload_genome_file(genome, directory,
+                                    'Gene Presence / Absence list',
+                                    'csv', 'gene_presence_absence.csv', 'Pen-Genome analysis', 'pan-genome', False)
             self.upload_genome_file(genome, directory,
                                     'Pairwise Mash distances of conspecific genomes',
                                     'nwk', 'mashtree.nwk', 'Pan-Genome analysis', 'pan-genome', False)

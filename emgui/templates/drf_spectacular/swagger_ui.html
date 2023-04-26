@@ -17,7 +17,7 @@
 
       </style>
 
-      <link rel="stylesheet" type="text/css" href="{{dist}}/swagger-ui.css" />
+      <link rel="stylesheet" href="{{ swagger_ui_css }}">
 {% endblock %}
 
 {%  block apidocsnavitem %}
@@ -29,8 +29,8 @@
 {% block content %}
 
     <div id="swagger-ui"></div>
-    <script src="{{dist}}/swagger-ui-bundle.js"></script>
-    <script src="{{dist}}/swagger-ui-standalone-preset.js"></script>
+    <script src="{{ swagger_ui_bundle }}"></script>
+    <script src="{{ swagger_ui_standalone }}"></script>
     {% if script_url %}
     <script src="{{script_url|safe}}"></script>
     {% else %}
