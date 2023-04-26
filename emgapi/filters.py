@@ -664,6 +664,14 @@ class AnalysisJobFilter(RunFilter):
         field_name='pipeline__release_version', distinct=True,
         label='Pipeline version', help_text='Pipeline version')
 
+    sample_accession = django_filters.CharFilter(
+        method='filter_sample_accession', distinct=True,
+        label='Sample accession',
+        help_text='Sample accession')
+
+    def filter_sample_accession(self, qs, name, value):
+        return qs.filter(Q(sample__accession=value) | Q(sample__primary_accession=value))
+
     class Meta:
         model = emg_models.AnalysisJob
         fields = (
@@ -777,7 +785,7 @@ class AssemblyFilter(django_filters.FilterSet):
         help_text='Sample accession')
 
     def filter_sample_accession(self, qs, name, value):
-        return qs.filter(samples__accession=value)
+        return qs.filter(Q(samples__accession=value) | Q(samples__primary_accession=value))
 
     run_accession = django_filters.CharFilter(
         method='filter_runs_accession', distinct=True,
