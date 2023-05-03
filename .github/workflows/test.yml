@@ -35,7 +35,6 @@ jobs:
 
     - name: 🔧 - Install Dependencies
       run: |
-        pip install -U git+https://github.com/EBI-Metagenomics/ena-api-handler.git
         pip install -U -r requirements.txt
         pip install -U -r requirements-test.txt
         pip freeze
