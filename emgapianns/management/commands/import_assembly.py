@@ -41,13 +41,15 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("accessions", help="ENA analysis accessions", nargs="+")
-        parser.add_argument("--ena_db",
-                            help="ENA's production database enapro",
-                            default="ena")
-        parser.add_argument("--emg_db",
-                            help="Target emg_db_name alias",
-                            choices=["default", "dev", "prod"],
-                            default="default")
+        parser.add_argument(
+            "--ena_db", help="ENA's production database enapro", default="ena"
+        )
+        parser.add_argument(
+            "--emg_db",
+            help="Target emg_db_name alias",
+            choices=["default", "dev", "prod"],
+            default="default",
+        )
         parser.add_argument("--biome", help="Lineage of GOLD biome")
 
     def handle(self, *args, **options):
@@ -130,13 +132,25 @@ class Command(BaseCommand):
         else:
             logging.warning("Could not retrieve run accession from assembly name!")
 
-        logging.info("Checking if there are additional runs in ENA, required for hybrid assemblies")
+        logging.info(
+            "Checking if there are additional runs in ENA, required for hybrid assemblies"
+        )
         try:
-            run_refs = ena.get_assembly(assembly_name=assembly.accession, fields="run_ref", data_portal="ena").get("run_ref", []).split(";")
-            for run_ref in run_refs:
-                if not run_ref == run_accession:    
-                    logging.info("Assembly has additional run: {}".format(run_ref))
-                    self.tag_run(assembly, run_ref)
+            ena_run_accessions = (
+                ena.get_assembly(
+                    assembly_name=assembly.accession,
+                    fields="run_accession",
+                    data_portal="ena",
+                )
+                .get("run_accession", [])
+                .split(";")
+            )
+            for ena_run_accession in ena_run_accessions:
+                if not ena_run_accession == run_accession:
+                    logging.info(
+                        "Assembly has additional run: {}".format(ena_run_accession)
+                    )
+                    self.tag_run(assembly, ena_run_accession)
         except ValueError as e:
             logging.exception(e)
             logging.info(f"Could not retrive the runs for the assembly {assembly}")

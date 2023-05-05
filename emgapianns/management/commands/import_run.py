@@ -84,7 +84,13 @@ class Command(BaseCommand):
                                                library_source=_library_source).value)
 
         self.tag_study(run, api_run_data['secondary_study_accession'], get_or_create=self.import_study)
-        self.tag_sample(run, api_run_data['secondary_sample_accession'])
+
+        # The portal API v2.0 squeezes the samples data into a single row, if there many
+        # samples associated with an entity
+        sample_accessions = api_run_data.get('secondary_sample_accession')
+        if sample_accessions:
+            for sample_accession in sample_accessions.split(';'):
+                self.tag_sample(run, sample_accession.strip())
 
         # Validate and save #
         run.full_clean()

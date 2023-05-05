@@ -110,6 +110,16 @@ class Command(BaseCommand):
         if api_data.get('location'):
             defaults['latitude'], defaults['longitude'] = get_lat_long(api_data['location'])
 
+        # defensive mechanism - portal API v2.0 migration
+        # this should not happend here, but the portal API will return:
+        # 
+        # accession	sample_accession
+        # FX526847	SAMD00010145;SAMD00010147
+        # if there is more than one sample linked to a record
+        # again, this should not happend here, but just in case
+
+        assert ";" not in api_data['sample_accession']
+
         sample, created = emg_models.Sample.objects.using(self.emg_db).update_or_create(
             accession=accession,
             primary_accession=api_data['sample_accession'],
