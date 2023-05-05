@@ -9,7 +9,7 @@ mysqlclient==2.1.1
 mysql-connector-python~=8.0.23
 sqlparse==0.4.3
 whitenoise==6.4.0
-requests==2.28.2
+requests==2.28.1
 
 yamjam==0.1.7
 # python 3.4
@@ -44,3 +44,6 @@ celery[redis]==5.2.7
 
 # my-sql utils
 django-mysql==4.3.0
+
+# ena api lib
+git+https://github.com/EBI-Metagenomics/ena-api-handler.git@v2.0.0
