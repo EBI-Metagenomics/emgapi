@@ -101,7 +101,6 @@ Install application::
     conda create -q -n myenv python=3.6.8
     source activate myenv
 
-    pip install -U git+https://github.com/EBI-Metagenomics/ena-api-handler.git
     pip install https://github.com/EBI-Metagenomics/emgapi/archive/$latestTag.tar.gz
 
 Create database::
@@ -131,8 +130,6 @@ How to install the webuploader (one off)?
 
     conda create -q -n myenv python=3.6.8
     source activate myenv
-
-    pip install -U git+git://github.com/EBI-Metagenomics/ena-api-handler.git
 
     pip install -U -r https://raw.githubusercontent.com/EBI-Metagenomics/emgapi/webuploader/requirements-webuploader.txt
     pip install "git+git://github.com/EBI-Metagenomics/emgapi.git@webuploader"
