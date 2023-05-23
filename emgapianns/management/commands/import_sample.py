@@ -93,7 +93,7 @@ class Command(BaseCommand):
 
         defaults = sanitise_fields({
             'collection_date': api_data['collection_date'],
-            'is_private': int(api_data['status_id']) == 2,
+            'is_private': api_data['status'] == "private",
             'sample_desc': api_data['description'],
             'environment_biome': api_data['environment_biome'],
             'environment_feature': api_data['environment_feature'],
