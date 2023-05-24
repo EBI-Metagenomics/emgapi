@@ -46,4 +46,4 @@ celery[redis]==5.2.7
 django-mysql==4.3.0
 
 # ena api lib
-git+https://github.com/EBI-Metagenomics/ena-api-handler.git@v2.0.0
+ena-api-libs @ git+https://github.com/EBI-Metagenomics/ena-api-handler.git@v2.0.1

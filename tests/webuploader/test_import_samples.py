@@ -30,7 +30,7 @@ def mock_fetch_sample_api(*args, **kwargs):
         'secondary_sample_accession': 'ERS1282031',
         'description': 'Example description',
         'collection_date': '2019-01-01',
-        'status_id': '4',
+        'status': 'public',
         'environment_biome': '',
         'environment_feature': '',
         'environment_material': '',
@@ -80,7 +80,7 @@ class TestImportSampleTransactions:
     def test_import_sample_should_load_private_sample(self):
         sample_accession = 'ERS1282031'
         mock_api_data = mock_fetch_sample_api()
-        mock_api_data['status_id'] = '2'
+        mock_api_data['status'] = 'private'
         mock_api = mock.patch.object(Command, 'fetch_sample_api', new=lambda *args, **kwargs: mock_api_data)
         mock_db = mock.patch.object(Command, 'get_ena_db_sample', new=create_model)
         mock_api_sample_studies = mock.patch.object(
