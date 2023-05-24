@@ -93,7 +93,7 @@ class Command(BaseCommand):
 
         defaults = sanitise_fields({
             'collection_date': api_data['collection_date'],
-            'is_private': int(api_data['status_id']) == 2,
+            'is_private': api_data.get('status', "private").strip().lower() == "private",
             'sample_desc': api_data['description'],
             'environment_biome': api_data['environment_biome'],
             'environment_feature': api_data['environment_feature'],
@@ -141,7 +141,7 @@ class Command(BaseCommand):
             ('environment (feature)', 'environment_feature'),
             ('environment (biome)', 'environment_biome'),
             ('environment (material)', 'environment_material'),
-            ('environmental package', 'environmental_package'),
+            ('environmental package', 'ncbi_reporting_standard'),
             ('sequencing method', 'sequencing_method'),
             ('host taxid', 'host_tax_id'),
             ('host sex', 'host_sex'),
@@ -159,7 +159,7 @@ class Command(BaseCommand):
             ('salinity', 'salinity'),
             ('project name', 'project_name'),
             ('target gene', 'target_gene'),
-            ('host scientific name', 'host_scientific_name')
+            ('host scientific name', 'host')
         )
 
         for var_name, api_field in simple_mappings:
