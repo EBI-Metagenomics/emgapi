@@ -92,8 +92,8 @@ class Command(BaseCommand):
         logger.info('Creating sample {}'.format(accession))
 
         defaults = sanitise_fields({
-            'collection_date': api_data['collection_date'],
-            'is_private': api_data.get('status', "private").strip().lower() == "private",
+            # 'collection_date': api_data['collection_date'], # FIXME: this field changed it's format has changed.
+            'is_private': api_data.get('status', 'private').strip().lower() == 'private',
             'sample_desc': api_data['description'],
             'environment_biome': api_data['environment_biome'],
             'environment_feature': api_data['environment_feature'],
