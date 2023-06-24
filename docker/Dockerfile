@@ -10,11 +10,9 @@ RUN yum -y install python3 python3-devel python3-setuptools mysql-devel && \
 
 RUN mkdir /opt/emgapi && mkdir -p /opt/staticfiles && mkdir -p /opt/results 
 
-COPY requirements* /opt/emgapi/
+COPY pyproject.toml /opt/emgapi/
 
-RUN pip3 install -r /opt/emgapi/requirements.txt
-RUN pip3 install -r /opt/emgapi/requirements-dev.txt
-RUN pip3 install -r /opt/emgapi/requirements-admin.txt
+RUN pip3 install /opt/emgapi[dev,admin]
 
 ENV PYTHONPATH="${PYTHONPATH}:/opt/emgapi/emgcli"
 
