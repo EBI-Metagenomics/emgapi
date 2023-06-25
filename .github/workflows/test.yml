@@ -35,7 +35,7 @@ jobs:
 
     - name: 🔧 - Install Dependencies
       run: |
-        pip install install .[test]
+        pip install install .[tests]
         pip freeze
 
     - name: 🧪 - Testing
