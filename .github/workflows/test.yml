@@ -4,7 +4,6 @@ on: [push, pull_request]
 env:
   EMG_CONFIG: ${{ github.workspace }}/ci/configuration.yaml
 
-
 jobs:
   build:
 
@@ -12,10 +11,10 @@ jobs:
     strategy:
       matrix:
         python-version: [3.8, 3.9]
-        # TODO: Temporarily removed 3.7.1, waiting for https://github.com/celery/celery/issues/7783
 
     steps:
     - uses: actions/checkout@v3
+
     - name: 🐍 - Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
@@ -25,6 +24,7 @@ jobs:
       uses: supercharge/mongodb-github-action@1.3.0
       with:
         mongodb-version: 4.0.6
+
     - name: ⚙️ - Checking environment
       run: |
         python -V
@@ -35,19 +35,21 @@ jobs:
 
     - name: 🔧 - Install Dependencies
       run: |
-        pip install -U -r requirements.txt
-        pip install -U -r requirements-test.txt
+        pip install install .[test]
         pip freeze
+
     - name: 🧪 - Testing
       run: |
         cat $EMG_CONFIG
         pytest
+
     # TODO: disabled until black formatting completed and all flake issues fixed
     # - name: Flake
     #   continue-on-error: true
     #   run: |
     #     flake8 --version
     #     flake8 -v .
+
     - name: 📮 - Slack Notification
       uses: rtCamp/action-slack-notify@v2
       continue-on-error: true
