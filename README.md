@@ -7,34 +7,18 @@ Metagenomics service is a large-scale platform for analyzing and archiving metag
 
 # Setup
 ## Local env.
-
-For development there are 3 options: 
-
-* Use the parent repo ["MGnify Web"](https://github.com/EBI-Metagenomics/mgnify-web) which includes this API repository, as well as two frontend web repositories needed to develop/run the [MGnify website](https://www.ebi.ac.uk/metagenomics).
-* Or, install the stack locally
-* Or, use Docker for the database and mongo
-
-In any case the webapp will be executed from a local virtual environment.
+For development, use the parent repo ["MGnify Web"](https://github.com/EBI-Metagenomics/mgnify-web) which includes this API repository, as well as the frontend web repository needed to develop/run the [MGnify website](https://www.ebi.ac.uk/metagenomics).
 
 ### MGnify Web parent repo
 The parent repo uses docker-compose to configure a development environment and test data for the entire stack of the MGnify website.
 It is the recommended development setup.
 See: [MGnify Web](https://github.com/EBI-Metagenomics/mgnify-web) on GitHub for instructions.
 
-
-### Stack locally
-
-The app uses `MySQL` version `5.6` and `Mongo` version `3.4`.
-
-TODO: write the instructions for MacOS and Linux.
-
-### Docker
-
-There are 2 docker containers defined, one for `MySQL` and another one `MongoDB`.
-
-The app will be executed from a python virtual environment.
-
 **The Docker setup is just for local dev. at the moment.**
+
+This API relies on a relational (SQLite or MySQL) and a document (Mongo) database.
+
+This docker compose setup in the parent repo handles these.
 
 ### Helper scripts
 
@@ -44,11 +28,10 @@ There are some helper scripts that are meant to make running the project locally
 - `gunicorn.sh` run the app using gunicorn with the `--reload` flag.
 
 ## Setup
-Create configuration file in `~/path/to/config.yaml <docker/config.yaml>`_.
+Create/edit configuration file in `./config/<some config>.yaml` and set the env var `EMG_CONFIG` to point to that file.
 
 ### DB config file
-An environment variable named *EMG_CONFIG* needs to be defined for the database config.
-This should contain the path to yaml config file, which must contain the following fields:
+The config file must specify the databases:
 ```yaml
 emg:
   databases:
@@ -60,39 +43,28 @@ emg:
       NAME: 'schema_name'
       USER: 'user'
       PASSWORD: 'password'
-    dev:
-        ....
-    prod:
-        ....
-    era:
-      ENGINE: 'django.db.backends.oracle'
-      NAME: ?
-      USER: ?
-      PASSWORD: ?
-      HOST: ?
-      PORT: ?
-```
-
-Install `virtualenv <https://virtualenv.pypa.io/en/latest/installation//>`_
-
-Create a virtual environment::
     
-    `virtualenv -p python3 venv`
+    ...
+```
+(see the example config yamls for full details).
 
-Activate and install the dependencies `source venv/bin/activate && pip install -r requirements-dev.txt`.
+If **not** using the mgnify-web docker compose setup for some reason: 
 
-Start containers using::
+Install [virtualenv](https://virtualenv.pypa.io/en/latest/installation/).
 
-    docker-compose -f docker/docker-compose.yml up --build -d
+Create a virtual environment or a conda env, e.g.: `virtualenv -p python3 venv`
 
-Run the migrations::
+Activate and install the dependencies `source venv/bin/activate && pip install .[dev,admin]`.
 
-    ./manage.sh migrate
+Run the migrations: `./manage.sh migrate`
 
-Run the server::
+Run the server: `./manage.sh runserver 8000`
 
-   ./manage.sh runserver 8000
+**If using the mgnify-web setup, follow the instructions in the parents repo README, and use the Taskfile in it.**
 
+---
+
+**TODO: update the following**
 ## Production env.
 ### Install
 

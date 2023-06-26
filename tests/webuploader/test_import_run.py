@@ -48,7 +48,7 @@ FAKE_ENA_RESPONSE = {
     "sample_title": "This sample has been submitted by pda|rampelli85 on 2015-05-27; human gut metagenome",
     "sample_description": "Human Gut Microbiome of Hadza subject 1",
     "first_public": "2015-06-05",
-    "status_id": "public", # Public
+    "status": "public", # Public
 }
 
 
