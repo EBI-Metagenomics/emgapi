@@ -1,6 +1,6 @@
 [project]
 name = "emgcli"
-version = "2.4.22"
+version = "2.4.23"
 readme = "README.md"
 authors = [
   {name = "MGnify team", email = "metagenomics-help@ebi.ac.uk"},
