@@ -1,3 +1,0 @@
--r requirements.txt
-
-django-grappelli==2.15.1

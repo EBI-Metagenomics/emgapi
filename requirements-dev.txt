@@ -1,5 +1,0 @@
--r requirements.txt
-
-# dev tools
-django-debug-toolbar==3.8.1
-django-extensions==3.2.1

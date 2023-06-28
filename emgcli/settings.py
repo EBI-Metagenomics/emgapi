@@ -41,7 +41,7 @@ from corsheaders.defaults import default_headers
 try:
     from YamJam import yamjam, YAMLError
 except ImportError:
-    raise ImportError("Install yamjam. Run `pip install -r requirements.txt`")
+    raise ImportError("Install yamjam. Install dependencies.")
 
 logger = logging.getLogger(__name__)
 
