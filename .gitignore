@@ -8,7 +8,6 @@ dist
 emgcli.egg-info/
 .pytest_cache/
 
-
 staticfiles/
 media/
 venv/
@@ -20,7 +19,6 @@ fixtures/*.sig
 
 # IntelliJ project structure files
 *.iml
-*.xml
 .idea/
 
 .coverage
