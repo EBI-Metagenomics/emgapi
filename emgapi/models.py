@@ -213,6 +213,11 @@ class BaseQuerySet(models.QuerySet):
                     Q(assembly__is_private=False),
                 ],
             },
+            'RunExtraAnnotationQuerySet': {
+                'all': [
+                    Q(run__is_private=False),
+                ],
+            },
         }
 
         if request is not None and request.user.is_authenticated:
@@ -241,6 +246,10 @@ class BaseQuerySet(models.QuerySet):
                 [Q(assembly__samples__studies__submission_account_id__iexact=_username,
                    is_private=True) |
                  Q(assembly__is_private=False)]
+            _query_filters['RunExtraAnnotationQuerySet']['authenticated'] = \
+                [Q(sun__samples__studies__submission_account_id__iexact=_username,
+                   is_private=True) |
+                 Q(run__is_private=False)]
 
         filters = _query_filters.get(self.__class__.__name__)
 
@@ -700,6 +709,7 @@ class AssemblyExtraAnnotationManager(BaseDownloadManager):
     pass
 
 
+
 class AssemblyExtraAnnotation(BaseDownload):
     assembly = models.ForeignKey(
         'Assembly', db_column='ASSEMBLY_ID', related_name='extra_annotations',
@@ -718,6 +728,33 @@ class AssemblyExtraAnnotation(BaseDownload):
 
     def __str__(self):
         return f'AssemblyExtraAnnotation: {self.id} {self.alias}'
+
+class RunExtraAnnotationQuerySet(BaseQuerySet):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+class RunExtraAnnotationManager(BaseDownloadManager):
+    pass
+
+class RunExtraAnnotation(BaseDownload):
+    run = models.ForeignKey(
+        'Run', db_column='RUN_ID', related_name='extra_annotations',
+        on_delete=models.CASCADE)
+
+    @property
+    def accession(self):
+        return self.run.accession
+
+    objects = RunExtraAnnotationManager(select_related=[])
+
+    class Meta:
+        db_table = 'RUN_DOWNLOAD'
+        unique_together = (('realname', 'alias', 'run'),)
+        ordering = ('group_type', 'alias',)
+
+    def __str__(self):
+        return f'RunExtraAnnotation: {self.id} {self.alias}'
 
 
 class StudyDownloadQuerySet(BaseQuerySet):

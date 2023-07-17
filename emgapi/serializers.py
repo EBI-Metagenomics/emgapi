@@ -672,6 +672,24 @@ class AssemblyExtraAnnotationSerializer(BaseDownloadSerializer):
         )
 
 
+class RunExtraAnnotationSerializer(BaseDownloadSerializer):
+    url = emg_fields.DownloadHyperlinkedIdentityField(
+        view_name='emgapi_v1:run-extra-annotations-detail',
+        lookup_field='alias',
+    )
+
+    class Meta:
+        model = emg_models.RunExtraAnnotation
+        fields = (
+            'id',
+            'url',
+            'alias',
+            'file_format',
+            'description',
+            'group_type',
+            'file_checksum'
+        )
+
 class RetrieveAssemblySerializer(AssemblySerializer):
 
     pipelines = emg_relations.HyperlinkedSerializerMethodResourceRelatedField(

@@ -66,6 +66,13 @@ router.register(
 )
 
 router.register(
+    r'runs/(?P<accession>[^/]+)/extra-annotations',
+    views.RunExtraAnnotationViewSet,
+    basename='run-extra-annotations'
+)
+
+
+router.register(
     r'analyses',
     views.AnalysisJobViewSet,
     basename='analyses'
