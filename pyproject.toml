@@ -1,12 +1,12 @@
 [project]
 name = "emgcli"
-version = "2.4.23"
 readme = "README.md"
 authors = [
   {name = "MGnify team", email = "metagenomics-help@ebi.ac.uk"},
 ]
 license = {file = "LICENSE"}
 keywords = ["django", "api", "resource", "django-rest-framework", "jsonapi", "metagenomics"]
+dynamic = ["version"]
 
 dependencies = [
     # deployment
@@ -58,6 +58,9 @@ requires-python = ">=3.8"
 [tool.setuptools.packages]
 find = {}
 
+[tool.setuptools.dynamic]
+version = {attr = "emgcli.__version__"}
+
 [project.scripts]
 emgcli = "emgcli.manage:main"
 emgdeploy = "gunicorn.app.wsgiapp:run"
@@ -80,7 +83,8 @@ tests = [
 dev = [
     "django-debug-toolbar==3.8.1",
     "django-extensions==3.2.1",
-    "django-grappelli==2.15.1"
+    "django-grappelli==2.15.1",
+    "bump-my-version==0.6.0",
 ]
 
 admin = [
@@ -110,3 +114,9 @@ exclude =
 max-complexity = 10
 max-line-length = 119
 """
+
+[tool.bumpversion]
+current_version = "2.4.24"
+
+[[tool.bumpversion.files]]
+filename = "emgcli/__init__.py"
