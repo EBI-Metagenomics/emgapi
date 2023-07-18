@@ -142,10 +142,14 @@ class Command(BaseCommand):
                     fields="run_accession",
                     data_portal="ena",
                 )
-                .get("run_accession", [])
+                .get("run_accession", "")
                 .split(";")
             )
-            for ena_run_accession in ena_run_accessions:
+
+            for ena_run_accession in filter(
+                    lambda accession: len(accession),
+                    ena_run_accessions
+            ):
                 if not ena_run_accession == run_accession:
                     logging.info(
                         "Assembly has additional run: {}".format(ena_run_accession)
@@ -153,7 +157,7 @@ class Command(BaseCommand):
                     self.tag_run(assembly, ena_run_accession)
         except ValueError as e:
             logging.exception(e)
-            logging.info(f"Could not retrive the runs for the assembly {assembly}")
+            logging.info(f"Could not retrieve the runs for the assembly {assembly}")
 
     def tag_run(self, assembly, run_accession):
         try:
