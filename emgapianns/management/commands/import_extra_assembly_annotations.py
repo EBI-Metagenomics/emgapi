@@ -74,6 +74,7 @@ class Command(BaseCommand):
             logger.info('Looking for RO Crates (.zips')
             for file in Path(self.gffs_dir).glob('**/*.zip'):
                 logger.info(f'Handling RO Crate Zip file {file}')
+                logger.info('this is the FILE NAME ' + file.name)
                 erz = 'ERZ' + file.name.split('ERZ')[1].strip('.zip')
                 try:
                     assembly = emg_models.Assembly.objects.get(accession=erz)

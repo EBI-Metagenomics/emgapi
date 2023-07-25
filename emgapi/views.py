@@ -119,7 +119,7 @@ class UtilsViewSet(viewsets.GenericViewSet):
         submitter = ena_models.Submitter.objects.using('era_pro') \
             .filter(
             submission_account__submission_account__iexact=self
-            .request.user.username
+                .request.user.username
         ) \
             .select_related('submission_account')
 
@@ -723,8 +723,8 @@ class AssemblyViewSet(mixins.RetrieveModelMixin,
         return emg_models.Assembly.objects.available(self.request)
 
     def get_object(self):
-        return get_object_or_404(
-            self.get_queryset(),
+         return get_object_or_404(
+             self.get_queryset(),
             Q(accession=self.kwargs['accession']) |
             Q(wgs_accession=self.kwargs['accession']) |
             Q(legacy_accession=self.kwargs['accession'])
@@ -766,8 +766,8 @@ class AssemblyViewSet(mixins.RetrieveModelMixin,
                 legacy_entry = emg_models.LegacyAssembly.objects. \
                     get(legacy_accession=self.kwargs['accession'])
                 return redirect("emgapi_v1:assemblies-detail",
-                                accession=legacy_entry.new_accession,
-                                permanent=True)
+                    accession=legacy_entry.new_accession,
+                    permanent=True)
             except emg_models.LegacyAssembly.DoesNotExist:
                 raise Http404()
         return super(AssemblyViewSet, self).retrieve(request, *args, **kwargs)
@@ -827,60 +827,59 @@ class AssemblyExtraAnnotationViewSet(
             file_path = obj.realname
         return emg_utils.prepare_results_file_download_response(file_path, alias)
 
-
 class RunExtraAnnotationViewSet(
-    emg_mixins.ListModelMixin,
-    viewsets.GenericViewSet
-):
-    serializer_class = emg_serializers.RunExtraAnnotationSerializer
+        emg_mixins.ListModelMixin,
+        viewsets.GenericViewSet
+    ):
+        serializer_class = emg_serializers.RunExtraAnnotationSerializer
 
-    filter_backends = (
-        filters.OrderingFilter,
-    )
-
-    ordering_fields = (
-        'alias',
-    )
-
-    ordering = ('alias',)
-
-    lookup_field = 'alias'
-    lookup_value_regex = '[^/]+'
-
-    def get_queryset(self):
-        try:
-            accession = self.kwargs['accession']
-        except ValueError:
-            raise Http404()
-        return emg_models.RunExtraAnnotation.objects.available(self.request) \
-            .filter(run__accession=accession)
-
-    def get_object(self):
-        return get_object_or_404(
-            self.get_queryset(), Q(alias=self.kwargs['alias'])
+        filter_backends = (
+            filters.OrderingFilter,
         )
 
-    def get_serializer_class(self):
-        return super(RunExtraAnnotationViewSet, self) \
-            .get_serializer_class()
+        ordering_fields = (
+            'alias',
+        )
 
-    def list(self, request, *args, **kwargs):
-        """
+        ordering = ('alias',)
+
+        lookup_field = 'alias'
+        lookup_value_regex = '[^/]+'
+
+        def get_queryset(self):
+            try:
+                accession = self.kwargs['accession']
+            except ValueError:
+                raise Http404()
+            return emg_models.RunExtraAnnotation.objects.available(self.request) \
+                .filter(run__accession=accession)
+
+        def get_object(self):
+            return get_object_or_404(
+                self.get_queryset(), Q(alias=self.kwargs['alias'])
+            )
+
+        def get_serializer_class(self):
+            return super(RunExtraAnnotationViewSet, self) \
+                .get_serializer_class()
+
+        def list(self, request, *args, **kwargs):
+            """
             Retrieves list of Run Extra Annotation downloads
             Example:
             ---
             `/run/<accession>/extra-annotations`
             """
-        return super(RunExtraAnnotationViewSet, self).list(request, *args, **kwargs)
+            return super(RunExtraAnnotationViewSet, self).list(request, *args, **kwargs)
 
-    def retrieve(self, request, accession, alias,
-                 *args, **kwargs):
-        obj = self.get_object()
-        if obj.subdir is not None:
-            file_path = f'{obj.subdir}/{obj.realname}'
-        else:
-            file_path = obj.realname
-        return emg_utils.prepare_results_file_download_response(file_path, alias)
+        def retrieve(self, request, accession, alias,
+                     *args, **kwargs):
+            obj = self.get_object()
+            if obj.subdir is not None:
+                file_path = f'{obj.subdir}/{obj.realname}'
+            else:
+                file_path = obj.realname
+            return emg_utils.prepare_results_file_download_response(file_path, alias)
 
 
 class AnalysisJobViewSet(mixins.RetrieveModelMixin,
@@ -1355,6 +1354,7 @@ class PublicationViewSet(mixins.RetrieveModelMixin,
 class GenomeCatalogueViewSet(mixins.RetrieveModelMixin,
                              emg_mixins.ListModelMixin,
                              emg_viewsets.BaseGenomeCatalogueGenericViewSet):
+
     filterset_class = emg_filters.GenomeCatalogueFilter
 
     lookup_field = 'catalogue_id'

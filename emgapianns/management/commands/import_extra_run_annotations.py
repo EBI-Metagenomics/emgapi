@@ -57,89 +57,20 @@ class Command(BaseCommand):
         if not os.path.exists(self.gffs_dir):
             raise FileNotFoundError(f'GFFs dir {self.gffs_dir} does not exist')
 
-        # if options.get('tool') == 'sanntis':
-        #     logger.info('Looking for SanntiS-style GFFs')
-        #     for file in Path(self.gffs_dir).glob('**/*.gff'):
-        #         logger.info(f'Handling GFF file {file}')
-        #         erz = file.name.split('.')[0]
-        #         try:
-        #             run = emg_models.Run.objects.get(accession=erz)
-        #         except emg_models.Run.DoesNotExist:
-        #             logger.warning(f'No Run found for sanntis GFF {erz}')
-        #             continue
-        #         logger.info(f'Will upload sanntis GFF for {erz}')
-        #         self.upload_sanntis_gff_file(run, gffs_directory, file.name)
-
         if options.get('tool') == 'rocrate':
             logger.info('Looking for RO Crates (.zips')
             for file in Path(self.gffs_dir).glob('**/*.zip'):
                 logger.info(f'Handling RO Crate Zip file {file}')
-                erz = 'ERZ' + file.name.split('ERZ')[1].strip('.zip')
+                # erz = 'ERZ' + file.name.split('ERZ')[1].strip('.zip')
+                logger.info('this is the FILE NAME ' +  file.name)
+                srr = 'SRR' + file.name.split('SRR')[1].strip('.zip')
                 try:
-                    run = emg_models.Run.objects.get(accession=erz)
+                    run = emg_models.Run.objects.get(accession=srr)
                 except emg_models.Run.DoesNotExist:
-                    logger.warning(f'No Run found for RO Crate apparent ERZ {erz}')
+                    logger.warning(f'No Run found for RO Crate apparent ERZ {srr}')
                     continue
-                logger.info(f'Will upload RO Crate for {erz}')
+                logger.info(f'Will upload RO Crate for {srr}')
                 self.upload_rocrate(run, gffs_directory, file.name)
-
-    # def upload_sanntis_gff_file(
-    #     self,
-    #     run,
-    #     subdir,
-    #     filename,
-    # ):
-    #     description_label = self.desc_label_cache.get('SanntiS annotation')
-    #     if not description_label:
-    #         description_label, created = emg_models.DownloadDescriptionLabel \
-    #             .objects \
-    #             .get_or_create(description_label='SanntiS annotation', defaults={
-    #                 "description": "SMBGC Annotation using Neural Networks Trained on Interpro Signatures"
-    #             })
-    #         if created:
-    #             logger.info(f'Added new download description label {description_label}')
-    #         self.desc_label_cache[description_label.description_label] = description_label
-    #
-    #     fmt = self.fmt_cache.setdefault(
-    #         'gff',
-    #         emg_models.FileFormat.objects
-    #         .filter(format_extension='gff', compression=False)
-    #         .first()
-    #     )
-    #
-    #     subdir_obj = self.subdir_cache.get(subdir)
-    #     if not subdir_obj:
-    #         subdir_obj, created = emg_models.DownloadSubdir.objects.get_or_create(subdir=subdir)
-    #         if created:
-    #             logger.info(f'Added new downloads subdir {subdir_obj}')
-    #         self.subdir_cache[subdir] = subdir_obj
-    #
-    #     group = self.group_cache.setdefault(
-    #         'Functional analysis',
-    #         emg_models.DownloadGroupType.objects.get(
-    #             group_type='Functional analysis'
-    #         )
-    #     )
-    #
-    #     alias = f'{run.accession}-sanntis.gff'
-    #
-    #     defaults = {
-    #         'alias': alias,
-    #         'description': description_label,
-    #         'file_format': fmt,
-    #         'group_type': group,
-    #         'realname': os.path.basename(filename),
-    #         'subdir': subdir_obj
-    #     }
-    #
-    #     dl, created = emg_models.RunExtraAnnotation.objects.update_or_create(
-    #         defaults,
-    #         run=run,
-    #         alias=alias,
-    #     )
-    #
-    #     logger.info(f'{"Created" if created else "Updated"} download {dl}')
-    #     return dl
 
     def upload_rocrate(
         self,
