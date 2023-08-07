@@ -931,7 +931,10 @@ class AnalysisQCChartViewSet(mixins.RetrieveModelMixin,
         if os.path.isfile(filepath):
             logger.info("Path %r" % filepath)
             with open(filepath, "r") as f:
-                return Response(f.read())
+                data = f.read()
+                if chart!="nucleotide-distribution":
+                    data = "key\tvalue" + "\n" + data
+                return Response( data)
         raise Http404()
 
 
