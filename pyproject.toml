@@ -42,7 +42,7 @@ dependencies = [
     # sourmash search
     "celery[redis]==5.2.7",
     # ena api lib
-    "ena_api_libs@git+https://github.com/EBI-Metagenomics/ena-api-handler.git@v2.0.2",
+    "ena_api_libs@git+https://github.com/EBI-Metagenomics/ena-api-handler.git@v2.0.3",
 ]
 
 [project.urls]
@@ -116,7 +116,7 @@ max-line-length = 119
 """
 
 [tool.bumpversion]
-current_version = "2.4.23"
+current_version = "2.4.25"
 
 [[tool.bumpversion.files]]
 filename = "emgcli/__init__.py"
