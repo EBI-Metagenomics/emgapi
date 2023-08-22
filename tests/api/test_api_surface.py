@@ -145,7 +145,7 @@ class TestAPISurface:
              ['studies', 'samples']),
             ('Run', 'runs', 'emgapi_v1:runs', [],
              ['pipelines', 'analyses', 'experiment-type', 'sample', 'study',
-              'assemblies']),
+              'assemblies', 'extra-annotations']),
             ('Assembly', 'assemblies', 'emgapi_v1:assemblies', [],
              ['pipelines', 'analyses', 'runs', 'samples', 'extra-annotations']),
             ('Sample', 'samples', 'emgapi_v1:samples', [],

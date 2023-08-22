@@ -49,6 +49,11 @@ class DownloadHyperlinkedIdentityField(serializers.HyperlinkedIdentityField):
             kwargs = {
                 'accession': obj.assembly.accession
             }
+
+        elif hasattr(obj, 'run'):
+            kwargs = {
+                'accession': obj.run.accession
+            }
         kwargs['alias'] = obj.alias
 
         return reverse(

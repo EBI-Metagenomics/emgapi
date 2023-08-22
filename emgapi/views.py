@@ -827,6 +827,60 @@ class AssemblyExtraAnnotationViewSet(
             file_path = obj.realname
         return emg_utils.prepare_results_file_download_response(file_path, alias)
 
+class RunExtraAnnotationViewSet(
+        emg_mixins.ListModelMixin,
+        viewsets.GenericViewSet
+    ):
+        serializer_class = emg_serializers.RunExtraAnnotationSerializer
+
+        filter_backends = (
+            filters.OrderingFilter,
+        )
+
+        ordering_fields = (
+            'alias',
+        )
+
+        ordering = ('alias',)
+
+        lookup_field = 'alias'
+        lookup_value_regex = '[^/]+'
+
+        def get_queryset(self):
+            try:
+                accession = self.kwargs['accession']
+            except ValueError:
+                raise Http404()
+            return emg_models.RunExtraAnnotation.objects.available(self.request) \
+                .filter(run__accession=accession)
+
+        def get_object(self):
+            return get_object_or_404(
+                self.get_queryset(), Q(alias=self.kwargs['alias'])
+            )
+
+        def get_serializer_class(self):
+            return super(RunExtraAnnotationViewSet, self) \
+                .get_serializer_class()
+
+        def list(self, request, *args, **kwargs):
+            """
+            Retrieves list of Run Extra Annotation downloads
+            Example:
+            ---
+            `/run/<accession>/extra-annotations`
+            """
+            return super(RunExtraAnnotationViewSet, self).list(request, *args, **kwargs)
+
+        def retrieve(self, request, accession, alias,
+                     *args, **kwargs):
+            obj = self.get_object()
+            if obj.subdir is not None:
+                file_path = f'{obj.subdir}/{obj.realname}'
+            else:
+                file_path = obj.realname
+            return emg_utils.prepare_results_file_download_response(file_path, alias)
+
 
 class AnalysisJobViewSet(mixins.RetrieveModelMixin,
                          emg_mixins.ListModelMixin,
