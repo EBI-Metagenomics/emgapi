@@ -16,13 +16,17 @@ emg:
     - 'django.contrib.auth.backends.ModelBackend'
     - 'emgapi.backends.EMGBackend'
 
-  cors_origin_allow_all: true
   debug: true
   results_dir: '/opt/emgapi/results'
   results_production_dir: '/opt/emgapi/results'
   static_root: '/opt/emgapi/staticfiles'
   emg_backend_auth: 'https://wwwdev.ebi.ac.uk/ena/dev/submit/webin/auth/login'
   secure_cookies: false
+
+  log_dir: '/opt/emgapi/logs'
+  log_lock_dir: '/opt/emgapi/loglockdir'
+
+  secret_key: '/opt/emgapi'
 
   mongodb:
     db: emg

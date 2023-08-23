@@ -25,3 +25,8 @@ fixtures/*.sig
 
 .coverage
 /build/
+
+loglockdir
+logs
+
+secret.key

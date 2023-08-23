@@ -62,6 +62,10 @@ except KeyError:
 if not os.path.exists(LOGDIR):
     os.makedirs(LOGDIR)
 
+LOG_LOCK_DIR = EMG_CONF["emg"].get("log_lock_dir", LOGDIR)
+if not os.path.exists(LOG_LOCK_DIR):
+    os.makedirs(LOG_LOCK_DIR)
+
 LOGFILE = EMG_CONF["emg"].get("log_file", "emg.log")
 
 LOGGING_CLASS = 'concurrent_log_handler.ConcurrentRotatingFileHandler'
@@ -90,6 +94,7 @@ LOGGING = {
             'level': 'DEBUG',
             'class': LOGGING_CLASS,
             'filename': os.path.join(LOGDIR, LOGFILE).replace('\\', '/'),
+            'lock_file_directory': os.path.join(LOG_LOCK_DIR).replace('\\', '/'),
             'maxBytes': 1024 * 1024 * 10,
             'backupCount': 50,
             'formatter': 'default',
