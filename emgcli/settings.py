@@ -480,6 +480,8 @@ except KeyError:
                   RuntimeWarning)
 try:
     CORS_ALLOW_ALL_ORIGINS = EMG_CONF['emg']['cors_origin_allow_all']
+    # TODO remove this before pushing  !!!!
+    CORS_ALLOW_CREDENTIALS = True
 except KeyError:
     CORS_ALLOW_ALL_ORIGINS = False
 
