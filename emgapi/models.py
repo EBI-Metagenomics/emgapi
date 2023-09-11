@@ -1694,6 +1694,17 @@ class AnalysisJobDumpManager(AnalysisJobManager):
             .select_related(
                 'analysis_status','experiment_type', 'assembly', 'pipeline', 'run', 'sample', 'study')
 
+class ME_Broker(models.Model):
+    brokerID = models.CharField(db_column='BROKER', max_length=10, null=True, blank=True)
+
+class MetagenomicsExchange(models.Model):
+    """Table to track Metagenomics Exchange population
+    https://www.ebi.ac.uk/ena/registry/metagenome/api/
+    """
+    broker_id = models.ForeignKey(ME_Broker, db_column='BROKER', on_delete=models.CASCADE)
+    first_created = models.DateTimeField(db_column='FIRST_CREATED', auto_now_add=True)
+    last_update = models.DateTimeField(db_column='LAST_UPDATE', auto_now=True)
+
 
 class AnalysisJob(SuppressibleModel, PrivacyControlledModel, EbiSearchIndexedModel):
     def __init__(self, *args, **kwargs):
@@ -1758,6 +1769,9 @@ class AnalysisJob(SuppressibleModel, PrivacyControlledModel, EbiSearchIndexedMod
     instrument_model = models.CharField(
         db_column='INSTRUMENT_MODEL', max_length=50,
         blank=True, null=True)
+    metagenomics_exchange = models.ForeignKey(
+        MetagenomicsExchange, db_column='METAGENOMICS_EXCHANGE',
+        on_delete=models.CASCADE, blank=True, null=True)
 
     @property
     def release_version(self):
