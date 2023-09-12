@@ -83,6 +83,10 @@ LOGGING = {
         'require_debug_true': {
             '()': 'django.utils.log.RequireDebugTrue',
         },
+        'exclude_myaccounts': {
+            '()': 'django.utils.log.CallbackFilter',
+            'callback': lambda record: "v1/utils/myaccounts" not in record.getMessage(),
+        },
     },
     'formatters': {
         'default': {
@@ -131,12 +135,19 @@ LOGGING = {
         'django.request': {  # Stop SQL debug from logging to main logger
             'handlers': ['default'],
             'level': 'INFO',
-            'propagate': False
+            'propagate': False,
+            'filters': ['exclude_myaccounts'],
+        },
+        'django.server': {
+            'handlers': ['default'],
+            'level': 'INFO',
+            'propagate': False,
+            'filters': ['exclude_myaccounts'],
         },
         'django': {
             'handlers': ['null'],
             'level': 'INFO',
-            'propagate': True
+            'propagate': True,
         },
         '': {
             'handlers': ['default', 'console'],
