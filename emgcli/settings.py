@@ -641,3 +641,10 @@ if 'ena_api_user' in EMG_CONF['emg']:
     os.environ['ENA_API_USER'] = EMG_CONF['emg']['ena_api_user']
 if 'ena_api_password' in EMG_CONF['emg']:
     os.environ['ENA_API_PASSWORD'] = EMG_CONF['emg']['ena_api_password']
+
+# Metagenomics Exchange
+ME_API = {
+    'real': 'https://www.ebi.ac.uk/ena/registry/metagenome/api/',
+    'dev': 'http://wp-np2-5c.ebi.ac.uk:8080/ena/registry/metagenome/api/'
+}
+ME_TOKEN = 'mgx 3D70473ED7C443CA9E97749F62FFCC5D'

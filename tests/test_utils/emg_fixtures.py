@@ -37,7 +37,7 @@ __all__ = [
     'ena_private_studies', 'ena_suppressed_studies', 'ena_public_runs', 'ena_private_runs',
     'ena_suppressed_runs', 'ena_public_samples', 'ena_private_samples', 'ena_suppressed_samples',
     'ena_public_assemblies', 'ena_private_assemblies', 'ena_suppressed_assemblies',
-    'assembly_extra_annotation',
+    'assembly_extra_annotation', 'me_broker', 'metagenomics_exchange',
 ]
 
 
@@ -920,3 +920,14 @@ def ena_suppressed_assemblies():
         )
     )
     return assemblies
+
+@pytest.fixture
+def me_broker():
+    broker = baker.make(emg_models.ME_Broker, brokerID="MAR")
+    return broker
+
+@pytest.fixture
+def metagenomics_exchange(me_broker, run_multiple_analysis):
+    analysis = run_multiple_analysis[0]
+    me = baker.make(emg_models.MetagenomicsExchange, broker=me_broker, analysis=analysis)
+    return me
