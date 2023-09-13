@@ -19,7 +19,7 @@ import logging
 from django.conf import settings
 from django.db import models
 from django.db.models import (CharField, Count, OuterRef, Prefetch, Q,
-                              Subquery, Value)
+                              Subquery, Value, QuerySet)
 from django.db.models.functions import Cast, Concat
 from django.utils import timezone
 
@@ -70,6 +70,9 @@ class SuppressManager(models.Manager):
 
 
 class SuppressibleModel(models.Model):
+    suppressible_descendants = []
+    # List of related_names from this model that should have their suppression status propagated from this.
+    # E.g. Study.suppressible_descendants = ['samples'] to suppress a study's samples if the study is suppressed.
     
     class Reason(models.IntegerChoices):
         DRAFT = 1
@@ -79,24 +82,71 @@ class SuppressibleModel(models.Model):
         TEMPORARY_SUPPRESSED = 7
         TEMPORARY_KILLED = 8
 
+        ANCESTOR_SUPPRESSED = 100
+
     is_suppressed = models.BooleanField(db_column='IS_SUPPRESSED', default=False)
     suppressed_at = models.DateTimeField(db_column='SUPPRESSED_AT', blank=True, null=True)
     suppression_reason = models.IntegerField(db_column='SUPPRESSION_REASON', blank=True, null=True, choices=Reason.choices)
 
-    def suppress(self, suppression_reason=None, save=True):
+    def suppress(self, suppression_reason=None, save=True, propagate=True):
         self.is_suppressed = True
         self.suppressed_at = timezone.now()
         self.suppression_reason = suppression_reason
         if save:
             self.save()
+        if propagate:
+            for descendant_relation in self.suppressible_descendants:
+                descendants_to_suppress: QuerySet = getattr(
+                    self,
+                    descendant_relation
+                ).filter(
+                    is_suppressed=False
+                )
+                for descendant in descendants_to_suppress:
+                    descendant.is_suppressed = True
+                    descendant.suppression_reason = self.Reason.ANCESTOR_SUPPRESSED
+                descendants_to_suppress.bulk_update(
+                    descendants_to_suppress,
+                    [
+                        'is_suppressed',
+                        'suppression_reason'
+                    ]
+                )
+                logger.info(
+                    f'Propagated suppression of {self} '
+                    f'to {len(descendants_to_suppress)} {descendant_relation} descendants'
+                )
         return self
 
-    def unsuppress(self, suppression_reason=None, save=True):
+    def unsuppress(self, suppression_reason=None, save=True, propagate=True):
         self.is_suppressed = False
         self.suppressed_at = None
         self.suppression_reason = None
         if save:
             self.save()
+        if propagate:
+            for descendant_relation in self.suppressible_descendants:
+                descendants_to_unsuppress: QuerySet = getattr(
+                    self,
+                    descendant_relation
+                ).filter(
+                    is_suppressed=True,
+                    suppression_reason=self.Reason.ANCESTOR_SUPPRESSED
+                )
+                for descendant in descendants_to_unsuppress:
+                    descendant.is_suppressed = False
+                    descendant.suppression_reason = None
+                descendants_to_unsuppress.bulk_update(
+                    descendants_to_unsuppress,
+                    [
+                        'is_suppressed',
+                        'suppression_reason'
+                    ]
+                )
+                logger.info(
+                    f'Propagated unsuppression of {self} '
+                    f'to {len(descendants_to_unsuppress)} {descendant_relation} descendants'
+                )
         return self
 
     class Meta:
@@ -104,10 +154,9 @@ class SuppressibleModel(models.Model):
 
 
 class ENASyncableModel(SuppressibleModel, PrivacyControlledModel):
-
     def sync_with_ena_status(self, ena_model_status: ENAStatus):
         """Sync the model with the ENA status accordingly.
-        Fields that are updated: is_supppressed, suppressed_at, reason and is_private
+        Fields that are updated: is_suppressed, suppressed_at, reason and is_private
         """
         if ena_model_status == ENAStatus.PRIVATE and not self.is_private:
             self.is_private = True
@@ -832,6 +881,7 @@ class StudyManager(models.Manager):
 
 
 class Study(ENASyncableModel):
+    suppressible_descendants = ['samples', 'runs', 'assemblies', 'analyses']
 
     def __init__(self, *args, **kwargs):
         super(Study, self).__init__(*args, **kwargs)
@@ -1095,6 +1145,8 @@ class SampleManager(models.Manager):
 
 
 class Sample(ENASyncableModel):
+    suppressible_descendants = ['assemblies', 'runs', 'analyses']
+
     sample_id = models.AutoField(
         db_column='SAMPLE_ID', primary_key=True)
     accession = models.CharField(
@@ -1301,6 +1353,8 @@ class RunManager(models.Manager):
 
 
 class Run(ENASyncableModel):
+    suppressible_descendants = ['assemblies', 'analyses']
+
     run_id = models.BigAutoField(
         db_column='RUN_ID', primary_key=True)
     accession = models.CharField(
@@ -1363,6 +1417,7 @@ class AssemblyManager(models.Manager):
 
 
 class Assembly(ENASyncableModel):
+    suppressible_descendants = ['analyses']
 
     assembly_id = models.BigAutoField(
         db_column='ASSEMBLY_ID', primary_key=True)
@@ -1381,7 +1436,7 @@ class Assembly(ENASyncableModel):
     samples = models.ManyToManyField(
         'Sample', through='AssemblySample', related_name='assemblies',
         blank=True)
-    study = models.ForeignKey("emgapi.Study", db_column="STUDY_ID",
+    study = models.ForeignKey("emgapi.Study", db_column="STUDY_ID", related_name='assemblies',
         on_delete=models.SET_NULL, null=True, blank=True)
 
     coverage = models.IntegerField(db_column="COVERAGE", null=True, blank=True)
@@ -1448,9 +1503,10 @@ class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet, SuppressQuerySet):
         """
         query_filters = {
             "all": [
-                Q(study__is_private=False),
-                Q(sample__isnull=True) | Q(sample__is_suppressed=False),
-                Q(run__is_private=False) | Q(assembly__is_private=False),
+                # Q(study__is_private=False),
+                # Q(sample__isnull=True) | Q(sample__is_suppressed=False),
+                # Q(run__is_private=False) | Q(assembly__is_private=False),
+                Q(is_suppressed=False),
                 Q(analysis_status_id=AnalysisStatus.COMPLETED)
                 | Q(analysis_status_id=AnalysisStatus.QC_NOT_PASSED),
             ],
@@ -1519,23 +1575,23 @@ class AnalysisJobManager(models.Manager):
                 Prefetch('analysis_metadata', queryset=_qs),)
 
     def available(self, request):
-        return self.get_queryset().available(request) \
-            .prefetch_related(
-            Prefetch(
-                'study',
-                queryset=Study.objects.available(request)
-            ),
-            Prefetch(
-                'sample',
-                queryset=Sample.objects.available(
-                    request)
-            ),
-            Prefetch(
-                'run',
-                queryset=Run.objects.available(
-                    request)
-            )
-        )
+        return self.get_queryset().available(request)
+        #     .prefetch_related(
+        #     Prefetch(
+        #         'study',
+        #         queryset=Study.objects.available(request)
+        #     ),
+        #     Prefetch(
+        #         'sample',
+        #         queryset=Sample.objects.available(
+        #             request)
+        #     ),
+        #     Prefetch(
+        #         'run',
+        #         queryset=Run.objects.available(
+        #             request)
+        #     )
+        # )
 
 
 class AnalysisJob(SuppressibleModel, PrivacyControlledModel):
