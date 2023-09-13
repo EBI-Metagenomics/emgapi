@@ -1608,6 +1608,9 @@ class AnalysisJob(SuppressibleModel, PrivacyControlledModel):
 
     @property
     def analysis_summary(self):
+        if self.analysis_summary_json:
+            return self.analysis_summary_json
+
         return [
             {
                 'key': v.var.var_name,
