@@ -93,7 +93,7 @@ class Command(EMGBaseCommand):
                 job.analysis_summary_json = analysis_summary
                 job.save()
 
-            anns.append(job_ann)
+                anns.append(job_ann)
         logger.info("Total %d Annotations for Run: %s" % (len(anns), job))
 
     @staticmethod
