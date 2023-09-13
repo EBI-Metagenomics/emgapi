@@ -147,8 +147,7 @@ class TestCLI:
         assert response.status_code == status.HTTP_200_OK
         rsp = response.json()
         if results["pipeline"] == "5.0":
-            # assert len(rsp["data"]["attributes"]["analysis-summary"]) == 12
-            assert len(rsp["data"]["attributes"]["analysis-summary"]) == 7
+            assert len(rsp["data"]["attributes"]["analysis-summary"]) == 12
         else:
             assert len(rsp["data"]["attributes"]["analysis-summary"]) == 5
 
