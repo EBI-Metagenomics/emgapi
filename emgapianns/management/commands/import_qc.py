@@ -8,6 +8,7 @@ import os
 from emgapi import models as emg_models
 from emgapianns.management.lib.uploader_exceptions import UnexpectedVariableName
 from ..lib import EMGBaseCommand
+from emgapi.models import AnalysisJob
 
 logger = logging.getLogger(__name__)
 
@@ -84,6 +85,13 @@ class Command(EMGBaseCommand):
                     job=job, var=var,
                     defaults={'var_val_ucv': row[1]}
                 )
+                analysis_summary = job.analysis_summary_json or []
+                analysis_summary.append({
+                    'key': job_ann.var.var_name,
+                    'value': job_ann.var_val_ucv,
+                })
+                job.analysis_summary_json = analysis_summary
+                job.save()
 
                 anns.append(job_ann)
         logger.info("Total %d Annotations for Run: %s" % (len(anns), job))
