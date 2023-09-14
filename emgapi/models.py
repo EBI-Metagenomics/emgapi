@@ -1608,8 +1608,8 @@ class AnalysisJob(SuppressibleModel, PrivacyControlledModel):
 
     @property
     def analysis_summary(self):
-        # if self.analysis_summary_json:
-        #     return self.analysis_summary_json
+        if self.analysis_summary_json:
+            return self.analysis_summary_json
 
         return [
             {
