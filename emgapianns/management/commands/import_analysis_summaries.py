@@ -24,7 +24,7 @@ class Command(BaseCommand):
 
             for analysis_job in analysis_jobs:
                 analysis_summary = analysis_job.analysis_summary
-                if analysis_summary:
+                if analysis_summary and not analysis_job.analysis_summary_json:
                     analysis_job.analysis_summary_json = analysis_summary
                     updated_records.append(analysis_job)
 
@@ -32,5 +32,6 @@ class Command(BaseCommand):
                 AnalysisJob.objects.bulk_update(updated_records, ['analysis_summary_json'])
 
             self.stdout.write(self.style.SUCCESS(f'Values copied successfully for batch {batch_number}.'))
+            self.stdout.write(self.style.SUCCESS(f'Updated {len(updated_records)} records.'))
         except AnalysisJob.DoesNotExist:
             self.stdout.write(self.style.ERROR('AnalysisJob table does not exist or is empty.'))
