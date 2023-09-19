@@ -1021,7 +1021,7 @@ class AnalysisSerializer(BaseAnalysisSerializer):
             'is_suppressed',
             'suppressed_at',
             'suppression_reason',
-            'analysis_summary_json'
+            # 'analysis_summary_json'
         )
 
 
