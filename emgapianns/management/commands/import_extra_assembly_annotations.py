@@ -47,6 +47,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         logger.info(options)
 
+        return
+
         self.results_directory = os.path.realpath(options.get('results_directory').strip())
 
         if not os.path.exists(self.results_directory):

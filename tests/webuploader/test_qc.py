@@ -159,8 +159,8 @@ class TestCLI:
 
 
             # print results
-            # assert len(rsp["data"]["attributes"]["analysis-summary"]) == 12
-            assert len(rsp["data"]["attributes"]["analysis-summary"]) == 7
+            assert len(rsp["data"]["attributes"]["analysis-summary"]) == 12
+
         else:
             assert len(rsp["data"]["attributes"]["analysis-summary"]) == 5
 
