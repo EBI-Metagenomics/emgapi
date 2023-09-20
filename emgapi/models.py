@@ -1559,6 +1559,8 @@ class AnalysisJob(SuppressibleModel, PrivacyControlledModel):
         blank=True, null=True)
     job_operator = models.CharField(
         db_column='JOB_OPERATOR', max_length=15, blank=True, null=True)
+    analysis_summary_json = models.JSONField(
+        db_column='ANALYSIS_SUMMARY_JSON', blank=True, null=True)
     pipeline = models.ForeignKey(
         Pipeline, db_column='PIPELINE_ID', blank=True, null=True,
         related_name='analyses', on_delete=models.CASCADE)
@@ -1606,6 +1608,9 @@ class AnalysisJob(SuppressibleModel, PrivacyControlledModel):
 
     @property
     def analysis_summary(self):
+        if self.analysis_summary_json:
+            return self.analysis_summary_json
+
         return [
             {
                 'key': v.var.var_name,
