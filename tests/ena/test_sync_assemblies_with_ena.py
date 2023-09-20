@@ -21,7 +21,7 @@ from unittest.mock import patch
 
 from django.urls import reverse
 from django.core.management import call_command
-from emgapi.models import Assembly
+from emgapi.models import Assembly, AnalysisJob
 
 from test_utils.emg_fixtures import *  # noqa
 
@@ -117,3 +117,21 @@ class TestSyncENAAssemblies:
             assembly.refresh_from_db()
             assert assembly.is_suppressed == False
             assert assembly.is_private == False
+
+
+    @patch("emgena.models.Assembly.objects")
+    def test_sync_assemblies_propagation(
+        self, ena_assembly_objs_mock, ena_suppression_propagation_assemblies
+    ):
+        ena_assembly_objs_mock.using("ena").filter.return_value = ena_suppression_propagation_assemblies
+
+        assert Assembly.objects.filter(is_suppressed=True).count() == 0
+        assert AnalysisJob.objects.filter(is_suppressed=True).count() == 0
+
+        call_command("sync_assemblies_with_ena")
+
+        assert Assembly.objects.filter(is_suppressed=True).count() == 32
+        assert AnalysisJob.objects.filter(
+            is_suppressed=True,
+            suppression_reason=AnalysisJob.Reason.ANCESTOR_SUPPRESSED
+        ).count() == 64

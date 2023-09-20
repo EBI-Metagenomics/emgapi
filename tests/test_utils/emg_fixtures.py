@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 EMBL - European Bioinformatics Institute
+# Copyright 2019-2023 EMBL - European Bioinformatics Institute
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ import pytest
 import uuid
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
 
 from model_bakery import baker
 
@@ -37,7 +36,8 @@ __all__ = [
     'ena_private_studies', 'ena_suppressed_studies', 'ena_public_runs', 'ena_private_runs',
     'ena_suppressed_runs', 'ena_public_samples', 'ena_private_samples', 'ena_suppressed_samples',
     'ena_public_assemblies', 'ena_private_assemblies', 'ena_suppressed_assemblies',
-    'assembly_extra_annotation',
+    'assembly_extra_annotation', 'ena_suppression_propagation_studies', 'ena_suppression_propagation_runs',
+    'ena_suppression_propagation_samples', 'ena_suppression_propagation_assemblies',
 ]
 
 
@@ -688,6 +688,7 @@ def ena_run_study():
     study.pubmed_id = ""
     return study
 
+
 def make_suppresible_studies(quantity, emg_props=None, ena_props=None):
     emg_props = emg_props or {}
     ena_props = ena_props or {}
@@ -698,7 +699,6 @@ def make_suppresible_studies(quantity, emg_props=None, ena_props=None):
             ena_models.Study(study_id=emg_study.secondary_accession, **ena_props)
         )
     return ena_studies
-
 
 
 @pytest.fixture
@@ -745,6 +745,63 @@ def ena_suppressed_studies():
         )
     )
     return studies
+
+@pytest.fixture
+def ena_suppression_propagation_studies(experiment_type_assembly):
+    """Returns:
+    2 Studies that are suppressed in ENA but not in EMG, with unsuppressed sample/assembly/run
+    2 Studies that are unsuprressed in ENA and in EMG, with unsuppressed sample/assembly/run
+    One sample in the ENA-suppressed studies is ALSO in an unsuppressed study.
+    """
+    ena_studies_to_be_suppressed = make_suppresible_studies(
+        2,
+        emg_props={},
+        ena_props={"study_status": ena_models.Status.SUPPRESSED}
+    )
+    ena_studies_to_remain = make_suppresible_studies(
+        2,
+        emg_props={},
+        ena_props={}
+    )
+    for study in emg_models.Study.objects.all():
+        samples = baker.make(
+            emg_models.Sample,
+            _quantity=2,
+            studies=[study]
+        )
+        for sample in samples:
+            runs = baker.make(
+                emg_models.Run,
+                _quantity=2,
+                study=study,
+                sample=sample
+            )
+            for run in runs:
+                assemblies = baker.make(
+                    emg_models.Assembly,
+                    _quantity=2,
+                    runs=[run],
+                    samples=[run.sample],
+                    study=study,
+                    experiment_type=experiment_type_assembly
+                )
+                for assembly in assemblies:
+                    baker.make(
+                        emg_models.AnalysisJob,
+                        _quantity=2,
+                        assembly=assembly,
+                        sample=assembly.samples.first(),
+                        study=study,
+                    )
+    emg_study_to_suppress = emg_models.Study.objects.get(secondary_accession=ena_studies_to_be_suppressed[0].study_id)
+    # Share one sample across all studies
+    sample = emg_study_to_suppress.samples.first()
+    for study in emg_models.Study.objects.all():
+        if not study.samples.filter(sample_id=sample.sample_id).exists():
+            emg_models.StudySample.objects.create(study=study, sample=sample)
+
+    return ena_studies_to_be_suppressed + ena_studies_to_remain
+
 
 def make_suppresible_runs(quantity, emg_props=None, ena_props=None):
     emg_props = emg_props or {}
@@ -804,6 +861,49 @@ def ena_suppressed_runs():
     )
     return runs
 
+
+@pytest.fixture
+def ena_suppression_propagation_runs(experiment_type_assembly, study):
+    runs = make_suppresible_runs(
+        2,
+        emg_props={},
+        ena_props={"status_id": ena_models.Status.SUPPRESSED},
+    )
+    runs.extend(
+        make_suppresible_runs(
+            2,
+            emg_props={},
+            ena_props={"status_id": ena_models.Status.PUBLIC}
+        )
+    )
+
+    for run in emg_models.Run.objects.all():
+        sample = baker.make(
+            emg_models.Sample,
+            _quantity=1,
+            studies=[study]
+        )[0]
+        run.sample = sample
+        run.save()
+        assemblies = baker.make(
+            emg_models.Assembly,
+            _quantity=2,
+            runs=[run],
+            study=study,
+            samples=[run.sample],
+            experiment_type=experiment_type_assembly
+        )
+        for assembly in assemblies:
+            baker.make(
+                emg_models.AnalysisJob,
+                _quantity=2,
+                assembly=assembly,
+                sample=assembly.samples.first(),
+                study=study,
+            )
+    return runs
+
+
 def make_suppresible_samples(quantity, emg_props=None, ena_props=None):
     emg_props = emg_props or {}
     ena_props = ena_props or {}
@@ -862,6 +962,50 @@ def ena_suppressed_samples():
     )
     return samples
 
+
+@pytest.fixture
+def ena_suppression_propagation_samples(experiment_type_assembly, study):
+    samples =  make_suppresible_samples(
+        2,
+        emg_props={},
+        ena_props={"status_id": ena_models.Status.SUPPRESSED},
+    )
+    samples.extend(
+        make_suppresible_samples(
+            2,
+            emg_props={},
+            ena_props={"status_id": ena_models.Status.PUBLIC},
+        )
+    )
+
+    for sample in emg_models.Sample.objects.all():
+        runs = baker.make(
+            emg_models.Run,
+            _quantity=2,
+            study=study,
+            sample=sample
+        )
+        for run in runs:
+            assemblies = baker.make(
+                emg_models.Assembly,
+                _quantity=2,
+                runs=[run],
+                samples=[run.sample],
+                study=study,
+                experiment_type=experiment_type_assembly
+            )
+            for assembly in assemblies:
+                baker.make(
+                    emg_models.AnalysisJob,
+                    _quantity=2,
+                    assembly=assembly,
+                    sample=assembly.samples.first(),
+                    study=study,
+                )
+
+    return samples
+
+
 def make_suppresible_assemblies(quantity, emg_props=None, ena_props=None):
     emg_props = emg_props or {}
     ena_props = ena_props or {}
@@ -919,4 +1063,33 @@ def ena_suppressed_assemblies():
             ena_props={"status_id": ena_models.Status.CANCELLED},
         )
     )
+    return assemblies
+
+
+@pytest.fixture
+def ena_suppression_propagation_assemblies(experiment_type_assembly, study):
+    assemblies = []
+    emg_props = {}
+    assemblies.extend(
+        make_suppresible_assemblies(
+            32,
+            emg_props=emg_props,
+            ena_props={"status_id": ena_models.Status.SUPPRESSED},
+        )
+    )
+    assemblies.extend(
+        make_suppresible_assemblies(
+            32,
+            emg_props=emg_props,
+            ena_props={"status_id": ena_models.Status.PUBLIC},
+        )
+    )
+    for assembly in emg_models.Assembly.objects.all():
+        baker.make(
+            emg_models.AnalysisJob,
+            _quantity=2,
+            assembly=assembly,
+            sample=assembly.samples.first(),
+            study=study,
+        )
     return assemblies

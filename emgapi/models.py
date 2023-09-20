@@ -16,6 +16,7 @@
 
 import logging
 
+from django.apps import apps
 from django.conf import settings
 from django.db import models
 from django.db.models import (CharField, Count, OuterRef, Prefetch, Q,
@@ -73,7 +74,7 @@ class SuppressibleModel(models.Model):
     suppressible_descendants = []
     # List of related_names from this model that should have their suppression status propagated from this.
     # E.g. Study.suppressible_descendants = ['samples'] to suppress a study's samples if the study is suppressed.
-    
+
     class Reason(models.IntegerChoices):
         DRAFT = 1
         CANCELLED = 3
@@ -88,6 +89,79 @@ class SuppressibleModel(models.Model):
     suppressed_at = models.DateTimeField(db_column='SUPPRESSED_AT', blank=True, null=True)
     suppression_reason = models.IntegerField(db_column='SUPPRESSION_REASON', blank=True, null=True, choices=Reason.choices)
 
+    def _get_suppression_descendant_tree(self, suppressing: bool = True):
+        """
+        Recursively find all suppressible descendants of the calling suppressible model.
+        :param suppressing: True if looking for descendants that should be (i.e. are not currently) suppressed. False if opposite.
+        :return: Dict mapping model names to sets of model instances
+        """
+        suppressibles = {}
+
+        def __add_to_suppressibles(kls, additional_suppressibles):
+            suppressibles.setdefault(
+                kls,
+                set()
+            ).update(additional_suppressibles)
+
+        logger.debug(f'Building suppression descendant tree for {self._meta.object_name}')
+
+        for descendant_relation_name in self.suppressible_descendants:
+            descendant_relation = getattr(
+                self,
+                descendant_relation_name
+            )
+            descendants_to_update = descendant_relation.filter(
+                is_suppressed=not suppressing,
+            )
+            if not descendants_to_update.exists():
+                logger.debug(f'No {descendant_relation_name} descendants to handle.')
+                continue
+            # Check whether the descendant might have other non-suppressed ancestors of the same type as this
+            # (If so, it shouldn't be suppressed).
+            relation_field = self._meta.get_field(descendant_relation_name)
+            logger.info(f'{relation_field = }')
+            if isinstance(relation_field, models.ManyToManyField):
+                logger.debug(
+                    f"Descendant relation {descendant_relation_name} on {self.__class__} is a Many2Many."
+                    f"Checking whether descendants have unsuppressed siblings.."
+                )
+                logger.debug(f"Before filtering, had {descendants_to_update.count()} {descendant_relation_name}")
+
+                descendant_ids_with_unsuppressed_alike_ancestors = descendant_relation.through.objects.filter(
+                    **{
+                        f"{descendant_relation.target_field_name}__in": descendant_relation.all(),  # e.g. sample in study.samples
+                        f"{descendant_relation.source_field_name}__is_suppressed": False, # e.g. not study.is_suppressed
+                    }
+                ).exclude(
+                    **{
+                        f"{descendant_relation.source_field_name}": self,  # e.g. study != self
+                    }
+                ).values_list(
+                    f"{descendant_relation.target_field_name}_id",
+                    flat=True
+                )
+                descendants_to_update = descendants_to_update.exclude(
+                    pk__in=descendant_ids_with_unsuppressed_alike_ancestors
+                )
+
+                logger.debug(f"After filtering, had {descendants_to_update.count()} {descendant_relation_name}")
+
+            __add_to_suppressibles(
+                descendant_relation.model._meta.object_name,
+                descendants_to_update
+            )
+
+            for descendant in descendants_to_update:
+                for kls, kls_suppressibles in descendant._get_suppression_descendant_tree(
+                        suppressing
+                ).items():
+                    __add_to_suppressibles(
+                        kls,
+                        kls_suppressibles
+                    )
+
+        return suppressibles
+
     def suppress(self, suppression_reason=None, save=True, propagate=True):
         self.is_suppressed = True
         self.suppressed_at = timezone.now()
@@ -95,57 +169,34 @@ class SuppressibleModel(models.Model):
         if save:
             self.save()
         if propagate:
-            for descendant_relation in self.suppressible_descendants:
-                descendants_to_suppress: QuerySet = getattr(
-                    self,
-                    descendant_relation
-                ).filter(
-                    is_suppressed=False
-                )
-                for descendant in descendants_to_suppress:
+            descendant_tree = self._get_suppression_descendant_tree()
+            for descendants_object_type, descendants in descendant_tree.items():
+                for descendant in descendants:
                     descendant.is_suppressed = True
                     descendant.suppression_reason = self.Reason.ANCESTOR_SUPPRESSED
-                descendants_to_suppress.bulk_update(
-                    descendants_to_suppress,
-                    [
-                        'is_suppressed',
-                        'suppression_reason'
-                    ]
-                )
+                m: SuppressibleModel = apps.get_model(app_label='emgapi', model_name=descendants_object_type)
+                m.objects.bulk_update(descendants, fields=['is_suppressed', 'suppression_reason'])
                 logger.info(
-                    f'Propagated suppression of {self} '
-                    f'to {len(descendants_to_suppress)} {descendant_relation} descendants'
+                    f'Propagated suppression of {self} to  {len(descendants)} descendant {descendants_object_type}s'
                 )
         return self
 
-    def unsuppress(self, suppression_reason=None, save=True, propagate=True):
+    def unsuppress(self, save=True, propagate=True):
         self.is_suppressed = False
         self.suppressed_at = None
         self.suppression_reason = None
         if save:
             self.save()
         if propagate:
-            for descendant_relation in self.suppressible_descendants:
-                descendants_to_unsuppress: QuerySet = getattr(
-                    self,
-                    descendant_relation
-                ).filter(
-                    is_suppressed=True,
-                    suppression_reason=self.Reason.ANCESTOR_SUPPRESSED
-                )
-                for descendant in descendants_to_unsuppress:
+            descendant_tree = self._get_suppression_descendant_tree(suppressing=False)
+            for descendants_object_type, descendants in descendant_tree.items():
+                for descendant in descendants:
                     descendant.is_suppressed = False
                     descendant.suppression_reason = None
-                descendants_to_unsuppress.bulk_update(
-                    descendants_to_unsuppress,
-                    [
-                        'is_suppressed',
-                        'suppression_reason'
-                    ]
-                )
+                m: SuppressibleModel = apps.get_model(app_label='emgapi', model_name=descendants_object_type)
+                m.objects.bulk_update(descendants, fields=['is_suppressed', 'suppression_reason'])
                 logger.info(
-                    f'Propagated unsuppression of {self} '
-                    f'to {len(descendants_to_unsuppress)} {descendant_relation} descendants'
+                    f'Propagated unsuppression of {self} to  {len(descendants)} descendant {descendants_object_type}s'
                 )
         return self
 
@@ -154,9 +205,11 @@ class SuppressibleModel(models.Model):
 
 
 class ENASyncableModel(SuppressibleModel, PrivacyControlledModel):
-    def sync_with_ena_status(self, ena_model_status: ENAStatus):
+    def sync_with_ena_status(self, ena_model_status: ENAStatus, propagate=True):
         """Sync the model with the ENA status accordingly.
         Fields that are updated: is_suppressed, suppressed_at, reason and is_private
+
+        :propagate: If True, propagate the ena status of this entity to entities that are derived from / children of it.
         """
         if ena_model_status == ENAStatus.PRIVATE and not self.is_private:
             self.is_private = True
@@ -197,7 +250,7 @@ class ENASyncableModel(SuppressibleModel, PrivacyControlledModel):
             elif ena_model_status == ENAStatus.CANCELLED:
                 reason = SuppressibleModel.Reason.CANCELLED
 
-            self.suppress(suppression_reason=reason, save=False)
+            self.suppress(suppression_reason=reason, save=False, propagate=propagate)
 
             logging.info(
                 f"{self} was suppressed, status on ENA {ena_model_status}"
@@ -1115,7 +1168,7 @@ class SuperStudyGenomeCatalogue(models.Model):
 
 
 class SampleQuerySet(BaseQuerySet, SuppressQuerySet):
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -1334,7 +1387,7 @@ class Status(models.Model):
 
 
 class RunQuerySet(BaseQuerySet, SuppressQuerySet):
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -1757,7 +1810,7 @@ class VariableNames(models.Model):
     class Meta:
         db_table = 'VARIABLE_NAMES'
         unique_together = (('var_id', 'var_name'), ('var_id', 'var_name'),)
-        verbose_name = 'variable name'                
+        verbose_name = 'variable name'
 
     def __str__(self):
         return self.var_name

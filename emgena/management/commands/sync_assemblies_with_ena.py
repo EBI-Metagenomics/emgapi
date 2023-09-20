@@ -71,11 +71,7 @@ class Command(BaseCommand):
                         )
                         continue
 
-                    # inherits the status of its study
-                    if study.is_suppressed:
-                        emg_assembly.suppress(
-                            suppression_reason=study.suppression_reason
-                        )
+                    # inherits the privacy status of its study
                     emg_assembly.is_private = study.is_private
                     continue
                 elif ena_assembly.status_id is None:
