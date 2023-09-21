@@ -8,6 +8,7 @@ import os
 from emgapi import models as emg_models
 from emgapianns.management.lib.uploader_exceptions import UnexpectedVariableName
 from ..lib import EMGBaseCommand
+from emgapi.models import AnalysisJob
 
 logger = logging.getLogger(__name__)
 
@@ -80,12 +81,9 @@ class Command(EMGBaseCommand):
                 var = emg_models.AnalysisMetadataVariableNames.objects.using(emg_db) \
                     .get(var_name=row[0])
             if var is not None:
-                job_ann, created = emg_models.AnalysisJobAnn.objects.using(emg_db).update_or_create(
-                    job=job, var=var,
-                    defaults={'var_val_ucv': row[1]}
-                )
+                Command.update_analysis_summary(job, var.var_name, row[1])
 
-                anns.append(job_ann)
+                # anns.append(job_ann)
         logger.info("Total %d Annotations for Run: %s" % (len(anns), job))
 
     @staticmethod
@@ -96,7 +94,7 @@ class Command(EMGBaseCommand):
             with open(res) as tsvfile:
                 reader = csv.reader(tsvfile, delimiter='\t')
                 for row in reader:
-                    if not row: # skip empty lines at the end of the file
+                    if not row:  # skip empty lines at the end of the file
                         continue
                     try:
                         if row[0] == 'SSU count':
@@ -104,7 +102,7 @@ class Command(EMGBaseCommand):
                         elif row[0] == 'LSU count':
                             var_name = 'Predicted LSU sequences'
                         elif not row[0]:
-                            continue # Skip empty value rows
+                            continue  # Skip empty value rows
                         else:
                             logging.error("Unsupported variable name {}".format(row[0]))
                             raise UnexpectedVariableName
@@ -112,15 +110,13 @@ class Command(EMGBaseCommand):
                         var = emg_models.AnalysisMetadataVariableNames.objects.using(emg_db) \
                             .get(var_name=var_name)
 
-                        job_ann, created = emg_models.AnalysisJobAnn.objects.using(emg_db).update_or_create(
-                            job=job, var=var,
-                            defaults={'var_val_ucv': row[1]}
-                        )
+                        if var is not None:
+                            Command.update_analysis_summary(job, var.var_name, row[1])
                         logging.info("{} successfully loaded into the database.".format(row[0]))
 
                     except emg_models.AnalysisMetadataVariableNames.DoesNotExist:
                         logging.error("Could not find variable name {} in the database even "
-                                        "though it should be supported!".format(row[0]))
+                                      "though it should be supported!".format(row[0]))
                         raise UnexpectedVariableName
         else:
             logging.warning("RNA counts file does not exist: {}".format(res))
@@ -154,10 +150,8 @@ class Command(EMGBaseCommand):
                         var = emg_models.AnalysisMetadataVariableNames.objects.using(emg_db) \
                             .get(var_name=var_name)
 
-                        job_ann, created = emg_models.AnalysisJobAnn.objects.using(emg_db).update_or_create(
-                            job=job, var=var,
-                            defaults={'var_val_ucv': row[1]}
-                        )
+                        if var is not None:
+                            Command.update_analysis_summary(job, var.var_name, row[1])
                         logging.info("{} successfully loaded into the database.".format(row[0]))
 
                     except emg_models.AnalysisMetadataVariableNames.DoesNotExist:
@@ -168,3 +162,13 @@ class Command(EMGBaseCommand):
                         raise UnexpectedVariableName(msg)
         else:
             logging.warning("orf.stats file does not exist: {}".format(res))
+
+    @staticmethod
+    def update_analysis_summary(job, var_key, var_value):
+        analysis_summary = job.analysis_summary_json or []
+        analysis_summary.append({
+            'key': var_key,
+            'value': var_value,
+        })
+        job.analysis_summary_json = analysis_summary
+        job.save()
