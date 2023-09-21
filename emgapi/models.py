@@ -204,6 +204,20 @@ class SuppressibleModel(models.Model):
         abstract = True
 
 
+class SelectRelatedOnlyQuerySetMixin():
+    def select_related_only(self: QuerySet, related_name: str, only_fields: [str]) -> QuerySet:
+        """
+        Adds a 'select_related' to the queryset, and a 'defer' for all fields other than those specified.
+        :param queryset: QuerySet of calling model
+        :param related_name: Related name from calling model to target relation
+        :param only_fields: List of field names on target to NOT be deferred.
+        :return: QuerySet
+        """
+        other_model = self.model._meta.get_field(related_name).related_model
+        other_fields = filter(lambda f: f.name not in only_fields, other_model._meta.fields)
+        return self.select_related(related_name).defer(*[f"{related_name}__{o.name}" for o in other_fields])
+
+
 class ENASyncableModel(SuppressibleModel, PrivacyControlledModel):
     def sync_with_ena_status(self, ena_model_status: ENAStatus, propagate=True):
         """Sync the model with the ENA status accordingly.
@@ -304,7 +318,6 @@ class BaseQuerySet(models.QuerySet):
             },
             'AnalysisJobDownloadQuerySet': {
                 'all': [
-                    Q(job__sample__isnull=True) | Q(job__sample__is_suppressed=False),
                     Q(job__study__is_private=False),
                     Q(job__run__is_private=False) | Q(job__assembly__is_private=False),
                     Q(job__analysis_status_id=AnalysisStatus.COMPLETED) | Q(job__analysis_status_id=AnalysisStatus.QC_NOT_PASSED)
@@ -349,7 +362,7 @@ class BaseQuerySet(models.QuerySet):
                    is_private=True) |
                  Q(assembly__is_private=False)]
             _query_filters['RunExtraAnnotationQuerySet']['authenticated'] = \
-                [Q(sun__samples__studies__submission_account_id__iexact=_username,
+                [Q(run__samples__studies__submission_account_id__iexact=_username,
                    is_private=True) |
                  Q(run__is_private=False)]
 
@@ -1541,7 +1554,7 @@ class AssemblySample(models.Model):
         return 'Assembly:{} - Sample:{}'.format(self.assembly, self.sample)
 
 
-class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet, SuppressQuerySet):
+class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet, SuppressQuerySet, SelectRelatedOnlyQuerySetMixin):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1556,9 +1569,8 @@ class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet, SuppressQuerySet):
         """
         query_filters = {
             "all": [
-                # Q(study__is_private=False),
-                # Q(sample__isnull=True) | Q(sample__is_suppressed=False),
-                # Q(run__is_private=False) | Q(assembly__is_private=False),
+                Q(study__is_private=False),
+                Q(run__is_private=False) | Q(assembly__is_private=False),
                 Q(is_suppressed=False),
                 Q(analysis_status_id=AnalysisStatus.COMPLETED)
                 | Q(analysis_status_id=AnalysisStatus.QC_NOT_PASSED),
@@ -1568,7 +1580,6 @@ class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet, SuppressQuerySet):
         if request is not None and request.user.is_authenticated:
             username = request.user.username
             query_filters["authenticated"] = [
-                Q(sample__isnull=True) | Q(sample__is_suppressed=False),
                 Q(study__submission_account_id__iexact=username, run__is_private=True)
                 | Q(
                     study__submission_account_id__iexact=username,
@@ -1618,33 +1629,17 @@ class AnalysisJobManager(models.Manager):
             .force_index("PRIMARY", table_name="PIPELINE_RELEASE", for_="JOIN") \
             .select_related(
                 'analysis_status',
-                'experiment_type',
-                'run',
-                'study',
-                'assembly',
-                'pipeline',
-                'sample') \
+                'experiment_type') \
             .prefetch_related(
-                Prefetch('analysis_metadata', queryset=_qs),)
+                Prefetch('analysis_metadata', queryset=_qs),) \
+            .select_related_only('assembly', ['assembly_id', 'accession']) \
+            .select_related_only('pipeline', ['pipeline_id', 'release_version']) \
+            .select_related_only('run', ['run_id', 'accession']) \
+            .select_related_only('sample', ['sample_id', 'accession']) \
+            .select_related_only('study', ['study_id', 'accession'])
 
     def available(self, request):
         return self.get_queryset().available(request)
-        #     .prefetch_related(
-        #     Prefetch(
-        #         'study',
-        #         queryset=Study.objects.available(request)
-        #     ),
-        #     Prefetch(
-        #         'sample',
-        #         queryset=Sample.objects.available(
-        #             request)
-        #     ),
-        #     Prefetch(
-        #         'run',
-        #         queryset=Run.objects.available(
-        #             request)
-        #     )
-        # )
 
 
 class AnalysisJob(SuppressibleModel, PrivacyControlledModel):
@@ -1777,7 +1772,7 @@ class BlacklistedStudy(models.Model):
     class Meta:
         managed = False
         db_table = 'BLACKLISTED_STUDY'
-        verbose_name_plural = 'blacklisted study'
+        verbose_name = 'blacklisted study'
         verbose_name_plural = 'blacklisted studies'
 
     def __str__(self):
