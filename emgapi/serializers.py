@@ -504,6 +504,19 @@ class RunSerializer(ExplicitFieldsModelSerializer,
     def get_analyses(self, obj):
         return None
 
+    extra_annotations = relations.SerializerMethodHyperlinkedRelatedField(
+        many=True,
+        read_only=True,
+        source='get_extra_annotations',
+        model=emg_models.RunExtraAnnotation,
+        related_link_view_name='emgapi_v1:run-extra-annotations-list',
+        related_link_url_kwarg='accession',
+        related_link_lookup_field='accession',
+    )
+
+    def get_extra_annotations(self, obj):
+        return None
+
     class Meta:
         model = emg_models.Run
         exclude = (
@@ -671,6 +684,24 @@ class AssemblyExtraAnnotationSerializer(BaseDownloadSerializer):
             'file_checksum'
         )
 
+
+class RunExtraAnnotationSerializer(BaseDownloadSerializer):
+    url = emg_fields.DownloadHyperlinkedIdentityField(
+        view_name='emgapi_v1:run-extra-annotations-detail',
+        lookup_field='alias',
+    )
+
+    class Meta:
+        model = emg_models.RunExtraAnnotation
+        fields = (
+            'id',
+            'url',
+            'alias',
+            'file_format',
+            'description',
+            'group_type',
+            'file_checksum'
+        )
 
 class RetrieveAssemblySerializer(AssemblySerializer):
 
@@ -990,6 +1021,7 @@ class AnalysisSerializer(BaseAnalysisSerializer):
             'is_suppressed',
             'suppressed_at',
             'suppression_reason',
+            'analysis_summary_json'
         )
 
 

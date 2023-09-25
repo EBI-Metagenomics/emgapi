@@ -8,7 +8,7 @@ emg:
   emg_backend_auth: "https://backend"
   mongodb:
       db: emg_tests
-      host: mongodb-lite
+      host: mongodb
   sourmash:
     signatures_path: 'fixtures/'
     results_path: 'fixtures/'

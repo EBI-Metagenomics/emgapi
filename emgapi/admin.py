@@ -87,7 +87,7 @@ class StudyAdmin(admin.ModelAdmin, NoRemoveMixin):
         'project_id',
         'study_name',
     )
-    list_filter = ('is_private', )
+    list_filter = ('is_private',)
     raw_id_fields = ('biome',)
 
     def save_model(self, request, obj, form, change):
@@ -127,7 +127,6 @@ class SuperStudyAdminForm(forms.ModelForm):
 
 @admin.register(emg_models.SuperStudy)
 class SuperStudyAdmin(admin.ModelAdmin):
-
     inlines = [SuperStudyStudiesInline, SuperStudyBiomesInline, SuperStudyGenomeCataloguesInline]
     form = SuperStudyAdminForm
 
@@ -182,6 +181,18 @@ class SampleAdmin(admin.ModelAdmin, NoRemoveMixin):
             return super().get_search_results(request, queryset, search_term)
 
 
+class RunExtraAnnotationDownloads(admin.TabularInline):
+    model = emg_models.RunExtraAnnotation
+    raw_id_fields = [
+        'run',
+        'parent_id',
+        'group_type',
+        'subdir',
+        'description',
+        'file_format'
+    ]
+    extra = 0
+
 @admin.register(emg_models.Run)
 class RunAdmin(admin.ModelAdmin, AccessionSearch):
     change_list_template = "admin/change_list_filter_sidebar.html"
@@ -208,6 +219,9 @@ class RunAdmin(admin.ModelAdmin, AccessionSearch):
         'secondary_accession',
         'sample',
         'study',
+    ]
+    inlines = [
+        RunExtraAnnotationDownloads,
     ]
 
     filter_property = 'study'
@@ -361,13 +375,13 @@ class AnalysisJobAdmin(admin.ModelAdmin, AccessionSearch, NoRemoveMixin):
     def get_queryset(self, request):
         return emg_models.AnalysisJob.objects_admin.all() \
             .select_related(
-                'pipeline',
-                'analysis_status',
-                'experiment_type',
-                'run',
-                'study',
-                'assembly',
-                'sample')
+            'pipeline',
+            'analysis_status',
+            'experiment_type',
+            'run',
+            'study',
+            'assembly',
+            'sample')
 
 
 @admin.register(emg_models.StudyErrorType)

@@ -41,7 +41,7 @@ from corsheaders.defaults import default_headers
 try:
     from YamJam import yamjam, YAMLError
 except ImportError:
-    raise ImportError("Install yamjam. Run `pip install -r requirements.txt`")
+    raise ImportError("Install yamjam. Install dependencies.")
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +62,10 @@ except KeyError:
 if not os.path.exists(LOGDIR):
     os.makedirs(LOGDIR)
 
+LOG_LOCK_DIR = EMG_CONF["emg"].get("log_lock_dir", LOGDIR)
+if not os.path.exists(LOG_LOCK_DIR):
+    os.makedirs(LOG_LOCK_DIR)
+
 LOGFILE = EMG_CONF["emg"].get("log_file", "emg.log")
 
 LOGGING_CLASS = 'concurrent_log_handler.ConcurrentRotatingFileHandler'
@@ -79,6 +83,10 @@ LOGGING = {
         'require_debug_true': {
             '()': 'django.utils.log.RequireDebugTrue',
         },
+        'exclude_myaccounts': {
+            '()': 'django.utils.log.CallbackFilter',
+            'callback': lambda record: "v1/utils/myaccounts" not in record.getMessage(),
+        },
     },
     'formatters': {
         'default': {
@@ -90,6 +98,7 @@ LOGGING = {
             'level': 'DEBUG',
             'class': LOGGING_CLASS,
             'filename': os.path.join(LOGDIR, LOGFILE).replace('\\', '/'),
+            'lock_file_directory': os.path.join(LOG_LOCK_DIR).replace('\\', '/'),
             'maxBytes': 1024 * 1024 * 10,
             'backupCount': 50,
             'formatter': 'default',
@@ -126,12 +135,19 @@ LOGGING = {
         'django.request': {  # Stop SQL debug from logging to main logger
             'handlers': ['default'],
             'level': 'INFO',
-            'propagate': False
+            'propagate': False,
+            'filters': ['exclude_myaccounts'],
+        },
+        'django.server': {
+            'handlers': ['default'],
+            'level': 'INFO',
+            'propagate': False,
+            'filters': ['exclude_myaccounts'],
         },
         'django': {
             'handlers': ['null'],
             'level': 'INFO',
-            'propagate': True
+            'propagate': True,
         },
         '': {
             'handlers': ['default', 'console'],

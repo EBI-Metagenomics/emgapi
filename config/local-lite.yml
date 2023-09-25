@@ -16,7 +16,6 @@ emg:
     - 'django.contrib.auth.backends.ModelBackend'
     - 'emgapi.backends.EMGBackend'
 
-  cors_origin_allow_all: true
   debug: true
   results_dir: '/opt/emgapi/results'
   results_production_dir: '/opt/emgapi/results'
@@ -24,9 +23,14 @@ emg:
   emg_backend_auth: 'https://wwwdev.ebi.ac.uk/ena/dev/submit/webin/auth/login'
   secure_cookies: false
 
+  log_dir: '/opt/emgapi/logs'
+  log_lock_dir: '/opt/emgapi/loglockdir'
+
+  secret_key: '/opt/emgapi'
+
   mongodb:
     db: emg
-    host: mongodb-lite
+    host: mongodb
   documentation:
     title: 'EBI Metagenomics API'
     description: 'Is a free resource to visualise and discover metagenomic datasets. For more details go to http://www.ebi.ac.uk/metagenomics/'
