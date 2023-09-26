@@ -118,6 +118,8 @@ class SuppressibleModel(models.Model):
                 continue
             # Check whether the descendant might have other non-suppressed ancestors of the same type as this
             # (If so, it shouldn't be suppressed).
+            # This was written mostly for samples that are associated to multiples 
+            # studies, such as a raw-reads study and the corresponding assembly study.
             relation_field = self._meta.get_field(descendant_relation_name)
             logger.info(f'{relation_field = }')
             if isinstance(relation_field, models.ManyToManyField):
