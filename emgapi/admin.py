@@ -463,21 +463,21 @@ class AnalysisMetadataVariableNamesAdmin(admin.ModelAdmin):
     ]
 
 
-@admin.register(emg_models.AnalysisJobAnn)
-class AnalysisJobAnnAdmin(admin.ModelAdmin):
-    readonly_fields = [
-        'job',
-        'var',
-    ]
-    list_display = [
-        'job',
-        'var'
-    ]
-    search_fields = [
-        'job__job_id',
-        'var__var_name',
-        'var__description',
-    ]
+# @admin.register(emg_models.AnalysisJobAnn)
+# class AnalysisJobAnnAdmin(admin.ModelAdmin):
+#     readonly_fields = [
+#         'job',
+#         'var',
+#     ]
+#     list_display = [
+#         'job',
+#         'var'
+#     ]
+#     search_fields = [
+#         'job__job_id',
+#         'var__var_name',
+#         'var__description',
+#     ]
 
 
 @admin.register(emg_models.CogCat)

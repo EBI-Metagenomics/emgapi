@@ -1500,23 +1500,23 @@ class AnalysisJobManager(models.Manager):
         IMPORTANT: it is also required that the ordering of the query set is done by ANALYSIS_JOB.PIPELINE_ID and not a 
                    field of PIPELINE_RELEASE. This was changes in emgapi.viewsets.BaseAnalysisGenericViewSet.ordering
 
-        TODO: figure our what is going on with this query.
-        """
-        _qs = AnalysisJobAnn.objects.all() \
-            .select_related('var')
-        return AnalysisJobQuerySet(self.model, using=self._db) \
-            .straight_join() \
-            .force_index("PRIMARY", table_name="PIPELINE_RELEASE", for_="JOIN") \
-            .select_related(
-                'analysis_status',
-                'experiment_type',
-                'run',
-                'study',
-                'assembly',
-                'pipeline',
-                'sample') \
-            .prefetch_related(
-                Prefetch('analysis_metadata', queryset=_qs),)
+        # TODO: figure our what is going on with this query.
+        # """
+        # _qs = AnalysisJobAnn.objects.all() \
+        #     .select_related('var')
+        # return AnalysisJobQuerySet(self.model, using=self._db) \
+        #     .straight_join() \
+        #     .force_index("PRIMARY", table_name="PIPELINE_RELEASE", for_="JOIN") \
+        #     .select_related(
+        #         'analysis_status',
+        #         'experiment_type',
+        #         'run',
+        #         'study',
+        #         'assembly',
+        #         'pipeline',
+        #         'sample') \
+        #     .prefetch_related(
+        #         Prefetch('analysis_metadata', queryset=_qs),)
 
     def available(self, request):
         return self.get_queryset().available(request) \
@@ -1762,29 +1762,29 @@ class AnalysisMetadataVariableNames(models.Model):
         return self.var_name
 
 
-class AnalysisJobAnnManager(models.Manager):
+# class AnalysisJobAnnManager(models.Manager):
+#
+#     def get_queryset(self):
+#         return super().get_queryset().select_related('job', 'var')
 
-    def get_queryset(self):
-        return super().get_queryset().select_related('job', 'var')
 
-
-class AnalysisJobAnn(models.Model):
-    job = models.ForeignKey(AnalysisJob, db_column='JOB_ID', related_name='analysis_metadata', on_delete=models.CASCADE)
-    units = models.CharField(db_column='UNITS', max_length=25, blank=True, null=True)
-    var = models.ForeignKey(AnalysisMetadataVariableNames, on_delete=models.CASCADE)
-    var_val_ucv = models.CharField(db_column='VAR_VAL_UCV', max_length=4000, blank=True, null=True)
-
-    objects = AnalysisJobAnnManager()
-
-    class Meta:
-        db_table = 'ANALYSIS_JOB_ANN'
-        unique_together = (('job', 'var'), ('job', 'var'),)
-
-    def __str__(self):
-        return '%s %s' % (self.job, self.var)
-
-    def multiple_pk(self):
-        return '%s/%s' % (self.var.var_name, self.var_val_ucv)
+# class AnalysisJobAnn(models.Model):
+#     job = models.ForeignKey(AnalysisJob, db_column='JOB_ID', related_name='analysis_metadata', on_delete=models.CASCADE)
+#     units = models.CharField(db_column='UNITS', max_length=25, blank=True, null=True)
+#     var = models.ForeignKey(AnalysisMetadataVariableNames, on_delete=models.CASCADE)
+#     var_val_ucv = models.CharField(db_column='VAR_VAL_UCV', max_length=4000, blank=True, null=True)
+#
+#     objects = AnalysisJobAnnManager()
+#
+#     class Meta:
+#         db_table = 'ANALYSIS_JOB_ANN'
+#         unique_together = (('job', 'var'), ('job', 'var'),)
+#
+#     def __str__(self):
+#         return '%s %s' % (self.job, self.var)
+#
+#     def multiple_pk(self):
+#         return '%s/%s' % (self.var.var_name, self.var_val_ucv)
 
 
 class CogCat(models.Model):
