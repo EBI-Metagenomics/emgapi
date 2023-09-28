@@ -15,12 +15,12 @@
 # limitations under the License.
 
 import logging
-import requests
 
 from django.core.management import BaseCommand
 from django.conf import settings
 
 from emgapi.models import AnalysisJob, MetagenomicsExchange, ME_Broker
+from metagenomics_exchange import MetagenomicsExchangeAPI
 
 logger = logging.getLogger(__name__)
 
@@ -82,66 +82,6 @@ class Command(BaseCommand):
             help="Broker name",
             choices=["EMG", "MAR"],
         )
-    def get_request(self, url, params):
-        if self.auth:
-            response = requests.get(url, params=params, headers=self.auth)
-        else:
-            logging.warning(
-                "Not authenticated to get private data."
-                # noqa: E501
-            )
-            response = requests.get(url, params=params)
-        return response
-
-    def _check_analysis(self, sourceID, public):
-        params = {
-            'status': 'public' if public else 'private',
-        }
-        response = self.get_request(url=self.check_url, params=params)
-        exists = False
-        if not response.ok:
-            logging.error(
-                "Error retrieving dataset {}, response code: {}".format(
-                    self.check_url, response.status_code
-                )
-            )
-        else:
-            data = response.json()['datasets']
-            for item in data:
-                if item['sourceID'] == sourceID:
-                    exists = True
-        return exists
-
-    def post_request(self, auth, url, data):
-        default = {
-            "headers": {
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-            }
-        }
-        default["headers"].update(auth)
-        response = requests.post(
-            url, json=data, **default
-        )
-        print(response.text)
-        if response.ok:
-            logging.info("Data added to ME")
-        return response
-
-    def _add_record_me(self, analysis, public):
-        data = {
-            'confidence': 'full',
-            'endPoint': f'https://www.ebi.ac.uk/metagenomics/analyses/{analysis.accession}',
-            'method': ['other_metadata'],
-            'sourceID': analysis.accession,
-            'sequenceID': analysis.run.secondary_accession,
-            'status': 'public' if public else 'private',
-            'brokerID': self.broker,
-        }
-        response = self.post_request(auth=self.auth, url=self.url + 'datasets', data=data)
-        if response.ok:
-            broker = ME_Broker.objects.get_or_create(name=self.broker)
-            MetagenomicsExchange.objects.get_or_create(analysis=analysis, broker=broker)
 
     def _filtering_analyses(self):
         analyses = AnalysisJob.objects.all()
@@ -154,26 +94,28 @@ class Command(BaseCommand):
         if self.pipeline_version:
             analyses = analyses.filter(pipeline__pipeline_id=self.pipeline_version)
         return analyses
-    def handle(self, *args, **options):
-        self.auth = {"Authorization": settings.ME_TOKEN}
-        self.url = settings.ME_API['dev']
-        self.broker = options.get("broker")
-        self.check_url = self.url + f'brokers/{self.broker}/datasets'
 
+    def handle(self, *args, **options):
         self.study_accession = options.get("study")
         self.pipeline_version = options.get("pipeline")
         self.assembly_accession = options.get("assembly")
         self.run_accession = options.get("run")
 
+        broker = options.get("broker")
+        url = settings.ME_API['dev']
+        check_url = url + f'brokers/{self.broker}/datasets'
+        ME = MetagenomicsExchangeAPI()
         analyses = self._filtering_analyses()
+
         for analysis in analyses:
             MGYA = analysis.accession
             public = not analysis.is_private
             # check is MGYA in ME
-            if (self._check_analysis(sourceID=MGYA, public=public)):
+            if ME.check_analysis(url=check_url, sourceID=MGYA, public=public, token=settings.ME_TOKEN):
                 logging.info(f"{MGYA} exists in ME")
             else:
                 logging.info(f"{MGYA} does not exist in ME")
-                self._add_record_me(analysis, public)
+                ME.add_record(url=url, mgya=MGYA, run_accession=analysis.run.accesison, public=public, broker=broker,
+                              token=settings.ME_TOKEN)
 
 

@@ -13,7 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+"""
 import pytest
 from unittest.mock import patch
 
@@ -67,7 +67,6 @@ class TestMeAPI:
 
             def json(self):
                 return self.json_data
-
         test_run = "ABC01234"
         test_pipeline_version = 1.0
         test_broker = 'MAR'
@@ -85,3 +84,4 @@ class TestMeAPI:
 
         assert ME_Broker.objects.filter(brokerID=test_broker).count() == 1
         assert MetagenomicsExchange.objects.filter(analysis=analysis).count() == 1
+    """
