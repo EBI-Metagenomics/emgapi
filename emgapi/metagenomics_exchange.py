@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2021 EMBL - European Bioinformatics Institute
+# Copyright 2018-2023 EMBL - European Bioinformatics Institute
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,98 +14,68 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
 import logging
 import requests
 
+from django.conf import settings
+
+
 class MetagenomicsExchangeAPI:
+
     """Metagenomics Exchange API Client"""
-    def get_request(self, session, url, params):
-        response = session.get(url, params=params)
-        data = None
-        if not response.ok:
-            logging.error(
-                "Error retrieving dataset {}, response code: {}".format(
-                    url, response.status_code
-                )
-            )
-        else:
-            data = response.json()
-        return data
 
-    def post_request(self, session, url, data):
-        default = {
-            "headers": {
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-            }
-        }
+    def __init__(self, broker="EMG"):
+        self.base_url = settings.ME_API
+        self.__token = settings.ME_API_TOKEN
+        self.broker = broker
 
-        response = session.post(
-            url, json=data, **default
+    def get_request(self, endpoint: str, params: dict):
+        """Make a GET request, returns the response"""
+        headers = {"Accept": "application/json", "Authorization": self.__token}
+        response = requests.get(
+            f"{self.base_url}/{endpoint}", headers=headers, params=params
         )
-
-        if response.ok:
-            print('Added')
-            logging.info("Data added to ME")
-            logging.debug(response.text)
-        else:
-            print(response.text)
+        response.raise_for_status()
         return response
-    def add_record(
-        self, url, mgya, run_accession, public, broker, token
-    ):
+
+    def post_request(self, endpoint: str, data: dict):
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": self.__token,
+        }
+        response = requests.post(
+            f"{self.base_url}/{endpoint}", json=data, headers=headers
+        )
+        response.raise_for_status()
+        return response
+
+    def add_record(self, mgya: str, run_accession: str, public: bool):
         data = {
-            'confidence': 'full',
-            'endPoint': f'https://www.ebi.ac.uk/metagenomics/analyses/mgya',
-            'method': ['other_metadata'],
-            'sourceID': mgya,
-            'sequenceID': run_accession,
-            'status': 'public' if public else 'private',
-            'brokerID': broker,
+            "confidence": "full",
+            "endPoint": f"https://www.ebi.ac.uk/metagenomics/analyses/mgya",
+            "method": ["other_metadata"],
+            "sourceID": mgya,
+            "sequenceID": run_accession,
+            "status": "public" if public else "private",
+            "brokerID": self.broker,
         }
+        response = self.post_request(endpoint="datasets", data=data)
+        return response.json()
 
-        with requests.Session() as session:
-            url = url + 'datasets'
-            session = self._authenticate_session(session, url, token)
-            print(session)
-            response = self.post_request(session=session, url=url, data=data)
-            data = response.json()
-            return data
-
-    def check_analysis(self, url, sourceID, public, token):
-        logging.info(f'Check {sourceID}')
+    def check_analysis(self, source_id: str, public: bool) -> bool:
+        logging.info(f"Check {source_id}")
         params = {
-            'status': 'public' if public else 'private',
+            "status": "public" if public else "private",
         }
-        with requests.Session() as session:
-            session = self._authenticate_session(session, url, token)
-            response = self.get_request(session=session, url=url, params=params)
-            if response:
-                data = response['datasets']
-                exists = False
-                for item in data:
-                    if item['sourceID'] == sourceID:
-                        exists = True
-                logging.info(f"{sourceID} exists: {exists}")
-        return exists
-
-    def _authenticate_session(self, session, url, token):
-        """Authenticate the MGnify API request"""
-
-        logging.debug(f"Authenticating ME account")
-
-        headers = {"Authorization": token}
-
-        response = session.get(url, headers=headers)
-
+        endpoint = f"brokers/{self.broker}/datasets"
+        response = self.get_request(endpoint=endpoint, params=params)
         if response.ok:
-            logging.debug("ME account successfully authenticated.")
-            print(f'Auth {url} {response}')
-        else:
-            print(response)
-            # Log textual reason of responded HTTP Status
-            logging.error(f"Authentication services responded: {response.reason}). Program will exit now.")
-            sys.exit(1)
+            data = response.json()
+            datasets = data.get("datasets")
+            for item in datasets:
+                if item.get("sourceID") == source_id:
+                    return True
+            logging.info(f"{source_id} exists")
 
-        return session
+        return False

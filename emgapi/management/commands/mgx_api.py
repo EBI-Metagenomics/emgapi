@@ -101,6 +101,7 @@ class Command(BaseCommand):
         self.assembly_accession = options.get("assembly")
         self.run_accession = options.get("run")
 
+        # FIXME: this command needs adjustments
         broker = options.get("broker")
         url = settings.ME_API['dev']
         check_url = url + f'brokers/{self.broker}/datasets'

@@ -643,8 +643,10 @@ if 'ena_api_password' in EMG_CONF['emg']:
     os.environ['ENA_API_PASSWORD'] = EMG_CONF['emg']['ena_api_password']
 
 # Metagenomics Exchange
-ME_API = {
-    'real': 'https://www.ebi.ac.uk/ena/registry/metagenome/api/',
-    'dev': 'http://wp-np2-5c.ebi.ac.uk:8080/ena/registry/metagenome/api/'
-}
-ME_TOKEN = 'mgx 3D70473ED7C443CA9E97749F62FFCC5D'
+try:
+    ME_API = EMG_CONF['emg']['me_api']
+    ME_API_TOKEN = EMG_CONF['emg']['me_api_token']
+except KeyError:
+    ME_API = ""
+    ME_API_TOKEN = ""
+    warnings.warn("The metagenomics exchange API and Token are not configured properly")
