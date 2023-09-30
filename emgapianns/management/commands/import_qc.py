@@ -165,10 +165,10 @@ class Command(EMGBaseCommand):
 
     @staticmethod
     def update_analysis_summary(job, var_key, var_value):
-        analysis_summary = job.analysis_summary_json or []
+        analysis_summary = job.analysis_summary or []
         analysis_summary.append({
             'key': var_key,
             'value': var_value,
         })
-        job.analysis_summary_json = analysis_summary
+        job.analysis_summary = analysis_summary
         job.save()
