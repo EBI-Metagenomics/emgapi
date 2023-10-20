@@ -17,9 +17,10 @@
 import logging
 
 from django.conf import settings
+from django.core.exceptions import FieldDoesNotExist
 from django.db import models
 from django.db.models import (CharField, Count, OuterRef, Prefetch, Q,
-                              Subquery, Value)
+                              Subquery, Value, F)
 from django.db.models.functions import Cast, Concat
 from django.utils import timezone
 
@@ -155,6 +156,67 @@ class ENASyncableModel(SuppressibleModel, PrivacyControlledModel):
             )
 
         return self
+
+    class Meta:
+        abstract = True
+
+
+class EbiSearchIndexQueryset(models.QuerySet):
+    """
+    to_delete: Objects that have been suppressed since they were last indexed,
+    or that have been indexed but updated since.
+
+    to_add: Objects that have never been indexed,
+    or that have been indexed but updated since.
+    """
+    def to_delete(self):
+        updated_after_indexing = Q(last_update__gte=F("last_indexed"), last_indexed__isnull=False)
+
+        try:
+            self.model._meta.get_field("suppressed_at")
+        except FieldDoesNotExist:
+            return self.filter(
+                updated_after_indexing
+            )
+        else:
+            return self.filter(
+                Q(suppressed_at__gte=F("last_indexed")) | updated_after_indexing
+            )
+
+    def to_add(self):
+        updated_after_indexing = Q(last_update__gte=F("last_indexed"), last_indexed__isnull=False)
+        never_indexed = Q(last_indexed__isnull=True)
+
+        try:
+            self.model._meta.get_field("is_suppressed")
+        except FieldDoesNotExist:
+            not_suppressed = Q()
+        else:
+            not_suppressed = Q(is_suppressed=False)
+
+        try:
+            self.model._meta.get_field("is_private")
+        except FieldDoesNotExist:
+            not_private = Q()
+        else:
+            not_private = Q(is_private=False)
+
+        return self.filter(never_indexed | updated_after_indexing, not_suppressed, not_private)
+
+
+class EbiSearchIndexedModel(models.Model):
+    last_update = models.DateTimeField(
+        db_column='LAST_UPDATE',
+        auto_now=True
+    )
+    last_indexed = models.DateTimeField(
+        db_column='LAST_INDEXED',
+        null=True,
+        blank=True,
+        help_text="Date at which this model was last included in an EBI Search initial/incremental index."
+    )
+
+    objects_for_indexing = EbiSearchIndexQueryset.as_manager()
 
     class Meta:
         abstract = True
@@ -1538,7 +1600,7 @@ class AnalysisJobManager(models.Manager):
         )
 
 
-class AnalysisJob(SuppressibleModel, PrivacyControlledModel):
+class AnalysisJob(SuppressibleModel, PrivacyControlledModel, EbiSearchIndexedModel):
     def __init__(self, *args, **kwargs):
         super(AnalysisJob, self).__init__(*args, **kwargs)
         setattr(self, 'accession',
