@@ -1813,18 +1813,16 @@ class ME_Broker(models.Model):
 
 
 class MetagenomicsExchangeManager(models.Manager):
-    def get_or_create(self, analysis, broker=None):
+    def get_or_create(self, analysis, broker):
         try:
             me_record = MetagenomicsExchange.objects.get(
-                analysis=analysis
+                analysis=analysis, broker=broker
             )
         except ObjectDoesNotExist:
             logging.warning(f"{analysis.accession} not in ME db, creating.")
             me_record = MetagenomicsExchange(
-                analysis=analysis,
+                analysis=analysis, broker=broker
             )
-            if broker:
-                me_record.broker = broker
             me_record.save()
             logging.info(f"Created record ID: {me_record.id}")
         return me_record
@@ -1841,6 +1839,9 @@ class MetagenomicsExchange(models.Model):
 
     objects = MetagenomicsExchangeManager()
     objects_admin = models.Manager()
+
+    def __str__(self):
+        return f"{self.analysis.job_id} under {self.broker}"
 
 
 class StudyErrorType(models.Model):

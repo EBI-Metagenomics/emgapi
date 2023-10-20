@@ -13,7 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""
+
 import pytest
 from unittest.mock import patch
 
@@ -25,18 +25,21 @@ from emgapi.models import AnalysisJob, MetagenomicsExchange, ME_Broker
 
 @pytest.mark.django_db
 class TestMeAPI:
-    @patch("emgapi.management.commands.mgx_api.Command.post_request")
+    @patch("emgapi.metagenomics_exchange.MetagenomicsExchangeAPI.post_request")
+    @pytest.mark.usefixtures(
+        "me_broker",
+        "metagenomics_exchange",
+    )
     def test_new_analysis_population(
             self,
-            mock_post_request,
-            run_multiple_analysis
+            mock_post_request
     ):
         class MockResponse:
             def __init__(self, ok, status_code):
                 self.ok = ok
                 self.status_code = status_code
 
-        mock_post_request.return_value = MockResponse(True, 200)
+        mock_post_request.return_value = MockResponse(True, 201)
         test_run = "ABC01234"
         test_pipeline_version = 5.0
         test_broker = 'EMG'
@@ -49,9 +52,14 @@ class TestMeAPI:
         )
         analysis = AnalysisJob.objects.filter(run__accession=test_run).filter(pipeline__pipeline_id=test_pipeline_version).first()
         assert ME_Broker.objects.filter(brokerID=test_broker).count() == 1
-        assert MetagenomicsExchange.objects.filter(analysis=analysis).count() == 1
+        broker_id = ME_Broker.objects.filter(brokerID=test_broker).first().id
+        assert MetagenomicsExchange.objects.filter(analysis=analysis).filter(broker=broker_id).count() == 1
 
-    @patch("emgapi.management.commands.mgx_api.Command.get_request")
+    @pytest.mark.usefixtures(
+        "me_broker",
+        "metagenomics_exchange",
+    )
+    @patch("emgapi.metagenomics_exchange.MetagenomicsExchangeAPI.get_request")
     def test_check_existing_analysis(
             self,
             mock_get_request,
@@ -67,6 +75,7 @@ class TestMeAPI:
 
             def json(self):
                 return self.json_data
+
         test_run = "ABC01234"
         test_pipeline_version = 1.0
         test_broker = 'MAR'
@@ -83,5 +92,5 @@ class TestMeAPI:
         )
 
         assert ME_Broker.objects.filter(brokerID=test_broker).count() == 1
-        assert MetagenomicsExchange.objects.filter(analysis=analysis).count() == 1
-    """
+        broker_id = ME_Broker.objects.filter(brokerID=test_broker).first().id
+        assert MetagenomicsExchange.objects.filter(analysis=analysis, broker=broker_id).count() == 1

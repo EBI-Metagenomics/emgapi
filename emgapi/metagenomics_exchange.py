@@ -53,7 +53,7 @@ class MetagenomicsExchangeAPI:
     def add_record(self, mgya: str, run_accession: str, public: bool):
         data = {
             "confidence": "full",
-            "endPoint": f"https://www.ebi.ac.uk/metagenomics/analyses/mgya",
+            "endPoint": f"https://www.ebi.ac.uk/metagenomics/analyses/{mgya}",
             "method": ["other_metadata"],
             "sourceID": mgya,
             "sequenceID": run_accession,
@@ -61,7 +61,7 @@ class MetagenomicsExchangeAPI:
             "brokerID": self.broker,
         }
         response = self.post_request(endpoint="datasets", data=data)
-        return response.json()
+        return response
 
     def check_analysis(self, source_id: str, public: bool) -> bool:
         logging.info(f"Check {source_id}")
@@ -75,7 +75,7 @@ class MetagenomicsExchangeAPI:
             datasets = data.get("datasets")
             for item in datasets:
                 if item.get("sourceID") == source_id:
+                    logging.info(f"{source_id} exists")
                     return True
-            logging.info(f"{source_id} exists")
-
+            logging.info(f"{source_id} does not exist")
         return False

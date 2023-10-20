@@ -17,10 +17,9 @@
 import logging
 
 from django.core.management import BaseCommand
-from django.conf import settings
 
 from emgapi.models import AnalysisJob, MetagenomicsExchange, ME_Broker
-from metagenomics_exchange import MetagenomicsExchangeAPI
+from emgapi.metagenomics_exchange import MetagenomicsExchangeAPI
 
 logger = logging.getLogger(__name__)
 
@@ -101,22 +100,24 @@ class Command(BaseCommand):
         self.assembly_accession = options.get("assembly")
         self.run_accession = options.get("run")
 
-        # FIXME: this command needs adjustments
         broker = options.get("broker")
-        url = settings.ME_API['dev']
-        check_url = url + f'brokers/{self.broker}/datasets'
-        ME = MetagenomicsExchangeAPI()
+        broker_obj = ME_Broker.objects.get_or_create(broker)
+        ME = MetagenomicsExchangeAPI(broker=broker)
         analyses = self._filtering_analyses()
 
         for analysis in analyses:
             MGYA = analysis.accession
             public = not analysis.is_private
             # check is MGYA in ME
-            if ME.check_analysis(url=check_url, sourceID=MGYA, public=public, token=settings.ME_TOKEN):
+            if ME.check_analysis(source_id=MGYA, public=public):
                 logging.info(f"{MGYA} exists in ME")
             else:
                 logging.info(f"{MGYA} does not exist in ME")
-                ME.add_record(url=url, mgya=MGYA, run_accession=analysis.run.accesison, public=public, broker=broker,
-                              token=settings.ME_TOKEN)
+                response = ME.add_record(mgya=MGYA, run_accession=analysis.run, public=public)
+                if response.status_code == 201:
+                    logging.info(f"Populating MetagenomicsExchange table with {MGYA}")
+                    MetagenomicsExchange.objects.get_or_create(analysis, broker=broker_obj)
+                else:
+                    logging.error(f"{MGYA} response exit code: {response.status_code}. No population to DB.")
 
 
