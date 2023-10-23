@@ -18,8 +18,8 @@ import pytest
 import responses
 from unittest.mock import patch
 
+from django.conf import settings
 from django.core.management import call_command
-import settings
 
 from test_utils.emg_fixtures import *  # noqa
 
