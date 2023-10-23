@@ -15,10 +15,13 @@
 # limitations under the License.
 
 import logging
-import re
+import pathlib
+from datetime import timedelta
 
 from django.core.management import BaseCommand
+from django.db.models import QuerySet
 from django.template.loader import render_to_string
+from django.utils import timezone
 
 from emgapi.models import AnalysisJob
 from emgapianns.models import (
@@ -31,50 +34,18 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = "Generate the XML dump of an analysis."
+    help = "Generate the XML dump of analyses for EBI Search."
 
     def add_arguments(self, parser):
         super(Command, self).add_arguments(parser)
         parser.add_argument(
-            "-a", "--accession", help="Analysis accession", required=True
+            "--full",
+            action="store_true",
+            help="Create a full snapshot rather than incremental.",
         )
-        parser.add_argument("-o", "--output", help="Output xml file", required=True)
+        parser.add_argument("-o", "--output", help="Output dir for xml files", required=True)
 
-    # TODO: this was ported directly from EBI Search Dump
-    # we need to improve it, maybe move it to a template tag?
-    # TODO: apply this to InterPro and GO annotations
-    def unicode_and_clean(self, identifier, text):
-        """Converts text to utf8 encoded string with xml subsitutions"""
-        if not text:
-            return text
-        try:
-            text = text.encode("utf8", "strict")
-        except Exception as ex:
-            match = re.search(r"in position (\d+)", str(ex))
-            if match:
-                position = int(match.group(1))
-                matchStart = position - 15
-                if matchStart < 0:
-                    matchStart = 0
-                matchEnd = position + 15
-                if matchEnd > len(text):
-                    matchEnd = len(text)
-                logger.error(
-                    f"Replacing '{identifier}' in {text[position]} [{text[matchStart:matchEnd]}]",
-                    ex,
-                )
-                text = text[:position] + text[position + 1 :]
-                text = self.unicode_and_clean(identifier, text)
-            else:
-                logger.error(f"Failed to convert: {identifier}.", ex)
-        return text.decode("utf8")
-
-    def handle(self, *args, **options):
-        """Render an analysis using the EBI Search XML template"""
-        # TODO: The migration for the analysis should be nearly done, code ported from: https://github.com/EBI-Metagenomics/MetagenomicsSearchDump
-        # In that repo the analyses corresponds to the Run entries.
-        accession: str = options["accession"]
-        analysis: AnalysisJob = AnalysisJob.objects.get(job_id=accession)
+    def get_analysis_context(self, analysis: AnalysisJob):
         analysis_taxonomy: AnalysisJobTaxonomy = AnalysisJobTaxonomy.objects.get(
             analysis_id=str(analysis.job_id)
         )
@@ -101,36 +72,10 @@ class Command(BaseCommand):
                     tax_lineage_list = list(filter(None, tax.lineage.split(":")))
                     if len(tax_lineage_list) > 1:
                         taxonomy_lists.append(
-                            [
-                                self.unicode_and_clean("tax", tax_el)
-                                for tax_el in tax_lineage_list
-                            ]
+                            tax_lineage_list
                         )
 
-        # TODO: port these metadata "cleaning" rules.
-        # if depth and len(depth) > 0:
-        #     self.depth = checkIfNumerical(extID, depth)
-        # if altitude and len(altitude) > 0:
-        #     self.altitude = checkIfNumerical(extID, altitude)
-        # if elevation and len(elevation) > 0:
-        #     self.elevation = checkIfNumerical(extID, elevation)
-        # if salinity and len(salinity) > 0:
-        #     self.salinity = checkIfNumerical(extID, salinity)
-        # if temperature and len(temperature) > 0:
-        #     self.temperature = checkIfNumerical(extID, temperature)
-        # if pH and len(pH) > 0:
-        #     self.pH = checkIfNumerical(extID, pH[0])
-        # if longitudeStart and len(longitudeStart) > 0:
-        #     self.longitudeStart = encodeToUnicodeAndClean(extID, longitudeStart)
-        # if longitudeEnd and len(longitudeEnd) > 0:
-        #     self.longitudeEnd = checkIfNumerical(extID, longitudeEnd)
-        # if latitudeStart and len(latitudeStart) > 0:
-        #     self.latitudeStart = checkIfNumerical(extID, latitudeStart)
-        # if latitudeEnd and len(latitudeEnd) > 0:
-        #     self.latitudeEnd = checkIfNumerical(extID, latitudeEnd)
-
-        # TODO: from this list (taken from )
-        SAMPLE_ANNOTATIONS_ACCEPT_LIST = {
+        sample_numeric_fields_to_index = {
             "temperature": "temperature",
             "pH": "pH",
             "altitude": "altitude",
@@ -145,23 +90,98 @@ class Command(BaseCommand):
             "latitude end": "latitudeEnd",
         }
 
+        sample_text_annotations_to_index = {
+            "sequencing method": "sequencing_method",
+            "geographic location (region and locality)": "location_name",
+            "geographic location (country and/or sea,region)": "location_name",
+            "disease status": "disease_status",
+            "phenotype": "phenotype",
+        }
+
+        sample_annotations_to_index = sample_numeric_fields_to_index.copy()
+        sample_annotations_to_index.update(sample_text_annotations_to_index)
+
         sample_metadata = {}
         for sample_metadata_entry in analysis.sample.metadata.all():
-            if sample_metadata_entry.var.var_name in SAMPLE_ANNOTATIONS_ACCEPT_LIST:
-                sample_metadata[
-                    SAMPLE_ANNOTATIONS_ACCEPT_LIST[sample_metadata_entry.var.var_name]
-                ] = sample_metadata_entry.var_val_ucv
+            if (vn := sample_metadata_entry.var.var_name) in sample_annotations_to_index:
+                indexable_name = sample_annotations_to_index[vn]
+                indexable_value = sample_metadata_entry.var_val_ucv
 
-        print(
-            render_to_string(
-                "ebi_search/analysis.xml",
-                {
-                    "analysis": analysis,
-                    "analysis_biome": biome_list,
-                    "analysis_taxonomies": taxonomy_lists,
-                    "analysis_go_entries": go_annotation.go_terms,
-                    "analysis_ips_entries": ips_annotation.interpro_identifiers,
-                    "sample_metadata": sample_metadata,
-                },
+                if indexable_name in sample_numeric_fields_to_index.values():
+                    try:
+                        indexable_value = float(indexable_value.strip())
+                    except ValueError:
+                        logger.warning(
+                            f"Could not float-parse supposedly numeric field {indexable_name} : {indexable_value}")
+                        continue
+                sample_metadata[
+                    indexable_name
+                ] = indexable_value
+
+        if 'location_name' not in sample_metadata and analysis.sample.geo_loc_name:
+            sample_metadata['location_name'] = analysis.sample.geo_loc_name
+
+        return {
+            "analysis": analysis,
+            "analysis_biome": biome_list,
+            "analysis_taxonomies": taxonomy_lists,
+            "analysis_go_entries": go_annotation.go_terms,
+            "analysis_ips_entries": ips_annotation.interpro_identifiers,
+            "sample_metadata": sample_metadata,
+        }
+
+    @staticmethod
+    def write_without_blank_lines(fp, string):
+        fp.write(
+            "\n".join(
+                filter(
+                    str.strip,
+                    string.splitlines()
+                )
             )
         )
+
+    def handle(self, *args, **options):
+        """Dump EBI Search XML file of analyses"""
+        is_full_snapshot: str = options["full"]
+        output_dir: str = options["output"]
+
+        pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
+
+        analyses: QuerySet = AnalysisJob.objects.available(None)
+
+        if not is_full_snapshot:
+            analyses = AnalysisJob.objects_for_indexing.to_add()
+
+            removals = AnalysisJob.objects_for_indexing.to_delete()
+
+            # produce incremental deletion file
+            deletions_file = pathlib.Path(output_dir) / pathlib.Path('analyses-deletes.xml')
+            with open(deletions_file, 'w') as d:
+                self.write_without_blank_lines(d,
+                    render_to_string(
+                        "ebi_search/analyses-deletes.xml",
+                        {
+                            "removals": removals
+                        }
+                    )
+                )
+
+        additions_file = pathlib.Path(output_dir) / pathlib.Path('analyses.xml')
+        with open(additions_file, 'w') as a:
+            self.write_without_blank_lines(a,
+                render_to_string(
+                    "ebi_search/analyses.xml",
+                    {
+                        "additions": (self.get_analysis_context(analysis) for analysis in analyses)
+                    }
+                )
+            )
+
+        nowish = timezone.now() + timedelta(minutes=1)
+        # Small buffer into the future so that the indexing time remains ahead of auto-now updated times.
+
+        for analysis in analyses:
+            analysis.last_indexed = nowish
+
+        AnalysisJob.objects.bulk_update(analyses, fields=["last_indexed"])

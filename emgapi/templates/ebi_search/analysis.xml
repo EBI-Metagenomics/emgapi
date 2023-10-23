@@ -4,6 +4,7 @@
             <dates>
                 <date type="creation_date" value="{{ analysis.submit_time|date:'Y-m-d' }}"/>
                 <date type="completion_date" value="{{ analysis.complete_time|date:'Y-m-d' }}"/>
+                <date type="sample_collection_date" value="{{ analysis.sample.collection_date|date:'Y-m-d' }}"/>
             </dates>
             <additional_fields>
                 <field name="experiment_type">assembly</field>
@@ -11,6 +12,22 @@
                 <field name="sample_name">{{ analysis.sample.sample_name | safe }}</field>
                 <field name="project_name">{{ analysis.study.study_name | safe }}</field>
                 <field name="biome_name">{{ analysis.study.biome.biome_name | safe }}</field>
+
+                {% if analysis.sample.species %}
+                <field name="species">{{ analysis.sample.species | safe }}</field>
+                {% endif %}
+
+                {% if analysis.sample.environment_feature %}
+                <field name="feature">{{ analysis.sample.environment_feature | safe }}</field>
+                {% endif %}
+
+                {% if analysis.sample.environment_material %}
+                <field name="material">{{ analysis.sample.environment_material | safe }}</field>
+                {% endif %}
+
+                <field name="sample_alias">{{ analysis.sample.sample_alias | safe }}</field>
+                <field name="project_name">{{ analysis.study.study_name | safe }}</field>
+
                 <hierarchical_field name="biome">
                 {% for biome_element in analysis_biome %}
                     {% if forloop.first %}
@@ -20,6 +37,11 @@
                     {% endif %}
                 {% endfor %}
                 </hierarchical_field>
+
+                {% for metadata_key, metadata_value in sample_metadata.items %}
+                <field name="{{ metadata_key | safe }}">{{ metadata_value | safe }}</field>
+                {% endfor %}
+
                 {% for taxonomy_lineage_elements in analysis_taxonomies %}
                 <hierarchical_field name="organism">
                     {% for taxonomy_element in taxonomy_lineage_elements %}
@@ -39,14 +61,8 @@
                 {% for ips in analysis_ips_entries %}
                 <field name="interpro_entry">{{ ips.description | safe }}</field>
                 {% endfor %}
-
-                {% for metadata_key, metadata_value in sample_metadata.items %}
-                <field name="{{ metadata_key | safe }}">{{ metadata_value | safe }}</field>
-                {% endfor %}
-
             </additional_fields>
             <cross_references>
-                <ref dbkey="{{ analysis.sample.accession }}" dbname="metagenomics_samples"/>
                 <ref dbkey="{{ analysis.study.accession }}" dbname="metagenomics_projects"/>
                 <ref dbkey="{{ analysis.study.project_id }}" dbname="ena_project"/>
 
