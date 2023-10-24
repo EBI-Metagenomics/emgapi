@@ -50,13 +50,13 @@ class MetagenomicsExchangeAPI:
         response.raise_for_status()
         return response
 
-    def delete_request(self, endpoint: str, data: dict):
+    def delete_request(self, endpoint: str):
         headers = {
             "Accept": "application/json",
             "Authorization": self.__token,
         }
         response = requests.delete(
-            f"{self.base_url}/{endpoint}", json=data, headers=headers
+            f"{self.base_url}/{endpoint}", headers=headers
         )
         response.raise_for_status()
         return response
@@ -104,15 +104,16 @@ class MetagenomicsExchangeAPI:
         return False
 
     def delete_analysis(self, registry_id: str):
-        data = {"registryID": registry_id}
-        response = self.delete_request(endpoint="datasets", data=data)
+        response = self.delete_request(endpoint=f"datasets/{registry_id}")
         if response.ok:
-            logging.info(f"{registry_id} was deleted")
+            logging.info(f"{registry_id} was deleted with {response.status_code}")
             return True
         else:
             if response.status_code == 400:
                 logging.error(f"Bad request for {registry_id}")
             elif response.status_code == 401:
+                logging.error(f"Failed to authenticate for {registry_id}")
+            else:
                 logging.error(f"{response.message} for {registry_id}")
             return False
 

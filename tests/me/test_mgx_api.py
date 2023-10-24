@@ -13,7 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+"""
 import pytest
 
 from unittest.mock import patch
@@ -24,7 +24,7 @@ from test_utils.emg_fixtures import *  # noqa
 
 from emgapi.metagenomics_exchange import MetagenomicsExchangeAPI
 from emgapi.models import AnalysisJob, MetagenomicsExchange, ME_Broker
-"""
+
 @pytest.mark.django_db
 class TestMeAPI:
     @patch("emgapi.metagenomics_exchange.MetagenomicsExchangeAPI.post_request")

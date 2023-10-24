@@ -11,17 +11,18 @@ import requests
 import responses
 
 class TestME:
-    def test_check_existing_analysis(self):
+
+    def test_check_existing_analysis_me(self):
         me_api = MetagenomicsExchangeAPI()
         source_id = "MGYA00293719"
         assert me_api.check_analysis(source_id, True)
 
-    def test_check_not_existing_analysis(self):
+    def test_check_not_existing_analysis_me(self):
         me_api = MetagenomicsExchangeAPI(broker="MAR")
         source_id = "MGYA00293719"
         assert not me_api.check_analysis(source_id, True)
 
-    def test_post_existing_analysis(self):
+    def test_post_existing_analysis_me(self):
         me_api = MetagenomicsExchangeAPI()
         source_id = "MGYA00293719"
         # Should return -> https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/409
@@ -40,3 +41,44 @@ class TestME:
 
         assert response.status_code == 201
         assert response.json() == {'success': True}
+
+    @responses.activate
+    def test_mock_delete_analysis_from_me(self):
+        me_api = MetagenomicsExchangeAPI()
+        registry_id = "MGX0000780"
+        endpoint = f"datasets/{registry_id}"
+        url = settings.ME_API + f"/{endpoint}"
+
+        responses.add(responses.DELETE, url, json={'success': True}, status=201)
+        response = me_api.delete_request(endpoint)
+
+        assert response.status_code == 201
+        assert response.json() == {'success': True}
+
+
+    def test_wrong_delete_request_me(self):
+        me_api = MetagenomicsExchangeAPI()
+        registry_id = "MGX0000780"
+        endpoint = f"dataset/{registry_id}"
+
+        with pytest.raises(requests.HTTPError, match="404 Client Error"):
+            me_api.delete_request(endpoint)
+
+    def test_patch_analysis_me(self):
+        me_api = MetagenomicsExchangeAPI()
+        registry_id = "MGX0000788"
+        mgya = "MGYA00593709"
+        run_accession = "SRR3960575"
+        public = False
+
+        data = {
+            "confidence": "full",
+            "endPoint": f"https://www.ebi.ac.uk/metagenomics/analyses/{mgya}",
+            "method": ["other_metadata"],
+            "sourceID": mgya,
+            "sequenceID": run_accession,
+            "status": "public" if public else "private",
+            "brokerID": "EMG",
+        }
+        assert me_api.patch_analysis(registry_id, data)
+
