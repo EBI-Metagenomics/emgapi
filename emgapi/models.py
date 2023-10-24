@@ -893,7 +893,7 @@ class StudyManager(models.Manager):
         return self.get_queryset().mydata(request)
 
 
-class Study(ENASyncableModel):
+class Study(ENASyncableModel, EbiSearchIndexedModel):
 
     def __init__(self, *args, **kwargs):
         super(Study, self).__init__(*args, **kwargs)
@@ -927,7 +927,7 @@ class Study(ENASyncableModel):
     author_name = models.CharField(
         db_column='AUTHOR_NAME', max_length=100, blank=True, null=True)
     last_update = models.DateTimeField(
-        db_column='LAST_UPDATE')
+        db_column='LAST_UPDATE', auto_now=True)
     submission_account_id = models.CharField(
         db_column='SUBMISSION_ACCOUNT_ID',
         max_length=15, blank=True, null=True)

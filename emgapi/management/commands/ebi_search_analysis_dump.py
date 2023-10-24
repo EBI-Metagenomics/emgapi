@@ -173,7 +173,8 @@ class Command(BaseCommand):
                 render_to_string(
                     "ebi_search/analyses.xml",
                     {
-                        "additions": (self.get_analysis_context(analysis) for analysis in analyses)
+                        "additions": (self.get_analysis_context(analysis) for analysis in analyses),
+                        "count": analyses.count()
                     }
                 )
             )
