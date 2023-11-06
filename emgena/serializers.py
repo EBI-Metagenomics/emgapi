@@ -92,7 +92,6 @@ class NotifySerializer(serializers.Serializer):
         n = ena_models.Notify(**validated_data)
 
         emg_queue = settings.RT["emg_queue"]
-        ena_queue = settings.RT["ena_queue"]
 
         ticket = {
             "Requestor": n.from_email,
@@ -104,7 +103,7 @@ class NotifySerializer(serializers.Serializer):
             ticket["Cc"] = n.cc
 
         if n.is_consent:
-            ticket["Queue"] = ena_queue
+            return 403
         else:
             ticket["Queue"] = emg_queue
 
