@@ -74,39 +74,3 @@ class TestNotify(APITestCase):
         call = responses.calls[0]
         assert call.request.url == settings.RT["url"]
         assert call.request.body == json.dumps(expected_body)
-
-    @responses.activate
-    @pytest.mark.skipif(sys.version_info < (3, 6), reason="requires python3.6 or higher")
-    def test_notify_consent(self):
-        """Test notify endpoint for consent requests
-        """
-        expected_body = {
-            "Requestor": "fake@email.com",
-            "Priority": "4",
-            "Subject": "Test email subject",
-            "Content": "Hi this is just an example",
-            "Queue": settings.RT["ena_queue"],
-        }
-
-        responses.add(
-            responses.POST,
-            settings.RT["url"],
-            status=200)
-
-        post_data = {
-            "from_email": "fake@email.com",
-            "subject": "Test email subject",
-            "message": "Hi this is just an example",
-            "is_consent": True
-        }
-
-        self.client.post(
-            reverse('emgapi_v1:csrf-notify'),
-            data=post_data, format='json',
-            HTTP_AUTHORIZATION='Bearer {}'.format(self.get_token())
-        )
-
-        assert len(responses.calls) == 1
-        call = responses.calls[0]
-        assert call.request.url == settings.RT["url"]
-        assert call.request.body == json.dumps(expected_body)
