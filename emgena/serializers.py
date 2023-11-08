@@ -103,7 +103,7 @@ class NotifySerializer(serializers.Serializer):
             ticket["Cc"] = n.cc
 
         if n.is_consent:
-            return 403
+            return 404
         else:
             ticket["Queue"] = emg_queue
 
