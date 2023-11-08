@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2022 EMBL - European Bioinformatics Institute
+# Copyright 2019-2023 EMBL - European Bioinformatics Institute
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ def get_default_connection_headers():
     }
 
 
-class Publication(object):
+class Publication:
     def __init__(
         self,
         pub_year,
