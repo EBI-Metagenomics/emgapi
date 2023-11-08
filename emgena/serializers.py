@@ -81,11 +81,7 @@ class NotifySerializer(serializers.Serializer):
         return super().is_valid()
 
     def create(self, validated_data):
-        """Create an RT ticket.
-        If this is a consent approval then the procedure is:
-        - create ticket in ENA-MG queue
-        otherwise:
-        - create ticket in EMG queue
+        """Create an RT ticket in EMG queue
         Note: remember to setup valid credentials (i.e. url, user and token token) in the config.rt
         """
         import requests
