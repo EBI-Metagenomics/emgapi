@@ -564,13 +564,24 @@ class Publication(models.Model):
         db_column='PUBLISHED_YEAR', blank=True, null=True,
         help_text='Published year')
     pub_type = models.CharField(
-        db_column='PUB_TYPE', max_length=150, blank=True, null=True)
+        db_column='PUB_TYPE', max_length=300, blank=True, null=True)
 
     objects = PublicationManager()
 
     class Meta:
         db_table = 'PUBLICATION'
         ordering = ('pubmed_id',)
+
+    def save(self, *args, **kwargs):
+        for field in self._meta.fields:
+            if isinstance(field, models.TextField) or isinstance(field, models.CharField):
+                field_name = field.name
+                max_length = field.max_length
+                field_value = getattr(self, field_name)
+                if field_value and len(field_value) > max_length:
+                    logger.error(f"Publication field {field_name} content was truncated at {max_length}")
+                    setattr(self, field_name, field_value[:max_length])
+        super(Publication, self).save(*args, **kwargs)
 
     def __str__(self):
         return str(self.pubmed_id)
