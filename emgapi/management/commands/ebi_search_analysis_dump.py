@@ -17,6 +17,7 @@
 import logging
 import pathlib
 from datetime import timedelta
+from typing import Optional
 
 from django.core.management import BaseCommand
 from django.db.models import QuerySet
@@ -46,34 +47,49 @@ class Command(BaseCommand):
         parser.add_argument("-o", "--output", help="Output dir for xml files", required=True)
 
     def get_analysis_context(self, analysis: AnalysisJob):
-        analysis_taxonomy: AnalysisJobTaxonomy = AnalysisJobTaxonomy.objects.get(
-            analysis_id=str(analysis.job_id)
-        )
-        go_annotation: AnalysisJobGoTerm = AnalysisJobGoTerm.objects.get(
-            pk=str(analysis.job_id)
-        )
-        ips_annotation: AnalysisJobInterproIdentifier = AnalysisJobInterproIdentifier.objects.get(
-            pk=str(analysis.job_id)
-        )
+        try:
+            analysis_taxonomy: Optional[AnalysisJobTaxonomy] = AnalysisJobTaxonomy.objects.get(
+                analysis_id=str(analysis.job_id)
+            )
+        except AnalysisJobTaxonomy.DoesNotExist:
+            logger.warning(f"Could not find analysis job taxonomy for {analysis.job_id}")
+            analysis_taxonomy = None
+
+        try:
+            go_annotation: Optional[AnalysisJobGoTerm] = AnalysisJobGoTerm.objects.get(
+                pk=str(analysis.job_id)
+            )
+        except AnalysisJobGoTerm.DoesNotExist:
+            logger.warning(f"Could not find go terms for {analysis.job_id}")
+            go_annotation = None
+
+        try:
+            ips_annotation: Optional[AnalysisJobInterproIdentifier] = AnalysisJobInterproIdentifier.objects.get(
+                pk=str(analysis.job_id)
+            )
+        except AnalysisJobInterproIdentifier.DoesNotExist:
+            logger.warning(f"Could not find IPS terms for {analysis.job_id}")
+            ips_annotation = None
 
         biome_list = analysis.study.biome.lineage.split(":")[1:]
 
         taxonomy_lists = []
-        taxonomy_attributes = [
-            analysis_taxonomy.taxonomy,
-            analysis_taxonomy.taxonomy_ssu,
-            analysis_taxonomy.taxonomy_lsu,
-            analysis_taxonomy.taxonomy_itsonedb,
-            analysis_taxonomy.taxonomy_itsunite,
-        ]
-        for taxonomy_attribute in taxonomy_attributes:
-            if taxonomy_attribute:
-                for tax in taxonomy_attribute:
-                    tax_lineage_list = list(filter(None, tax.lineage.split(":")))
-                    if len(tax_lineage_list) > 1:
-                        taxonomy_lists.append(
-                            tax_lineage_list
-                        )
+        if analysis_taxonomy:
+            taxonomy_attributes = [
+                analysis_taxonomy.taxonomy,
+                analysis_taxonomy.taxonomy_ssu,
+                analysis_taxonomy.taxonomy_lsu,
+                analysis_taxonomy.taxonomy_itsonedb,
+                analysis_taxonomy.taxonomy_itsunite,
+            ]
+            for taxonomy_attribute in taxonomy_attributes:
+                if taxonomy_attribute:
+                    for tax in taxonomy_attribute:
+                        tax_lineage_list = list(filter(None, tax.lineage.split(":")))
+                        if len(tax_lineage_list) > 1:
+                            taxonomy_lists.append(
+                                tax_lineage_list
+                            )
 
         sample_numeric_fields_to_index = {
             "temperature": "temperature",
@@ -125,8 +141,8 @@ class Command(BaseCommand):
             "analysis": analysis,
             "analysis_biome": biome_list,
             "analysis_taxonomies": taxonomy_lists,
-            "analysis_go_entries": go_annotation.go_terms,
-            "analysis_ips_entries": ips_annotation.interpro_identifiers,
+            "analysis_go_entries": go_annotation.go_terms if go_annotation else [],
+            "analysis_ips_entries": ips_annotation.interpro_identifiers if ips_annotation else [],
             "sample_metadata": sample_metadata,
         }
 
