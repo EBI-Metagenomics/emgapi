@@ -20,6 +20,7 @@ from datetime import timedelta
 from typing import Optional
 
 from django.core.management import BaseCommand
+from django.core.paginator import Paginator
 from django.db.models import QuerySet
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -45,30 +46,31 @@ class Command(BaseCommand):
             help="Create a full snapshot rather than incremental.",
         )
         parser.add_argument("-o", "--output", help="Output dir for xml files", required=True)
+        parser.add_argument("-c", "--chunk", help="Number of analyses per chunk", default=100, nargs='?', type=int)
 
     def get_analysis_context(self, analysis: AnalysisJob):
         try:
             analysis_taxonomy: Optional[AnalysisJobTaxonomy] = AnalysisJobTaxonomy.objects.get(
-                analysis_id=str(analysis.job_id)
+                analysis_id=analysis.job_id
             )
         except AnalysisJobTaxonomy.DoesNotExist:
-            logger.warning(f"Could not find analysis job taxonomy for {analysis.job_id}")
+            logger.debug(f"Could not find analysis job taxonomy for {analysis.job_id}")
             analysis_taxonomy = None
 
         try:
             go_annotation: Optional[AnalysisJobGoTerm] = AnalysisJobGoTerm.objects.get(
-                pk=str(analysis.job_id)
+                pk=analysis.job_id
             )
         except AnalysisJobGoTerm.DoesNotExist:
-            logger.warning(f"Could not find go terms for {analysis.job_id}")
+            logger.debug(f"Could not find go terms for {analysis.job_id}")
             go_annotation = None
 
         try:
             ips_annotation: Optional[AnalysisJobInterproIdentifier] = AnalysisJobInterproIdentifier.objects.get(
-                pk=str(analysis.job_id)
+                pk=analysis.job_id
             )
         except AnalysisJobInterproIdentifier.DoesNotExist:
-            logger.warning(f"Could not find IPS terms for {analysis.job_id}")
+            logger.debug(f"Could not find IPS terms for {analysis.job_id}")
             ips_annotation = None
 
         biome_list = analysis.study.biome.lineage.split(":")[1:]
@@ -161,6 +163,7 @@ class Command(BaseCommand):
         """Dump EBI Search XML file of analyses"""
         is_full_snapshot: str = options["full"]
         output_dir: str = options["output"]
+        chunk_size: int = options["chunk"]
 
         pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
 
@@ -183,17 +186,21 @@ class Command(BaseCommand):
                     )
                 )
 
-        additions_file = pathlib.Path(output_dir) / pathlib.Path('analyses.xml')
-        with open(additions_file, 'w') as a:
-            self.write_without_blank_lines(a,
-                render_to_string(
-                    "ebi_search/analyses.xml",
-                    {
-                        "additions": (self.get_analysis_context(analysis) for analysis in analyses),
-                        "count": analyses.count()
-                    }
+        paginated_analyses = Paginator(analyses, chunk_size)
+
+        for page in paginated_analyses:
+            logger.info(f"Dumping {page.number = }/{paginated_analyses.num_pages}")
+            additions_file = pathlib.Path(output_dir) / pathlib.Path(f'analyses_{page.number:04}.xml')
+            with open(additions_file, 'w') as a:
+                self.write_without_blank_lines(a,
+                    render_to_string(
+                        "ebi_search/analyses.xml",
+                        {
+                            "additions": (self.get_analysis_context(analysis) for analysis in page),
+                            "count": len(page)
+                        }
+                    )
                 )
-            )
 
         nowish = timezone.now() + timedelta(minutes=1)
         # Small buffer into the future so that the indexing time remains ahead of auto-now updated times.
