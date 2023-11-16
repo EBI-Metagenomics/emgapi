@@ -9,57 +9,57 @@
             <additional_fields>
                 <field name="experiment_type">assembly</field>
                 <field name="pipeline_version">{{ analysis.pipeline.release_version }}</field>
-                <field name="sample_name">{{ analysis.sample.sample_name | safe }}</field>
-                <field name="project_name">{{ analysis.study.study_name | safe }}</field>
-                <field name="biome_name">{{ analysis.study.biome.biome_name | safe }}</field>
+                <field name="sample_name">{{ analysis.sample.sample_name | escape }}</field>
+                <field name="project_name">{{ analysis.study.study_name | escape }}</field>
+                <field name="biome_name">{{ analysis.study.biome.biome_name | escape }}</field>
 
                 {% if analysis.sample.species %}
-                <field name="species">{{ analysis.sample.species | safe }}</field>
+                <field name="species">{{ analysis.sample.species | escape }}</field>
                 {% endif %}
 
                 {% if analysis.sample.environment_feature %}
-                <field name="feature">{{ analysis.sample.environment_feature | safe }}</field>
+                <field name="feature">{{ analysis.sample.environment_feature | escape }}</field>
                 {% endif %}
 
                 {% if analysis.sample.environment_material %}
-                <field name="material">{{ analysis.sample.environment_material | safe }}</field>
+                <field name="material">{{ analysis.sample.environment_material | escape }}</field>
                 {% endif %}
 
-                <field name="sample_alias">{{ analysis.sample.sample_alias | safe }}</field>
-                <field name="project_name">{{ analysis.study.study_name | safe }}</field>
+                <field name="sample_alias">{{ analysis.sample.sample_alias | escape }}</field>
+                <field name="project_name">{{ analysis.study.study_name | escape }}</field>
 
                 <hierarchical_field name="biome">
                 {% for biome_element in analysis_biome %}
                     {% if forloop.first %}
-                    <root>{{ biome_element | safe }}</root>
+                    <root>{{ biome_element | escape }}</root>
                     {% else %}
-                    <child>{{ biome_element | safe }}</child>
+                    <child>{{ biome_element | escape }}</child>
                     {% endif %}
                 {% endfor %}
                 </hierarchical_field>
 
                 {% for metadata_key, metadata_value in sample_metadata.items %}
-                <field name="{{ metadata_key | safe }}">{{ metadata_value | safe }}</field>
+                <field name="{{ metadata_key | escape }}">{{ metadata_value | escape }}</field>
                 {% endfor %}
 
                 {% for taxonomy_lineage_elements in analysis_taxonomies %}
                 <hierarchical_field name="organism">
                     {% for taxonomy_element in taxonomy_lineage_elements %}
                         {% if forloop.first %}
-                        <root>{{ taxonomy_element | safe }}</root>
+                        <root>{{ taxonomy_element | escape }}</root>
                         {% else %}
-                        <child>{{ taxonomy_element | safe  }}</child>
+                        <child>{{ taxonomy_element | escape  }}</child>
                         {% endif %}
                     {% endfor %}
                 </hierarchical_field>
                 {% endfor %}
 
                 {% for go_slim in analysis_go_entries %}
-                <field name="go_term">{{ go_slim.description | safe }}</field>
+                <field name="go_term">{{ go_slim.description | escape }}</field>
                 {% endfor %}
 
                 {% for ips in analysis_ips_entries %}
-                <field name="interpro_entry">{{ ips.description | safe }}</field>
+                <field name="interpro_entry">{{ ips.description | escape }}</field>
                 {% endfor %}
             </additional_fields>
             <cross_references>

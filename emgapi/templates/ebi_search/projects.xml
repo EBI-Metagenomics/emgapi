@@ -7,8 +7,8 @@
         {% for addition in additions %}
         {% with addition.study as study %}
         <entry xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="{{ study.accession }}">
-            <name>{{ study.study_name | safe }}</name>
-            <description>{{ study.study_abstract | safe }}</description>
+            <name>{{ study.study_name | escape }}</name>
+            <description>{{ study.study_abstract | escape }}</description>
             <dates>
                 <date type="creation_date" value="{{ study.first_created|date:'Y-m-d' }}"/>
                 <date type="last_modification_date" value="{{ study.last_update|date:'Y-m-d' }}"/>
@@ -19,13 +19,13 @@
                 <hierarchical_field name="biome">
                 {% for biome_element in addition.biome_list %}
                     {% if forloop.first %}
-                    <root>{{ biome_element | safe }}</root>
+                    <root>{{ biome_element | escape }}</root>
                     {% else %}
-                    <child>{{ biome_element | safe }}</child>
+                    <child>{{ biome_element | escape }}</child>
                     {% endif %}
                 {% endfor %}
                 </hierarchical_field>
-                <field name="centre_name">{{ study.centre_name | safe }}</field>
+                <field name="centre_name">{{ study.centre_name | escape }}</field>
             </additional_fields>
             <cross_references>
                 <ref dbkey="{{ study.project_id }}" dbname="ena_project"/>

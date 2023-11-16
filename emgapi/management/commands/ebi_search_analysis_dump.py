@@ -129,7 +129,7 @@ class Command(BaseCommand):
                     try:
                         indexable_value = float(indexable_value.strip())
                     except ValueError:
-                        logger.warning(
+                        logger.debug(
                             f"Could not float-parse supposedly numeric field {indexable_name} : {indexable_value}")
                         continue
                 sample_metadata[

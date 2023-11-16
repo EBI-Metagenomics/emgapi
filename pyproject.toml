@@ -117,7 +117,7 @@ max-line-length = 119
 """
 
 [tool.bumpversion]
-current_version = "2.4.38"
+current_version = "2.4.39"
 
 [[tool.bumpversion.files]]
 filename = "emgcli/__init__.py"
