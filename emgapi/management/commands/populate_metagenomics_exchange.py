@@ -68,6 +68,17 @@ class Command(BaseCommand):
             help="Do a full check of DB",
         )
 
+    def generate_metadata(self, mgya, run_accession, status):
+        return {
+            "confidence": "full",
+            "endPoint": f"https://www.ebi.ac.uk/metagenomics/analyses/{mgya}",
+            "method": ["other_metadata"],
+            "sourceID": mgya,
+            "sequenceID": run_accession,
+            "status": status,
+            "brokerID": settings.MGNIFY_BROKER,
+        }
+
     def handle(self, *args, **options):
         self.study_accession = options.get("study")
         self.dry_run = options.get("dry_run")
@@ -88,15 +99,8 @@ class Command(BaseCommand):
             removals = removals.filter(pipeline__pipeline_id=self.pipeline_version)
         logging.info(f"Processing {len(new_analyses)} new analyses")
         for ajob in new_analyses:
-            metadata = {
-                "confidence": "full",
-                "endPoint": f"https://www.ebi.ac.uk/metagenomics/analyses/{ajob.accession}",
-                "method": ["other_metadata"],
-                "sourceID": ajob.accession,
-                "sequenceID": ajob.run,
-                "status": "public" if not ajob.is_private else "private",
-                "brokerID": settings.MGNIFY_BROKER,
-            }
+            metadata = self.generate_metadata(mgya=ajob.accession, run_accession=ajob.run,
+                                              status="public" if not ajob.is_private else "private")
             registryID, metadata_match = ME.check_analysis(source_id=ajob.accession, metadata=metadata)
             if not registryID:
                 logging.debug(f"Add new {ajob}")
@@ -111,17 +115,8 @@ class Command(BaseCommand):
             else:
                 if not metadata_match:
                     logging.debug(f"Patch existing {ajob}")
-                    data = {
-                        "confidence": "full",
-                        "endPoint": f"https://www.ebi.ac.uk/metagenomics/analyses/{ajob.accession}",
-                        "method": ["other_metadata"],
-                        "sourceID": ajob.accession,
-                        "sequenceID": ajob.run,
-                        "status": "public" if not ajob.is_private else "private",
-                        "brokerID": settings.MGNIFY_BROKER,
-                    }
                     if not self.dry_run:
-                        if ME.patch_analysis(registry_id=registryID, data=data):
+                        if ME.patch_analysis(registry_id=registryID, data=metadata):
                             logging.info(f"Analysis {ajob} updated successfully")
                         else:
                             logging.info(f"Analysis {ajob} update failed")
@@ -132,7 +127,9 @@ class Command(BaseCommand):
 
         logging.info(f"Processing {len(removals)} analyses to remove")
         for ajob in removals:
-            registryID, _ = ME.check_analysis(source_id=ajob.accession)
+            metadata = self.generate_metadata(mgya=ajob.accession, run_accession=ajob.run,
+                                              status="public" if not ajob.is_private else "private")
+            registryID, _ = ME.check_analysis(source_id=ajob.accession, metadata=metadata)
             if registryID:
                 if not self.dry_run:
                     if ME.delete_analysis(registryID):
