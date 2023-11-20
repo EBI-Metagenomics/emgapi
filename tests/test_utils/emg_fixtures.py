@@ -1106,6 +1106,7 @@ def make_suppressed_analysis_jobs(quantity, emg_props=None):
 def suppressed_analysis_jobs(ena_suppressed_runs):
     suppressed_analysisjobs = make_suppressed_analysis_jobs(quantity=5,
                                                             emg_props={"is_suppressed": True,
+                                                                       "suppressed_at": '1980-01-01 00:00:00',
                                                                        'last_populated_me': '1970-01-01 00:00:00'})
     return suppressed_analysisjobs
 
