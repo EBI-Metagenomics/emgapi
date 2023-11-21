@@ -22,6 +22,8 @@ from django.core.management import call_command
 
 from test_utils.emg_fixtures import *  # noqa
 
+from emgapi.models import AnalysisJob
+
 
 @pytest.mark.django_db
 class TestMeAPI:
@@ -50,8 +52,9 @@ class TestMeAPI:
             dev=True,
             dry_run=True,
         )
-
-        assert "No MGYA00000002 in ME, nothing to delete" in caplog.text
+        ajobs = AnalysisJob.objects.all()
+        for job in ajobs:
+            assert f"No {job.accession} in ME, nothing to delete" in caplog.text
         assert "Processing 0 new analyses" in caplog.text
 
     @pytest.mark.usefixtures('analysis_existed_in_me')
@@ -64,3 +67,13 @@ class TestMeAPI:
         assert "Incorrect field None in ME (ERR1806500)" in caplog.text
         assert "Dry-mode run: no patch to real ME for MGYA00147343" in caplog.text
         assert "Processing 0 analyses to remove" in caplog.text
+
+    @pytest.mark.usefixtures('run_multiple_analysis')
+    def test_population(
+            self,
+            caplog
+    ):
+        call_command(
+            "populate_metagenomics_exchange",
+            dev=True,
+        )

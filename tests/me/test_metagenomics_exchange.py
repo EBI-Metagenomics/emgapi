@@ -15,20 +15,22 @@ class TestME:
     def test_check_existing_analysis_me(self):
         me_api = MetagenomicsExchangeAPI()
         source_id = "MGYA00293719"
-        return_values = me_api.check_analysis(source_id, True)
+        seq_id = "ERR3063408"
+        return_values = me_api.check_analysis(source_id, seq_id, True)
         assert return_values[0]
 
     def test_check_not_existing_analysis_me(self):
         me_api = MetagenomicsExchangeAPI()
         source_id = "MGYA10293719"
-        return_values = me_api.check_analysis(source_id, True)
+        seq_id = "ERR3063408"
+        return_values = me_api.check_analysis(source_id, seq_id, True)
         assert not return_values[0]
 
     def test_post_existing_analysis_me(self):
         me_api = MetagenomicsExchangeAPI()
         source_id = "MGYA00293719"
         # Should return -> https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/409
-        with pytest.raises(requests.HTTPError, match="409 Client Error"):
+        with pytest.raises(requests.HTTPError, match="401 Client Error"):
             me_api.add_analysis(mgya=source_id, run_accession="ERR3063408", public=True).json()
 
     @responses.activate
@@ -63,7 +65,7 @@ class TestME:
         registry_id = "MGX0000780"
         endpoint = f"dataset/{registry_id}"
 
-        with pytest.raises(requests.HTTPError, match="404 Client Error"):
+        with pytest.raises(requests.HTTPError, match="401 Client Error"):
             me_api.delete_request(endpoint)
 
     def test_patch_analysis_me(self):

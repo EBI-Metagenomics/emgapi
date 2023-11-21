@@ -101,7 +101,8 @@ class Command(BaseCommand):
         for ajob in new_analyses:
             metadata = self.generate_metadata(mgya=ajob.accession, run_accession=ajob.run,
                                               status="public" if not ajob.is_private else "private")
-            registryID, metadata_match = ME.check_analysis(source_id=ajob.accession, metadata=metadata)
+            registryID, metadata_match = ME.check_analysis(source_id=ajob.accession, sequence_id=ajob.run,
+                                                           metadata=metadata)
             if not registryID:
                 logging.debug(f"Add new {ajob}")
                 if not self.dry_run:
@@ -129,7 +130,7 @@ class Command(BaseCommand):
         for ajob in removals:
             metadata = self.generate_metadata(mgya=ajob.accession, run_accession=ajob.run,
                                               status="public" if not ajob.is_private else "private")
-            registryID, _ = ME.check_analysis(source_id=ajob.accession, metadata=metadata)
+            registryID, _ = ME.check_analysis(source_id=ajob.accession, sequence_id=ajob.run, metadata=metadata)
             if registryID:
                 if not self.dry_run:
                     if ME.delete_analysis(registryID):

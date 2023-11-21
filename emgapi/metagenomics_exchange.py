@@ -87,37 +87,38 @@ class MetagenomicsExchangeAPI:
         return response
 
 
-    def check_analysis(self, source_id: str, public=None, metadata=None) -> [str, bool]:
+    def check_analysis(self, source_id: str, sequence_id: str, public=None, metadata=None) -> [str, bool]:
         logging.info(f"Check {source_id}")
         params = {}
         if public:
             params = {
                 "status": "public" if public else "private",
             }
-        endpoint = f"brokers/{self.broker}/datasets"
+        endpoint = f"sequences/{sequence_id}"
         response = self.get_request(endpoint=endpoint, params=params)
         analysis_registryID = ""
         metadata_match = True
         if response.ok:
             data = response.json()
             datasets = data.get("datasets")
-            for item in datasets:
-                if item.get("sourceID") == source_id:
-                    logging.info(f"{source_id} exists in ME")
-                    analysis_registryID = item.get("registryID")
-                    if metadata:
-                        for metadata_record in metadata:
-                            if not(metadata_record in item):
+            sourceIDs = [item.get("sourceID") for item in datasets]
+            if source_id in sourceIDs:
+                found_record = [item for item in datasets if item.get("sourceID") == source_id][0]
+                logging.info(f"{source_id} exists in ME")
+                analysis_registryID = found_record.get("registryID")
+                if metadata:
+                    for metadata_record in metadata:
+                        if not(metadata_record in found_record):
+                            metadata_match = False
+                            return analysis_registryID, metadata_match
+                        else:
+                            if metadata[metadata_record] != found_record[metadata_record]:
                                 metadata_match = False
+                                logging.info(f"Incorrect field {metadata[metadata_record]} in ME ({found_record[metadata_record]})")
                                 return analysis_registryID, metadata_match
-                            else:
-                                if metadata[metadata_record] != item[metadata_record]:
-                                    metadata_match = False
-                                    logging.info(f"Incorrect field {metadata[metadata_record]} in ME ({item[metadata_record]})")
-                                    return analysis_registryID, metadata_match
-                    return analysis_registryID, metadata_match
-                else:
-                    logging.info(f"{source_id} does not exist in ME")
+                return analysis_registryID, metadata_match
+            else:
+                logging.info(f"{source_id} does not exist in ME")
         return analysis_registryID, metadata_match
 
     def delete_analysis(self, registry_id: str):
