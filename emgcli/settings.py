@@ -87,6 +87,10 @@ LOGGING = {
             '()': 'django.utils.log.CallbackFilter',
             'callback': lambda record: "v1/utils/myaccounts" not in record.getMessage(),
         },
+        'exclude_token_verification': {
+            '()': 'django.utils.log.CallbackFilter',
+            'callback': lambda record: "v1/utils/token/verify" not in record.getMessage(),
+        },
     },
     'formatters': {
         'default': {
@@ -136,13 +140,13 @@ LOGGING = {
             'handlers': ['default'],
             'level': 'INFO',
             'propagate': False,
-            'filters': ['exclude_myaccounts'],
+            'filters': ['exclude_myaccounts', 'exclude_token_verification'],
         },
         'django.server': {
             'handlers': ['default'],
             'level': 'INFO',
             'propagate': False,
-            'filters': ['exclude_myaccounts'],
+            'filters': ['exclude_myaccounts', 'exclude_token_verification'],
         },
         'django': {
             'handlers': ['null'],
