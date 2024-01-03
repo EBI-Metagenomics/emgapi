@@ -200,7 +200,7 @@ class RunStudy(StudyAbstract):
         # the PUBLIC SYNONYM (according to ENA) and it's not working ATM
         # we were advised to prefix the views and this is the simplest way.
         # The short-term plan is to remove the dependency of ENA databases
-        _prefix_workaround = settings.DATABASES['era'].get('ERA_TABLESPACE_PREFIX', 'ERA\".\"')
+        _prefix_workaround = settings.DATABASES.get('era', {}).get('ERA_TABLESPACE_PREFIX', 'ERA\".\"')
         db_table = f'{_prefix_workaround}V_MGP_RUN_STUDY'
 
 
