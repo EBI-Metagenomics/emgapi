@@ -9,6 +9,7 @@ emg:
     era:
       ENGINE: 'django.db.backends.sqlite3'
       NAME: '/opt/ci/testdbs/ena-testdb.sqlite'
+      ERA_TABLESPACE_PREFIX: ''
 
   admin: True
   downloads_bypass_nginx: True
