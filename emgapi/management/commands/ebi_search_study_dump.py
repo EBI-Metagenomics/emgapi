@@ -54,7 +54,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def get_study_context(study: Study):
-        biome_list = study.biome.lineage.split(":")[1:]
+        biome_list = study.biome.lineage.split(":")[1:] or ['root']
 
         return {
             "study": study,

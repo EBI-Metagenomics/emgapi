@@ -73,7 +73,8 @@ class Command(BaseCommand):
             logger.debug(f"Could not find IPS terms for {analysis.job_id}")
             ips_annotation = None
 
-        biome_list = analysis.study.biome.lineage.split(":")[1:]
+        biome_list = analysis.study.biome.lineage.split(":")[1:] or ['root']
+        # to ensure there are no empty hierarchical fields
 
         taxonomy_lists = []
         if analysis_taxonomy:
