@@ -7,9 +7,10 @@
                 <date type="sample_collection_date" value="{{ analysis.sample.collection_date|date:'Y-m-d' }}"/>
             </dates>
             <additional_fields>
-                <field name="experiment_type">assembly</field>
+                <field name="experiment_type">{{ analysis.experiment_type.experiment_type }}</field>
                 <field name="pipeline_version">{{ analysis.pipeline.release_version }}</field>
                 <field name="sample_name">{{ analysis.sample.sample_name | escape }}</field>
+                <field name="sample_description">{{ analysis.sample.sample_desc | escape }}</field>
                 <field name="project_name">{{ analysis.study.study_name | escape }}</field>
                 <field name="biome_name">{{ analysis.study.biome.biome_name | escape }}</field>
 
@@ -66,16 +67,26 @@
                 <ref dbkey="{{ analysis.study.accession }}" dbname="metagenomics_projects"/>
                 <ref dbkey="{{ analysis.study.project_id }}" dbname="ena_project"/>
 
+                {# biosample #}
+                {% if analysis.sample.primary_accession %}
+                <ref dbkey="{{ analysis.sample.primary_accession }}" dbname="biosamples"/>
+                {% endif %}
+
+                {# INSDC sample like DRSxx, ERSxx, SRSxx #}
+                {% if analysis.sample.accession and analysis.sample.accession|slice:"1:3" == "RS"%}
+                <ref dbkey="{{ analysis.sample.accession }}" dbname="sra-sample"/>
+                {% endif %}
+
                 {# Assembly analysis #}
-                {% if analysis.assembly and analysis.assembly.accession|slice:":4" == "GCA_" %}
-                <ref dbkey="{{ analysis.assembly.legacy_accession }}" dbname="ena_wgs_sequence_set"/>
-                <ref dbkey="{{ analysis.assembly.accession }}" dbname="assembly"/>
+                {% if analysis.assembly %}
+                <ref dbkey="{{ analysis.assembly.accession }}" dbname="analysis"/>
                 {% endif %}
 
                 {# WGS/Amplicon analysis #}
                 {% if analysis.run %}
                 <ref dbkey="{{ analysis.run.accession }}" dbname="ena_run"/>
                 {% endif %}
+
                 {% for go in analysis_go_entries %}
                 <ref dbkey="{{ go.accession }}" dbname="go"/>
                 {% endfor %}

@@ -59,7 +59,7 @@ class Command(BaseCommand):
 
         try:
             go_annotation: Optional[AnalysisJobGoTerm] = AnalysisJobGoTerm.objects.get(
-                pk=analysis.job_id
+                pk=str(analysis.job_id)
             )
         except AnalysisJobGoTerm.DoesNotExist:
             logger.debug(f"Could not find go terms for {analysis.job_id}")
@@ -67,7 +67,7 @@ class Command(BaseCommand):
 
         try:
             ips_annotation: Optional[AnalysisJobInterproIdentifier] = AnalysisJobInterproIdentifier.objects.get(
-                pk=analysis.job_id
+                pk=str(analysis.job_id)
             )
         except AnalysisJobInterproIdentifier.DoesNotExist:
             logger.debug(f"Could not find IPS terms for {analysis.job_id}")
@@ -203,10 +203,10 @@ class Command(BaseCommand):
                     )
                 )
 
-        nowish = timezone.now() + timedelta(minutes=1)
-        # Small buffer into the future so that the indexing time remains ahead of auto-now updated times.
+            nowish = timezone.now() + timedelta(minutes=1)
+            # Small buffer into the future so that the indexing time remains ahead of auto-now updated times.
 
-        for analysis in analyses:
-            analysis.last_indexed = nowish
+            for analysis in page:
+                analysis.last_indexed = nowish
 
-        AnalysisJob.objects.bulk_update(analyses, fields=["last_indexed"])
+            AnalysisJob.objects.bulk_update(page, fields=["last_indexed"])
