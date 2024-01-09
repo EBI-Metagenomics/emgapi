@@ -78,6 +78,7 @@ tests = [
     "pytest-cov==2.12.1",
     "pandas==1.3.2",
     "responses==0.23.1",
+    "Faker==19.6.2",
 ]
 
 dev = [
@@ -116,7 +117,7 @@ max-line-length = 119
 """
 
 [tool.bumpversion]
-current_version = "2.4.34"
+current_version = "2.4.36"
 
 [[tool.bumpversion.files]]
 filename = "emgcli/__init__.py"
