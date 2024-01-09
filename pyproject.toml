@@ -18,7 +18,7 @@ dependencies = [
     # log handler
     "concurrent-log-handler~=0.9.24",
     # django
-    "Django==3.2.18",
+    "Django==3.2.23",
     "djangorestframework==3.12",
     "django-filter==23.1",
     "djangorestframework-jwt~=1.11.0",
@@ -36,7 +36,7 @@ dependencies = [
     "django-mysql==4.3.0",
     "mysqlclient==2.1.1",
     "mysql-connector-python~=8.0.23",
-    "sqlparse==0.4.3",
+    "sqlparse==0.4.4",
     # assembly contig viewer
     "pysam==0.21.0",
     # sourmash search
