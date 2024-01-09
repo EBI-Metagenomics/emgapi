@@ -1175,13 +1175,12 @@ class GenomeKeggModuleRelationshipsViewSet(emg_mixins.ListModelMixin,
                                            viewsets.GenericViewSet):
     serializer_class = emg_serializers.KeggModuleMatchSerializer
 
-    # filter_backends = (
-    #     filters.OrderingFilter,
-    # )
+    filter_backends = (
+        filters.OrderingFilter,
+    )
 
     ordering_fields = (
         'class_id',
-        'name',
         'genome_count',
     )
 

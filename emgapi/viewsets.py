@@ -241,10 +241,10 @@ class BasePublicationGenericViewSet(viewsets.GenericViewSet):
 class BaseGenomeGenericViewSet(viewsets.GenericViewSet):
     serializer_class = emg_serializers.GenomeSerializer
 
-    # filter_backends = (
-    #     filters.SearchFilter,
-    #     emg_filters.getUnambiguousOrderingFilterByField('accession'),
-    # )
+    filter_backends = (
+        filters.SearchFilter,
+        emg_filters.getUnambiguousOrderingFilterByField('accession'),
+    )
 
     ordering_fields = (
         'accession',
@@ -252,7 +252,6 @@ class BaseGenomeGenericViewSet(viewsets.GenericViewSet):
         'num_contigs',
         'completeness',
         'contamination',
-        'num_genomes',
         'num_genomes_total',
         'num_proteins',
         'last_update',
