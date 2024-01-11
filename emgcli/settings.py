@@ -518,6 +518,7 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=108000),
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+    'JWT_AUTH_COOKIE': 'EMG_AUTH',
 }
 
 try:
