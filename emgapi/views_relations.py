@@ -340,7 +340,7 @@ class StudyAnalysisResultViewSet(emg_mixins.ListModelMixin,
         queryset = emg_models.AnalysisJob.objects \
             .available(self.request) \
             .filter(*emg_utils.related_study_accession_query(
-                    self.kwargs['accession']))
+            self.kwargs['accession']))
         return queryset
 
     def list(self, request, *args, **kwargs):
@@ -358,7 +358,6 @@ class SuperStudyFlagshipStudiesViewSet(
     emg_mixins.ListModelMixin,
     emg_viewsets.BaseStudyGenericViewSet
 ):
-
     lookup_field = 'super_study_id'
 
     def get_queryset(self):
@@ -382,7 +381,6 @@ class SuperStudyRelatedStudiesViewSet(
     emg_mixins.ListModelMixin,
     emg_viewsets.BaseStudyGenericViewSet
 ):
-
     lookup_field = 'super_study_id'
 
     def get_queryset(self):
@@ -406,7 +404,6 @@ class SuperStudyGenomeCataloguesViewSet(
     emg_mixins.ListModelMixin,
     emg_viewsets.BaseGenomeCatalogueGenericViewSet
 ):
-
     lookup_field = 'super_study_id'
 
     def get_queryset(self):
@@ -965,7 +962,7 @@ class SampleMetadataRelationshipViewSet(mixins.ListModelMixin,
         return emg_models.SampleAnn.objects \
             .filter(sample__accession=accession) \
             .prefetch_related(
-                Prefetch('sample', queryset=emg_models.Sample.objects.available(self.request))) \
+            Prefetch('sample', queryset=emg_models.Sample.objects.available(self.request))) \
             .order_by('var')
 
     def list(self, request, *args, **kwargs):
@@ -1070,7 +1067,6 @@ class AssemblyAnalysisViewSet(emg_mixins.ListModelMixin,
 
 class AssemblyRunsViewSet(emg_mixins.ListModelMixin,
                           viewsets.GenericViewSet):
-
     serializer_class = emg_serializers.RunSerializer
 
     filterset_class = emg_filters.RunFilter
@@ -1113,6 +1109,7 @@ class AssemblyRunsViewSet(emg_mixins.ListModelMixin,
         """
         return super(AssemblyRunsViewSet, self) \
             .list(request, *args, **kwargs)
+
 
 class GenomeCogsRelationshipsViewSet(emg_mixins.ListModelMixin,
                                      viewsets.GenericViewSet):
@@ -1184,7 +1181,6 @@ class GenomeKeggModuleRelationshipsViewSet(emg_mixins.ListModelMixin,
 
     ordering_fields = (
         'class_id',
-        'name',
         'genome_count',
     )
 
@@ -1205,7 +1201,6 @@ class GenomeKeggModuleRelationshipsViewSet(emg_mixins.ListModelMixin,
 
 
 class GenomeAntiSmashGeneClustersRelationshipsViewSet(emg_mixins.ListModelMixin, viewsets.GenericViewSet):
-
     serializer_class = emg_serializers.AntiSmashCountSerializer
 
     filter_backends = (
