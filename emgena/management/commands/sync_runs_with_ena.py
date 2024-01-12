@@ -15,11 +15,8 @@
 # limitations under the License.
 
 import logging
-import os
 
-from django.db.models import Count
 from django.core.management import BaseCommand
-from django.conf import settings
 
 from emgapi import models as emg_models
 from emgena import models as ena_models
@@ -38,7 +35,7 @@ class Command(BaseCommand):
         logging.info(f"Total Runs on EMG {runs_count}")
 
         while offset < runs_count:
-            emg_runs_batch = emg_models.Run.objects.all()[offset : offset + batch_size]
+            emg_runs_batch = emg_models.Run.objects.all()[offset: offset + batch_size]
             ena_runs_batch = ena_models.Run.objects.using("era").filter(
                 run_id__in=[run.accession for run in emg_runs_batch]
             )

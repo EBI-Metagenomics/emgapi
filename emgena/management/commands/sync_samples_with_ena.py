@@ -15,11 +15,8 @@
 # limitations under the License.
 
 import logging
-import os
 
-from django.db.models import Count
 from django.core.management import BaseCommand
-from django.conf import settings
 
 from emgapi import models as emg_models
 from emgena import models as ena_models

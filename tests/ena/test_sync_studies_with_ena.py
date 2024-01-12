@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-# Copyright 2017-2022 EMBL - European Bioinformatics Institute
+# Copyright 2017-2023 EMBL - European Bioinformatics Institute
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
@@ -15,15 +14,15 @@
 # limitations under the License.
 
 import pytest
-import os
 
 from unittest.mock import patch
 
-from django.urls import reverse
 from django.core.management import call_command
 from emgapi.models import Study
 
 from test_utils.emg_fixtures import *  # noqa
+
+from emgena.models import Status
 
 
 @pytest.mark.django_db
@@ -34,7 +33,6 @@ class TestSyncENAStudies:
 
         all_studies = Study.objects.order_by("?").all()
         public_studies = all_studies[0:5]
-        reminder = all_studies[5 : len(all_studies)]
 
         for study in public_studies:
             study.is_private = False
@@ -55,7 +53,6 @@ class TestSyncENAStudies:
 
         all_studies = Study.objects.order_by("?").all()
         private_studies = all_studies[0:5]
-        reminder = all_studies[5 : len(all_studies)]
 
         for study in private_studies:
             study.is_private = True
@@ -96,3 +93,21 @@ class TestSyncENAStudies:
                 ena_study.get_study_status_display().lower()
                 == study.get_suppression_reason_display().lower()
             )
+
+    @patch("emgena.models.Study.objects")
+    def test_suppress_studies_propagation(self, ena_study_objs_mock, ena_suppression_propagation_studies):
+        ena_study_objs_mock.using("era").filter.return_value = ena_suppression_propagation_studies
+
+        call_command("sync_studies_with_ena")
+
+        for ena_study in ena_suppression_propagation_studies:
+            emg_study = Study.objects.get(secondary_accession=ena_study.study_id)
+            if ena_study.study_status == Status.SUPPRESSED:
+                assert emg_study.is_suppressed
+                for descendant in ['runs', 'samples', 'assemblies', 'analyses']:
+                    related_qs = getattr(emg_study, descendant)
+                    assert related_qs.filter(is_suppressed=True).exists()
+                    # 1 sample was shared with unsuppressed studies so should remain
+                    assert related_qs.filter(is_suppressed=False).count() == (1 if descendant == 'samples' else 0)
+                    assert (related_qs.filter(is_suppressed=True).count() ==
+                            related_qs.filter(suppression_reason=Study.Reason.ANCESTOR_SUPPRESSED).count())

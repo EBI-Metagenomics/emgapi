@@ -1020,8 +1020,7 @@ class AnalysisSerializer(BaseAnalysisSerializer):
             'secondary_accession',
             'is_suppressed',
             'suppressed_at',
-            'suppression_reason',
-            'analysis_summary_json'
+            'suppression_reason'
         )
 
 
