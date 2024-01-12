@@ -319,6 +319,17 @@ try:
 except KeyError:
     raise KeyError("Config must container default database.")
 
+# TODO: ensure all configs (including production webuploader yamls) use the same naming scheme.
+# This is a brute workaround to make all current envs and all deployments work
+if 'era_pro' in DATABASES and 'era' not in DATABASES:
+    DATABASES['era'] = DATABASES['era_pro']
+if 'ena_pro' in DATABASES and 'ena' not in DATABASES:
+    DATABASES['ena'] = DATABASES['ena_pro']
+if 'era' in DATABASES and 'era_pro' not in DATABASES:
+    DATABASES['era_pro'] = DATABASES['era']
+if 'ena' in DATABASES and 'ena_pro' not in DATABASES:
+    DATABASES['ena_pro'] = DATABASES['ena']
+
 # this is required to use the djang-mysql QS Hints 
 # https://django-mysql.readthedocs.io/en/latest/queryset_extensions.html?highlight=DJANGO_MYSQL_REWRITE_QUERIES#query-hints 
 DJANGO_MYSQL_REWRITE_QUERIES = True
