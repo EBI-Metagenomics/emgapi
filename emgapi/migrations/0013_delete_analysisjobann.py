@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('emgapi', '0011_analysisjob_analysis_summary_json'),
+        ('emgapi', '0012_alter_publication_pub_type'),
     ]
 
     operations = [

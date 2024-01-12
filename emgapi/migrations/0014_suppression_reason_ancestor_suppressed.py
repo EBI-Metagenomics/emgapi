@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('emgapi', '0011_analysisjob_analysis_summary_json'),
+        ('emgapi', '0013_delete_analysisjobann'),
     ]
 
     operations = [
