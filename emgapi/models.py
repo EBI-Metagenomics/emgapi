@@ -361,7 +361,7 @@ class BaseQuerySet(models.QuerySet):
                  Q(job__study__submission_account_id__iexact=_username,
                    job__assembly__is_private=True) |
                  Q(job__run__is_private=False) | Q(job__assembly__is_private=False),
-                 Q(job_is_suppressed=False)]
+                 Q(job__is_suppressed=False)]
             _query_filters['AssemblyExtraAnnotationQuerySet']['authenticated'] = \
                 [Q(assembly__samples__studies__submission_account_id__iexact=_username,
                    is_private=True) |
