@@ -15,11 +15,8 @@
 # limitations under the License.
 
 import logging
-import os
 
-from django.db.models import Count
 from django.core.management import BaseCommand
-from django.conf import settings
 
 from emgapi import models as emg_models
 from emgena import models as ena_models
@@ -72,7 +69,7 @@ class Command(BaseCommand):
                 emg_samples_batch,
                 ["is_private", "is_suppressed", "suppression_reason", "suppressed_at"],
             )
-            logging.info(f"Batch {round(samples_count / batch_size)} processed.")
+            logging.info(f"Batch {round(offset / batch_size)} of {round(samples_count / batch_size)} processed.")
             offset += batch_size
 
         logging.info("Completed")

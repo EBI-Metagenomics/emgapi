@@ -87,6 +87,10 @@ LOGGING = {
             '()': 'django.utils.log.CallbackFilter',
             'callback': lambda record: "v1/utils/myaccounts" not in record.getMessage(),
         },
+        'exclude_token_verification': {
+            '()': 'django.utils.log.CallbackFilter',
+            'callback': lambda record: "v1/utils/token/verify" not in record.getMessage(),
+        },
     },
     'formatters': {
         'default': {
@@ -136,13 +140,13 @@ LOGGING = {
             'handlers': ['default'],
             'level': 'INFO',
             'propagate': False,
-            'filters': ['exclude_myaccounts'],
+            'filters': ['exclude_myaccounts', 'exclude_token_verification'],
         },
         'django.server': {
             'handlers': ['default'],
             'level': 'INFO',
             'propagate': False,
-            'filters': ['exclude_myaccounts'],
+            'filters': ['exclude_myaccounts', 'exclude_token_verification'],
         },
         'django': {
             'handlers': ['null'],
@@ -314,6 +318,17 @@ try:
     DATABASES = EMG_CONF['emg']['databases']
 except KeyError:
     raise KeyError("Config must container default database.")
+
+# TODO: ensure all configs (including production webuploader yamls) use the same naming scheme.
+# This is a brute workaround to make all current envs and all deployments work
+if 'era_pro' in DATABASES and 'era' not in DATABASES:
+    DATABASES['era'] = DATABASES['era_pro']
+if 'ena_pro' in DATABASES and 'ena' not in DATABASES:
+    DATABASES['ena'] = DATABASES['ena_pro']
+if 'era' in DATABASES and 'era_pro' not in DATABASES:
+    DATABASES['era_pro'] = DATABASES['era']
+if 'ena' in DATABASES and 'ena_pro' not in DATABASES:
+    DATABASES['ena_pro'] = DATABASES['ena']
 
 # this is required to use the djang-mysql QS Hints 
 # https://django-mysql.readthedocs.io/en/latest/queryset_extensions.html?highlight=DJANGO_MYSQL_REWRITE_QUERIES#query-hints 
@@ -514,6 +529,7 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=108000),
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+    'JWT_AUTH_COOKIE': 'EMG_AUTH',
 }
 
 try:

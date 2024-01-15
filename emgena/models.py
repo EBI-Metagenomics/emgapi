@@ -27,7 +27,9 @@
 from __future__ import unicode_literals
 
 from datetime import date
-from django.db import models, NotSupportedError
+
+from django.conf import settings
+from django.db import models
 
 
 class Status(models.IntegerChoices):
@@ -197,8 +199,9 @@ class RunStudy(StudyAbstract):
         # ERA needs to be appended as the default connection tries to use
         # the PUBLIC SYNONYM (according to ENA) and it's not working ATM
         # we were advised to prefix the views and this is the simplest way.
-        # The short-term plan is to remove the dependency of ENA databases 
-        db_table = 'ERA\".\"V_MGP_RUN_STUDY'
+        # The short-term plan is to remove the dependency of ENA databases
+        _prefix_workaround = settings.DATABASES.get('era', {}).get('ERA_TABLESPACE_PREFIX', 'ERA\".\"')
+        db_table = f'{_prefix_workaround}V_MGP_RUN_STUDY'
 
 
 class AssemblyStudy(StudyAbstract):

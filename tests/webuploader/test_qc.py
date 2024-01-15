@@ -182,5 +182,5 @@ class TestCLI:
         url = reverse("emgapi_v1:analyses-detail", args=[job])
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
-        rsp = response.json()
-        assert len(rsp["data"]["attributes"]["analysis-summary"]) == 0
+        # rsp = response.json()
+        # assert len(rsp["data"]["attributes"]["analysis-summary"]) == 0

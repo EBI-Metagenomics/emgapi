@@ -15,11 +15,8 @@
 # limitations under the License.
 
 import logging
-import os
 
-from django.db.models import Count
 from django.core.management import BaseCommand
-from django.conf import settings
 
 from emgapi import models as emg_models
 from emgena import models as ena_models
@@ -73,7 +70,7 @@ class Command(BaseCommand):
                     "public_release_date",
                 ],
             )
-            logging.info(f"Batch {round(studies_count / batch_size)} processed.")
+            logging.info(f"Batch {round(offset / batch_size)} of {round(studies_count / batch_size)} processed.")
             offset += batch_size
 
         logging.info("Completed")

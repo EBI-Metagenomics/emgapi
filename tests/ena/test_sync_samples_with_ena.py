@@ -15,13 +15,11 @@
 # limitations under the License.
 
 import pytest
-import os
 
 from unittest.mock import patch
 
-from django.urls import reverse
 from django.core.management import call_command
-from emgapi.models import Sample
+from emgapi.models import Sample, Assembly, AnalysisJob, Run
 
 from test_utils.emg_fixtures import *  # noqa
 
@@ -89,3 +87,19 @@ class TestSyncENAStudies:
                 ena_sample.get_status_id_display().lower()
                 == sample.get_suppression_reason_display().lower()
             )
+
+    @patch("emgena.models.Sample.objects")
+    def test_suppress_samples_propagation(self, ena_sample_objs_mock, ena_suppression_propagation_samples):
+        ena_sample_objs_mock.using("era").filter.return_value = ena_suppression_propagation_samples
+
+        assert Sample.objects.filter(is_suppressed=True).count() == 0
+        assert Run.objects.filter(is_suppressed=True).count() == 0
+        assert Assembly.objects.filter(is_suppressed=True).count() == 0
+        assert AnalysisJob.objects.filter(is_suppressed=True).count() == 0
+
+        call_command("sync_samples_with_ena")
+
+        assert Sample.objects.filter(is_suppressed=True).count() == 2
+        assert Run.objects.filter(is_suppressed=True).count() == 4
+        assert Assembly.objects.filter(is_suppressed=True).count() == 8
+        assert AnalysisJob.objects.filter(is_suppressed=True).count() == 16

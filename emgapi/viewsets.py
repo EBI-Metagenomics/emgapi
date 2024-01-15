@@ -252,7 +252,6 @@ class BaseGenomeGenericViewSet(viewsets.GenericViewSet):
         'num_contigs',
         'completeness',
         'contamination',
-        'num_genomes',
         'num_genomes_total',
         'num_proteins',
         'last_update',

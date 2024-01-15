@@ -71,11 +71,7 @@ class Command(BaseCommand):
                         )
                         continue
 
-                    # inherits the status of its study
-                    if study.is_suppressed:
-                        emg_assembly.suppress(
-                            suppression_reason=study.suppression_reason
-                        )
+                    # inherits the privacy status of its study
                     emg_assembly.is_private = study.is_private
                     continue
                 elif ena_assembly.status_id is None:
@@ -100,7 +96,7 @@ class Command(BaseCommand):
                 emg_assemblies_batch,
                 ["is_private", "is_suppressed", "suppression_reason", "suppressed_at"],
             )
-            logging.info(f"Batch {round(assemblies_count / batch_size)} processed.")
+            logging.info(f"Batch {round(offset / batch_size)} of {round(assemblies_count / batch_size)} processed.")
             offset += batch_size
 
         logging.info("Completed")

@@ -16,10 +16,11 @@
 
 import logging
 
+from django.apps import apps
 from django.conf import settings
 from django.db import models
 from django.db.models import (CharField, Count, OuterRef, Prefetch, Q,
-                              Subquery, Value)
+                              Subquery, Value, QuerySet)
 from django.db.models.functions import Cast, Concat
 from django.utils import timezone
 
@@ -70,7 +71,10 @@ class SuppressManager(models.Manager):
 
 
 class SuppressibleModel(models.Model):
-    
+    suppressible_descendants = []
+    # List of related_names from this model that should have their suppression status propagated from this.
+    # E.g. Study.suppressible_descendants = ['samples'] to suppress a study's samples if the study is suppressed.
+
     class Reason(models.IntegerChoices):
         DRAFT = 1
         CANCELLED = 3
@@ -79,35 +83,149 @@ class SuppressibleModel(models.Model):
         TEMPORARY_SUPPRESSED = 7
         TEMPORARY_KILLED = 8
 
+        ANCESTOR_SUPPRESSED = 100
+
     is_suppressed = models.BooleanField(db_column='IS_SUPPRESSED', default=False)
     suppressed_at = models.DateTimeField(db_column='SUPPRESSED_AT', blank=True, null=True)
     suppression_reason = models.IntegerField(db_column='SUPPRESSION_REASON', blank=True, null=True, choices=Reason.choices)
 
-    def suppress(self, suppression_reason=None, save=True):
+    def _get_suppression_descendant_tree(self, suppressing: bool = True):
+        """
+        Recursively find all suppressible descendants of the calling suppressible model.
+        :param suppressing: True if looking for descendants that should be (i.e. are not currently) suppressed. False if opposite.
+        :return: Dict mapping model names to sets of model instances
+        """
+        suppressibles = {}
+
+        def __add_to_suppressibles(kls, additional_suppressibles):
+            suppressibles.setdefault(
+                kls,
+                set()
+            ).update(additional_suppressibles)
+
+        logger.debug(f'Building suppression descendant tree for {self._meta.object_name}')
+
+        for descendant_relation_name in self.suppressible_descendants:
+            descendant_relation = getattr(
+                self,
+                descendant_relation_name
+            )
+            descendants_to_update = descendant_relation.filter(
+                is_suppressed=not suppressing,
+            )
+            if not descendants_to_update.exists():
+                logger.debug(f'No {descendant_relation_name} descendants to handle.')
+                continue
+            # Check whether the descendant might have other non-suppressed ancestors of the same type as this
+            # (If so, it shouldn't be suppressed).
+            # This was written mostly for samples that are associated to multiples
+            # studies, such as a raw-reads study and the corresponding assembly study.
+            relation_field = self._meta.get_field(descendant_relation_name)
+            logger.info(f'{relation_field = }')
+            if isinstance(relation_field, models.ManyToManyField):
+                logger.debug(
+                    f"Descendant relation {descendant_relation_name} on {self.__class__} is a Many2Many."
+                    f"Checking whether descendants have unsuppressed siblings.."
+                )
+                logger.debug(f"Before filtering, had {descendants_to_update.count()} {descendant_relation_name}")
+
+                descendant_ids_with_unsuppressed_alike_ancestors = descendant_relation.through.objects.filter(
+                    **{
+                        f"{descendant_relation.target_field_name}__in": descendant_relation.all(),  # e.g. sample in study.samples
+                        f"{descendant_relation.source_field_name}__is_suppressed": False, # e.g. not study.is_suppressed
+                    }
+                ).exclude(
+                    **{
+                        f"{descendant_relation.source_field_name}": self,  # e.g. study != self
+                    }
+                ).values_list(
+                    f"{descendant_relation.target_field_name}_id",
+                    flat=True
+                )
+                descendants_to_update = descendants_to_update.exclude(
+                    pk__in=descendant_ids_with_unsuppressed_alike_ancestors
+                )
+
+                logger.debug(f"After filtering, had {descendants_to_update.count()} {descendant_relation_name}")
+
+            __add_to_suppressibles(
+                descendant_relation.model._meta.object_name,
+                descendants_to_update
+            )
+
+            for descendant in descendants_to_update:
+                for kls, kls_suppressibles in descendant._get_suppression_descendant_tree(
+                        suppressing
+                ).items():
+                    __add_to_suppressibles(
+                        kls,
+                        kls_suppressibles
+                    )
+
+        return suppressibles
+
+    def suppress(self, suppression_reason=None, save=True, propagate=True):
         self.is_suppressed = True
         self.suppressed_at = timezone.now()
         self.suppression_reason = suppression_reason
         if save:
             self.save()
+        if propagate:
+            descendant_tree = self._get_suppression_descendant_tree()
+            for descendants_object_type, descendants in descendant_tree.items():
+                for descendant in descendants:
+                    descendant.is_suppressed = True
+                    descendant.suppression_reason = self.Reason.ANCESTOR_SUPPRESSED
+                m: SuppressibleModel = apps.get_model(app_label='emgapi', model_name=descendants_object_type)
+                m.objects.bulk_update(descendants, fields=['is_suppressed', 'suppression_reason'])
+                logger.info(
+                    f'Propagated suppression of {self} to  {len(descendants)} descendant {descendants_object_type}s'
+                )
         return self
 
-    def unsuppress(self, suppression_reason=None, save=True):
+    def unsuppress(self, save=True, propagate=True):
         self.is_suppressed = False
         self.suppressed_at = None
         self.suppression_reason = None
         if save:
             self.save()
+        if propagate:
+            descendant_tree = self._get_suppression_descendant_tree(suppressing=False)
+            for descendants_object_type, descendants in descendant_tree.items():
+                for descendant in descendants:
+                    descendant.is_suppressed = False
+                    descendant.suppression_reason = None
+                m: SuppressibleModel = apps.get_model(app_label='emgapi', model_name=descendants_object_type)
+                m.objects.bulk_update(descendants, fields=['is_suppressed', 'suppression_reason'])
+                logger.info(
+                    f'Propagated unsuppression of {self} to  {len(descendants)} descendant {descendants_object_type}s'
+                )
         return self
 
     class Meta:
         abstract = True
 
 
-class ENASyncableModel(SuppressibleModel, PrivacyControlledModel):
+class SelectRelatedOnlyQuerySetMixin():
+    def select_related_only(self: QuerySet, related_name: str, only_fields: [str]) -> QuerySet:
+        """
+        Adds a 'select_related' to the queryset, and a 'defer' for all fields other than those specified.
+        :param queryset: QuerySet of calling model
+        :param related_name: Related name from calling model to target relation
+        :param only_fields: List of field names on target to NOT be deferred.
+        :return: QuerySet
+        """
+        other_model = self.model._meta.get_field(related_name).related_model
+        other_fields = filter(lambda f: f.name not in only_fields, other_model._meta.fields)
+        return self.select_related(related_name).defer(*[f"{related_name}__{o.name}" for o in other_fields])
 
-    def sync_with_ena_status(self, ena_model_status: ENAStatus):
+
+class ENASyncableModel(SuppressibleModel, PrivacyControlledModel):
+    def sync_with_ena_status(self, ena_model_status: ENAStatus, propagate=True):
         """Sync the model with the ENA status accordingly.
-        Fields that are updated: is_supppressed, suppressed_at, reason and is_private
+        Fields that are updated: is_suppressed, suppressed_at, reason and is_private
+
+        :propagate: If True, propagate the ena status of this entity to entities that are derived from / children of it.
         """
         if ena_model_status == ENAStatus.PRIVATE and not self.is_private:
             self.is_private = True
@@ -148,7 +266,7 @@ class ENASyncableModel(SuppressibleModel, PrivacyControlledModel):
             elif ena_model_status == ENAStatus.CANCELLED:
                 reason = SuppressibleModel.Reason.CANCELLED
 
-            self.suppress(suppression_reason=reason, save=False)
+            self.suppress(suppression_reason=reason, save=False, propagate=propagate)
 
             logging.info(
                 f"{self} was suppressed, status on ENA {ena_model_status}"
@@ -182,40 +300,39 @@ class BaseQuerySet(models.QuerySet):
         """
         _query_filters = {
             'StudyQuerySet': {
-                'all': [Q(is_private=False),],
+                'all': [Q(is_private=False, is_suppressed=False),],
             },
             'StudyDownloadQuerySet': {
-                'all': [Q(study__is_private=False),],
+                'all': [Q(study__is_private=False, study__is_suppressed=False),],
             },
             'SampleQuerySet': {
-                'all': [Q(is_private=False),],
+                'all': [Q(is_private=False, is_suppressed=False),],
             },
             'RunQuerySet': {
                 'all': [
-                    Q(is_private=False),
+                    Q(is_private=False, is_suppressed=False),
                 ],
             },
             'AssemblyQuerySet': {
                 'all': [
-                    Q(is_private=False),
+                    Q(is_private=False, is_suppressed=False),
                 ],
             },
             'AnalysisJobDownloadQuerySet': {
                 'all': [
-                    Q(job__sample__isnull=True) | Q(job__sample__is_suppressed=False),
-                    Q(job__study__is_private=False),
+                    Q(job__study__is_private=False, job__study__is_suppressed=False),
                     Q(job__run__is_private=False) | Q(job__assembly__is_private=False),
                     Q(job__analysis_status_id=AnalysisStatus.COMPLETED) | Q(job__analysis_status_id=AnalysisStatus.QC_NOT_PASSED)
                 ],
             },
             'AssemblyExtraAnnotationQuerySet': {
                 'all': [
-                    Q(assembly__is_private=False),
+                    Q(assembly__is_private=False, assembly__is_suppressed=False),
                 ],
             },
             'RunExtraAnnotationQuerySet': {
                 'all': [
-                    Q(run__is_private=False),
+                    Q(run__is_private=False, run__is_suppressed=False),
                 ],
             },
         }
@@ -223,33 +340,38 @@ class BaseQuerySet(models.QuerySet):
         if request is not None and request.user.is_authenticated:
             _username = request.user.username
             _query_filters['StudyQuerySet']['authenticated'] = \
-                [Q(submission_account_id__iexact=_username) | Q(is_private=False)]
+                [Q(submission_account_id__iexact=_username) | Q(is_private=False, is_suppressed=False)]
             _query_filters['StudyDownloadQuerySet']['authenticated'] = \
                 [Q(study__submission_account_id__iexact=_username) |
-                 Q(study__is_private=False)]
+                 Q(study__is_private=False, study__is_suppressed=False)]
             _query_filters['SampleQuerySet']['authenticated'] = \
-                [Q(submission_account_id__iexact=_username) | Q(is_private=False)]
+                [Q(submission_account_id__iexact=_username) | Q(is_private=False), Q(is_suppressed=False)]
             _query_filters['RunQuerySet']['authenticated'] = \
                 [Q(study__submission_account_id__iexact=_username, is_private=True) |
-                 Q(is_private=False)]
+                 Q(is_private=False),
+                 Q(is_suppressed=False)]
             _query_filters['AssemblyQuerySet']['authenticated'] = \
                 [Q(samples__studies__submission_account_id__iexact=_username,
                    is_private=True) |
-                 Q(is_private=False)]
+                 Q(is_private=False),
+                 Q(is_suppressed=False)]
             _query_filters['AnalysisJobDownloadQuerySet']['authenticated'] = \
                 [Q(job__study__submission_account_id__iexact=_username,
                    job__is_private=True) |
                  Q(job__study__submission_account_id__iexact=_username,
                    job__assembly__is_private=True) |
-                 Q(job__run__is_private=False) | Q(job__assembly__is_private=False)]
+                 Q(job__run__is_private=False) | Q(job__assembly__is_private=False),
+                 Q(job__is_suppressed=False)]
             _query_filters['AssemblyExtraAnnotationQuerySet']['authenticated'] = \
                 [Q(assembly__samples__studies__submission_account_id__iexact=_username,
                    is_private=True) |
-                 Q(assembly__is_private=False)]
+                 Q(assembly__is_private=False),
+                 Q(assembly__is_suppressed=False)]
             _query_filters['RunExtraAnnotationQuerySet']['authenticated'] = \
-                [Q(sun__samples__studies__submission_account_id__iexact=_username,
+                [Q(run__samples__studies__submission_account_id__iexact=_username,
                    is_private=True) |
-                 Q(run__is_private=False)]
+                 Q(run__is_private=False),
+                 Q(run__is_suppressed=False)]
 
         filters = _query_filters.get(self.__class__.__name__)
 
@@ -843,6 +965,7 @@ class StudyManager(models.Manager):
 
 
 class Study(ENASyncableModel):
+    suppressible_descendants = ['samples', 'runs', 'assemblies', 'analyses']
 
     def __init__(self, *args, **kwargs):
         super(Study, self).__init__(*args, **kwargs)
@@ -1076,7 +1199,7 @@ class SuperStudyGenomeCatalogue(models.Model):
 
 
 class SampleQuerySet(BaseQuerySet, SuppressQuerySet):
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -1106,6 +1229,8 @@ class SampleManager(models.Manager):
 
 
 class Sample(ENASyncableModel):
+    suppressible_descendants = ['assemblies', 'runs', 'analyses']
+
     sample_id = models.AutoField(
         db_column='SAMPLE_ID', primary_key=True)
     accession = models.CharField(
@@ -1293,7 +1418,7 @@ class Status(models.Model):
 
 
 class RunQuerySet(BaseQuerySet, SuppressQuerySet):
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -1312,6 +1437,8 @@ class RunManager(models.Manager):
 
 
 class Run(ENASyncableModel):
+    suppressible_descendants = ['assemblies', 'analyses']
+
     run_id = models.BigAutoField(
         db_column='RUN_ID', primary_key=True)
     accession = models.CharField(
@@ -1374,6 +1501,7 @@ class AssemblyManager(models.Manager):
 
 
 class Assembly(ENASyncableModel):
+    suppressible_descendants = ['analyses']
 
     assembly_id = models.BigAutoField(
         db_column='ASSEMBLY_ID', primary_key=True)
@@ -1392,7 +1520,7 @@ class Assembly(ENASyncableModel):
     samples = models.ManyToManyField(
         'Sample', through='AssemblySample', related_name='assemblies',
         blank=True)
-    study = models.ForeignKey("emgapi.Study", db_column="STUDY_ID",
+    study = models.ForeignKey("emgapi.Study", db_column="STUDY_ID", related_name='assemblies',
         on_delete=models.SET_NULL, null=True, blank=True)
 
     coverage = models.IntegerField(db_column="COVERAGE", null=True, blank=True)
@@ -1444,7 +1572,7 @@ class AssemblySample(models.Model):
         return 'Assembly:{} - Sample:{}'.format(self.assembly, self.sample)
 
 
-class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet, SuppressQuerySet):
+class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet, SuppressQuerySet, SelectRelatedOnlyQuerySetMixin):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1460,8 +1588,8 @@ class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet, SuppressQuerySet):
         query_filters = {
             "all": [
                 Q(study__is_private=False),
-                Q(sample__isnull=True) | Q(sample__is_suppressed=False),
                 Q(run__is_private=False) | Q(assembly__is_private=False),
+                Q(is_suppressed=False),
                 Q(analysis_status_id=AnalysisStatus.COMPLETED)
                 | Q(analysis_status_id=AnalysisStatus.QC_NOT_PASSED),
             ],
@@ -1470,7 +1598,6 @@ class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet, SuppressQuerySet):
         if request is not None and request.user.is_authenticated:
             username = request.user.username
             query_filters["authenticated"] = [
-                Q(sample__isnull=True) | Q(sample__is_suppressed=False),
                 Q(study__submission_account_id__iexact=username, run__is_private=True)
                 | Q(
                     study__submission_account_id__iexact=username,
@@ -1485,68 +1612,18 @@ class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet, SuppressQuerySet):
 
 class AnalysisJobManager(models.Manager):
     def get_queryset(self):
-        """Customized Analysis Job QS.
-        There are 2 very custom bits here:
-        
-        straight_join
-        -------------
-        This one is needed because of a mysql bug that causes the optimizer
-        to https://code.djangoproject.com/ticket/22438
-
-        force_index
-        -----------
-        This one is more of a mistery to me. The join with PIPELINE_RELEASE 
-        is causing a full table scan on PIPELINE_RELEASE.
-
-        | id | select\_type | table | type | possible\_keys | key | key\_len | ref | rows | filtered | Extra |
-        | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-        | 1 | SIMPLE | PIPELINE\_RELEASE | ALL | PRIMARY,PIPELINE\_RELEASE\_PIPELINE\_ID\_RELEASE\_VERSION\_d40fe384\_uniq,PIPELINE\_RELEASE\_PIPELINE\_ID\_index | NULL | NULL | NULL | 6 | 83.33 | Using where; Using join buffer \(Block Nested Loop\) |
-
-        By forcing the index PRIMARY on the JOIN the query is faster:
-
-        | id | select\_type | table | type | possible\_keys | key | key\_len | ref | rows | filtered | Extra |
-        | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-        | 1 | SIMPLE | PIPELINE\_RELEASE | eq\_ref | PRIMARY | PRIMARY | 2 | emg.ANALYSIS\_JOB.PIPELINE\_ID | 1 | 100 | NULL |
-
-        IMPORTANT: it is also required that the ordering of the query set is done by ANALYSIS_JOB.PIPELINE_ID and not a 
-                   field of PIPELINE_RELEASE. This was changes in emgapi.viewsets.BaseAnalysisGenericViewSet.ordering
-
-        TODO: figure our what is going on with this query.
-        """
-        _qs = AnalysisJobAnn.objects.all() \
-            .select_related('var')
         return AnalysisJobQuerySet(self.model, using=self._db) \
-            .straight_join() \
-            .force_index("PRIMARY", table_name="PIPELINE_RELEASE", for_="JOIN") \
             .select_related(
                 'analysis_status',
-                'experiment_type',
-                'run',
-                'study',
-                'assembly',
-                'pipeline',
-                'sample') \
-            .prefetch_related(
-                Prefetch('analysis_metadata', queryset=_qs),)
+                'experiment_type') \
+            .select_related_only('assembly', ['assembly_id', 'accession']) \
+            .select_related_only('pipeline', ['pipeline_id', 'release_version']) \
+            .select_related_only('run', ['run_id', 'accession']) \
+            .select_related_only('sample', ['sample_id', 'accession']) \
+            .select_related_only('study', ['study_id', 'accession'])
 
     def available(self, request):
-        return self.get_queryset().available(request) \
-            .prefetch_related(
-            Prefetch(
-                'study',
-                queryset=Study.objects.available(request)
-            ),
-            Prefetch(
-                'sample',
-                queryset=Sample.objects.available(
-                    request)
-            ),
-            Prefetch(
-                'run',
-                queryset=Run.objects.available(
-                    request)
-            )
-        )
+        return self.get_queryset().available(request)
 
 
 class AnalysisJob(SuppressibleModel, PrivacyControlledModel):
@@ -1570,7 +1647,7 @@ class AnalysisJob(SuppressibleModel, PrivacyControlledModel):
         blank=True, null=True)
     job_operator = models.CharField(
         db_column='JOB_OPERATOR', max_length=15, blank=True, null=True)
-    analysis_summary_json = models.JSONField(
+    analysis_summary = models.JSONField(
         db_column='ANALYSIS_SUMMARY_JSON', blank=True, null=True)
     pipeline = models.ForeignKey(
         Pipeline, db_column='PIPELINE_ID', blank=True, null=True,
@@ -1616,19 +1693,6 @@ class AnalysisJob(SuppressibleModel, PrivacyControlledModel):
     @property
     def release_version(self):
         return self.pipeline.release_version
-
-    @property
-    def analysis_summary(self):
-        if self.analysis_summary_json:
-            return self.analysis_summary_json
-
-        return [
-            {
-                'key': v.var.var_name,
-                'value': v.var_val_ucv
-            } for v in self.analysis_metadata.all()
-        ]
-
     @property
     def downloads(self):
         return self.analysis_download.all()
@@ -1679,7 +1743,7 @@ class BlacklistedStudy(models.Model):
     class Meta:
         managed = False
         db_table = 'BLACKLISTED_STUDY'
-        verbose_name_plural = 'blacklisted study'
+        verbose_name = 'blacklisted study'
         verbose_name_plural = 'blacklisted studies'
 
     def __str__(self):
@@ -1717,7 +1781,7 @@ class VariableNames(models.Model):
     class Meta:
         db_table = 'VARIABLE_NAMES'
         unique_together = (('var_id', 'var_name'), ('var_id', 'var_name'),)
-        verbose_name = 'variable name'                
+        verbose_name = 'variable name'
 
     def __str__(self):
         return self.var_name
@@ -1771,26 +1835,6 @@ class AnalysisMetadataVariableNames(models.Model):
 
     def __str__(self):
         return self.var_name
-
-
-class AnalysisJobAnnManager(models.Manager):
-
-    def get_queryset(self):
-        return super().get_queryset().select_related('job', 'var')
-
-
-class AnalysisJobAnn(models.Model):
-    job = models.ForeignKey(AnalysisJob, db_column='JOB_ID', related_name='analysis_metadata', on_delete=models.CASCADE)
-    units = models.CharField(db_column='UNITS', max_length=25, blank=True, null=True)
-    var = models.ForeignKey(AnalysisMetadataVariableNames, on_delete=models.CASCADE)
-    var_val_ucv = models.CharField(db_column='VAR_VAL_UCV', max_length=4000, blank=True, null=True)
-
-    objects = AnalysisJobAnnManager()
-
-    class Meta:
-        db_table = 'ANALYSIS_JOB_ANN'
-        unique_together = (('job', 'var'), ('job', 'var'),)
-
     def __str__(self):
         return '%s %s' % (self.job, self.var)
 
