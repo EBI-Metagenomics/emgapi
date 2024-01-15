@@ -96,7 +96,7 @@ class Command(BaseCommand):
                 emg_assemblies_batch,
                 ["is_private", "is_suppressed", "suppression_reason", "suppressed_at"],
             )
-            logging.info(f"Batch {round(assemblies_count / batch_size)} processed.")
+            logging.info(f"Batch {round(offset / batch_size)} of {round(assemblies_count / batch_size)} processed.")
             offset += batch_size
 
         logging.info("Completed")
