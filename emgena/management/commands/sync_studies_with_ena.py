@@ -70,7 +70,7 @@ class Command(BaseCommand):
                     "public_release_date",
                 ],
             )
-            logging.info(f"Batch {round(studies_count / batch_size)} processed.")
+            logging.info(f"Batch {round(offset / batch_size)} of {round(studies_count / batch_size)} processed.")
             offset += batch_size
 
         logging.info("Completed")

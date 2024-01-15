@@ -300,39 +300,39 @@ class BaseQuerySet(models.QuerySet):
         """
         _query_filters = {
             'StudyQuerySet': {
-                'all': [Q(is_private=False),],
+                'all': [Q(is_private=False, is_suppressed=False),],
             },
             'StudyDownloadQuerySet': {
-                'all': [Q(study__is_private=False),],
+                'all': [Q(study__is_private=False, study__is_suppressed=False),],
             },
             'SampleQuerySet': {
-                'all': [Q(is_private=False),],
+                'all': [Q(is_private=False, is_suppressed=False),],
             },
             'RunQuerySet': {
                 'all': [
-                    Q(is_private=False),
+                    Q(is_private=False, is_suppressed=False),
                 ],
             },
             'AssemblyQuerySet': {
                 'all': [
-                    Q(is_private=False),
+                    Q(is_private=False, is_suppressed=False),
                 ],
             },
             'AnalysisJobDownloadQuerySet': {
                 'all': [
-                    Q(job__study__is_private=False),
+                    Q(job__study__is_private=False, job__study__is_suppressed=False),
                     Q(job__run__is_private=False) | Q(job__assembly__is_private=False),
                     Q(job__analysis_status_id=AnalysisStatus.COMPLETED) | Q(job__analysis_status_id=AnalysisStatus.QC_NOT_PASSED)
                 ],
             },
             'AssemblyExtraAnnotationQuerySet': {
                 'all': [
-                    Q(assembly__is_private=False),
+                    Q(assembly__is_private=False, assembly__is_suppressed=False),
                 ],
             },
             'RunExtraAnnotationQuerySet': {
                 'all': [
-                    Q(run__is_private=False),
+                    Q(run__is_private=False, run__is_suppressed=False),
                 ],
             },
         }
@@ -340,33 +340,38 @@ class BaseQuerySet(models.QuerySet):
         if request is not None and request.user.is_authenticated:
             _username = request.user.username
             _query_filters['StudyQuerySet']['authenticated'] = \
-                [Q(submission_account_id__iexact=_username) | Q(is_private=False)]
+                [Q(submission_account_id__iexact=_username) | Q(is_private=False, is_suppressed=False)]
             _query_filters['StudyDownloadQuerySet']['authenticated'] = \
                 [Q(study__submission_account_id__iexact=_username) |
-                 Q(study__is_private=False)]
+                 Q(study__is_private=False, study__is_suppressed=False)]
             _query_filters['SampleQuerySet']['authenticated'] = \
-                [Q(submission_account_id__iexact=_username) | Q(is_private=False)]
+                [Q(submission_account_id__iexact=_username) | Q(is_private=False), Q(is_suppressed=False)]
             _query_filters['RunQuerySet']['authenticated'] = \
                 [Q(study__submission_account_id__iexact=_username, is_private=True) |
-                 Q(is_private=False)]
+                 Q(is_private=False),
+                 Q(is_suppressed=False)]
             _query_filters['AssemblyQuerySet']['authenticated'] = \
                 [Q(samples__studies__submission_account_id__iexact=_username,
                    is_private=True) |
-                 Q(is_private=False)]
+                 Q(is_private=False),
+                 Q(is_suppressed=False)]
             _query_filters['AnalysisJobDownloadQuerySet']['authenticated'] = \
                 [Q(job__study__submission_account_id__iexact=_username,
                    job__is_private=True) |
                  Q(job__study__submission_account_id__iexact=_username,
                    job__assembly__is_private=True) |
-                 Q(job__run__is_private=False) | Q(job__assembly__is_private=False)]
+                 Q(job__run__is_private=False) | Q(job__assembly__is_private=False),
+                 Q(job__is_suppressed=False)]
             _query_filters['AssemblyExtraAnnotationQuerySet']['authenticated'] = \
                 [Q(assembly__samples__studies__submission_account_id__iexact=_username,
                    is_private=True) |
-                 Q(assembly__is_private=False)]
+                 Q(assembly__is_private=False),
+                 Q(assembly__is_suppressed=False)]
             _query_filters['RunExtraAnnotationQuerySet']['authenticated'] = \
                 [Q(run__samples__studies__submission_account_id__iexact=_username,
                    is_private=True) |
-                 Q(run__is_private=False)]
+                 Q(run__is_private=False),
+                 Q(run__is_suppressed=False)]
 
         filters = _query_filters.get(self.__class__.__name__)
 
