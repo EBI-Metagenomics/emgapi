@@ -15,11 +15,9 @@
 # limitations under the License.
 
 import pytest
-import os
 
 from unittest.mock import patch
 
-from django.urls import reverse
 from django.core.management import call_command
 from emgapi.models import Sample, Assembly, AnalysisJob, Run
 

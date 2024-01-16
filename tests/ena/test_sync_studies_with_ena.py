@@ -47,6 +47,9 @@ class TestSyncENAStudies:
             if study in public_studies:
                 assert study.is_private == True
 
+        assert Study.objects.available(None).count() == 0
+
+
     @patch("emgena.models.Study.objects")
     def test_make_studies_public(self, ena_study_objs_mock, ena_public_studies):
         ena_study_objs_mock.using("era").filter.return_value = ena_public_studies
@@ -66,6 +69,8 @@ class TestSyncENAStudies:
         for study in all_studies:
             if study in private_studies:
                 assert study.is_private == False
+
+        assert Study.objects.available(None).count() == all_studies.count()
 
     @patch("emgena.models.Study.objects")
     def test_suppress_studies(self, ena_study_objs_mock, ena_suppressed_studies):
@@ -93,6 +98,8 @@ class TestSyncENAStudies:
                 ena_study.get_study_status_display().lower()
                 == study.get_suppression_reason_display().lower()
             )
+
+        assert Study.objects.available(None).count() == 0
 
     @patch("emgena.models.Study.objects")
     def test_suppress_studies_propagation(self, ena_study_objs_mock, ena_suppression_propagation_studies):
