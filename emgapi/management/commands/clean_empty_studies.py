@@ -56,5 +56,5 @@ class Command(BaseCommand):
                 run.ena_study_accession = study.secondary_accession
                 run.study = None
             Run.objects.bulk_update(runs, ["ena_study_accession", "study"])
-            study.suppress()
+            study.suppress(propagate=False)
             logger.info(f"{study} suppressed")
