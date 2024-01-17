@@ -54,14 +54,6 @@
                     {% endfor %}
                 </hierarchical_field>
                 {% endfor %}
-
-                {% for go_slim in analysis_go_entries %}
-                <field name="go_term">{{ go_slim.description | escape }}</field>
-                {% endfor %}
-
-                {% for ips in analysis_ips_entries %}
-                <field name="interpro_entry">{{ ips.description | escape }}</field>
-                {% endfor %}
             </additional_fields>
             <cross_references>
                 <ref dbkey="{{ analysis.study.accession }}" dbname="metagenomics_projects"/>
@@ -88,10 +80,10 @@
                 {% endif %}
 
                 {% for go in analysis_go_entries %}
-                <ref dbkey="{{ go.accession }}" dbname="go"/>
+                <ref dbkey="{{ go }}" dbname="go"/>
                 {% endfor %}
                 {% for ips in analysis_ips_entries %}
-                <ref dbkey="{{ ips.accession }}" dbname="interpro"/>
+                <ref dbkey="{{ ips }}" dbname="interpro"/>
                 {% endfor %}
             </cross_references>
         </entry>

@@ -37,6 +37,9 @@ import datetime
 from os.path import expanduser
 
 from corsheaders.defaults import default_headers
+from pymongo import monitoring
+
+from emgapianns.utils import MongoCommandLogger
 
 try:
     from YamJam import yamjam, YAMLError
@@ -44,7 +47,6 @@ except ImportError:
     raise ImportError("Install yamjam. Install dependencies.")
 
 logger = logging.getLogger(__name__)
-
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -161,8 +163,15 @@ LOGGING = {
     }
 }
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
+if EMG_CONF.get('emg', {}).get('log_db_queries', False):
+    monitoring.register(MongoCommandLogger())
+    LOGGING['loggers']['django.db.backends'] = {
+        'handlers': ['default', 'console'],
+        'level': 'DEBUG',
+        'propagate': False,
+    }
+    LOGGING['loggers']['']['level'] = 'DEBUG'
+
 
 def create_secret_key(var_dir):
     secret_key = None

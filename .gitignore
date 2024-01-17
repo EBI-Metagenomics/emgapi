@@ -30,3 +30,15 @@ logs
 secret.key
 
 dumps
+
+/config/*.yml
+/config/*.yaml
+!/config/*local*
+
+/config/*.yml
+/config/*.yaml
+!/config/*local*
+
+/config/*.yml
+/config/*.yaml
+!/config/*local*

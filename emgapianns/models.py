@@ -106,7 +106,7 @@ class BaseAnalysisJobAnnotation(mongoengine.EmbeddedDocument):
 
 class AnalysisJobGoTermAnnotation(BaseAnalysisJobAnnotation):
 
-    go_term = mongoengine.ReferenceField(GoTerm, required=True)
+    go_term = mongoengine.LazyReferenceField(GoTerm, required=True)
 
     @property
     def accession(self):
@@ -123,8 +123,10 @@ class AnalysisJobGoTermAnnotation(BaseAnalysisJobAnnotation):
 
 class AnalysisJobInterproIdentifierAnnotation(BaseAnalysisJobAnnotation):
 
-    interpro_identifier = mongoengine.ReferenceField(InterproIdentifier,
-                                                     required=True)
+    interpro_identifier = mongoengine.LazyReferenceField(
+        InterproIdentifier,
+        required=True
+    )
 
     @property
     def accession(self):
@@ -142,7 +144,7 @@ class AnalysisJobInterproIdentifierAnnotation(BaseAnalysisJobAnnotation):
 class AnalysisJobKeggModuleAnnotation(mongoengine.EmbeddedDocument):
     """KEGG modules on a given Analysis Job.
     """
-    module = mongoengine.ReferenceField(KeggModule, required=True)
+    module = mongoengine.LazyReferenceField(KeggModule, required=True)
     completeness = mongoengine.FloatField(default=0.0)
     matching_kos = mongoengine.ListField(mongoengine.StringField(), default=list)
     missing_kos = mongoengine.ListField(mongoengine.StringField(), default=list)
@@ -163,7 +165,7 @@ class AnalysisJobKeggModuleAnnotation(mongoengine.EmbeddedDocument):
 class AnalysisJobPfamAnnotation(BaseAnalysisJobAnnotation):
     """Pfam on a given Analysis Job.
     """
-    pfam_entry = mongoengine.ReferenceField(PfamEntry, required=True)
+    pfam_entry = mongoengine.LazyReferenceField(PfamEntry, required=True)
 
     @property
     def accession(self):
@@ -177,7 +179,7 @@ class AnalysisJobPfamAnnotation(BaseAnalysisJobAnnotation):
 class AnalysisJobCOGAnnotation(BaseAnalysisJobAnnotation):
     """COG on a given Analysis Job.
     """
-    cog = mongoengine.ReferenceField(COG, required=True)
+    cog = mongoengine.LazyReferenceField(COG, required=True)
 
     @property
     def accession(self):
@@ -199,7 +201,7 @@ class AnalysisJobGenomePropAnnotation(mongoengine.EmbeddedDocument):
         (PARTIAL_PRESENCE, 'Partial'),
         (NO_PRESENCE, 'No'),
     )
-    genome_property = mongoengine.ReferenceField(GenomeProperty, required=True)
+    genome_property = mongoengine.LazyReferenceField(GenomeProperty, required=True)
     presence = mongoengine.IntField(required=True, choices=PRESENCE_CHOICES)
 
     @property
@@ -214,7 +216,7 @@ class AnalysisJobGenomePropAnnotation(mongoengine.EmbeddedDocument):
 class AnalysisJobKeggOrthologAnnotation(BaseAnalysisJobAnnotation):
     """KEGG KO on a given Analysis Job.
     """
-    ko = mongoengine.ReferenceField(KeggOrtholog, required=True)
+    ko = mongoengine.LazyReferenceField(KeggOrtholog, required=True)
 
     @property
     def accession(self):
@@ -228,7 +230,7 @@ class AnalysisJobKeggOrthologAnnotation(BaseAnalysisJobAnnotation):
 class AnalysisJobAntiSmashGCAnnotation(BaseAnalysisJobAnnotation):
     """antiSMASH gene cluster on a given Analysis Job
     """
-    gene_cluster = mongoengine.ReferenceField(AntiSmashGeneCluster, required=True)
+    gene_cluster = mongoengine.LazyReferenceField(AntiSmashGeneCluster, required=True)
 
     @property
     def accession(self):
@@ -333,7 +335,7 @@ class Organism(mongoengine.Document):
 class AnalysisJobOrganism(mongoengine.EmbeddedDocument):
 
     count = mongoengine.IntField(required=True)
-    organism = mongoengine.ReferenceField(Organism)
+    organism = mongoengine.LazyReferenceField(Organism)
 
     @property
     def lineage(self):

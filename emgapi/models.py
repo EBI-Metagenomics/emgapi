@@ -1688,6 +1688,13 @@ class AnalysisJobManager(models.Manager):
         return self.get_queryset().available(request)
 
 
+class AnalysisJobDumpManager(AnalysisJobManager):
+    def get_queryset(self):
+        return AnalysisJobQuerySet(self.model, using=self._db) \
+            .select_related(
+                'analysis_status','experiment_type', 'assembly', 'pipeline', 'run', 'sample', 'study')
+
+
 class AnalysisJob(SuppressibleModel, PrivacyControlledModel, EbiSearchIndexedModel):
     def __init__(self, *args, **kwargs):
         super(AnalysisJob, self).__init__(*args, **kwargs)
@@ -1761,6 +1768,7 @@ class AnalysisJob(SuppressibleModel, PrivacyControlledModel, EbiSearchIndexedMod
 
     objects = AnalysisJobManager()
     objects_admin = models.Manager()
+    objects_dump = AnalysisJobDumpManager()
 
     class Meta:
         db_table = 'ANALYSIS_JOB'

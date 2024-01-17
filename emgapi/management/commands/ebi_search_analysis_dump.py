@@ -47,11 +47,12 @@ class Command(BaseCommand):
         )
         parser.add_argument("-o", "--output", help="Output dir for xml files", required=True)
         parser.add_argument("-c", "--chunk", help="Number of analyses per chunk", default=100, nargs='?', type=int)
+        parser.add_argument("-m", "--max_pages", help="Max number of pages to dump", default=-1, type=int)
 
     def get_analysis_context(self, analysis: AnalysisJob):
         try:
             analysis_taxonomy: Optional[AnalysisJobTaxonomy] = AnalysisJobTaxonomy.objects.get(
-                analysis_id=analysis.job_id
+                pk=str(analysis.job_id)
             )
         except AnalysisJobTaxonomy.DoesNotExist:
             logger.debug(f"Could not find analysis job taxonomy for {analysis.job_id}")
@@ -88,7 +89,7 @@ class Command(BaseCommand):
             for taxonomy_attribute in taxonomy_attributes:
                 if taxonomy_attribute:
                     for tax in taxonomy_attribute:
-                        tax_lineage_list = list(filter(None, tax.lineage.split(":")))
+                        tax_lineage_list = list(filter(None, tax.organism.pk.split('|')[0].split(":")))
                         if len(tax_lineage_list) > 1:
                             taxonomy_lists.append(
                                 tax_lineage_list
@@ -139,13 +140,13 @@ class Command(BaseCommand):
 
         if 'location_name' not in sample_metadata and analysis.sample.geo_loc_name:
             sample_metadata['location_name'] = analysis.sample.geo_loc_name
-
         return {
             "analysis": analysis,
             "analysis_biome": biome_list,
             "analysis_taxonomies": taxonomy_lists,
-            "analysis_go_entries": go_annotation.go_terms if go_annotation else [],
-            "analysis_ips_entries": ips_annotation.interpro_identifiers if ips_annotation else [],
+            "analysis_go_entries": [go.go_term.pk for go in go_annotation.go_terms] if go_annotation else [],
+            "analysis_ips_entries": [ipr.interpro_identifier.pk for ipr in ips_annotation.interpro_identifiers] if ips_annotation else [],
+            # .pk ensures the IPR and GO documents are not queried on mongo, which would have a big performance hit
             "sample_metadata": sample_metadata,
         }
 
@@ -168,7 +169,7 @@ class Command(BaseCommand):
 
         pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
 
-        analyses: QuerySet = AnalysisJob.objects.available(None)
+        analyses: QuerySet = AnalysisJob.objects_dump.available(None)
 
         if not is_full_snapshot:
             analyses = AnalysisJob.objects_for_indexing.to_add()
@@ -190,6 +191,10 @@ class Command(BaseCommand):
         paginated_analyses = Paginator(analyses, chunk_size)
 
         for page in paginated_analyses:
+            if (mp := options["max_pages"]) >= 0:
+                if page.number > mp:
+                    logger.warning("Skipping remaining pages")
+                    break
             logger.info(f"Dumping {page.number = }/{paginated_analyses.num_pages}")
             additions_file = pathlib.Path(output_dir) / pathlib.Path(f'analyses_{page.number:04}.xml')
             with open(additions_file, 'w') as a:
@@ -202,7 +207,6 @@ class Command(BaseCommand):
                         }
                     )
                 )
-
             nowish = timezone.now() + timedelta(minutes=1)
             # Small buffer into the future so that the indexing time remains ahead of auto-now updated times.
 

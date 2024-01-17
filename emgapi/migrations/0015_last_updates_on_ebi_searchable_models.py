@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('emgapi', '0012_alter_publication_pub_type'),
+        ('emgapi', '0014_suppression_reason_ancestor_suppressed'),
     ]
 
     operations = [
