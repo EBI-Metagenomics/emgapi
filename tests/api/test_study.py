@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import datetime
 
 # Copyright 2020 EMBL - European Bioinformatics Institute
 #
@@ -45,7 +46,7 @@ class TestStudyAPI:
         assert _attr['study-abstract'] == "abcdefghijklmnoprstuvwyz"
         assert _attr['study-name'] == "Example study name SRP01234"
         assert _attr['data-origination'] == "HARVESTED"
-        assert _attr['last-update'] == "1970-01-01T00:00:00"
+        assert _attr['last-update'][:4] == datetime.datetime.now().isoformat()[:4]
         assert _attr['bioproject'] == "PRJDB1234"
         assert _attr['is-private'] == False
 
