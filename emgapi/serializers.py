@@ -1020,7 +1020,8 @@ class AnalysisSerializer(BaseAnalysisSerializer):
             'secondary_accession',
             'is_suppressed',
             'suppressed_at',
-            'suppression_reason'
+            'suppression_reason',
+            'last_indexed'
         )
 
 
@@ -1409,6 +1410,7 @@ class StudySerializer(ExplicitFieldsModelSerializer,
             'is_suppressed',
             'suppression_reason',
             'suppressed_at',
+            'last_indexed',
         )
 
 
