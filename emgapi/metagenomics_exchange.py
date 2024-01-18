@@ -27,7 +27,7 @@ class MetagenomicsExchangeAPI:
     def __init__(self, base_url=None):
         self.base_url = base_url if base_url else settings.METAGENOMICS_EXCHANGE_API
         self.__token = settings.METAGENOMICS_EXCHANGE_API_TOKEN
-        self.broker = settings.MGNIFY_BROKER
+        self.broker = settings.METAGENOMICS_EXCHANGE_MGNIFY_BROKER
 
     def get_request(self, endpoint: str, params: dict):
         """Make a GET request, returns the response"""

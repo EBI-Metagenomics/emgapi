@@ -279,12 +279,6 @@ class ENASyncableModel(SuppressibleModel, PrivacyControlledModel):
         abstract = True
 
 
-class IndexableModel(models.Model):
-    last_update = models.DateTimeField(
-        db_column='LAST_UPDATE',
-        auto_now=True
-    )
-
 class IndexableModelQueryset(models.QuerySet):
     """
     to_delete: Objects that have been suppressed since they were last indexed,
@@ -294,8 +288,8 @@ class IndexableModelQueryset(models.QuerySet):
     or that have been indexed but updated since.
     """
     def to_delete(self):
-        not_indexed_filter = {f"{self._index_field__isnull}": False}
-        updated_after_indexing = Q(last_update__gte=F(self._index_field), **not_indexed_filter)
+        not_indexed_filter = {f"{self.index_field}__isnull": False}
+        updated_after_indexing = Q(last_update__gte=F(self.index_field), **not_indexed_filter)
 
         try:
             self.model._meta.get_field("suppressed_at")
@@ -305,12 +299,12 @@ class IndexableModelQueryset(models.QuerySet):
             )
         else:
             return self.filter(
-                Q(suppressed_at__gte=F(self._index_field)) | updated_after_indexing
+                Q(suppressed_at__gte=F(self.index_field)) | updated_after_indexing
             )
 
     def to_add(self):
-        not_indexed_filter = {f"{self._index_field__isnull}": False}
-        updated_after_indexing = Q(last_update__gte=F(self._index_field), **not_indexed_filter)
+        not_indexed_filter = {f"{self.index_field}__isnull": False}
+        updated_after_indexing = Q(last_update__gte=F(self.index_field), **not_indexed_filter)
         never_indexed = Q(last_indexed__isnull=True)
 
         try:
@@ -333,10 +327,10 @@ class IndexableModelQueryset(models.QuerySet):
 
 class EBISearchIndexQueryset(IndexableModelQueryset):
 
-    _index_field = "last_ebi_search_indexed"
+    index_field = "last_ebi_search_indexed"
 
 
-class EBISearchIndexedModel(IndexableModel):
+class EBISearchIndexedModel(models.Model):
 
     last_ebi_search_indexed = models.DateTimeField(
         db_column='LAST_EBI_SEARCH_INDEXED',
@@ -353,10 +347,10 @@ class EBISearchIndexedModel(IndexableModel):
 
 class MetagenomicsExchangeQueryset(IndexableModelQueryset):
     
-    _index_field = "last_mgx_indexed"
+    index_field = "last_mgx_indexed"
 
 
-class MetagenomicsExchangeIndexedModel(IndexableModel):
+class MetagenomicsExchangeIndexedModel(models.Model):
     """Model to track Metagenomics Exchange indexation of analysis jobs
     """
     last_mgx_indexed = models.DateTimeField(
@@ -364,6 +358,14 @@ class MetagenomicsExchangeIndexedModel(IndexableModel):
         null=True,
         blank=True,
         help_text="Date at which this model was last indexed in the Metagenomics Exchange"
+    )
+    mgx_accession = models.CharField(
+        db_column='MGX_ACCESSION',
+        max_length=10,
+        unique=True,
+        null=True,
+        blank=True,
+        help_text="The Metagenomics Exchange accession."
     )
 
     objects_for_mgx_indexing = MetagenomicsExchangeQueryset.as_manager()
@@ -1790,19 +1792,7 @@ class AnalysisJobDumpManager(AnalysisJobManager):
             .select_related(
                 'analysis_status','experiment_type', 'assembly', 'pipeline', 'run', 'sample', 'study')
 
-class ME_Broker(models.Model):
-    brokerID = models.CharField(db_column='BROKER', max_length=10, null=True, blank=True)
-
-class MetagenomicsExchange(models.Model):
-    """Table to track Metagenomics Exchange population
-    https://www.ebi.ac.uk/ena/registry/metagenome/api/
-    """
-    broker_id = models.ForeignKey(ME_Broker, db_column='BROKER', on_delete=models.CASCADE)
-    first_created = models.DateTimeField(db_column='FIRST_CREATED', auto_now_add=True)
-    last_update = models.DateTimeField(db_column='LAST_UPDATE', auto_now=True)
-
-
-class AnalysisJob(SuppressibleModel, PrivacyControlledModel, EBISearchIndexedModel, MetagenomicsExchangeModel):
+class AnalysisJob(SuppressibleModel, PrivacyControlledModel, EBISearchIndexedModel, MetagenomicsExchangeIndexedModel):
     def __init__(self, *args, **kwargs):
         super(AnalysisJob, self).__init__(*args, **kwargs)
         setattr(self, 'accession',

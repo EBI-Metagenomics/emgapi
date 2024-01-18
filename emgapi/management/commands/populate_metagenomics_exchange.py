@@ -19,6 +19,8 @@ import logging
 from django.conf import settings
 from django.core.management import BaseCommand
 from django.utils import timezone
+from django.core.paginator import Paginator
+from datetime import timedelta
 
 from emgapi.models import AnalysisJob
 from emgapi.metagenomics_exchange import MetagenomicsExchangeAPI
@@ -79,7 +81,7 @@ class Command(BaseCommand):
         self.study_accession = options.get("study")
         self.dry_run = options.get("dry_run")
         self.pipeline_version = options.get("pipeline")
-        
+
         mgx_api = MetagenomicsExchangeAPI(base_url=settings.METAGENOMICS_EXCHANGE_API)
 
         analyses_to_index = AnalysisJob.objects_for_mgx_indexing.to_add()
@@ -97,78 +99,102 @@ class Command(BaseCommand):
             analyses_to_index = analyses_to_index.filter(
                 pipeline__pipeline_id=self.pipeline_version
             )
-            analyses_to_delete = analyses_to_delete.filter(pipeline__pipeline_id=self.pipeline_version)
-
-        logging.info(f"Indexig {len(analyses_to_index)} new analyses")
-
-        jobs_to_update = []
-
-        for ajob in analyses_to_index:
-            metadata = self.generate_metadata(
-                mgya=ajob.accession,
-                run_accession=ajob.run,
-                status="public" if not ajob.is_private else "private",
+            analyses_to_delete = analyses_to_delete.filter(
+                pipeline__pipeline_id=self.pipeline_version
             )
-            registry_id, metadata_match = mgx_api.check_analysis(
-                source_id=ajob.accession, sequence_id=ajob.run, metadata=metadata
-            )
-            # The job is not registered
-            if not registry_id:
-                logging.debug(f"Add new {ajob}")
-                if self.dry_run:
-                    logging.info(f"Dry-mode run: no addition to real ME for {ajob}")
-                    continue
-                    
-                response = mgx_api.add_analysis(
+
+        logging.info(f"Indexing {len(analyses_to_index)} new analyses")
+
+        for page in Paginator(analyses_to_index, 100):
+            jobs_to_update = []
+
+            for ajob in page:
+                metadata = self.generate_metadata(
                     mgya=ajob.accession,
                     run_accession=ajob.run,
-                    public=not ajob.is_private,
+                    status="public" if not ajob.is_private else "private",
                 )
-                if response.ok:
-                    logging.debug(f"Added {ajob}")
-                    ajob.last_mgx_indexed = timezone.now()
-                    jobs_to_update.append(ajob)
-                else:
-                    logging.error(f"Error adding {ajob}: {response.message}")
-
-            # else we have to check if the metadata matches, if not we need to update it
-            else:
-                if not metadata_match:
-                    logging.debug(f"Patch existing {ajob}")
+                registry_id, metadata_match = mgx_api.check_analysis(
+                    source_id=ajob.accession, sequence_id=ajob.run, metadata=metadata
+                )
+                # The job is not registered
+                if not registry_id:
+                    logging.debug(f"Add new {ajob}")
                     if self.dry_run:
-                        logging.info(f"Dry-mode run: no patch to real ME for {ajob}")
+                        logging.info(f"Dry-mode run: no addition to real ME for {ajob}")
                         continue
-                    if mgx_api.patch_analysis(registry_id=registry_id, data=metadata):
-                        logging.info(f"Analysis {ajob} updated successfully")
+
+                    response = mgx_api.add_analysis(
+                        mgya=ajob.accession,
+                        run_accession=ajob.run,
+                        public=not ajob.is_private,
+                    )
+                    if response.ok:
+                        logging.debug(f"Added {ajob}")
+                        ajob.mgx_accession = registry_id
+                        ajob.last_mgx_indexed = timezone.now() + timedelta(minutes=1)
+                        jobs_to_update.append(ajob)
+                    else:
+                        logging.error(f"Error adding {ajob}: {response.message}")
+
+                # else we have to check if the metadata matches, if not we need to update it
+                else:
+                    if not metadata_match:
+                        logging.debug(f"Patch existing {ajob}")
+                        if self.dry_run:
+                            logging.info(
+                                f"Dry-mode run: no patch to real ME for {ajob}"
+                            )
+                            continue
+                        if mgx_api.patch_analysis(
+                            registry_id=registry_id, data=metadata
+                        ):
+                            logging.info(f"Analysis {ajob} updated successfully")
+                            # Just to be safe, update the MGX accession
+                            ajob.mgx_accession = registry_id
+                            ajob.last_mgx_indexed = timezone.now()
+                            jobs_to_update.append(ajob)
+                        else:
+                            logging.error(f"Analysis {ajob} update failed")
+                    else:
+                        logging.debug(f"No edit for {ajob}, metadata is correct")
+
+            AnalysisJob.objects.bulk_update(
+                jobs_to_update, ["last_mgx_indexed", "mgx_accession"], batch_size=100
+            )
+
+        logging.info(f"Processing {len(analyses_to_delete)} analyses to remove")
+
+        for page in Paginator(analyses_to_delete, 100):
+            jobs_to_update = []
+
+            for ajob in page:
+                metadata = self.generate_metadata(
+                    mgya=ajob.accession,
+                    run_accession=ajob.run,
+                    status="public" if not ajob.is_private else "private",
+                )
+                registry_id, _ = mgx_api.check_analysis(
+                    source_id=ajob.accession, sequence_id=ajob.run, metadata=metadata
+                )
+                if registry_id:
+                    if self.dry_run:
+                        logging.info(f"Dry-mode run: no delete from real ME for {ajob}")
+
+                    if mgx_api.delete_analysis(registry_id):
+                        logging.info(f"{ajob} successfully deleted")
                         ajob.last_mgx_indexed = timezone.now()
                         jobs_to_update.append(ajob)
                     else:
-                        logging.error(f"Analysis {ajob} update failed")
+                        logging.info(f"{ajob} failed on delete")
                 else:
-                    logging.debug(f"No edit for {ajob}, metadata is correct")
+                    logging.info(
+                        f"{ajob} doesn't exist in the registry, nothing to delete"
+                    )
 
-        # BULK UPDATE #
-        AnalysisJob.objects.bulk_update(jobs_to_update, ["last_mgx_indexed"])
-
-        logging.info(f"Processing {len(analyses_to_delete)} analyses to remove")
-        for ajob in analyses_to_delete:
-            metadata = self.generate_metadata(
-                mgya=ajob.accession,
-                run_accession=ajob.run,
-                status="public" if not ajob.is_private else "private",
+            # BULK UPDATE #
+            AnalysisJob.objects.bulk_update(
+                jobs_to_update, ["last_mgx_indexed"], batch_size=100
             )
-            registry_id, _ = mgx_api.check_analysis(
-                source_id=ajob.accession, sequence_id=ajob.run, metadata=metadata
-            )
-            if registry_id:
-                if self.dry_run:
-                    logging.info(f"Dry-mode run: no delete from real ME for {ajob}")
-
-                if mgx_api.delete_analysis(registry_id):
-                    logging.info(f"{ajob} successfully deleted")
-                else:
-                    logging.info(f"{ajob} failed on delete")
-            else:
-                logging.info(f"{ajob} doesn't exist in the registry, nothing to delete")
 
         logging.info("Done")
