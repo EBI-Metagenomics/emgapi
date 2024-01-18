@@ -96,7 +96,7 @@ class MetagenomicsExchangeAPI:
             }
         endpoint = f"sequences/{sequence_id}"
         response = self.get_request(endpoint=endpoint, params=params)
-        analysis_registryID = ""
+        analysis_registry_id = None
         metadata_match = True
         if response.ok:
             data = response.json()
@@ -105,21 +105,21 @@ class MetagenomicsExchangeAPI:
             if source_id in sourceIDs:
                 found_record = [item for item in datasets if item.get("sourceID") == source_id][0]
                 logging.info(f"{source_id} exists in ME")
-                analysis_registryID = found_record.get("registryID")
+                analysis_registry_id  = found_record.get("registryID")
                 if metadata:
                     for metadata_record in metadata:
                         if not(metadata_record in found_record):
                             metadata_match = False
-                            return analysis_registryID, metadata_match
+                            return analysis_registry_id , metadata_match
                         else:
                             if metadata[metadata_record] != found_record[metadata_record]:
                                 metadata_match = False
                                 logging.info(f"Incorrect field {metadata[metadata_record]} in ME ({found_record[metadata_record]})")
-                                return analysis_registryID, metadata_match
-                return analysis_registryID, metadata_match
+                                return analysis_registry_id, metadata_match
+                return analysis_registry_id , metadata_match
             else:
                 logging.info(f"{source_id} does not exist in ME")
-        return analysis_registryID, metadata_match
+        return analysis_registry_id, metadata_match
 
     def delete_analysis(self, registry_id: str):
         response = self.delete_request(endpoint=f"datasets/{registry_id}")

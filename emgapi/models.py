@@ -279,6 +279,16 @@ class ENASyncableModel(SuppressibleModel, PrivacyControlledModel):
         abstract = True
 
 
+class IndexableModel(models.Model):
+    last_update = models.DateTimeField(
+        db_column='LAST_UPDATE',
+        auto_now=True
+    )
+
+    class Meta:
+        abstract = True
+
+
 class IndexableModelQueryset(models.QuerySet):
     """
     to_delete: Objects that have been suppressed since they were last indexed,
@@ -288,8 +298,7 @@ class IndexableModelQueryset(models.QuerySet):
     or that have been indexed but updated since.
     """
     def to_delete(self):
-        not_indexed_filter = {f"{self.index_field}__isnull": False}
-        updated_after_indexing = Q(last_update__gte=F(self.index_field), **not_indexed_filter)
+        updated_after_indexing = Q(last_update__gte=F(self.index_field), **{f"{self.index_field}__isnull": False})
 
         try:
             self.model._meta.get_field("suppressed_at")
@@ -303,9 +312,8 @@ class IndexableModelQueryset(models.QuerySet):
             )
 
     def to_add(self):
-        not_indexed_filter = {f"{self.index_field}__isnull": False}
-        updated_after_indexing = Q(last_update__gte=F(self.index_field), **not_indexed_filter)
-        never_indexed = Q(last_indexed__isnull=True)
+        updated_after_indexing = Q(last_update__gte=F(self.index_field), **{f"{self.index_field}__isnull": False})
+        never_indexed = Q(**{f"{self.index_field}__isnull": True})
 
         try:
             self.model._meta.get_field("is_suppressed")
@@ -330,7 +338,7 @@ class EBISearchIndexQueryset(IndexableModelQueryset):
     index_field = "last_ebi_search_indexed"
 
 
-class EBISearchIndexedModel(models.Model):
+class EBISearchIndexedModel(IndexableModel):
 
     last_ebi_search_indexed = models.DateTimeField(
         db_column='LAST_EBI_SEARCH_INDEXED',
@@ -352,6 +360,10 @@ class MetagenomicsExchangeQueryset(IndexableModelQueryset):
 
 class MetagenomicsExchangeIndexedModel(models.Model):
     """Model to track Metagenomics Exchange indexation of analysis jobs
+    TODO: this model should have the last_update field as it's a requirement.
+          The current implementation of this works because the analysis jobs are
+          also extending the EBISearchIndexable model which provided the
+          last_update field.
     """
     last_mgx_indexed = models.DateTimeField(
         db_column='LAST_MGX_INDEXED',
@@ -1094,8 +1106,6 @@ class Study(ENASyncableModel, EBISearchIndexedModel):
         db_column='AUTHOR_EMAIL', max_length=100, blank=True, null=True)
     author_name = models.CharField(
         db_column='AUTHOR_NAME', max_length=100, blank=True, null=True)
-    last_update = models.DateTimeField(
-        db_column='LAST_UPDATE', auto_now=True)
     submission_account_id = models.CharField(
         db_column='SUBMISSION_ACCOUNT_ID',
         max_length=15, blank=True, null=True)

@@ -54,12 +54,6 @@ class Command(BaseCommand):
             type=float,
         )
         parser.add_argument(
-            "--dev",
-            action="store_true",
-            required=False,
-            help="Populate dev API",
-        )
-        parser.add_argument(
             "--dry-run",
             action="store_true",
             required=False,

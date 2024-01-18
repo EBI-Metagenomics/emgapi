@@ -1107,15 +1107,15 @@ def suppressed_analysis_jobs(ena_suppressed_runs):
     suppressed_analysisjobs = make_suppressed_analysis_jobs(quantity=5,
                                                             emg_props={"is_suppressed": True,
                                                                        "suppressed_at": '1980-01-01 00:00:00',
-                                                                       'last_populated_me': '1970-01-01 00:00:00'})
+                                                                       'last_mgx_indexed': '1970-01-01 00:00:00'})
     return suppressed_analysisjobs
 
 @pytest.fixture
 def analysis_existed_in_me():
     emg_props = {
         "job_id": 147343,
-        "last_populated_me": '1970-01-01 00:00:00',
-        "last_updated_me": '1980-01-01 00:00:00',
+        "last_mgx_indexed": '1970-01-01 00:00:00',
+        "last_update": '1980-01-01 00:00:00',
         "is_suppressed": False,
         "is_private": False
     }
