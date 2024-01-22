@@ -70,7 +70,7 @@ class TestStudyAPI:
         assert d['attributes']['accession'] == "MGYS00001234"
 
     def test_csv(self, client, studies):
-        url = reverse("emgapi_v1:studies-list", kwargs={'format': 'csv', 'ordering': 'last_update'})
+        url = reverse("emgapi_v1:studies-list", kwargs={'format': 'csv'})
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert response.get('Content-Disposition') == 'attachment; filename="Study.csv"'
