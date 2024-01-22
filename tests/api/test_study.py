@@ -95,22 +95,22 @@ class TestStudyAPI:
             "\"url\""
         ])
         first_row = [
-            "MGYS00000001",
-            "",
-            "PRJDB0001",
-            "Centre Name",
-            "HARVESTED",
-            "",
+            "\"MGYS00000001\"",
+            "\"\"",
+            "\"PRJDB0001\"",
+            "\"Centre Name\"",
+            "\"HARVESTED\"",
+            "\"\"",
             "False",
             None,
-            "",
-            "",
-            "",
-            "",
-            "SRP0001",
-            "",
-            "Example study name 1",
-            "http://testserver/v1/studies/MGYS00000001.csv"
+            "\"\"",
+            "\"\"",
+            "\"\"",
+            "\"\"",
+            "\"SRP0001\"",
+            "\"\"",
+            "\"Example study name 1\"",
+            "\"http://testserver/v1/studies/MGYS00000001.csv\""
         ]
 
         rows = content.splitlines()
