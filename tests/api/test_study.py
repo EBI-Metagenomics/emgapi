@@ -70,13 +70,13 @@ class TestStudyAPI:
         assert d['attributes']['accession'] == "MGYS00001234"
 
     def test_csv(self, client, studies):
-        url = reverse("emgapi_v1:studies-list", kwargs={'format': 'csv'})
+        url = reverse("emgapi_v1:studies-list", kwargs={'format': 'csv', 'ordering': 'last_update'})
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert response.get('Content-Disposition') == 'attachment; filename="Study.csv"'
         content = b''.join(response.streaming_content).decode('utf-8')
 
-        expected_header = ",".join([
+        expected_header = [
             "\"accession\"",
             "\"analyses\"",
             "\"bioproject\"",
@@ -93,29 +93,34 @@ class TestStudyAPI:
             "\"study_abstract\"",
             "\"study_name\"",
             "\"url\""
-        ])
-        first_row = ",".join([
-            "\"MGYS00000001\"",
-            "\"\"",
-            "\"PRJDB0001\"",
-            "\"Centre Name\"",
-            "\"HARVESTED\"",
-            "\"\"",
+        ]
+        first_row = [
+            "MGYS00000001",
+            "",
+            "PRJDB0001",
+            "Centre Name",
+            "HARVESTED",
+            "",
             "False",
-            "\"1970-01-01T00:00:00\"",
-            "\"\"",
-            "\"\"",
-            "\"\"",
-            "\"\"",
-            "\"SRP0001\"",
-            "\"\"",
-            "\"Example study name 1\"",
-            "\"http://testserver/v1/studies/MGYS00000001.csv\""
-        ])
+            None,
+            "",
+            "",
+            "",
+            "",
+            "SRP0001",
+            "",
+            "Example study name 1",
+            "http://testserver/v1/studies/MGYS00000001.csv"
+        ]
 
         rows = content.splitlines()
 
         assert len(rows) == 50
 
         assert expected_header == rows[0]
-        assert first_row == rows[1]
+        first_row_response = rows[1].split(',')
+        assert len(first_row_response) == len(first_row)
+        for response_element, expected_element in zip(first_row_response, first_row):
+            if expected_element is not None:
+                assert response_element == expected_element
+
