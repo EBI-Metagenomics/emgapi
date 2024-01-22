@@ -109,7 +109,6 @@ class AnalysisJobGoTermAnnotation(BaseAnalysisJobAnnotation):
 
     go_term = mongoengine.LazyReferenceField(GoTerm, required=True)
 
-
     @cached_property
     def materialised_go_term(self):
         return self.go_term.fetch()
@@ -159,17 +158,21 @@ class AnalysisJobKeggModuleAnnotation(mongoengine.EmbeddedDocument):
     matching_kos = mongoengine.ListField(mongoengine.StringField(), default=list)
     missing_kos = mongoengine.ListField(mongoengine.StringField(), default=list)
 
+    @cached_property
+    def materialised_module(self):
+        return self.module.fetch()
+
     @property
     def accession(self):
-        return self.module.accession
+        return self.materialised_module.accession
 
     @property
     def description(self):
-        return self.module.description
+        return self.materialised_module.description
 
     @property
     def name(self):
-        return self.module.name
+        return self.materialised_module.name
 
 
 class AnalysisJobPfamAnnotation(BaseAnalysisJobAnnotation):
@@ -222,13 +225,17 @@ class AnalysisJobGenomePropAnnotation(mongoengine.EmbeddedDocument):
     genome_property = mongoengine.LazyReferenceField(GenomeProperty, required=True)
     presence = mongoengine.IntField(required=True, choices=PRESENCE_CHOICES)
 
+    @cached_property
+    def materialised_genome_property(self):
+        return self.genome_property.fetch()
+
     @property
     def accession(self):
-        return self.genome_property.accession
+        return self.materialised_genome_property.accession
 
     @property
     def description(self):
-        return self.genome_property.description
+        return self.materialised_genome_property.description
 
 
 class AnalysisJobKeggOrthologAnnotation(BaseAnalysisJobAnnotation):
@@ -363,37 +370,41 @@ class AnalysisJobOrganism(mongoengine.EmbeddedDocument):
     count = mongoengine.IntField(required=True)
     organism = mongoengine.LazyReferenceField(Organism)
 
+    @cached_property
+    def materialised_organism(self):
+        return self.organism.fetch()
+
     @property
     def lineage(self):
-        return self.organism.lineage
+        return self.materialised_organism.lineage
 
     @property
     def ancestors(self):
-        return self.organism.ancestors
+        return self.materialised_organism.ancestors
 
     @property
     def hierarchy(self):
-        return self.organism.hierarchy
+        return self.materialised_organism.hierarchy
 
     @property
     def domain(self):
-        return self.organism.domain
+        return self.materialised_organism.domain
 
     @property
     def name(self):
-        return self.organism.name
+        return self.materialised_organism.name
 
     @property
     def parent(self):
-        return self.organism.parent
+        return self.materialised_organism.parent
 
     @property
     def rank(self):
-        return self.organism.rank
+        return self.materialised_organism.rank
 
     @property
     def pipeline_version(self):
-        return self.organism.pipeline_version
+        return self.materialised_organism.pipeline_version
 
     class EMGMeta:
         pk_field = 'lineage'
