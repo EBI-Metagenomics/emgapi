@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from functools import cached_property
 
 # Copyright 2019 EMBL - European Bioinformatics Institute
 #
@@ -108,17 +109,22 @@ class AnalysisJobGoTermAnnotation(BaseAnalysisJobAnnotation):
 
     go_term = mongoengine.LazyReferenceField(GoTerm, required=True)
 
+
+    @cached_property
+    def materialised_go_term(self):
+        return self.go_term.fetch()
+
     @property
     def accession(self):
-        return self.go_term.accession
+        return self.materialised_go_term.accession
 
     @property
     def description(self):
-        return self.go_term.description
+        return self.materialised_go_term.description
 
     @property
     def lineage(self):
-        return self.go_term.lineage
+        return self.materialised_go_term.lineage
 
 
 class AnalysisJobInterproIdentifierAnnotation(BaseAnalysisJobAnnotation):
@@ -128,17 +134,21 @@ class AnalysisJobInterproIdentifierAnnotation(BaseAnalysisJobAnnotation):
         required=True
     )
 
+    @cached_property
+    def materialised_interpro_identifier(self):
+        return self.interpro_identifier.fetch()
+
     @property
     def accession(self):
-        return self.interpro_identifier.accession
+        return self.materialised_interpro_identifier.accession
 
     @property
     def description(self):
-        return self.interpro_identifier.description
+        return self.materialised_interpro_identifier.description
 
     @property
     def lineage(self):
-        return self.interpro_identifier.lineage
+        return self.materialised_interpro_identifier.lineage
 
 
 class AnalysisJobKeggModuleAnnotation(mongoengine.EmbeddedDocument):
@@ -167,13 +177,17 @@ class AnalysisJobPfamAnnotation(BaseAnalysisJobAnnotation):
     """
     pfam_entry = mongoengine.LazyReferenceField(PfamEntry, required=True)
 
+    @cached_property
+    def materialised_pfam_entry(self):
+        return self.pfam_entry.fetch()
+
     @property
     def accession(self):
-        return self.pfam_entry.accession
+        return self.materialised_pfam_entry.accession
 
     @property
     def description(self):
-        return self.pfam_entry.description
+        return self.materialised_pfam_entry.description
 
 
 class AnalysisJobCOGAnnotation(BaseAnalysisJobAnnotation):
@@ -181,13 +195,17 @@ class AnalysisJobCOGAnnotation(BaseAnalysisJobAnnotation):
     """
     cog = mongoengine.LazyReferenceField(COG, required=True)
 
+    @cached_property
+    def materialised_cog(self):
+        return self.cog.fetch()
+
     @property
     def accession(self):
-        return self.cog.accession
+        return self.materialised_cog.accession
 
     @property
     def description(self):
-        return self.cog.description
+        return self.materialised_cog.description
 
 
 class AnalysisJobGenomePropAnnotation(mongoengine.EmbeddedDocument):
@@ -218,13 +236,17 @@ class AnalysisJobKeggOrthologAnnotation(BaseAnalysisJobAnnotation):
     """
     ko = mongoengine.LazyReferenceField(KeggOrtholog, required=True)
 
+    @cached_property
+    def materialised_ko(self):
+        return self.ko.fetch()
+
     @property
     def accession(self):
-        return self.ko.accession
+        return self.materialised_ko.accession
 
     @property
     def description(self):
-        return self.ko.description
+        return self.materialised_ko.description
 
 
 class AnalysisJobAntiSmashGCAnnotation(BaseAnalysisJobAnnotation):
@@ -232,13 +254,17 @@ class AnalysisJobAntiSmashGCAnnotation(BaseAnalysisJobAnnotation):
     """
     gene_cluster = mongoengine.LazyReferenceField(AntiSmashGeneCluster, required=True)
 
+    @cached_property
+    def materialised_gene_cluster(self):
+        return self.gene_cluster.fetch()
+
     @property
     def accession(self):
-        return self.gene_cluster.accession
+        return self.materialised_gene_cluster.accession
 
     @property
     def description(self):
-        return self.gene_cluster.description
+        return self.materialised_gene_cluster.description
 
 
 class BaseAnalysisJob(mongoengine.Document):
