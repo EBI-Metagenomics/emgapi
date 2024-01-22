@@ -76,7 +76,7 @@ class TestStudyAPI:
         assert response.get('Content-Disposition') == 'attachment; filename="Study.csv"'
         content = b''.join(response.streaming_content).decode('utf-8')
 
-        expected_header = [
+        expected_header = ",".join([
             "\"accession\"",
             "\"analyses\"",
             "\"bioproject\"",
@@ -93,7 +93,7 @@ class TestStudyAPI:
             "\"study_abstract\"",
             "\"study_name\"",
             "\"url\""
-        ]
+        ])
         first_row = [
             "MGYS00000001",
             "",
