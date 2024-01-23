@@ -144,3 +144,20 @@ class TestGenomes:
 
         call_command('remove_genomes_catalogue', 'uhgg-v2-0', confirm=True)
         assert not emg_models.GenomeCatalogue.objects.filter(catalogue_id='uhgg-v2-0').exists()
+
+        ### METADATA UPDATE in place ###
+        call_command(
+            'import_genomes',
+            path,
+            'genomes/uhgg/2.0.1',
+            'UHGG',
+            '2.0',
+            'root:Host-Associated:Human:Digestive System:Large intestine',
+            "v1.2.1",
+            "--update-metadata-only",
+        )
+        genome = emg_models.Genome.objects.get(accession='MGYG000000001')
+
+        assert genome.accession == 'MGYG000000001'
+        assert genome.completeness == 90.59
+        assert genome.pangenome_geographic_range.filter(name__in=["North America", "South America"]).count() == 2
