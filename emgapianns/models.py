@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from functools import cached_property
 
 # Copyright 2019 EMBL - European Bioinformatics Institute
 #
@@ -106,86 +107,108 @@ class BaseAnalysisJobAnnotation(mongoengine.EmbeddedDocument):
 
 class AnalysisJobGoTermAnnotation(BaseAnalysisJobAnnotation):
 
-    go_term = mongoengine.ReferenceField(GoTerm, required=True)
+    go_term = mongoengine.LazyReferenceField(GoTerm, required=True)
+
+    @cached_property
+    def materialised_go_term(self):
+        return self.go_term.fetch()
 
     @property
     def accession(self):
-        return self.go_term.accession
+        return self.materialised_go_term.accession
 
     @property
     def description(self):
-        return self.go_term.description
+        return self.materialised_go_term.description
 
     @property
     def lineage(self):
-        return self.go_term.lineage
+        return self.materialised_go_term.lineage
 
 
 class AnalysisJobInterproIdentifierAnnotation(BaseAnalysisJobAnnotation):
 
-    interpro_identifier = mongoengine.ReferenceField(InterproIdentifier,
-                                                     required=True)
+    interpro_identifier = mongoengine.LazyReferenceField(
+        InterproIdentifier,
+        required=True
+    )
+
+    @cached_property
+    def materialised_interpro_identifier(self):
+        return self.interpro_identifier.fetch()
 
     @property
     def accession(self):
-        return self.interpro_identifier.accession
+        return self.materialised_interpro_identifier.accession
 
     @property
     def description(self):
-        return self.interpro_identifier.description
+        return self.materialised_interpro_identifier.description
 
     @property
     def lineage(self):
-        return self.interpro_identifier.lineage
+        return self.materialised_interpro_identifier.lineage
 
 
 class AnalysisJobKeggModuleAnnotation(mongoengine.EmbeddedDocument):
     """KEGG modules on a given Analysis Job.
     """
-    module = mongoengine.ReferenceField(KeggModule, required=True)
+    module = mongoengine.LazyReferenceField(KeggModule, required=True)
     completeness = mongoengine.FloatField(default=0.0)
     matching_kos = mongoengine.ListField(mongoengine.StringField(), default=list)
     missing_kos = mongoengine.ListField(mongoengine.StringField(), default=list)
 
+    @cached_property
+    def materialised_module(self):
+        return self.module.fetch()
+
     @property
     def accession(self):
-        return self.module.accession
+        return self.materialised_module.accession
 
     @property
     def description(self):
-        return self.module.description
+        return self.materialised_module.description
 
     @property
     def name(self):
-        return self.module.name
+        return self.materialised_module.name
 
 
 class AnalysisJobPfamAnnotation(BaseAnalysisJobAnnotation):
     """Pfam on a given Analysis Job.
     """
-    pfam_entry = mongoengine.ReferenceField(PfamEntry, required=True)
+    pfam_entry = mongoengine.LazyReferenceField(PfamEntry, required=True)
+
+    @cached_property
+    def materialised_pfam_entry(self):
+        return self.pfam_entry.fetch()
 
     @property
     def accession(self):
-        return self.pfam_entry.accession
+        return self.materialised_pfam_entry.accession
 
     @property
     def description(self):
-        return self.pfam_entry.description
+        return self.materialised_pfam_entry.description
 
 
 class AnalysisJobCOGAnnotation(BaseAnalysisJobAnnotation):
     """COG on a given Analysis Job.
     """
-    cog = mongoengine.ReferenceField(COG, required=True)
+    cog = mongoengine.LazyReferenceField(COG, required=True)
+
+    @cached_property
+    def materialised_cog(self):
+        return self.cog.fetch()
 
     @property
     def accession(self):
-        return self.cog.accession
+        return self.materialised_cog.accession
 
     @property
     def description(self):
-        return self.cog.description
+        return self.materialised_cog.description
 
 
 class AnalysisJobGenomePropAnnotation(mongoengine.EmbeddedDocument):
@@ -199,44 +222,56 @@ class AnalysisJobGenomePropAnnotation(mongoengine.EmbeddedDocument):
         (PARTIAL_PRESENCE, 'Partial'),
         (NO_PRESENCE, 'No'),
     )
-    genome_property = mongoengine.ReferenceField(GenomeProperty, required=True)
+    genome_property = mongoengine.LazyReferenceField(GenomeProperty, required=True)
     presence = mongoengine.IntField(required=True, choices=PRESENCE_CHOICES)
+
+    @cached_property
+    def materialised_genome_property(self):
+        return self.genome_property.fetch()
 
     @property
     def accession(self):
-        return self.genome_property.accession
+        return self.materialised_genome_property.accession
 
     @property
     def description(self):
-        return self.genome_property.description
+        return self.materialised_genome_property.description
 
 
 class AnalysisJobKeggOrthologAnnotation(BaseAnalysisJobAnnotation):
     """KEGG KO on a given Analysis Job.
     """
-    ko = mongoengine.ReferenceField(KeggOrtholog, required=True)
+    ko = mongoengine.LazyReferenceField(KeggOrtholog, required=True)
+
+    @cached_property
+    def materialised_ko(self):
+        return self.ko.fetch()
 
     @property
     def accession(self):
-        return self.ko.accession
+        return self.materialised_ko.accession
 
     @property
     def description(self):
-        return self.ko.description
+        return self.materialised_ko.description
 
 
 class AnalysisJobAntiSmashGCAnnotation(BaseAnalysisJobAnnotation):
     """antiSMASH gene cluster on a given Analysis Job
     """
-    gene_cluster = mongoengine.ReferenceField(AntiSmashGeneCluster, required=True)
+    gene_cluster = mongoengine.LazyReferenceField(AntiSmashGeneCluster, required=True)
+
+    @cached_property
+    def materialised_gene_cluster(self):
+        return self.gene_cluster.fetch()
 
     @property
     def accession(self):
-        return self.gene_cluster.accession
+        return self.materialised_gene_cluster.accession
 
     @property
     def description(self):
-        return self.gene_cluster.description
+        return self.materialised_gene_cluster.description
 
 
 class BaseAnalysisJob(mongoengine.Document):
@@ -333,39 +368,43 @@ class Organism(mongoengine.Document):
 class AnalysisJobOrganism(mongoengine.EmbeddedDocument):
 
     count = mongoengine.IntField(required=True)
-    organism = mongoengine.ReferenceField(Organism)
+    organism = mongoengine.LazyReferenceField(Organism)
+
+    @cached_property
+    def materialised_organism(self):
+        return self.organism.fetch()
 
     @property
     def lineage(self):
-        return self.organism.lineage
+        return self.materialised_organism.lineage
 
     @property
     def ancestors(self):
-        return self.organism.ancestors
+        return self.materialised_organism.ancestors
 
     @property
     def hierarchy(self):
-        return self.organism.hierarchy
+        return self.materialised_organism.hierarchy
 
     @property
     def domain(self):
-        return self.organism.domain
+        return self.materialised_organism.domain
 
     @property
     def name(self):
-        return self.organism.name
+        return self.materialised_organism.name
 
     @property
     def parent(self):
-        return self.organism.parent
+        return self.materialised_organism.parent
 
     @property
     def rank(self):
-        return self.organism.rank
+        return self.materialised_organism.rank
 
     @property
     def pipeline_version(self):
-        return self.organism.pipeline_version
+        return self.materialised_organism.pipeline_version
 
     class EMGMeta:
         pk_field = 'lineage'

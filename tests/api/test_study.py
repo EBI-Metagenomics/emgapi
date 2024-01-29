@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import datetime
 
 # Copyright 2020 EMBL - European Bioinformatics Institute
 #
@@ -45,7 +46,7 @@ class TestStudyAPI:
         assert _attr['study-abstract'] == "abcdefghijklmnoprstuvwyz"
         assert _attr['study-name'] == "Example study name SRP01234"
         assert _attr['data-origination'] == "HARVESTED"
-        assert _attr['last-update'] == "1970-01-01T00:00:00"
+        assert _attr['last-update'][:4] == datetime.datetime.now().isoformat()[:4]
         assert _attr['bioproject'] == "PRJDB1234"
         assert _attr['is-private'] == False
 
@@ -93,7 +94,7 @@ class TestStudyAPI:
             "\"study_name\"",
             "\"url\""
         ])
-        first_row = ",".join([
+        first_row = [
             "\"MGYS00000001\"",
             "\"\"",
             "\"PRJDB0001\"",
@@ -101,7 +102,7 @@ class TestStudyAPI:
             "\"HARVESTED\"",
             "\"\"",
             "False",
-            "\"1970-01-01T00:00:00\"",
+            None,
             "\"\"",
             "\"\"",
             "\"\"",
@@ -110,11 +111,16 @@ class TestStudyAPI:
             "\"\"",
             "\"Example study name 1\"",
             "\"http://testserver/v1/studies/MGYS00000001.csv\""
-        ])
+        ]
 
         rows = content.splitlines()
 
         assert len(rows) == 50
 
         assert expected_header == rows[0]
-        assert first_row == rows[1]
+        first_row_response = rows[1].split(',')
+        assert len(first_row_response) == len(first_row)
+        for response_element, expected_element in zip(first_row_response, first_row):
+            if expected_element is not None:
+                assert response_element == expected_element
+

@@ -127,7 +127,7 @@ def super_study(study, study_private, biome):
 @pytest.fixture
 def studies(biome):
     studies = []
-    for pk in range(1, 50):
+    for pk in range(49, 0, -1):
         studies.append(
             emg_models.Study(
                 biome=biome,

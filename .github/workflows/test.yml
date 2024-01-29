@@ -38,6 +38,10 @@ jobs:
         pip install install .[tests]
         pip freeze
 
+    - name: Check for unmigrated code changes
+      run: |
+         python emgcli/manage.py makemigrations --noinput --check --dry-run
+
     - name: 🧪 - Testing
       run: |
         cat $EMG_CONFIG
