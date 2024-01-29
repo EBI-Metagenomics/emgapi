@@ -1706,7 +1706,7 @@ class MetagenomicsExchange(models.Model):
     last_update = models.DateTimeField(db_column='LAST_UPDATE', auto_now=True)
 
 
-class AnalysisJob(SuppressibleModel, PrivacyControlledModel, EbiSearchIndexedModel):
+class AnalysisJob(SuppressibleModel, PrivacyControlledModel, EbiSearchIndexedModel, MetagenomicsExchangeModel):
     def __init__(self, *args, **kwargs):
         super(AnalysisJob, self).__init__(*args, **kwargs)
         setattr(self, 'accession',
@@ -1789,59 +1789,6 @@ class AnalysisJob(SuppressibleModel, PrivacyControlledModel, EbiSearchIndexedMod
 
     def __str__(self):
         return self.accession
-
-class ME_BrokerManager(models.Manager):
-    def get_or_create(self, name):
-        try:
-            broker = ME_Broker.objects.get(
-                brokerID=name
-            )
-        except ObjectDoesNotExist:
-            logging.warning(f"{name} not in ME db, creating.")
-            broker = ME_Broker(
-                brokerID=name,
-            )
-            broker.save()
-            logging.info(f"Created record in ME_broker for {name}")
-        return broker
-
-class ME_Broker(models.Model):
-    brokerID = models.CharField(db_column='BROKER', max_length=10, null=True, blank=True)
-
-    objects = ME_BrokerManager()
-    objects_admin = models.Manager()
-
-
-class MetagenomicsExchangeManager(models.Manager):
-    def get_or_create(self, analysis, broker):
-        try:
-            me_record = MetagenomicsExchange.objects.get(
-                analysis=analysis, broker=broker
-            )
-        except ObjectDoesNotExist:
-            logging.warning(f"{analysis.accession} not in ME db, creating.")
-            me_record = MetagenomicsExchange(
-                analysis=analysis, broker=broker
-            )
-            me_record.save()
-            logging.info(f"Created record ID: {me_record.id}")
-        return me_record
-
-class MetagenomicsExchange(models.Model):
-    """Table to track Metagenomics Exchange population
-    https://www.ebi.ac.uk/ena/registry/metagenome/api/
-    """
-    broker = models.ForeignKey(ME_Broker, db_column='BROKER', on_delete=models.CASCADE)
-    analysis = models.ForeignKey(AnalysisJob, db_column='ANALYSIS_ID', on_delete=models.CASCADE, blank=True,
-                                    null=True)
-    first_created = models.DateTimeField(db_column='FIRST_CREATED', auto_now_add=True)
-    last_update = models.DateTimeField(db_column='LAST_UPDATE', auto_now=True)
-
-    objects = MetagenomicsExchangeManager()
-    objects_admin = models.Manager()
-
-    def __str__(self):
-        return f"{self.analysis.job_id} under {self.broker}"
 
 
 class StudyErrorType(models.Model):

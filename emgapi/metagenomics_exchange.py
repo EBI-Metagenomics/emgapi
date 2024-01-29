@@ -50,7 +50,30 @@ class MetagenomicsExchangeAPI:
         response.raise_for_status()
         return response
 
-    def add_record(self, mgya: str, run_accession: str, public: bool):
+    def delete_request(self, endpoint: str, data: dict):
+        headers = {
+            "Accept": "application/json",
+            "Authorization": self.__token,
+        }
+        response = requests.delete(
+            f"{self.base_url}/{endpoint}", json=data, headers=headers
+        )
+        response.raise_for_status()
+        return response
+
+    def patch_request(self, endpoint: str, data: dict):
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": self.__token,
+        }
+        response = requests.patch(
+            f"{self.base_url}/{endpoint}", json=data, headers=headers
+        )
+        response.raise_for_status()
+        return response
+
+    def add_analysis(self, mgya: str, run_accession: str, public: bool):
         data = {
             "confidence": "full",
             "endPoint": f"https://www.ebi.ac.uk/metagenomics/analyses/{mgya}",
@@ -79,3 +102,30 @@ class MetagenomicsExchangeAPI:
                     return True
             logging.info(f"{source_id} does not exist")
         return False
+
+    def delete_analysis(self, registry_id: str):
+        data = {"registryID": registry_id}
+        response = self.delete_request(endpoint="datasets", data=data)
+        if response.ok:
+            logging.info(f"{registry_id} was deleted")
+            return True
+        else:
+            if response.status_code == 400:
+                logging.error(f"Bad request for {registry_id}")
+            elif response.status_code == 401:
+                logging.error(f"{response.message} for {registry_id}")
+            return False
+
+    def patch_analysis(self, registry_id: str, data: dict):
+        response = self.patch_request(endpoint=f"datasets/{registry_id}", data=data)
+        if response.ok:
+            logging.info(f"{registry_id} was patched")
+            return True
+        else:
+            if response.status_code == 400:
+                logging.error(f"Bad request for {registry_id}")
+            elif response.status_code == 401:
+                logging.error(f"Fail to authenticate for {registry_id}")
+            elif response.status_code == 409:
+                logging.error(f"Conflicts with existing data for {registry_id}")
+            return False

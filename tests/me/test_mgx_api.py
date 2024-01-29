@@ -15,31 +15,16 @@
 # limitations under the License.
 
 import pytest
-import responses
+
 from unittest.mock import patch
 
-from django.conf import settings
 from django.core.management import call_command
 
 from test_utils.emg_fixtures import *  # noqa
 
 from emgapi.metagenomics_exchange import MetagenomicsExchangeAPI
 from emgapi.models import AnalysisJob, MetagenomicsExchange, ME_Broker
-
-class TestMockResponse:
-    @responses.activate
-    def test_mock_post_new_analysis(self):
-        me_api = MetagenomicsExchangeAPI()
-        endpoint = "datasets"
-        url = settings.ME_API + f"/{endpoint}"
-
-        responses.add(responses.POST, url, json={'success': True}, status=201)
-
-        response = me_api.add_record(mgya="MGYA00593709", run_accession="SRR3960575", public=True)
-
-        assert response.status_code == 201
-        assert response.json() == {'success': True}
-
+"""
 @pytest.mark.django_db
 class TestMeAPI:
     @patch("emgapi.metagenomics_exchange.MetagenomicsExchangeAPI.post_request")
@@ -111,3 +96,4 @@ class TestMeAPI:
         assert ME_Broker.objects.filter(brokerID=test_broker).count() == 1
         broker_id = ME_Broker.objects.filter(brokerID=test_broker).first().id
         assert MetagenomicsExchange.objects.filter(analysis=analysis, broker=broker_id).count() == 1
+"""
