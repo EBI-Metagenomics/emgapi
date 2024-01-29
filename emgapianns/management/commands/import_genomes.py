@@ -41,6 +41,9 @@ class Command(BaseCommand):
                                  "E.g. root:Host-Associated:Human:Digestive\\ System:Large\\ intestine")
         parser.add_argument('pipeline_version', action='store', type=str,
                             help='Pipeline version tag that catalogue was produced by. E.g. "1.2.1"')
+        parser.add_argument('--update-metadata-only', dest='update_metadata_only', action='store_true', default=False,
+                            help="Only update the metadata of genomes in an existing catalogue; "
+                                 "i.e. reparse the MGYG*.json files.")
         parser.add_argument('--database', type=str,
                             default='default')
 
@@ -105,6 +108,12 @@ class Command(BaseCommand):
         self.catalogue_dir = os.path.join(self.results_directory, catalogue_dir)
 
         self.database = options['database']
+
+        if options['update_metadata_only']:
+            assert emg_models.GenomeCatalogue.objects.filter(
+                catalogue_id=self.make_slug(catalogue_name, version)
+            ).exists()
+
         self.catalogue_obj = self.get_catalogue(
             catalogue_name,
             version, gold_biome,
@@ -123,11 +132,14 @@ class Command(BaseCommand):
         sanity_check_catalogue_dir(self.catalogue_dir)
 
         for d in genome_dirs:
-            self.upload_dir(d)
+            self.upload_dir(d, update_metadata_only=options['update_metadata_only'])
 
         self.upload_catalogue_files()
         self.catalogue_obj.calculate_genome_count()
         self.catalogue_obj.save()
+
+    def make_slug(self, catalogue_name, catalogue_version):
+        return slugify('{0}-v{1}'.format(catalogue_name, catalogue_version).replace('.', '-'))
 
     def get_catalogue(self, catalogue_name, catalogue_version, gold_biome, catalogue_dir, pipeline_version_tag):
         logging.warning('GOLD')
@@ -137,7 +149,7 @@ class Command(BaseCommand):
         catalogue, _ = emg_models.GenomeCatalogue.objects \
             .using(self.database) \
             .get_or_create(
-                catalogue_id=slugify('{0}-v{1}'.format(catalogue_name, catalogue_version).replace('.', '-')),
+                catalogue_id=self.make_slug(catalogue_name, catalogue_version),
                 defaults={
                     'version': catalogue_version,
                     'name': '{0} v{1}'.format(catalogue_name, catalogue_version),
@@ -148,9 +160,11 @@ class Command(BaseCommand):
                 })
         return catalogue
 
-    def upload_dir(self, directory):
+    def upload_dir(self, directory, update_metadata_only=False):
         logger.info('Uploading dir: {}'.format(directory))
         genome, has_pangenome = self.create_genome(directory)
+        if update_metadata_only:
+            return
         self.upload_cog_results(genome, directory)
         self.upload_kegg_class_results(genome, directory)
         self.upload_kegg_module_results(genome, directory)
@@ -207,6 +221,10 @@ class Command(BaseCommand):
             accession=data['accession'],
             defaults=data)
         g.save(using=self.database)
+
+        # in case we are updating and the geo range metadata has changed:
+        if g.pangenome_geographic_range.exists():
+            g.pangenome_geographic_range.clear()
 
         if geo_locations:
             [self.attach_geo_location(g, l) for l in geo_locations]
