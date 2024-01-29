@@ -103,6 +103,6 @@ class Command(BaseCommand):
         # Small buffer into the future so that the indexing time remains ahead of auto-now updated times.
 
         for study in studies:
-            study.last_indexed = nowish
+            study.last_ebi_search_indexed = nowish
 
-        Study.objects.bulk_update(studies, fields=["last_indexed"])
+        Study.objects.bulk_update(studies, fields=["last_ebi_search_indexed"])

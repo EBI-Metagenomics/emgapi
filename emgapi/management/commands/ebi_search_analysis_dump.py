@@ -211,6 +211,6 @@ class Command(BaseCommand):
             # Small buffer into the future so that the indexing time remains ahead of auto-now updated times.
 
             for analysis in page:
-                analysis.last_indexed = nowish
+                analysis.last_ebi_search_indexed = nowish
 
-            AnalysisJob.objects.bulk_update(page, fields=["last_indexed"])
+            AnalysisJob.objects.bulk_update(page, fields=["last_ebi_search_indexed"])
