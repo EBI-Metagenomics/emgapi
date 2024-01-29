@@ -93,8 +93,9 @@ class MetagenomicsExchangeAPI:
         if public:
             params = {
                 "status": "public" if public else "private",
+                "broker": self.broker
             }
-        endpoint = f"sequences/{sequence_id}"
+        endpoint = f"sequences/{sequence_id}/datasets"
         response = self.get_request(endpoint=endpoint, params=params)
         analysis_registry_id = None
         metadata_match = True

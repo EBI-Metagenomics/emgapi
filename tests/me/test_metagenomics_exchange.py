@@ -65,7 +65,7 @@ class TestME:
         registry_id = "MGX0000780"
         endpoint = f"dataset/{registry_id}"
 
-        with pytest.raises(requests.HTTPError, match="401 Client Error"):
+        with pytest.raises(requests.HTTPError, match="404 Client Error"):
             me_api.delete_request(endpoint)
 
     def test_patch_analysis_me(self):
