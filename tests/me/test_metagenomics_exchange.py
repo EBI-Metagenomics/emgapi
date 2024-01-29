@@ -37,7 +37,7 @@ class TestME:
     def test_mock_post_new_analysis(self):
         me_api = MetagenomicsExchangeAPI()
         endpoint = "datasets"
-        url = settings.ME_API + f"/{endpoint}"
+        url = settings.METAGENOMICS_EXCHANGE_API + f"/{endpoint}"
 
         responses.add(responses.POST, url, json={'success': True}, status=201)
 
@@ -51,7 +51,7 @@ class TestME:
         me_api = MetagenomicsExchangeAPI()
         registry_id = "MGX0000780"
         endpoint = f"datasets/{registry_id}"
-        url = settings.ME_API + f"/{endpoint}"
+        url = settings.METAGENOMICS_EXCHANGE_API + f"/{endpoint}"
 
         responses.add(responses.DELETE, url, json={'success': True}, status=201)
         response = me_api.delete_request(endpoint)
