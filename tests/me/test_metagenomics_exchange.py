@@ -15,12 +15,14 @@ class TestME:
     def test_check_existing_analysis_me(self):
         me_api = MetagenomicsExchangeAPI()
         source_id = "MGYA00293719"
-        assert me_api.check_analysis(source_id, True)
+        return_values = me_api.check_analysis(source_id, True)
+        assert return_values[0]
 
     def test_check_not_existing_analysis_me(self):
-        me_api = MetagenomicsExchangeAPI(broker="MAR")
-        source_id = "MGYA00293719"
-        assert not me_api.check_analysis(source_id, True)
+        me_api = MetagenomicsExchangeAPI()
+        source_id = "MGYA10293719"
+        return_values = me_api.check_analysis(source_id, True)
+        assert not return_values[0]
 
     def test_post_existing_analysis_me(self):
         me_api = MetagenomicsExchangeAPI()

@@ -684,6 +684,7 @@ if 'ena_api_password' in EMG_CONF['emg']:
     os.environ['ENA_API_PASSWORD'] = EMG_CONF['emg']['ena_api_password']
 
 # Metagenomics Exchange
+MGNIFY_BROKER = "EMG"
 try:
     ME_API = EMG_CONF['emg']['me_api']
     ME_API_TOKEN = EMG_CONF['emg']['me_api_token']
@@ -691,3 +692,10 @@ except KeyError:
     ME_API = ""
     ME_API_TOKEN = ""
     warnings.warn("The metagenomics exchange API and Token are not configured properly")
+try:
+    ME_API_DEV = EMG_CONF['emg']['me_api_dev']
+    ME_API_TOKEN = EMG_CONF['emg']['me_api_token_dev']
+except KeyError:
+    ME_API_DEV = ""
+    ME_API_TOKEN = ""
+    warnings.warn("The metagenomics exchange DEV API and Token are not configured properly")

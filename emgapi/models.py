@@ -1634,6 +1634,70 @@ class AssemblySample(models.Model):
         return 'Assembly:{} - Sample:{}'.format(self.assembly, self.sample)
 
 
+class MetagenomicsExchangeQueryset(models.QuerySet):
+    """
+    to_delete: Objects that have been suppressed since they were last populated,
+    or that have been added but updated since.
+
+    to_add: Objects that have never been added,
+    or that have been added but updated since.
+    """
+    def to_delete(self):
+        updated_after_populating = Q(last_updated_me__gte=F("last_populated_me"), last_populated_me__isnull=False)
+
+        try:
+            self.model._meta.get_field("suppressed_at")
+        except FieldDoesNotExist:
+            return self.filter(
+                updated_after_populating
+            )
+        else:
+            return self.filter(
+                Q(suppressed_at__gte=F("last_populated_me"))
+            )
+
+    def to_add(self):
+        updated_after_populating = Q(last_updated_me__gte=F("last_populated_me"), last_populated_me__isnull=False)
+        never_populated = Q(last_populated_me__isnull=True)
+
+        try:
+            self.model._meta.get_field("is_suppressed")
+        except FieldDoesNotExist:
+            not_suppressed = Q()
+        else:
+            not_suppressed = Q(is_suppressed=False)
+
+        try:
+            self.model._meta.get_field("is_private")
+        except FieldDoesNotExist:
+            not_private = Q()
+        else:
+            not_private = Q(is_private=False)
+
+        return self.filter(never_populated | updated_after_populating, not_suppressed, not_private)
+
+
+class MetagenomicsExchangeModel(models.Model):
+    """Model to track Metagenomics Exchange population
+    https://www.ebi.ac.uk/ena/registry/metagenome/api/
+    """
+    last_updated_me = models.DateTimeField(
+        db_column='LAST_UPDATED_ME',
+        auto_now=True
+    )
+    last_populated_me = models.DateTimeField(
+        db_column='LAST_POPULATED_ME',
+        null=True,
+        blank=True,
+        help_text="Date at which this model was last appeared in Metagenomics Exchange"
+    )
+
+    objects_for_population = MetagenomicsExchangeQueryset.as_manager()
+
+    class Meta:
+        abstract = True
+
+
 class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet, SuppressQuerySet, SelectRelatedOnlyQuerySetMixin):
 
     def __init__(self, *args, **kwargs):

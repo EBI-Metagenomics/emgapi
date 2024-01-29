@@ -24,10 +24,10 @@ class MetagenomicsExchangeAPI:
 
     """Metagenomics Exchange API Client"""
 
-    def __init__(self, broker="EMG"):
-        self.base_url = settings.ME_API
+    def __init__(self, base_url=None):
+        self.base_url = base_url if base_url else settings.ME_API
         self.__token = settings.ME_API_TOKEN
-        self.broker = broker
+        self.broker = settings.MGNIFY_BROKER
 
     def get_request(self, endpoint: str, params: dict):
         """Make a GET request, returns the response"""
@@ -86,22 +86,39 @@ class MetagenomicsExchangeAPI:
         response = self.post_request(endpoint="datasets", data=data)
         return response
 
-    def check_analysis(self, source_id: str, public: bool) -> bool:
+
+    def check_analysis(self, source_id: str, public=None, metadata=None) -> [str, bool]:
         logging.info(f"Check {source_id}")
-        params = {
-            "status": "public" if public else "private",
-        }
+        params = {}
+        if public:
+            params = {
+                "status": "public" if public else "private",
+            }
         endpoint = f"brokers/{self.broker}/datasets"
         response = self.get_request(endpoint=endpoint, params=params)
+        analysis_registryID = ""
+        metadata_match = True
         if response.ok:
             data = response.json()
             datasets = data.get("datasets")
             for item in datasets:
                 if item.get("sourceID") == source_id:
-                    logging.info(f"{source_id} exists")
-                    return True
-            logging.info(f"{source_id} does not exist")
-        return False
+                    logging.info(f"{source_id} exists in ME")
+                    analysis_registryID = item.get("registryID")
+                    if metadata:
+                        for metadata_record in metadata:
+                            if not(metadata_record in item):
+                                metadata_match = False
+                                return analysis_registryID, metadata_match
+                            else:
+                                if metadata[metadata_record] != item[metadata_record]:
+                                    metadata_match = False
+                                    logging.info(f"Incorrect field {metadata[metadata_record]} in ME ({item[metadata_record]})")
+                                    return analysis_registryID, metadata_match
+                    return analysis_registryID, metadata_match
+                else:
+                    logging.info(f"{source_id} does not exist in ME")
+        return analysis_registryID, metadata_match
 
     def delete_analysis(self, registry_id: str):
         response = self.delete_request(endpoint=f"datasets/{registry_id}")

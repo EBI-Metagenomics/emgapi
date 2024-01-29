@@ -36,8 +36,9 @@ __all__ = [
     'ena_private_studies', 'ena_suppressed_studies', 'ena_public_runs', 'ena_private_runs',
     'ena_suppressed_runs', 'ena_public_samples', 'ena_private_samples', 'ena_suppressed_samples',
     'ena_public_assemblies', 'ena_private_assemblies', 'ena_suppressed_assemblies',
-    'assembly_extra_annotation', 'ena_suppression_propagation_studies', 'ena_suppression_propagation_runs',
     'ena_suppression_propagation_samples', 'ena_suppression_propagation_assemblies',
+    'assembly_extra_annotation', 'ena_suppression_propagation_studies', 'ena_suppression_propagation_runs',
+    'suppressed_analysis_jobs', 'analysis_existed_in_me',
 ]
 
 
@@ -1093,3 +1094,28 @@ def ena_suppression_propagation_assemblies(experiment_type_assembly, study):
             study=study,
         )
     return assemblies
+
+
+def make_suppressed_analysis_jobs(quantity, emg_props=None):
+    emg_props = emg_props or {}
+    analyses = baker.make(emg_models.AnalysisJob, _quantity=quantity, **emg_props)
+    return analyses
+
+
+@pytest.fixture
+def suppressed_analysis_jobs(ena_suppressed_runs):
+    suppressed_analysisjobs = make_suppressed_analysis_jobs(quantity=5,
+                                                            emg_props={"is_suppressed": True,
+                                                                       'last_populated_me': '1970-01-01 00:00:00'})
+    return suppressed_analysisjobs
+
+@pytest.fixture
+def analysis_existed_in_me():
+    emg_props = {
+        "job_id": 147343,
+        "last_populated_me": '1970-01-01 00:00:00',
+        "last_updated_me": '1980-01-01 00:00:00',
+        "is_suppressed": False,
+        "is_private": False
+    }
+    return baker.make(emg_models.AnalysisJob, **emg_props)
