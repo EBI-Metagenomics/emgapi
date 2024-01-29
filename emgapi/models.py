@@ -18,7 +18,7 @@ import logging
 
 from django.apps import apps
 from django.conf import settings
-from django.core.exceptions import FieldDoesNotExist
+from django.core.exceptions import FieldDoesNotExist, ObjectDoesNotExist
 from django.db import models
 from django.db.models import (CharField, Count, OuterRef, Prefetch, Q,
                               Subquery, Value, QuerySet, F)
@@ -1769,9 +1769,6 @@ class AnalysisJob(SuppressibleModel, PrivacyControlledModel, EbiSearchIndexedMod
     instrument_model = models.CharField(
         db_column='INSTRUMENT_MODEL', max_length=50,
         blank=True, null=True)
-    metagenomics_exchange = models.ForeignKey(
-        MetagenomicsExchange, db_column='METAGENOMICS_EXCHANGE',
-        on_delete=models.CASCADE, blank=True, null=True)
 
     @property
     def release_version(self):
@@ -1792,6 +1789,58 @@ class AnalysisJob(SuppressibleModel, PrivacyControlledModel, EbiSearchIndexedMod
 
     def __str__(self):
         return self.accession
+
+class ME_BrokerManager(models.Manager):
+    def get_or_create(self, name):
+        try:
+            broker = ME_Broker.objects.get(
+                brokerID=name
+            )
+        except ObjectDoesNotExist:
+            logging.warning(f"{name} not in ME db, creating.")
+            broker = ME_Broker(
+                brokerID=name,
+            )
+            broker.save()
+            logging.info(f"Created record in ME_broker for {name}")
+        return broker
+
+class ME_Broker(models.Model):
+    brokerID = models.CharField(db_column='BROKER', max_length=10, null=True, blank=True)
+
+    objects = ME_BrokerManager()
+    objects_admin = models.Manager()
+
+
+class MetagenomicsExchangeManager(models.Manager):
+    def get_or_create(self, analysis, broker=None):
+        try:
+            me_record = MetagenomicsExchange.objects.get(
+                analysis=analysis
+            )
+        except ObjectDoesNotExist:
+            logging.warning(f"{analysis.accession} not in ME db, creating.")
+            me_record = MetagenomicsExchange(
+                analysis=analysis,
+            )
+            if broker:
+                me_record.broker = broker
+            me_record.save()
+            logging.info(f"Created record ID: {me_record.id}")
+        return me_record
+
+class MetagenomicsExchange(models.Model):
+    """Table to track Metagenomics Exchange population
+    https://www.ebi.ac.uk/ena/registry/metagenome/api/
+    """
+    broker = models.ForeignKey(ME_Broker, db_column='BROKER', on_delete=models.CASCADE)
+    analysis = models.ForeignKey(AnalysisJob, db_column='ANALYSIS_ID', on_delete=models.CASCADE, blank=True,
+                                    null=True)
+    first_created = models.DateTimeField(db_column='FIRST_CREATED', auto_now_add=True)
+    last_update = models.DateTimeField(db_column='LAST_UPDATE', auto_now=True)
+
+    objects = MetagenomicsExchangeManager()
+    objects_admin = models.Manager()
 
 
 class StudyErrorType(models.Model):

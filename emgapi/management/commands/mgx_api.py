@@ -15,21 +15,14 @@
 # limitations under the License.
 
 import logging
-import os
 import requests
 
-from django.db.models import Count
 from django.core.management import BaseCommand
 from django.conf import settings
 
-from emgapi.models import Assembly, AnalysisJob
+from emgapi.models import AnalysisJob, MetagenomicsExchange, ME_Broker
 
 logger = logging.getLogger(__name__)
-API = {
-    'real': 'https://www.ebi.ac.uk/ena/registry/metagenome/api/',
-    'dev': 'http://wp-np2-5c:8080/ena/registry/metagenome/api/'
-}
-TOKEN = 'mgx 3D70473ED7C443CA9E97749F62FFCC5D'
 
 RETRY_COUNT = 5
 
@@ -119,27 +112,36 @@ class Command(BaseCommand):
                     exists = True
         return exists
 
-    def _post_request(self, url, data):
+    def post_request(self, auth, url, data):
         default = {
             "headers": {
                 "Content-Type": "application/json",
                 "Accept": "application/json",
             }
         }
-        if self.auth:
-            default["headers"].update(self.auth)
-            response = requests.post(
-                url, json=data, **default
-            )
-        else:
-            logging.warning(
-                "Not authenticated to POST private data."
-                # noqa: E501
-            )
-            response = requests.post(
-                url, json=data, **default
-            )
+        default["headers"].update(auth)
+        response = requests.post(
+            url, json=data, **default
+        )
+        print(response.text)
+        if response.ok:
+            logging.info("Data added to ME")
         return response
+
+    def _add_record_me(self, analysis, public):
+        data = {
+            'confidence': 'full',
+            'endPoint': f'https://www.ebi.ac.uk/metagenomics/analyses/{analysis.accession}',
+            'method': ['other_metadata'],
+            'sourceID': analysis.accession,
+            'sequenceID': analysis.run.secondary_accession,
+            'status': 'public' if public else 'private',
+            'brokerID': self.broker,
+        }
+        response = self.post_request(auth=self.auth, url=self.url + 'datasets', data=data)
+        if response.ok:
+            broker = ME_Broker.objects.get_or_create(name=self.broker)
+            MetagenomicsExchange.objects.get_or_create(analysis=analysis, broker=broker)
 
     def _filtering_analyses(self):
         analyses = AnalysisJob.objects.all()
@@ -153,8 +155,8 @@ class Command(BaseCommand):
             analyses = analyses.filter(pipeline__pipeline_id=self.pipeline_version)
         return analyses
     def handle(self, *args, **options):
-        self.auth = None
-        self.url = API['dev']
+        self.auth = {"Authorization": settings.ME_TOKEN}
+        self.url = settings.ME_API['dev']
         self.broker = options.get("broker")
         self.check_url = self.url + f'brokers/{self.broker}/datasets'
 
@@ -167,22 +169,11 @@ class Command(BaseCommand):
         for analysis in analyses:
             MGYA = analysis.accession
             public = not analysis.is_private
-            if not public:
-                self.auth = {"Authorization": TOKEN}
             # check is MGYA in ME
             if (self._check_analysis(sourceID=MGYA, public=public)):
                 logging.info(f"{MGYA} exists in ME")
             else:
                 logging.info(f"{MGYA} does not exist in ME")
-                data = {
-                    'confidence': 'full',
-                    'endPoint': f'https://www.ebi.ac.uk/metagenomics/analyses/{MGYA}',
-                    'method': ['other_metadata'],
-                    'sourceID': MGYA,
-                    'sequenceID': analysis.run.accesison,
-                    'status': 'public' if public else 'private'
-                }
-                #self._post_request(url=self.url+'datasets', data=data)
-
+                self._add_record_me(analysis, public)
 
 
