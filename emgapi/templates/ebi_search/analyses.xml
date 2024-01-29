@@ -1,0 +1,11 @@
+<database xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.ebi.ac.uk/ebisearch/XML4dbDumps.xsd">
+    <name>EMG_run</name>
+    <description>EMG Analysis runs – samples analysed by MGnify pipelines</description>
+    <release>{% now "Y-m-d" %}</release>
+    <entry_count>{{ count }}</entry_count>
+    <entries>
+        {% for a in additions %}
+            {% include "ebi_search/analysis.xml" with analysis=a.analysis analysis_biome=a.analysis_biome analysis_taxonomies=a.analysis_taxonomies analysis_go_entries=a.analysis_go_entries analysis_ips_entries=a.analysis_ips_entries sample_metadata=a.sample_metadata only %}
+        {% endfor %}
+    </entries>
+</database>

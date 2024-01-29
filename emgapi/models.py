@@ -18,9 +18,10 @@ import logging
 
 from django.apps import apps
 from django.conf import settings
+from django.core.exceptions import FieldDoesNotExist
 from django.db import models
 from django.db.models import (CharField, Count, OuterRef, Prefetch, Q,
-                              Subquery, Value, QuerySet)
+                              Subquery, Value, QuerySet, F)
 from django.db.models.functions import Cast, Concat
 from django.utils import timezone
 
@@ -273,6 +274,67 @@ class ENASyncableModel(SuppressibleModel, PrivacyControlledModel):
             )
 
         return self
+
+    class Meta:
+        abstract = True
+
+
+class EbiSearchIndexQueryset(models.QuerySet):
+    """
+    to_delete: Objects that have been suppressed since they were last indexed,
+    or that have been indexed but updated since.
+
+    to_add: Objects that have never been indexed,
+    or that have been indexed but updated since.
+    """
+    def to_delete(self):
+        updated_after_indexing = Q(last_update__gte=F("last_indexed"), last_indexed__isnull=False)
+
+        try:
+            self.model._meta.get_field("suppressed_at")
+        except FieldDoesNotExist:
+            return self.filter(
+                updated_after_indexing
+            )
+        else:
+            return self.filter(
+                Q(suppressed_at__gte=F("last_indexed")) | updated_after_indexing
+            )
+
+    def to_add(self):
+        updated_after_indexing = Q(last_update__gte=F("last_indexed"), last_indexed__isnull=False)
+        never_indexed = Q(last_indexed__isnull=True)
+
+        try:
+            self.model._meta.get_field("is_suppressed")
+        except FieldDoesNotExist:
+            not_suppressed = Q()
+        else:
+            not_suppressed = Q(is_suppressed=False)
+
+        try:
+            self.model._meta.get_field("is_private")
+        except FieldDoesNotExist:
+            not_private = Q()
+        else:
+            not_private = Q(is_private=False)
+
+        return self.filter(never_indexed | updated_after_indexing, not_suppressed, not_private)
+
+
+class EbiSearchIndexedModel(models.Model):
+    last_update = models.DateTimeField(
+        db_column='LAST_UPDATE',
+        auto_now=True
+    )
+    last_indexed = models.DateTimeField(
+        db_column='LAST_INDEXED',
+        null=True,
+        blank=True,
+        help_text="Date at which this model was last included in an EBI Search initial/incremental index."
+    )
+
+    objects_for_indexing = EbiSearchIndexQueryset.as_manager()
 
     class Meta:
         abstract = True
@@ -964,7 +1026,7 @@ class StudyManager(models.Manager):
         return self.get_queryset().mydata(request)
 
 
-class Study(ENASyncableModel):
+class Study(ENASyncableModel, EbiSearchIndexedModel):
     suppressible_descendants = ['samples', 'runs', 'assemblies', 'analyses']
 
     def __init__(self, *args, **kwargs):
@@ -999,7 +1061,7 @@ class Study(ENASyncableModel):
     author_name = models.CharField(
         db_column='AUTHOR_NAME', max_length=100, blank=True, null=True)
     last_update = models.DateTimeField(
-        db_column='LAST_UPDATE')
+        db_column='LAST_UPDATE', auto_now=True)
     submission_account_id = models.CharField(
         db_column='SUBMISSION_ACCOUNT_ID',
         max_length=15, blank=True, null=True)
@@ -1626,7 +1688,14 @@ class AnalysisJobManager(models.Manager):
         return self.get_queryset().available(request)
 
 
-class AnalysisJob(SuppressibleModel, PrivacyControlledModel):
+class AnalysisJobDumpManager(AnalysisJobManager):
+    def get_queryset(self):
+        return AnalysisJobQuerySet(self.model, using=self._db) \
+            .select_related(
+                'analysis_status','experiment_type', 'assembly', 'pipeline', 'run', 'sample', 'study')
+
+
+class AnalysisJob(SuppressibleModel, PrivacyControlledModel, EbiSearchIndexedModel):
     def __init__(self, *args, **kwargs):
         super(AnalysisJob, self).__init__(*args, **kwargs)
         setattr(self, 'accession',
@@ -1699,6 +1768,7 @@ class AnalysisJob(SuppressibleModel, PrivacyControlledModel):
 
     objects = AnalysisJobManager()
     objects_admin = models.Manager()
+    objects_dump = AnalysisJobDumpManager()
 
     class Meta:
         db_table = 'ANALYSIS_JOB'

@@ -1,0 +1,40 @@
+<database xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.ebi.ac.uk/ebisearch/XML4dbDumps.xsd">
+    <name>EMG_Project</name>
+    <description>EMG Projects – studies analysed by MGnify</description>
+    <release>{% now "Y-m-d" %}</release>
+    <entry_count>{{ count }}</entry_count>
+    <entries>
+        {% for addition in additions %}
+        {% with addition.study as study %}
+        <entry xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="{{ study.accession }}">
+            <name>{{ study.study_name | escape }}</name>
+            <description>{{ study.study_abstract | escape }}</description>
+            <dates>
+                <date type="creation_date" value="{{ study.first_created|date:'Y-m-d' }}"/>
+                <date type="last_modification_date" value="{{ study.last_update|date:'Y-m-d' }}"/>
+            </dates>
+            <additional_fields>
+                <field name="secondary_acc">{{ study.secondary_accession }}</field>
+				<field name="biome_name">{{ study.biome.biome_name }}</field>
+                <hierarchical_field name="biome">
+                {% for biome_element in addition.biome_list %}
+                    {% if forloop.first %}
+                    <root>{{ biome_element | escape }}</root>
+                    {% else %}
+                    <child>{{ biome_element | escape }}</child>
+                    {% endif %}
+                {% endfor %}
+                </hierarchical_field>
+                <field name="centre_name">{{ study.centre_name | escape }}</field>
+            </additional_fields>
+            <cross_references>
+                <ref dbkey="{{ study.project_id }}" dbname="ena_project"/>
+                {% for analysis in study.analyses.all %}
+                <ref dbkey="{{ analysis.accession }}_{{ analysis.pipeline.release_version }}" dbname="metagenomics_analyses"/>
+                {% endfor %}
+            </cross_references>
+        </entry>
+        {% endwith %}
+        {% endfor %}
+    </entries>
+</database>

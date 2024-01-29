@@ -1,0 +1,89 @@
+
+        <entry xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="{{ analysis.accession }}_{{ analysis.pipeline.release_version }}">
+            <name>{{ analysis.accession }}</name>
+            <dates>
+                <date type="creation_date" value="{{ analysis.submit_time|date:'Y-m-d' }}"/>
+                <date type="completion_date" value="{{ analysis.complete_time|date:'Y-m-d' }}"/>
+                <date type="sample_collection_date" value="{{ analysis.sample.collection_date|date:'Y-m-d' }}"/>
+            </dates>
+            <additional_fields>
+                <field name="experiment_type">{{ analysis.experiment_type.experiment_type }}</field>
+                <field name="pipeline_version">{{ analysis.pipeline.release_version }}</field>
+                <field name="sample_name">{{ analysis.sample.sample_name | escape }}</field>
+                <field name="sample_description">{{ analysis.sample.sample_desc | escape }}</field>
+                <field name="project_name">{{ analysis.study.study_name | escape }}</field>
+                <field name="biome_name">{{ analysis.study.biome.biome_name | escape }}</field>
+
+                {% if analysis.sample.species %}
+                <field name="species">{{ analysis.sample.species | escape }}</field>
+                {% endif %}
+
+                {% if analysis.sample.environment_feature %}
+                <field name="feature">{{ analysis.sample.environment_feature | escape }}</field>
+                {% endif %}
+
+                {% if analysis.sample.environment_material %}
+                <field name="material">{{ analysis.sample.environment_material | escape }}</field>
+                {% endif %}
+
+                <field name="sample_alias">{{ analysis.sample.sample_alias | escape }}</field>
+                <field name="project_name">{{ analysis.study.study_name | escape }}</field>
+
+                <hierarchical_field name="biome">
+                {% for biome_element in analysis_biome %}
+                    {% if forloop.first %}
+                    <root>{{ biome_element | escape }}</root>
+                    {% else %}
+                    <child>{{ biome_element | escape }}</child>
+                    {% endif %}
+                {% endfor %}
+                </hierarchical_field>
+
+                {% for metadata_key, metadata_value in sample_metadata.items %}
+                <field name="{{ metadata_key | escape }}">{{ metadata_value | escape }}</field>
+                {% endfor %}
+
+                {% for taxonomy_lineage_elements in analysis_taxonomies %}
+                <hierarchical_field name="organism">
+                    {% for taxonomy_element in taxonomy_lineage_elements %}
+                        {% if forloop.first %}
+                        <root>{{ taxonomy_element | escape }}</root>
+                        {% else %}
+                        <child>{{ taxonomy_element | escape  }}</child>
+                        {% endif %}
+                    {% endfor %}
+                </hierarchical_field>
+                {% endfor %}
+            </additional_fields>
+            <cross_references>
+                <ref dbkey="{{ analysis.study.accession }}" dbname="metagenomics_projects"/>
+                <ref dbkey="{{ analysis.study.project_id }}" dbname="ena_project"/>
+
+                {# biosample #}
+                {% if analysis.sample.primary_accession %}
+                <ref dbkey="{{ analysis.sample.primary_accession }}" dbname="biosamples"/>
+                {% endif %}
+
+                {# INSDC sample like DRSxx, ERSxx, SRSxx #}
+                {% if analysis.sample.accession and analysis.sample.accession|slice:"1:3" == "RS"%}
+                <ref dbkey="{{ analysis.sample.accession }}" dbname="sra-sample"/>
+                {% endif %}
+
+                {# Assembly analysis #}
+                {% if analysis.assembly %}
+                <ref dbkey="{{ analysis.assembly.accession }}" dbname="analysis"/>
+                {% endif %}
+
+                {# WGS/Amplicon analysis #}
+                {% if analysis.run %}
+                <ref dbkey="{{ analysis.run.accession }}" dbname="ena_run"/>
+                {% endif %}
+
+                {% for go in analysis_go_entries %}
+                <ref dbkey="{{ go }}" dbname="go"/>
+                {% endfor %}
+                {% for ips in analysis_ips_entries %}
+                <ref dbkey="{{ ips }}" dbname="interpro"/>
+                {% endfor %}
+            </cross_references>
+        </entry>

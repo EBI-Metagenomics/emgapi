@@ -1,0 +1,8 @@
+<database xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.ebi.ac.uk/ebisearch/XML4dbDumps.xsd">
+    <name>EMG_Project</name>
+    <entries>
+        {% for entry in removals %}
+            <entry id="{{ entry.accession }}" />
+        {% endfor %}
+    </entries>
+</database>
