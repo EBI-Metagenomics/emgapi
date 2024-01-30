@@ -38,7 +38,7 @@ __all__ = [
     'ena_public_assemblies', 'ena_private_assemblies', 'ena_suppressed_assemblies',
     'ena_suppression_propagation_samples', 'ena_suppression_propagation_assemblies',
     'assembly_extra_annotation', 'ena_suppression_propagation_studies', 'ena_suppression_propagation_runs',
-    'suppressed_analysis_jobs', 'analysis_existed_in_me',
+    'suppressed_analysis_jobs', 'analysis_existed_in_me', 'run_multiple_analysis_me'
 ]
 
 
@@ -1120,3 +1120,71 @@ def analysis_existed_in_me():
         "is_private": False
     }
     return baker.make(emg_models.AnalysisJob, **emg_props)
+
+
+@pytest.fixture
+def run_multiple_analysis_me(study, sample, analysis_status,
+                          experiment_type):
+    pipeline, created = emg_models.Pipeline.objects.get_or_create(
+        pk=1,
+        release_version='1.0',
+        release_date='1970-01-01',
+    )
+    pipeline4, created4 = emg_models.Pipeline.objects.get_or_create(
+        pk=4,
+        release_version='4.0',
+        release_date='1970-01-01',
+    )
+    pipeline5, created5 = emg_models.Pipeline.objects.get_or_create(
+        pk=5,
+        release_version='5.0',
+        release_date='2020-01-01',
+    )
+    run = emg_models.Run.objects.create(
+        run_id=1234,
+        accession='ERR3063408',
+        sample=sample,
+        study=study,
+        is_private=False,
+        experiment_type=experiment_type
+    )
+    _anl1 = emg_models.AnalysisJob.objects.create(
+        job_id=1234,
+        sample=sample,
+        study=study,
+        run=run,
+        is_private=False,
+        experiment_type=experiment_type,
+        pipeline=pipeline,
+        analysis_status=analysis_status,
+        input_file_name='ABC_FASTQ',
+        result_directory='test_data/version_1.0/ABC_FASTQ',
+        submit_time='1970-01-01 00:00:00',
+    )
+    _anl4 = emg_models.AnalysisJob.objects.create(
+        job_id=5678,
+        sample=sample,
+        study=study,
+        run=run,
+        is_private=False,
+        experiment_type=experiment_type,
+        pipeline=pipeline4,
+        analysis_status=analysis_status,
+        input_file_name='ABC_FASTQ',
+        result_directory='test_data/version_4.0/ABC_FASTQ',
+        submit_time='1970-01-01 00:00:00',
+    )
+    _anl5 = emg_models.AnalysisJob.objects.create(
+        job_id=466090,
+        sample=sample,
+        study=study,
+        run=run,
+        is_private=False,
+        experiment_type=experiment_type,
+        pipeline=pipeline5,
+        analysis_status=analysis_status,
+        input_file_name='ABC_FASTQ',
+        result_directory='test_data/version_5.0/ABC_FASTQ',
+        submit_time='2020-01-01 00:00:00',
+    )
+    return (_anl1, _anl4, _anl5)

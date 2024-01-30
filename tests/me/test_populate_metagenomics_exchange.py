@@ -26,13 +26,17 @@ from emgapi.models import AnalysisJob
 
 
 @pytest.mark.django_db
-class TestMeAPI:
-    @pytest.mark.usefixtures("run_multiple_analysis")
+class TestPopulateMeAPI:
+    @pytest.mark.usefixtures("run_multiple_analysis_me")
     def test_population_dry_mode(self, caplog):
         call_command(
             "populate_metagenomics_exchange",
             dry_run=True,
         )
+        assert "Indexing 3 new analyses" in caplog.text
+        assert "MGYA00001234 does not exist in ME" in caplog.text
+        assert "MGYA00005678 does not exist in ME" in caplog.text
+        assert "MGYA00466090 does not exist in ME" in caplog.text
         assert "Dry-mode run: no addition to real ME for MGYA00001234" in caplog.text
         assert "Dry-mode run: no addition to real ME for MGYA00005678" in caplog.text
         assert "Dry-mode run: no addition to real ME for MGYA00466090" in caplog.text
@@ -60,6 +64,7 @@ class TestMeAPI:
             "populate_metagenomics_exchange",
             dry_run=True,
         )
+        assert "Indexing 1 new analyses" in caplog.text
         assert "Incorrect field None in ME (ERR1806500)" in caplog.text
         assert "Dry-mode run: no patch to real ME for MGYA00147343" in caplog.text
         assert "Processing 0 analyses to remove" in caplog.text

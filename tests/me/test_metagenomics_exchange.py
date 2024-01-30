@@ -26,6 +26,7 @@ class TestME:
         return_values = me_api.check_analysis(source_id, seq_id, True)
         assert not return_values[0]
 
+    @pytest.mark.skip(reason="Error on ME API side")
     def test_post_existing_analysis_me(self):
         me_api = MetagenomicsExchangeAPI()
         source_id = "MGYA00293719"

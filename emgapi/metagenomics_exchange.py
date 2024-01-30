@@ -96,9 +96,15 @@ class MetagenomicsExchangeAPI:
                 "broker": self.broker
             }
         endpoint = f"sequences/{sequence_id}/datasets"
-        response = self.get_request(endpoint=endpoint, params=params)
         analysis_registry_id = None
         metadata_match = True
+
+        try:
+            response = self.get_request(endpoint=endpoint, params=params)
+        except:
+            logging.warning(f"Get API request failed")
+            return analysis_registry_id , metadata_match
+
         if response.ok:
             data = response.json()
             datasets = data.get("datasets")
