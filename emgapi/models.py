@@ -331,6 +331,15 @@ class IndexableModelQueryset(models.QuerySet):
 
         return self.filter(never_indexed | updated_after_indexing, not_suppressed, not_private)
 
+    def get_suppressed(self):
+        try:
+            self.model._meta.get_field("suppressed_at")
+        except FieldDoesNotExist:
+            return Q()
+        else:
+            return self.filter(
+                Q(suppressed_at__gte=F(self.index_field))
+            )
 
 
 class EBISearchIndexQueryset(IndexableModelQueryset):

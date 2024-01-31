@@ -76,13 +76,15 @@ class Command(BaseCommand):
         self.dry_run = options.get("dry_run")
         self.pipeline_version = options.get("pipeline")
 
-        mgx_api = MetagenomicsExchangeAPI(base_url=settings.METAGENOMICS_EXCHANGE_API)
+        self.mgx_api = MetagenomicsExchangeAPI(base_url=settings.METAGENOMICS_EXCHANGE_API)
 
-        analyses_to_index = AnalysisJob.objects_for_mgx_indexing.to_add()
-        analyses_to_delete = AnalysisJob.objects_for_mgx_indexing.to_delete()
+        # never indexed or updated after indexed
+        analyses_to_index_and_update = AnalysisJob.objects_for_mgx_indexing.to_add()
+        # suppressed only
+        analyses_to_delete = AnalysisJob.objects_for_mgx_indexing.get_suppressed()
 
         if self.study_accession:
-            analyses_to_index = analyses_to_index.filter(
+            analyses_to_index_and_update = analyses_to_index_and_update.filter(
                 study__secondary_accession__in=self.study_accession
             )
             analyses_to_delete = analyses_to_delete.filter(
@@ -90,16 +92,23 @@ class Command(BaseCommand):
             )
 
         if self.pipeline_version:
-            analyses_to_index = analyses_to_index.filter(
-                pipeline__pipeline_id=self.pipeline_version
+            analyses_to_index_and_update = analyses_to_index_and_update.filter(
+                pipeline__release_version=self.pipeline_version
             )
             analyses_to_delete = analyses_to_delete.filter(
-                pipeline__pipeline_id=self.pipeline_version
+                pipeline__release_version=self.pipeline_version
             )
 
-        logging.info(f"Indexing {len(analyses_to_index)} new analyses")
+        self.process_to_index_and_update_records(analyses_to_index_and_update)
+        self.process_to_delete_records(analyses_to_delete)
 
-        for page in Paginator(analyses_to_index, 100):
+        logging.info("Done")
+
+
+    def process_to_index_and_update_records(self, analyses_to_index_and_update):
+        logging.info(f"Indexing {len(analyses_to_index_and_update)} new analyses")
+
+        for page in Paginator(analyses_to_index_and_update, 100):
             jobs_to_update = []
 
             for ajob in page:
@@ -108,23 +117,25 @@ class Command(BaseCommand):
                     run_accession=ajob.run,
                     status="public" if not ajob.is_private else "private",
                 )
-                registry_id, metadata_match = mgx_api.check_analysis(
+                registry_id, metadata_match = self.mgx_api.check_analysis(
                     source_id=ajob.accession, sequence_id=ajob.run, metadata=metadata
                 )
                 # The job is not registered
                 if not registry_id:
-                    logging.debug(f"Add new {ajob}")
+                    logging.info(f"Add new {ajob}")
                     if self.dry_run:
                         logging.info(f"Dry-mode run: no addition to real ME for {ajob}")
                         continue
 
-                    response = mgx_api.add_analysis(
+                    response = self.mgx_api.add_analysis(
                         mgya=ajob.accession,
                         run_accession=ajob.run,
                         public=not ajob.is_private,
                     )
                     if response.ok:
-                        logging.debug(f"Added {ajob}")
+                        logging.info(f"Successfully added {ajob}")
+                        registry_id, metadata_match = self.mgx_api.check_analysis(
+                            source_id=ajob.accession, sequence_id=ajob.run)
                         ajob.mgx_accession = registry_id
                         ajob.last_mgx_indexed = timezone.now() + timedelta(minutes=1)
                         jobs_to_update.append(ajob)
@@ -134,14 +145,14 @@ class Command(BaseCommand):
                 # else we have to check if the metadata matches, if not we need to update it
                 else:
                     if not metadata_match:
-                        logging.debug(f"Patch existing {ajob}")
+                        logging.info(f"Patch existing {ajob}")
                         if self.dry_run:
                             logging.info(
                                 f"Dry-mode run: no patch to real ME for {ajob}"
                             )
                             continue
-                        if mgx_api.patch_analysis(
-                            registry_id=registry_id, data=metadata
+                        if self.mgx_api.patch_analysis(
+                                registry_id=registry_id, data=metadata
                         ):
                             logging.info(f"Analysis {ajob} updated successfully")
                             # Just to be safe, update the MGX accession
@@ -157,6 +168,10 @@ class Command(BaseCommand):
                 jobs_to_update, ["last_mgx_indexed", "mgx_accession"], batch_size=100
             )
 
+    def process_to_delete_records(self, analyses_to_delete):
+        """
+        This function removes suppressed records from ME.
+        """
         logging.info(f"Processing {len(analyses_to_delete)} analyses to remove")
 
         for page in Paginator(analyses_to_delete, 100):
@@ -168,14 +183,16 @@ class Command(BaseCommand):
                     run_accession=ajob.run,
                     status="public" if not ajob.is_private else "private",
                 )
-                registry_id, _ = mgx_api.check_analysis(
+                registry_id, _ = self.mgx_api.check_analysis(
                     source_id=ajob.accession, sequence_id=ajob.run, metadata=metadata
                 )
                 if registry_id:
+                    logging.info(f"Deleting {ajob}")
                     if self.dry_run:
                         logging.info(f"Dry-mode run: no delete from real ME for {ajob}")
+                        continue
 
-                    if mgx_api.delete_analysis(registry_id):
+                    if self.mgx_api.delete_analysis(registry_id):
                         logging.info(f"{ajob} successfully deleted")
                         ajob.last_mgx_indexed = timezone.now()
                         jobs_to_update.append(ajob)
@@ -190,5 +207,3 @@ class Command(BaseCommand):
             AnalysisJob.objects.bulk_update(
                 jobs_to_update, ["last_mgx_indexed"], batch_size=100
             )
-
-        logging.info("Done")

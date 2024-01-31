@@ -88,7 +88,7 @@ class MetagenomicsExchangeAPI:
 
 
     def check_analysis(self, source_id: str, sequence_id: str, public=None, metadata=None) -> [str, bool]:
-        logging.info(f"Check {source_id}")
+        logging.info(f"Check {source_id} {sequence_id}")
         params = {}
         if public:
             params = {
@@ -120,8 +120,9 @@ class MetagenomicsExchangeAPI:
                             return analysis_registry_id , metadata_match
                         else:
                             if metadata[metadata_record] != found_record[metadata_record]:
+                                print(metadata[metadata_record], found_record[metadata_record])
                                 metadata_match = False
-                                logging.info(f"Incorrect field {metadata[metadata_record]} in ME ({found_record[metadata_record]})")
+                                logging.info(f"Incorrect field {metadata[metadata_record]} != {found_record[metadata_record]})")
                                 return analysis_registry_id, metadata_match
                 return analysis_registry_id , metadata_match
             else:
