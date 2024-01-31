@@ -1138,6 +1138,8 @@ def run_multiple_analysis_me(study, sample, analysis_status,
     )
     pipeline5, created5 = emg_models.Pipeline.objects.get_or_create(
         pk=6,
+        release_version='5.0',
+        release_date='2020-01-01',
     )
     run = emg_models.Run.objects.create(
         run_id=111,
