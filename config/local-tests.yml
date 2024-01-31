@@ -18,5 +18,3 @@ emg:
   # metagenomics exchange
   me_api: 'https://wwwdev.ebi.ac.uk/ena/registry/metagenome/api'
   me_api_token: 'mgx 871cd915-2826-46bb-94ed-8e6a3d9b6014'
-  me_api_dev: 'https://wwwdev.ebi.ac.uk/ena/registry/metagenome/api'
-  me_api_token_dev: 'mgx 871cd915-2826-46bb-94ed-8e6a3d9b6014'
