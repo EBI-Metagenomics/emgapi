@@ -9,6 +9,7 @@ from emgapi.metagenomics_exchange import MetagenomicsExchangeAPI
 
 import requests
 import responses
+from unittest import mock
 
 class TestME:
 
@@ -69,8 +70,19 @@ class TestME:
         with pytest.raises(requests.HTTPError, match="404 Client Error"):
             me_api.delete_request(endpoint)
 
-    def test_patch_analysis_me(self):
+    @mock.patch("emgapi.metagenomics_exchange.MetagenomicsExchangeAPI.patch_request")
+    def test_patch_analysis_me(self,
+                               mock_patch_request):
         me_api = MetagenomicsExchangeAPI()
+        class MockResponse:
+            def __init__(self, json_data, status_code):
+                self.json_data = json_data
+                self.status_code = status_code
+                self.ok = True
+            def json(self):
+                return self.json_data
+
+        mock_patch_request.return_value = MockResponse({}, 200)
         registry_id = "MGX0000788"
         mgya = "MGYA00593709"
         run_accession = "SRR3960575"
