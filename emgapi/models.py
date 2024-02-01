@@ -331,16 +331,6 @@ class IndexableModelQueryset(models.QuerySet):
 
         return self.filter(never_indexed | updated_after_indexing, not_suppressed, not_private)
 
-    def get_suppressed(self):
-        try:
-            self.model._meta.get_field("suppressed_at")
-        except FieldDoesNotExist:
-            return Q()
-        else:
-            return self.filter(
-                Q(suppressed_at__gte=F(self.index_field))
-            )
-
 
 class EBISearchIndexQueryset(IndexableModelQueryset):
 
@@ -365,6 +355,16 @@ class EBISearchIndexedModel(IndexableModel):
 class MetagenomicsExchangeQueryset(IndexableModelQueryset):
     
     index_field = "last_mgx_indexed"
+
+    def to_delete(self):
+        try:
+            self.model._meta.get_field("suppressed_at")
+        except FieldDoesNotExist:
+            return Q()
+        else:
+            return self.filter(
+                Q(suppressed_at__gte=F(self.index_field))
+            )
 
 
 class MetagenomicsExchangeIndexedModel(models.Model):
@@ -1685,49 +1685,6 @@ class AssemblySample(models.Model):
 
     def __str__(self):
         return 'Assembly:{} - Sample:{}'.format(self.assembly, self.sample)
-
-
-class MetagenomicsExchangeQueryset(models.QuerySet):
-    """
-    to_delete: Objects that have been suppressed since they were last populated,
-    or that have been added but updated since.
-
-    to_add: Objects that have never been added,
-    or that have been added but updated since.
-    """
-    def to_delete(self):
-        updated_after_populating = Q(last_updated_me__gte=F("last_populated_me"), last_populated_me__isnull=False)
-
-        try:
-            self.model._meta.get_field("suppressed_at")
-        except FieldDoesNotExist:
-            return self.filter(
-                updated_after_populating
-            )
-        else:
-            return self.filter(
-                Q(suppressed_at__gte=F("last_populated_me"))
-            )
-
-    def to_add(self):
-        updated_after_populating = Q(last_updated_me__gte=F("last_populated_me"), last_populated_me__isnull=False)
-        never_populated = Q(last_populated_me__isnull=True)
-
-        try:
-            self.model._meta.get_field("is_suppressed")
-        except FieldDoesNotExist:
-            not_suppressed = Q()
-        else:
-            not_suppressed = Q(is_suppressed=False)
-
-        try:
-            self.model._meta.get_field("is_private")
-        except FieldDoesNotExist:
-            not_private = Q()
-        else:
-            not_private = Q(is_private=False)
-
-        return self.filter(never_populated | updated_after_populating, not_suppressed, not_private)
 
 
 class MetagenomicsExchangeModel(models.Model):

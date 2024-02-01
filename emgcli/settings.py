@@ -689,6 +689,9 @@ METAGENOMICS_EXCHANGE_API = ""
 METAGENOMICS_EXCHANGE_API_TOKEN = ""
 try:
     METAGENOMICS_EXCHANGE_API = EMG_CONF['emg']['me_api']
-    METAGENOMICS_EXCHANGE_API_TOKEN = EMG_CONF['emg']['me_api_token']
+    if EMG_CONF['emg'].get('me_api_token'):
+        METAGENOMICS_EXCHANGE_API_TOKEN = EMG_CONF['emg']['me_api_token']
+    else:
+        METAGENOMICS_EXCHANGE_API_TOKEN = os.getenv('METAGENOMICS_EXCHANGE_API_TOKEN')
 except KeyError:
     warnings.warn("The metagenomics exchange API and Token are not configured properly")

@@ -60,17 +60,6 @@ class Command(BaseCommand):
             help="Dry mode, no population of ME",
         )
 
-    def generate_metadata(self, mgya, run_accession, status):
-        return {
-            "confidence": "full",
-            "endPoint": f"https://www.ebi.ac.uk/metagenomics/analyses/{mgya}",
-            "method": ["other_metadata"],
-            "sourceID": mgya,
-            "sequenceID": run_accession,
-            "status": status,
-            "brokerID": settings.METAGENOMICS_EXCHANGE_MGNIFY_BROKER,
-        }
-
     def handle(self, *args, **options):
         self.study_accession = options.get("study")
         self.dry_run = options.get("dry_run")
@@ -81,7 +70,7 @@ class Command(BaseCommand):
         # never indexed or updated after indexed
         analyses_to_index_and_update = AnalysisJob.objects_for_mgx_indexing.to_add()
         # suppressed only
-        analyses_to_delete = AnalysisJob.objects_for_mgx_indexing.get_suppressed()
+        analyses_to_delete = AnalysisJob.objects_for_mgx_indexing.to_delete()
 
         if self.study_accession:
             analyses_to_index_and_update = analyses_to_index_and_update.filter(
@@ -104,15 +93,13 @@ class Command(BaseCommand):
 
         logging.info("Done")
 
-
     def process_to_index_and_update_records(self, analyses_to_index_and_update):
         logging.info(f"Indexing {len(analyses_to_index_and_update)} new analyses")
 
         for page in Paginator(analyses_to_index_and_update, 100):
             jobs_to_update = []
-
             for ajob in page:
-                metadata = self.generate_metadata(
+                metadata = self.mgx_api.generate_metadata(
                     mgya=ajob.accession,
                     run_accession=ajob.run,
                     status="public" if not ajob.is_private else "private",
@@ -157,7 +144,7 @@ class Command(BaseCommand):
                             logging.info(f"Analysis {ajob} updated successfully")
                             # Just to be safe, update the MGX accession
                             ajob.mgx_accession = registry_id
-                            ajob.last_mgx_indexed = timezone.now()
+                            ajob.last_mgx_indexed = timezone.now() + timedelta(minutes=1)
                             jobs_to_update.append(ajob)
                         else:
                             logging.error(f"Analysis {ajob} update failed")
@@ -178,7 +165,7 @@ class Command(BaseCommand):
             jobs_to_update = []
 
             for ajob in page:
-                metadata = self.generate_metadata(
+                metadata = self.mgx_api.generate_metadata(
                     mgya=ajob.accession,
                     run_accession=ajob.run,
                     status="public" if not ajob.is_private else "private",

@@ -73,16 +73,19 @@ class MetagenomicsExchangeAPI:
         response.raise_for_status()
         return response
 
-    def add_analysis(self, mgya: str, run_accession: str, public: bool):
-        data = {
+    def generate_metadata(self, mgya, run_accession, status):
+        return {
             "confidence": "full",
             "endPoint": f"https://www.ebi.ac.uk/metagenomics/analyses/{mgya}",
             "method": ["other_metadata"],
             "sourceID": mgya,
             "sequenceID": run_accession,
-            "status": "public" if public else "private",
+            "status": status,
             "brokerID": self.broker,
         }
+
+    def add_analysis(self, mgya: str, run_accession: str, public: bool):
+        data = self.generate_metadata(mgya, run_accession, public)
         response = self.post_request(endpoint="datasets", data=data)
         return response
 
