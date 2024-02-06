@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2022 EMBL - European Bioinformatics Institute
+# Copyright 2017-2024 EMBL - European Bioinformatics Institute
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ class Command(BaseCommand):
     def process_to_index_and_update_records(self, analyses_to_index_and_update):
         logging.info(f"Indexing {len(analyses_to_index_and_update)} new analyses")
 
-        for page in Paginator(analyses_to_index_and_update, 100):
+        for page in Paginator(analyses_to_index_and_update, settings.METAGENOMICS_EXCHANGE_PAGINATOR_NUMBER):
             jobs_to_update = []
             for ajob in page:
                 metadata = self.mgx_api.generate_metadata(
@@ -152,7 +152,7 @@ class Command(BaseCommand):
                         logging.debug(f"No edit for {ajob}, metadata is correct")
 
             AnalysisJob.objects.bulk_update(
-                jobs_to_update, ["last_mgx_indexed", "mgx_accession"], batch_size=100
+                jobs_to_update, ["last_mgx_indexed", "mgx_accession"], batch_size=settings.METAGENOMICS_EXCHANGE_PAGINATOR_NUMBER
             )
 
     def process_to_delete_records(self, analyses_to_delete):
@@ -161,7 +161,7 @@ class Command(BaseCommand):
         """
         logging.info(f"Processing {len(analyses_to_delete)} analyses to remove")
 
-        for page in Paginator(analyses_to_delete, 100):
+        for page in Paginator(analyses_to_delete, settings.METAGENOMICS_EXCHANGE_PAGINATOR_NUMBER):
             jobs_to_update = []
 
             for ajob in page:
@@ -192,5 +192,5 @@ class Command(BaseCommand):
 
             # BULK UPDATE #
             AnalysisJob.objects.bulk_update(
-                jobs_to_update, ["last_mgx_indexed"], batch_size=100
+                jobs_to_update, ["last_mgx_indexed"], batch_size=settings.METAGENOMICS_EXCHANGE_PAGINATOR_NUMBER
             )

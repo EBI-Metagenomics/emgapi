@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2023 EMBL - European Bioinformatics Institute
+# Copyright 2018-2024 EMBL - European Bioinformatics Institute
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ class MetagenomicsExchangeAPI:
     """Metagenomics Exchange API Client"""
 
     def __init__(self, base_url=None):
-        self.base_url = base_url if base_url else settings.METAGENOMICS_EXCHANGE_API
+        self.base_url = base_url or settings.METAGENOMICS_EXCHANGE_API
         self.__token = settings.METAGENOMICS_EXCHANGE_API_TOKEN
         self.broker = settings.METAGENOMICS_EXCHANGE_MGNIFY_BROKER
 

@@ -687,11 +687,11 @@ if 'ena_api_password' in EMG_CONF['emg']:
 METAGENOMICS_EXCHANGE_MGNIFY_BROKER = "EMG"
 METAGENOMICS_EXCHANGE_API = ""
 METAGENOMICS_EXCHANGE_API_TOKEN = ""
+METAGENOMICS_EXCHANGE_PAGINATOR_NUMBER = 100
 try:
     METAGENOMICS_EXCHANGE_API = EMG_CONF['emg']['me_api']
-    if EMG_CONF['emg'].get('me_api_token'):
+    METAGENOMICS_EXCHANGE_API_TOKEN = os.getenv('METAGENOMICS_EXCHANGE_API_TOKEN')
+    if not METAGENOMICS_EXCHANGE_API_TOKEN:
         METAGENOMICS_EXCHANGE_API_TOKEN = EMG_CONF['emg']['me_api_token']
-    else:
-        METAGENOMICS_EXCHANGE_API_TOKEN = os.getenv('METAGENOMICS_EXCHANGE_API_TOKEN')
 except KeyError:
     warnings.warn("The metagenomics exchange API and Token are not configured properly")
