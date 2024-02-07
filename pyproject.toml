@@ -18,7 +18,7 @@ dependencies = [
     # log handler
     "concurrent-log-handler~=0.9.24",
     # django
-    "Django==3.2.23",
+    "Django==3.2.24",
     "djangorestframework==3.12",
     "django-filter==23.1",
     "djangorestframework-jwt~=1.11.0",
