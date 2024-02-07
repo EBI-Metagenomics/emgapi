@@ -10,6 +10,16 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AlterField(
+            model_name='analysisjob',
+            name='last_indexed',
+            field=models.DateTimeField(blank=True, db_column='LAST_EBI_SEARCH_INDEXED', help_text='Date at which this model was last included in an EBI Search initial/incremental index.', null=True),
+        ),
+        migrations.AlterField(
+            model_name='study',
+            name='last_indexed',
+            field=models.DateTimeField(blank=True, db_column='LAST_EBI_SEARCH_INDEXED', help_text='Date at which this model was last included in an EBI Search initial/incremental index.', null=True),
+        ),
         migrations.RenameField(
             model_name='analysisjob',
             old_name='last_indexed',
