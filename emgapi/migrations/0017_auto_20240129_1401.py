@@ -10,18 +10,15 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
+        migrations.RenameField(
             model_name='analysisjob',
-            name='last_indexed',
+            old_name='last_indexed',
+            new_name='last_ebi_search_indexed',
         ),
-        migrations.RemoveField(
+        migrations.RenameField(
             model_name='study',
-            name='last_indexed',
-        ),
-        migrations.AddField(
-            model_name='analysisjob',
-            name='last_ebi_search_indexed',
-            field=models.DateTimeField(blank=True, db_column='LAST_EBI_SEARCH_INDEXED', help_text='Date at which this model was last included in an EBI Search initial/incremental index.', null=True),
+            old_name='last_indexed',
+            new_name='last_ebi_search_indexed',
         ),
         migrations.AddField(
             model_name='analysisjob',
@@ -32,10 +29,5 @@ class Migration(migrations.Migration):
             model_name='analysisjob',
             name='mgx_accession',
             field=models.CharField(blank=True, db_column='MGX_ACCESSION', help_text='The Metagenomics Exchange accession.', max_length=10, null=True, unique=True),
-        ),
-        migrations.AddField(
-            model_name='study',
-            name='last_ebi_search_indexed',
-            field=models.DateTimeField(blank=True, db_column='LAST_EBI_SEARCH_INDEXED', help_text='Date at which this model was last included in an EBI Search initial/incremental index.', null=True),
         ),
     ]
