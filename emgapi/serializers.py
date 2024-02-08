@@ -1021,7 +1021,8 @@ class AnalysisSerializer(BaseAnalysisSerializer):
             'is_suppressed',
             'suppressed_at',
             'suppression_reason',
-            'last_indexed'
+            'last_ebi_search_indexed',
+            'last_mgx_indexed',
         )
 
 
@@ -1410,7 +1411,7 @@ class StudySerializer(ExplicitFieldsModelSerializer,
             'is_suppressed',
             'suppression_reason',
             'suppressed_at',
-            'last_indexed',
+            'last_ebi_search_indexed',
         )
 
 
