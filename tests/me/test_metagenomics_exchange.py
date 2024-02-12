@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest
+import logging
 
 from django.conf import settings
 
@@ -10,6 +11,7 @@ from emgapi.metagenomics_exchange import MetagenomicsExchangeAPI
 import requests
 import responses
 from unittest import mock
+
 
 class TestME:
 
@@ -33,7 +35,9 @@ class TestME:
         source_id = "MGYA00293719"
         # Should return -> https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/409
         with pytest.raises(requests.HTTPError, match="401 Client Error"):
-            me_api.add_analysis(mgya=source_id, run_accession="ERR3063408", public=True).json()
+            me_api.add_analysis(
+                mgya=source_id, run_accession="ERR3063408", public=True
+            ).json()
 
     @responses.activate
     def test_mock_post_new_analysis(self):
@@ -41,12 +45,14 @@ class TestME:
         endpoint = "datasets"
         url = settings.METAGENOMICS_EXCHANGE_API + f"/{endpoint}"
 
-        responses.add(responses.POST, url, json={'success': True}, status=201)
+        responses.add(responses.POST, url, json={"success": True}, status=201)
 
-        response = me_api.add_analysis(mgya="MGYA00593709", run_accession="SRR3960575", public=True)
+        response = me_api.add_analysis(
+            mgya="MGYA00593709", run_accession="SRR3960575", public=True
+        )
 
         assert response.status_code == 201
-        assert response.json() == {'success': True}
+        assert response.json() == {"success": True}
 
     @responses.activate
     def test_mock_delete_analysis_from_me(self):
@@ -55,30 +61,28 @@ class TestME:
         endpoint = f"datasets/{registry_id}"
         url = settings.METAGENOMICS_EXCHANGE_API + f"/{endpoint}"
 
-        responses.add(responses.DELETE, url, json={'success': True}, status=201)
+        responses.add(responses.DELETE, url, json={"success": True}, status=201)
         response = me_api.delete_request(endpoint)
 
         assert response.status_code == 201
-        assert response.json() == {'success': True}
-
+        assert response.json() == {"success": True}
 
     def test_wrong_delete_request_me(self):
         me_api = MetagenomicsExchangeAPI()
         registry_id = "MGX0000780"
         endpoint = f"dataset/{registry_id}"
-
-        with pytest.raises(requests.HTTPError, match="404 Client Error"):
-            me_api.delete_request(endpoint)
+        assert not me_api.delete_request(endpoint)
 
     @mock.patch("emgapi.metagenomics_exchange.MetagenomicsExchangeAPI.patch_request")
-    def test_patch_analysis_me(self,
-                               mock_patch_request):
+    def test_patch_analysis_me(self, mock_patch_request):
         me_api = MetagenomicsExchangeAPI()
+
         class MockResponse:
             def __init__(self, json_data, status_code):
                 self.json_data = json_data
                 self.status_code = status_code
                 self.ok = True
+
             def json(self):
                 return self.json_data
 
@@ -98,4 +102,3 @@ class TestME:
             "brokerID": "EMG",
         }
         assert me_api.patch_analysis(registry_id, data)
-

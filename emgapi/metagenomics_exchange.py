@@ -21,7 +21,6 @@ from django.conf import settings
 
 
 class MetagenomicsExchangeAPI:
-
     """Metagenomics Exchange API Client"""
 
     def __init__(self, base_url=None):
@@ -55,10 +54,7 @@ class MetagenomicsExchangeAPI:
             "Accept": "application/json",
             "Authorization": self.__token,
         }
-        response = requests.delete(
-            f"{self.base_url}/{endpoint}", headers=headers
-        )
-        response.raise_for_status()
+        response = requests.delete(f"{self.base_url}/{endpoint}", headers=headers)
         return response
 
     def patch_request(self, endpoint: str, data: dict):
@@ -70,7 +66,6 @@ class MetagenomicsExchangeAPI:
         response = requests.patch(
             f"{self.base_url}/{endpoint}", json=data, headers=headers
         )
-        response.raise_for_status()
         return response
 
     def generate_metadata(self, mgya, run_accession, status):
@@ -89,14 +84,15 @@ class MetagenomicsExchangeAPI:
         response = self.post_request(endpoint="datasets", data=data)
         return response
 
-
-    def check_analysis(self, source_id: str, sequence_id: str, public=None, metadata=None) -> [str, bool]:
+    def check_analysis(
+        self, source_id: str, sequence_id: str, public=None, metadata=None
+    ):
         logging.info(f"Check {source_id} {sequence_id}")
         params = {}
         if public:
             params = {
                 "status": "public" if public else "private",
-                "broker": self.broker
+                "broker": self.broker,
             }
         endpoint = f"sequences/{sequence_id}/datasets"
         analysis_registry_id = None
@@ -105,34 +101,42 @@ class MetagenomicsExchangeAPI:
         try:
             response = self.get_request(endpoint=endpoint, params=params)
         except:
-            logging.warning(f"Get API request failed")
-            return analysis_registry_id , metadata_match
+            logging.error(f"Get API request failed")
+            return analysis_registry_id, metadata_match
 
-        if response.ok:
-            data = response.json()
-            datasets = data.get("datasets")
-            sourceIDs = [item.get("sourceID") for item in datasets]
-            if source_id in sourceIDs:
-                found_record = [item for item in datasets if item.get("sourceID") == source_id][0]
-                logging.info(f"{source_id} exists in ME")
-                analysis_registry_id  = found_record.get("registryID")
-                if metadata:
-                    for metadata_record in metadata:
-                        if not(metadata_record in found_record):
+        data = response.json()
+        datasets = data.get("datasets", [])
+
+        # The API will return an emtpy datasets array if it can find the accession
+        if not len(datasets):
+            logging.info(f"{source_id} does not exist in ME")
+            return analysis_registry_id, metadata_match
+
+        sourceIDs = [item.get("sourceID") for item in datasets]
+        if source_id in sourceIDs:
+            found_record = [
+                item for item in datasets if item.get("sourceID") == source_id
+            ][0]
+            logging.info(f"{source_id} exists in ME")
+            analysis_registry_id = found_record.get("registryID")
+            if metadata:
+                for metadata_record in metadata:
+                    if not (metadata_record in found_record):
+                        metadata_match = False
+                        return analysis_registry_id, metadata_match
+                    else:
+                        if metadata[metadata_record] != found_record[metadata_record]:
                             metadata_match = False
-                            return analysis_registry_id , metadata_match
-                        else:
-                            if metadata[metadata_record] != found_record[metadata_record]:
-                                print(metadata[metadata_record], found_record[metadata_record])
-                                metadata_match = False
-                                logging.info(f"Incorrect field {metadata[metadata_record]} != {found_record[metadata_record]})")
-                                return analysis_registry_id, metadata_match
-                return analysis_registry_id , metadata_match
-            else:
-                logging.info(f"{source_id} does not exist in ME")
+                            logging.info(
+                                f"Incorrect field {metadata[metadata_record]} != {found_record[metadata_record]})"
+                            )
+                            return analysis_registry_id, metadata_match
+            return analysis_registry_id, metadata_match
+
         return analysis_registry_id, metadata_match
 
     def delete_analysis(self, registry_id: str):
+        """Delete an entry from the registry"""
         response = self.delete_request(endpoint=f"datasets/{registry_id}")
         if response.ok:
             logging.info(f"{registry_id} was deleted with {response.status_code}")
@@ -140,13 +144,18 @@ class MetagenomicsExchangeAPI:
         else:
             if response.status_code == 400:
                 logging.error(f"Bad request for {registry_id}")
+            elif response.status_code == 404:
+                logging.error(f"{registry_id} not found")
             elif response.status_code == 401:
                 logging.error(f"Failed to authenticate for {registry_id}")
             else:
-                logging.error(f"{response.message} for {registry_id}")
+                logging.error(
+                    f"Deleted failed for {registry_id}, response message: {response.message}"
+                )
             return False
 
     def patch_analysis(self, registry_id: str, data: dict):
+        """Patch an entry on the registry"""
         response = self.patch_request(endpoint=f"datasets/{registry_id}", data=data)
         if response.ok:
             logging.info(f"{registry_id} was patched")
@@ -158,4 +167,8 @@ class MetagenomicsExchangeAPI:
                 logging.error(f"Fail to authenticate for {registry_id}")
             elif response.status_code == 409:
                 logging.error(f"Conflicts with existing data for {registry_id}")
+            else:
+                logging.error(
+                    f"Patch failed for {registry_id}, response message: {response.message}"
+                )
             return False
