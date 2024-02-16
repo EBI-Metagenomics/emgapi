@@ -127,8 +127,12 @@ class MetagenomicsExchangeAPI:
             Either the Run accession or the Assembly accession related to the MGYA.
 
         Returns:
-        requests.models.Response
-            The response object from the API request.
+        tuple
+            A tuple containing two elements:
+                - analysis_registry_id : str
+                    The analysis registry ID.
+                - metadata_match : boolean
+                    True, if the metadata matchs.
         """
         if not mgya:
             raise ValueError(f"mgya is mandatory.")
@@ -143,7 +147,7 @@ class MetagenomicsExchangeAPI:
 
         endpoint = f"sequences/{sequence_accession}/datasets"
         analysis_registry_id = None
-        metadata_match = True
+        metadata_match = False
 
         try:
             response = self.get_request(endpoint=endpoint, params=params)
@@ -171,18 +175,22 @@ class MetagenomicsExchangeAPI:
             ]
             logging.info(f"{mgya} exists in ME")
             analysis_registry_id = found_record.get("registryID")
+            if not analysis_registry_id:
+                raise ValueError(f"The Metagenomics Exchange 'registryID' for {mgya} is null.")
+
             if metadata:
                 for metadata_record in metadata:
                     if not (metadata_record in found_record):
-                        metadata_match = False
-                        return analysis_registry_id, metadata_match
+                        return analysis_registry_id, False
                     else:
                         if metadata[metadata_record] != found_record[metadata_record]:
                             metadata_match = False
                             logging.info(
-                                f"Incorrect field {metadata[metadata_record]} != {found_record[metadata_record]})"
+                                f"The metadata doesn't match, for field {metadata[metadata_record]} != {found_record[metadata_record]})"
                             )
-                            return analysis_registry_id, metadata_match
+                        else:
+                            metadata_match = True
+                        return analysis_registry_id, metadata_match
             return analysis_registry_id, metadata_match
 
         return analysis_registry_id, metadata_match
