@@ -106,7 +106,11 @@ class MetagenomicsExchangeAPI:
             The response object from the API request.
         """
         data = self.generate_metadata(mgya, sequence_accession)
-        response = self.post_request(endpoint="datasets", data=data)
+        try:
+            response = self.post_request(endpoint="datasets", data=data)
+        except HTTPError as http_error:
+            logging.exception(f"POST request failed. HTTP Error: {http_error}")
+            raise http_error
         return response
 
     def check_analysis(self, mgya: str, sequence_accession: str, metadata=None):
