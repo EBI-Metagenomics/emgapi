@@ -1,32 +1,29 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pytest
-import logging
+from unittest import mock
 
+import pytest
+import requests
+import responses
 from django.conf import settings
 
 from emgapi.metagenomics_exchange import MetagenomicsExchangeAPI
 
-import requests
-import responses
-from unittest import mock
-
 
 class TestME:
-
     def test_check_existing_analysis_me(self):
         me_api = MetagenomicsExchangeAPI()
-        source_id = "MGYA00293719"
-        seq_id = "ERR3063408"
-        return_values = me_api.check_analysis(source_id, seq_id, True)
+        mgya = "MGYA00293719"
+        sequence_accession = "ERR3063408"
+        return_values = me_api.check_analysis(mgya, sequence_accession)
         assert return_values[0]
 
     def test_check_not_existing_analysis_me(self):
         me_api = MetagenomicsExchangeAPI()
         source_id = "MGYA10293719"
         seq_id = "ERR3063408"
-        return_values = me_api.check_analysis(source_id, seq_id, True)
+        return_values = me_api.check_analysis(source_id, seq_id)
         assert not return_values[0]
 
     @pytest.mark.skip(reason="Error on ME API side")
@@ -35,9 +32,7 @@ class TestME:
         source_id = "MGYA00293719"
         # Should return -> https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/409
         with pytest.raises(requests.HTTPError, match="401 Client Error"):
-            me_api.add_analysis(
-                mgya=source_id, run_accession="ERR3063408", public=True
-            ).json()
+            me_api.add_analysis(mgya=source_id, sequence_accession="ERR3063408").json()
 
     @responses.activate
     def test_mock_post_new_analysis(self):
@@ -48,7 +43,7 @@ class TestME:
         responses.add(responses.POST, url, json={"success": True}, status=201)
 
         response = me_api.add_analysis(
-            mgya="MGYA00593709", run_accession="SRR3960575", public=True
+            mgya="MGYA00593709", sequence_accession="SRR3960575"
         )
 
         assert response.status_code == 201

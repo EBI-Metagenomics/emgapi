@@ -104,7 +104,6 @@ class Command(BaseCommand):
         ):
             jobs_to_update = []
             for annotation_job in page:
-
                 sequence_accession = ""
                 if annotation_job.run:
                     sequence_accession = annotation_job.run.accession
@@ -112,7 +111,7 @@ class Command(BaseCommand):
                     sequence_accession = annotation_job.assembly.accession
 
                 metadata = self.mgx_api.generate_metadata(
-                    mgya=annotation_job.accession, run_accession=sequence_accession
+                    mgya=annotation_job.accession, sequence_accession=sequence_accession
                 )
                 registry_id, metadata_match = self.mgx_api.check_analysis(
                     mgya=annotation_job.accession,
@@ -129,7 +128,8 @@ class Command(BaseCommand):
                         continue
 
                     response = self.mgx_api.add_analysis(
-                        mgya=annotation_job.accession, run_accession=annotation_job.run
+                        mgya=annotation_job.accession,
+                        sequence_accession=annotation_job.run,
                     )
                     if response.ok:
                         logging.info(f"Successfully added {annotation_job}")
@@ -193,7 +193,6 @@ class Command(BaseCommand):
             jobs_to_update = []
 
             for annotation_job in page:
-
                 sequence_accession = ""
                 if annotation_job.run:
                     sequence_accession = annotation_job.run.accession
@@ -201,7 +200,7 @@ class Command(BaseCommand):
                     sequence_accession = annotation_job.assembly.accession
 
                 metadata = self.mgx_api.generate_metadata(
-                    mgya=annotation_job.accession, run_accession=annotation_job.run
+                    mgya=annotation_job.accession, sequence_accession=sequence_accession
                 )
                 registry_id, _ = self.mgx_api.check_analysis(
                     mgya=annotation_job.accession,
