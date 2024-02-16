@@ -109,7 +109,11 @@ class MetagenomicsExchangeAPI:
         try:
             response = self.post_request(endpoint="datasets", data=data)
         except HTTPError as http_error:
-            logging.exception(f"POST request failed. HTTP Error: {http_error}")
+            try:
+                response_json = http_error.response.json()
+                logging.error(f"API response content: {response_json}")
+            except:
+                pass
             raise http_error
         return response
 
@@ -145,6 +149,11 @@ class MetagenomicsExchangeAPI:
             response = self.get_request(endpoint=endpoint, params=params)
         except HTTPError as http_error:
             logging.error(f"Get API request failed. HTTP Error: {http_error}")
+            try:
+                response_json = http_error.response.json()
+                logging.error(f"API response content: {response_json}")
+            except:
+                pass
             return analysis_registry_id, metadata_match
 
         data = response.json()
