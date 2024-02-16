@@ -115,7 +115,7 @@ class Command(BaseCommand):
                 )
                 registry_id, metadata_match = self.mgx_api.check_analysis(
                     mgya=annotation_job.accession,
-                    sequence_accession=annotation_job.run,
+                    sequence_accession=sequence_accession,
                     metadata=metadata,
                 )
                 # The job is not registered

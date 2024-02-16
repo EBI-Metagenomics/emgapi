@@ -109,13 +109,13 @@ class MetagenomicsExchangeAPI:
         response = self.post_request(endpoint="datasets", data=data)
         return response
 
-    def check_analysis(self, mgya: str, sequence_accesion: str, metadata=None):
+    def check_analysis(self, mgya: str, sequence_accession: str, metadata=None):
         """Check if a sequence exists in the M. Exchange
 
         Parameters:
         mgya : str
             The MGnify Analysis accession.
-        sequence_accesion : str
+        sequence_accession : str
             Either the Run accession or the Assembly accession related to the MGYA.
 
         Returns:
@@ -124,16 +124,16 @@ class MetagenomicsExchangeAPI:
         """
         if not mgya:
             raise ValueError(f"mgya is mandatory.")
-        if not sequence_accesion:
-            raise ValueError(f"sequence_accesion is mandatory.")
+        if not sequence_accession:
+            raise ValueError(f"sequence_accession is mandatory.")
 
-        logging.info(f"Checking {mgya} - {sequence_accesion}")
+        logging.info(f"Checking {mgya} - {sequence_accession}")
 
         params = {
             "broker": self.broker,
         }
 
-        endpoint = f"sequences/{sequence_accesion}/datasets"
+        endpoint = f"sequences/{sequence_accession}/datasets"
         analysis_registry_id = None
         metadata_match = True
 
