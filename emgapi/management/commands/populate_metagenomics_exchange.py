@@ -135,7 +135,7 @@ class Command(BaseCommand):
                         logging.info(f"Successfully added {annotation_job}")
                         registry_id, metadata_match = self.mgx_api.check_analysis(
                             mgya=annotation_job.accession,
-                            sequence_id=sequence_accession,
+                            sequence_accession=sequence_accession,
                         )
                         annotation_job.mgx_accession = registry_id
                         annotation_job.last_mgx_indexed = timezone.now() + timedelta(
