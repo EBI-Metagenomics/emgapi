@@ -168,6 +168,13 @@ class MetagenomicsExchangeAPI:
             logging.info(f"{mgya} does not exist in ME")
             return analysis_registry_id, metadata_match
 
+        # TODO: this code needs some refactoring to improve it:
+        """
+        try:
+            found_record = next(item for item in datasets if item.get("sourceID") == mgya)
+        except StopIteration
+            ...
+        """
         sourceIDs = [item.get("sourceID") for item in datasets]
         if mgya in sourceIDs:
             found_record = [item for item in datasets if item.get("sourceID") == mgya][
