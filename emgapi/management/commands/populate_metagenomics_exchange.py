@@ -15,15 +15,15 @@
 # limitations under the License.
 
 import logging
+from datetime import timedelta
 
 from django.conf import settings
 from django.core.management import BaseCommand
-from django.utils import timezone
 from django.core.paginator import Paginator
-from datetime import timedelta
+from django.utils import timezone
 
-from emgapi.models import AnalysisJob
 from emgapi.metagenomics_exchange import MetagenomicsExchangeAPI
+from emgapi.models import AnalysisJob
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +65,9 @@ class Command(BaseCommand):
         self.dry_run = options.get("dry_run")
         self.pipeline_version = options.get("pipeline")
 
-        self.mgx_api = MetagenomicsExchangeAPI(base_url=settings.METAGENOMICS_EXCHANGE_API)
+        self.mgx_api = MetagenomicsExchangeAPI(
+            base_url=settings.METAGENOMICS_EXCHANGE_API
+        )
 
         # never indexed or updated after indexed
         analyses_to_index_and_update = AnalysisJob.objects_for_mgx_indexing.to_add()
@@ -96,63 +98,87 @@ class Command(BaseCommand):
     def process_to_index_and_update_records(self, analyses_to_index_and_update):
         logging.info(f"Indexing {len(analyses_to_index_and_update)} new analyses")
 
-        for page in Paginator(analyses_to_index_and_update, settings.METAGENOMICS_EXCHANGE_PAGINATOR_NUMBER):
+        for page in Paginator(
+            analyses_to_index_and_update,
+            settings.METAGENOMICS_EXCHANGE_PAGINATOR_NUMBER,
+        ):
             jobs_to_update = []
-            for ajob in page:
+            for annotation_job in page:
+                sequence_accession = ""
+                if annotation_job.run:
+                    sequence_accession = annotation_job.run.accession
+                if annotation_job.assembly:
+                    sequence_accession = annotation_job.assembly.accession
+
                 metadata = self.mgx_api.generate_metadata(
-                    mgya=ajob.accession,
-                    run_accession=ajob.run,
-                    status="public" if not ajob.is_private else "private",
+                    mgya=annotation_job.accession, sequence_accession=sequence_accession
                 )
                 registry_id, metadata_match = self.mgx_api.check_analysis(
-                    source_id=ajob.accession, sequence_id=ajob.run, metadata=metadata
+                    mgya=annotation_job.accession,
+                    sequence_accession=sequence_accession,
+                    metadata=metadata,
                 )
                 # The job is not registered
                 if not registry_id:
-                    logging.info(f"Add new {ajob}")
+                    logging.info(f"Add new {annotation_job}")
                     if self.dry_run:
-                        logging.info(f"Dry-mode run: no addition to real ME for {ajob}")
+                        logging.info(
+                            f"Dry-mode run: no addition to real ME for {annotation_job}"
+                        )
                         continue
 
                     response = self.mgx_api.add_analysis(
-                        mgya=ajob.accession,
-                        run_accession=ajob.run,
-                        public=not ajob.is_private,
+                        mgya=annotation_job.accession,
+                        sequence_accession=sequence_accession,
                     )
                     if response.ok:
-                        logging.info(f"Successfully added {ajob}")
+                        logging.info(f"Successfully added {annotation_job}")
                         registry_id, metadata_match = self.mgx_api.check_analysis(
-                            source_id=ajob.accession, sequence_id=ajob.run)
-                        ajob.mgx_accession = registry_id
-                        ajob.last_mgx_indexed = timezone.now() + timedelta(minutes=1)
-                        jobs_to_update.append(ajob)
+                            mgya=annotation_job.accession,
+                            sequence_accession=sequence_accession,
+                        )
+                        annotation_job.mgx_accession = registry_id
+                        annotation_job.last_mgx_indexed = timezone.now() + timedelta(
+                            minutes=1
+                        )
+                        jobs_to_update.append(annotation_job)
                     else:
-                        logging.error(f"Error adding {ajob}: {response.message}")
+                        logging.error(
+                            f"Error adding {annotation_job}: {response.message}"
+                        )
 
                 # else we have to check if the metadata matches, if not we need to update it
                 else:
                     if not metadata_match:
-                        logging.info(f"Patch existing {ajob}")
+                        logging.info(f"Patch existing {annotation_job}")
                         if self.dry_run:
                             logging.info(
-                                f"Dry-mode run: no patch to real ME for {ajob}"
+                                f"Dry-mode run: no patch to real ME for {annotation_job}"
                             )
                             continue
                         if self.mgx_api.patch_analysis(
-                                registry_id=registry_id, data=metadata
+                            registry_id=registry_id, data=metadata
                         ):
-                            logging.info(f"Analysis {ajob} updated successfully")
+                            logging.info(
+                                f"Analysis {annotation_job} updated successfully"
+                            )
                             # Just to be safe, update the MGX accession
-                            ajob.mgx_accession = registry_id
-                            ajob.last_mgx_indexed = timezone.now() + timedelta(minutes=1)
-                            jobs_to_update.append(ajob)
+                            annotation_job.mgx_accession = registry_id
+                            annotation_job.last_mgx_indexed = (
+                                timezone.now() + timedelta(minutes=1)
+                            )
+                            jobs_to_update.append(annotation_job)
                         else:
-                            logging.error(f"Analysis {ajob} update failed")
+                            logging.error(f"Analysis {annotation_job} update failed")
                     else:
-                        logging.debug(f"No edit for {ajob}, metadata is correct")
+                        logging.debug(
+                            f"No edit for {annotation_job}, metadata is correct"
+                        )
 
             AnalysisJob.objects.bulk_update(
-                jobs_to_update, ["last_mgx_indexed", "mgx_accession"], batch_size=settings.METAGENOMICS_EXCHANGE_PAGINATOR_NUMBER
+                jobs_to_update,
+                ["last_mgx_indexed", "mgx_accession"],
+                batch_size=settings.METAGENOMICS_EXCHANGE_PAGINATOR_NUMBER,
             )
 
     def process_to_delete_records(self, analyses_to_delete):
@@ -161,36 +187,48 @@ class Command(BaseCommand):
         """
         logging.info(f"Processing {len(analyses_to_delete)} analyses to remove")
 
-        for page in Paginator(analyses_to_delete, settings.METAGENOMICS_EXCHANGE_PAGINATOR_NUMBER):
+        for page in Paginator(
+            analyses_to_delete, settings.METAGENOMICS_EXCHANGE_PAGINATOR_NUMBER
+        ):
             jobs_to_update = []
 
-            for ajob in page:
+            for annotation_job in page:
+                sequence_accession = ""
+                if annotation_job.run:
+                    sequence_accession = annotation_job.run.accession
+                if annotation_job.assembly:
+                    sequence_accession = annotation_job.assembly.accession
+
                 metadata = self.mgx_api.generate_metadata(
-                    mgya=ajob.accession,
-                    run_accession=ajob.run,
-                    status="public" if not ajob.is_private else "private",
+                    mgya=annotation_job.accession, sequence_accession=sequence_accession
                 )
                 registry_id, _ = self.mgx_api.check_analysis(
-                    source_id=ajob.accession, sequence_id=ajob.run, metadata=metadata
+                    mgya=annotation_job.accession,
+                    sequence_accession=sequence_accession,
+                    metadata=metadata,
                 )
                 if registry_id:
-                    logging.info(f"Deleting {ajob}")
+                    logging.info(f"Deleting {annotation_job}")
                     if self.dry_run:
-                        logging.info(f"Dry-mode run: no delete from real ME for {ajob}")
+                        logging.info(
+                            f"Dry-mode run: no delete from real ME for {annotation_job}"
+                        )
                         continue
 
                     if self.mgx_api.delete_analysis(registry_id):
-                        logging.info(f"{ajob} successfully deleted")
-                        ajob.last_mgx_indexed = timezone.now()
-                        jobs_to_update.append(ajob)
+                        logging.info(f"{annotation_job} successfully deleted")
+                        annotation_job.last_mgx_indexed = timezone.now()
+                        jobs_to_update.append(annotation_job)
                     else:
-                        logging.info(f"{ajob} failed on delete")
+                        logging.info(f"{annotation_job} failed on delete")
                 else:
                     logging.info(
-                        f"{ajob} doesn't exist in the registry, nothing to delete"
+                        f"{annotation_job} doesn't exist in the registry, nothing to delete"
                     )
 
             # BULK UPDATE #
             AnalysisJob.objects.bulk_update(
-                jobs_to_update, ["last_mgx_indexed"], batch_size=settings.METAGENOMICS_EXCHANGE_PAGINATOR_NUMBER
+                jobs_to_update,
+                ["last_mgx_indexed"],
+                batch_size=settings.METAGENOMICS_EXCHANGE_PAGINATOR_NUMBER,
             )

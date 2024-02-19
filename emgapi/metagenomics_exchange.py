@@ -15,9 +15,10 @@
 # limitations under the License.
 
 import logging
-import requests
 
+import requests
 from django.conf import settings
+from requests.exceptions import HTTPError
 
 
 class MetagenomicsExchangeAPI:
@@ -25,7 +26,7 @@ class MetagenomicsExchangeAPI:
 
     def __init__(self, base_url=None):
         self.base_url = base_url or settings.METAGENOMICS_EXCHANGE_API
-        self.__token = settings.METAGENOMICS_EXCHANGE_API_TOKEN
+        self.__token = f"mgx {settings.METAGENOMICS_EXCHANGE_API_TOKEN}"
         self.broker = settings.METAGENOMICS_EXCHANGE_MGNIFY_BROKER
 
     def get_request(self, endpoint: str, params: dict):
@@ -68,40 +69,95 @@ class MetagenomicsExchangeAPI:
         )
         return response
 
-    def generate_metadata(self, mgya, run_accession, status):
+    def generate_metadata(self, mgya, sequence_accession):
+        """Generate the metadata object for the Metagenomics Exchange API.
+
+        Parameters:
+        mgya : str
+            The MGnify Analysis accession.
+        sequence_accession : str
+            Either the Run accession or the Assembly accession related to the MGYA.
+
+        Returns:
+        dict
+            A dictionary containing metadata for the Metagenomics Exchange API.
+        """
         return {
             "confidence": "full",
             "endPoint": f"https://www.ebi.ac.uk/metagenomics/analyses/{mgya}",
             "method": ["other_metadata"],
             "sourceID": mgya,
-            "sequenceID": run_accession,
-            "status": status,
+            "sequenceID": sequence_accession,
+            "status": "public",
             "brokerID": self.broker,
         }
 
-    def add_analysis(self, mgya: str, run_accession: str, public: bool):
-        data = self.generate_metadata(mgya, run_accession, public)
-        response = self.post_request(endpoint="datasets", data=data)
+    def add_analysis(self, mgya: str, sequence_accession: str):
+        """Add an analysis to the M. Exchange
+
+        Parameters:
+        mgya : str
+            The MGnify Analysis accession.
+        sequence_accession : str
+            Either the Run accession or the Assembly accession related to the MGYA.
+
+        Returns:
+        requests.models.Response
+            The response object from the API request.
+        """
+        data = self.generate_metadata(mgya, sequence_accession)
+        try:
+            response = self.post_request(endpoint="datasets", data=data)
+        except HTTPError as http_error:
+            try:
+                response_json = http_error.response.json()
+                logging.error(f"API response content: {response_json}")
+            except:
+                pass
+            raise http_error
         return response
 
-    def check_analysis(
-        self, source_id: str, sequence_id: str, public=None, metadata=None
-    ):
-        logging.info(f"Check {source_id} {sequence_id}")
-        params = {}
-        if public:
-            params = {
-                "status": "public" if public else "private",
-                "broker": self.broker,
-            }
-        endpoint = f"sequences/{sequence_id}/datasets"
+    def check_analysis(self, mgya: str, sequence_accession: str, metadata=None):
+        """Check if a sequence exists in the M. Exchange
+
+        Parameters:
+        mgya : str
+            The MGnify Analysis accession.
+        sequence_accession : str
+            Either the Run accession or the Assembly accession related to the MGYA.
+
+        Returns:
+        tuple
+            A tuple containing two elements:
+                - analysis_registry_id : str
+                    The analysis registry ID.
+                - metadata_match : boolean
+                    True, if the metadata matchs.
+        """
+        if not mgya:
+            raise ValueError(f"mgya is mandatory.")
+        if not sequence_accession:
+            raise ValueError(f"sequence_accession is mandatory.")
+
+        logging.info(f"Checking {mgya} - {sequence_accession}")
+
+        params = {
+            "broker": self.broker,
+        }
+
+        endpoint = f"sequences/{sequence_accession}/datasets"
         analysis_registry_id = None
-        metadata_match = True
+        metadata_match = False
 
         try:
             response = self.get_request(endpoint=endpoint, params=params)
-        except:
-            logging.error(f"Get API request failed")
+        except HTTPError as http_error:
+            logging.error(f"Get API request failed. HTTP Error: {http_error}")
+            try:
+                response_json = http_error.response.json()
+                logging.error(f"API response content: {response_json}")
+            except:
+                pass
             return analysis_registry_id, metadata_match
 
         data = response.json()
@@ -109,28 +165,39 @@ class MetagenomicsExchangeAPI:
 
         # The API will return an emtpy datasets array if it can find the accession
         if not len(datasets):
-            logging.info(f"{source_id} does not exist in ME")
+            logging.info(f"{mgya} does not exist in ME")
             return analysis_registry_id, metadata_match
 
+        # TODO: this code needs some refactoring to improve it:
+        """
+        try:
+            found_record = next(item for item in datasets if item.get("sourceID") == mgya)
+        except StopIteration
+            ...
+        """
         sourceIDs = [item.get("sourceID") for item in datasets]
-        if source_id in sourceIDs:
-            found_record = [
-                item for item in datasets if item.get("sourceID") == source_id
-            ][0]
-            logging.info(f"{source_id} exists in ME")
+        if mgya in sourceIDs:
+            found_record = [item for item in datasets if item.get("sourceID") == mgya][
+                0
+            ]
+            logging.info(f"{mgya} exists in ME")
             analysis_registry_id = found_record.get("registryID")
+            if not analysis_registry_id:
+                raise ValueError(f"The Metagenomics Exchange 'registryID' for {mgya} is null.")
+
             if metadata:
                 for metadata_record in metadata:
                     if not (metadata_record in found_record):
-                        metadata_match = False
-                        return analysis_registry_id, metadata_match
+                        return analysis_registry_id, False
                     else:
                         if metadata[metadata_record] != found_record[metadata_record]:
                             metadata_match = False
                             logging.info(
-                                f"Incorrect field {metadata[metadata_record]} != {found_record[metadata_record]})"
+                                f"The metadata doesn't match, for field {metadata[metadata_record]} != {found_record[metadata_record]})"
                             )
-                            return analysis_registry_id, metadata_match
+                        else:
+                            metadata_match = True
+                        return analysis_registry_id, metadata_match
             return analysis_registry_id, metadata_match
 
         return analysis_registry_id, metadata_match

@@ -42,8 +42,10 @@ class TestPopulateMeAPI:
         assert "Dry-mode run: no addition to real ME for MGYA00466090" in caplog.text
         assert "Dry-mode run: no addition to real ME for MGYA00466091" in caplog.text
         assert "Processing 1 analyses to remove" in caplog.text
-        assert "MGYA00005678 doesn't exist in the registry, nothing to delete" in caplog.text
-
+        assert (
+            "MGYA00005678 doesn't exist in the registry, nothing to delete"
+            in caplog.text
+        )
 
     @pytest.mark.usefixtures("run_multiple_analysis_me")
     @mock.patch("emgapi.metagenomics_exchange.MetagenomicsExchangeAPI.add_analysis")
@@ -56,16 +58,18 @@ class TestPopulateMeAPI:
         """
         pipeline = 4.1
         registry_id = "MGX1"
+
         class MockResponse:
             def __init__(self, json_data, status_code):
                 self.json_data = json_data
                 self.status_code = status_code
                 self.ok = True
+
             def json(self):
                 return self.json_data
 
         def mock_check_process(*args, **kwargs):
-            if 'metadata' in kwargs:
+            if "metadata" in kwargs:
                 return None, True
             else:
                 return registry_id, True
@@ -84,14 +88,10 @@ class TestPopulateMeAPI:
         assert ajob.last_mgx_indexed
         assert ajob.mgx_accession == registry_id
 
-
     @pytest.mark.usefixtures("run_multiple_analysis_me")
     @mock.patch("emgapi.metagenomics_exchange.MetagenomicsExchangeAPI.check_analysis")
     @mock.patch("emgapi.metagenomics_exchange.MetagenomicsExchangeAPI.delete_analysis")
-    def test_removals(self,
-                      mock_delete_analysis,
-                      mock_check_analysis,
-                      caplog):
+    def test_removals(self, mock_delete_analysis, mock_check_analysis, caplog):
         """
         Test delete process.
         1 analysis should be removed and updated indexed field in DB
@@ -100,10 +100,7 @@ class TestPopulateMeAPI:
         mock_check_analysis.return_value = True, True
         mock_delete_analysis.return_value = True
 
-        call_command(
-            "populate_metagenomics_exchange",
-            pipeline=pipeline
-        )
+        call_command("populate_metagenomics_exchange", pipeline=pipeline)
         assert "Indexing 0 new analyses" in caplog.text
         assert "Processing 1 analyses to remove" in caplog.text
         assert "Deleting MGYA00005678" in caplog.text
@@ -114,10 +111,7 @@ class TestPopulateMeAPI:
     @pytest.mark.usefixtures("run_multiple_analysis_me")
     @mock.patch("emgapi.metagenomics_exchange.MetagenomicsExchangeAPI.check_analysis")
     @mock.patch("emgapi.metagenomics_exchange.MetagenomicsExchangeAPI.patch_analysis")
-    def test_update(self,
-                    mock_patch_analysis,
-                    mock_check_analysis,
-                    caplog):
+    def test_update(self, mock_patch_analysis, mock_check_analysis, caplog):
         """
         Test update process for job that was indexed before updated.
         MGX accession and last_mgx_indexed should be updated
@@ -138,5 +132,3 @@ class TestPopulateMeAPI:
         ajob = AnalysisJob.objects.filter(pipeline__release_version=pipeline).first()
         assert ajob.last_mgx_indexed.date() == timezone.now().date()
         assert ajob.mgx_accession == registry_id
-
-
