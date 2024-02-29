@@ -279,7 +279,17 @@ class ENASyncableModel(SuppressibleModel, PrivacyControlledModel):
         abstract = True
 
 
-class EbiSearchIndexQueryset(models.QuerySet):
+class IndexableModel(models.Model):
+    last_update = models.DateTimeField(
+        db_column='LAST_UPDATE',
+        auto_now=True
+    )
+
+    class Meta:
+        abstract = True
+
+
+class IndexableModelQueryset(models.QuerySet):
     """
     to_delete: Objects that have been suppressed since they were last indexed,
     or that have been indexed but updated since.
@@ -288,7 +298,7 @@ class EbiSearchIndexQueryset(models.QuerySet):
     or that have been indexed but updated since.
     """
     def to_delete(self):
-        updated_after_indexing = Q(last_update__gte=F("last_indexed"), last_indexed__isnull=False)
+        updated_after_indexing = Q(last_update__gte=F(self.index_field), **{f"{self.index_field}__isnull": False})
 
         try:
             self.model._meta.get_field("suppressed_at")
@@ -298,12 +308,12 @@ class EbiSearchIndexQueryset(models.QuerySet):
             )
         else:
             return self.filter(
-                Q(suppressed_at__gte=F("last_indexed")) | updated_after_indexing
+                Q(suppressed_at__gte=F(self.index_field)) | updated_after_indexing
             )
 
     def to_add(self):
-        updated_after_indexing = Q(last_update__gte=F("last_indexed"), last_indexed__isnull=False)
-        never_indexed = Q(last_indexed__isnull=True)
+        updated_after_indexing = Q(last_update__gte=F(self.index_field), **{f"{self.index_field}__isnull": False})
+        never_indexed = Q(**{f"{self.index_field}__isnull": True})
 
         try:
             self.model._meta.get_field("is_suppressed")
@@ -322,19 +332,64 @@ class EbiSearchIndexQueryset(models.QuerySet):
         return self.filter(never_indexed | updated_after_indexing, not_suppressed, not_private)
 
 
-class EbiSearchIndexedModel(models.Model):
-    last_update = models.DateTimeField(
-        db_column='LAST_UPDATE',
-        auto_now=True
-    )
-    last_indexed = models.DateTimeField(
-        db_column='LAST_INDEXED',
+class EBISearchIndexQueryset(IndexableModelQueryset):
+
+    index_field = "last_ebi_search_indexed"
+
+
+class EBISearchIndexedModel(IndexableModel):
+
+    last_ebi_search_indexed = models.DateTimeField(
+        db_column='LAST_EBI_SEARCH_INDEXED',
         null=True,
         blank=True,
         help_text="Date at which this model was last included in an EBI Search initial/incremental index."
     )
 
-    objects_for_indexing = EbiSearchIndexQueryset.as_manager()
+    objects_for_ebisearch_indexing = EBISearchIndexQueryset.as_manager()
+
+    class Meta:
+        abstract = True
+
+
+class MetagenomicsExchangeQueryset(IndexableModelQueryset):
+    
+    index_field = "last_mgx_indexed"
+
+    def to_delete(self):
+        try:
+            self.model._meta.get_field("suppressed_at")
+        except FieldDoesNotExist:
+            return Q()
+        else:
+            return self.filter(
+                Q(suppressed_at__gte=F(self.index_field))
+            )
+
+
+class MetagenomicsExchangeIndexedModel(models.Model):
+    """Model to track Metagenomics Exchange indexation of analysis jobs
+    TODO: this model should have the last_update field as it's a requirement.
+          The current implementation of this works because the analysis jobs are
+          also extending the EBISearchIndexable model which provided the
+          last_update field.
+    """
+    last_mgx_indexed = models.DateTimeField(
+        db_column='LAST_MGX_INDEXED',
+        null=True,
+        blank=True,
+        help_text="Date at which this model was last indexed in the Metagenomics Exchange"
+    )
+    mgx_accession = models.CharField(
+        db_column='MGX_ACCESSION',
+        max_length=10,
+        unique=True,
+        null=True,
+        blank=True,
+        help_text="The Metagenomics Exchange accession."
+    )
+
+    objects_for_mgx_indexing = MetagenomicsExchangeQueryset.as_manager()
 
     class Meta:
         abstract = True
@@ -1026,7 +1081,7 @@ class StudyManager(models.Manager):
         return self.get_queryset().mydata(request)
 
 
-class Study(ENASyncableModel, EbiSearchIndexedModel):
+class Study(ENASyncableModel, EBISearchIndexedModel):
     suppressible_descendants = ['samples', 'runs', 'assemblies', 'analyses']
 
     def __init__(self, *args, **kwargs):
@@ -1060,8 +1115,6 @@ class Study(ENASyncableModel, EbiSearchIndexedModel):
         db_column='AUTHOR_EMAIL', max_length=100, blank=True, null=True)
     author_name = models.CharField(
         db_column='AUTHOR_NAME', max_length=100, blank=True, null=True)
-    last_update = models.DateTimeField(
-        db_column='LAST_UPDATE', auto_now=True)
     submission_account_id = models.CharField(
         db_column='SUBMISSION_ACCOUNT_ID',
         max_length=15, blank=True, null=True)
@@ -1694,8 +1747,7 @@ class AnalysisJobDumpManager(AnalysisJobManager):
             .select_related(
                 'analysis_status','experiment_type', 'assembly', 'pipeline', 'run', 'sample', 'study')
 
-
-class AnalysisJob(SuppressibleModel, PrivacyControlledModel, EbiSearchIndexedModel):
+class AnalysisJob(SuppressibleModel, PrivacyControlledModel, EBISearchIndexedModel, MetagenomicsExchangeIndexedModel):
     def __init__(self, *args, **kwargs):
         super(AnalysisJob, self).__init__(*args, **kwargs)
         setattr(self, 'accession',
