@@ -172,9 +172,9 @@ class Command(BaseCommand):
         analyses: QuerySet = AnalysisJob.objects_dump.available(None)
 
         if not is_full_snapshot:
-            analyses = AnalysisJob.objects_for_indexing.to_add()
+            analyses = AnalysisJob.objects_for_ebisearch_indexing.to_add()
 
-            removals = AnalysisJob.objects_for_indexing.to_delete()
+            removals = AnalysisJob.objects_for_ebisearch_indexing.to_delete()
 
             # produce incremental deletion file
             deletions_file = pathlib.Path(output_dir) / pathlib.Path('analyses-deletes.xml')
