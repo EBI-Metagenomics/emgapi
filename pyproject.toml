@@ -10,7 +10,7 @@ dynamic = ["version"]
 
 dependencies = [
     # deployment
-    "gunicorn==20.1.0",
+    "gunicorn==22.0.0",
     "whitenoise==6.4.0",
     "requests==2.28.1",
     "yamjam==0.1.7",
