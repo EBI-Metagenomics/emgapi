@@ -29,6 +29,7 @@ from emgapianns.management.commands.import_publication import (
     update_or_create_publication,
 )
 from emgapianns.management.lib import utils
+from emgcli.settings import EMG_CONF
 from emgena import models as ena_models
 from emgena.models import RunStudy, AssemblyStudy
 
@@ -165,6 +166,9 @@ class StudyImporter:
         )
 
         hold_date = ena_study.hold_date
+        ena_api_password = EMG_CONF['emg']['ena_api_password']
+        if ena_api_password is None:
+            logging.warning("ENA API password is missing. Study ownership cannot be verified.")
         try:
             study_is_public = self.check_if_study_is_public(secondary_study_accession)
             if study_is_public:
@@ -303,9 +307,11 @@ class StudyImporter:
 
     def verify_study_ownership(self, study_id, submission_account_id):
         url = f"{'https://www.ebi.ac.uk/ena/submit/report/studies'}/{study_id}"
-        # TODO:  fetch password from env
-        generic_password = 'Where to store Password ?'
-        auth_string = f"mg-{submission_account_id}:{generic_password}"
+        ena_api_password = EMG_CONF['emg']['ena_api_password']
+        if not ena_api_password:
+            logging.warning("ENA API password is missing. Study ownership cannot be verified.")
+            return False
+        auth_string = f"mg-{submission_account_id}:{ena_api_password}"
         headers = {
             "accept": "*/*",
             "Authorization": f"Basic {b64encode(auth_string.encode()).decode()}"
