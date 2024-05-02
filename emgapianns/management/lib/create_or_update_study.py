@@ -318,6 +318,4 @@ class StudyImporter:
         }
         response = requests.get(url, headers=headers)
         ownership_verified = False
-        if response.status_code == 200 and study_id in response.text:
-            ownership_verified = True
-        return ownership_verified
+        return response.status_code == 200 and study_id in response.text
