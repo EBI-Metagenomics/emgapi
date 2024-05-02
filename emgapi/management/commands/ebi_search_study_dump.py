@@ -71,9 +71,9 @@ class Command(BaseCommand):
         studies: QuerySet = Study.objects.available(None)
 
         if not is_full_snapshot:
-            studies = Study.objects_for_indexing.to_add()
+            studies = Study.objects_for_ebisearch_indexing.to_add()
 
-            removals = Study.objects_for_indexing.to_delete()
+            removals = Study.objects_for_ebisearch_indexing.to_delete()
 
             # produce incremental deletion file
             deletions_file = pathlib.Path(output_dir) / pathlib.Path('projects-deletes.xml')
