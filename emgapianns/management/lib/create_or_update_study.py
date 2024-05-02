@@ -316,7 +316,7 @@ class StudyImporter:
             "accept": "*/*",
             "Authorization": f"Basic {b64encode(auth_string.encode()).decode()}"
         }
-        response = requests.get(url, params=None, headers=headers)
+        response = requests.get(url, headers=headers)
         ownership_verified = False
         if response.status_code == 200 and study_id in response.text:
             ownership_verified = True
