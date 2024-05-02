@@ -168,7 +168,7 @@ class StudyImporter:
         hold_date = ena_study.hold_date
         ena_api_password = EMG_CONF['emg']['ena_api_password']
         if ena_api_password is None:
-            logging.warning("ENA API password is missing. Study ownership cannot be verified.")
+            logging.error(f"ENA API password is missing. Study {secondary_study_accession} ownership cannot be verified.")
         try:
             study_is_public = self.check_if_study_is_public(secondary_study_accession)
             if study_is_public:
