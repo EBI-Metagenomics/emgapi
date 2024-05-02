@@ -306,7 +306,7 @@ class StudyImporter:
         return is_public
 
     def verify_study_ownership(self, study_id, submission_account_id):
-        url = f"{'https://www.ebi.ac.uk/ena/submit/report/studies'}/{study_id}"
+        url = f"https://www.ebi.ac.uk/ena/submit/report/studies/{study_id}"
         ena_api_password = EMG_CONF['emg']['ena_api_password']
         if not ena_api_password:
             logging.warning("ENA API password is missing. Study ownership cannot be verified.")
