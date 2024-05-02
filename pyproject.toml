@@ -30,7 +30,7 @@ dependencies = [
     "cx_Oracle~=6.2.1",
     # mongo
     "mongoengine==0.27.0",
-    "pymongo==4.3.3",
+    "pymongo==4.6.3",
     "django-rest-framework-mongoengine==3.4.1",
     # my-sql
     "django-mysql==4.3.0",
