@@ -108,14 +108,20 @@ class MetagenomicsExchangeAPI:
         data = self.generate_metadata(mgya, sequence_accession)
         try:
             response = self.post_request(endpoint="datasets", data=data)
+            response.raise_for_status()  # Ensure we raise for HTTP errors
+            return response
         except HTTPError as http_error:
             try:
                 response_json = http_error.response.json()
                 logging.error(f"API response content: {response_json}")
-            except:
-                pass
-            raise http_error
-        return response
+            except ValueError:  # Catch JSON decoding errors
+                logging.error(f"Failed to decode JSON from response: {http_error.response.text}")
+            except Exception as e:
+                logging.error(f"Unexpected error: {e}")
+
+            # Log the HTTP status code and the error message
+            logging.error(f"HTTPError occurred: {http_error}")
+            return None
 
     def check_analysis(self, mgya: str, sequence_accession: str, metadata=None):
         """Check if a sequence exists in the M. Exchange
