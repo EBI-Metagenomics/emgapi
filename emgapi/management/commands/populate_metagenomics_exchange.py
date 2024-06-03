@@ -131,6 +131,9 @@ class Command(BaseCommand):
                         mgya=annotation_job.accession,
                         sequence_accession=sequence_accession,
                     )
+                    if not response:
+                        logging.warning(f"Error occurred {annotation_job}")
+                        continue
                     if response.ok:
                         logging.info(f"Successfully added {annotation_job}")
                         registry_id, metadata_match = self.mgx_api.check_analysis(
