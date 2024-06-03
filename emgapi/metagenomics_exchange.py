@@ -18,7 +18,7 @@ import logging
 
 import requests
 from django.conf import settings
-from requests.exceptions import HTTPError
+from requests.exceptions import HTTPError, JSONDecodeError
 
 
 class MetagenomicsExchangeAPI:
@@ -114,7 +114,7 @@ class MetagenomicsExchangeAPI:
             try:
                 response_json = http_error.response.json()
                 logging.error(f"API response content: {response_json}")
-            except ValueError:  # Catch JSON decoding errors
+            except JSONDecodeError:  # Catch JSON decoding errors
                 logging.error(f"Failed to decode JSON from response: {http_error.response.text}")
             except Exception as e:
                 logging.error(f"Unexpected error: {e}")

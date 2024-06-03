@@ -132,7 +132,7 @@ class Command(BaseCommand):
                         sequence_accession=sequence_accession,
                     )
                     if not response:
-                        logging.info(f"Error occured {annotation_job}")
+                        logging.warning(f"Error occurred {annotation_job}")
                         continue
                     if response.ok:
                         logging.info(f"Successfully added {annotation_job}")
