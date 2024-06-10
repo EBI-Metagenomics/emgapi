@@ -17,6 +17,7 @@
 import logging
 
 import requests
+import time
 from django.conf import settings
 from requests.exceptions import HTTPError, JSONDecodeError
 
@@ -106,22 +107,38 @@ class MetagenomicsExchangeAPI:
             The response object from the API request.
         """
         data = self.generate_metadata(mgya, sequence_accession)
-        try:
-            response = self.post_request(endpoint="datasets", data=data)
-            response.raise_for_status()  # Ensure we raise for HTTP errors
-            return response
-        except HTTPError as http_error:
-            try:
-                response_json = http_error.response.json()
-                logging.error(f"API response content: {response_json}")
-            except JSONDecodeError:  # Catch JSON decoding errors
-                logging.error(f"Failed to decode JSON from response: {http_error.response.text}")
-            except Exception as e:
-                logging.error(f"Unexpected error: {e}")
+        max_retries = 3
+        wait_time = 2  # seconds
 
-            # Log the HTTP status code and the error message
-            logging.error(f"HTTPError occurred: {http_error}")
-            return None
+        for attempt in range(max_retries):
+            try:
+                response = self.post_request(endpoint="datasets", data=data)
+                response.raise_for_status()  # Ensure we raise for HTTP errors
+                return response
+            except HTTPError as http_error:
+                if http_error.response.status_code == 500:
+                    logging.error(f"HTTP 500 error on attempt {attempt + 1} of {max_retries}: {http_error}")
+                    if attempt < max_retries - 1:
+                        time.sleep(wait_time)  # Wait before retrying
+                        continue
+                    else:
+                        logging.error("Max retries reached. Failing the request.")
+                else:
+                    # For other HTTP errors, do not retry and log the error
+                    try:
+                        response_json = http_error.response.json()
+                        logging.error(f"API response content: {response_json}")
+                    except JSONDecodeError:  # Catch JSON decoding errors
+                        logging.error(f"Failed to decode JSON from response: {http_error.response.text}")
+                    except Exception as e:
+                        logging.error(f"Unexpected error: {e}")
+                    # Log the HTTP status code and the error message
+                    logging.error(f"HTTPError occurred: {http_error}")
+                    return None
+            except Exception as e:
+                logging.error(f"An unexpected error occurred: {e}")
+                return None
+        return None
 
     def check_analysis(self, mgya: str, sequence_accession: str, metadata=None):
         """Check if a sequence exists in the M. Exchange
