@@ -20,3 +20,4 @@ emg:
   results_production_dir: '/dummy/path/results'
   # metagenomics exchange
   me_api: 'https://wwwdev.ebi.ac.uk/ena/registry/metagenome/api'
+  ena_api_password: None
