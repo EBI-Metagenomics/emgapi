@@ -324,7 +324,16 @@ WSGI_APPLICATION = 'emgcli.wsgi.application'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 try:
-    DATABASES = EMG_CONF['emg']['databases']
+    # DATABASES = EMG_CONF['emg']['databases']
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'emg',
+            'USER': 'root',
+            'HOST': 'mysql',
+            'PORT': '3306',
+        }
+    }
 except KeyError:
     raise KeyError("Config must container default database.")
 
