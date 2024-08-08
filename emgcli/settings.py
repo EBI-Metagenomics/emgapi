@@ -128,12 +128,12 @@ LOGGING = {
         },
     },
     'loggers': {
-        'emgena': { 
+        'emgena': {
             'handlers': ['notify'],
             'level': 'INFO',
             'propagate': False
         },
-        'emgapianns.management.commands': { 
+        'emgapianns.management.commands': {
             'handlers': ['default', 'console'],
             'level': 'INFO',
             'propagate': False
@@ -324,16 +324,7 @@ WSGI_APPLICATION = 'emgcli.wsgi.application'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 try:
-    # DATABASES = EMG_CONF['emg']['databases']
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'emg',
-            'USER': 'root',
-            'HOST': 'mysql',
-            'PORT': '3306',
-        }
-    }
+    DATABASES = EMG_CONF['emg']['databases']
 except KeyError:
     raise KeyError("Config must container default database.")
 
@@ -348,8 +339,8 @@ if 'era' in DATABASES and 'era_pro' not in DATABASES:
 if 'ena' in DATABASES and 'ena_pro' not in DATABASES:
     DATABASES['ena_pro'] = DATABASES['ena']
 
-# this is required to use the djang-mysql QS Hints 
-# https://django-mysql.readthedocs.io/en/latest/queryset_extensions.html?highlight=DJANGO_MYSQL_REWRITE_QUERIES#query-hints 
+# this is required to use the djang-mysql QS Hints
+# https://django-mysql.readthedocs.io/en/latest/queryset_extensions.html?highlight=DJANGO_MYSQL_REWRITE_QUERIES#query-hints
 DJANGO_MYSQL_REWRITE_QUERIES = True
 
 try:
