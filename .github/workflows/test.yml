@@ -35,7 +35,7 @@ jobs:
 
     - name: 🔧 - Install Dependencies
       run: |
-        pip install install .[tests]
+        pip install .[tests]
         pip freeze
 
     - name: Check for unmigrated code changes
