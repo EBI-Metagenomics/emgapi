@@ -1698,10 +1698,11 @@ class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet, SuppressQuerySet, SelectR
         - all           | has access to public analyses
         - authenticated | has access to public and private analyses they own
 
-        Filtered out analyses for SUPPRESSED samples
+        Filtered out analyses for SUPPRESSED studies
         """
         query_filters = {
             "all": [
+                Q(study__is_suppressed=False),
                 Q(study__is_private=False),
                 Q(run__is_private=False) | Q(assembly__is_private=False),
                 Q(is_suppressed=False),
