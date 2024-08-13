@@ -76,7 +76,7 @@ tests = [
     "mongomock==3.23.0",
     "jsonapi-client==0.9.9",
     "pytest-cov==2.12.1",
-    "pandas==2.2.2",
+    "pandas==2.2.1",
     "responses==0.23.1",
     "Faker==19.6.2",
 ]
@@ -114,11 +114,7 @@ exclude =
     emgapi/migrations
 max-complexity = 10
 max-line-length = 119
-
-[testenv:py39]
-basepython = python3.9
 """
-
 
 [tool.bumpversion]
 current_version = "2.4.47"
