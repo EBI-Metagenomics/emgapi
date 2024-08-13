@@ -128,12 +128,12 @@ LOGGING = {
         },
     },
     'loggers': {
-        'emgena': { 
+        'emgena': {
             'handlers': ['notify'],
             'level': 'INFO',
             'propagate': False
         },
-        'emgapianns.management.commands': { 
+        'emgapianns.management.commands': {
             'handlers': ['default', 'console'],
             'level': 'INFO',
             'propagate': False
@@ -339,8 +339,8 @@ if 'era' in DATABASES and 'era_pro' not in DATABASES:
 if 'ena' in DATABASES and 'ena_pro' not in DATABASES:
     DATABASES['ena_pro'] = DATABASES['ena']
 
-# this is required to use the djang-mysql QS Hints 
-# https://django-mysql.readthedocs.io/en/latest/queryset_extensions.html?highlight=DJANGO_MYSQL_REWRITE_QUERIES#query-hints 
+# this is required to use the djang-mysql QS Hints
+# https://django-mysql.readthedocs.io/en/latest/queryset_extensions.html?highlight=DJANGO_MYSQL_REWRITE_QUERIES#query-hints
 DJANGO_MYSQL_REWRITE_QUERIES = True
 
 try:
