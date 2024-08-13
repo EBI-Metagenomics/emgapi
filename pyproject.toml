@@ -114,7 +114,11 @@ exclude =
     emgapi/migrations
 max-complexity = 10
 max-line-length = 119
+
+[testenv:py39]
+basepython = python3.9
 """
+
 
 [tool.bumpversion]
 current_version = "2.4.47"
