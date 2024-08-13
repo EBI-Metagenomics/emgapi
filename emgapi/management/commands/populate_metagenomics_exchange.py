@@ -131,6 +131,9 @@ class Command(BaseCommand):
                         mgya=annotation_job.accession,
                         sequence_accession=sequence_accession,
                     )
+                    if not response:
+                        logging.warning(f"Error occurred {annotation_job}")
+                        continue
                     if response.ok:
                         logging.info(f"Successfully added {annotation_job}")
                         registry_id, metadata_match = self.mgx_api.check_analysis(
@@ -171,9 +174,19 @@ class Command(BaseCommand):
                         else:
                             logging.error(f"Analysis {annotation_job} update failed")
                     else:
-                        logging.debug(
-                            f"No edit for {annotation_job}, metadata is correct"
-                        )
+                        if annotation_job.mgx_accession and annotation_job.last_mgx_indexed:
+                            logging.info(
+                                f"No edit for {annotation_job}, metadata is correct"
+                            )
+                        else:
+                            logging.info(
+                                f"Metadata is correct but {annotation_job} is missing in DB. Adding."
+                            )
+                            annotation_job.mgx_accession = registry_id
+                            annotation_job.last_mgx_indexed = (
+                                    timezone.now() + timedelta(minutes=1)
+                            )
+                            jobs_to_update.append(annotation_job)
 
             AnalysisJob.objects.bulk_update(
                 jobs_to_update,
