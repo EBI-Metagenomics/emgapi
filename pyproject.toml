@@ -102,6 +102,13 @@ python_files = "tests/*.py"
 
 [tool.tox]
 legacy_tox_ini = """
+[tox]
+envlist = py39
+
+[testenv]
+deps = .[tests]
+commands = pytest
+
 [flake8]
 exclude =
     .git,
