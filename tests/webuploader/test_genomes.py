@@ -65,6 +65,10 @@ class TestGenomes:
             ("Additional data for CRISPRCasFinder records reported in the CRISPRCasFinder GFF", "Genome CRISPRCasFinder Additional Records"),
             ("Annotated viral sequence and mobile elements", "Genome Mobilome Annotation"),
             ("List of genes in the pan-genome with their annotation and MGYG accessions.", "Gene Presence / Absence list"),
+            ("CAZy and putative polysaccharide utilization loci annotations produced by dbCAN", "Genome dbCAN Annotation"),
+            ("Anti-phage defence system annotations produced by Defense Finder", "Genome Defense Finder Annotation"),
+            ("BGC annotations produced by GECCO", "Genome GECCO Annotation"),
+            ("Completeness of identified KEGG pathways", "KEGG Pathway Completeness"),
         )
         for d in downloads:
             emg_models.DownloadDescriptionLabel.objects.get_or_create(
