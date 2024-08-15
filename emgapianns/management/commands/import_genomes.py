@@ -388,13 +388,13 @@ class Command(BaseCommand):
         self.upload_genome_file(genome, directory, 'Genome Mobilome Annotation', 'gff',
                                 genome.accession + '_mobilome.gff', 'Genome analysis', 'genome', False)
         # pipeline v2.4.0 files (if not empty):
-        self.upload_genome_file(genome, directory, 'Genome dbCAN annotation', 'gff',
+        self.upload_genome_file(genome, directory, 'Genome dbCAN Annotation', 'gff',
                                 genome.accession + '_dbcan.gff', 'Genome analysis', 'genome', False)
-        self.upload_genome_file(genome, directory, 'Genome Defense Finder annotation', 'gff',
+        self.upload_genome_file(genome, directory, 'Genome Defense Finder Annotation', 'gff',
                                 genome.accession + '_defense_finder.gff', 'Genome analysis', 'genome', False)
-        self.upload_genome_file(genome, directory, 'Genome GECCO annotation', 'gff',
+        self.upload_genome_file(genome, directory, 'Genome GECCO Annotation', 'gff',
                                 genome.accession + '_gecco.gff', 'Genome analysis', 'genome', False)
-        self.upload_genome_file(genome, directory, 'KEGG pathway completeness', 'tsv',
+        self.upload_genome_file(genome, directory, 'KEGG Pathway Completeness', 'tsv',
                                 genome.accession + '_kegg_pathways.tsv', 'Genome analysis', 'genome', False)
 
         if has_pangenome:
