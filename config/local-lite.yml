@@ -10,6 +10,8 @@ emg:
       ENGINE: 'django.db.backends.sqlite3'
       NAME: '/opt/ci/testdbs/ena-testdb.sqlite'
       ERA_TABLESPACE_PREFIX: ''
+  ena_api_password: None
+
 
   admin: True
   downloads_bypass_nginx: True
