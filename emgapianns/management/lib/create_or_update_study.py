@@ -297,11 +297,16 @@ class StudyImporter:
         headers = {
             "accept": "*/*"
         }
-        response = requests.get(url, params=None, headers=headers)
-        if response.json() == []:
+        try:
+            response = requests.get(url, params=None, headers=headers)
+            response.raise_for_status()  # Raise an HTTPError for bad responses
+            if response.status_code != 200 or response.json() == []:
+                is_public = False
+            else:
+                is_public = response.json()[0]['secondary_study_accession'] == study_id
+        except requests.RequestException as e:
+            logging.error(f"Error checking if study is public: {e}")
             is_public = False
-        else:
-            is_public = response.json()[0]['secondary_study_accession'] == study_id
 
         return is_public
 
@@ -309,7 +314,7 @@ class StudyImporter:
         url = f"https://www.ebi.ac.uk/ena/submit/report/studies/{study_id}"
         ena_api_password = EMG_CONF['emg']['ena_api_password']
         if not ena_api_password:
-            logging.warning("ENA API password is missing. Study ownership cannot be verified.")
+            logging.error("ENA API password is missing. Study ownership cannot be verified.")
             return False
         auth_string = f"mg-{submission_account_id}:{ena_api_password}"
         headers = {
@@ -317,5 +322,4 @@ class StudyImporter:
             "Authorization": f"Basic {b64encode(auth_string.encode()).decode()}"
         }
         response = requests.get(url, headers=headers)
-        ownership_verified = False
         return response.status_code == 200 and study_id in response.text
