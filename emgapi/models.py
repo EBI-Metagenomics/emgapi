@@ -1702,7 +1702,6 @@ class AnalysisJobQuerySet(BaseQuerySet, MySQLQuerySet, SuppressQuerySet, SelectR
         """
         query_filters = {
             "all": [
-                Q(study__is_suppressed=False),
                 Q(study__is_private=False),
                 Q(run__is_private=False) | Q(assembly__is_private=False),
                 Q(is_suppressed=False),
