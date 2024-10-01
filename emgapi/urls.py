@@ -23,6 +23,8 @@ from . import views_relations
 
 router = routers.DefaultRouter(trailing_slash=False)
 
+router.register(r'mgs-data', views.DataViewSet, basename='mgsdata')
+
 router.register(
     r'biomes',
     views.BiomeViewSet,
