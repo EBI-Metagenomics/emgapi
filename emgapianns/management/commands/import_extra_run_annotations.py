@@ -7,7 +7,7 @@ from emgapi import models as emg_models
 from django.core.management import BaseCommand
 
 logger = logging.getLogger(__name__)
-
+import re
 
 class Command(BaseCommand):
     help = "Imports a directory of GFFs that as 'extra run annotations', " \
@@ -61,15 +61,15 @@ class Command(BaseCommand):
             logger.info('Looking for RO Crates (.zips')
             for file in Path(self.gffs_dir).glob('**/*.zip'):
                 logger.info(f'Handling RO Crate Zip file {file}')
-                # erz = 'ERZ' + file.name.split('ERZ')[1].strip('.zip')
                 logger.info('this is the FILE NAME ' +  file.name)
-                srr = 'SRR' + file.name.split('SRR')[1].strip('.zip')
+                accession_prefix = re.search(r'[A-Z]{3}\d+', file.name)
+                accession_prefix = accession_prefix.group().strip()
                 try:
-                    run = emg_models.Run.objects.get(accession=srr)
+                    run = emg_models.Run.objects.get(accession=accession_prefix)
                 except emg_models.Run.DoesNotExist:
-                    logger.warning(f'No Run found for RO Crate apparent ERZ {srr}')
+                    logger.warning(f'No Run found for RO Crate  {accession_prefix}')
                     continue
-                logger.info(f'Will upload RO Crate for {srr}')
+                logger.info(f'Will upload RO Crate for {accession_prefix}')
                 self.upload_rocrate(run, gffs_directory, file.name)
 
     def upload_rocrate(
