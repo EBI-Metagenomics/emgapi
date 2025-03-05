@@ -2042,6 +2042,26 @@ class GenomeCatalogue(models.Model):
         max_length=20,
         default=settings.LATEST_MAGS_PIPELINE_TAG
     )
+    catalogue_biome_label = models.CharField(
+        db_column='CATALOGUE_BIOME_LABEL',
+        max_length=100,
+        help_text='The biome label for the catalogue (and any others that share the same practical biome). '
+                  'Need not be a GOLD biome, e.g. may include host species.'
+    )
+    PROK = 'prokaryotes'
+    EUKS = 'eukaryotes'
+    VIRS = 'viruses'
+    CATALOGUE_TYPE_CHOICES = (
+        (PROK, PROK),
+        (EUKS, EUKS),
+        (VIRS, VIRS),
+    )
+    catalogue_type = models.CharField(
+        db_column='CATALOGUE_TYPE',
+        choices=CATALOGUE_TYPE_CHOICES,
+        max_length=20,
+    )
+
 
     class Meta:
         unique_together = ('biome', 'version')

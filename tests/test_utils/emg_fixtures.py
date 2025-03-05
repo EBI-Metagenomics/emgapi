@@ -79,7 +79,9 @@ def genome_catalogue(biome_human):
         biome=biome_human,
         name='Mandalorian Genomes v1.0',
         catalogue_id='mandalor-1-0',
-        version='1.0'
+        version='1.0',
+        catalogue_type='eukaryotes',
+        catalogue_biome_label='Mandalor',
     )
 
 

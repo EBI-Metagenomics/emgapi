@@ -1,4 +1,4 @@
-FROM python:3.8-bullseye
+FROM python:3.9-bookworm
 
 RUN mkdir /opt/emgapi && mkdir -p /opt/staticfiles && mkdir -p /opt/results
 
