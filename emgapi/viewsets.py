@@ -281,6 +281,8 @@ class BaseGenomeCatalogueGenericViewSet(viewsets.GenericViewSet):
         'last_update',
         'genome_count',
         'unclustered_genome_count',
+        'catalogue_type',
+        'catalogue_biome_label',
     )
 
     ordering = ('catalogue_id',)
@@ -289,4 +291,6 @@ class BaseGenomeCatalogueGenericViewSet(viewsets.GenericViewSet):
         'catalogue_id',
         'name',
         'biome__biome_name',
+        'catalogue_type',
+        'catalogue_biome_label',
     )

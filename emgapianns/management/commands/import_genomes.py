@@ -41,11 +41,16 @@ class Command(BaseCommand):
                                  "E.g. root:Host-Associated:Human:Digestive\\ System:Large\\ intestine")
         parser.add_argument('pipeline_version', action='store', type=str,
                             help='Pipeline version tag that catalogue was produced by. E.g. "1.2.1"')
+        parser.add_argument('catalogue_type', action='store', type=str, choices=[choice for choice, _ in emg_models.GenomeCatalogue.CATALOGUE_TYPE_CHOICES],
+                            help='The type of genomes in the catalogue, e.g. prokaryotes, eukaryotes, viruses')
         parser.add_argument('--update-metadata-only', dest='update_metadata_only', action='store_true', default=False,
                             help="Only update the metadata of genomes in an existing catalogue; "
                                  "i.e. reparse the MGYG*.json files.")
         parser.add_argument('--database', type=str,
                             default='default')
+        parser.add_argument('--catalogue_biome_label', type=str, default='',
+                            help='A catalogue biome label (e.g. Mouse Gut) which can be used to group together related '
+                                 'catalogues of different types. If none, the catalogue name is used.')
 
     def handle(self, *args, **options):
         ver = options['pipeline_version'].strip()
@@ -67,6 +72,8 @@ class Command(BaseCommand):
         catalogue_dir = options['catalogue_directory'].strip()
         gold_biome = options['gold_biome'].strip()
         pipeline_version_tag = options['pipeline_version'].strip()
+        catalogue_type = options['catalogue_type'].strip()
+        catalogue_biome_label = options['catalogue_biome_label'].strip() or catalogue_name
         self.catalogue_dir = os.path.join(self.results_directory, catalogue_dir)
 
         self.database = options['database']
@@ -74,7 +81,9 @@ class Command(BaseCommand):
             catalogue_name,
             version, gold_biome,
             catalogue_dir,
-            pipeline_version_tag
+            pipeline_version_tag,
+            catalogue_type,
+            catalogue_biome_label
         )
 
         logger.info("CLI %r" % options)
@@ -105,6 +114,8 @@ class Command(BaseCommand):
         catalogue_dir = options['catalogue_directory'].strip()
         gold_biome = options['gold_biome'].strip()
         pipeline_version_tag = options['pipeline_version'].strip()
+        catalogue_type = options['catalogue_type'].strip()
+        catalogue_biome_label = options['catalogue_biome_label'].strip() or catalogue_name
         self.catalogue_dir = os.path.join(self.results_directory, catalogue_dir)
 
         self.database = options['database']
@@ -116,9 +127,12 @@ class Command(BaseCommand):
 
         self.catalogue_obj = self.get_catalogue(
             catalogue_name,
-            version, gold_biome,
+            version,
+            gold_biome,
             catalogue_dir,
-            pipeline_version_tag
+            pipeline_version_tag,
+            catalogue_type,
+            catalogue_biome_label
         )
 
         logger.info("CLI %r" % options)
@@ -141,7 +155,7 @@ class Command(BaseCommand):
     def make_slug(self, catalogue_name, catalogue_version):
         return slugify('{0}-v{1}'.format(catalogue_name, catalogue_version).replace('.', '-'))
 
-    def get_catalogue(self, catalogue_name, catalogue_version, gold_biome, catalogue_dir, pipeline_version_tag):
+    def get_catalogue(self, catalogue_name, catalogue_version, gold_biome, catalogue_dir, pipeline_version_tag, catalogue_type, catalogue_biome_label):
         logging.warning('GOLD')
         logging.warning(gold_biome)
         biome = self.get_gold_biome(gold_biome)
@@ -156,7 +170,9 @@ class Command(BaseCommand):
                     'biome': biome,
                     'result_directory': catalogue_dir,
                     'ftp_url': 'http://ftp.ebi.ac.uk/pub/databases/metagenomics/mgnify_genomes/',
-                    'pipeline_version_tag': pipeline_version_tag
+                    'pipeline_version_tag': pipeline_version_tag,
+                    'catalogue_biome_label': catalogue_biome_label,
+                    'catalogue_type': catalogue_type
                 })
         return catalogue
 

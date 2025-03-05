@@ -1838,6 +1838,8 @@ class GenomeCatalogueSerializer(ExplicitFieldsModelSerializer,
             'last_update',
             'pipeline_version_tag',
             'ftp_url',
+            'catalogue_type',
+            'catalogue_biome_label',
         )
 
 
