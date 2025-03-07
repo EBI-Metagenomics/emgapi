@@ -44,8 +44,7 @@ def get_run_accession(path):
     match = re.search(pattern, path)
     if match:
         if len(match.groups()) > 0:
-            end_pos = match.end()
-            return path[0:end_pos]
+            return match.groups()[0]
         else:
             raise Exception("Could not identify run accession from {}".format(path))
     else:

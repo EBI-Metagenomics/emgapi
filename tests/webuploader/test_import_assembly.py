@@ -24,6 +24,8 @@ from emgapianns.management.commands.import_assembly import Command
 
 from model_bakery import baker
 
+from emgapianns.management.lib.utils import get_run_accession
+
 
 def bake_models(coverage=None, min_gap_length=None):
     """Build the required models for import_assembly
@@ -109,3 +111,10 @@ class TestImportAssembly:
         assert emg_assembly.is_private == False
         assert emg_assembly.wgs_accession == ena_assembly.wgs_accession
         assert emg_assembly.legacy_accession == ena_assembly.gc_id
+
+    def test_run_accession_getter(self):
+        assert get_run_accession("ERR1111111") == "ERR1111111"
+        assert get_run_accession("ERR1111111;ERR1111112") == "ERR1111111"  # first only
+        assert get_run_accession("PREFIX_ERR1111111") == "ERR1111111"  # only accession part
+        assert get_run_accession("ERR1111111_SUFFIX") == "ERR1111111"
+        assert get_run_accession("NOPE;PREFIX_ERR1111111_SUFFIX;PREFIX_ERR1111112_SUFFIX;ALSONOPE") == "ERR1111111"  # complete edge case
