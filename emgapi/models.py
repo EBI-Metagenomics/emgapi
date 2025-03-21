@@ -2064,7 +2064,7 @@ class GenomeCatalogue(models.Model):
 
 
     class Meta:
-        unique_together = ('biome', 'version')
+        unique_together = ('catalogue_biome_label', 'version', 'catalogue_type')
         db_table = 'GENOME_CATALOGUE'
 
     def __str__(self):
@@ -2133,9 +2133,20 @@ class Genome(models.Model):
                             max_length=80)
     completeness = models.FloatField(db_column='COMPLETENESS')
     contamination = models.FloatField(db_column='CONTAMINATION')
-    rna_5s = models.FloatField(db_column='RNA_5S')
-    rna_16s = models.FloatField(db_column='RNA_16S')
-    rna_23s = models.FloatField(db_column='RNA_23S')
+
+    # EUKS:
+    busco_completeness = models.FloatField(db_column='BUSCO_COMPLETENESS', null=True, blank=True)
+
+    # EUKS + PROKS:
+    rna_5s = models.FloatField(db_column='RNA_5S', null=True, blank=True)
+    # PROKS:
+    rna_16s = models.FloatField(db_column='RNA_16S', null=True, blank=True)
+    rna_23s = models.FloatField(db_column='RNA_23S', null=True, blank=True)
+    # EUKS:
+    rna_5_8s = models.FloatField(db_column='RNA_5_8S', null=True, blank=True)
+    rna_18s = models.FloatField(db_column='RNA_18S', null=True, blank=True)
+    rna_28s = models.FloatField(db_column='RNA_28S', null=True, blank=True)
+
     trnas = models.FloatField(db_column='T_RNA')
     nc_rnas = models.IntegerField(db_column='NC_RNA')
     num_proteins = models.IntegerField(db_column='NUM_PROTEINS')

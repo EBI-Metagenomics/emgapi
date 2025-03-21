@@ -6,11 +6,15 @@ from django.utils.text import slugify
 
 from emgapi import models as emg_models
 
-from ..lib.genome_util import sanity_check_genome_output, \
-    sanity_check_catalogue_dir, find_genome_results, \
-    get_genome_result_path, \
-    read_tsv_w_headers, read_json, \
+from ..lib.genome_util import (
+    sanity_check_genome_output_euks,
+    sanity_check_genome_output_proks,
+    sanity_check_catalogue_dir,
+    find_genome_results,
+    get_genome_result_path,
+    read_tsv_w_headers, read_json,
     apparent_accession_of_genome_dir
+)
 
 logger = logging.getLogger(__name__)
 
@@ -92,7 +96,7 @@ class Command(BaseCommand):
         logger.info(
             'Found {} genome dirs to upload'.format(len(genome_dirs)))
 
-        [sanity_check_genome_output(d) for d in genome_dirs]
+        [sanity_check_genome_output_proks(d) for d in genome_dirs]
 
         sanity_check_catalogue_dir(self.catalogue_dir)
 
@@ -141,7 +145,10 @@ class Command(BaseCommand):
         logger.info(
             'Found {} genome dirs to upload'.format(len(genome_dirs)))
 
-        [sanity_check_genome_output(d) for d in genome_dirs]
+        if catalogue_type == 'eukaryotes':
+            [sanity_check_genome_output_euks(d) for d in genome_dirs]
+        elif catalogue_type == 'prokaryotes':
+            [sanity_check_genome_output_proks(d) for d in genome_dirs]
 
         sanity_check_catalogue_dir(self.catalogue_dir)
 
@@ -215,6 +222,11 @@ class Command(BaseCommand):
             del d['geographic_origin']
 
         del d['gold_biome']
+
+        if 'rna_5.8s' in d:
+            d['rna_5_8s'] = d['rna_5.8s']
+            del d['rna_5.8s']
+
         return d, has_pangenome
 
     def get_geo_location(self, location):
