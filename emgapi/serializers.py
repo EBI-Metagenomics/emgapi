@@ -1840,6 +1840,7 @@ class GenomeCatalogueSerializer(ExplicitFieldsModelSerializer,
             'ftp_url',
             'catalogue_type',
             'catalogue_biome_label',
+            "other_stats"
         )
 
 

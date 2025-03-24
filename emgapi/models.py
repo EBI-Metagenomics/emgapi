@@ -2061,7 +2061,9 @@ class GenomeCatalogue(models.Model):
         choices=CATALOGUE_TYPE_CHOICES,
         max_length=20,
     )
-
+    other_stats = models.JSONField(
+        db_column='OTHER_STATS_JSON', blank=True, null=True
+    )
 
     class Meta:
         unique_together = ('catalogue_biome_label', 'version', 'catalogue_type')

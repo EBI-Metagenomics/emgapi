@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 
 from django.core.management import BaseCommand, CommandError
 from django.utils.text import slugify
@@ -62,8 +63,10 @@ class Command(BaseCommand):
             return self.handle_v1(*args, **options)
         if ver.startswith('v2'):
             return self.handle_v2(*args, **options)
+        if ver.startswith('v3'):
+            return self.handle_v3(*args, **options)
         else:
-            raise CommandError("Only pipeline versions v1.x and v2.x are supported.")
+            raise CommandError("Only pipeline versions v1.x – v3.x are supported.")
 
     def handle_v1(self, *args, **options):
         self.results_directory = os.path.realpath(options.get('results_directory').strip())
@@ -158,6 +161,26 @@ class Command(BaseCommand):
         self.upload_catalogue_files()
         self.catalogue_obj.calculate_genome_count()
         self.catalogue_obj.save()
+
+    def _prettify_catalogue_summary_field_name(self):
+        if not isinstance(self.catalogue_obj.other_stats, dict):
+            return
+        if self.catalogue_obj.catalogue_type == emg_models.GenomeCatalogue.EUKS:
+            if "Clusters with pan-genomes" in self.catalogue_obj.other_stats:
+                self.catalogue_obj.other_stats["Clusters with multiple genomes"] = self.catalogue_obj.other_stats.pop("Clusters with pan-genomes")
+        self.catalogue_obj.save()
+
+    def handle_v3(self, *args, **options):
+        self.handle_v2(*args, **options)
+
+        catalogue_summary_file = Path(self.catalogue_dir) / "catalogue_summary.json"
+        if catalogue_summary_file.is_file():
+            self.catalogue_obj.other_stats = read_json(catalogue_summary_file)
+        else:
+            logger.warning(f"No catalogue summary found at {catalogue_summary_file}.")
+        self.catalogue_obj.save()
+        self._prettify_catalogue_summary_field_name()
+
 
     def make_slug(self, catalogue_name, catalogue_version):
         return slugify('{0}-v{1}'.format(catalogue_name, catalogue_version).replace('.', '-'))
