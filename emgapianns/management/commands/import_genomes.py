@@ -1,16 +1,21 @@
 import logging
 import os
+from pathlib import Path
 
 from django.core.management import BaseCommand, CommandError
 from django.utils.text import slugify
 
 from emgapi import models as emg_models
 
-from ..lib.genome_util import sanity_check_genome_output, \
-    sanity_check_catalogue_dir, find_genome_results, \
-    get_genome_result_path, \
-    read_tsv_w_headers, read_json, \
+from ..lib.genome_util import (
+    sanity_check_genome_output_euks,
+    sanity_check_genome_output_proks,
+    sanity_check_catalogue_dir,
+    find_genome_results,
+    get_genome_result_path,
+    read_tsv_w_headers, read_json,
     apparent_accession_of_genome_dir
+)
 
 logger = logging.getLogger(__name__)
 
@@ -41,11 +46,16 @@ class Command(BaseCommand):
                                  "E.g. root:Host-Associated:Human:Digestive\\ System:Large\\ intestine")
         parser.add_argument('pipeline_version', action='store', type=str,
                             help='Pipeline version tag that catalogue was produced by. E.g. "1.2.1"')
+        parser.add_argument('catalogue_type', action='store', type=str, choices=[choice for choice, _ in emg_models.GenomeCatalogue.CATALOGUE_TYPE_CHOICES],
+                            help='The type of genomes in the catalogue, e.g. prokaryotes, eukaryotes, viruses')
         parser.add_argument('--update-metadata-only', dest='update_metadata_only', action='store_true', default=False,
                             help="Only update the metadata of genomes in an existing catalogue; "
                                  "i.e. reparse the MGYG*.json files.")
         parser.add_argument('--database', type=str,
                             default='default')
+        parser.add_argument('--catalogue_biome_label', type=str, default='',
+                            help='A catalogue biome label (e.g. Mouse Gut) which can be used to group together related '
+                                 'catalogues of different types. If none, the catalogue name is used.')
 
     def handle(self, *args, **options):
         ver = options['pipeline_version'].strip()
@@ -53,8 +63,10 @@ class Command(BaseCommand):
             return self.handle_v1(*args, **options)
         if ver.startswith('v2'):
             return self.handle_v2(*args, **options)
+        if ver.startswith('v3'):
+            return self.handle_v3(*args, **options)
         else:
-            raise CommandError("Only pipeline versions v1.x and v2.x are supported.")
+            raise CommandError("Only pipeline versions v1.x – v3.x are supported.")
 
     def handle_v1(self, *args, **options):
         self.results_directory = os.path.realpath(options.get('results_directory').strip())
@@ -67,6 +79,8 @@ class Command(BaseCommand):
         catalogue_dir = options['catalogue_directory'].strip()
         gold_biome = options['gold_biome'].strip()
         pipeline_version_tag = options['pipeline_version'].strip()
+        catalogue_type = options['catalogue_type'].strip()
+        catalogue_biome_label = options['catalogue_biome_label'].strip() or catalogue_name
         self.catalogue_dir = os.path.join(self.results_directory, catalogue_dir)
 
         self.database = options['database']
@@ -74,7 +88,9 @@ class Command(BaseCommand):
             catalogue_name,
             version, gold_biome,
             catalogue_dir,
-            pipeline_version_tag
+            pipeline_version_tag,
+            catalogue_type,
+            catalogue_biome_label
         )
 
         logger.info("CLI %r" % options)
@@ -83,7 +99,7 @@ class Command(BaseCommand):
         logger.info(
             'Found {} genome dirs to upload'.format(len(genome_dirs)))
 
-        [sanity_check_genome_output(d) for d in genome_dirs]
+        [sanity_check_genome_output_proks(d) for d in genome_dirs]
 
         sanity_check_catalogue_dir(self.catalogue_dir)
 
@@ -105,6 +121,8 @@ class Command(BaseCommand):
         catalogue_dir = options['catalogue_directory'].strip()
         gold_biome = options['gold_biome'].strip()
         pipeline_version_tag = options['pipeline_version'].strip()
+        catalogue_type = options['catalogue_type'].strip()
+        catalogue_biome_label = options['catalogue_biome_label'].strip() or catalogue_name
         self.catalogue_dir = os.path.join(self.results_directory, catalogue_dir)
 
         self.database = options['database']
@@ -116,9 +134,12 @@ class Command(BaseCommand):
 
         self.catalogue_obj = self.get_catalogue(
             catalogue_name,
-            version, gold_biome,
+            version,
+            gold_biome,
             catalogue_dir,
-            pipeline_version_tag
+            pipeline_version_tag,
+            catalogue_type,
+            catalogue_biome_label
         )
 
         logger.info("CLI %r" % options)
@@ -127,7 +148,10 @@ class Command(BaseCommand):
         logger.info(
             'Found {} genome dirs to upload'.format(len(genome_dirs)))
 
-        [sanity_check_genome_output(d) for d in genome_dirs]
+        if catalogue_type == 'eukaryotes':
+            [sanity_check_genome_output_euks(d) for d in genome_dirs]
+        elif catalogue_type == 'prokaryotes':
+            [sanity_check_genome_output_proks(d) for d in genome_dirs]
 
         sanity_check_catalogue_dir(self.catalogue_dir)
 
@@ -138,10 +162,30 @@ class Command(BaseCommand):
         self.catalogue_obj.calculate_genome_count()
         self.catalogue_obj.save()
 
+    def _prettify_catalogue_summary_field_name(self):
+        if not isinstance(self.catalogue_obj.other_stats, dict):
+            return
+        if self.catalogue_obj.catalogue_type == emg_models.GenomeCatalogue.EUKS:
+            if "Clusters with pan-genomes" in self.catalogue_obj.other_stats:
+                self.catalogue_obj.other_stats["Clusters with multiple genomes"] = self.catalogue_obj.other_stats.pop("Clusters with pan-genomes")
+        self.catalogue_obj.save()
+
+    def handle_v3(self, *args, **options):
+        self.handle_v2(*args, **options)
+
+        catalogue_summary_file = Path(self.catalogue_dir) / "catalogue_summary.json"
+        if catalogue_summary_file.is_file():
+            self.catalogue_obj.other_stats = read_json(catalogue_summary_file)
+        else:
+            logger.warning(f"No catalogue summary found at {catalogue_summary_file}.")
+        self.catalogue_obj.save()
+        self._prettify_catalogue_summary_field_name()
+
+
     def make_slug(self, catalogue_name, catalogue_version):
         return slugify('{0}-v{1}'.format(catalogue_name, catalogue_version).replace('.', '-'))
 
-    def get_catalogue(self, catalogue_name, catalogue_version, gold_biome, catalogue_dir, pipeline_version_tag):
+    def get_catalogue(self, catalogue_name, catalogue_version, gold_biome, catalogue_dir, pipeline_version_tag, catalogue_type, catalogue_biome_label):
         logging.warning('GOLD')
         logging.warning(gold_biome)
         biome = self.get_gold_biome(gold_biome)
@@ -156,7 +200,9 @@ class Command(BaseCommand):
                     'biome': biome,
                     'result_directory': catalogue_dir,
                     'ftp_url': 'http://ftp.ebi.ac.uk/pub/databases/metagenomics/mgnify_genomes/',
-                    'pipeline_version_tag': pipeline_version_tag
+                    'pipeline_version_tag': pipeline_version_tag,
+                    'catalogue_biome_label': catalogue_biome_label,
+                    'catalogue_type': catalogue_type
                 })
         return catalogue
 
@@ -199,6 +245,11 @@ class Command(BaseCommand):
             del d['geographic_origin']
 
         del d['gold_biome']
+
+        if 'rna_5.8s' in d:
+            d['rna_5_8s'] = d['rna_5.8s']
+            del d['rna_5.8s']
+
         return d, has_pangenome
 
     def get_geo_location(self, location):
