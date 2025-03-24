@@ -49,6 +49,8 @@ class TestGenomesAPI:
         _attr = rsp['data']['attributes']
         assert _attr['name'] == 'Mandalorian Genomes v1.0'
         assert _attr['version'] == '1.0'
+        assert _attr['catalogue-type'] == 'eukaryotes'
+        assert _attr['catalogue-biome-label'] == 'Mandalor'
         assert rsp['data']['relationships']['biome']['data']['id'] == 'root:Host-associated:Human'
 
     def test_catalogue_genomes(self, client, genome_catalogue, genome):

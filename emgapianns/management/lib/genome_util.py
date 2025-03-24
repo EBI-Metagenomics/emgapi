@@ -55,7 +55,7 @@ def sanity_check_catalogue_dir(d):
         sys.exit(1)
 
 
-REQUIRED_JSON_FIELDS = {
+REQUIRED_JSON_FIELDS_PROKS = {
     'accession',
     'completeness',
     'contamination',
@@ -76,17 +76,44 @@ REQUIRED_JSON_FIELDS = {
     'type'
 }
 
-REQUIRED_JSON_PANGENOME_FIELDS = {
+REQUIRED_JSON_FIELDS_EUKS = {
+    'accession',
+    'completeness',
+    'contamination',
+    'busco_completeness',
+    'eggnog_coverage',
+    'gc_content',
+    'gold_biome',
+    'ipr_coverage',
+    'length',
+    'n_50',
+    'nc_rnas',
+    'num_contigs',
+    'num_proteins',
+    'rna_18s',
+    'rna_28s',
+    'rna_5s',
+    'rna_5.8s',
+    'taxon_lineage',
+    'trnas',
+    'type'
+}
+
+REQUIRED_JSON_PANGENOME_FIELDS_PROKS = {
     'pangenome_accessory_size',
     'pangenome_core_size',
     'num_genomes_total',
     'pangenome_size'
 }
 
+REQUIRED_JSON_PANGENOME_FIELDS_EUKS = {
+    'num_genomes_total',
+}
 
-def sanity_check_genome_json(data):
+
+def sanity_check_genome_json_proks(data):
     keys = data.keys()
-    missing_req_keys = set(REQUIRED_JSON_FIELDS).difference(set(keys))
+    missing_req_keys = set(REQUIRED_JSON_FIELDS_PROKS).difference(set(keys))
     if len(missing_req_keys):
         raise ValueError('{} JSON is missing fields: {}'.format(
             data.get('accession'), " ".join(missing_req_keys)))
@@ -94,22 +121,41 @@ def sanity_check_genome_json(data):
     if 'pangenome_stats' in data:
         p_data = data['pangenome_stats']
         p_keys = set(p_data.keys())
-        missing_preq_keys = set(REQUIRED_JSON_PANGENOME_FIELDS).difference(
+        missing_preq_keys = set(REQUIRED_JSON_PANGENOME_FIELDS_PROKS).difference(
             set(p_keys))
         if len(missing_preq_keys):
             raise ValueError('{} JSON is missing fields: {}'.format(
                 data['accession'], " ".join(missing_preq_keys)))
 
 
-def sanity_check_genome_dir(accession, d):
-    expected_files = get_expected_genome_files(accession)
+def sanity_check_genome_json_euks(data):
+    keys = data.keys()
+    missing_req_keys = set(REQUIRED_JSON_FIELDS_EUKS).difference(set(keys))
+    if len(missing_req_keys):
+        raise ValueError('{} JSON is missing fields: {}'.format(
+            data.get('accession'), " ".join(missing_req_keys)))
+
+    if 'pangenome_stats' in data:
+        p_data = data['pangenome_stats']
+        p_keys = set(p_data.keys())
+        missing_preq_keys = set(REQUIRED_JSON_PANGENOME_FIELDS_EUKS).difference(
+            set(p_keys))
+        if len(missing_preq_keys):
+            raise ValueError('{} JSON is missing fields: {}'.format(
+                data['accession'], " ".join(missing_preq_keys)))
+
+
+def sanity_check_genome_dir(accession, d, expected_files_factory=get_expected_genome_files):
+    expected_files = expected_files_factory(accession)
     fs = os.listdir(d)
     missing = expected_files.difference(fs)
     if len(missing):
         missing_files = ", ".join(missing)
         raise ValueError(
-            'Files missing in directory {}: {}'.format(d,
-                                                       missing_files))
+            'Files missing in directory {}: {}'.format(
+                d,
+                missing_files)
+        )
 
 
 def sanity_check_pangenome_dir(d):
@@ -131,15 +177,30 @@ def apparent_accession_of_genome_dir(d):
     return os.path.basename(os.path.normpath(d))
 
 
-def sanity_check_genome_output(d):
+def sanity_check_genome_output_any(d):
     apparent_accession = apparent_accession_of_genome_dir(d)
     if not os.path.isdir(os.path.join(d, 'genome')):
         raise ValueError(f'genome/ directory missing from {d}')
     if not os.path.exists(os.path.join(d, f'{apparent_accession}.json')):
         raise ValueError(f'{apparent_accession}.json missing from {d}')
+    return apparent_accession
+
+
+def sanity_check_genome_output_proks(d):
+    apparent_accession = apparent_accession_of_genome_dir(d)
     json_file = os.path.join(d, f'{apparent_accession}.json')
     json_data = read_json(json_file)
-    sanity_check_genome_json(json_data)
+    sanity_check_genome_json_proks(json_data)
+
+    genome_dir = os.path.join(d, 'genome')
+    sanity_check_genome_dir(json_data['accession'], genome_dir)
+
+
+def sanity_check_genome_output_euks(d):
+    apparent_accession = apparent_accession_of_genome_dir(d)
+    json_file = os.path.join(d, f'{apparent_accession}.json')
+    json_data = read_json(json_file)
+    sanity_check_genome_json_euks(json_data)
 
     genome_dir = os.path.join(d, 'genome')
     sanity_check_genome_dir(json_data['accession'], genome_dir)
