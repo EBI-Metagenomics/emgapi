@@ -216,7 +216,7 @@ class StudyImporter:
                 study_id=project_id)
             return project
         except ena_models.RunStudy.DoesNotExist:
-            logging.warning(f"No ENA run project found for {project_id}")
+            logging.warning(f"No ENA run project found in ena_models.RunStudy for {project_id}")
         try:
             project = ena_models.AssemblyStudy.objects.using(ena_db).get(
                 study_id=project_id)
