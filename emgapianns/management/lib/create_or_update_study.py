@@ -222,7 +222,7 @@ class StudyImporter:
                 study_id=project_id)
             return project
         except ena_models.AssemblyStudy.DoesNotExist:
-            logging.warning(f"No ENA project found for {project_id}")
+            logging.warning(f"No ENA project found in ena_models.AssemblyStudy for {project_id}")
         return None
 
 
