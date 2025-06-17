@@ -212,14 +212,19 @@ class StudyImporter:
     def _get_ena_project(ena_db, project_id):
         # return ena_models.Project.objects.using(ena_db).get(project_id=project_id)
         try:
-            project = ena_models.Project.objects.using(ena_db).get(
-                project_id=project_id
-            )
-        except ena_models.Project.DoesNotExist:
-            logging.warning(f"No ENA project found for {project_id}")
-            return None
-        else:
+            project = ena_models.RunStudy.objects.using(ena_db).get(
+                study_id=project_id)
             return project
+        except ena_models.RunStudy.DoesNotExist:
+            logging.warning(f"No ENA run project found in ena_models.RunStudy for {project_id}")
+        try:
+            project = ena_models.AssemblyStudy.objects.using(ena_db).get(
+                study_id=project_id)
+            return project
+        except ena_models.AssemblyStudy.DoesNotExist:
+            logging.warning(f"No ENA project found in ena_models.AssemblyStudy for {project_id}")
+        return None
+
 
     def _update_or_create_study_from_api_result(
         self, api_study, study_result_dir, lineage, ena_db, emg_db
