@@ -211,6 +211,7 @@ class StudyImporter:
     @staticmethod
     def _get_ena_project(ena_db, project_id):
         # return ena_models.Project.objects.using(ena_db).get(project_id=project_id)
+        logging.info(f"Trying as secondary study accession")
         try:
             project = ena_models.RunStudy.objects.using(ena_db).get(
                 study_id=project_id)
@@ -222,7 +223,21 @@ class StudyImporter:
                 study_id=project_id)
             return project
         except ena_models.AssemblyStudy.DoesNotExist:
-            logging.warning(f"No ENA project found in ena_models.AssemblyStudy for {project_id}")
+            logging.warning(f"No ENA project found for {project_id}")
+        logging.info(f"Trying as primary study accession")
+        try:
+            project = ena_models.RunStudy.objects.using(ena_db).get(
+                project_id=project_id)
+            return project
+        except ena_models.RunStudy.DoesNotExist:
+            logging.warning(f"No ENA assembly project found for {project_id}")
+        try:
+            project = ena_models.AssemblyStudy.objects.using(ena_db).get(
+                project_id=project_id)
+            return project
+        except ena_models.AssemblyStudy.DoesNotExist:
+            logging.warning(f"No ENA project found for {project_id}")
+        logging.error(f"Could not find ENA project for {project_id} in {ena_db}")
         return None
 
 
