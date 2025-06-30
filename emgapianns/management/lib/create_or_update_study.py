@@ -158,6 +158,8 @@ class StudyImporter:
         """
 
         secondary_study_accession = ena_study.study_id
+        project_id = ena_study.project_id
+
         data_origination = (
             "SUBMITTED" if secondary_study_accession.startswith("ERP") else "HARVESTED"
         )
@@ -171,14 +173,14 @@ class StudyImporter:
         # Lookup study publication
         pubmed_ids = ena_study.pubmed_id
         emg_publications = self._lookup_publication_by_pubmed_ids(pubmed_ids)
+        
+        project_id_search = project_id if project_id else secondary_study_accession
+        project = self._get_ena_project(ena_db, project_id_search)
 
-        project_id = ena_study.project_id
-        try:
-            project = self._get_ena_project(ena_db, project_id)
+        if project and hasattr(project, 'center_name'):
             center_name = project.center_name
-        except ObjectDoesNotExist:
+        else:
             center_name = ena_study.center_name
-            pass
 
         defaults = {
             "centre_name": center_name,
