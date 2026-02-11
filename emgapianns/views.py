@@ -51,6 +51,7 @@ from . import models as m_models
 from . import pagination as m_pagination
 from . import viewsets as m_viewsets
 from . import mixins as m_mixins
+from .filters import MongoOrderingFilter
 
 logger = logging.getLogger(__name__)
 
@@ -591,7 +592,6 @@ class OrganismViewSet(m_viewsets.ListReadOnlyModelViewSet):
 
     ordering_fields = (
         'name',
-        'prefix',
         'lineage',
     )
 
@@ -629,7 +629,6 @@ class OrganismTreeViewSet(m_viewsets.ListReadOnlyModelViewSet):
     ordering_fields = (
         'name',
         'domain',
-        'prefix',
         'lineage',
     )
 
@@ -680,12 +679,11 @@ class AnalysisOrganismRelationshipViewSet(m_mixins.AnalysisJobAnnotationMixin,
     pagination_class = m_pagination.MaxSetPagination
 
     filter_backends = (
-        filters.OrderingFilter,
+        MongoOrderingFilter,
     )
 
     ordering_fields = (
         'name',
-        'prefix',
         'lineage',
     )
 
@@ -732,12 +730,11 @@ class AnalysisOrganismSSURelationshipViewSet(  # NOQA
     pagination_class = m_pagination.MaxSetPagination
 
     filter_backends = (
-        filters.OrderingFilter,
+        MongoOrderingFilter,
     )
 
     ordering_fields = (
         'name',
-        'prefix',
         'lineage',
     )
 
@@ -762,12 +759,11 @@ class AnalysisOrganismLSURelationshipViewSet(  # NOQA
     pagination_class = m_pagination.MaxSetPagination
 
     filter_backends = (
-        filters.OrderingFilter,
+        MongoOrderingFilter,
     )
 
     ordering_fields = (
         'name',
-        'prefix',
         'lineage',
     )
 
@@ -792,12 +788,11 @@ class AnalysisOrganismITSOneDBRelationshipViewSet(  # NOQA
     pagination_class = m_pagination.MaxSetPagination
 
     filter_backends = (
-        filters.OrderingFilter,
+        MongoOrderingFilter,
     )
 
     ordering_fields = (
         'name',
-        'prefix',
         'lineage',
     )
 
@@ -822,12 +817,11 @@ class AnalysisOrganismITSUniteRelationshipViewSet(  # NOQA
     pagination_class = m_pagination.MaxSetPagination
 
     filter_backends = (
-        filters.OrderingFilter,
+        MongoOrderingFilter,
     )
 
     ordering_fields = (
         'name',
-        'prefix',
         'lineage',
     )
 
