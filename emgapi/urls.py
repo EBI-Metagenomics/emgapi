@@ -452,9 +452,6 @@ urlpatterns = [
     path(r'v1/ebi-search-download/<str:domain>',
         views.EBISearchCSVDownload.as_view(),
         name='ebi-search-download'),
-    path(r'v1/sentry-debug',
-        views.SentryDebugView.as_view(),
-        name='sentry-debug'),
     url(r'^v1/genomes-search/status/(?P<job_id>[^/]+)',
         views.GenomeSearchStatusView.as_view(),
         name='genomes-status'),
@@ -468,4 +465,11 @@ if settings.ADMIN:
         path(r'v1/biom-prediction',
             views.BiomePrediction.as_view(),
             name='biom-prediction')
+    ]
+
+if settings.DEBUG:
+    urlpatterns += [
+        path(r'v1/sentry-debug',
+            views.SentryDebugView.as_view(),
+            name='sentry-debug')
     ]

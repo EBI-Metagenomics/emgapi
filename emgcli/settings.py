@@ -698,11 +698,7 @@ except KeyError:
     warnings.warn("The metagenomics exchange API and Token are not configured properly")
 
 
-sentry_dsn = os.getenv("SENTRY_DSN")
-if sentry_dsn:
-    sentry_sdk.init(
-        dsn=sentry_dsn,
-        send_default_pii=True,
-    )
-else:
-    warnings.warn("SENTRY_DSN not set; Sentry is disabled.", RuntimeWarning)
+sentry_sdk.init(
+    dsn="https://13c1c22f3cfd185214813c38b3c7b899@o4511133851451392.ingest.de.sentry.io/4511133861019728",
+    send_default_pii=True,
+)
