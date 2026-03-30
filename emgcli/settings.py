@@ -36,6 +36,7 @@ import datetime
 
 from os.path import expanduser
 
+import sentry_sdk
 from corsheaders.defaults import default_headers
 from pymongo import monitoring
 
@@ -695,3 +696,13 @@ try:
         METAGENOMICS_EXCHANGE_API_TOKEN = EMG_CONF['emg']['me_api_token']
 except KeyError:
     warnings.warn("The metagenomics exchange API and Token are not configured properly")
+
+
+sentry_dsn = os.getenv("SENTRY_DSN")
+if sentry_dsn:
+    sentry_sdk.init(
+        dsn=sentry_dsn,
+        send_default_pii=True,
+    )
+else:
+    warnings.warn("SENTRY_DSN not set; Sentry is disabled.", RuntimeWarning)

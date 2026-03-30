@@ -17,6 +17,7 @@ dependencies = [
     "PyYAML==6.0",
     # log handler
     "concurrent-log-handler~=0.9.24",
+    "sentry-sdk==1.45.0",
     # django
     "Django==3.2.23",
     "djangorestframework==3.12",
