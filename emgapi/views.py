@@ -1469,7 +1469,7 @@ class GenomeFragmentSearchViewSet(viewsets.GenericViewSet):
             response = response.json()
         except (JSONDecodeError, ValueError):
             logging.error(f'Failed to decode JSON from genome search backend')
-            logging.error(response.text)
+            logging.error('response.text')
             raise Http404('Genome search failed. Please try later.')
 
         results = response.get('results', [])
@@ -1882,3 +1882,11 @@ class BiomePrediction(APIView):
                 logger.error("Biome prediction match is not a valid: " + str(hit))
                 pass
         return Response(biomes_results)
+
+
+class SentryDebugView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        # Intentionally trigger an error so Sentry captures it
+        raise RuntimeError("Sentry test error: this is a deliberate exception from /v1/sentry-debug")

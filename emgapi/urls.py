@@ -466,3 +466,10 @@ if settings.ADMIN:
             views.BiomePrediction.as_view(),
             name='biom-prediction')
     ]
+
+if settings.DEBUG:
+    urlpatterns += [
+        path(r'v1/sentry-debug',
+            views.SentryDebugView.as_view(),
+            name='sentry-debug')
+    ]
