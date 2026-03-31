@@ -699,6 +699,6 @@ except KeyError:
 
 
 sentry_sdk.init(
-    dsn="https://13c1c22f3cfd185214813c38b3c7b899@o4511133851451392.ingest.de.sentry.io/4511133861019728",
+    dsn="https://41e3df8208fa1cc077755e34848a2adf@o1128655.ingest.us.sentry.io/4511138555494400",
     send_default_pii=True,
 )
