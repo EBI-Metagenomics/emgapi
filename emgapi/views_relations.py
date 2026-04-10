@@ -1120,9 +1120,9 @@ class GenomeCogsRelationshipsViewSet(emg_mixins.ListModelMixin,
     )
 
     ordering_fields = (
-        'name',
+        'cog__name',
         'genome_count',
-        'description'
+        'cog__description'
     )
 
     ordering = ['-genome_count']
@@ -1150,8 +1150,8 @@ class GenomeKeggClassRelationshipsViewSet(emg_mixins.ListModelMixin,
     )
 
     ordering_fields = (
-        'class_id',
-        'name',
+        'kegg_class__class_id',
+        'kegg_class__name',
         'genome_count',
     )
 
@@ -1180,7 +1180,7 @@ class GenomeKeggModuleRelationshipsViewSet(emg_mixins.ListModelMixin,
     )
 
     ordering_fields = (
-        'class_id',
+        'kegg_module__name',
         'genome_count',
     )
 
@@ -1208,7 +1208,7 @@ class GenomeAntiSmashGeneClustersRelationshipsViewSet(emg_mixins.ListModelMixin,
     )
 
     ordering_fields = (
-        'name',
+        'antismash_genecluster__name',
         'genome_count'
     )
 
@@ -1223,7 +1223,7 @@ class GenomeAntiSmashGeneClustersRelationshipsViewSet(emg_mixins.ListModelMixin,
             Q(accession=self.kwargs['accession'])
         )
         queryset = emg_models.GenomeAntiSmashGCCounts.objects \
-            .selected_related('') \
+            .select_related('antismash_genecluster') \
             .filter(genome=genome)
         return queryset
 
