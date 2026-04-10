@@ -46,8 +46,9 @@ class ListModelMixin(object):
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         if isinstance(request.accepted_renderer, CSVStreamingRenderer):
-
-            if queryset.count() > 50 * settings.EMG_DEFAULT_LIMIT:
+            count_limit = 50 * settings.EMG_DEFAULT_LIMIT
+            queryset_size = len(queryset) if isinstance(queryset, list) else queryset.count()
+            if queryset_size > count_limit:
                 # More than 50 pages of results will probably timeout
                 # (for a complicated endpoint like Studies).
                 # Return custom exception detailing use of paginated API.
