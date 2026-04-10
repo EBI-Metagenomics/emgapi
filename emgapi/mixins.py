@@ -2,14 +2,13 @@
 # -*- coding: utf-8 -*-
 
 from django.conf import settings
-from django.shortcuts import get_object_or_404
 from django.http.response import StreamingHttpResponse
+from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import APIException
-
 from rest_framework.response import Response
+from rest_framework_json_api.renderers import JSONRenderer
 
 from emgapi.renderers import CSVStreamingRenderer, EMGBrowsableAPIRenderer
-from rest_framework_json_api.renderers import JSONRenderer
 
 
 class MultipleFieldLookupMixin(object):
@@ -64,7 +63,7 @@ class ListModelMixin(object):
                 try:
                     filename = queryset._name
                 except AttributeError:
-                    filename = queryset._document.__name__
+                    filename = queryset._document.__name__ if hasattr(queryset, '_document') else request.path.split('/')[-1]
             serializer = self.get_serializer(queryset, many=True)
             response = StreamingHttpResponse(request.accepted_renderer.render(serializer.data), content_type='text/csv')
             response['Content-Disposition'] = \
