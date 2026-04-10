@@ -64,6 +64,6 @@ class TestGenomesAPI:
         assert rsp['meta']['pagination']['count'] == 1
         assert rsp['data'][0]['type'] == 'genomes'
         assert rsp['data'][0]['id'] == 'MGYG000000001'
-        assert rsp['data'][0]['attributes']['genome-id'] == 1
+        assert rsp['data'][0]['attributes']['genome-id'] == genome.pk
         assert rsp['data'][0]['attributes']['accession'] == 'MGYG000000001'
         assert rsp['data'][0]['attributes']['taxon-lineage'] == 'd__Test;'

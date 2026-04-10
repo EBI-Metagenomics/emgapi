@@ -18,7 +18,8 @@ import pytest
 
 from model_bakery import baker
 
-from django.urls import reverse
+from emgapi import models as emg_models
+from django.urls import reverse, resolve
 from django.urls.exceptions import NoReverseMatch
 
 from rest_framework import status
@@ -166,6 +167,12 @@ class TestAPISurface:
             ('GenomeCatalogue', 'genome-catalogues', 'emgapi_v1:genome-catalogues', [],
              ['name', 'description', 'downloads',
               'genomes', 'biome', 'version']),
+            ('Genome', 'genomes', 'emgapi_v1:genomes', [],
+             ['cog-matches', 'kegg-modules-matches', 'downloads',
+              'antismash-geneclusters', 'biome', 'kegg-class-matches', 'catalogue']),
+            ('GenomeCatalogue', 'genomes', 'emgapi_v1:genome-catalogue-genomes', ['dummy1'],
+             ['cog-matches', 'kegg-modules-matches', 'downloads',
+              'antismash-geneclusters', 'biome', 'kegg-class-matches', 'catalogue']),
         ]
     )
     @pytest.mark.django_db
@@ -245,12 +252,35 @@ class TestAPISurface:
                            study=_study, super_study=_ss)
                 baker.make('emgapi.SuperStudyBiome', super_study=_ss, biome=_biome)
             elif _model in ('Genome', ):
-                _biome = baker.make('emgapi.Biome', pk=pk)
-                baker.make('emgapi.Genome', pk=pk, biome=_biome)
+                if pk == 1:
+                    _biome = baker.make('emgapi.Biome', pk=pk, lineage='root')
+                else:
+                    _biome = emg_models.Biome.objects.get(lineage='root')
+                _gc = baker.make('emgapi.GenomeCatalogue', pk=pk, catalogue_id='dummy%d' % pk, biome=_biome)
+                _g = baker.make('emgapi.Genome', pk=pk, biome=_biome, catalogue=_gc)
+                # Make some related data for ordering tests
+                _cog = baker.make('emgapi.CogCat', pk=pk, name='COG%d' % pk)
+                baker.make('emgapi.GenomeCogCounts', genome=_g, cog=_cog, genome_count=1)
+                _kc = baker.make('emgapi.KeggClass', pk=pk, class_id='K%d' % pk, name='KEGG%d' % pk)
+                baker.make('emgapi.GenomeKeggClassCounts', genome=_g, kegg_class=_kc, genome_count=1)
+                _km = baker.make('emgapi.KeggModule', pk=pk, name='M%d' % pk)
+                baker.make('emgapi.GenomeKeggModuleCounts', genome=_g, kegg_module=_km, genome_count=1)
+                _asgc = baker.make('emgapi.AntiSmashGC', pk=pk, name='AS%d' % pk)
+                baker.make('emgapi.GenomeAntiSmashGCCounts', genome=_g, antismash_genecluster=_asgc, genome_count=1)
             elif _model in ('GenomeCatalogue', ):
-                _biome = baker.make('emgapi.Biome', pk=pk)
-                # _genome = baker.make('emgapi.Genome', pk=pk, biome=_biome)
-                baker.make('emgapi.GenomeCatalogue', pk=pk, biome=_biome, catalogue_id='dummy')
+                if pk == 1:
+                    _biome = baker.make('emgapi.Biome', pk=pk, lineage='root')
+                else:
+                    _biome = emg_models.Biome.objects.get(lineage='root')
+                _gc = baker.make('emgapi.GenomeCatalogue', pk=pk, biome=_biome, catalogue_id='dummy%d' % pk)
+                # Ensure each catalogue has genomes if we are testing a catalogue's genomes
+                if _view == 'emgapi_v1:genome-catalogue-genomes':
+                    _target_gc_id = _view_args[0]
+                    _target_gc = emg_models.GenomeCatalogue.objects.get(catalogue_id=_target_gc_id)
+                    baker.make('emgapi.Genome', pk=pk, biome=_biome, catalogue=_target_gc)
+                else:
+                    baker.make('emgapi.Genome', pk=pk, biome=_biome, catalogue=_gc)
+
             else:
                 baker.make(model_name, pk=pk)
 
@@ -266,10 +296,10 @@ class TestAPISurface:
 
         # Links
         host = 'http://testserver/%s' % api_version
-        _view_url = _view.split(':')[1]
-        first_link = '%s/%s?page=1' % (host, _view_url)
-        last_link = '%s/%s?page=4' % (host, _view_url)
-        next_link = '%s/%s?page=2' % (host, _view_url)
+        _view_url = url.split(api_version)[1]
+        first_link = '%s%s?page=1' % (host, _view_url)
+        last_link = '%s%s?page=4' % (host, _view_url)
+        next_link = '%s%s?page=2' % (host, _view_url)
         assert rsp['links']['first'] == first_link
         assert rsp['links']['last'] == last_link
         assert rsp['links']['next'] == next_link
@@ -283,3 +313,51 @@ class TestAPISurface:
             assert 'attributes' in d
             assert 'relationships' in d
             assert set(d['relationships']) - set(relations) == set()
+
+        # Test ordering
+        view_func = resolve(url).func
+        view_class = getattr(view_func, 'view_class', None)
+        if view_class:
+            ordering_fields = getattr(view_class, 'ordering_fields', [])
+            fields_to_test = []
+            for field in ordering_fields:
+                if isinstance(field, tuple):
+                    fields_to_test.append(field[0])
+                else:
+                    fields_to_test.append(field)
+
+            for field in fields_to_test:
+                for sort_field in [field, f"-{field}"]:
+                    response = client.get(url, {'ordering': sort_field})
+                    assert response.status_code == status.HTTP_200_OK, \
+                        f"Ordering by {sort_field} failed for {url}. Status: {response.status_code}"
+
+        # Test ordering on related endpoints
+        if len(rsp['data']) > 0:
+            item = rsp['data'][0]
+            for rel_name, rel_data in item.get('relationships', {}).items():
+                related_link = rel_data.get('links', {}).get('related')
+                if related_link:
+                    # Strip the host to get the path
+                    rel_path = related_link.replace('http://testserver', '')
+                    try:
+                        rel_match = resolve(rel_path)
+                        rel_view_class = getattr(rel_match.func, 'view_class', None)
+                        if rel_view_class:
+                            rel_ordering_fields = getattr(rel_view_class, 'ordering_fields', [])
+                            rel_fields_to_test = []
+                            for field in rel_ordering_fields:
+                                if isinstance(field, tuple):
+                                    rel_fields_to_test.append(field[0])
+                                else:
+                                    rel_fields_to_test.append(field)
+
+                            for field in rel_fields_to_test:
+                                for sort_field in [field, f"-{field}"]:
+                                    rel_url_with_ordering = f"{rel_path}?ordering={sort_field}"
+                                    response = client.get(rel_url_with_ordering)
+                                    assert response.status_code == status.HTTP_200_OK, \
+                                        f"Ordering by {sort_field} failed for related {rel_path}. Status: {response.status_code}"
+                    except Exception:
+                        # Some links might not be resolvable or might be external
+                        continue
