@@ -280,13 +280,7 @@ class TestAPISurface:
                     baker.make('emgapi.Genome', pk=pk, biome=_biome, catalogue=_target_gc)
                 else:
                     baker.make('emgapi.Genome', pk=pk, biome=_biome, catalogue=_gc)
-            elif _model in ('Biome',):
-                if pk == 1:
-                    _biome = baker.make('emgapi.Biome', pk=pk, lineage='root')
-                else:
-                    _biome = emg_models.Biome.objects.get(lineage='root')
-                _gc = baker.make('emgapi.GenomeCatalogue', pk=pk, catalogue_id='dummy%d' % pk, biome=_biome)
-                baker.make('emgapi.Genome', pk=pk, biome=_biome, catalogue=_gc)
+
             else:
                 baker.make(model_name, pk=pk)
 
