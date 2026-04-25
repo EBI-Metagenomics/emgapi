@@ -15,7 +15,9 @@
 # limitations under the License.
 
 import logging
-
+import os
+from base64 import b64encode
+import requests
 from django.db.models import Q
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
@@ -27,6 +29,7 @@ from emgapianns.management.commands.import_publication import (
     update_or_create_publication,
 )
 from emgapianns.management.lib import utils
+from emgcli.settings import EMG_CONF
 from emgena import models as ena_models
 from emgena.models import RunStudy, AssemblyStudy
 
@@ -122,7 +125,7 @@ class StudyImporter:
         pass
 
     def _update_or_create_study_from_db_result(
-        self, ena_study, study_result_dir, lineage, ena_db, emg_db
+            self, ena_study, study_result_dir, lineage, ena_db, emg_db
     ):
         """Attributes to parse out:
             - Center name (done)
@@ -163,7 +166,25 @@ class StudyImporter:
         )
 
         hold_date = ena_study.hold_date
-        is_private = bool(hold_date)
+        ena_api_password = EMG_CONF['emg']['ena_api_password']
+        if ena_api_password is None:
+            logging.error(f"ENA API password is missing. Study {secondary_study_accession} ownership cannot be verified.")
+        try:
+            study_is_public = self.check_if_study_is_public(secondary_study_accession)
+            if study_is_public:
+                is_private = False
+            else:
+                study_ownership_verified = self.verify_study_ownership(secondary_study_accession,
+                                                                       ena_study.submission_account_id)
+                if study_ownership_verified:
+                    is_private = True
+                else:
+                    logging.error(
+                        f"Study {secondary_study_accession} is not owned by {ena_study.submission_account_id}. Skipping.")
+                    return
+        except:
+            logging.error(f"Could not verify if study {secondary_study_accession} is public. Skipping.")
+            return
 
         # Retrieve biome object
         biome = emg_models.Biome.objects.using(emg_db).get(lineage=lineage)
@@ -222,7 +243,7 @@ class StudyImporter:
             return project
 
     def _update_or_create_study_from_api_result(
-        self, api_study, study_result_dir, lineage, ena_db, emg_db
+            self, api_study, study_result_dir, lineage, ena_db, emg_db
     ):
         secondary_study_accession = api_study.get("secondary_study_accession")
         data_origination = (
@@ -261,10 +282,44 @@ class StudyImporter:
 
     @staticmethod
     def _update_or_create_study(
-        emg_db, project_id, secondary_study_accession, defaults
+            emg_db, project_id, secondary_study_accession, defaults
     ):
         return emg_models.Study.objects.using(emg_db).update_or_create(
             project_id=project_id,
             secondary_accession=secondary_study_accession,
             defaults=defaults,
         )
+
+    def check_if_study_is_public(self, study_id):
+        url = (f"https://www.ebi.ac.uk/ena/portal/api/search?result=study&query=study_accession%3D{study_id}%20OR"
+               f"%20secondary_study_accession%3D{study_id}&limit=10&dataPortal=metagenome&includeMetagenomes=true&format"
+               "=json")
+        headers = {
+            "accept": "*/*"
+        }
+        try:
+            response = requests.get(url, params=None, headers=headers)
+            response.raise_for_status()  # Raise an HTTPError for bad responses
+            if response.status_code != 200 or response.json() == []:
+                is_public = False
+            else:
+                is_public = response.json()[0]['secondary_study_accession'] == study_id
+        except requests.RequestException as e:
+            logging.error(f"Error checking if study is public: {e}")
+            is_public = False
+
+        return is_public
+
+    def verify_study_ownership(self, study_id, submission_account_id):
+        url = f"https://www.ebi.ac.uk/ena/submit/report/studies/{study_id}"
+        ena_api_password = EMG_CONF['emg']['ena_api_password']
+        if not ena_api_password:
+            logging.error("ENA API password is missing. Study ownership cannot be verified.")
+            return False
+        auth_string = f"mg-{submission_account_id}:{ena_api_password}"
+        headers = {
+            "accept": "*/*",
+            "Authorization": f"Basic {b64encode(auth_string.encode()).decode()}"
+        }
+        response = requests.get(url, headers=headers)
+        return response.status_code == 200 and study_id in response.text
